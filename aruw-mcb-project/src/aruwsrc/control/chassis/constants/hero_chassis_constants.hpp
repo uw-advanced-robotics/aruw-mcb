@@ -36,8 +36,9 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 3'500},
-    {120, 6'000}};
+    {50, 3'750},
+    {120, 6'500},
+};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -75,12 +76,18 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 100.0f;
-static constexpr float AUTOROTATION_PID_KD = 1.0f;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
+
+/**
+ * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
+ * X-Drive (m/s)
+ */
+static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.7f;
 
 // mechanical chassis constants
 /**
@@ -103,7 +110,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading

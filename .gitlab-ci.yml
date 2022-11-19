@@ -72,9 +72,8 @@ before_script:
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
             aruwsrc/control/engineer_control.cpp
-            aruwsrc/control/sentinel_2021_control.cpp
-            aruwsrc/control/sentinel_2022_control.cpp
-            aruwsrc/control/soldier_control.cpp
+            aruwsrc/control/sentry_control.cpp
+            aruwsrc/control/standard_control.cpp
             aruwsrc/control/drone_control.cpp
             aruwsrc/control/hero_control.cpp
             main.cpp
@@ -181,57 +180,80 @@ before_script:
     paths:
       - $BUILD_PATH
 
-# Soldier 2022 build
+# Standard (Spider) build
 
-"Soldier 2022: MCB Build":
+"Standard (Spider): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SOLDIER_2022
+    ROBOT: STANDARD_SPIDER
 
-"Soldier 2022: Sim Build":
+"Standard (Spider): Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SOLDIER_2022
+    ROBOT: STANDARD_SPIDER
 
-"Soldier 2022: Test Build":
+"Standard (Spider): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_WOODY
+
+# Standard (Elsa) build
+
+"Standard (Elsa): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_ELSA
+
+"Standard (Elsa): Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: STANDARD_ELSA
+
+"Standard (Elsa): Test Build":
   stage: Tests
   needs: []
   only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
+    - scons run-tests-gcov profile=fast robot=TARGET_STANDARD_ELSA -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
+  coverage: '/\s+Total:\|(\d+.\d+\%).+\|.+\|.+/'
   artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-soldier-tests"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-standard-tests"
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
     expire_in: 2 weeks
 
-# Soldier 2021 Build
+# Standard (Woody) Build
 
-"Soldier 2021: MCB Build":
+"Standard (Woody): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_WOODY
 
-"Soldier 2021: Sim Build":
+"Standard (Woody): Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_WOODY
 
-"Soldier 2021: Test Build":
+"Standard (Woody): Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_WOODY
 
 # Drone build
 
@@ -279,59 +301,39 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
 "Hero: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
-# Sentinel 2021 build
+# Sentry (Beehive) build
 
-"Sentinel 2021: MCB Build":
+"Sentry: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTINEL_2021
+    ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2021: Sim Build":
+"Sentry: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SENTINEL_2021
+    ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2021: Test Build":
+"Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTINEL_2021
-
-# Sentinel 2022 build
-
-"Sentinel 2022: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: SENTINEL_2022
-
-"Sentinel 2022: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: SENTINEL_2022
-
-"Sentinel 2022: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: SENTINEL_2022
+    ROBOT: SENTRY_BEEHIVE
 
 # Pages deploy
 

@@ -44,8 +44,8 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::sendInitialGraphics()
 
     // send initial chassis orientation graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
-    chassisOrientationGraphics.graphicData[0].operation = Tx::ADD_GRAPHIC_MODIFY;
-    chassisOrientationGraphics.graphicData[1].operation = Tx::ADD_GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[0].operation = Tx::GRAPHIC_MODIFY;
+    chassisOrientationGraphics.graphicData[1].operation = Tx::GRAPHIC_MODIFY;
 
     RF_END();
 }
@@ -56,8 +56,9 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
 
     // update chassisOrientation if turret is online
     // otherwise don't rotate chassis
-    chassisOrientation.rotate(modm::toRadian(
-        (turretSubsystem.isOnline()) ? -turretSubsystem.getYawAngleFromCenter() : 0.0f));
+    chassisOrientation.rotate(
+        turretSubsystem.yawMotor.isOnline() ? -turretSubsystem.yawMotor.getAngleFromCenter()
+                                            : 0.0f);
 
     // if chassis orientation has changed, send new graphic with updated orientation
     if (chassisOrientation != chassisOrientationPrev)
@@ -97,7 +98,7 @@ void ChassisOrientationIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[0],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_ORIENTATION_COLOR);
 
@@ -116,7 +117,7 @@ void ChassisOrientationIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &chassisOrientationGraphics.graphicData[1],
         chassisOrientationName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         CHASSIS_BARREL_COLOR);
 

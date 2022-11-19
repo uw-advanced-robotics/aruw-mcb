@@ -47,14 +47,16 @@ BooleanHudIndicators::BooleanHudIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
-    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand)
+    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
+    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
+      sentryResponseHandler(sentryResponseHandler),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -69,6 +71,13 @@ BooleanHudIndicators::BooleanHudIndicators(
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>,
+              0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
               0),
       }
 {
@@ -106,6 +115,9 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
+    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
+        sentryResponseHandler.getSentryMoving());
+
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
          booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;
@@ -131,7 +143,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
@@ -148,7 +160,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
@@ -165,7 +177,7 @@ void BooleanHudIndicators::initialize()
         RefSerialTransmitter::configGraphicGenerics(
             &booleanHudIndicatorStaticLabelGraphics[i].graphicData,
             booleanHudIndicatorName,
-            Tx::ADD_GRAPHIC,
+            Tx::GRAPHIC_ADD,
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 

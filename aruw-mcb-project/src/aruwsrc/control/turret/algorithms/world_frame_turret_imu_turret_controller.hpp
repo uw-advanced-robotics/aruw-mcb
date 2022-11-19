@@ -25,16 +25,13 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
 
-#include "turret_controller_interface.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "turret_controller_interface.hpp"
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class TurretMotor;
 }
 
 namespace aruwsrc::control::turret::algorithms
@@ -54,16 +51,17 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
-     * @param[in] posPidConfig Position PID configuration struct for the controller.
-     * @param[in] velPidConfig Velocity PID configuration struct for the controller.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
+     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] positionPid Position PID controller.
+     * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
-        const tap::algorithms::SmoothPidConfig &posPidConfig,
-        const tap::algorithms::SmoothPidConfig &velPidConfig);
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        TurretMotor &yawMotor,
+        tap::algorithms::SmoothPid &positionPid,
+        tap::algorithms::SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -73,52 +71,29 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
+    void setSetpoint(float desiredSetpoint) final;
+
+    /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
+
+    /// @return World frame yaw angle measurement, refer to top level documentation for more
+    /// details.
+    float getMeasurement() const final;
 
     bool isOnline() const final;
 
-private:
-    const aruwsrc::Drivers *drivers;
+    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
 
-    tap::algorithms::SmoothPid positionPid;
-    tap::algorithms::SmoothPid velocityPid;
-
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
-};
-
-/**
- * Band-aid fix since I don't want to fix WorldFrameYawTurretImuCascadePidTurretController's
- * constructor.
- */
-class HeroTurretImuCascadePidTurretController final : public TurretYawControllerInterface
-{
-public:
-    HeroTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
-        const tap::algorithms::SmoothPidConfig &posPidConfig,
-        const tap::algorithms::FuzzyPDConfig &fuzzyPidConfig,
-        const tap::algorithms::SmoothPidConfig &velPidConfig);
-
-    void initialize() final;
-
-    /**
-     * @see TurretControllerInterface for more details.
-     * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
-     */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
-
-    float getSetpoint() const final;
-
-    bool isOnline() const final;
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
 
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::FuzzyPD positionPid;
-    tap::algorithms::SmoothPid velocityPid;
+    tap::algorithms::SmoothPid &positionPid;
+    tap::algorithms::SmoothPid &velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    float worldFrameSetpoint;
 };
 
 /**
@@ -137,16 +112,17 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 {
 public:
     /**
-     * @param[in] drivers A drivers object that will be queried for IMU information.
-     * @param[in] turretSubsystem A `TurretSubsystem` object accessible for children objects to use.
-     * @param[in] posPidConfig Position PID configuration struct for the controller.
-     * @param[in] velPidConfig Velocity PID configuration struct for the controller.
+     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * information.
+     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] positionPid Position PID controller.
+     * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
-        const aruwsrc::Drivers *drivers,
-        TurretSubsystem *turretSubsystem,
-        const tap::algorithms::SmoothPidConfig &posPidConfig,
-        const tap::algorithms::SmoothPidConfig &velPidConfig);
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        TurretMotor &pitchMotor,
+        tap::algorithms::SmoothPid &positionPid,
+        tap::algorithms::SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -156,17 +132,29 @@ public:
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 
+    /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
+    /// details.
+    void setSetpoint(float desiredSetpoint) final;
+
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     float getSetpoint() const final;
+
+    /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
+    float getMeasurement() const final;
 
     bool isOnline() const final;
 
+    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+
 private:
-    const aruwsrc::Drivers *drivers;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::SmoothPid positionPid;
-    tap::algorithms::SmoothPid velocityPid;
+    tap::algorithms::SmoothPid &positionPid;
+    tap::algorithms::SmoothPid &velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    float worldFrameSetpoint;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

@@ -22,18 +22,19 @@
 
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all soldiers.
+ * true for all standards.
  */
-#if defined(TARGET_SOLDIER_2021) || defined(TARGET_SOLDIER_2022)
-#define ALL_SOLDIERS
+#if defined(TARGET_STANDARD_WOODY) || defined(TARGET_STANDARD_ELSA) || \
+    defined(TARGET_STANDARD_SPIDER)
+#define ALL_STANDARDS
 #endif
 
 /**
  * A helper macro that makes it easier to specify at compile time something that should be true for
- * all sentinels.
+ * all sentries.
  */
-#if defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022)
-#define ALL_SENTINELS
+#if defined(TARGET_SENTRY_BEEHIVE)
+#define ALL_SENTRIES
 #endif
 
 #endif  // UTIL_MACROS_HPP_

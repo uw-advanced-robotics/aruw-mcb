@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+import subprocess
 from os.path import abspath
 
 Import("env")
@@ -27,6 +28,16 @@ IGNORED_FILES_WHILE_TESTING = ["aruwsrc/drivers.hpp"]
 
 ignored_files = []
 ignored_dirs = []
+try:
+    get_user_name = ((subprocess.check_output(["git", "config", "user.name"]).decode('UTF-8'))).strip()
+except subprocess.CalledProcessError as error:
+    get_user_name = "Unknown"
+    print(error.output)
+try:
+    get_sha = ((subprocess.check_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])).decode('UTF-8')).strip()
+except subprocess.CalledProcessError as error:
+    get_sha = "Unknown"
+    print(error.output)
 
 if args["TARGET_ENV"] == "tests":
     ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
@@ -35,6 +46,9 @@ env_cpy = env.Clone()
 
 # Append on the global robot target build flag
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+
 
 if args["COMPILE_SRC"]:
     ignored_files.append("main_src_not_compiled.cpp")

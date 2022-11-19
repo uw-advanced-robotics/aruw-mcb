@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -36,11 +36,11 @@ namespace aruwsrc::chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret,
+    const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret),
+      yawMotor(yawMotor),
       chassisSymmetry(chassisSymmetry),
       chassisAutorotating(true)
 {
@@ -52,15 +52,13 @@ void ChassisAutorotateCommand::initialize()
     desiredRotationAverage = chassis->getDesiredRotation();
 }
 
-void ChassisAutorotateCommand::updateAutorotateState(
-    const tap::control::turret::TurretSubsystemInterface* turret)
+void ChassisAutorotateCommand::updateAutorotateState()
 {
-    float turretYawActualSetpointDiff =
-        abs(turret->getCurrentYawValue().difference(turret->getYawSetpoint()));
+    float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
-        !turret->yawLimited() &&
-        turretYawActualSetpointDiff > (180 - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+        !yawMotor->getConfig().limitMotorAngles &&
+        turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;
@@ -74,44 +72,49 @@ void ChassisAutorotateCommand::updateAutorotateState(
     }
 }
 
+float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
+    float turretAngleFromCenter,
+    float maxAngleFromCenter)
+{
+    return ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+        .getValue();
+}
+
 void ChassisAutorotateCommand::execute()
 {
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
-    if (turret->isOnline())
+    if (yawMotor->isOnline())
     {
-        updateAutorotateState(turret);
+        updateAutorotateState();
 
-        float turretAngleFromCenter = turret->getYawAngleFromCenter();
+        float turretAngleFromCenter = yawMotor->getAngleFromCenter();
 
         if (chassisAutorotating)
         {
-            float maxAngleFromCenter = 180.0f;
+            float maxAngleFromCenter = M_PI;
 
-            if (!turret->yawLimited())
+            if (!yawMotor->getConfig().limitMotorAngles)
             {
                 switch (chassisSymmetry)
                 {
                     case ChassisSymmetry::SYMMETRICAL_180:
-                        maxAngleFromCenter = 90.0f;
+                        maxAngleFromCenter = M_PI_2;
                         break;
                     case ChassisSymmetry::SYMMETRICAL_90:
-                        maxAngleFromCenter = 45.0f;
+                        maxAngleFromCenter = M_PI_4;
                         break;
                     case ChassisSymmetry::SYMMETRICAL_NONE:
                     default:
                         break;
                 }
             }
-
             float angleFromCenterForChassisAutorotate =
-                ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
-                    .getValue();
-
+                computeAngleFromCenterForAutorotation(turretAngleFromCenter, maxAngleFromCenter);
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
-                turret->getYawVelocity() - drivers->mpu6500.getGz());
+                yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()));
 
             // find an alpha value to be used for the low pass filter, some value >
             // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
@@ -122,8 +125,8 @@ void ChassisAutorotateCommand::execute()
                 1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
                 AUTOROTATION_MIN_SMOOTHING_ALPHA);
 
-            // low pass filter the desiredRotation to avoid radical changes in the desired rotation
-            // when far away from where we are centering the chassis around
+            // low pass filter the desiredRotation to avoid radical changes in the desired
+            // rotation when far away from where we are centering the chassis around
             desiredRotationAverage =
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
@@ -132,8 +135,8 @@ void ChassisAutorotateCommand::execute()
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        // the x/y translational speed is limited to this value, this means when rotation is large,
-        // the translational speed will be clamped to a smaller value to compensate
+        // the x/y translational speed is limited to this value, this means when rotation is
+        // large, the translational speed will be clamped to a smaller value to compensate
         float rotationLimitedMaxTranslationalSpeed =
             maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
@@ -148,10 +151,7 @@ void ChassisAutorotateCommand::execute()
             rotationLimitedMaxTranslationalSpeed);
 
         // Rotate X and Y depending on turret angle
-        rotateVector(
-            &chassisXDesiredWheelspeed,
-            &chassisYDesiredWheelspeed,
-            modm::toRadian(turretAngleFromCenter));
+        rotateVector(&chassisXDesiredWheelspeed, &chassisYDesiredWheelspeed, turretAngleFromCenter);
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,

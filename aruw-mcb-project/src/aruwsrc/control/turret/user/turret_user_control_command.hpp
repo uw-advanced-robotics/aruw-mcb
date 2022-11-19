@@ -23,6 +23,7 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
+#include "../turret_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -40,7 +41,7 @@ class TurretUserControlCommand : public tap::control::Command
 public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
+     * @param[in] turretSubsystem Pointer to the sentry turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
@@ -54,8 +55,9 @@ public:
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        float userYawInputScalar = 1.0f,
-        float userPitchInputScalar = 1.0f);
+        float userYawInputScalar,
+        float userPitchInputScalar,
+        uint8_t turretID = 0);
 
     bool isReady() override;
 
@@ -80,6 +82,8 @@ private:
 
     const float userYawInputScalar;
     const float userPitchInputScalar;
+
+    const uint8_t turretID;
 };
 }  // namespace aruwsrc::control::turret::user
 

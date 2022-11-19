@@ -28,16 +28,16 @@ namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
     aruwsrc::Drivers* drivers,
-    aruwsrc::control::turret::TurretSubsystem* turret)
+    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
     : drivers(drivers),
-      turret(turret)
+      turretSubsystem(turretSubsystem)
 {
 }
 
 bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     /// @todo fix this in the future, should use some sort of interface
-#if defined(ALL_SENTINELS)
+#if defined(ALL_SENTRIES)
     *output = 0;
     return true;
 #else
@@ -45,7 +45,12 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     // meaningful for the vision system.
     /// @todo in the future we could have the odometry subsystem fall back to using
     /// just chassis IMU and turret when turret IMU is offline.
-    if (!drivers->turretMCBCanComm.isConnected() || !turret->isOnline())
+
+    // the turret must have a turret IMU for this function to work
+    auto turretMCB = turretSubsystem.getTurretMCB();
+    assert(turretMCB != nullptr);
+
+    if (!turretMCB->isConnected() || !turretSubsystem.yawMotor.isOnline())
     {
         return false;
     }
@@ -55,10 +60,9 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
-        float turretWorldYawRadians =
-            modm::Angle::normalize(modm::toRadian(drivers->turretMCBCanComm.getYaw()));
+        float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
         // Normalized angle in range (-pi, pi)
-        float turretChassisYawRadians = modm::toRadian(turret->getYawAngleFromCenter());
+        float turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
 
         *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
         return true;

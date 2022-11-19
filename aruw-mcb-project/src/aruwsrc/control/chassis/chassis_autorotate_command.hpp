@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,7 +21,8 @@
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-#include "tap/control/turret_subsystem_interface.hpp"
+
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc
 {
@@ -39,9 +40,10 @@ class ChassisSubsystem;
 class ChassisAutorotateCommand : public tap::control::Command
 {
 public:
-    /** When the turret yaw setpoint and measured value is < 180 - this value, autorotation will be
+    /** When the turret yaw setpoint and measured value is < M_PI - this value, autorotation will be
      * paused until the difference is within this value again. */
-    static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = 1.0f;
+    static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION =
+        modm::toRadian(1.0f);
 
     /** The symmetry of the chassis. */
     enum class ChassisSymmetry : uint8_t
@@ -64,7 +66,7 @@ public:
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
         ChassisSubsystem* chassis,
-        const tap::control::turret::TurretSubsystemInterface* turret,
+        const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
 
     void initialize() override;
@@ -83,16 +85,16 @@ public:
 
     const char* getName() const override { return "chassis autorotate"; }
 
-private:
+protected:
     aruwsrc::Drivers* drivers;
     ChassisSubsystem* chassis;
-    const tap::control::turret::TurretSubsystemInterface* turret;
+    const aruwsrc::control::turret::TurretMotor* yawMotor;
 
     /** Autorotation setpoint, smoothed using a low pass filter. */
     float desiredRotationAverage = 0;
 
     /**
-     * The chassis's symmetry. This only matters if your turret can spin 360 degrees. If the
+     * The chassis's symmetry. This only matters if your turret can spin TWOPI radians. If the
      * symmetry is not SYMMETRY_NONE, the chassis will attempt to recenter itself around whichever
      * "center" the turret is closest to, where a "center" is defined by either the front of the
      * chassis or one of the chassis's points that is symmetrical to the front.
@@ -108,7 +110,19 @@ private:
      */
     bool chassisAutorotating;
 
-    void updateAutorotateState(const tap::control::turret::TurretSubsystemInterface* turret);
+    /**
+     * Computes the setpoint to autorotate the chassis towards
+     *
+     * @param turretAngleFromCenter the current angle of the turret relative to the chassis
+     * @param maxAngleFromCenter the maximum angle difference to either side before the autorotation
+     * setpoint swaps
+     * @return how much to rotate the chassis to get it aligned with the turret
+     */
+    virtual float computeAngleFromCenterForAutorotation(
+        float turretAngleFromCenter,
+        float maxAngleFromCenter);
+
+    void updateAutorotateState();
 };  // class ChassisAutorotateCommand
 
 }  // namespace aruwsrc::chassis

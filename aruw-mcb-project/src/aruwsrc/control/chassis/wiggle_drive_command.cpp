@@ -40,10 +40,10 @@ namespace chassis
 WiggleDriveCommand::WiggleDriveCommand(
     aruwsrc::Drivers* drivers,
     ChassisSubsystem* chassis,
-    const tap::control::turret::TurretSubsystemInterface* turret)
+    const aruwsrc::control::turret::TurretMotor* yawMotor)
     : drivers(drivers),
       chassis(chassis),
-      turret(turret),
+      yawMotor(yawMotor),
       rotationSpeedRamp(0)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -62,9 +62,9 @@ void WiggleDriveCommand::initialize()
 void WiggleDriveCommand::execute()
 {
     // We only wiggle when the turret is online.
-    if (turret->isOnline())
+    if (yawMotor->isOnline())
     {
-        const float turretYawFromCenter = turret->getYawAngleFromCenter();
+        const float turretYawFromCenter = yawMotor->getAngleFromCenter();
         const WiggleParams& wiggleParams = getWiggleParams();
 
         if (turretYawFromCenter > wiggleParams.turnaroundAngle)
@@ -95,7 +95,7 @@ void WiggleDriveCommand::execute()
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
         // relative while wiggling.
-        rotateVector(&x, &y, modm::toRadian(turretYawFromCenter));
+        rotateVector(&x, &y, turretYawFromCenter);
 
         chassis->setDesiredOutput(x, y, r);
     }

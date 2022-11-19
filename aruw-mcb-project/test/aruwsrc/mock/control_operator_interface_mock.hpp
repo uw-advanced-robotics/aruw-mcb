@@ -40,9 +40,9 @@ public:
     MOCK_METHOD(float, getChassisXInput, (), (override));
     MOCK_METHOD(float, getChassisYInput, (), (override));
     MOCK_METHOD(float, getChassisRInput, (), (override));
-    MOCK_METHOD(float, getTurretYawInput, (), (override));
-    MOCK_METHOD(float, getTurretPitchInput, (), (override));
-    MOCK_METHOD(float, getSentinelSpeedInput, (), (override));
+    MOCK_METHOD(float, getTurretYawInput, (uint8_t), (override));
+    MOCK_METHOD(float, getTurretPitchInput, (uint8_t), (override));
+    MOCK_METHOD(float, getSentrySpeedInput, (), (override));
 };  // class ControlOperatorInterfaceMock
 }  // namespace mock
 }  // namespace aruwsrc

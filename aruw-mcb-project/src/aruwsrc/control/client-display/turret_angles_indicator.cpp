@@ -46,7 +46,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::sendInitialGraphics()
 
     // send turret angle data graphic and associated labels
     RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesGraphic));
-    turretAnglesGraphic.graphicData.operation = Tx::ADD_GRAPHIC_MODIFY;
+    turretAnglesGraphic.graphicData.operation = Tx::GRAPHIC_MODIFY;
     RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesLabelGraphics));
 
     RF_END();
@@ -56,8 +56,8 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
 {
     RF_BEGIN(1);
 
-    yaw = robotTurretSubsystem.getWorldYaw();
-    pitch = robotTurretSubsystem.getWorldPitch();
+    yaw = modm::toDegree(robotTurretSubsystem.getWorldYaw());
+    pitch = modm::toDegree(robotTurretSubsystem.getWorldPitch());
 
     if (sendTurretDataTimer.execute() &&
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
@@ -82,7 +82,7 @@ void TurretAnglesIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesGraphic.graphicData,
         turretAnglesName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);
 
@@ -99,7 +99,7 @@ void TurretAnglesIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &turretAnglesLabelGraphics.graphicData,
         turretAnglesName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         TURRET_ANGLES_COLOR);
 

@@ -56,22 +56,48 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
 {
     RF_BEGIN(2);
 
-    currVisionTargetStatus = drivers.visionCoprocessor.isCvOnline() &&
-                             drivers.visionCoprocessor.getSomeTurretHasTarget();
+    {
+        bool hasTarget = drivers.visionCoprocessor.isCvOnline() &&
+                         drivers.visionCoprocessor.getSomeTurretHasTarget();
+
+        if (hasTarget)
+        {
+            bool shotTimingMode = drivers.visionCoprocessor.getSomeTurretUsingTimedShots();
+            newVisionIndicatorColor =
+                shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
+        }
+        else
+        {
+            newVisionIndicatorColor = std::nullopt;
+        }
+    }
+
+    if (newVisionIndicatorColor.has_value())
+    {
+        visionTargetFoundGraphics.graphicData[0].color =
+            static_cast<uint8_t>(*newVisionIndicatorColor);
+        visionTargetFoundGraphics.graphicData[1].color =
+            static_cast<uint8_t>(*newVisionIndicatorColor);
+    }
 
     if ((updateVisionTargetFoundTimeout.isExpired() ||
          updateVisionTargetFoundTimeout.isStopped()) &&
-        prevVisionTargetStatus != currVisionTargetStatus)
+        prevVisionIndicatorColor != newVisionIndicatorColor)
     {
-        visionTargetFoundGraphics.graphicData[0].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
-        visionTargetFoundGraphics.graphicData[1].operation =
-            currVisionTargetStatus ? Tx::ADD_GRAPHIC : Tx::ADD_GRAPHIC_DELETE;
+        {
+            bool wasPresent = prevVisionIndicatorColor.has_value();
+            bool isPresent = newVisionIndicatorColor.has_value();
+            auto presenceChanged = !wasPresent || !isPresent;
+            auto operation = presenceChanged ? (isPresent ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE)
+                                             : Tx::GRAPHIC_MODIFY;
+            visionTargetFoundGraphics.graphicData[0].operation = operation;
+            visionTargetFoundGraphics.graphicData[1].operation = operation;
+        }
 
         RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics));
 
         updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
-        prevVisionTargetStatus = currVisionTargetStatus;
+        prevVisionIndicatorColor = newVisionIndicatorColor;
     }
 
     RF_END();
@@ -79,7 +105,7 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
 
 void VisionHudIndicators::initialize()
 {
-    prevVisionTargetStatus = false;
+    prevVisionIndicatorColor = std::nullopt;
 
     static constexpr int CENTER_X_OFFSET =
         SCREEN_WIDTH / 2 + ReticleIndicator::RETICLE_CENTER_X_OFFSET;
@@ -103,7 +129,7 @@ void VisionHudIndicators::initializeVisionHudIndicator(
     RefSerialTransmitter::configGraphicGenerics(
         graphicData,
         hudIndicatorName,
-        Tx::ADD_GRAPHIC,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         VISION_TARGET_FOUND_COLOR);
 

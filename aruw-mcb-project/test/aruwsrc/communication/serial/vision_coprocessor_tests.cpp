@@ -72,6 +72,7 @@ static void initAndRunAutoAimRxTest(
         EXPECT_EQ(expectedAimData[i].zAcc, callbackData.zAcc);
         EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
         EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
+        EXPECT_EQ(expectedAimData[i].firerate, callbackData.firerate);
     }
 }
 
@@ -103,6 +104,11 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
             .zAcc = 9,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -122,6 +128,11 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
             .zAcc = -9,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -141,6 +152,11 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
             .zAcc = 0.35,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
     initAndRunAutoAimRxTest(aimData);
 }
@@ -160,6 +176,11 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
             .zAcc = 123456789.0f,
             .hasTarget = false,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
 
     initAndRunAutoAimRxTest(aimData);
@@ -180,6 +201,11 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
             .zAcc = -14.2,
             .hasTarget = true,
             .timestamp = 1234,
+            .firerate = VisionCoprocessor::FireRate::ZERO,
+            .recommendUseTimedShots = false,
+            .targetHitTimeOffset = 0,
+            .targetPulseInterval = 0,
+            .targetIntervalDuration = 0,
         }};
 
     // if there are > 1 turret, fill in aim data
@@ -196,6 +222,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
         aimData[i].yAcc++;
         aimData[i].zAcc++;
         aimData[i].timestamp++;
+        aimData[i].firerate = (VisionCoprocessor::FireRate)((uint8_t)aimData[i].firerate + 1);
     }
 
     initAndRunAutoAimRxTest(aimData);
@@ -237,8 +264,8 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     odometryData.chassisOdometry.yaw = 0;
     odometryData.chassisOdometry.roll = 0;
 
-    odometryData.turretOdometry[0].pitch = 45;
-    odometryData.turretOdometry[0].yaw = -30;
+    odometryData.turretOdometry[0].pitch = M_PI_4;
+    odometryData.turretOdometry[0].yaw = -M_PI;
     odometryData.turretOdometry[0].timestamp = 456;
 
     clock.time = odometryData.chassisOdometry.timestamp / 1000;

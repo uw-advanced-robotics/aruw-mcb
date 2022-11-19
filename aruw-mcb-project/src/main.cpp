@@ -20,9 +20,6 @@
 #ifdef PLATFORM_HOSTED
 /* hosted environment (simulator) includes --------------------------------- */
 #include <iostream>
-
-#include "tap/communication/tcp-server/tcp_server.hpp"
-#include "tap/motor/motorsim/sim_handler.hpp"
 #endif
 
 #include "tap/board/board.hpp"
@@ -46,8 +43,11 @@
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
+static constexpr float MAHONY_KP = 0.1f;
+
 /* define timers here -------------------------------------------------------*/
-tap::arch::PeriodicMilliTimer sendMotorTimeout(2);
+tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
@@ -75,13 +75,6 @@ int main()
     initializeIo(drivers);
     aruwsrc::control::initSubsystemCommands(drivers);
 
-#ifdef PLATFORM_HOSTED
-    // aruwsrc::sim::initialize_robot_sim();
-    // tap::motorsim::SimHandler::resetMotorSims();
-    // // Blocking call, waits until Windows Simulator connects.
-    // tap::communication::TCPServer::MainServer()->getConnection();
-#endif
-
     while (1)
     {
         // do this as fast as you can
@@ -94,8 +87,11 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-            PROFILE(drivers->profiler, drivers->turretMCBCanComm.sendData, ());
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+#endif
+#if defined(TARGET_SENTRY_BEEHIVE)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
@@ -113,7 +109,7 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->can.initialize();
     drivers->errorController.init();
     drivers->remote.initialize();
-    drivers->mpu6500.init();
+    drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->oledDisplay.initialize();
@@ -121,17 +117,16 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
     drivers->visionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
-#if defined(ALL_SOLDIERS) || defined(TARGET_HERO)
-    drivers->turretMCBCanComm.init();
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+    drivers->turretMCBCanCommBus1.init();
+#endif
+#if defined(TARGET_SENTRY_BEEHIVE)
+    drivers->turretMCBCanCommBus2.init();
 #endif
 }
 
 static void updateIo(aruwsrc::Drivers *drivers)
 {
-#ifdef PLATFORM_HOSTED
-    tap::motorsim::SimHandler::updateSims();
-#endif
-
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();

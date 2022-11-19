@@ -7,7 +7,6 @@
   <options>
     <option name="taproot:rebuild_modm">True</option>
     <option name="taproot:project_name">aruw-mcb-project</option>
-    <option name="taproot:modm_repo_lb">../taproot/modm/repo.lb</option>
     <option name="taproot:dev_board">rm-dev-board-a</option>
     <option name="taproot:communication:serial:terminal_serial:uart_port">Uart7</option>
     <option name="taproot:communication:serial:ref_serial:uart_port">Uart6</option>
@@ -36,6 +35,7 @@
     <module>taproot:core</module>
     <module>taproot:communication:sensors:buzzer</module>
     <module>taproot:communication:sensors:distance</module>
+    <module>taproot:communication:sensors:limit-switch</module>
     <module>taproot:communication:gpio:leds</module>
     <module>taproot:communication:gpio:digital</module>
     <module>taproot:communication:tcp-server</module>
