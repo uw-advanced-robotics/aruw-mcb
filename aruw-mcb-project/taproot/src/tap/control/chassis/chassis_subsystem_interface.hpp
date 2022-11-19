@@ -43,17 +43,17 @@ public:
     /**
      * @return the number of chassis motors
      */
-    virtual int getNumChassisMotors() const = 0;
+    virtual inline int getNumChassisMotors() const = 0;
 
-    virtual int16_t getLeftFrontRpmActual() const = 0;
-    virtual int16_t getLeftBackRpmActual() const = 0;
-    virtual int16_t getRightFrontRpmActual() const = 0;
-    virtual int16_t getRightBackRpmActual() const = 0;
+    virtual inline int16_t getLeftFrontRpmActual() const = 0;
+    virtual inline int16_t getLeftBackRpmActual() const = 0;
+    virtual inline int16_t getRightFrontRpmActual() const = 0;
+    virtual inline int16_t getRightBackRpmActual() const = 0;
 
     /**
      * @return `true` if all motors are online
      */
-    virtual bool allMotorsOnline() const = 0;
+    virtual inline bool allMotorsOnline() const = 0;
 
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -62,7 +62,7 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const = 0;
+    virtual inline modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const = 0;
 
     /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
