@@ -106,7 +106,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    mockable virtual void setDesiredOutput(float x, float y, float r);
+    void virtual setDesiredOutput(float x, float y, float r) = 0;
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
