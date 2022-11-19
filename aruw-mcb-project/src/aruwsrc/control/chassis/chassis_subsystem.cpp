@@ -87,7 +87,8 @@ ChassisSubsystem::ChassisSubsystem(
           &currentSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD)
+          ENERGY_BUFFER_CRIT_THRESHOLD,
+          nullptr)
 {
     constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                             ? 1
