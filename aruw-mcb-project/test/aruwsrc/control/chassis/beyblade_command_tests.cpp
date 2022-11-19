@@ -20,7 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
