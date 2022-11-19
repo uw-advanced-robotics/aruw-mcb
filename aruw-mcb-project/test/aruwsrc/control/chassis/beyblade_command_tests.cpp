@@ -46,7 +46,7 @@ protected:
     BeybladeCommandTest()
         : d(),
           t(&d),
-          cs(chassis::MecanumChassisSubsystem(&d)),
+          cs(MecanumChassisSubsystem(&d)),
           bc(&d, &cs, &t.yawMotor),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
