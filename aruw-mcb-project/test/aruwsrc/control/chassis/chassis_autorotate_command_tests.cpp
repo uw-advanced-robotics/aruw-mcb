@@ -20,7 +20,10 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -36,7 +39,7 @@ class ChassisAutorotateCommandTest : public Test
 protected:
     ChassisAutorotateCommandTest()
         : drivers(),
-          chassis(&drivers),
+          chassis(chassis::MecanumChassisSubsystem(&drivers)),
           turret(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
     {
