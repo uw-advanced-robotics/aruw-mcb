@@ -23,12 +23,14 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
+
 
 namespace aruwsrc
 {
 namespace mock
 {
-class ChassisSubsystemMock : public aruwsrc::chassis::HolonomicChassisSubsystem
+class ChassisSubsystemMock : public aruwsrc::chassis::Holonomic4MotorChassisSubsystem
 {
 public:
     ChassisSubsystemMock(aruwsrc::Drivers *drivers);
