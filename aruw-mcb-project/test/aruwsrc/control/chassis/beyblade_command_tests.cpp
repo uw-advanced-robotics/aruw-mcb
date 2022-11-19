@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
@@ -45,7 +46,7 @@ protected:
     BeybladeCommandTest()
         : d(),
           t(&d),
-          cs(&d),
+          cs(chassis::MecanumChassisSubsystem(&d)),
           bc(&d, &cs, &t.yawMotor),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
