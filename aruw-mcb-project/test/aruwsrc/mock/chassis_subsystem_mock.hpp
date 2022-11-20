@@ -36,8 +36,7 @@ public:
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredOutput
-    , (float, float, float), (override));
+    MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
     MOCK_METHOD(void, setZeroRPM, ());
     MOCK_METHOD(float, chassisSpeedRotationPID, (float, float));
     MOCK_METHOD(void, refresh, (), (override));

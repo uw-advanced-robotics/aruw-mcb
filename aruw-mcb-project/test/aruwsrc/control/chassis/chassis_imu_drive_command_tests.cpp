@@ -37,12 +37,7 @@ static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
 class ChassisImuDriveCommandTest : public Test
 {
 protected:
-    ChassisImuDriveCommandTest()
-        : drivers(),
-          chassis(&drivers),
-          robotData{}
-    {
-    }
+    ChassisImuDriveCommandTest() : drivers(), chassis(&drivers), robotData{} {}
 
     void SetUp() override
     {
