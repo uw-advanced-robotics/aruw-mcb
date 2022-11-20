@@ -17,15 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tap/algorithms/transforms/frames.hpp"
+#include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
 
 namespace aruwsrc::algorithms
 {
 
-class WorldFrame : public tap::algorithms::Frame { } ;
+StandardTransformer::StandardTransformer()
+{
 
-class ChassisFrame : public tap::algorithms::Frame { } ;
-
-class TurretFrame : public tap::algorithms::Frame { } ;
+}
 
 }
