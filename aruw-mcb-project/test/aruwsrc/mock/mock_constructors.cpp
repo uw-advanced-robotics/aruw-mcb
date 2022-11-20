@@ -86,7 +86,7 @@ ChassisDriveCommandMock::ChassisDriveCommandMock(
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
-    : HolonomicChassisSubsystem(drivers, chassis::HolonomicChassisSubsystem::ChassisType::MECANUM)
+    : Holonomic4MotorChassisSubsystem(drivers)
 {
 }
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
