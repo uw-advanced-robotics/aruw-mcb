@@ -22,9 +22,8 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
-
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {

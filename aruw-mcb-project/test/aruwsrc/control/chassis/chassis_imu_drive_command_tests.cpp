@@ -38,9 +38,9 @@ class ChassisImuDriveCommandTest : public Test
 {
 protected:
     ChassisImuDriveCommandTest()
-     : drivers(),
-       chassis(chassis::MecanumChassisSubsystem(&drivers)),
-       robotData{} 
+        : drivers(),
+          chassis(chassis::MecanumChassisSubsystem(&drivers)),
+          robotData{}
     {
     }
 
