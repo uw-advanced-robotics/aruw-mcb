@@ -189,7 +189,6 @@ public:
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
-
     
 };  // class HolonomicChassisSubsystem
 
