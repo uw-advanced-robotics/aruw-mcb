@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,26 +21,20 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "math_user_utils.hpp"
+#ifndef __FRAMES_HPP__
+#define __FRAMES_HPP__
 
-#include <cstdint>
-
-float tap::algorithms::fastInvSqrt(float x)
+namespace tap::algorithms
 {
-    static_assert(sizeof(float) == 4, "fast inverse sqrt requires 32-bit float");
-    float halfx = 0.5f * x;
-    float y = x;
-    int32_t i = reinterpretCopy<float, int32_t>(y);
-    i = 0x5f3759df - (i >> 1);
-    y = reinterpretCopy<int32_t, float>(i);
-    y = y * (1.5f - (halfx * y * y));
-    return y;
+
+/**
+ * Frame is an empty class to provide type-checking for
+ * generic Transforms. This class is intended to be inherited
+ * by more specific frame subclasses, which should also be empty.
+*/
+
+class Frame { };
 }
 
-void tap::algorithms::rotateVector(float* x, float* y, float radians)
-{
-    float x_temp = *x;
-    *x = (*x) * cosf(radians) - *y * sinf(radians);
-    *y = x_temp * sinf(radians) + *y * cosf(radians);
-}
 
+#endif // __FRAMES_HPP__ 
