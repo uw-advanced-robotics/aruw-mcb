@@ -27,9 +27,21 @@ using namespace tap::algorithms;
 namespace aruwsrc::algorithms
 {
 
+/**
+ * Standard-specific Transformer to handle and update world, chassis, 
+ * and turret frame transforms.
+ * 
+ * @param leftFrontMotor Left front motor
+ * @param leftBackMotor Left back motor
+ * @param rightFrontMotor Right front motor
+ * @param rightBackMotor Right back motor
+ * @param turretPitchMotor Turret pitch motor
+ * @param turretYawMotor Turret yaw motor
+ * @param chassisImu Chassis IMU
+ * @param turretImu Turret IMU
+*/
 class StandardTransformer : public Transformer
 {
-
 public:
     StandardTransformer::StandardTransformer (
         tap::motor::DjiMotor& leftFrontMotor,
@@ -41,18 +53,57 @@ public:
         tap::communication::sensors::imu::ImuInterface& chassisImu,
         tap::communication::sensors::imu::ImuInterface& turretImu
     );
-
+    
+    /**
+     * Get World to Chassis transform
+     * 
+     * @returns World to Chassis transform
+    */
     Transform<WorldFrame, ChassisFrame> StandardTransformer::getWorldToChassisTranform();
 
+    /**
+     * Get World to Turret transform
+     * 
+     * @returns World to Turret transform
+    */
     Transform<WorldFrame, TurretFrame> StandardTransformer::getWorldToTurretTranform();
 
+    /**
+     * Get Chassis to Turret transform
+     * 
+     * @returns Chassis to Turret transform
+    */
     Transform<ChassisFrame, TurretFrame> StandardTransformer::getChassisToTurretTranform();
 
+    /**
+     * Get Chassis to World transform
+     * 
+     * @returns Chassis to World transform
+    */
     Transform<ChassisFrame, WorldFrame> StandardTransformer::getChassisToWorldTranform();
     
+    /**
+     * Get Turret to Chassis transform
+     * 
+     * @returns Turret to Chassis transform
+    */
     Transform<TurretFrame, ChassisFrame> StandardTransformer::getTurretToChassisTranform();
 
+    /**
+     * Update each transform with most recent encoder and IMU odometry data. This method
+     * should be called every refresh.
+    */
     void StandardTransformer::update();
+
+private:
+    tap::motor::DjiMotor& leftFrontMotor;
+    tap::motor::DjiMotor& leftBackMotor;
+    tap::motor::DjiMotor& rightFrontMotor;
+    tap::motor::DjiMotor& rightBackMotor;
+    tap::motor::DjiMotor& turretPitchMotor;
+    tap::motor::DjiMotor& turretYawMotor;
+    tap::communication::sensors::imu::ImuInterface& chassisImu;
+    tap::communication::sensors::imu::ImuInterface& turretImu;
 };
 
 }
