@@ -17,17 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tap"
 #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
+#include "tap/algorithms/transforms/transformer.hpp"
 
 namespace aruwsrc::algorithms
 {
 
 StandardTransformer::StandardTransformer(
-    tap
-) {
-
-
-}
+    tap::motor::DjiMotor& leftFrontMotor,
+    tap::motor::DjiMotor& leftBackMotor,
+    tap::motor::DjiMotor& rightFrontMotor,
+    tap::motor::DjiMotor& rightBackMotor,
+    tap::motor::DjiMotor& turretPitchMotor,
+    tap::motor::DjiMotor& turretYawMotor,
+    tap::communication::sensors::imu::ImuInterface& chassisImu,
+    tap::communication::sensors::imu::ImuInterface& turretImu
+) :
+    leftFrontMotor(leftFrontMotor), leftBackMotor(leftBackMotor),
+    rightFrontMotor(rightFrontMotor), rightBackMotor(rightBackMotor),
+    turretPitchMotor(turretPitchMotor), turretYawMotor(turretYawMotor),
+    chassisImu(chassisImu), turretImu(turretImu) 
+    { };
 
 }
