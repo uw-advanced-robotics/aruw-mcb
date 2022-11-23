@@ -260,7 +260,8 @@ class SentryChassisTest : public ControlOperatorInterfaceTest,
 
 TEST_P(SentryChassisTest, getSentrySpeedInput_retuns_user_input)
 {
-    ON_CALL(drivers.remote, getChannel(Remote::Channel::WHEEL)).WillByDefault(Return(std::get<0>(GetParam())));
+    ON_CALL(drivers.remote, getChannel(Remote::Channel::WHEEL))
+        .WillByDefault(Return(std::get<0>(GetParam())));
 
     EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentrySpeedInput(), 1E-3);
 }
