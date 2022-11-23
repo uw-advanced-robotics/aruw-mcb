@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tap/motor/dji_motor.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp" // change this probably
 #include "tap/algorithms/transforms/transformer.hpp"
 #include "aruwsrc/algorithms/transforms/frames.hpp"
 
@@ -29,7 +31,16 @@ class StandardTransformer : public Transformer
 {
 
 public:
-    StandardTransformer::StandardTransformer (); // TODO: Write parameters
+    StandardTransformer::StandardTransformer (
+        tap::motor::DjiMotor& leftFrontMotor,
+        tap::motor::DjiMotor& leftBackMotor,
+        tap::motor::DjiMotor& rightFrontMotor,
+        tap::motor::DjiMotor& rightBackMotor,
+        tap::motor::DjiMotor& turretPitchMotor,
+        tap::motor::DjiMotor& turretYawMotor,
+        tap::communication::sensors::imu::ImuInterface& chassisImu,
+        tap::communication::sensors::imu::ImuInterface& turretImu
+    );
 
     Transform<WorldFrame, ChassisFrame> StandardTransformer::getWorldToChassisTranform();
 

@@ -17,13 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tap"
 #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
 
 namespace aruwsrc::algorithms
 {
 
-StandardTransformer::StandardTransformer()
-{
+StandardTransformer::StandardTransformer(
+    tap
+) {
+
 
 }
 
