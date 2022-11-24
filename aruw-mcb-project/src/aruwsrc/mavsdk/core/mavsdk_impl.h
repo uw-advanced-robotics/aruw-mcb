@@ -9,7 +9,7 @@
 #include "call_every_handler.h"
 #include "..\mavsdk\core\connection.h"
 #include "aruw-mcb-project\src\aruwsrc\mavsdk\core\include\mavsdk\mavsdk.h"
-#include "aruwsrc\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "mavlink_include.h"
 #include "mavlink_address.h"
 #include "aruwsrc\mavsdk\core\mavlink_message_handler.h"
 #include "aruwsrc\mavsdk\core\mavlink_command_receiver.h"

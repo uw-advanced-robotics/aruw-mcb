@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "aruwsrc\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
-#include "aruwsrc\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "mavlink_include.h"
 #include "aruwsrc\mavsdk\core\plugin_impl_base.h"
 #include "aruwsrc\mavsdk\core\include\mavsdk\system.h"
 #include "aruwsrc\mavsdk\core\callback_list.h"
