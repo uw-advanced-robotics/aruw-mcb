@@ -13,9 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "aruwsrc\mavsdk\core\include\mavsdk\plugin_base.h"
+#include "plugin_base.h"
 
-#include "aruwsrc\mavsdk\core\include\mavsdk\handle.h"
+#include "handle.h"
 
 namespace mavsdk {
 

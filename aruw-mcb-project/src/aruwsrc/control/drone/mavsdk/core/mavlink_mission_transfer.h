@@ -8,11 +8,11 @@
 #include <vector>
 #include "mavlink_address.h"
 #include "mavlink_include.h"
-#include "aruwsrc\mavsdk\core\mavlink_message_handler.h"
+#include "mavlink_message_handler.h"
 #include "timeout_handler.h"
 #include "timeout_s_callback.h"
 #include "locked_queue.h"
-#include "aruwsrc\mavsdk\core\sender.h"
+#include "sender.h"
 
 namespace mavsdk {
 

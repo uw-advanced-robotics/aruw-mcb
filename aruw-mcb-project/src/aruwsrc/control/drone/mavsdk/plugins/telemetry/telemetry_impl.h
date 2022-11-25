@@ -4,11 +4,11 @@
 #include <mutex>
 #include <optional>
 
-#include "aruwsrc\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
+#include "plugins/telemetry/telemetry.h"
 #include "mavlink_include.h"
-#include "aruwsrc\mavsdk\core\plugin_impl_base.h"
-#include "aruwsrc\mavsdk\core\include\mavsdk\system.h"
-#include "aruwsrc\mavsdk\core\callback_list.h"
+#include "plugin_impl_base.h"
+#include "system.h"
+#include "callback_list.h"
 
 namespace mavsdk {
 

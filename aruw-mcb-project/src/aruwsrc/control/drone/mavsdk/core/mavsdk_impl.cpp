@@ -1,4 +1,4 @@
-#include "aruw-mcb-project\src\aruwsrc\mavsdk\core\mavsdk_impl.h"
+#include "mavsdk_impl.h"
 
 #include <algorithm>
 #include <mutex>

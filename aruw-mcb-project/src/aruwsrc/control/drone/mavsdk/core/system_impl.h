@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aruwsrc\mavsdk\core\callback_list.h"
+#include "callback_list.h"
 #include "flight_mode.h"
 #include "mavlink_address.h"
 #include "mavlink_include.h"

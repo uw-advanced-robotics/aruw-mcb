@@ -7,17 +7,17 @@
 #include <thread>
 
 #include "call_every_handler.h"
-#include "..\mavsdk\core\connection.h"
-#include "aruw-mcb-project\src\aruwsrc\mavsdk\core\include\mavsdk\mavsdk.h"
+#include "connection.h"
+#include "mavsdk.h"
 #include "mavlink_include.h"
 #include "mavlink_address.h"
-#include "aruwsrc\mavsdk\core\mavlink_message_handler.h"
-#include "aruwsrc\mavsdk\core\mavlink_command_receiver.h"
+#include "mavlink_message_handler.h"
+#include "mavlink_command_receiver.h"
 #include "safe_queue.h"
-#include "aruwsrc\mavsdk\core\server_component.h"
-#include "aruwsrc\mavsdk\core\system.h"
+#include "server_component.h"
+#include "system.h"
 #include "timeout_handler.h"
-#include "aruwsrc\mavsdk\core\callback_list.h"
+#include "callback_list.h"
 
 namespace mavsdk {
 
