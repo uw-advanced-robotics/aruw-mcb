@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 
 // As found in
 // https://stackoverflow.com/questions/1537964#answer-3312896

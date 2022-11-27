@@ -3,7 +3,7 @@
 #include <mutex>
 
 #include "plugins/shell/shell.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugin_impl_base.h"
 #include "system.h"
 #include "callback_list.h"

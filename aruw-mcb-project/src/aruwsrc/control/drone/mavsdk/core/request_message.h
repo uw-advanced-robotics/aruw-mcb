@@ -3,7 +3,7 @@
 #include "mavlink_command_sender.h"
 #include "mavlink_message_handler.h"
 #include "timeout_handler.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include <functional>
 #include <mutex>
 #include <optional>

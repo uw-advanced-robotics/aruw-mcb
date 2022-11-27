@@ -1,6 +1,6 @@
 #include "log.h"
 #include "mission_import.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include <cmath> // for `std::round`
 #include <sstream> // for `std::stringstream`
 

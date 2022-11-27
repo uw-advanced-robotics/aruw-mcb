@@ -2,7 +2,7 @@
 
 #include <mutex>
 
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/mission_raw/mission_raw.h"
 #include "plugin_impl_base.h"
 #include "system.h"

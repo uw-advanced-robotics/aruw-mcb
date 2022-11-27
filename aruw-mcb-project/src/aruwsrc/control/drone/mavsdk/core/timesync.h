@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mavsdk_time.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 
 namespace mavsdk {
 

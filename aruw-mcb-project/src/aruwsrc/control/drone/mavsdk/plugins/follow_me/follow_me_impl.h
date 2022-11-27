@@ -1,7 +1,7 @@
 #pragma once
 
 #include "log.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/follow_me/follow_me.h"
 #include "plugin_impl_base.h"
 #include "system.h"

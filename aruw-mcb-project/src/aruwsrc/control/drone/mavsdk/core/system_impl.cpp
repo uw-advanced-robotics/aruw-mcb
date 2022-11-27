@@ -1,6 +1,6 @@
 #include "system.h"
 #include "mavsdk_impl.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "system_impl.h"
 #include "plugin_impl_base.h"
 #include "px4_custom_mode.h"

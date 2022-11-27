@@ -4,7 +4,7 @@
 #include <mutex>
 #include <string>
 
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/ftp/ftp.h"
 #include "plugin_impl_base.h"
 

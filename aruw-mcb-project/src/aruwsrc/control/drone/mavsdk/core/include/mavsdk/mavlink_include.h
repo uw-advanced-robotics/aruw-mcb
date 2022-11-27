@@ -1,3 +1,3 @@
 #pragma once
 
-#include "mavlink/v2.0/common/mavlink.h"
+#include "aruwsrc\control\drone\mavsdk\mavlink\common\mavlink.h"

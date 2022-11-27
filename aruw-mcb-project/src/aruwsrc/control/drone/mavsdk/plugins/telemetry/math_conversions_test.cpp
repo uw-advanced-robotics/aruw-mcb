@@ -1,6 +1,6 @@
 #include "math_conversions.h"
 #include <gtest/gtest.h>
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "mavsdk_math.h"
 
 using namespace mavsdk;

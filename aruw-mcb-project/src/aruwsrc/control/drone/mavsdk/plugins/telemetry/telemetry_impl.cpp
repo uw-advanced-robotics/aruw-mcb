@@ -1,15 +1,15 @@
 #include "telemetry_impl.h"
-#include "system.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
 #include "math_conversions.h"
-#include "mavsdk_math.h"
-#include "callback_list.tpp"
+#include "aruwsrc\control\drone\mavsdk\core\mavsdk_math.h"
+#include "aruwsrc\control\drone\mavsdk\core\callback_list.tpp"
 
 #include <cmath>
 #include <functional>
 #include <string>
 #include <array>
 #include <cassert>
-#include <unused.h>
+#include <aruwsrc\control\drone\mavsdk\core\unused.h>
 
 namespace mavsdk {
 

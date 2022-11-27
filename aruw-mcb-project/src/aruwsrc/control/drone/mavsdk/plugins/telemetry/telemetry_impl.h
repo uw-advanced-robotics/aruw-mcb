@@ -4,11 +4,14 @@
 #include <mutex>
 #include <optional>
 
-#include "plugins/telemetry/telemetry.h"
-#include "mavlink_include.h"
-#include "plugin_impl_base.h"
-#include "system.h"
-#include "callback_list.h"
+#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\plugin_base.h"
+#include "aruwsrc\control\drone\mavsdk\core\plugin_impl_base.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
+#include "aruwsrc\control\drone\mavsdk\core\callback_list.h"
+
+#include "aruwsrc\control\drone\mavsdk\core\mavlink_parameters.h"
 
 namespace mavsdk {
 

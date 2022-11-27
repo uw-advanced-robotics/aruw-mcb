@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/action/action.h"
 #include "plugin_impl_base.h"
 #include <atomic>

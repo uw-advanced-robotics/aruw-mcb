@@ -5,7 +5,7 @@
 #include <iomanip>
 
 #include "telemetry_impl.h"
-#include "plugins/telemetry/telemetry.h"
+#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
 
 namespace mavsdk {
 

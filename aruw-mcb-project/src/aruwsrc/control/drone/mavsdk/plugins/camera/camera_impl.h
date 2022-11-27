@@ -3,7 +3,7 @@
 #include <map>
 
 #include "camera_definition.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/camera/camera.h"
 #include "plugin_impl_base.h"
 #include "system.h"

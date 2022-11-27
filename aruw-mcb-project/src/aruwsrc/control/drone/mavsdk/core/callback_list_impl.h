@@ -6,7 +6,7 @@
 #include <mutex>
 #include <utility>
 #include <vector>
-#include "log.h"
+#include "aruwsrc\control\drone\mavsdk\core\log.h"
 #include "callback_list.h"
 
 namespace mavsdk {

@@ -7,7 +7,7 @@
 #include <mutex>
 #include <vector>
 #include "mavlink_address.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "mavlink_message_handler.h"
 #include "timeout_handler.h"
 #include "timeout_s_callback.h"

@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "log.h"
-#include "mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "plugins/mission_raw/mission_raw.h"
 #include "mission_import.h"
 

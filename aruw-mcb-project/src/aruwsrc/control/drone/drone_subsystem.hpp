@@ -21,8 +21,9 @@
 #define DRONE_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
-#include "aruwsrc/mavsdk/core/include/mavsdk/mavsdk.h"
-#include "aruwsrc\mavsdk\core/plugins\telemetry\telemetry.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavsdk.h"
+#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\telemetry.cpp"
+#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
 
 namespace aruwsrc
 {
