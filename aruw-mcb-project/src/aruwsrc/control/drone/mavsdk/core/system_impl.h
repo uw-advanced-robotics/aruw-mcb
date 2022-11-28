@@ -17,7 +17,7 @@
 #include "timeout_handler.h"
 #include "safe_queue.h"
 #include "timesync.h"
-#include "system.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
 #include <cstdint>
 #include <functional>
 #include <atomic>

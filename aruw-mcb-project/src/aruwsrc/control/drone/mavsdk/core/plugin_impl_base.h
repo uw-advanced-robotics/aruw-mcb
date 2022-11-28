@@ -1,11 +1,15 @@
 #pragma once
 #include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
+#include "aruwsrc\control\drone\mavsdk\core\system_impl.h"
+#include "aruwsrc\control\drone\mavsdk\core\system_impl.cpp"
 #include <memory>
 
 namespace mavsdk {
 
 class System;
 class SystemImpl;
+
 
 class PluginImplBase {
 public:

@@ -4,8 +4,8 @@
 #pragma GCC system_header
 #endif
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include <aruwsrc\control\drone\mavsdk\core\include\curl\curl.h>
+#include <aruwsrc\control\drone\mavsdk\core\include\curl\easy.h>
 
 // On Windows the build fails if the definition for ERROR is leaked after
 // above includes.

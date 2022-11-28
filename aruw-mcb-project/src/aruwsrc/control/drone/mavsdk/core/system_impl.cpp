@@ -1,5 +1,5 @@
-#include "system.h"
-#include "mavsdk_impl.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
+#include "aruwsrc\control\drone\mavsdk\core\mavsdk_impl.h"
 #include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "system_impl.h"
 #include "plugin_impl_base.h"

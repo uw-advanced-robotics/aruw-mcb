@@ -8,14 +8,14 @@
 
 #include "call_every_handler.h"
 #include "connection.h"
-#include "mavsdk.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavsdk.h"
 #include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
 #include "mavlink_address.h"
 #include "mavlink_message_handler.h"
 #include "mavlink_command_receiver.h"
 #include "safe_queue.h"
-#include "server_component.h"
-#include "system.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\server_component.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
 #include "timeout_handler.h"
 #include "callback_list.h"
 

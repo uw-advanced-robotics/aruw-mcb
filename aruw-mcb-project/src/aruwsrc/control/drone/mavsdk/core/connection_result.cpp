@@ -1,4 +1,4 @@
-#include "connection_result.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\connection_result.h"
 
 namespace mavsdk {
 
