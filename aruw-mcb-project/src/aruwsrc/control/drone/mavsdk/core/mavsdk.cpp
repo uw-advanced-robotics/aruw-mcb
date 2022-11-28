@@ -1,4 +1,4 @@
-#include "mavsdk.h"
+#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavsdk.h"
 
 #include "mavsdk_impl.h"
 

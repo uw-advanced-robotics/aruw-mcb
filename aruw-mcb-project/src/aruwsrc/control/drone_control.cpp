@@ -21,6 +21,8 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "turret/constants/turret_constants.hpp"
+
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -32,7 +34,16 @@ aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
 namespace drone_control
 {
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 /* define subsystems --------------------------------------------------------*/
+
+tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+
+
 
 /* define commands ----------------------------------------------------------*/
 

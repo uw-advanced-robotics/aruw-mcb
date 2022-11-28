@@ -43,6 +43,8 @@ class DroneSubsystem : public tap::control::Subsystem
 
 private:
 mavsdk::Mavsdk droneController;
+mavsdk::Telemetry::PositionNed currentPosition;
+
 
 };
 

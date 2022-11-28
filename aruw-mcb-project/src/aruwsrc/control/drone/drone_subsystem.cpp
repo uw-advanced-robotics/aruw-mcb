@@ -21,18 +21,34 @@
 
 #include "aruwsrc/drivers.hpp"
 
+#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
 
 namespace aruwsrc
 {
 namespace drone
 {
 
-DroneSubsystem::DroneSubsystem(Drivers* drivers) :  tap::control::Subsystem(drivers){
-	//this might be wrong
-	droneController.add_serial_connection("serial://COM3:57600");
+DroneSubsystem::DroneSubsystem(Drivers* drivers) : tap::control::Subsystem(drivers)
+{
+    // this might be wrong
+    droneController.add_serial_connection("serial://COM3:57600");
+
+    std::shared_ptr<mavsdk::System> system = droneController.systems()[0];
+    auto telemetry = mavsdk::Telemetry{system};
+    telemetry.set_rate_position(0.5);
+    auto thing = telemetry.subscribe_position_velocity_ned(
+        [&](mavsdk::Telemetry::PositionVelocityNed positionVel)
+        { currentPosition = positionVel.position; });
 }
 
-
+/**
+ * For when transforms drop
+ *
+ * Translation3D DroneSubsystem::getDronePosition(){
+ * return new Translation3d(currentPosition.north_m, currentPosition.east_m,
+ * currentPosition.down_m);
+ * }
+ */
 
 }  // namespace drone
 
