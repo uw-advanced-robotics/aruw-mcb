@@ -27,9 +27,16 @@
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
+#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "chassis/beyblade_command.hpp"
+#include "chassis/chassis_autorotate_command.hpp"
+#include "chassis/chassis_drive_command.hpp"
+#include "chassis/chassis_imu_drive_command.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "drone/drone_subsystem.hpp"
@@ -85,6 +92,21 @@ DroneTurretSubsystem turret(
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
+
+aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor);
+
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
+
+aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
+    aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+
+aruwsrc::chassis::BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -247,6 +269,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassis);
+
+aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 /* define commands ----------------------------------------------------------*/
 
