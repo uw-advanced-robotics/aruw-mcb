@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavsdk.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavsdk.h"
 #include "mavlink_receiver.h"
 #include <memory>
 #include <unordered_set>

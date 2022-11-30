@@ -4,20 +4,22 @@
 #include <mutex>
 #include <optional>
 
-#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\plugin_base.h"
-#include "aruwsrc\control\drone\mavsdk\core\plugin_impl_base.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
-#include "aruwsrc\control\drone\mavsdk\core\callback_list.h"
+#include "aruw-mcb-project/src/aruwsrc/control/drone/mavsdk/core/plugin_impl_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/callback_list.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/plugin_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/system.h"
+#include "aruwsrc/control/drone/mavsdk/core/mavlink_parameters.h"
+#include "aruwsrc/control/drone/mavsdk/core/plugin_impl_base.h"
+#include "aruwsrc/control/drone/mavsdk/plugins/telemetry/include/plugins/telemetry/telemetry.h"
 
-#include "aruwsrc\control\drone\mavsdk\core\mavlink_parameters.h"
-
-namespace mavsdk {
+namespace mavsdk
+{
 
 class System;
 
-class TelemetryImpl : public PluginImplBase {
+class TelemetryImpl : public PluginImplBase
+{
 public:
     explicit TelemetryImpl(System& system);
     explicit TelemetryImpl(std::shared_ptr<System> system);
@@ -119,8 +121,8 @@ public:
     Telemetry::Heading heading() const;
     Telemetry::Altitude altitude() const;
 
-    Telemetry::PositionVelocityNedHandle
-    subscribe_position_velocity_ned(const Telemetry::PositionVelocityNedCallback& callback);
+    Telemetry::PositionVelocityNedHandle subscribe_position_velocity_ned(
+        const Telemetry::PositionVelocityNedCallback& callback);
     void unsubscribe_position_velocity_ned(Telemetry::PositionVelocityNedHandle handle);
     Telemetry::PositionHandle subscribe_position(const Telemetry::PositionCallback& callback);
     void unsubscribe_position(Telemetry::PositionHandle handle);
@@ -128,35 +130,35 @@ public:
     void unsubscribe_home(Telemetry::HomeHandle handle);
     Telemetry::InAirHandle subscribe_in_air(const Telemetry::InAirCallback& callback);
     void unsubscribe_in_air(Telemetry::InAirHandle handle);
-    Telemetry::StatusTextHandle
-    subscribe_status_text(const Telemetry::StatusTextCallback& callback);
+    Telemetry::StatusTextHandle subscribe_status_text(
+        const Telemetry::StatusTextCallback& callback);
     void unsubscribe_status_text(Telemetry::StatusTextHandle handle);
     Telemetry::ArmedHandle subscribe_armed(const Telemetry::ArmedCallback& callback);
     void unsubscribe_armed(Telemetry::ArmedHandle handle);
-    Telemetry::AttitudeQuaternionHandle
-    subscribe_attitude_quaternion(const Telemetry::AttitudeQuaternionCallback& callback);
+    Telemetry::AttitudeQuaternionHandle subscribe_attitude_quaternion(
+        const Telemetry::AttitudeQuaternionCallback& callback);
     void unsubscribe_attitude_quaternion(Telemetry::AttitudeQuaternionHandle handle);
-    Telemetry::AttitudeEulerHandle
-    subscribe_attitude_euler(const Telemetry::AttitudeEulerCallback& callback);
+    Telemetry::AttitudeEulerHandle subscribe_attitude_euler(
+        const Telemetry::AttitudeEulerCallback& callback);
     void unsubscribe_attitude_euler(Telemetry::AttitudeEulerHandle handle);
     Telemetry::AttitudeAngularVelocityBodyHandle subscribe_attitude_angular_velocity_body(
         const Telemetry::AttitudeAngularVelocityBodyCallback& callback);
-    void
-    unsubscribe_attitude_angular_velocity_body(Telemetry::AttitudeAngularVelocityBodyHandle handle);
-    Telemetry::FixedwingMetricsHandle
-    subscribe_fixedwing_metrics(const Telemetry::FixedwingMetricsCallback& callback);
+    void unsubscribe_attitude_angular_velocity_body(
+        Telemetry::AttitudeAngularVelocityBodyHandle handle);
+    Telemetry::FixedwingMetricsHandle subscribe_fixedwing_metrics(
+        const Telemetry::FixedwingMetricsCallback& callback);
     void unsubscribe_fixedwing_metrics(Telemetry::FixedwingMetricsHandle handle);
-    Telemetry::GroundTruthHandle
-    subscribe_ground_truth(const Telemetry::GroundTruthCallback& callback);
+    Telemetry::GroundTruthHandle subscribe_ground_truth(
+        const Telemetry::GroundTruthCallback& callback);
     void unsubscribe_ground_truth(Telemetry::GroundTruthHandle handle);
-    Telemetry::AttitudeQuaternionHandle
-    subscribe_camera_attitude_quaternion(const Telemetry::AttitudeQuaternionCallback& callback);
+    Telemetry::AttitudeQuaternionHandle subscribe_camera_attitude_quaternion(
+        const Telemetry::AttitudeQuaternionCallback& callback);
     void unsubscribe_camera_attitude_quaternion(Telemetry::AttitudeQuaternionHandle handle);
-    Telemetry::AttitudeEulerHandle
-    subscribe_camera_attitude_euler(const Telemetry::AttitudeEulerCallback& callback);
+    Telemetry::AttitudeEulerHandle subscribe_camera_attitude_euler(
+        const Telemetry::AttitudeEulerCallback& callback);
     void unsubscribe_camera_attitude_euler(Telemetry::AttitudeEulerHandle handle);
-    Telemetry::VelocityNedHandle
-    subscribe_velocity_ned(const Telemetry::VelocityNedCallback& callback);
+    Telemetry::VelocityNedHandle subscribe_velocity_ned(
+        const Telemetry::VelocityNedCallback& callback);
     void unsubscribe_velocity_ned(Telemetry::VelocityNedHandle handle);
     Telemetry::ImuHandle subscribe_imu(const Telemetry::ImuCallback& callback);
     void unsubscribe_imu(Telemetry::ImuHandle handle);
@@ -170,37 +172,37 @@ public:
     void unsubscribe_raw_gps(Telemetry::RawGpsHandle handle);
     Telemetry::BatteryHandle subscribe_battery(const Telemetry::BatteryCallback& callback);
     void unsubscribe_battery(Telemetry::BatteryHandle handle);
-    Telemetry::FlightModeHandle
-    subscribe_flight_mode(const Telemetry::FlightModeCallback& callback);
+    Telemetry::FlightModeHandle subscribe_flight_mode(
+        const Telemetry::FlightModeCallback& callback);
     void unsubscribe_flight_mode(Telemetry::FlightModeHandle handle);
     Telemetry::HealthHandle subscribe_health(const Telemetry::HealthCallback& callback);
     void unsubscribe_health(Telemetry::HealthHandle handle);
-    Telemetry::HealthAllOkHandle
-    subscribe_health_all_ok(const Telemetry::HealthAllOkCallback& callback);
+    Telemetry::HealthAllOkHandle subscribe_health_all_ok(
+        const Telemetry::HealthAllOkCallback& callback);
     void unsubscribe_health_all_ok(Telemetry::HealthAllOkHandle handle);
     Telemetry::VtolStateHandle subscribe_vtol_state(const Telemetry::VtolStateCallback& callback);
     void unsubscribe_vtol_state(Telemetry::VtolStateHandle handle);
-    Telemetry::LandedStateHandle
-    subscribe_landed_state(const Telemetry::LandedStateCallback& callback);
+    Telemetry::LandedStateHandle subscribe_landed_state(
+        const Telemetry::LandedStateCallback& callback);
     void unsubscribe_landed_state(Telemetry::LandedStateHandle handle);
     Telemetry::RcStatusHandle subscribe_rc_status(const Telemetry::RcStatusCallback& callback);
     void unsubscribe_rc_status(Telemetry::RcStatusHandle handle);
-    Telemetry::UnixEpochTimeHandle
-    subscribe_unix_epoch_time(const Telemetry::UnixEpochTimeCallback& callback);
+    Telemetry::UnixEpochTimeHandle subscribe_unix_epoch_time(
+        const Telemetry::UnixEpochTimeCallback& callback);
     void unsubscribe_unix_epoch_time(Telemetry::UnixEpochTimeHandle handle);
-    Telemetry::ActuatorControlTargetHandle
-    subscribe_actuator_control_target(const Telemetry::ActuatorControlTargetCallback& callback);
+    Telemetry::ActuatorControlTargetHandle subscribe_actuator_control_target(
+        const Telemetry::ActuatorControlTargetCallback& callback);
     void unsubscribe_actuator_control_target(Telemetry::ActuatorControlTargetHandle handle);
-    Telemetry::ActuatorOutputStatusHandle
-    subscribe_actuator_output_status(const Telemetry::ActuatorOutputStatusCallback& callback);
+    Telemetry::ActuatorOutputStatusHandle subscribe_actuator_output_status(
+        const Telemetry::ActuatorOutputStatusCallback& callback);
     void unsubscribe_actuator_output_status(Telemetry::ActuatorOutputStatusHandle handle);
     Telemetry::OdometryHandle subscribe_odometry(const Telemetry::OdometryCallback& callback);
     void unsubscribe_odometry(Telemetry::OdometryHandle handle);
-    Telemetry::DistanceSensorHandle
-    subscribe_distance_sensor(const Telemetry::DistanceSensorCallback& callback);
+    Telemetry::DistanceSensorHandle subscribe_distance_sensor(
+        const Telemetry::DistanceSensorCallback& callback);
     void unsubscribe_distance_sensor(Telemetry::DistanceSensorHandle handle);
-    Telemetry::ScaledPressureHandle
-    subscribe_scaled_pressure(const Telemetry::ScaledPressureCallback& callback);
+    Telemetry::ScaledPressureHandle subscribe_scaled_pressure(
+        const Telemetry::ScaledPressureCallback& callback);
     void unsubscribe_scaled_pressure(Telemetry::ScaledPressureHandle handle);
     Telemetry::HeadingHandle subscribe_heading(const Telemetry::HeadingCallback& callback);
     void unsubscribe_heading(Telemetry::HeadingHandle handle);
@@ -302,13 +304,15 @@ private:
     void check_calibration();
 
     static bool sys_status_present_enabled_health(
-        const mavlink_sys_status_t& sys_status, MAV_SYS_STATUS_SENSOR flag);
+        const mavlink_sys_status_t& sys_status,
+        MAV_SYS_STATUS_SENSOR flag);
 
-    static Telemetry::Result
-    telemetry_result_from_command_result(MavlinkCommandSender::Result command_result);
+    static Telemetry::Result telemetry_result_from_command_result(
+        MavlinkCommandSender::Result command_result);
 
     static void command_result_callback(
-        MavlinkCommandSender::Result command_result, const Telemetry::ResultCallback& callback);
+        MavlinkCommandSender::Result command_result,
+        const Telemetry::ResultCallback& callback);
 
     static Telemetry::LandedState to_landed_state(mavlink_extended_sys_state_t extended_sys_state);
     static Telemetry::VtolState to_vtol_state(mavlink_extended_sys_state_t extended_sys_state);
@@ -469,8 +473,10 @@ private:
     std::atomic<bool> _has_received_mag_calibration{false};
 
     std::mutex _ap_calibration_mutex{};
-    struct ArdupilotCalibration {
-        struct OffsetStatus {
+    struct ArdupilotCalibration
+    {
+        struct OffsetStatus
+        {
             std::optional<float> x{};
             std::optional<float> y{};
             std::optional<float> z{};
@@ -491,11 +497,12 @@ private:
 
     } _ap_calibration{};
 
-    enum class SysStatusUsed {
+    enum class SysStatusUsed
+    {
         Unknown,
         Yes,
         No,
     };
     std::atomic<SysStatusUsed> _sys_status_used_for_position{SysStatusUsed::Unknown};
 };
-} // namespace mavsdk
+}  // namespace mavsdk
