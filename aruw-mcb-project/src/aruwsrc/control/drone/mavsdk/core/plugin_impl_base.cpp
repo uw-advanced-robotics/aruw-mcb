@@ -1,4 +1,4 @@
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/system.h"
 #include "plugin_impl_base.h"
 
 namespace mavsdk {

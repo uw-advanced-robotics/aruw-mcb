@@ -1,7 +1,7 @@
 #pragma once
 
 #include "log.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 #include "timeout_s_callback.h"
 #include "locked_queue.h"
 #include <array>

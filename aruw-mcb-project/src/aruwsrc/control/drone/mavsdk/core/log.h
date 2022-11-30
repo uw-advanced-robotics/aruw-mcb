@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sstream>
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\log_callback.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/log_callback.h"
 
 #if defined(ANDROID)
 #include <android/log.h>
@@ -12,7 +12,7 @@
 
 #if !defined(WINDOWS)
 // Remove path and extract only filename.
-#define FILENAME \
+#define FILENAME /
     (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #else
 #define FILENAME __FILE__
@@ -92,7 +92,7 @@ public:
         time_t rawtime;
         time(&rawtime);
         struct tm* timeinfo = localtime(&rawtime);
-        char time_buffer[10]{}; // We need 8 characters + \0
+        char time_buffer[10]{}; // We need 8 characters + /0
         strftime(time_buffer, sizeof(time_buffer), "%I:%M:%S", timeinfo);
         std::cout << "[" << time_buffer;
 
@@ -116,7 +116,7 @@ public:
         std::cout << _s.str();
         std::cout << " (" << _caller_filename << ":" << std::dec << _caller_filenumber << ")";
 
-        std::cout << '\n';
+        std::cout << '/n';
 #endif
     }
 

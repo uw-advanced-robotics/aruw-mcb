@@ -6,7 +6,7 @@
 #include <mutex>
 #include <utility>
 #include <vector>
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\handle.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/handle.h"
 
 namespace mavsdk {
 

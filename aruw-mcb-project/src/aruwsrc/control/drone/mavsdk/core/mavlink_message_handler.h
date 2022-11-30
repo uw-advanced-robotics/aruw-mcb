@@ -5,7 +5,7 @@
 #include <mutex>
 #include <vector>
 #include <optional>
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 
 namespace mavsdk {
 
