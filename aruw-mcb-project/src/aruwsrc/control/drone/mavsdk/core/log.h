@@ -12,7 +12,7 @@
 
 #if !defined(WINDOWS)
 // Remove path and extract only filename.
-#define FILENAME \
+#define FILENAME /
     (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #else
 #define FILENAME __FILE__
