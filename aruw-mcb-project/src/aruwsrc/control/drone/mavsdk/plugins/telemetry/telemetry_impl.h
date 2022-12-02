@@ -4,7 +4,7 @@
 #include <mutex>
 #include <optional>
 
-#include "aruw-mcb-project/src/aruwsrc/control/drone/mavsdk/core/plugin_impl_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/plugin_impl_base.h"
 #include "aruwsrc/control/drone/mavsdk/core/callback_list.h"
 #include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 #include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/plugin_base.h"
