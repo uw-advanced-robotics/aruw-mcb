@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sstream>
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\log_callback.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/log_callback.h"
 
 #if defined(ANDROID)
 #include <android/log.h>

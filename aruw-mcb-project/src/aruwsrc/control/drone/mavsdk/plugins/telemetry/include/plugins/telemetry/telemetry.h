@@ -13,9 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\plugin_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/plugin_base.h"
 
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\handle.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/handle.h"
 
 namespace mavsdk {
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 #include <memory>
 
 namespace mavsdk {

@@ -10,7 +10,7 @@
 #include "system.h"
 #include "server_component.h"
 #include "connection_result.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 
 namespace mavsdk {
 

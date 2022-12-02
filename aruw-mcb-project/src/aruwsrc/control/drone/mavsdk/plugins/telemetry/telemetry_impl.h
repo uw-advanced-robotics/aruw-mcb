@@ -4,14 +4,17 @@
 #include <mutex>
 #include <optional>
 
-#include "aruwsrc\control\drone\mavsdk\plugins\telemetry\include\plugins\telemetry\telemetry.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\plugin_base.h"
-#include "aruwsrc\control\drone\mavsdk\core\plugin_impl_base.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\system.h"
-#include "aruwsrc\control\drone\mavsdk\core\callback_list.h"
+#include "aruwsrc/control/drone/mavsdk/core/mavlink_statustext_handler.h"
+#include "aruwsrc/control/drone/mavsdk/core/mavlink_parameters.h"
+#include "aruwsrc/control/drone/mavsdk/core/mavlink_command_sender.h"
+#include "aruwsrc/control/drone/mavsdk/plugins/telemetry/include/plugins/telemetry/telemetry.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/plugin_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/plugin_impl_base.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/system.h"
+#include "aruwsrc/control/drone/mavsdk/core/callback_list.h"
 
-#include "aruwsrc\control\drone\mavsdk\core\mavlink_parameters.h"
+#include "aruwsrc/control/drone/mavsdk/core/mavlink_parameters.h"
 
 namespace mavsdk {
 
@@ -305,7 +308,7 @@ private:
         const mavlink_sys_status_t& sys_status, MAV_SYS_STATUS_SENSOR flag);
 
     static Telemetry::Result
-    telemetry_result_from_command_result(MavlinkCommandSender::Result command_result);
+    telemetry_result_from_command_result(MAVLinkParameters::Result command_result);
 
     static void command_result_callback(
         MavlinkCommandSender::Result command_result, const Telemetry::ResultCallback& callback);
