@@ -309,13 +309,8 @@ private:
         const mavlink_sys_status_t& sys_status,
         MAV_SYS_STATUS_SENSOR flag);
 
-<<<<<<< HEAD
     static Telemetry::Result
     telemetry_result_from_command_result(MAVLinkParameters::Result command_result);
-=======
-    static Telemetry::Result telemetry_result_from_command_result(
-        MavlinkCommandSender::Result command_result);
->>>>>>> 18a40d573bce6a2f886f8444b6b4d23468390a2f
 
     static void command_result_callback(
         MavlinkCommandSender::Result command_result,
@@ -324,7 +319,7 @@ private:
     static Telemetry::LandedState to_landed_state(mavlink_extended_sys_state_t extended_sys_state);
     static Telemetry::VtolState to_vtol_state(mavlink_extended_sys_state_t extended_sys_state);
 
-    static Telemetry::FlightMode telemetry_flight_mode_from_flight_mode(FlightMode flight_mode);
+    static Telemetry::FlightMode telemetry_flight_mode_from_flight_mode(Telemetry::FlightMode flight_mode);
 
     // Make all fields thread-safe using mutexs
     // The mutexs are mutable so that the lock can get aqcuired in
