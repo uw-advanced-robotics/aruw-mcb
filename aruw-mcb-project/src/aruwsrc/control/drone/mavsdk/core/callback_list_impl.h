@@ -26,7 +26,7 @@ public:
             std::lock_guard<std::mutex> lock(_mutex);
             _list.emplace_back(handle, callback);
         } else {
-            LogErr() << "Use new unsubscribe methods instead of subscribe(nullptr)\n"
+            LogErr() << "Use new unsubscribe methods instead of subscribe(nullptr)/n"
                      << "See: https://mavsdk.mavlink.io/main/en/cpp/api_changes.html#unsubscribe";
             try_clear();
         }

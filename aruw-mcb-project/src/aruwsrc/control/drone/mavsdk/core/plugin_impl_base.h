@@ -7,6 +7,7 @@ namespace mavsdk {
 class System;
 class SystemImpl;
 
+
 class PluginImplBase {
 public:
     explicit PluginImplBase(System& system); // to be deprecated

@@ -20,6 +20,7 @@
 #ifndef DRONE_SUBSYSTEM_HPP_
 #define DRONE_SUBSYSTEM_HPP_
 
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/subsystem.hpp"
 #include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavsdk.h"
 #include "aruwsrc/control/drone/mavsdk/plugins/telemetry/telemetry.cpp"
@@ -35,15 +36,16 @@ namespace aruwsrc
 namespace drone
 {
 
-class DroneSubsystem : public tap::control::Subsystem
+class DroneSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
+    DroneSubsystem(Drivers* drivers);
 
-	DroneSubsystem(Drivers* drivers);
-
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
 private:
-mavsdk::Mavsdk droneController;
-
+    mavsdk::Mavsdk droneController;
+    mavsdk::Telemetry::PositionNed currentPosition;
+    mavsdk::Telemetry::VelocityNed currentVelocity;
 };
 
 }  // namespace drone

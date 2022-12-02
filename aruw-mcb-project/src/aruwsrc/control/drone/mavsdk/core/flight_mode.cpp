@@ -1,6 +1,6 @@
 
 #include "flight_mode.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 #include "ardupilot_custom_mode.h"
 #include "px4_custom_mode.h"
 #include "mavlink_command_sender.h"

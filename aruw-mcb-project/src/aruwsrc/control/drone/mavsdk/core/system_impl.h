@@ -3,7 +3,7 @@
 #include "callback_list.h"
 #include "flight_mode.h"
 #include "mavlink_address.h"
-#include "aruwsrc\control\drone\mavsdk\core\include\mavsdk\mavlink_include.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/mavlink_include.h"
 #include "mavlink_parameters.h"
 #include "mavlink_command_sender.h"
 #include "mavlink_ftp.h"
@@ -17,7 +17,7 @@
 #include "timeout_handler.h"
 #include "safe_queue.h"
 #include "timesync.h"
-#include "system.h"
+#include "aruwsrc/control/drone/mavsdk/core/include/mavsdk/system.h"
 #include <cstdint>
 #include <functional>
 #include <atomic>
