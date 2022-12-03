@@ -85,7 +85,7 @@ static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_CONFIG = {
     .maxErrorDerivative = 2.0f * M_TWOPI,  ///< 2 rotations per second max speed of turret
     .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
         std::array<float, 3>({YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp, YAW_POS_PID_CONFIG.kp}),
-        std::array<float, 3>({0.0f, 0.1f, 0.7f})),
+        std::array<float, 3>({0.05f, 0.1f, 0.7f})),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
@@ -110,7 +110,7 @@ static tap::algorithms::FuzzyPDConfig YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG = {
             {YAW_POS_PID_AUTO_AIM_CONFIG.kp,
              YAW_POS_PID_AUTO_AIM_CONFIG.kp,
              YAW_POS_PID_AUTO_AIM_CONFIG.kp}),
-        std::array<float, 3>({0.0f, 0.1f, 0.7f})),
+        std::array<float, 3>({0.05f, 0.25f, 1.4f})),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
