@@ -21,6 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
+#include "aruwsrc/control/drone/mavlink/common/mavlink_msg_position_target_local_ned.h"
 
 namespace aruwsrc
 {
