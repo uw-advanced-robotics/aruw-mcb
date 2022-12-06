@@ -2,6 +2,7 @@
 // MESSAGE SYS_STATUS PACKING
 
 #include <cstdint>
+#include "aruwsrc/control/drone/mavlink/protocol.h"
 
 #define MAVLINK_MSG_ID_SYS_STATUS 1
 

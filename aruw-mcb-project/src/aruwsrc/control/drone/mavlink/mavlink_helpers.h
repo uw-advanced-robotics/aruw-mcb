@@ -6,7 +6,7 @@
 #include "mavlink_conversions.h"
 #include <stdio.h>
 
-#include "common\mavlink.h"
+#include "common/mavlink.h"
 
 #ifndef MAVLINK_HELPER
 #define MAVLINK_HELPER
