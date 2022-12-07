@@ -24,7 +24,6 @@
 #include "aruwsrc/algorithms/transforms/frames.hpp"
 
 using namespace tap::algorithms;
-using namespace std;
 
 namespace aruwsrc::algorithms
 {
