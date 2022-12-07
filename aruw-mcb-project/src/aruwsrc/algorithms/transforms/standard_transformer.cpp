@@ -19,6 +19,8 @@
 
 #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
 #include "tap/algorithms/transforms/transformer.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
+#include "aruwsrc/algorithms/transforms/frames.hpp"
 
 namespace aruwsrc::algorithms
 {
