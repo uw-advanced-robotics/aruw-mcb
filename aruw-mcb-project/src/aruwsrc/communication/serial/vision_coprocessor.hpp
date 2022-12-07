@@ -87,7 +87,8 @@ public:
         HIGH = 3,
     };
 
-    
+    static constexpr uint8_t NUM_TAGS = 2;
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12};
 
     struct positionData {
         float xPos;  ///< x position of the target (in m).
@@ -111,11 +112,11 @@ public:
 
     struct TurretAimData {
         uint8_t messageType;
-        uint32_t timeStamp; 
         struct positionData pva;
-        struct timingData timing;
+        uint32_t timeStamp; 
         FireRate firerate;
-    }
+        struct timingData timing;
+    };
     
 
    
@@ -123,6 +124,7 @@ public:
     /**
      * AutoAim data to receive from Jetson.
      */
+    /*
     struct TurretAimData
     {
         float xPos;  ///< x position of the target (in m).
@@ -148,7 +150,7 @@ public:
         uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
         uint32_t
             targetIntervalDuration;  ///< Duration during which the plate is at the target point
-    } modm_packed;
+    } modm_packed; */
     
 
     /**
