@@ -85,7 +85,7 @@ before_script:
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
-    - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot
+    - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot "release develop"
   only: *verification_only
   except: *verification_except
 
