@@ -46,7 +46,7 @@ public:
 
 private:
     // TODO: this is what is used in terminal device, need to figure out what this should be
-    static constexpr uint32_t UART_BAUDE_RATE = 115200;
+    static constexpr uint32_t UART_BAUD_RATE = 115200;
 
     Drivers *drivers;
 

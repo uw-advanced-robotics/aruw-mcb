@@ -26,7 +26,7 @@ namespace drone
 DroneUartParser::DroneUartParser(Drivers *drivers) : drivers(drivers) {}
 
 void DroneUartParser::initialize() {
-	drivers -> uart.init<DRONE_PORT, UART_BAUDE_RATE>();
+	drivers -> uart.init<DRONE_PORT, UART_BAUD_RATE>();
 }
 
 bool DroneUartParser::read(char &c) {
