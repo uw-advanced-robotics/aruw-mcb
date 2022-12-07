@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+//#include <stdint.h>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -86,6 +87,39 @@ public:
         HIGH = 3,
     };
 
+    
+
+    struct positionData {
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
+
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
+
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
+    };
+
+    struct timingData {
+        float offset;
+        float pulseInterval;
+        float duration;
+    };
+
+    struct TurretAimData {
+        uint8_t messageType;
+        uint32_t timeStamp; 
+        struct positionData pva;
+        struct timingData timing;
+        FireRate firerate;
+    }
+    
+
+   
+
     /**
      * AutoAim data to receive from Jetson.
      */
@@ -115,6 +149,7 @@ public:
         uint32_t
             targetIntervalDuration;  ///< Duration during which the plate is at the target point
     } modm_packed;
+    
 
     /**
      * Chassis odometry data to send to Jetson.
