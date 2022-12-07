@@ -106,7 +106,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    
+    //remove this comment
     //isolate tags from message
     uint8_t tags;
     int expectedLength;
@@ -119,7 +119,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     if (expectedLength != message.header.dataLength) return false;
 
     for (int i = 0; i < NUM_TAGS; ++i) {
-        //tags[i]
+        //tags[i] 
         if (tags | (1 << i)) {
             //if submessage < LEN_FIELDS[i]
             switch (i) {
