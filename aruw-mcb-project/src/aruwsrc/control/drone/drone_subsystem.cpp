@@ -28,18 +28,18 @@ namespace aruwsrc
 namespace drone
 {
 
-DroneSubsystem::DroneSubsystem(Drivers* drivers) : ChassisSubsystemInterface(drivers)
+DroneSubsystem::DroneSubsystem(Drivers* drivers) : ChassisSubsystemInterface(drivers), parser(drivers)
 {
 
 }
 
-// modm::Matrix<float, 3, 1> DroneSubsystem::getActualVelocityChassisRelative() const {
-//     modm::Matrix<float, 3, 1> velocity;
-//     velocity[0][0] = currentVelocity.north_m_s;
-//     velocity[1][0] = -currentVelocity.east_m_s;
-//     velocity[2][0] = drivers->mpu6500.getGx();
-//     return velocity;
-// }
+modm::Matrix<float, 3, 1> DroneSubsystem::getActualVelocityChassisRelative() const {
+    modm::Matrix<float, 3, 1> velocity;
+    velocity[0][0] = parser.position.vx;
+    velocity[1][0] = parser.position.vy;
+    velocity[2][0] = drivers->mpu6500.getGx();
+    return velocity;
+}
 
 /**
  * For when transforms drop

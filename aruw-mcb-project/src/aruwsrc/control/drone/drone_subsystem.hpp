@@ -22,6 +22,7 @@
 
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/subsystem.hpp"
+#include "aruwsrc/control/drone/drone_uart_parser.hpp"
 
 namespace aruwsrc
 {
@@ -40,6 +41,8 @@ class DroneSubsystem : public tap::control::chassis::ChassisSubsystemInterface
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
 private:
+
+    DroneUartParser parser;
 
 };
 
