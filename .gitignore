@@ -1,5 +1,6 @@
 *.pyc
 
+Pipfile
 aruw-mcb-project/build
 aruw-mcb-project/Pipfile.lock
 project.xml.log
