@@ -313,12 +313,14 @@ static constexpr TestParams TEST_TIMING_WITHIN_WINDOW_LARGER_THAN_INTERVAL_ALLOW
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
         .hasTarget = true,
-        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
         .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = 100'000,
-        .targetIntervalDuration = 600'000,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .timing {
+            .duration = 600'000,
+            .pulseInterval = 100'000,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS
+        }
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -328,12 +330,14 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOW
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
     .aimData{
         .hasTarget = true,
-        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
         .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .timing {
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = REALLY_LONG_TIME,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        }
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -362,12 +366,14 @@ static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_SECOND_WINDOW_NARRO
     .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
         .hasTarget = true,
-        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
         .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = 1,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .timing {
+            .duration = 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        }
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -392,12 +398,14 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLO
                               SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
     .aimData{
         .hasTarget = true,
-        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
         .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .timing {
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        }
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -427,12 +435,14 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOW
                               SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
     .aimData{
         .hasTarget = true,
-        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
         .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
+        .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+        .timing {
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+        }
     },
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
@@ -464,12 +474,14 @@ static constexpr TestParams
                                   SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
         .aimData{
             .hasTarget = true,
-            .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
             .recommendUseTimedShots = true,
-            .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                                   DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-            .targetPulseInterval = SMALL_PULSE_INTERVAL_MICROS,
-            .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
+            .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
+            .timing {
+                .duration = SMALL_TIMING_ERROR * 2 + 1,
+                .pulseInterval = SMALL_PULSE_INTERVAL_MICROS,
+                .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
+                                    DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
+            }
         },
         .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
     };
