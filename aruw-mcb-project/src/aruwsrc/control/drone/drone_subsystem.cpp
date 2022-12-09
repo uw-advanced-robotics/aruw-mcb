@@ -21,22 +21,30 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#include "aruwsrc/control/drone/mavlink/common/mavlink_msg_position_target_local_ned.h"
-
 namespace aruwsrc
 {
 namespace drone
 {
 
-DroneSubsystem::DroneSubsystem(Drivers* drivers) : ChassisSubsystemInterface(drivers), parser(drivers)
+DroneSubsystem::DroneSubsystem(Drivers* drivers)
+    : ChassisSubsystemInterface(drivers),
+      parser(drivers)
 {
-
 }
 
-modm::Matrix<float, 3, 1> DroneSubsystem::getActualVelocityChassisRelative() const {
+void DroneSubsystem::refresh()
+{
+    if (parser.update() == MessageStatus::OK)
+    {
+        currentTelemetryData = parser.telemetryData;
+    }
+}
+
+modm::Matrix<float, 3, 1> DroneSubsystem::getActualVelocityChassisRelative() const
+{
     modm::Matrix<float, 3, 1> velocity;
-    velocity[0][0] = parser.position.vx;
-    velocity[1][0] = parser.position.vy;
+    velocity[0][0] = currentTelemetryData.vx;
+    velocity[1][0] = currentTelemetryData.vy;
     velocity[2][0] = drivers->mpu6500.getGx();
     return velocity;
 }

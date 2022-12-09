@@ -19,13 +19,10 @@
 #ifndef DRONE_UART_PARSER_HPP_
 #define DRONE_UART_PARSER_HPP_
 
-#define MSG_START 0xFE          
-#define MSG_CRC 185
+#define MSG_START 0xFE
+#define MSG_ID 32
 #define MSG_PAYLOAD_LENGTH 28
-
-
-
-
+#define MSG_CRC 185
 
 #include <stdint.h>
 
@@ -52,12 +49,21 @@ struct Telemetry
     float vz;           /*< [m/s] Z Speed*/
 };
 
+enum MessageStatus
+{
+    OK,
+    INCORRECT_START,
+    INCORRECT_PAYLOAD_LENGTH,
+    INCORRECT_MESSAGE_ID,
+    INCORRECT_CRC
+};
+
 class DroneUartParser
 {
 public:
     DroneUartParser(Drivers *drivers);
 
-    void update();
+    MessageStatus update();
 
     Telemetry telemetryData;
 
@@ -72,9 +78,9 @@ private:
 
     void initialize();
 
-    bool read(char &c, int length);
+    bool read(char &c);
 
-    void flush();
+    bool read(auto &c, int length);
 };
 }  // namespace drone
 }  // namespace aruwsrc

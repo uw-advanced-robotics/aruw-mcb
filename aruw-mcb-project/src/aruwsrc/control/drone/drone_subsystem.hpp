@@ -38,11 +38,14 @@ class DroneSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
     DroneSubsystem(Drivers* drivers);
 
+    void refresh() override;
+
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
 private:
 
     DroneUartParser parser;
+    Telemetry currentTelemetryData;
 
 };
 
