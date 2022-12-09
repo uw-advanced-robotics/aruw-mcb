@@ -107,9 +107,9 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns
     VisionCoprocessor::TurretAimData aimData;
     aimData.hasTarget = 1;
     aimData.recommendUseTimedShots = 1;
-    aimData.targetHitTimeOffset = 100;
-    aimData.targetIntervalDuration = 100;
-    aimData.targetPulseInterval = 0;
+    aimData.offset = 100;
+    aimData.duration = 100;
+    aimData.pulseInterval = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
