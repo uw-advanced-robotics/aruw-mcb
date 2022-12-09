@@ -79,7 +79,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 // most of this is being copied over from standard, apologies in advance if it's wrong
 /* define subsystems--------------------------------------------------------*/
 
-DroneSubsystem droneTelemChassis(drivers());
+DroneSubsystem chassis(drivers());
 
 tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
@@ -127,7 +127,7 @@ ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, droneChassissTelem);
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 OttoBallisticsSolver ballisticsSolver(
     *drivers(),
@@ -272,25 +272,170 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
+ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    &hopperCover,
+    frictionWheels,
+    agitator,
+    turret,
+    imuCalibrateCommand,
+    &leftMousePressedBNotPressed,
+    &cvOnTargetGovernor,
+    &beybladeCommand,
+    &chassisAutorotateCommand,
+    &chassisImuDriveCommand,
+    sentryResponseHandler);
+
 /* define commands ----------------------------------------------------------*/
+
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&stopFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&beybladeCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&turretCVCommand, &chassisDriveCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+// Keyboard/Mouse related mappings
+PressCommandMapping cPressed(
+    drivers(),
+    {&sentryToggleDriveMovementCommand},
+    RemoteMapState({Remote::Key::C}));
+PressCommandMapping gPressedCtrlNotPressed(
+    drivers(),
+    {&sentryTargetNewQuadrantCommand},
+    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
+PressCommandMapping gCtrlPressed(
+    drivers(),
+    {&sentryPauseProjectileLaunchingCommand},
+    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
+
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor);
+
+HoldRepeatCommandMapping leftMousePressedBPressed(
+    drivers(),
+    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
+CycleStateCommandMapping<
+    MultiShotCvCommandMapping::LaunchMode,
+    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+    MultiShotCvCommandMapping>
+    vPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::V}),
+        MultiShotCvCommandMapping::SINGLE,
+        &leftMousePressedBNotPressed,
+        &MultiShotCvCommandMapping::setShooterState);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
+void initializeSubsystems() {
+    turret.initialize();
+    odometrySubsystem.initialize();
+    agitator.initialize();
+    frictionWheels.initialize();
+    hopperCover.initialize();
+    clientDisplay.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(aruwsrc::Drivers *) {}
+void registerDroneSubsystems(aruwsrc::Drivers *) {
+    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&agitator);
+    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&hopperCover);
+    drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(aruwsrc::Drivers *) {}
+void setDefaultDroneCommands(aruwsrc::Drivers *) {
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    frictionWheels.setDefaultCommand(&spinFrictionWheels);
+}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(aruwsrc::Drivers *) {}
+void startDroneCommands(aruwsrc::Drivers *) {
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
+        &sentryResponseHandler);
+}
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(aruwsrc::Drivers *) {}
+void registerDroneIoMappings(aruwsrc::Drivers *) {
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
+    drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&cPressed);
+    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    drivers->commandMapper.addMap(&gCtrlPressed);
+    drivers->commandMapper.addMap(&vPressed);
+}
 }  // namespace drone_control
 
 namespace aruwsrc::control
