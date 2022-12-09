@@ -111,7 +111,8 @@ public:
     };
 
     struct TurretAimData {
-        uint8_t messageType;
+        uint8_t hasTarget;
+        uint8_t recommendUseTimedShots;
         struct positionData pva;
         uint32_t timeStamp; 
         FireRate firerate;
