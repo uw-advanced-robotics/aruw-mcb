@@ -18,9 +18,6 @@
  */
 #include "drone_uart_parser.hpp"
 
-#include "aruwsrc/control/drone/mavlink/common/mavlink_msg_local_position_ned.h"
-#include "aruwsrc/control/drone/mavlink/mavlink_helpers.h"
-
 namespace aruwsrc
 {
 namespace drone
@@ -29,28 +26,23 @@ DroneUartParser::DroneUartParser(Drivers *drivers) : drivers(drivers) {}
 
 void DroneUartParser::initialize() { drivers->uart.init<DRONE_PORT, UART_BAUD_RATE>(); }
 
-bool DroneUartParser::read(char &c)
+bool DroneUartParser::read(char &c, int length)
 {
-    return drivers->uart.read(DRONE_PORT, &reinterpret_cast<uint8_t &>(c));
-}
-
-// Don't use this, its a read only port
-void DroneUartParser::write(char c)
-{
-    // drivers->uart.write(DRONE_PORT, c);
+    return drivers->uart.read(DRONE_PORT, &reinterpret_cast<uint8_t &>(c), length);
 }
 
 void DroneUartParser::flush() { drivers->uart.flushWriteBuffer(DRONE_PORT); }
 
-void DroneUartParser::compute()
+void DroneUartParser::update()
 {
-    do
-    {
-        char byte;
-        read(byte);
-        mavlink_parse_char(COMMUNICATION_CHANNEL, byte, &currentMessage, &currentMessageStatus);
-    } while (currentMessageStatus.parse_state != MAVLINK_FRAMING_OK);
-    mavlink_msg_local_position_ned_decode(&currentMessage, &position);
+    char messageStart;
+    read(messageStart, 4);
+
+    // do
+    // {
+    //     char byte;
+    //     read(byte);
+    // } while (currentMessageStatus.parse_state != MAVLINK_FRAMING_OK);
 }
 
 }  // namespace drone

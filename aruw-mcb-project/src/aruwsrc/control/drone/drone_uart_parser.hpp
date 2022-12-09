@@ -19,10 +19,19 @@
 #ifndef DRONE_UART_PARSER_HPP_
 #define DRONE_UART_PARSER_HPP_
 
+#define MSG_START 0xFE          
+#define MSG_CRC 185
+#define MSG_PAYLOAD_LENGTH 28
+
+
+
+
+
+#include <stdint.h>
+
 #include "tap/communication/serial/uart.hpp"
 #include "taproot/modm/src/modm/io/iodevice.hpp"
 
-#include "aruwsrc/control/drone/mavlink/mavlink_types.h"
 #include "aruwsrc/drivers.hpp"
 
 using namespace tap::communication::serial;
@@ -32,23 +41,25 @@ namespace aruwsrc
 namespace drone
 {
 
-class DroneUartParser : public ::modm::IODevice
+struct Telemetry
+{
+    uint32_t timestamp; /*< [ms] Timestamp (time since system boot).*/
+    float x;            /*< [m] X Position*/
+    float y;            /*< [m] Y Position*/
+    float z;            /*< [m] Z Position*/
+    float vx;           /*< [m/s] X Speed*/
+    float vy;           /*< [m/s] Y Speed*/
+    float vz;           /*< [m/s] Z Speed*/
+};
+
+class DroneUartParser
 {
 public:
     DroneUartParser(Drivers *drivers);
 
-    void initialize();
+    void update();
 
-    bool read(char &c) override;
-
-    void write(char c) override;
-
-    void flush() override;
-
-    void compute();
-
-    mavlink_local_position_ned_t position;
-
+    Telemetry telemetryData;
 
 private:
     // TODO: this is what is used in terminal device, need to figure out what this should be
@@ -59,13 +70,11 @@ private:
     // TODO: This needs to be defined
     static constexpr Uart::UartPort DRONE_PORT = Uart::Uart1;
 
-    static constexpr int MESSAGE_SIZE = 256;
+    void initialize();
 
-    //TODO: Figure this out
-    static constexpr int COMMUNICATION_CHANNEL = MAVLINK_COMM_0;
+    bool read(char &c, int length);
 
-    mavlink_message_t currentMessage;
-    mavlink_status_t currentMessageStatus;
+    void flush();
 };
 }  // namespace drone
 }  // namespace aruwsrc
