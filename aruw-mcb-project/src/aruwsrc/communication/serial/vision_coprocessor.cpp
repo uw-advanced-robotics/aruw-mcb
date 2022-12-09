@@ -123,23 +123,12 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
         if (tags[i]) {
             switch (i) {
                 case 0:
-                    //memcpy to lastAimData + offset, &message.data + offset, sizeof(LEN_FIELDS[i])
-                    memcpy(&lastAimData[0].pva, &(dataRef -> pva) /*+ offset*/,sizeof(LEN_FIELDS[i]));
+                    memcpy(&lastAimData[0].pva, &(dataRef -> pva),sizeof(LEN_FIELDS[i]));
                 case 1:
-                    memcpy(&lastAimData[0].timing, &(dataRef -> timing) /*+ offset*/,sizeof(LEN_FIELDS[i]));
+                    memcpy(&lastAimData[0].timing, &(dataRef -> timing),sizeof(LEN_FIELDS[i]));
             }
         }
     }
-
-
-    /* Old Code
-    if (message.header.dataLength != sizeof(lastAimData))
-    {
-        return false;
-    }
-    memcpy(lastAimData, &message.data, sizeof(lastAimData));
-    return true; */
-    
 }
 
 void VisionCoprocessor::sendMessage()

@@ -90,6 +90,9 @@ public:
     static constexpr uint8_t NUM_TAGS = 2;
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12};
 
+     /**
+     * AutoAim data to receive from Jetson.
+     */
     struct positionData {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
@@ -114,44 +117,10 @@ public:
         uint8_t hasTarget;
         uint8_t recommendUseTimedShots;
         struct positionData pva;
-        uint32_t timestamp; 
+        uint32_t timetamp; 
         FireRate firerate;
         struct timingData timing;
-    };
-    
-
-   
-
-    /**
-     * AutoAim data to receive from Jetson.
-     */
-    /*
-    struct TurretAimData
-    {
-        float xPos;  ///< x position of the target (in m).
-        float yPos;  ///< y position of the target (in m).
-        float zPos;  ///< z position of the target (in m).
-
-        float xVel;  ///< x velocity of the target (in m/s).
-        float yVel;  ///< y velocity of the target (in m/s).
-        float zVel;  ///< z velocity of the target (in m/s).
-
-        float xAcc;  ///< x acceleration of the target (in m/s^2).
-        float yAcc;  ///< y acceleration of the target (in m/s^2).
-        float zAcc;  ///< z acceleration of the target (in m/s^2).
-
-        bool hasTarget;      ///< Whether or not the xavier has a target.
-        uint32_t timestamp;  ///< Timestamp in microseconds.
-
-        FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
-
-        bool recommendUseTimedShots;   ///< Validity of the targetHitTime
-        uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
-                                       ///< next shot should ideally hit
-        uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
-        uint32_t
-            targetIntervalDuration;  ///< Duration during which the plate is at the target point
-    } modm_packed; */
+    } modm_packed;
     
 
     /**
