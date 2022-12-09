@@ -117,7 +117,7 @@ public:
         uint8_t hasTarget;
         uint8_t recommendUseTimedShots;
         struct positionData pva;
-        uint32_t timetamp; 
+        uint32_t timestamp; 
         FireRate firerate;
         struct timingData timing;
     } modm_packed;
