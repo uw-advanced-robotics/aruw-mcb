@@ -62,10 +62,10 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         return std::nullopt;
     }
 
-    if (lastAimDataTimestamp != aimData.timestamp ||
+    if (lastAimDataTimestamp != aimData.timeStamp ||
         lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
     {
-        lastAimDataTimestamp = aimData.timestamp;
+        lastAimDataTimestamp = aimData.timeStamp;
         lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
 
         // if the friction wheel launch speed is 0, use a default launch speed so ballistics
@@ -110,16 +110,16 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 {aimData.pva.xPos - turretPosition.x,
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
-            .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
+            .velocity = {aimData.pva.xVel - chassisVel.x, aimData.pva.yVel - chassisVel.y, aimData.pva.zVel},
             .acceleration =
-                {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
+                {aimData.pva.xAcc, aimData.pva.yAcc, aimData.pva.zAcc},  // TODO consider using chassis
                                                              // acceleration from IMU
         };
 
         // time in microseconds to project the target position ahead by
         int64_t projectForwardTimeDt =
             static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-            static_cast<int64_t>(aimData.timestamp);
+            static_cast<int64_t>(aimData.timeStamp);
 
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
