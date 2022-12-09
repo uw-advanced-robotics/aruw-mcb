@@ -117,14 +117,16 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     }
     if (expectedLength != message.header.dataLength) return false;
 
+    const TurretAimData *dataRef = reinterpret_cast<const TurretAimData*>(&message.data);
+
     for (int i = 0; i < NUM_TAGS; ++i) {
         if (tags[i]) {
             switch (i) {
                 case 0:
                     //memcpy to lastAimData + offset, &message.data + offset, sizeof(LEN_FIELDS[i])
-                    memcpy(&lastAimData[0].pva, &message.data /*+ offset*/,sizeof(LEN_FIELDS[i]));
+                    memcpy(&lastAimData[0].pva, &(dataRef -> pva) /*+ offset*/,sizeof(LEN_FIELDS[i]));
                 case 1:
-
+                    memcpy(&lastAimData[0].timing, &(dataRef -> timing) /*+ offset*/,sizeof(LEN_FIELDS[i]));
             }
         }
     }
