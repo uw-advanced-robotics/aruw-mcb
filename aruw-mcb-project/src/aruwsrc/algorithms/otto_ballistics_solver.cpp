@@ -105,9 +105,9 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         // assume acceleration of the chassis is 0 since we don't measure it
         ballistics::MeasuredKinematicState targetState = {
             .position =
-                {aimData.xPos - turretPosition.x,
-                 aimData.yPos - turretPosition.y,
-                 aimData.zPos - turretPosition.z},
+                {aimData.pva.xPos - turretPosition.x,
+                 aimData.pva.yPos - turretPosition.y,
+                 aimData.pva.zPos - turretPosition.z},
             .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
             .acceleration =
                 {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
