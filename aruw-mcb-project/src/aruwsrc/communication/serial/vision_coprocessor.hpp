@@ -105,9 +105,9 @@ public:
     };
 
     struct timingData {
-        float offset;
-        float pulseInterval;
         float duration;
+        float pulseInterval;
+        float offset;
     };
 
     struct TurretAimData {
