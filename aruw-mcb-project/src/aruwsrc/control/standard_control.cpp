@@ -298,6 +298,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheel
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
+// Fear the wrath of my might comment! >:D
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
