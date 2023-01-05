@@ -41,7 +41,7 @@ namespace aruwsrc
 namespace chassis
 {
 /**
- * Encapsulates a chassis with mecanum wheels in standard layout
+ * Encapsulates a chassis with omni wheels in X layout
  */
 class XDriveChassisSubsystem : public Holonomic4MotorChassisSubsystem
 {
