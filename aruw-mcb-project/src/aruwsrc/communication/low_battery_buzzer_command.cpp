@@ -21,7 +21,6 @@
 
 namespace aruwsrc::communication
 {
-
 LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(aruwsrc::Drivers* drivers) : drivers(drivers) {}
 
 void LowBatteryBuzzerCommand::initialize() { controller.init(); }
