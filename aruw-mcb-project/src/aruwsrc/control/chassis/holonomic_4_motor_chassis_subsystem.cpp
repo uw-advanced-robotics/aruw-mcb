@@ -21,7 +21,7 @@
  * Copyright (c) 2019 Sanger_X
  */
 
-#include "chassis_subsystem.hpp"
+#include "holonomic_4_motor_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -29,24 +29,22 @@
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/drivers.hpp"
 
+#include "holonomic_chassis_subsystem.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc
 {
 namespace chassis
 {
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
-
-ChassisSubsystem::ChassisSubsystem(
+Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     aruwsrc::Drivers* drivers,
-    ChassisType chassisType,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
-    : tap::control::chassis::ChassisSubsystemInterface(drivers),
+    : HolonomicChassisSubsystem(drivers, currentPin),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
@@ -75,87 +73,36 @@ ChassisSubsystem::ChassisSubsystem(
       leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
       leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
       rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
-      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor"),
-      currentSensor(
-          {&drivers->analog,
-           currentPin,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-      chassisPowerLimiter(
-          drivers,
-          &currentSensor,
-          STARTING_ENERGY_BUFFER,
-          ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD)
+      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
 {
-    constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-                            ? 1
-                            : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-
-    switch (chassisType)
-    {
-        case ChassisType::MECANUM:
-            wheelVelToChassisVelMat[X][LF] = 1;
-            wheelVelToChassisVelMat[X][RF] = -1;
-            wheelVelToChassisVelMat[X][LB] = 1;
-            wheelVelToChassisVelMat[X][RB] = -1;
-            wheelVelToChassisVelMat[Y][LF] = -1;
-            wheelVelToChassisVelMat[Y][RF] = -1;
-            wheelVelToChassisVelMat[Y][LB] = 1;
-            wheelVelToChassisVelMat[Y][RB] = 1;
-            wheelVelToChassisVelMat[R][LF] = -1.0 / A;
-            wheelVelToChassisVelMat[R][RF] = -1.0 / A;
-            wheelVelToChassisVelMat[R][LB] = -1.0 / A;
-            wheelVelToChassisVelMat[R][RB] = -1.0 / A;
-            wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
-            break;
-        case ChassisType::X_DRIVE:
-            wheelVelToChassisVelMat[X][LF] = sqrtf(2);
-            wheelVelToChassisVelMat[X][RF] = -sqrtf(2);
-            wheelVelToChassisVelMat[X][LB] = sqrtf(2);
-            wheelVelToChassisVelMat[X][RB] = -sqrtf(2);
-            wheelVelToChassisVelMat[Y][LF] = -sqrtf(2);
-            wheelVelToChassisVelMat[Y][RF] = -sqrtf(2);
-            wheelVelToChassisVelMat[Y][LB] = sqrtf(2);
-            wheelVelToChassisVelMat[Y][RB] = sqrtf(2);
-            wheelVelToChassisVelMat[R][LF] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][RF] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][LB] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat[R][RB] = -1.0 / (2.0 * A);
-            wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
-            break;
-    }
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
     motors[LB] = &leftBackMotor;
     motors[RB] = &rightBackMotor;
 }
 
-void ChassisSubsystem::initialize()
+void Holonomic4MotorChassisSubsystem::initialize()
 {
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    for (int i = 0; i < getNumChassisMotors(); i++)
     {
         motors[i]->initialize();
     }
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    mecanumDriveCalculate(
+    calculateOutput(
         x,
         y,
         r,
-        ChassisSubsystem::getMaxWheelSpeed(
+        getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
-void ChassisSubsystem::setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
-
-void ChassisSubsystem::refresh()
+void Holonomic4MotorChassisSubsystem::refresh()
 {
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(motors); i++)
+    for (int i = 0; i < getNumChassisMotors(); i++)
     {
         updateMotorRpmPid(&velocityPid[i], motors[i], *desiredWheelRPM[i]);
     }
@@ -163,9 +110,9 @@ void ChassisSubsystem::refresh()
     limitChassisPower();
 }
 
-void ChassisSubsystem::limitChassisPower()
+void Holonomic4MotorChassisSubsystem::limitChassisPower()
 {
-    static constexpr size_t NUM_MOTORS = MODM_ARRAY_SIZE(motors);
+    int NUM_MOTORS = getNumChassisMotors();
 
     // use power limiting object to compute initial power limiting fraction
     currentSensor.update();
@@ -179,7 +126,7 @@ void ChassisSubsystem::limitChassisPower()
 
     // total velocity error for all wheels
     float totalError = 0.0f;
-    for (size_t i = 0; i < NUM_MOTORS; i++)
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
         totalError += abs(velocityPid[i].getLastError());
     }
@@ -188,10 +135,10 @@ void ChassisSubsystem::limitChassisPower()
 
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
-    for (size_t i = 0; i < NUM_MOTORS; i++)
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
-        // single motor. Some value between [0, 1]. The sume of all computed velocityErrorFrac
+        // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
         // values for all motors is 1.
         float velocityErrorFrac = totalErrorZero
                                       ? (1.0f / NUM_MOTORS)
@@ -208,7 +155,11 @@ void ChassisSubsystem::limitChassisPower()
     }
 }
 
-void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed)
+void Holonomic4MotorChassisSubsystem::calculateOutput(
+    float x,
+    float y,
+    float r,
+    float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
     float chassisRotationRatio = sqrtf(
@@ -247,7 +198,7 @@ void ChassisSubsystem::mecanumDriveCalculate(float x, float y, float r, float ma
     desiredRotation = r;
 }
 
-void ChassisSubsystem::updateMotorRpmPid(
+void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     modm::Pid<float>* pid,
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
@@ -256,58 +207,7 @@ void ChassisSubsystem::updateMotorRpmPid(
     motor->setDesiredOutput(pid->getValue());
 }
 
-float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
-{
-    // P
-    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
-    currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
-
-    // D
-    float currentRotationPidD = errD * AUTOROTATION_PID_KD;
-
-    currentRotationPidD =
-        limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
-
-    float wheelRotationSpeed = limitVal(
-        currRotationPidP + currentRotationPidD,
-        -AUTOROTATION_PID_MAX_OUTPUT,
-        AUTOROTATION_PID_MAX_OUTPUT);
-
-    return wheelRotationSpeed;
-}
-
-float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
-{
-    // what we will multiply x and y speed by to take into account rotation
-    float rTranslationalGain = 1.0f;
-
-    // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
-    // power consumption when the wheel rotation speed for chassis rotation is greater than the
-    // MIN_ROTATION_THRESHOLD
-    if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
-    {
-        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
-
-        // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
-        // power(max revolve speed, 2)
-        rTranslationalGain = powf(
-            (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
-                maxWheelSpeed,
-            2.0f);
-
-        rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
-    }
-    return rTranslationalGain;
-}
-
-modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
-{
-    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
-}
-
-modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChassisRelative() const
 {
     modm::Matrix<float, MODM_ARRAY_SIZE(motors), 1> wheelVelocity;
 
@@ -317,8 +217,6 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() c
     wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 }
-
-void ChassisSubsystem::onHardwareTestStart() { setDesiredOutput(0, 0, 0); }
 
 }  // namespace chassis
 

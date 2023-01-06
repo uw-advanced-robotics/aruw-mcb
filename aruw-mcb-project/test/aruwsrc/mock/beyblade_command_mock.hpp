@@ -34,7 +34,7 @@ class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
 public:
     BeybladeCommandMock(
         aruwsrc::Drivers *drivers,
-        chassis::ChassisSubsystem *chassis,
+        chassis::HolonomicChassisSubsystem *chassis,
         aruwsrc::control::turret::TurretMotor *yawMotor);
 
     virtual ~BeybladeCommandMock();
