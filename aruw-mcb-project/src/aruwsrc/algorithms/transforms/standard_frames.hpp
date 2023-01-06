@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TAPROOT_STANDARD_FRAMES_HPP_
+#define TAPROOT_STANDARD_FRAMES_HPP_
+
 #include "tap/algorithms/transforms/frames.hpp"
 
 namespace aruwsrc::algorithms
@@ -29,3 +32,5 @@ class ChassisFrame : public tap::algorithms::Frame { } ;
 class TurretFrame : public tap::algorithms::Frame { } ;
 
 }
+
+#endif // TAPROOT_STANDARD_FRAMES_HPP_
