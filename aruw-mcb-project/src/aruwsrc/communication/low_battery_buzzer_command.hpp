@@ -30,7 +30,6 @@
 
 namespace aruwsrc::communication
 {
-
 class LowBatteryBuzzerCommand : public tap::control::Command
 {
 public:
@@ -45,7 +44,6 @@ public:
     void end(bool interrupt) override;
 
     const char* getName() const override { return "Low battery buzzer command"; }
-
 
 private:
     Drivers* drivers;
