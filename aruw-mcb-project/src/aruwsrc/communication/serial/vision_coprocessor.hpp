@@ -90,10 +90,22 @@ public:
     static constexpr uint8_t NUM_TAGS = 2;
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12};
 
+    enum class MessageBits : uint8_t 
+    {
+        TIMESTAMP_BYTES = 3,
+        POSITION_BITS = 48/8, //does not include revolving flag or fire rate
+        TIMING_BITS = 336/8,
+    };
+
      /**
      * AutoAim data to receive from Jetson.
      */
-    struct positionData {
+
+    struct ImDying {
+        uint32_t timestamp;
+    };
+
+    struct PositionData {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -105,21 +117,25 @@ public:
         float xAcc;  ///< x acceleration of the target (in m/s^2).
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
+
+        bool updated;
     };
 
-    struct timingData {
+    struct TimingData {
         float duration;
         float pulseInterval;
         float offset;
+
+        bool updated;
     };
 
     struct TurretAimData {
         uint8_t hasTarget;
         uint8_t recommendUseTimedShots;
-        struct positionData pva;
+        //struct positionData pva;
         uint32_t timestamp; 
         FireRate firerate;
-        struct timingData timing;
+        //struct timingData timing;
     } modm_packed;
     
 
@@ -281,6 +297,9 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
+    PositionData lastPvaData[control::turret::NUM_TURRETS] = {};
+    TimingData lastTimingData[control::turret::NUM_TURRETS] = {};
+    ImDying lastTimeStamp[control::turret::NUM_TURRETS] = {};
 
     // CV online variables.
     /// Timer for determining if serial is offline.

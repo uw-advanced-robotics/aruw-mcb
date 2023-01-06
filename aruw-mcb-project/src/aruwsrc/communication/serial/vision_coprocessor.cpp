@@ -107,25 +107,41 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
     //isolate tags from message
-    const uint8_t * tags = message.data;
-    int expectedLength;
+    // MANOLI WE ARE LOST IN THE PACIFIC, PLEASE SET US ON THE RIGHT TRACK
+    ReceivedSerialMessage messageCopy = message;
+    const uint8_t * tags = messageCopy.data;
+    //int expectedLength;     
 
-    for (int i = 0; i < NUM_TAGS; ++i) {
-        if (tags[i]) {
-            expectedLength += LEN_FIELDS[i];
-        }
+    // for (int i = 0; i < NUM_TAGS; ++i) {
+    //     if (tags[i]) {
+    //         expectedLength += LEN_FIELDS[i];
+    //     }
+    // }
+    // if (expectedLength != messageCopy.header.dataLength) return false;
+
+    uint8_t timeStampBits = (uint8_t) MessageBits::TIMESTAMP_BYTES;
+    const ImDying * timingDataRef = reinterpret_cast<const ImDying*>(&messageCopy.data[timeStampBits]);
+    memcpy(lastTimeStamp, &(timingDataRef), 3);   
+
+    if(!tags[0]) {
+        lastPvaData[0].updated = false;
+        lastTimingData[0].updated = false;
+        return false;
     }
-    if (expectedLength != message.header.dataLength) return false;
-
-    const TurretAimData *dataRef = reinterpret_cast<const TurretAimData*>(&message.data);
 
     for (int i = 0; i < NUM_TAGS; ++i) {
         if (tags[i]) {
             switch (i) {
                 case 0:
-                    memcpy(&lastAimData[0].pva, &(dataRef -> pva),sizeof(LEN_FIELDS[i]));
+                    uint8_t pBits = (uint8_t) MessageBits::POSITION_BITS;
+                    const PositionData *pvaDataRef = reinterpret_cast<const PositionData*>(&messageCopy.data[pBits]);
+                    memcpy(&lastPvaData, &pvaDataRef, sizeof(LEN_FIELDS[i]));
+                    lastTimingData[0].updated = false;
                 case 1:
-                    memcpy(&lastAimData[0].timing, &(dataRef -> timing),sizeof(LEN_FIELDS[i]));
+                    uint8_t tBits = (uint8_t) MessageBits::TIMING_BITS;
+                    const TimingData *timingDataRef = reinterpret_cast<const TimingData*>(&messageCopy.data[tBits]);
+                    memcpy(&lastTimingData, &(timingDataRef), sizeof(LEN_FIELDS[i]));
+                    lastTimingData[0].updated = true;
             }
         }
     }
