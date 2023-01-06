@@ -26,12 +26,12 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#define LOW_BATTERY_THRESHOLD 10
+#define LOW_BATTERY_THRESHOLD 23.5
 
 namespace aruwsrc::communication
 {
 
-class LowBatteryBuzzerCommand : tap::control::Command
+class LowBatteryBuzzerCommand : public tap::control::Command
 {
 public:
     LowBatteryBuzzerCommand(aruwsrc::Drivers* drivers);

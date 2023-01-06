@@ -39,6 +39,7 @@
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -334,6 +335,8 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisImuDriveCommand,
     sentryResponseHandler);
 
+aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(drivers());
+
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
@@ -485,6 +488,8 @@ void startStandardCommands(aruwsrc::Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
+
+    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/

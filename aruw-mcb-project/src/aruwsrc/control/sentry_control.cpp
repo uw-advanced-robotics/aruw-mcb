@@ -35,6 +35,7 @@
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
@@ -340,6 +341,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     nullptr);
 
+aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(drivers());
+
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
 void targetNewQuadrantMessageHandler()
@@ -441,6 +444,8 @@ void startSentryCommands(aruwsrc::Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
+
+    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
