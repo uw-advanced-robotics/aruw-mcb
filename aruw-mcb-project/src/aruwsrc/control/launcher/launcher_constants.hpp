@@ -28,13 +28,13 @@
 
 namespace aruwsrc::control::launcher
 {
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
 
-#if defined(TARGET_HERO) || defined(ALL_SENTINELS)
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
@@ -42,7 +42,7 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#if defined(TARGET_SENTINEL_2022)
+#if defined(TARGET_SENTRY_BEEHIVE)
 static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #else
@@ -62,14 +62,14 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10, 3700.0f},
     {16.0f, 6700.0f},
     {20.0f, 8500.0f},
 };
-#elif defined(TARGET_SOLDIERMK4_2022)
+#elif defined(TARGET_STANDARD_SPIDER)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4325.0f},
@@ -77,7 +77,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_SOLDIER_2021)
+#elif defined(TARGET_STANDARD_WOODY)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4400.0f},
@@ -85,7 +85,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 7100.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_SENTINEL_2022)
+#elif defined(TARGET_SENTRY_BEEHIVE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4400.0f},
@@ -93,7 +93,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_SOLDIER_2022)
+#elif defined(TARGET_STANDARD_ELSA)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4450.0f},
@@ -101,7 +101,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 7050.0f},
     {32.0f, 8400.0f},
 };
-#else  // TARGET_SENTINEL_2021, TARGET_DRONE, TARGET_ENGINEER
+#else  // TARGET_DRONE, TARGET_ENGINEER
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4400.0f},
@@ -111,11 +111,11 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 #endif
 
-#if defined(ALL_SOLDIERS) || defined(TARGET_SENTINEL_2021)
+#if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
-#elif defined(TARGET_HERO)
+#elif defined(TARGET_HERO_CYCLONE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
-#elif defined(TARGET_SENTINEL_2022)
+#elif defined(TARGET_SENTRY_BEEHIVE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #endif
 

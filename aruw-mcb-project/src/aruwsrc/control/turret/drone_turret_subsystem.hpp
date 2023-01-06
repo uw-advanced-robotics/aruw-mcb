@@ -32,7 +32,7 @@ class TurretYawControllerInterface;
 namespace aruwsrc::control::turret
 {
 /**
- * Turret subsystem for the Soldier.
+ * Turret subsystem for the Standard.
  */
 class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
                                    public aruwsrc::control::turret::TurretOrientationInterface
@@ -43,7 +43,7 @@ class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsys
     uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
     float getPitchOffset() const override { return 0; };
-};  // class SoldierTurretSubsystem
+};  // class StandardTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
 

@@ -43,9 +43,9 @@ public:
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
-    static constexpr float USER_STICK_SENTINEL_DRIVE_SCALAR = 5000.0f;
+    static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
@@ -57,7 +57,7 @@ public:
      */
     static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
     static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
-#else  // TARGET_SOLDIER, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+#else  // TARGET_STANDARD, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
@@ -121,9 +121,9 @@ public:
 
     /**
      * @returns the value used for sentiel drive speed, between
-     *      [-USER_STICK_SENTINEL_DRIVE_SCALAR, USER_STICK_SENTINEL_DRIVE_SCALAR].
+     *      [-USER_STICK_SENTRY_DRIVE_SCALAR, USER_STICK_SENTRY_DRIVE_SCALAR].
      */
-    mockable float getSentinelSpeedInput();
+    mockable float getSentrySpeedInput();
 
     /**
      * @returns whether or not the key to disable diagonal drive is pressed.
