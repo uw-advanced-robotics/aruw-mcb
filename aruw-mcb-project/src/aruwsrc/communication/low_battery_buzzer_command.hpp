@@ -26,7 +26,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#define LOW_BATTERY_THRESHOLD 23.5
+#define LOW_BATTERY_THRESHOLD 25000
 
 namespace aruwsrc::communication
 {
@@ -34,8 +34,6 @@ class LowBatteryBuzzerCommand : public tap::control::Command
 {
 public:
     LowBatteryBuzzerCommand(aruwsrc::Drivers* drivers);
-
-    void initialize() override;
 
     void execute() override;
 
@@ -47,7 +45,6 @@ public:
 
 private:
     Drivers* drivers;
-    tap::gpio::Pwm controller;
 };
 
 }  // namespace aruwsrc::communication
