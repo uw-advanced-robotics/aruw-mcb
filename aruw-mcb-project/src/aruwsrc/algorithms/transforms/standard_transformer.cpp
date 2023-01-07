@@ -38,23 +38,20 @@ namespace aruwsrc::algorithms {
 
     StandardTransformer::StandardTransformer
     (aruwsrc::algorithms::odometry::ChassisKFOdometry& odom) 
-    : privateOdom(odom)
+    :privateOdom(odom), 
+    worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    worldToTurretTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    chassisToTurretTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    chassisToWorldTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    turretToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
     {   
-        // update so we have data to construct our transforms with
-        odom.update();
-        // now, we have update data
-        modm::Location2D<float> pos2D = odom.getCurrentLocation2D();
-        float chassisYaw = odom.getYaw();
+        // // update so we have data to construct our transforms with
+        // odom.update();
+        // // now, we have update data
+        // modm::Location2D<float> pos2D = odom.getCurrentLocation2D();
+        // float chassisYaw = odom.getYaw();
 
-        worldToChassisTransform = Transform<WorldFrame, ChassisFrame>(-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, chassisYaw);
-
-
-
-
-
-
-
-
+        // worldToChassisTransform = Transform<WorldFrame, ChassisFrame>(-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, chassisYaw);
     
     
     
