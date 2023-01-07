@@ -46,6 +46,8 @@ namespace aruwsrc
 {
 namespace serial
 {
+
+    
 /**
  * A class used to communicate with our vision coprocessors. Targets the "Project Otto" vision
  * system (2021-2022).
@@ -97,15 +99,12 @@ public:
         TIMING_BITS = 336/8,
     };
 
-     /**
-     * AutoAim data to receive from Jetson.
-     */
-
-    struct ImDying {
+    struct MessageData {
         uint32_t timestamp;
+        bool updated;
     };
 
-    struct PositionData {
+    struct PositionData : MessageData {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -118,8 +117,33 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool updated;
     };
+
+    class MessageCluster {
+        private:
+            MessageData data;
+            uint32_t len;
+            
+        public:
+            MessageCluster(MessageData t_data, uint32_t t_len) {
+                data = t_data;
+                len = t_len;
+            }
+
+
+    };
+
+    enum class MessageType : MessageCluster {
+        PVA,
+        ShotTiming,
+        NUM_TYPES
+    };
+
+     /**
+     * AutoAim data to receive from Jetson.
+     */
+
+    
 
     struct TimingData {
         float duration;
