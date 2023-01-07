@@ -56,35 +56,59 @@ namespace chassis
 
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
-    public:
+public:
 
-        SwerveChassisSubsystem(
-            aruwsrc::Drivers* drivers,
-            tap::motor::MotorId leftFrontAzimuthMotorId,
-            tap::motor::MotorId leftFrontDriveMotorId,
-            tap::motor::MotorId leftBackAzimuthMotorId,
-            tap::motor::MotorId leftBackDriveMotorId,
-            tap::motor::MotorId rightFrontAzimuthMotorId,
-            tap::motor::MotorId rightFrontDriveMotorId,
-            tap::motor::MotorId rightBackAzimuthMotorId,
-            tap::motor::MotorId rightBackDriveMotorId,
-            chassis::SwerveModuleConfig config,
-            tap::gpio::Analog::Pin currentPin
-        );
+    SwerveChassisSubsystem(
+        aruwsrc::Drivers* drivers,
+        tap::motor::MotorId leftFrontAzimuthMotorId,
+        tap::motor::MotorId leftFrontDriveMotorId,
+        tap::motor::MotorId leftBackAzimuthMotorId,
+        tap::motor::MotorId leftBackDriveMotorId,
+        tap::motor::MotorId rightFrontAzimuthMotorId,
+        tap::motor::MotorId rightFrontDriveMotorId,
+        tap::motor::MotorId rightBackAzimuthMotorId,
+        tap::motor::MotorId rightBackDriveMotorId,
+        chassis::SwerveModuleConfig config,
+        tap::gpio::Analog::Pin currentPin
+    );
 
+    void initialize() override;
 
+    void setDesiredOutput(float x, float y, float r) override;
 
-    private:
+    void limitChassisPower() override;
 
-        /**
-         * When you input desired x, y, an r rpm, this function translates
-         * and sets the target azimuth and drive RPM of individual chassis modules.
-         */
-        void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+    void refresh() override;
 
-        chassis::SwerveModule modules[4];
+    /**
+     * Used to index into the desiredWheelRPM matrix and velocityPid array.
+     */
+    enum ModuleIndex
+    {
+        LF = 0,
+        LB = 1,
+        RF = 2,
+        RB = 3,
+    };
 
-        
+    /**
+     * Stores the desired state of each of the modules in a matrix, indexed by ModuleIndex
+     */
+    modm::Matrix<float, 4, 2> desiredModuleStates;
+
+    modm::Matrix<float, 3, 8> swerveWheelVelToChassisVelMat;
+
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
+private:
+
+    /**
+     * When you input desired x, y, an r rpm, this function translates
+     * and sets the target azimuth and drive RPM of individual chassis modules.
+     */
+    void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+
+    chassis::SwerveModule modules[4];        
 
 };  // class SwerveChassisSubsystem
 

@@ -39,7 +39,9 @@ SwerveModule::SwerveModule(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId driveMotorId,
     tap::motor::MotorId azimuthMotorId,
-    SwerveModuleConfig& swerveModuleConfig)
+    SwerveModuleConfig& swerveModuleConfig,
+    float positionWithinChassisX,
+    float positionWithinChassisY)
     : driveMotor(
           drivers,
           driveMotorId,
@@ -67,12 +69,58 @@ SwerveModule::SwerveModule(
       config(swerveModuleConfig)
 {
     rotationSetpoint = 0;
+    speedSetpoint = 0;
+    rotationVectorX = -positionWithinChassisY;
+    rotationVectorY = positionWithinChassisX;
 }
 
 void SwerveModule::intialize()
 {
     driveMotor.initialize();
     azimuthMotor.initialize();
+}
+
+float SwerveModule::calculateTotalModuleError()
+{
+    return ANGULAR_ERROR_POWER_BIAS * getAzimuthError() + getDriveError();
+}
+
+
+//radians
+float SwerveModule::getAzimuthError()
+{
+    return azimuthPid.getLastError();
+}
+
+//
+float SwerveModule::getDriveError()
+{
+    return drivePid.getLastError();
+}
+
+
+float SwerveModule::calculate(float x, float y, float r)
+{
+    float moveVectorX = x + r * rotationVectorX;
+    float moveVectorY = y + r * rotationVectorY;
+
+    if(moveVectorX==0 && moveVectorY==0)
+    //todo: maybe do smart braking by keeping
+    //todo: dont use exact comparison? not sure
+    {
+        preScaledSpeedSetpoint = 0;
+    }
+    else
+    {
+        preOptimizedRotationSetpoint = atan2f(moveVectorY, moveVectorX);
+        preScaledSpeedSetpoint = sqrtf(moveVectorX*moveVectorX + moveVectorY*moveVectorY);
+    }
+    return preScaledSpeedSetpoint;
+}
+
+void SwerveModule::scaleAndSet(float scaleCoeff)
+{
+    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, preOptimizedRotationSetpoint);
 }
 
 void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
@@ -93,8 +141,8 @@ void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
  */
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpoint - getVelocity());
-    driveMotor.setDesiredOutput(drivePid.getValue());
+    drivePid.update(speedSetpoint - getDriveVelocity());
+    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() + drivePid.getValue());
 
     azimuthPid.update(rotationSetpoint - getAngle());
     azimuthMotor.setDesiredOutput(azimuthPid.getValue());
@@ -103,7 +151,7 @@ void SwerveModule::refresh()
 /**
  * Returns MPS of the wheel
  */
-float SwerveModule::getVelocity()
+float SwerveModule::getDriveVelocity() const
 {
     float currentMotorRPM = driveMotor.getShaftRPM();
     float wheelMPS = rpmToMps(currentMotorRPM);
@@ -113,23 +161,21 @@ float SwerveModule::getVelocity()
 /**
  * This returns Radian position of motor, CCW+
  */
-float SwerveModule::getAngle()
+float SwerveModule::getAngle() const
 {
     float motorEncoderPositionDegree =
         azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped());
     return modm::toRadian(motorEncoderPositionDegree / config.azimuthMotorGearing);
 }
 
-float SwerveModule::mpsToRpm(float mps)
+float SwerveModule::mpsToRpm(float mps) const
 {
-    float SEC_PER_M = 60.0f;
-    return (mps / config.WHEEL_CIRCUMFRENCE_M) * SEC_PER_M * config.driveMotorGearing;
+    return (mps / config.WHEEL_CIRCUMFRENCE_M) * 60.0f * config.driveMotorGearing;
 }
 
-float SwerveModule::rpmToMps(float rpm)
+float SwerveModule::rpmToMps(float rpm) const
 {
-    float SEC_PER_M = 60.0f;
-    return rpm / SEC_PER_M / config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
+    return rpm / 60.0f / config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
 }
 
 float SwerveModule::optimizeAngle(float desiredAngle)
@@ -143,6 +189,13 @@ float SwerveModule::optimizeAngle(float desiredAngle)
         desiredAngle = desiredAngle - getSign(desiredAngle - modm::toDegree(getAngle()) * 360);
     }
     return modm::toRadian(desiredAngle);
+}
+
+void SwerveModule::limitPower(float frac)
+{
+    //TODO: is getOutputDesired what i want to do here
+    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
+    azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);
 }
 
 }  // namespace chassis
