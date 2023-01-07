@@ -23,20 +23,20 @@ namespace aruwsrc::communication
 {
 LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(aruwsrc::Drivers* drivers) : drivers(drivers) {}
 
-void LowBatteryBuzzerCommand::initialize() { controller.init(); }
+void LowBatteryBuzzerCommand::initialize() {}
 
 void LowBatteryBuzzerCommand::execute()
 {
     if (drivers->refSerial.getRobotData().chassis.volt < LOW_BATTERY_THRESHOLD)
     {
-        tap::buzzer::playNote(&controller, 10);
+        tap::buzzer::playNote(&(drivers->pwm), 440);
     }
     else
     {
-        tap::buzzer::silenceBuzzer(&controller);
+        tap::buzzer::silenceBuzzer(&(drivers->pwm));
     }
 }
 
-void LowBatteryBuzzerCommand::end(bool) { tap::buzzer::silenceBuzzer(&controller); }
+void LowBatteryBuzzerCommand::end(bool) { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
 
 }  // namespace aruwsrc::communication

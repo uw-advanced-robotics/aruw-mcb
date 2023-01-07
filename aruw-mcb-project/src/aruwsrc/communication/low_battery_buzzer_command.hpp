@@ -26,7 +26,7 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#define LOW_BATTERY_THRESHOLD 23.5
+#define LOW_BATTERY_THRESHOLD 25000
 
 namespace aruwsrc::communication
 {
@@ -47,7 +47,6 @@ public:
 
 private:
     Drivers* drivers;
-    tap::gpio::Pwm controller;
 };
 
 }  // namespace aruwsrc::communication
