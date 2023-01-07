@@ -43,4 +43,3 @@ void tap::algorithms::rotateVector(float* x, float* y, float radians)
     *x = (*x) * cosf(radians) - *y * sinf(radians);
     *y = x_temp * sinf(radians) + *y * cosf(radians);
 }
-

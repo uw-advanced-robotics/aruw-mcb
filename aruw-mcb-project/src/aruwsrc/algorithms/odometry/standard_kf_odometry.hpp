@@ -17,3 +17,48 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tap/motor/dji_motor.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp" // change this probably
+#include "tap/algorithms/transforms/transformer.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
+#include "aruwsrc/algorithms/transforms/frames.hpp"
+#include "tap/algorithms/kalman_filter.hpp"
+
+
+using namespace tap::algorithms;
+
+namespace aruwsrc::algorithms
+{
+
+/**
+ * @param leftFrontMotor Left front motor
+ * @param leftBackMotor Left back motor
+ * @param rightFrontMotor Right front motor
+ * @param rightBackMotor Right back motor
+ * @param turretPitchMotor Turret pitch motor
+ * @param turretYawMotor Turret yaw motor
+ * @param chassisImu Chassis IMU
+ * @param turretImu Turret IMU
+ */
+
+class StandardKFODometry {
+
+public:
+    StandardKFODometry(
+        tap::motor::DjiMotor& leftFrontMotor,
+        tap::motor::DjiMotor& leftBackMotor,
+        tap::motor::DjiMotor& rightFrontMotor,
+        tap::motor::DjiMotor& rightBackMotor,
+        tap::motor::DjiMotor& turretPitchMotor,
+        tap::motor::DjiMotor& turretYawMotor,
+        tap::communication::sensors::imu::ImuInterface& chassisImu,
+        tap::communication::sensors::imu::ImuInterface& turretImu
+    );
+
+private:
+
+    // 
+    
+};
+
+}
