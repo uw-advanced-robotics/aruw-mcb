@@ -49,7 +49,7 @@ namespace aruwsrc::algorithms
          * @param chassisOdometry odometry used to update transforms
         */
         StandardTransformer
-        (aruwsrc::algorithms::odometry::ChassisKFOdometry chassisOdometry);
+        (aruwsrc::algorithms::odometry::ChassisKFOdometry& chassisOdometry);
         
         /**
          * Update each transform with most recent encoder and IMU odometry data. This method
@@ -91,7 +91,21 @@ namespace aruwsrc::algorithms
          * @returns Turret to Chassis transform
         */
         Transform<TurretFrame, ChassisFrame> StandardTransformer::getTurretToChassisTranform();
-        
+     private:
+        aruwsrc::algorithms::odometry::ChassisKFOdometry& privateOdom;
+        /**
+         * Updates the stored transforms for this cycle
+        */
+        void updateTransforms();
+
+        Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
+        Transform<WorldFrame, TurretFrame> worldToTurretTransform;
+        Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
+        Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
+        Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
+
+        float PLACEHOLDER_VAL = 0.0f;
+
     };
 }
 
@@ -193,11 +207,11 @@ namespace aruwsrc::algorithms
 //     // tap::communication::sensors::imu::ImuInterface& chassisImu;
 //     // tap::communication::sensors::imu::ImuInterface& turretImu;
 
-//     Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
-//     Transform<WorldFrame, TurretFrame> worldToTurretTransform;
-//     Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
-//     Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
-//     Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
+    // Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
+    // Transform<WorldFrame, TurretFrame> worldToTurretTransform;
+    // Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
+    // Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
+    // Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
 
 
 //     // EVENTUALLY:
