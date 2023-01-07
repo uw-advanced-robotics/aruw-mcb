@@ -52,37 +52,148 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
     modules({
-        SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config),
-        SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, config),
-        SwerveModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, config),
-        SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, config),
+        SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, config, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        SwerveModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, config, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, config, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
     })
 {
-    //
+    wheelVelToChassisVelMat[X][LF] = 1;
+    wheelVelToChassisVelMat[X][RF] = -1;
+    wheelVelToChassisVelMat[X][LB] = 1;
+    wheelVelToChassisVelMat[X][RB] = -1;
+    wheelVelToChassisVelMat[Y][LF] = -1;
+    wheelVelToChassisVelMat[Y][RF] = -1;
+    wheelVelToChassisVelMat[Y][LB] = 1;
+    wheelVelToChassisVelMat[Y][RB] = 1;
+    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
+}
+
+void SwerveChassisSubsystem::initialize()
+{
+    for(int i = 0; i<4; i++)
+    {
+        modules[i].intialize();
+    }
+}
+
+void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
+{
+    swerveDriveCalculate(
+        x,
+        y,
+        r,
+        getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed)
 {
-    // this is the distance between the center of the chassis to the wheel
-    float chassisRotationRatio = sqrtf(
-        powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
+    float maxInitialSpeed = 0;
+    for(int i = 0; i<4; i++)
+    {
+        desiredModuleStates[i][0] = modules[i].calculate(x, y, r);
+        if(desiredModuleStates[i][0] > maxInitialSpeed)
+        {
+            maxInitialSpeed = desiredModuleStates[i][0];
+        }
+    }
 
-    // to take into account the location of the turret so we rotate around the turret rather
-    // than the center of the chassis, we calculate the offset and than multiply however
-    // much we want to rotate by
-    float leftFrontRotationRatio =
-        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-    float rightFrontRotationRatio =
-        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-    float leftBackRotationRatio =
-        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-    float rightBackRotationRatio =
-        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    float scaleCoeff = 1;
+    if(maxInitialSpeed > maxWheelSpeed) scaleCoeff = maxWheelSpeed / maxInitialSpeed;
 
-    
+    for(int i = 0; i<4; i++)
+    {
+        modules[i].scaleAndSet(scaleCoeff);
+    }
+}
+
+void SwerveChassisSubsystem::refresh()
+{
+    for(int i = 0; i<4; i++)
+    {
+        modules[i].refresh();
+    }
+}
+
+void SwerveChassisSubsystem::limitChassisPower()
+{
+    int NUM_MOTORS = 4;
+
+    // use power limiting object to compute initial power limiting fraction
+    currentSensor.update();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // short circuit if power limiting doesn't need to be applied
+    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    {
+        return;
+    }
+
+    // total velocity error for all wheels
+    float totalError = 0.0f;
+    for (int i = 0; i < 4; i++)
+    {
+        totalError += abs(modules[i].calculateTotalModuleError());
+
+    }
+
+    bool totalErrorZero = compareFloatClose(0.0f, totalError, 1E-3);
+
+    // compute modified power limiting fraction based on velocity PID error
+    // motors with greater error should be allocated a larger fraction of the powerLimitFrac
+    for (int i = 0; i < 4; i++)
+    {
+        // Compared to the other wheels, fraction of how much velocity PID error there is for a
+        // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
+        // values for all motors is 1.
+        float velocityErrorFrac = totalErrorZero
+                                      ? (1.0f / 4)
+                                      : (abs(modules[i].calculateTotalModuleError()) / totalError);
+        // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
+        // based on the current velocity error. In this way, if the velocity error is large, the
+        // motor requires more current to be directed to it than other motors. Without this
+        // compensation, a total of NUM_MOTORS * powerLimitFrac fractional limiting is divided
+        // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
+        // velocityErrorFrac for each motor.
+        float modifiedPowerLimitFrac =
+            limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
+        //motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
+        modules[i].limitPower(modifiedPowerLimitFrac);
+    }
+}
+
+
+modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
+{
+    modm::Matrix<float, MODM_ARRAY_SIZE(modules)*2, 1> wheelVelocity;
+    for(int i = 0; i<4; i++)
+    {
+        float ang = modules[i].getAngle();
+        float mag = modules[i].getDriveVelocity();
+        wheelVelocity[2*i][0] = mag * cos(ang);
+        wheelVelocity[2*i + 1][0] = mag * sin(ang);
+    }
+
+    // wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
+    // wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
+    // wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
+    // wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+    return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+
     
 }
+
+
 
 
 }

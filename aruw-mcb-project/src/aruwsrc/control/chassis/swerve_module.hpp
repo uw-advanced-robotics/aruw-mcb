@@ -82,23 +82,46 @@ public:
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
-        SwerveModuleConfig& swerveModuleConfig);
+        SwerveModuleConfig& swerveModuleConfig,
+        float positionWithinChassisX,
+        float positionWithinChassisY);
 
     void setDesiredState(float metersPerSecond, float radianOutput);
 
-    float getVelocity();
+    void scaleAndSet(float scaleCoeff);
 
-    float getAngle();
+    float calculate(float x, float y, float r);
+
+    float getDriveVelocity() const;
+
+    float getAngle() const;
 
     void intialize();
 
     void refresh();
 
+    float calculateTotalModuleError();
+
+    const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
+
+    float getAzimuthError();
+    float getDriveError();
+
+    std::vector<float> getModuleVelocity();
+
+    void limitPower(float frac);
+
 private:
-    float mpsToRpm(float mps);
-    float rpmToMps(float rpm);
+    float mpsToRpm(float mps) const;
+    float rpmToMps(float rpm) const;
 
     float optimizeAngle(float desiredAngle);
+
+    
+    float rotationVectorX;
+    float rotationVectorY;
+
+    
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -114,6 +137,7 @@ private:
     modm::Pid<float> drivePid;
     modm::Pid<float> azimuthPid;
 
+    float preScaledSpeedSetpoint{0}, preOptimizedRotationSetpoint{0};
     float speedSetpoint, rotationSetpoint;
     SwerveModuleConfig config;
 
