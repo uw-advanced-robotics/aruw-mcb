@@ -31,17 +31,53 @@
 #include "tap/algorithms/transforms/transform.hpp"
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
 
+using namespace tap::algorithms;
+using namespace tap::algorithms::transforms;
 
-StandardTransformer::StandardTransformer(aruwsrc) {
+namespace aruwsrc::algorithms {
+
+    StandardTransformer::StandardTransformer
+    (aruwsrc::algorithms::odometry::ChassisKFOdometry& odom) 
+    : privateOdom(odom)
+    {   
+        // update so we have data to construct our transforms with
+        odom.update();
+        // now, we have update data
+        modm::Location2D<float> pos2D = odom.getCurrentLocation2D();
+        float chassisYaw = odom.getYaw();
+
+        worldToChassisTransform = Transform<WorldFrame, ChassisFrame>(-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, chassisYaw);
+
+
+
+
+
+
+
+
+    
+    
+    
+    }
+
+    void StandardTransformer::update() {
+        // first, update odometry
+        privateOdom.update();
+        // then, use that to update transforms
+        this->updateTransforms();
+    }
+
+    void updateTransforms() {
+
+    }
+
+
+
+
+
+
 
 }
-
-
-
-
-
-
-
 
 
 // #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
