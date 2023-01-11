@@ -70,7 +70,7 @@ static void initAndRunAutoAimRxTest(
         EXPECT_EQ(expectedAimData[i].pva.xAcc, callbackData.pva.xAcc);
         EXPECT_EQ(expectedAimData[i].pva.yAcc, callbackData.pva.yAcc);
         EXPECT_EQ(expectedAimData[i].pva.zAcc, callbackData.pva.zAcc);
-        EXPECT_EQ(expectedAimData[i].hasTarget, callbackData.hasTarget);
+        EXPECT_EQ(expectedAimData[i].pva.updated, callbackData.pva.updated);
         EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
         EXPECT_EQ(expectedAimData[i].firerate, callbackData.firerate);
     }
@@ -85,7 +85,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_zeros)
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_has_target)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {};
-    aimData[0].hasTarget = true;
+    aimData[0].pva.updated = true;
     initAndRunAutoAimRxTest(aimData);
 }
 
@@ -121,8 +121,6 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
         VisionCoprocessor::TurretAimData{
-            .hasTarget = false,
-            .recommendUseTimedShots = false,
             .pva = {
                 .xPos = -1,
                 .yPos = -2,
@@ -151,8 +149,6 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
         VisionCoprocessor::TurretAimData{
-            .hasTarget = false,
-            .recommendUseTimedShots = false,
             .pva = {
                 .xPos = -0.45,
                 .yPos = -0.35,
@@ -181,8 +177,6 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
         VisionCoprocessor::TurretAimData{
-            .hasTarget = false,
-            .recommendUseTimedShots = false,
             .pva = {
                 .xPos = 123456789.0f,
                 .yPos = 123456789.0f,
@@ -212,8 +206,6 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
         VisionCoprocessor::TurretAimData{
-            .hasTarget = true,
-            .recommendUseTimedShots = false,
             .pva = {
                 .xPos = -10,
                 .yPos = -0.32,
