@@ -42,4 +42,4 @@ public:
 
 }  // namespace aruwsrc::control::buzzer
 
-#endif
+#endif // BUZZER_SUBSYSTEM_HPP_
