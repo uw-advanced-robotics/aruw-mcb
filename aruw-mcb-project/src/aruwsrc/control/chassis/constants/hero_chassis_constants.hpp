@@ -102,6 +102,9 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
  * Distance from center of the front and rear wheels (m).
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
+
+static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
  */
