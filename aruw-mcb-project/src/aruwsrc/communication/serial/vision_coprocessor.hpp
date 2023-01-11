@@ -87,6 +87,55 @@ public:
     };
 
     /**
+     * Empty AutoAim data to receive from Jetson.
+     */
+    struct NoTurretAimData
+    {
+        uint32_t timestamp;  ///< Timestamp in microseconds.
+    } modm_packed;
+
+    /**
+     * Position, velocity, and acceleration data to receive from Jetson.
+     */
+    struct XVABlock 
+    {
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
+
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
+
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
+    } modm_packed;
+
+    /**
+     * Timing data to receive from Jetson.
+     */
+    struct TimingBlock 
+    {
+        uint32_t
+            targetIntervalDuration;  ///< Duration during which the plate is at the target point (POTENTIALLY ON-DURATION)
+        uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point (POTENTIALLY OFF-DURATION)
+        uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
+                                       ///< next shot should ideally hit
+    } modm_packed;
+
+    /**
+     * Revolving data to receive from Jetson. TBD
+     */
+    struct RevolvingBlock 
+    {
+        uint32_t radius;  ///< 
+        uint32_t phase;  ///< 
+        uint32_t angularVelocity;  ///< 
+        uint32_t angularAcceleration;  ///< 
+    } modm_packed;
+
+    /**
      * AutoAim data to receive from Jetson.
      */
     struct TurretAimData
@@ -103,12 +152,30 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool hasTarget;      ///< Whether or not the xavier has a target.
         uint32_t timestamp;  ///< Timestamp in microseconds.
+        FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
+    } modm_packed;
 
+    /**
+     * AutoAim data to receive from Jetson, with additional pulse and offset data.
+     */
+    struct PulseTurretAimData : public TurretAimData
+    {
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
+
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
+
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
+
+        uint32_t timestamp;  ///< Timestamp in microseconds.
         FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
 
-        bool recommendUseTimedShots;   ///< Validity of the targetHitTime
         uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
                                        ///< next shot should ideally hit
         uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
@@ -203,7 +270,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+            hasTarget |= lastAimData[i].hasTarget;
         }
         return hasTarget;
     }
@@ -254,8 +321,25 @@ private:
 
     enum RxMessageTypes
     {
-        CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_TURRET_AIM = 3,
     };
+
+    enum class AimDataType : uint8_t 
+    {
+        NO_AIM_DATA = 0,
+        REG_AIM_DATA = 1,
+        PULSE_AIM_DATA = 2,
+    };
+
+    enum class AimDataLength : uint8_t
+    {
+        XVA_LENGTH = 36,
+        TIMING_LENGTH = 12,
+        REVOLVING_LENGTH = 24,
+        NUM_BLOCKS = 3,
+    };
+
+    static constexpr uint8_t DATA_LENGTH[(uint8_t)AimDataLength::NUM_BLOCKS] = {(uint8_t)AimDataLength::XVA_LENGTH, (uint8_t)AimDataLength::TIMING_LENGTH, (uint8_t)AimDataLength::REVOLVING_LENGTH};
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
@@ -275,7 +359,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    // CV online variables.
+    // CV online variables. 
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 

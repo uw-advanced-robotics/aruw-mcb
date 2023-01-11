@@ -106,11 +106,25 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != sizeof(lastAimData))
+    // Checks for empty turret aim data
+    if (message.header.headByte == '000') {
+        // Copies over only the timestamp
+        memcpy(lastAimData, &message.data, sizeof(NoTurretAimData)); // CHANGE
+    }
+    uint8_t head_spare = message.header.headByte;
+    size_t message_length = 0;
+    for (uint8_t i = 0; i < (uint8_t)AimDataLength::NUM_BLOCKS; i++) {
+        if (head_spare & 1 == 1)
+        {
+            message_length += DATA_LENGTH[i];
+        }
+        head_spare = head_spare >> 1;
+    }
+    if (sizeof(&message.data) < message_length)
     {
         return false;
     }
-    memcpy(lastAimData, &message.data, sizeof(lastAimData));
+    memcpy(lastAimData, &message.data, sizeof(lastAimData)); // CHANGE
     return true;
 }
 
