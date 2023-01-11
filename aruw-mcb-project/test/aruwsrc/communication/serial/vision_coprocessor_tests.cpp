@@ -162,14 +162,16 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
                 .zVel = 0.05,
                 .xAcc = 0.15,
                 .yAcc = 0.25,
-                .zAcc = 0.35
+                .zAcc = 0.35,
+                .updated = 0
             },
             .timestamp = 1234,
             .firerate = VisionCoprocessor::FireRate::ZERO,
             .timing = {
                 .duration = 0,
                 .pulseInterval = 0,
-                .offset = 0
+                .offset = 0,
+                .updated = 0
             }
         }};
     initAndRunAutoAimRxTest(aimData);
@@ -190,14 +192,16 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
                 .zVel = 123456789.0f,
                 .xAcc = 123456789.0f,
                 .yAcc = 123456789.0f,
-                .zAcc = 123456789.0f
+                .zAcc = 123456789.0f,
+                .updated = 0
             },
             .timestamp = 1234,
             .firerate = VisionCoprocessor::FireRate::ZERO,
             .timing = {
                 .duration = 0,
                 .pulseInterval = 0,
-                .offset = 0
+                .offset = 0,
+                .updated = 0
             }
         }};
 
@@ -219,14 +223,16 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
                 .zVel = 0,
                 .xAcc = 76,
                 .yAcc = 42,
-                .zAcc = -14.2
+                .zAcc = -14.2,
+                .updated = 0
             },
             .timestamp = 1234,
             .firerate = VisionCoprocessor::FireRate::ZERO,
             .timing = {
                 .duration = 0,
                 .pulseInterval = 0,
-                .offset = 0
+                .offset = 0,
+                .updated = 0
             }
         }};
 
