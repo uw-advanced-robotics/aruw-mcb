@@ -51,7 +51,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     chassis::SwerveModuleConfig config,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
-    modules({
+    modules{
         SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config, 
             -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
         SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, config, 
@@ -60,7 +60,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
         SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, config, 
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
-    })
+    }
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;
@@ -175,22 +175,26 @@ void SwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, MODM_ARRAY_SIZE(modules)*2, 1> wheelVelocity;
-    for(int i = 0; i<4; i++)
-    {
-        float ang = modules[i].getAngle();
-        float mag = modules[i].getDriveVelocity();
-        wheelVelocity[2*i][0] = mag * cos(ang);
-        wheelVelocity[2*i + 1][0] = mag * sin(ang);
-    }
+    // modm::Matrix<float, MODM_ARRAY_SIZE(modules)*2, 1> wheelVelocity;
+    // for(int i = 0; i<4; i++)
+    // {
+    //     float ang = modules[i].getAngle();
+    //     float mag = modules[i].getDriveVelocity();
+    //     wheelVelocity[2*i][0] = mag * cos(ang);
+    //     wheelVelocity[2*i + 1][0] = mag * sin(ang);
+    // }
 
     // wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
     // wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
     // wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
     // wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
-    return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+    // return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 
-    
+    modm::Matrix<float, 3, 1> randomOutput;
+    randomOutput[0][0] = 0;
+    randomOutput[1][0] = 0;
+    randomOutput[2][0] = 0;
+    return randomOutput;
 }
 
 
