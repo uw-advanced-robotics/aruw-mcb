@@ -30,4 +30,4 @@ void BuzzerSubsystem::playNoise() { tap::buzzer::playNote(&(drivers->pwm), 440);
 
 void BuzzerSubsystem::stop() { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
 
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::buzzer

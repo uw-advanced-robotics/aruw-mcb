@@ -23,8 +23,8 @@
 
 #include "aruwsrc/drivers.hpp"
 
-#ifndef BUZZER_SUBSYSTEM_H_
-#define BUZZER_SUBSYSTEM_H_
+#ifndef BUZZER_SUBSYSTEM_HPP_
+#define BUZZER_SUBSYSTEM_HPP_
 
 namespace aruwsrc::control::buzzer
 {
@@ -40,6 +40,6 @@ public:
     void stop();
 };
 
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::buzzer
 
 #endif
