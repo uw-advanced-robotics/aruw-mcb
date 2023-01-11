@@ -48,8 +48,9 @@
 #include "chassis/chassis_diagonal_drive_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_imu_drive_command.hpp"
-#include "chassis/chassis_subsystem.hpp"
+#include "chassis/holonomic_chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
+#include "chassis/x_drive_chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
@@ -105,7 +106,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
-ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
+XDriveChassisSubsystem chassis(drivers());
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
