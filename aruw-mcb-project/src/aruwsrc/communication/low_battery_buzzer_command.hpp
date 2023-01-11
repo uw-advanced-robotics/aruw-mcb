@@ -27,7 +27,7 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
-#define LOW_BATTERY_THRESHOLD 25000
+#define LOW_BATTERY_THRESHOLD 23500
 
 namespace aruwsrc::communication
 {
