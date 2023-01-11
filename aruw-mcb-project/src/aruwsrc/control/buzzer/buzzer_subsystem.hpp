@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BUZZER_SUBSYSTEM_HPP_
 #define BUZZER_SUBSYSTEM_HPP_
 
