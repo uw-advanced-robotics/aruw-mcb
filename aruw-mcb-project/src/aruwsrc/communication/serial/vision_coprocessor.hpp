@@ -89,8 +89,14 @@ public:
         HIGH = 3,
     };
 
-    static constexpr uint8_t NUM_TAGS = 2;
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12};
+    enum Tags : uint8_t
+    {
+        PVA = 0,
+        TIMING = 1,
+        NUM_TAGS = 2,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
 
     enum class MessageBits : uint8_t 
     {
@@ -99,12 +105,11 @@ public:
         TIMING_BITS = 336/8,
     };
 
-    struct MessageData {
-        uint32_t timestamp;
-        bool updated;
-    };
+     /**
+     * AutoAim data to receive from Jetson.
+     */
 
-    struct PositionData : MessageData {
+    struct PositionData {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -117,33 +122,9 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-    };
+        bool updated;
 
-    class MessageCluster {
-        private:
-            MessageData data;
-            uint32_t len;
-            
-        public:
-            MessageCluster(MessageData t_data, uint32_t t_len) {
-                data = t_data;
-                len = t_len;
-            }
-
-
-    };
-
-    enum class MessageType : MessageCluster {
-        PVA,
-        ShotTiming,
-        NUM_TYPES
-    };
-
-     /**
-     * AutoAim data to receive from Jetson.
-     */
-
-    
+    } modm_packed;
 
     struct TimingData {
         float duration;
@@ -151,15 +132,13 @@ public:
         float offset;
 
         bool updated;
-    };
+    } modm_packed;
 
     struct TurretAimData {
-        uint8_t hasTarget;
-        uint8_t recommendUseTimedShots;
-        //struct positionData pva;
+        struct PositionData pva;
         uint32_t timestamp; 
         FireRate firerate;
-        //struct timingData timing;
+        struct TimingData timing;
     } modm_packed;
     
 
@@ -240,7 +219,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget;
+            hasTarget |= lastAimData[i].pva.updated;
         }
         return hasTarget;
     }
@@ -250,7 +229,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -320,10 +299,9 @@ private:
     uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
-    PositionData lastPvaData[control::turret::NUM_TURRETS] = {};
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; // this line was the old implementation
+    PositionData lastPvaData[control::turret::NUM_TURRETS] = {}; // new implementation UwU
     TimingData lastTimingData[control::turret::NUM_TURRETS] = {};
-    ImDying lastTimeStamp[control::turret::NUM_TURRETS] = {};
 
     // CV online variables.
     /// Timer for determining if serial is offline.

@@ -60,7 +60,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].hasTarget = 0;
+        this->lastAimData[i].pva.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -106,36 +106,36 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    ReceivedSerialMessage messageCopy = message;
-    const FrameHeader*  tags = &message.header;
     int expectedLength;     
-    for (int i = 0; i < NUM_TAGS; ++i)
+    uint8_t flags = message.data[0];
+    for (int i = 0; i < NUM_TAGS; i++)
     {
-        if (tags[i] == 1) {
+        uint8_t flag = flags & (1 << i);
+        if (flag == 1) {
             expectedLength += LEN_FIELDS[i];
         }
     }
-    if (expectedLength != messageCopy.header.dataLength) return false;
+    if (expectedLength != message.header.dataLength) return false;
 
-     MessageData msgdata[] = {};
-     int currIndex = 0;
+    lastAimData[0].pva.updated = 0;
+    lastAimData[0].timing.updated = 0;
+
+    int currIndex = 0;
     for (int i = 0; i < NUM_TAGS; ++i) {
-        if (tags[i]) {
+        uint8_t flag = flags & (1 << i);
+        if (flag == 1) {
             switch (i) {
                 case 0:
-                    //const PositionData *pvaDataRef = reinterpret_cast<const PositionData*>(&messageCopy.data[(uint8_t)MessageBits::POSITION_BITS]);
-                    memcpy(&lastPvaData, &message.data[currIndex], LEN_FIELDS[i]);
-                    currIndex += (int) LEN_FIELDS[i];
-                    // lastTimingData[0].updated = false;
+                    memcpy(&lastAimData[0].pva, &message.data[currIndex], LEN_FIELDS[i]); // double check if memcpy doing what it wants
+                    lastAimData[0].pva.updated = 1;
                 case 1:
-                    // const TimingData *timingDataRef = reinterpret_cast<const TimingData*>(&messageCopy.data[(uint8_t) MessageBits::TIMING_BITS]);
-                    // memcpy(&lastTimingData, &(timingDataRef), sizeof(LEN_FIELDS[i]));
-                    // lastTimingData[0].updated = true;
-                    memcpy(&lastTimingData, &message.data[currIndex], LEN_FIELDS[i]);
-                    currIndex += (int) LEN_FIELDS[i];
+                    memcpy(&lastAimData[0].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                    lastAimData[0].timing.updated = 1;
             }
-        }
+            currIndex += (int) LEN_FIELDS[i];
+        } 
     }
+    return true;
 }
 
 void VisionCoprocessor::sendMessage()

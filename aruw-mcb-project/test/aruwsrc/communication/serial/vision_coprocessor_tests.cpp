@@ -93,8 +93,6 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
 {
     std::array<VisionCoprocessor::TurretAimData, NUM_TURRETS> aimData = {
         VisionCoprocessor::TurretAimData{
-            .hasTarget = false,
-            .recommendUseTimedShots = false,
             .pva = {
                 .xPos = 1,
                 .yPos = 2,
@@ -104,7 +102,8 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
                 .zVel = 6,
                 .xAcc = 7,
                 .yAcc = 8,
-                .zAcc = 9
+                .zAcc = 9,
+                .updated = 0
             },
             .timestamp = 1234,
             .firerate = VisionCoprocessor::FireRate::ZERO,
@@ -112,6 +111,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
                 .duration = 0,
                 .pulseInterval = 0,
                 .offset = 0,
+                .updated = 0
             }
         }};
     initAndRunAutoAimRxTest(aimData);
@@ -132,14 +132,16 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
                 .zVel = -6,
                 .xAcc = -7,
                 .yAcc = -8,
-                .zAcc = -9
+                .zAcc = -9,
+                .updated = 0
             },
             .timestamp = 1234,
             .firerate = VisionCoprocessor::FireRate::ZERO,
             .timing = {
                 .duration = 0,
                 .pulseInterval = 0,
-                .offset = 0
+                .offset = 0,
+                .updated = 0
             }
         }};
     initAndRunAutoAimRxTest(aimData);

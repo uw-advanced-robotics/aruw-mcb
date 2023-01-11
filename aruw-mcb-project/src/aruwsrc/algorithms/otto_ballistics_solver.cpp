@@ -56,7 +56,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
-    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
+    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;

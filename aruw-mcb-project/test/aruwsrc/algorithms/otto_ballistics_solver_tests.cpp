@@ -151,7 +151,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
 {
     solution = solver.computeTurretAimAngles();
 
-    aimData.hasTarget = false;
+    aimData.pva.updated = false;
 
     EXPECT_FALSE(solution.has_value());
 }
@@ -168,7 +168,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 {
-    aimData.hasTarget = true;
+    aimData.pva.updated = true;
     aimData.pva.xPos = 2;
 
     lastComputedOdomTime = 100;
@@ -181,7 +181,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 {
-    aimData.hasTarget = true;
+    aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     aimData.timestamp = 100;
 
@@ -195,7 +195,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
-    aimData.hasTarget = true;
+    aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     chassisLoc.setPosition(-2, 0);
 
@@ -213,7 +213,7 @@ TEST_F(
     OttoBallisticsSolverTest,
     comiputeTurretAimAngles_solution_found_no_new_time_solution_not_resolved)
 {
-    aimData.hasTarget = true;
+    aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     aimData.timestamp = 100;
 
@@ -234,7 +234,7 @@ TEST_F(
 
 TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid_solution)
 {
-    aimData.hasTarget = true;
+    aimData.pva.updated = true;
     aimData.pva.xPos = 100;
     aimData.timestamp = 100;
 
