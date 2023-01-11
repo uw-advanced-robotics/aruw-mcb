@@ -19,9 +19,18 @@
 
 #include "low_battery_buzzer_command.hpp"
 
+#include "aruwsrc/drivers.hpp"
+
 namespace aruwsrc::communication
 {
-LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(aruwsrc::Drivers* drivers) : drivers(drivers) {}
+LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
+    aruwsrc::BuzzerSubsystem& buzzer,
+    aruwsrc::Drivers* drivers)
+    : buzzer(buzzer),
+      drivers(drivers)
+{
+    addSubsystemRequirement(&buzzer);
+}
 
 void LowBatteryBuzzerCommand::initialize() {}
 
@@ -29,14 +38,14 @@ void LowBatteryBuzzerCommand::execute()
 {
     if (drivers->refSerial.getRobotData().chassis.volt < LOW_BATTERY_THRESHOLD)
     {
-        tap::buzzer::playNote(&(drivers->pwm), 440);
+        buzzer.playNoise();
     }
     else
     {
-        tap::buzzer::silenceBuzzer(&(drivers->pwm));
+        buzzer.stop();
     }
 }
 
-void LowBatteryBuzzerCommand::end(bool) { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
+void LowBatteryBuzzerCommand::end(bool) { buzzer.stop(); }
 
 }  // namespace aruwsrc::communication
