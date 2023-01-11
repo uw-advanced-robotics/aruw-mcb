@@ -342,7 +342,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     nullptr);
 
-aruwsrc::BuzzerSubsystem buzzer(drivers());
+aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
