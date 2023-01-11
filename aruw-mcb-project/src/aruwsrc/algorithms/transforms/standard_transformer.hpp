@@ -26,6 +26,10 @@
 #include "tap/algorithms/transforms/transformer.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
+#include "tap/algorithms/kalman_filter.hpp"
+
+#include "modm/math/geometry/vector3.hpp"
+#include "modm/math/matrix.hpp"
 
 // for odometry
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
@@ -49,7 +53,10 @@ namespace aruwsrc::algorithms
          * @param chassisOdometry odometry used to update transforms
         */
         StandardTransformer
-        (aruwsrc::algorithms::odometry::ChassisKFOdometry& chassisOdometry);
+        (      
+        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        tap::communication::sensors::imu::ImuInterface& chassisImu,
+        tap::communication::sensors::imu::ImuInterface& turretImu);
         
         /**
          * Update each transform with most recent encoder and IMU odometry data. This method
@@ -62,263 +69,182 @@ namespace aruwsrc::algorithms
          * 
          * @returns World to Chassis transform
         */
-        Transform<WorldFrame, ChassisFrame> StandardTransformer::getWorldToChassisTranform();
+        Transform<WorldFrame, ChassisFrame> getWorldToChassisTranform();
 
         /**
          * Get World to Turret transform
          * 
          * @returns World to Turret transform
         */
-        Transform<WorldFrame, TurretFrame> StandardTransformer::getWorldToTurretTranform();
+        Transform<WorldFrame, TurretFrame> getWorldToTurretTranform();
 
         /**
          * Get Chassis to Turret transform
          * 
          * @returns Chassis to Turret transform
         */
-        Transform<ChassisFrame, TurretFrame> StandardTransformer::getChassisToTurretTranform();
+        Transform<ChassisFrame, TurretFrame> getChassisToTurretTranform();
 
         /**
          * Get Chassis to World transform
          * 
          * @returns Chassis to World transform
         */
-        Transform<ChassisFrame, WorldFrame> StandardTransformer::getChassisToWorldTranform();
+        Transform<ChassisFrame, WorldFrame> getChassisToWorldTranform();
         
         /**
          * Get Turret to Chassis transform
          * 
          * @returns Turret to Chassis transform
         */
-        Transform<TurretFrame, ChassisFrame> StandardTransformer::getTurretToChassisTranform();
+        Transform<TurretFrame, ChassisFrame> getTurretToChassisTranform();
      private:
-        aruwsrc::algorithms::odometry::ChassisKFOdometry& privateOdom;
         /**
          * Updates the stored transforms for this cycle
         */
         void updateTransforms();
 
+        /**
+         * Updates the internal odometry so that the values
+         * responsible for transforms are available
+        */
+        void updateOdometry();
+
+        float PLACEHOLDER_VAL = 0.0f;
+
+        // Transforms to take care of 
         Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
         Transform<WorldFrame, TurretFrame> worldToTurretTransform;
         Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
         Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
         Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
+        Transform<TurretFrame, WorldFrame> turretToWorldTransform;
+        Transform<ChassisFrame, TurretPivotFrame> chassisToTurretPivotTransform;
 
-        float PLACEHOLDER_VAL = 0.0f;
+        // References to all devices necessary for tracking odometry
+        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+        tap::communication::sensors::imu::ImuInterface& chassisImu;
+        tap::communication::sensors::imu::ImuInterface& turretImu;
 
+        // kalman filter stuff for keeping track of chassis position
+        enum class OdomState
+        {
+            POS_X = 0,
+            VEL_X,
+            ACC_X,
+            POS_Y,
+            VEL_Y,
+            ACC_Y,
+            POS_Z,
+            VEL_Z,
+            ACC_Z,
+            NUM_STATES,
+        };
+
+        enum class OdomInput
+        {
+            VEL_X = 0,
+            ACC_X,
+            VEL_Y,
+            ACC_Y,
+            VEL_Z,
+            ACC_Z,
+            NUM_INPUTS,
+        };
+
+
+        static constexpr int STATES_SQUARED =
+          static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
+        static constexpr int INPUTS_SQUARED =
+          static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
+        static constexpr int INPUTS_MULT_STATES =
+          static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+            
+        /// Assumed time difference between calls to `update`, in seconds
+        static constexpr float DT = 0.002f;
+        
+        // clang-format off
+        static constexpr float KF_A[STATES_SQUARED] = {
+          1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0, 0,
+          0, 1 , DT           , 0, 0 , 0            , 0, 0, 0,
+          0, 0 , 1            , 0, 0 , 0            , 0, 0, 0,
+          0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0, 0,
+          0, 0 , 0            , 0, 1 , DT           , 0, 0, 0,
+          0, 0 , 0            , 0, 0 , 1            , 0, 0, 0,
+          0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+          0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT,
+          0, 0 , 0            , 0, 0 , 0            , 0, 0, 1,
+        };
+
+        static constexpr float KF_C[INPUTS_MULT_STATES] = {
+          0, 1, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 1, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 1, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 1, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 1,
+        };
+
+        static constexpr float KF_Q[STATES_SQUARED] = {
+          1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+          0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+          0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
+          0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
+          0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
+          0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
+          0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
+          0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
+          0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
+        };
+
+        static constexpr float KF_R[INPUTS_SQUARED] = {
+          1.0, 0  , 0  , 0  , 0  , 0  ,
+          0  , 1.2, 0  , 0  , 0  , 0  ,
+          0  , 0  , 1.0, 0  , 0  , 0  ,
+          0  , 0  , 0  , 1.2, 0  , 0  ,
+          0  , 0  , 0  , 0  , 1.0, 0  ,
+          0  , 0  , 0  , 0  , 0  , 1.2,
+        };
+
+        static constexpr float KF_P0[STATES_SQUARED] = {
+          1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+          0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+          0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+          0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+          0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+          0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+          0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+          0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+          0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+        };
+        // clang-format on
+
+
+        tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+
+        // x,y,z location of chassis in world frame
+        modm::Vector3f chassisWorldPosition;
+
+        // rotation of chassis about x, y, z axes in world frame
+        // (roll, pitch, yaw)
+        modm::Vector3f chassisWorldOrientation;
+
+
+        // is this world frame????????????????????
+        // more specifically: is turret imu data relative
+        // to world frame?
+        // is turret world frame different than chassis world frame
+        //  (seems likely)
+        modm::Vector3f turretWorldOrientation;
+
+        
+
+
+        void updateInternalOdomFromKF();
+
+        void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
     };
 }
 
 
 #endif // STANDARD_TRANFORMER_HPP_
-
-
-
-
-
-
-// #include "tap/motor/dji_motor.hpp"
-// #include "tap/communication/sensors/imu/imu_interface.hpp" // change this probably
-// #include "tap/algorithms/transforms/transformer.hpp"
-// #include "tap/algorithms/transforms/transform.hpp"
-// #include "aruwsrc/algorithms/transforms/frames.hpp"
-// #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
-
-// using namespace tap::algorithms;
-
-// namespace aruwsrc::algorithms
-// {
-
-// /**
-//  * Standard-specific Transformer to handle and update world, chassis, 
-//  * and turret frame transforms.
-//  * 
-//  * @param leftFrontMotor Left front motor
-//  * @param leftBackMotor Left back motor
-//  * @param rightFrontMotor Right front motor
-//  * @param rightBackMotor Right back motor
-//  * @param turretPitchMotor Turret pitch motor
-//  * @param turretYawMotor Turret yaw motor
-//  * @param chassisImu Chassis IMU
-//  * @param turretImu Turret IMU
-// */
-// class StandardTransformer : public Transformer
-// {
-// public:
-//     StandardTransformer::StandardTransformer (
-//         tap::motor::DjiMotor& leftFrontMotor,
-//         tap::motor::DjiMotor& leftBackMotor,
-//         tap::motor::DjiMotor& rightFrontMotor,
-//         tap::motor::DjiMotor& rightBackMotor,
-//         tap::motor::DjiMotor& turretPitchMotor,
-//         tap::motor::DjiMotor& turretYawMotor,
-//         tap::communication::sensors::imu::ImuInterface& chassisImu,
-//         tap::communication::sensors::imu::ImuInterface& turretImu
-//     );
-    
-//     /**
-//      * Get World to Chassis transform
-//      * 
-//      * @returns World to Chassis transform
-//     */
-//     Transform<WorldFrame, ChassisFrame> StandardTransformer::getWorldToChassisTranform();
-
-//     /**
-//      * Get World to Turret transform
-//      * 
-//      * @returns World to Turret transform
-//     */
-//     Transform<WorldFrame, TurretFrame> StandardTransformer::getWorldToTurretTranform();
-
-//     /**
-//      * Get Chassis to Turret transform
-//      * 
-//      * @returns Chassis to Turret transform
-//     */
-//     Transform<ChassisFrame, TurretFrame> StandardTransformer::getChassisToTurretTranform();
-
-//     /**
-//      * Get Chassis to World transform
-//      * 
-//      * @returns Chassis to World transform
-//     */
-//     Transform<ChassisFrame, WorldFrame> StandardTransformer::getChassisToWorldTranform();
-    
-//     /**
-//      * Get Turret to Chassis transform
-//      * 
-//      * @returns Turret to Chassis transform
-//     */
-//     Transform<TurretFrame, ChassisFrame> StandardTransformer::getTurretToChassisTranform();
-
-//     /**
-//      * Update each transform with most recent encoder and IMU odometry data. This method
-//      * should be called every refresh.
-//     */
-//     void StandardTransformer::update();
-
-// private:
-//     // tap::motor::DjiMotor& leftFrontMotor;
-//     // tap::motor::DjiMotor& leftBackMotor;
-//     // tap::motor::DjiMotor& rightFrontMotor;
-//     // tap::motor::DjiMotor& rightBackMotor;
-//     // tap::motor::DjiMotor& turretPitchMotor;
-//     // tap::motor::DjiMotor& turretYawMotor;
-//     // tap::communication::sensors::imu::ImuInterface& chassisImu;
-//     // tap::communication::sensors::imu::ImuInterface& turretImu;
-
-    // Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
-    // Transform<WorldFrame, TurretFrame> worldToTurretTransform;
-    // Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
-    // Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
-    // Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
-
-
-//     // EVENTUALLY:
-//     // have some internal kalman filter that keeps track of:
-//     //  chassis (xyzabc)    (where abc = rotation in 3d)
-//     //  turret  (xyzabc)
-
-//     // FOR NOW:
-//     //  just 2d stuff, wrap around a kfodometry for testing purposes
-//     //  write tests for this
-//     //  Then, move to our own implementation of the same behavior
-//     //  see if it passes the same tests
-//     //  then move to 3d
-//     aruwsrc::algorithms::odometry::ChassisKFOdometry internalOdom;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // enum class OdomStateCartesian 
-// //     {
-// //         POS_X = 0,
-// //         VEL_X,
-// //         ACC_X,
-// //         POS_Y,
-// //         VEL_Y,
-// //         ACC_Y,
-// //         POS_Z,
-// //         VEL_Z,
-// //         ACC_Z,
-// //         NUM_STATES,
-// //     };
-
-// //     enum class OdomInputCartesian
-// //     {
-// //         VEL_X = 0,
-// //         ACC_X,
-// //         VEL_Y,
-// //         ACC_Y,
-// //         VEL_Z,
-// //         ACC_Z,
-// //         NUM_INPUTS
-// //     };
-
-// //     enum class OdomStateRotation 
-// //     {
-// //         THETA_X = 0,
-// //         OMEGA_X,
-// //         ALPHA_X,
-// //         THETA_Y,
-// //         OMEGA_Y,
-// //         ALPHA_Y,
-// //         THETA_Z,
-// //         OMEGA_Z,
-// //         ALPHA_Z,
-// //         NUM_STATES
-// //     };
-
-// //     enum class OdomInputRotation
-// //     {
-// //         THETA_X = 0,
-// //         OMEGA_X,
-// //         THETA_Y,
-// //         OMEGA_Y,
-// //         THETA_Z,
-// //         OMEGA_Z,
-// //         NUM_INPUTS
-// //     };
-
-// //     static constexpr int STATES_SQUARED =
-// //         static_cast<int>(OdomStateCartesian::NUM_STATES) * static_cast<int>(OdomStateCartesian::NUM_STATES);
-// //     static constexpr int INPUTS_SQUARED =
-// //         static_cast<int>(OdomInputCartesian::NUM_INPUTS) * static_cast<int>(OdomInputCartesian::NUM_INPUTS);
-// //     static constexpr int INPUTS_MULT_STATES =
-// //         static_cast<int>(OdomInputCartesian::NUM_INPUTS) * static_cast<int>(OdomStateCartesian::NUM_STATES);
-
-// //     /// Assumed time difference between calls to `update`, in seconds
-// //     static constexpr float DT = 0.002f;
-
-// //     // clang-format off
-// //     static constexpr float KF_A[STATES_SQUARED] = {
-// //         1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
-// //         0, 1 , DT           , 0, 0 , 0            ,
-// //         0, 0 , 1            , 0, 0 , 0            ,
-// //         0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-// //         0, 0 , 0            , 0, 1 , DT           ,
-// //         0, 0 , 0            , 0, 0 , 1            ,
-// //     };
-
-
-// };
-
-// }

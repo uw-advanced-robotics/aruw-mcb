@@ -31,6 +31,8 @@ class ChassisFrame : public tap::algorithms::Frame { } ;
 
 class TurretFrame : public tap::algorithms::Frame { } ;
 
+class TurretPivotFrame : public tap::algorithms::Frame { } ;
+
 }
 
 #endif // TAPROOT_STANDARD_FRAMES_HPP_

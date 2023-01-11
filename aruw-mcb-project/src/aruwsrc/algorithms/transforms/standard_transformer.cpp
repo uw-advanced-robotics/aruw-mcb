@@ -31,105 +31,156 @@
 #include "tap/algorithms/transforms/transform.hpp"
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
 
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
+
+
+// #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms {
 
     StandardTransformer::StandardTransformer
-    (aruwsrc::algorithms::odometry::ChassisKFOdometry& odom) 
-    :privateOdom(odom), 
-    worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    worldToTurretTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    chassisToTurretTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    chassisToWorldTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    turretToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    {   
-        // // update so we have data to construct our transforms with
-        // odom.update();
-        // // now, we have update data
-        // modm::Location2D<float> pos2D = odom.getCurrentLocation2D();
-        // float chassisYaw = odom.getYaw();
+    (
+      const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+      tap::communication::sensors::imu::ImuInterface& chassisImu,
+      tap::communication::sensors::imu::ImuInterface& turretImu
+    ) 
+    :
 
-        // worldToChassisTransform = Transform<WorldFrame, ChassisFrame>(-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, chassisYaw);
-    
-    
-    
+    // ugly hack for since transform has no default constructor
+    // but also allows us to set up any values in static transforms
+    worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    worldToTurretTransform(Transform<WorldFrame, TurretFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    chassisToTurretTransform(Transform<ChassisFrame, TurretFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    turretToChassisTransform(Transform<TurretFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    turretToWorldTransform(Transform<TurretFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // chassisToTurretPivotTransform = static
+    chassisToTurretPivotTransform(Transform<ChassisFrame, TurretPivotFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    chassisSubsystem(chassisSubsystem),
+    chassisImu(chassisImu),
+    turretImu(turretImu),
+    kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
+    {  
+        update();
     }
 
     void StandardTransformer::update() {
-        // first, update odometry
-        privateOdom.update();
-        // then, use that to update transforms
-        this->updateTransforms();
+        // update odometry so it can be used to update
+        updateOdometry();
+        // update transforms with odometry data
+        updateTransforms();
     }
 
-    void updateTransforms() {
+    void StandardTransformer::updateTransforms() {
 
+        // get values necessary for update (in perspective of world frame)
+        // auto chassisWorldPos = getChassisPositionWorldRelative();
+        // auto chassisWorldOrientation = getChassisPitchRollYawWorldRelative();
+        
+        // Since there isn't an easy way to do the rotation matrix computation,
+        // let's just construct a new transform with the 6-float constructor
+        // worldToChassisTransform = Transform<WorldFrame, ChassisFrame>
+        //     (-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL,
+        //       PLACEHOLDER_VAL, PLACEHOLDER_VAL, -chassisYaw);
+
+        worldToChassisTransform = Transform<WorldFrame, ChassisFrame>
+        (-chassisWorldPosition.getX(), -chassisWorldPosition.getY(), -chassisWorldPosition.getZ(),
+         -chassisWorldOrientation.getX(), -chassisWorldOrientation.getY(),-chassisWorldOrientation.getZ());
+        
+        chassisToWorldTransform = worldToChassisTransform.getInverse(worldToChassisTransform);
+
+
+
+        // chassisframe to turret pitch should be completely static
+        
+        // turretpitch to turret should have static position, dynamic
+        // rotation coming from turret imu
+
+        // transforms left to do
+
+        // for turret transforms:
+            // with current odometry, we can't do any turret transforms
+            // chassis -> turret pivot can be static
+            // turret pivot -> end of turret is dynamic only in rotation
+            // chassis -> end of turret is just the composition of those
+        
+            // turret -> camera also static
+            // chassis -> camera = chassis->turret * turret -> camera
+
+            
     }
 
-
-
-
-
-
-
-}
-
-
-// #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
-// #include "tap/algorithms/transforms/transformer.hpp"
-// #include "tap/algorithms/transforms/transform.hpp"
-// #include "aruwsrc/algorithms/transforms/frames.hpp"
-// #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-
-// namespace aruwsrc::algorithms
-// {
-
-// StandardTransformer::StandardTransformer(
-//     tap::motor::DjiMotor& leftFrontMotor,
-//     tap::motor::DjiMotor& leftBackMotor,
-//     tap::motor::DjiMotor& rightFrontMotor,
-//     tap::motor::DjiMotor& rightBackMotor,
-//     tap::motor::DjiMotor& turretPitchMotor,
-//     tap::motor::DjiMotor& turretYawMotor,
-//     tap::communication::sensors::imu::ImuInterface& chassisImu,
-//     tap::communication::sensors::imu::ImuInterface& turretImu,
-//     tap::control::chassis::ChassisSubsystemInterface tempsubsystem
-// ) :
-//     leftFrontMotor(leftFrontMotor), leftBackMotor(leftBackMotor),
-//     rightFrontMotor(rightFrontMotor), rightBackMotor(rightBackMotor),
-//     turretPitchMotor(turretPitchMotor), turretYawMotor(turretYawMotor),
-//     chassisImu(chassisImu), turretImu(turretImu) 
-//     { }
-
-//     Transform<WorldFrame, ChassisFrame> StandardTransformer::getWorldToChassisTranform()
-//     {
-//         return worldToChassisTransform;
-//     }
-
-//     Transform<WorldFrame, TurretFrame> StandardTransformer::getWorldToTurretTranform()
-//     {
-//         return worldToTurretTransform;
-//     }
-
-//     Transform<ChassisFrame, TurretFrame> StandardTransformer::getChassisToTurretTranform()
-//     {
-//         return chassisToTurretTransform;
-//     }
-
-//     Transform<ChassisFrame, WorldFrame> StandardTransformer::getChassisToWorldTranform()
-//     {
-//         return chassisToWorldTransform;
-//     }
+    void StandardTransformer::updateOdometry() {
+      // @todo: look into get to get yaw more confidently later, I'm 
+      // not sure this getYaw() gives world-relative yaw
+      float chassisYaw = chassisImu.getYaw();
     
-//     Transform<TurretFrame, ChassisFrame> StandardTransformer::getTurretToChassisTranform()
-//     {
-//         return turretToChassisTransform;
-//     }
+      // get chassis velocity
+      auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+      // transform chassis velocity to world frame
+      tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
+        chassisVelocity,
+        chassisYaw);
 
-//     void StandardTransformer::update() {
-//         // TODO: implement this
-//     }
+      // upate covariance
+      updateMeasurementCovariance(chassisVelocity);
+      // construct odominput
+      float y[int(OdomInput::NUM_INPUTS)] = {};
+      y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
+      y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+      y[int(OdomInput::VEL_Z)] = chassisVelocity[2][0];
 
-// }
+      y[int(OdomInput::ACC_X)] = chassisImu.getAx();
+      y[int(OdomInput::ACC_Y)] = chassisImu.getAy();
+      y[int(OdomInput::ACC_Z)] = chassisImu.getAz();
+
+      // Rotate acceleration in MCB frame to the world frame
+      // @todo: figure out what to do with z acceleration
+      tap::algorithms::rotateVector(
+        &y[int(OdomInput::ACC_X)],
+        &y[int(OdomInput::ACC_Y)],
+        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+
+      // update kf, a new state matrix will be available following update
+      kf.performUpdate(y);
+
+      // update chassis stored values (for use in location and rotation accessors)
+      updateInternalOdomFromKF();
+    }
+
+    void StandardTransformer::updateInternalOdomFromKF() {
+      const auto& state = kf.getStateVectorAsMatrix();
+
+      // update the store odometry for easy access internally
+      chassisWorldPosition.setX(state[int(OdomState::POS_X)]);
+      chassisWorldPosition.setY(state[int(OdomState::POS_Y)]);
+      chassisWorldPosition.setZ(state[int(OdomState::POS_Z)]);
+
+      // Update chassis orientation
+      // @note: rotation is not tracked by KF, so not 
+      //  sure how orientation is handled
+        //  ask Manoli how rotations are stored in imu: is the 
+        //  is the 0,0,0 orientation the one that the 
+        //  chassis starts with. If so, each imu has 
+        //  a different world frame
+      chassisWorldOrientation.setX(chassisImu.getRoll());
+      chassisWorldOrientation.setY(chassisImu.getPitch());
+      chassisWorldOrientation.setZ(chassisImu.getYaw()
+        + serial::VisionCoprocessor::MCB_ROTATION_OFFSET);
+
+      // update turret orientation
+      turretWorldOrientation.setX(turretImu.getRoll());
+      turretWorldOrientation.setY(turretImu.getPitch());
+      turretWorldOrientation.setZ(turretImu.getYaw());
+    }
+
+    void StandardTransformer::updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity) {
+
+    }
+}
