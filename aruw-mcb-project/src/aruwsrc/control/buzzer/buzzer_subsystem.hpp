@@ -17,14 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+#ifndef BUZZER_SUBSYSTEM_HPP_
+#define BUZZER_SUBSYSTEM_HPP_
+
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/drivers.hpp"
-
-#ifndef BUZZER_SUBSYSTEM_HPP_
-#define BUZZER_SUBSYSTEM_HPP_
 
 namespace aruwsrc::control::buzzer
 {
