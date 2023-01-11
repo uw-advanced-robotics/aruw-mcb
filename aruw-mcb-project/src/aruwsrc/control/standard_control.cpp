@@ -336,7 +336,7 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisImuDriveCommand,
     sentryResponseHandler);
 
-aruwsrc::BuzzerSubsystem buzzer(drivers());
+aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* define command mappings --------------------------------------------------*/

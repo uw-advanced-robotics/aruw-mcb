@@ -23,8 +23,8 @@
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/control/command.hpp"
-#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 #define LOW_BATTERY_THRESHOLD 25000
@@ -34,7 +34,7 @@ namespace aruwsrc::communication
 class LowBatteryBuzzerCommand : public tap::control::Command
 {
 public:
-    LowBatteryBuzzerCommand(aruwsrc::BuzzerSubsystem &buzzer, aruwsrc::Drivers* drivers);
+    LowBatteryBuzzerCommand(aruwsrc::control::buzzer::BuzzerSubsystem& buzzer, aruwsrc::Drivers* drivers);
 
     void initialize() override;
 
@@ -47,7 +47,7 @@ public:
     const char* getName() const override { return "Low battery buzzer command"; }
 
 private:
-    BuzzerSubsystem& buzzer;
+    aruwsrc::control::buzzer::BuzzerSubsystem& buzzer;
     aruwsrc::Drivers* drivers;
 };
 
