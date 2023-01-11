@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "low_Battery_buzzer_command.hpp"
+#include "low_battery_buzzer_command.hpp"
 
 namespace aruwsrc::communication
 {
