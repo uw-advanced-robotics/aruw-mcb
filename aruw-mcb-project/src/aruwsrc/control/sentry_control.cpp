@@ -39,6 +39,7 @@
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -341,7 +342,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     nullptr);
 
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(drivers());
+aruwsrc::BuzzerSubsystem buzzer(drivers());
+aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
@@ -396,6 +398,7 @@ void initializeSubsystems()
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
     sentryResponseSubsystem.initialize();
+    buzzer.initialize();
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -415,6 +418,7 @@ void registerSentrySubsystems(aruwsrc::Drivers *drivers)
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
+    drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
