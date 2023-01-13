@@ -103,17 +103,22 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
-        
-        //delete this
+
+        // delete this
         ballistics::MeasuredKinematicState targetState = {
             .position =
                 {aimData.pva.xPos - turretPosition.x,
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
-            .velocity = {aimData.pva.xVel - chassisVel.x, aimData.pva.yVel - chassisVel.y, aimData.pva.zVel},
+            .velocity =
+                {aimData.pva.xVel - chassisVel.x,
+                 aimData.pva.yVel - chassisVel.y,
+                 aimData.pva.zVel},
             .acceleration =
-                {aimData.pva.xAcc, aimData.pva.yAcc, aimData.pva.zAcc},  // TODO consider using chassis
-                                                             // acceleration from IMU
+                {aimData.pva.xAcc,
+                 aimData.pva.yAcc,
+                 aimData.pva.zAcc},  // TODO consider using chassis
+                                     // acceleration from IMU
         };
 
         // time in microseconds to project the target position ahead by

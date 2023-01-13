@@ -43,11 +43,9 @@ class TurretOrientationInterface;
 }
 
 namespace aruwsrc
-{ 
+{
 namespace serial
 {
-
-    
 /**
  * A class used to communicate with our vision coprocessors. Targets the "Project Otto" vision
  * system (2021-2022).
@@ -96,20 +94,23 @@ public:
         NUM_TAGS = 2,
     };
 
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
+        36,
+        12};  // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
 
-    enum class MessageBits : uint8_t 
+    enum class MessageBits : uint8_t
     {
         TIMESTAMP_BYTES = 3,
-        POSITION_BITS = 48/8, //does not include revolving flag or fire rate
-        TIMING_BITS = 336/8,
+        POSITION_BITS = 48 / 8,  // does not include revolving flag or fire rate
+        TIMING_BITS = 336 / 8,
     };
 
-     /**
+    /**
      * AutoAim data to receive from Jetson.
      */
 
-    struct PositionData {
+    struct PositionData
+    {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -126,7 +127,8 @@ public:
 
     } modm_packed;
 
-    struct TimingData {
+    struct TimingData
+    {
         uint32_t duration;
         uint32_t pulseInterval;
         uint32_t offset;
@@ -134,13 +136,13 @@ public:
         bool updated;
     } modm_packed;
 
-    struct TurretAimData {
+    struct TurretAimData
+    {
         struct PositionData pva;
-        uint32_t timestamp; 
+        uint32_t timestamp;
         FireRate firerate;
         struct TimingData timing;
     } modm_packed;
-    
 
     /**
      * Chassis odometry data to send to Jetson.
@@ -299,8 +301,9 @@ private:
     uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; // this line was the old implementation
-    PositionData lastPvaData[control::turret::NUM_TURRETS] = {}; // new implementation UwU
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] =
+        {};  // this line was the old implementation
+    PositionData lastPvaData[control::turret::NUM_TURRETS] = {};  // new implementation UwU
     TimingData lastTimingData[control::turret::NUM_TURRETS] = {};
 
     // CV online variables.
