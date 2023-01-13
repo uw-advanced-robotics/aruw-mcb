@@ -116,9 +116,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-static constexpr float WHEELBASE_HYPOTENUSE = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-                            ? 1
-                            : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+
 
 #endif
 
