@@ -127,9 +127,9 @@ public:
     } modm_packed;
 
     struct TimingData {
-        float duration;
-        float pulseInterval;
-        float offset;
+        uint32_t duration;
+        uint32_t pulseInterval;
+        uint32_t offset;
 
         bool updated;
     } modm_packed;
