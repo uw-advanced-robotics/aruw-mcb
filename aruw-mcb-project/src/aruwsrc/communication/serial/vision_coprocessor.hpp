@@ -43,7 +43,7 @@ class TurretOrientationInterface;
 }
 
 namespace aruwsrc
-{
+{ 
 namespace serial
 {
 
