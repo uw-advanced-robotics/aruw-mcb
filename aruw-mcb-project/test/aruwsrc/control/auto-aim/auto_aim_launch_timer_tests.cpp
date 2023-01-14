@@ -201,6 +201,7 @@ TEST_P(
         .recommendUseTimedShots{params.aimData.timing.updated},
 
         .pva{
+            .firerate{VisionCoprocessor::FireRate::ZERO},
             .xPos{0},
             .yPos{0},
             .zPos{0},
@@ -216,8 +217,6 @@ TEST_P(
         },
 
         .timestamp{params.aimData.timestamp},
-
-        .firerate{VisionCoprocessor::FireRate::ZERO},
         
         .timing = {
             .duration{params.aimData.timing.duration},
