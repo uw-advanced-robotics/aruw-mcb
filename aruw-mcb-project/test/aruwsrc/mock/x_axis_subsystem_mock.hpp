@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 
 namespace aruwsrc::mock
 {

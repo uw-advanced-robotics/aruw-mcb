@@ -19,7 +19,7 @@
 
 #include "sentry_turret_subsystem.hpp"
 
-#include "constants/turret_constants.hpp"
+#include "../../control/turret/turret_constants.hpp"
 
 namespace aruwsrc::control::turret
 {

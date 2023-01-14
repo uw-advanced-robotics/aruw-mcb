@@ -19,7 +19,7 @@
 
 #include "world_frame_turret_imu_turret_controller.hpp"
 
-#include "../constants/turret_constants.hpp"
+#include "../turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 

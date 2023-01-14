@@ -21,7 +21,7 @@
 
 #include "tap/mock/dji_motor_mock.hpp"
 
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_controller_interface_mock.hpp"

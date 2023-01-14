@@ -20,7 +20,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/engineer/manual_tow_command.hpp"
+#include "aruwsrc/robot/engineer/manual_tow_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 

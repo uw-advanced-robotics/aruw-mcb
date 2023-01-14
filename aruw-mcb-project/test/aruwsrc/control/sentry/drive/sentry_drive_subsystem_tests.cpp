@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 
 using namespace aruwsrc::control::sentry::drive;

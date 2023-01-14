@@ -19,7 +19,7 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
-#include "../constants/turret_constants.hpp"
+#include "../turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
 

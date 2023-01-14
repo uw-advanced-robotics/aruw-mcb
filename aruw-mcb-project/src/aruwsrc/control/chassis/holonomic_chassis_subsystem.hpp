@@ -30,7 +30,7 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
-#include "constants/chassis_constants.hpp"
+#include "chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 

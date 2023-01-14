@@ -22,7 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "chassis/holonomic_chassis_subsystem.hpp"
 

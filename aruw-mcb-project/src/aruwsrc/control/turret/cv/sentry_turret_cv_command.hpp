@@ -25,7 +25,7 @@
 #include "tap/control/subsystem.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
-#include "../constants/turret_constants.hpp"
+#include "../turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 #include "setpoint_scanner.hpp"

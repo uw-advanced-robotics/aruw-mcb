@@ -17,17 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_TURRET_SUBSYSTEM_HPP_
-#define STANDARD_TURRET_SUBSYSTEM_HPP_
+#ifndef HERO_TURRET_SUBSYSTEM_HPP_
+#define HERO_TURRET_SUBSYSTEM_HPP_
 
-#include "robot_turret_subsystem.hpp"
+#include "../../control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
 /**
- * Turret subsystem for the Standard.
+ * Turret subsystem for the Hero.
  */
-class StandardTurretSubsystem final : public RobotTurretSubsystem
+class HeroTurretSubsystem final : public RobotTurretSubsystem
 {
     using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
@@ -35,8 +35,8 @@ class StandardTurretSubsystem final : public RobotTurretSubsystem
     uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
     float getPitchOffset() const override { return 0; };
-};  // class StandardTurretSubsystem
+};  // class HeroTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
 
-#endif  // STANDARD_TURRET_SUBSYSTEM_HPP_
+#endif  // HERO_TURRET_SUBSYSTEM_HPP_

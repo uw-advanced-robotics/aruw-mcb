@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_evade_command.hpp"
+#include "aruwsrc/robot/sentry/drive/sentry_drive_evade_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/sentry_drive_subsystem_mock.hpp"
 

@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/grabber_subsystem.hpp"
+#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
 
 namespace aruwsrc::mock
 {

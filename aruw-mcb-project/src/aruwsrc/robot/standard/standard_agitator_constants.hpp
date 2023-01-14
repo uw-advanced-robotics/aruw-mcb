@@ -17,15 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_BEEHIVE_AGITATOR_CONSTANTS_HPP_
-#define SENTRY_BEEHIVE_AGITATOR_CONSTANTS_HPP_
+#ifndef STANDARD_AGITATOR_CONSTANTS_HPP_
+#define STANDARD_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../velocity_agitator_subsystem_config.hpp"
+#include "../../control/agitator/velocity_agitator_subsystem_config.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
 #ifndef AGITATOR_CONSTANTS_HPP_
@@ -34,40 +35,18 @@
 
 namespace aruwsrc::control::agitator::constants
 {
+// position PID terms
+// PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 3'000.0f,
+    .kp = 5'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 5'000.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = 16'000.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-namespace turret0
-{
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
-    .isAgitatorInverted = false,
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     *
-     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
-     *
-     * This should be positive or else weird behavior can occur
-     */
-    .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
-    .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
-};
-}
-
-namespace turret1
-{
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR7,
@@ -82,10 +61,9 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
-}
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = M_TWOPI / 10.0f,
+    .targetIntegralChange = 1.1f * (M_TWOPI / 10.0f),
     .desiredSetpoint = 2.0f * M_TWOPI,
     .integralSetpointTolerance = M_PI / 20.0f,
 };
@@ -96,15 +74,10 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_U
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.
     .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
-    .targetCycleCount = 2,
+    .targetCycleCount = 3,
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
-
-/// Time in milliseconds to pause launching projectiles when the user requests the projectile
-/// launcher to be paused
-static constexpr uint32_t AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME = 8'000;
-
 }  // namespace aruwsrc::control::agitator::constants
 
-#endif  // SENTRY_AGITATOR_CONSTANTS_HPP_
+#endif  // STANDARD_AGITATOR_CONSTANTS_HPP_

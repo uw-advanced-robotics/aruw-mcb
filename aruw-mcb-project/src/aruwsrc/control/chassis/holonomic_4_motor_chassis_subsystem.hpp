@@ -27,7 +27,7 @@
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 
-#include "constants/chassis_constants.hpp"
+#include "chassis_constants.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 

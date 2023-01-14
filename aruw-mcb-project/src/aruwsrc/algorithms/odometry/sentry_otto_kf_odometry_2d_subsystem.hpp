@@ -24,7 +24,7 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
