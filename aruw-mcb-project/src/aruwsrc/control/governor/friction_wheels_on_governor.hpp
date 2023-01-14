@@ -56,8 +56,7 @@ public:
                    frictionWheel.getDesiredFrictionWheelSpeed() *
                        MINIMUM_SPEED_THRESHOLD_FRACTION &&
                frictionWheel.getCurrentFrictionWheelSpeed() <=
-                   frictionWheel.getDesiredFrictionWheelSpeed() *
-                       MAXIMUM_SPEED_THRESHOLD_FRACTION;
+                   frictionWheel.getDesiredFrictionWheelSpeed() * MAXIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
