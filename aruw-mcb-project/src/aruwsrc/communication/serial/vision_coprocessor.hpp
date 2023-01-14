@@ -88,33 +88,30 @@ public:
 
     enum Tags : uint8_t
     {
-        PVA = 0,
-        TIMING = 1,
+        TARGET_STATE = 0,
+        SHOT_TIMING = 1,
         NUM_TAGS = 2,
     };
 
-    enum messageWidths : uint8_t {
-        FLAGS = 3,
-        TIMESTAMP = 4,
-        FIRERATE = 1,
-        PVA = 37,    //9 floats and 1 byte (from firerate)
-        TIMING = 12,
-    };
-
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {messageWidths::PVA,messageWidths::TIMING}; // indices correspond to Tags
-
-    enum class MessageBits : uint8_t
+    enum messageWidths : uint8_t
     {
-        TIMESTAMP_BYTES = 3,
-        POSITION_BITS = 48 / 8,  // does not include revolving flag or fire rate
-        TIMING_BITS = 336 / 8,
+        FLAGS_BITS = 3,
+        TIMESTAMP_BITS = 4,
+        FIRERATE_BITS = 1,
+        TARGET_DATA_BITS = 37,  // 9 floats and 1 byte (from firerate)
+        SHOT_TIMING_BITS = 12,
     };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
+        messageWidths::TARGET_DATA_BITS,
+        messageWidths::SHOT_TIMING_BITS};  // indices correspond to Tags
 
     /**
      * AutoAim data to receive from Jetson.
      */
 
-    struct PositionData {
+    struct PositionData
+    {
         unsigned char firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
         float xPos;  ///< x position of the target (in m).
@@ -129,24 +126,24 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool updated; ///< whether or not this came from the most recent message
+        bool updated;  ///< whether or not this came from the most recent message
 
     } modm_packed;
 
     struct TimingData
     {
-        uint32_t duration;      ///< duration during which the plate is at the target point
-        uint32_t pulseInterval; ///< time between plate centers transiting the target point
-        uint32_t offset;        ///< estimated microseconds beyond "timestamp" at which our
-                                ///< next shot should ideally hit
+        uint32_t duration;       ///< duration during which the plate is at the target point
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+                                 ///< next shot should ideally hit
 
-        bool updated;           ///< whether or not this came from the most recent message
+        bool updated;  ///< whether or not this came from the most recent message
     } modm_packed;
 
     struct TurretAimData
     {
         struct PositionData pva;
-        uint32_t timestamp;     ///< timestamp in microseconds
+        uint32_t timestamp;  ///< timestamp in microseconds
         struct TimingData timing;
     } modm_packed;
 
@@ -307,7 +304,7 @@ private:
     uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; 
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
     // CV online variables.
     /// Timer for determining if serial is offline.
