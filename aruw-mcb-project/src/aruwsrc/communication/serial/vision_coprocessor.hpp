@@ -21,7 +21,6 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
-//#include <stdint.h>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -102,7 +101,7 @@ public:
         TIMING = 12,
     };
 
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {messageWidths::PVA,messageWidths::TIMING}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {messageWidths::PVA,messageWidths::TIMING}; // indices correspond to Tags
 
     enum class MessageBits : uint8_t
     {
@@ -116,7 +115,7 @@ public:
      */
 
     struct PositionData {
-        unsigned char firerate;
+        unsigned char firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
@@ -130,23 +129,24 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool updated;
+        bool updated; ///< whether or not this came from the most recent message
 
     } modm_packed;
 
     struct TimingData
     {
-        uint32_t duration;
-        uint32_t pulseInterval;
-        uint32_t offset;
+        uint32_t duration;      ///< duration during which the plate is at the target point
+        uint32_t pulseInterval; ///< time between plate centers transiting the target point
+        uint32_t offset;        ///< estimated microseconds beyond "timestamp" at which our
+                                ///< next shot should ideally hit
 
-        bool updated;
+        bool updated;           ///< whether or not this came from the most recent message
     } modm_packed;
 
     struct TurretAimData
     {
         struct PositionData pva;
-        uint32_t timestamp; 
+        uint32_t timestamp;     ///< timestamp in microseconds
         struct TimingData timing;
     } modm_packed;
 
