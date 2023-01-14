@@ -112,7 +112,7 @@ public:
 
     struct PositionData
     {
-        unsigned char firerate;  //.< Firerate of sentry (low 0 - 3 high)
+        FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
