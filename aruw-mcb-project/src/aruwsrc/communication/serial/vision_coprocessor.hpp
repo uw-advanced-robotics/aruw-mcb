@@ -87,6 +87,7 @@ public:
         HIGH = 3,
     };
 
+<<<<<<< HEAD
     static constexpr uint8_t NUM_TAGS = 2;
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36, 12};
 
@@ -95,6 +96,39 @@ public:
      */
     struct positionData
     {
+=======
+    enum Tags : uint8_t
+    {
+        PVA = 0,
+        TIMING = 1,
+        NUM_TAGS = 2,
+    };
+
+    enum messageWidths : uint8_t {
+        FLAGS = 3,
+        TIMESTAMP = 4,
+        FIRERATE = 1,
+        PVA = 37,    //9 floats and 1 byte (from firerate)
+        TIMING = 12,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {messageWidths::PVA,messageWidths::TIMING}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
+
+    enum class MessageBits : uint8_t
+    {
+        TIMESTAMP_BYTES = 3,
+        POSITION_BITS = 48 / 8,  // does not include revolving flag or fire rate
+        TIMING_BITS = 336 / 8,
+    };
+
+    /**
+     * AutoAim data to receive from Jetson.
+     */
+
+    struct PositionData {
+        unsigned char firerate;
+
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -106,8 +140,8 @@ public:
         float xAcc;  ///< x acceleration of the target (in m/s^2).
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
-    };
 
+<<<<<<< HEAD
     struct timingData
     {
         float duration;
@@ -124,6 +158,27 @@ public:
         FireRate firerate;
         struct timingData timing;
     } modm_packed;
+=======
+        bool updated;
+
+    } modm_packed;
+
+    struct TimingData
+    {
+        uint32_t duration;
+        uint32_t pulseInterval;
+        uint32_t offset;
+
+        bool updated;
+    } modm_packed;
+
+    struct TurretAimData
+    {
+        struct PositionData pva;
+        uint32_t timestamp; 
+        struct TimingData timing;
+    } modm_packed;
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
 
     /**
      * Chassis odometry data to send to Jetson.
@@ -202,7 +257,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget;
+            hasTarget |= lastAimData[i].pva.updated;
         }
         return hasTarget;
     }
@@ -212,7 +267,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -282,7 +337,7 @@ private:
     uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; 
 
     // CV online variables.
     /// Timer for determining if serial is offline.

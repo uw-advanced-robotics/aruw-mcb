@@ -60,7 +60,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].hasTarget = 0;
+        this->lastAimData[i].pva.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -106,6 +106,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
+<<<<<<< HEAD
     // isolate tags from message
     const uint8_t* tags = message.data;
     int expectedLength;
@@ -113,12 +114,21 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     for (int i = 0; i < NUM_TAGS; ++i)
     {
         if (tags[i])
+=======
+    int expectedLength;   
+
+    expectedLength += messageWidths::FLAGS + messageWidths::TIMESTAMP;
+    for (int i = 0; i < NUM_TAGS; i++)
+    {
+        if (message.data[i] == 1)
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
         {
             expectedLength += LEN_FIELDS[i];
         }
     }
     if (expectedLength != message.header.dataLength) return false;
 
+<<<<<<< HEAD
     const TurretAimData* dataRef = reinterpret_cast<const TurretAimData*>(&message.data);
 
     for (int i = 0; i < NUM_TAGS; ++i)
@@ -131,9 +141,29 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
                     memcpy(&lastAimData[0].pva, &(dataRef->pva), sizeof(LEN_FIELDS[i]));
                 case 1:
                     memcpy(&lastAimData[0].timing, &(dataRef->timing), sizeof(LEN_FIELDS[i]));
+=======
+    lastAimData[0].pva.updated = 0;
+    lastAimData[0].timing.updated = 0;
+
+    int currIndex = 0;
+    memcpy(&lastAimData[0].timestamp, &message.data[0], messageWidths::TIMESTAMP);
+    currIndex += messageWidths::TIMESTAMP;
+    for (int i = 0; i < NUM_TAGS; ++i) {
+        if (message.data[i] == 1) {
+            switch (i) {
+                case 0:
+                    memcpy(&lastAimData[0].pva, &message.data[currIndex], LEN_FIELDS[i]);  // double check if memcpy doing what it wants
+                    lastAimData[0].pva.updated = 1;
+                case 1:
+                    memcpy(&lastAimData[0].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                    lastAimData[0].timing.updated = 1;
+                    currIndex += LEN_FIELDS[i];
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
             }
+            currIndex += (int)LEN_FIELDS[i];
         }
     }
+    return true;
 }
 
 void VisionCoprocessor::sendMessage()

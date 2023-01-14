@@ -37,12 +37,12 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint8_t turretId)
 {
     auto aimData = this->visionCoprocessor->getLastAimData(turretId);
-    if (!aimData.hasTarget)
+    if (!aimData.pva.updated)
     {
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.recommendUseTimedShots)
+    if (!aimData.timing.updated)
     {
         return LaunchInclination::UNGATED;
     }
