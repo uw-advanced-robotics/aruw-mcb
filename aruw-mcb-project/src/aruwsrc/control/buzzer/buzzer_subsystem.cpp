@@ -17,32 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BEYBLADE_COMMAND_MOCK_HPP_
-#define BEYBLADE_COMMAND_MOCK_HPP_
+#include "buzzer_subsystem.hpp"
 
-#include <gmock/gmock.h>
+#include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/drivers.hpp"
-
-namespace aruwsrc
+namespace aruwsrc::control::buzzer
 {
-namespace mock
-{
-class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
-{
-public:
-    BeybladeCommandMock(
-        aruwsrc::Drivers *drivers,
-        chassis::HolonomicChassisSubsystem *chassis,
-        aruwsrc::control::turret::TurretMotor *yawMotor);
+BuzzerSubsystem::BuzzerSubsystem(aruwsrc::Drivers* drivers) : Subsystem(drivers) {}
 
-    virtual ~BeybladeCommandMock();
+void BuzzerSubsystem::playNoise() { tap::buzzer::playNote(&(drivers->pwm), 440); }
 
-    MOCK_METHOD(void, initialize, (), ());
-    MOCK_METHOD(void, execute, (), ());
-};  // class BeybladeCommandMock
-}  // namespace mock
-}  // namespace aruwsrc
+void BuzzerSubsystem::stop() { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
 
-#endif  // BEYBLADE_COMMAND_MOCK_HPP_
+}  // namespace aruwsrc::control::buzzer
