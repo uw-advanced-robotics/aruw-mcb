@@ -38,9 +38,11 @@
 #include "agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -48,8 +50,9 @@
 #include "chassis/chassis_diagonal_drive_command.hpp"
 #include "chassis/chassis_drive_command.hpp"
 #include "chassis/chassis_imu_drive_command.hpp"
-#include "chassis/chassis_subsystem.hpp"
+#include "chassis/holonomic_chassis_subsystem.hpp"
 #include "chassis/wiggle_drive_command.hpp"
+#include "chassis/x_drive_chassis_subsystem.hpp"
 #include "client-display/client_display_command.hpp"
 #include "client-display/client_display_subsystem.hpp"
 #include "governor/cv_on_target_governor.hpp"
@@ -105,7 +108,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
-ChassisSubsystem chassis(drivers(), ChassisSubsystem::ChassisType::X_DRIVE);
+XDriveChassisSubsystem chassis(drivers());
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -362,6 +365,9 @@ ClientDisplayCommand clientDisplayCommand(
     &chassisImuDriveCommand,
     sentryResponseHandler);
 
+aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
+
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
     drivers(),
@@ -463,6 +469,7 @@ void initializeSubsystems()
     kickerAgitator.initialize();
     waterwheelAgitator.initialize();
     turret.initialize();
+    buzzer.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -476,6 +483,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -499,6 +507,8 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
+
+    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
