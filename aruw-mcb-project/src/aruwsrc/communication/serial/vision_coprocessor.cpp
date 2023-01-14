@@ -106,13 +106,9 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-<<<<<<< HEAD
     int expectedLength;   
 
     expectedLength += messageWidths::FLAGS + messageWidths::TIMESTAMP;
-=======
-    int expectedLength;
->>>>>>> f007b2cfec760a598d8f2949f29b1b218f5904e8
     for (int i = 0; i < NUM_TAGS; i++)
     {
         if (message.data[i] == 1)
@@ -126,25 +122,13 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     lastAimData[0].timing.updated = 0;
 
     int currIndex = 0;
-<<<<<<< HEAD
     memcpy(&lastAimData[0].timestamp, &message.data[0], messageWidths::TIMESTAMP);
     currIndex += messageWidths::TIMESTAMP;
     for (int i = 0; i < NUM_TAGS; ++i) {
         if (message.data[i] == 1) {
             switch (i) {
-=======
-    for (int i = 0; i < NUM_TAGS; ++i)
-    {
-        if (message.data[i] == 1)
-        {
-            switch (i)
-            {
->>>>>>> f007b2cfec760a598d8f2949f29b1b218f5904e8
                 case 0:
-                    memcpy(
-                        &lastAimData[0].pva,
-                        &message.data[currIndex],
-                        LEN_FIELDS[i]);  // double check if memcpy doing what it wants
+                    memcpy(&lastAimData[0].pva, &message.data[currIndex], LEN_FIELDS[i]);  // double check if memcpy doing what it wants
                     lastAimData[0].pva.updated = 1;
                 case 1:
                     memcpy(&lastAimData[0].timing, &message.data[currIndex], LEN_FIELDS[i]);
