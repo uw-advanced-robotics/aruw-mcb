@@ -106,26 +106,31 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    //isolate tags from message
-    const uint8_t * tags = message.data;
+    // isolate tags from message
+    const uint8_t* tags = message.data;
     int expectedLength;
 
-    for (int i = 0; i < NUM_TAGS; ++i) {
-        if (tags[i]) {
+    for (int i = 0; i < NUM_TAGS; ++i)
+    {
+        if (tags[i])
+        {
             expectedLength += LEN_FIELDS[i];
         }
     }
     if (expectedLength != message.header.dataLength) return false;
 
-    const TurretAimData *dataRef = reinterpret_cast<const TurretAimData*>(&message.data);
+    const TurretAimData* dataRef = reinterpret_cast<const TurretAimData*>(&message.data);
 
-    for (int i = 0; i < NUM_TAGS; ++i) {
-        if (tags[i]) {
-            switch (i) {
+    for (int i = 0; i < NUM_TAGS; ++i)
+    {
+        if (tags[i])
+        {
+            switch (i)
+            {
                 case 0:
-                    memcpy(&lastAimData[0].pva, &(dataRef -> pva),sizeof(LEN_FIELDS[i]));
+                    memcpy(&lastAimData[0].pva, &(dataRef->pva), sizeof(LEN_FIELDS[i]));
                 case 1:
-                    memcpy(&lastAimData[0].timing, &(dataRef -> timing),sizeof(LEN_FIELDS[i]));
+                    memcpy(&lastAimData[0].timing, &(dataRef->timing), sizeof(LEN_FIELDS[i]));
             }
         }
     }

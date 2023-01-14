@@ -88,12 +88,13 @@ public:
     };
 
     static constexpr uint8_t NUM_TAGS = 2;
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12};
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36, 12};
 
-     /**
+    /**
      * AutoAim data to receive from Jetson.
      */
-    struct positionData {
+    struct positionData
+    {
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -107,21 +108,22 @@ public:
         float zAcc;  ///< z acceleration of the target (in m/s^2).
     };
 
-    struct timingData {
+    struct timingData
+    {
         float duration;
         float pulseInterval;
         float offset;
     };
 
-    struct TurretAimData {
+    struct TurretAimData
+    {
         uint8_t hasTarget;
         uint8_t recommendUseTimedShots;
         struct positionData pva;
-        uint32_t timestamp; 
+        uint32_t timestamp;
         FireRate firerate;
         struct timingData timing;
     } modm_packed;
-    
 
     /**
      * Chassis odometry data to send to Jetson.
