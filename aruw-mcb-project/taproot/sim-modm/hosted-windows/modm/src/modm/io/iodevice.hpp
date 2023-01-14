@@ -16,7 +16,6 @@
 
 namespace modm
 {
-
 /**
  * Abstract calls of IO devices
  *
@@ -26,29 +25,24 @@ namespace modm
 class IODevice
 {
 public:
-	virtual
-	~IODevice() = default;
+    virtual ~IODevice() = default;
 
-	///	Write a single character
-	virtual void
-	write(char c) = 0;
+    ///	Write a single character
+    virtual void write(char c) = 0;
 
-	/// Write a C-string
-	virtual inline void
-	write(const char* str)
-	{
-		char c;
-		while ( (c = *str++) ) write(c);
-	}
+    /// Write a C-string
+    virtual inline void write(const char* str)
+    {
+        char c;
+        while ((c = *str++)) write(c);
+    }
 
-	virtual void
-	flush() = 0;
+    virtual void flush() = 0;
 
-	/// Read a single character
-	virtual bool
-	read(char& c) = 0;
+    /// Read a single character
+    virtual bool read(char& c) = 0;
 };
 
-}	// namespace modm
+}  // namespace modm
 
-#endif // MODM_IODEVICE_HPP
+#endif  // MODM_IODEVICE_HPP

@@ -17,4 +17,4 @@
 
 #include "debug/logger.hpp"
 
-#endif	// MODM_DEBUG_HPP
+#endif  // MODM_DEBUG_HPP

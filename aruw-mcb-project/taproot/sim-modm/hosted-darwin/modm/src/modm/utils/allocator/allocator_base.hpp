@@ -15,63 +15,59 @@
 #define MODM_ALLOCATOR_ALLOCATOR_BASE_HPP
 
 #include <cstddef>
-#include <new>		// needed for placement new
+#include <new>  // needed for placement new
 
 namespace modm
 {
-	namespace allocator
-	{
-		/**
-		 * \brief	Base class for all allocator types
-		 *
-		 * \internal
-		 *
-		 * \ingroup	modm_utils_allocator
-		 * \author	Fabian Greif
-		 */
-		template <typename T>
-		class AllocatorBase
-		{
-		public:
-			/**
-			 * \brief	Construct an object
-			 *
-			 * Constructs an object of type T (the template parameter) on the
-			 * location pointed by p using its copy constructor to initialize
-			 * its value to \p value.
-			 *
-			 * Notice that this does not allocate space for the element, it
-			 * should already be available at p.
-			 */
-			static inline void
-			construct(T* p, const T& value)
-			{
-				if (p == nullptr) return;
-				// placement new
-				::new((void *) p) T(value);
-			}
+namespace allocator
+{
+/**
+ * \brief	Base class for all allocator types
+ *
+ * \internal
+ *
+ * \ingroup	modm_utils_allocator
+ * \author	Fabian Greif
+ */
+template <typename T>
+class AllocatorBase
+{
+public:
+    /**
+     * \brief	Construct an object
+     *
+     * Constructs an object of type T (the template parameter) on the
+     * location pointed by p using its copy constructor to initialize
+     * its value to \p value.
+     *
+     * Notice that this does not allocate space for the element, it
+     * should already be available at p.
+     */
+    static inline void construct(T* p, const T& value)
+    {
+        if (p == nullptr) return;
+        // placement new
+        ::new ((void*)p) T(value);
+    }
 
-			/**
-			 * \brief	Destroy an object
-			 *
-			 * Destroys the object of type T (the template parameter) pointed
-			 * by p.
-			 *
-			 * Notice that this does not deallocate space for the element.
-			 */
-			static inline void
-			destroy(T* p)
-			{
-				if (p == nullptr) return;
-				p->~T();
-			}
+    /**
+     * \brief	Destroy an object
+     *
+     * Destroys the object of type T (the template parameter) pointed
+     * by p.
+     *
+     * Notice that this does not deallocate space for the element.
+     */
+    static inline void destroy(T* p)
+    {
+        if (p == nullptr) return;
+        p->~T();
+    }
 
-		protected:
-			AllocatorBase()
-			{
-			}
-		};
-	}
-}
+protected:
+    AllocatorBase() {}
+};
+}  // namespace allocator
+}  // namespace modm
 
-#endif // MODM_ALLOCATOR_ALLOCATOR_BASE_HPP
+#endif  // MODM_ALLOCATOR_ALLOCATOR_BASE_HPP

@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_FIXED_WIDTH_5X8_HPP
-#define	MODM_FONT_FIXED_WIDTH_5X8_HPP
+#define MODM_FONT_FIXED_WIDTH_5X8_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Fixed Width 5x8
-		 *
-		 * - fixed width     : 5
-		 * - height          : 8
-		 * - hspace          : 0
-		 * - vspace          : 1
-		 * - first char      : 32
-		 * - last char       : 128
-		 * - number of chars : 96
-		 * - size in bytes   : 584
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t FixedWidth5x8[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Fixed Width 5x8
+ *
+ * - fixed width     : 5
+ * - height          : 8
+ * - hspace          : 0
+ * - vspace          : 1
+ * - first char      : 32
+ * - last char       : 128
+ * - number of chars : 96
+ * - size in bytes   : 584
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t FixedWidth5x8[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_FIXED_WIDTH_5X8_HPP
-
+#endif  // MODM_FONT_FIXED_WIDTH_5X8_HPP

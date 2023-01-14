@@ -16,7 +16,6 @@
 
 namespace modm
 {
-
 /**
  * Basic interface of an ADC.
  *
@@ -52,111 +51,93 @@ class Adc : public ::modm::PeripheralDriver
 {
 #ifdef __DOXYGEN__
 public:
-	/// this type may also be an enum or enum class
-	typedef uint8_t Channel;
+    /// this type may also be an enum or enum class
+    typedef uint8_t Channel;
 
-	/// describes the maximum resolution in bits
-	static constexpr uint8_t Resolution;
+    /// describes the maximum resolution in bits
+    static constexpr uint8_t Resolution;
 
 public:
-	/**
-	 * Configures the input signals and connects them.
-	 *
-	 * @tparam	Signals
-	 *		At least one input signal is required and can be passed out-of-order.
-	 */
-	template< class... Signals >
-	static void
-	connect();
+    /**
+     * Configures the input signals and connects them.
+     *
+     * @tparam	Signals
+     *		At least one input signal is required and can be passed out-of-order.
+     */
+    template <class... Signals>
+    static void connect();
 
-	/**
-	 * Initializes the hardware and sets the datarate.
-	 *
-	 * @tparam	SystemClock
-	 * 		the currently active system clock
-	 * @tparam	frequency
-	 * 		the desired clock frequency in Hz
-	 * @tparam	tolerance
-	 * 		the allowed relative tolerance for the resulting clock frequency
-	 */
-	template< class SystemClock, frequency_t frequency=200_kHz, percent_t tolerance=10_pct >
-	static void
-	initialize();
+    /**
+     * Initializes the hardware and sets the datarate.
+     *
+     * @tparam	SystemClock
+     * 		the currently active system clock
+     * @tparam	frequency
+     * 		the desired clock frequency in Hz
+     * @tparam	tolerance
+     * 		the allowed relative tolerance for the resulting clock frequency
+     */
+    template <class SystemClock, frequency_t frequency = 200_kHz, percent_t tolerance = 10_pct>
+    static void initialize();
 
-	static void
-	disable();
+    static void disable();
 
+    /// starts a conversion on the selected analog channel
+    /// @pre A channel must be selected with setChannel().
+    static void startConversion();
 
-	/// starts a conversion on the selected analog channel
-	/// @pre A channel must be selected with setChannel().
-	static void
-	startConversion();
+    /// @return	`true` if all conversion have finished,
+    ///			`false` otherwise
+    static bool isConversionFinished();
 
-	/// @return	`true` if all conversion have finished,
-	///			`false` otherwise
-	static bool
-	isConversionFinished();
+    /// @return the most recent result of any conversion
+    static uint16_t getValue();
 
-	/// @return the most recent result of any conversion
-	static uint16_t
-	getValue();
+    /**
+     * Convenience function:
+     *
+     * 1. set the channel
+     * 2. starts the conversion
+     * 3. waits until conversion is complete
+     * @return	result of the conversion
+     */
+    static uint16_t readChannel(Channel channel);
 
+    /**
+     * Analog channel selection.
+     *
+     * @return	`true` if the channel exists and was available,
+     *			`false` otherwise
+     */
+    static bool setChannel(Channel channel);
 
-	/**
-	 * Convenience function:
-	 *
-	 * 1. set the channel
-	 * 2. starts the conversion
-	 * 3. waits until conversion is complete
-	 * @return	result of the conversion
-	 */
-	static uint16_t
-	readChannel(Channel channel);
+    /// @return the currently selected analog channel
+    static uint8_t getChannel();
 
+    /**
+     * Enables free running mode
+     *
+     * The ADC will continously start conversions and provide the most
+     * recent result in the ADC register.
+     */
+    static void enableFreeRunningMode();
 
-	/**
-	 * Analog channel selection.
-	 *
-	 * @return	`true` if the channel exists and was available,
-	 *			`false` otherwise
-	 */
-	static bool
-	setChannel(Channel channel);
+    /**
+     * Disables free running mode
+     *
+     * The ADC will do only one sample and stop. The result will be in
+     * the ADC register.
+     */
+    static void disableFreeRunningMode();
 
-	/// @return the currently selected analog channel
-	static uint8_t
-	getChannel();
+    /// Change the presentation of the ADC conversion result to left adjusted.
+    static void setLeftAdjustResult();
 
-
-	/**
-	 * Enables free running mode
-	 *
-	 * The ADC will continously start conversions and provide the most
-	 * recent result in the ADC register.
-	 */
-	static void
-	enableFreeRunningMode();
-
-	/**
-	 * Disables free running mode
-	 *
-	 * The ADC will do only one sample and stop. The result will be in
-	 * the ADC register.
-	 */
-	static void
-	disableFreeRunningMode();
-
-
-	/// Change the presentation of the ADC conversion result to left adjusted.
-	static void
-	setLeftAdjustResult();
-
-	/// Change the presentation of the ADC conversion result to right adjusted.
-	static void
-	setRightAdjustResult();
+    /// Change the presentation of the ADC conversion result to right adjusted.
+    static void setRightAdjustResult();
 #endif
 };
 
-}	// namespace modm
+}  // namespace modm
 
-#endif // MODM_INTERFACE_ADC_HPP
+#endif  // MODM_INTERFACE_ADC_HPP

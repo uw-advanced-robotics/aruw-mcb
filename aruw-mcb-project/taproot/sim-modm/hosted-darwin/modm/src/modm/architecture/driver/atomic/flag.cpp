@@ -14,19 +14,12 @@
 
 #include "flag.hpp"
 
-modm::atomic::Flag::Flag(bool inState) :
-	state(inState)
-{
-}
+modm::atomic::Flag::Flag(bool inState) : state(inState) {}
 
-modm::atomic::Flag::Flag(const Flag& other) :
-	state(other.state)
-{
-}
+modm::atomic::Flag::Flag(const Flag& other) : state(other.state) {}
 
-modm::atomic::Flag&
-modm::atomic::Flag::operator = (const Flag& other)
+modm::atomic::Flag& modm::atomic::Flag::operator=(const Flag& other)
 {
-	this->state = other.state;
-	return *this;
+    this->state = other.state;
+    return *this;
 }

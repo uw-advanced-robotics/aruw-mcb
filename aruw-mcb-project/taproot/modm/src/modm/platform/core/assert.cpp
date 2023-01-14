@@ -10,49 +10,42 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <modm/platform/device.hpp>
 #include <modm/architecture/interface/assert.hpp>
+#include <modm/platform/device.hpp>
 
-using modm::AssertionHandler;
 using modm::Abandonment;
 using modm::AbandonmentBehavior;
+using modm::AssertionHandler;
 
 extern AssertionHandler __assertion_table_start;
 extern AssertionHandler __assertion_table_end;
 extern "C"
 {
+    void modm_assert_report(_modm_assertion_info *cinfo)
+    {
+        auto info = reinterpret_cast<modm::AssertionInfo *>(cinfo);
+        AbandonmentBehavior behavior(info->behavior);
 
-void
-modm_assert_report(_modm_assertion_info *cinfo)
-{
-	auto info = reinterpret_cast<modm::AssertionInfo *>(cinfo);
-	AbandonmentBehavior behavior(info->behavior);
+        for (const AssertionHandler *handler = &__assertion_table_start;
+             handler < &__assertion_table_end;
+             handler++)
+        {
+            behavior |= (*handler)(*info);
+        }
 
-	for (const AssertionHandler *handler = &__assertion_table_start;
-		 handler < &__assertion_table_end; handler++)
-	{
-		behavior |= (*handler)(*info);
-	}
-
-	info->behavior = behavior;
-	behavior.reset(Abandonment::Debug);
-	if ((behavior == Abandonment::DontCare) or
-		(behavior & Abandonment::Fail))
-	{
-		modm_abandon(*info);
-		NVIC_SystemReset();
-	}
-}
+        info->behavior = behavior;
+        behavior.reset(Abandonment::Debug);
+        if ((behavior == Abandonment::DontCare) or (behavior & Abandonment::Fail))
+        {
+            modm_abandon(*info);
+            NVIC_SystemReset();
+        }
+    }
 
 // Mingw64 :facepalm;
 #if defined(__MINGW64__) && !defined(__clang__)
 #define PRIuPTR "I64u"
 #endif
 
-modm_weak
-void modm_abandon(const modm::AssertionInfo &info)
-{
-	(void)info;
-}
-
+    modm_weak void modm_abandon(const modm::AssertionInfo &info) { (void)info; }
 }

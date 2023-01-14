@@ -36,47 +36,29 @@ namespace modm
  * \author	Thomas Sommer
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
+template <int16_t Width, int16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
 class MonochromeGraphicDisplay : public GraphicDisplay
 {
-	static_assert(Width > 0, "width must be greater than 0");
-	static_assert(Height > 0, "height must be greater than 0");
+    static_assert(Width > 0, "width must be greater than 0");
+    static_assert(Height > 0, "height must be greater than 0");
 
 public:
-	virtual ~MonochromeGraphicDisplay() = default;
+    virtual ~MonochromeGraphicDisplay() = default;
 
-	inline uint16_t
-	getWidth() const final
-	{
-		return Width;
-	}
+    inline uint16_t getWidth() const final { return Width; }
 
-	inline uint16_t
-	getHeight() const final
-	{
-		return Height;
-	}
+    inline uint16_t getHeight() const final { return Height; }
 
-	inline std::size_t
-	getBufferWidth() const final
-	{
-		return BufferWidth;
-	}
+    inline std::size_t getBufferWidth() const final { return BufferWidth; }
 
-	inline std::size_t
-	getBufferHeight() const final
-	{
-		return BufferHeight;
-	}
+    inline std::size_t getBufferHeight() const final { return BufferHeight; }
 
-	virtual bool
-	getPixel(int16_t x, int16_t y) const = 0;
+    virtual bool getPixel(int16_t x, int16_t y) const = 0;
 
-	void
-	clear() final;
+    void clear() final;
 
 protected:
-	uint8_t buffer[BufferHeight][BufferWidth];
+    uint8_t buffer[BufferHeight][BufferWidth];
 };
 }  // namespace modm
 

@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_SCRIPTO_NARROW_HPP
-#define	MODM_FONT_SCRIPTO_NARROW_HPP
+#define MODM_FONT_SCRIPTO_NARROW_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Scripto Narrow
-		 *
-		 * - preferred width : 3
-		 * - height          : 7
-		 * - hspace          : 0
-		 * - vspace          : 1
-		 * - first char      : 32
-		 * - last char       : 127
-		 * - number of chars : 95
-		 * - size in bytes   : 382
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t ScriptoNarrow[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Scripto Narrow
+ *
+ * - preferred width : 3
+ * - height          : 7
+ * - hspace          : 0
+ * - vspace          : 1
+ * - first char      : 32
+ * - last char       : 127
+ * - number of chars : 95
+ * - size in bytes   : 382
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t ScriptoNarrow[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_SCRIPTO_NARROW_HPP
-
+#endif  // MODM_FONT_SCRIPTO_NARROW_HPP

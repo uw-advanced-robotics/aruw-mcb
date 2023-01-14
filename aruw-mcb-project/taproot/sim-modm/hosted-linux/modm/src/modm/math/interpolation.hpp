@@ -16,13 +16,13 @@
 
 namespace modm
 {
-	/// @ingroup modm_math_interpolation
-	namespace interpolation
-	{
-	}
+/// @ingroup modm_math_interpolation
+namespace interpolation
+{
 }
+}  // namespace modm
 
-#include "interpolation/linear.hpp"
 #include "interpolation/lagrange.hpp"
+#include "interpolation/linear.hpp"
 
-#endif	// MODM_INTERPOLATION_HPP
+#endif  // MODM_INTERPOLATION_HPP

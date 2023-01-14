@@ -13,99 +13,85 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_COMMUNICATOR_HPP
-#define	XPCC_COMMUNICATOR_HPP
+#ifndef XPCC_COMMUNICATOR_HPP
+#define XPCC_COMMUNICATOR_HPP
 
 #include <stdint.h>
 
 #include "communicatable.hpp"
+#include "dispatcher.hpp"
 #include "response_callback.hpp"
 #include "response_handle.hpp"
-#include "dispatcher.hpp"
 
 namespace xpcc
 {
-	/**
-	 * \brief	A adapter class which can be obtained from a AbstractComponent.
-	 *
-	 * Use it to enable communication for a group of classes. The component
-	 * identifier will be taken from the AbstractComponent.
-	 *
-	 * This class is just a forwarder to the Dispatcher like AbstractComponent
-	 * it also does.
-	 *
-	 * \ingroup	modm_communication_xpcc
-	 */
-	class Communicator : public Communicatable
-	{
-		friend class AbstractComponent;
+/**
+ * \brief	A adapter class which can be obtained from a AbstractComponent.
+ *
+ * Use it to enable communication for a group of classes. The component
+ * identifier will be taken from the AbstractComponent.
+ *
+ * This class is just a forwarder to the Dispatcher like AbstractComponent
+ * it also does.
+ *
+ * \ingroup	modm_communication_xpcc
+ */
+class Communicator : public Communicatable
+{
+    friend class AbstractComponent;
 
-	private:
-		/**
-		 * \brief	Constructor
-		 *
-		 * \param	ownIdentifier	Identifier of the component, must be unique
-		 * 							within the network.
-		 * \param	dispatcher		Communication class use to send messages
-		 */
-		Communicator(const uint8_t ownIdentifier,
-				Dispatcher &dispatcher);
+private:
+    /**
+     * \brief	Constructor
+     *
+     * \param	ownIdentifier	Identifier of the component, must be unique
+     * 							within the network.
+     * \param	dispatcher		Communication class use to send messages
+     */
+    Communicator(const uint8_t ownIdentifier, Dispatcher& dispatcher);
 
-		Communicator(const Communicator&);
+    Communicator(const Communicator&);
 
-		Communicator&
-		operator = (const Communicator&);
+    Communicator& operator=(const Communicator&);
 
-	public:
-		inline uint8_t
-		getIdentifier() const
-		{
-			return this->ownIdentifier;
-		}
+public:
+    inline uint8_t getIdentifier() const { return this->ownIdentifier; }
 
-		void
-		callAction(uint8_t receiver, uint8_t actionIdentifier);
+    void callAction(uint8_t receiver, uint8_t actionIdentifier);
 
-		void
-		callAction(uint8_t receiver, uint8_t actionIdentifier, ResponseCallback& responseCallback);
+    void callAction(uint8_t receiver, uint8_t actionIdentifier, ResponseCallback& responseCallback);
 
-		template<typename T>
-		void
-		callAction(uint8_t receiver, uint8_t actionIdentifier, const T& data);
+    template <typename T>
+    void callAction(uint8_t receiver, uint8_t actionIdentifier, const T& data);
 
-		template<typename T>
-		void
-		callAction(uint8_t receiver, uint8_t actionIdentifier, const T& data, ResponseCallback& responseCallback);
+    template <typename T>
+    void callAction(
+        uint8_t receiver,
+        uint8_t actionIdentifier,
+        const T& data,
+        ResponseCallback& responseCallback);
 
+    void publishEvent(uint8_t eventIdentifier);
 
-		void
-		publishEvent(uint8_t eventIdentifier);
+    template <typename T>
+    void publishEvent(uint8_t eventIdentifier, const T& data);
 
-		template<typename T>
-		void
-		publishEvent(uint8_t eventIdentifier, const T& data);
+    void sendResponse(const ResponseHandle& handle);
 
+    template <typename T>
+    void sendResponse(const ResponseHandle& handle, const T& data);
 
-		void
-		sendResponse(const ResponseHandle& handle);
+    template <typename T>
+    void sendNegativeResponse(const ResponseHandle& handle, const T& data);
 
-		template<typename T>
-		void
-		sendResponse(const ResponseHandle& handle, const T& data);
+    void sendNegativeResponse(const ResponseHandle& handle);
 
-		template<typename T>
-		void
-		sendNegativeResponse(const ResponseHandle& handle, const T& data);
-
-		void
-		sendNegativeResponse(const ResponseHandle& handle);
-
-	private:
-		const uint8_t ownIdentifier;
-		Dispatcher & dispatcher;
-	};
-}
+private:
+    const uint8_t ownIdentifier;
+    Dispatcher& dispatcher;
+};
+}  // namespace xpcc
 
 #include "communicator_impl.hpp"
 
-#endif // XPCC_COMMUNICATOR_HPP
+#endif  // XPCC_COMMUNICATOR_HPP

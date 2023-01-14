@@ -11,15 +11,10 @@
 // ----------------------------------------------------------------------------
 
 #include "container/deque.hpp"
-#include "container/queue.hpp"
-#include "container/stack.hpp"
-
-#include "container/linked_list.hpp"
 #include "container/doubly_linked_list.hpp"
-
 #include "container/dynamic_array.hpp"
-
+#include "container/linked_list.hpp"
 #include "container/pair.hpp"
+#include "container/queue.hpp"
 #include "container/smart_pointer.hpp"
-
-
+#include "container/stack.hpp"

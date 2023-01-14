@@ -15,95 +15,101 @@
 #ifndef MODM_PID_IMPL_HPP
 #define MODM_PID_IMPL_HPP
 
-template<typename T, unsigned int ScaleFactor>
+template <typename T, unsigned int ScaleFactor>
 modm::Pid<T, ScaleFactor>::Parameter::Parameter(
-		const float& kp, const float& ki, const float& kd,
-		const T& maxErrorSum, const T& maxOutput) :
-	kp(static_cast<T>(kp * ScaleFactor)),
-	ki(static_cast<T>(ki * ScaleFactor)),
-	kd(static_cast<T>(kd * ScaleFactor)),
-	maxErrorSum(static_cast<T>(maxErrorSum * ScaleFactor)),
-	maxOutput(maxOutput)
+    const float& kp,
+    const float& ki,
+    const float& kd,
+    const T& maxErrorSum,
+    const T& maxOutput)
+    : kp(static_cast<T>(kp * ScaleFactor)),
+      ki(static_cast<T>(ki * ScaleFactor)),
+      kd(static_cast<T>(kd * ScaleFactor)),
+      maxErrorSum(static_cast<T>(maxErrorSum * ScaleFactor)),
+      maxOutput(maxOutput)
 {
 }
 
 // -----------------------------------------------------------------------------
-template<typename T, unsigned int ScaleFactor>
+template <typename T, unsigned int ScaleFactor>
 modm::Pid<T, ScaleFactor>::Pid(
-		const float& kp, const float& ki, const float& kd,
-		const T& maxErrorSum, const T& maxOutput) :
-	parameter(kp, ki, kd, maxErrorSum, maxOutput)
+    const float& kp,
+    const float& ki,
+    const float& kd,
+    const T& maxErrorSum,
+    const T& maxOutput)
+    : parameter(kp, ki, kd, maxErrorSum, maxOutput)
 {
-	this->reset();
+    this->reset();
 }
 
 // -----------------------------------------------------------------------------
-template<typename T, unsigned int ScaleFactor>
-modm::Pid<T, ScaleFactor>::Pid(
-		Parameter& parameter) :
-	parameter(parameter)
+template <typename T, unsigned int ScaleFactor>
+modm::Pid<T, ScaleFactor>::Pid(Parameter& parameter) : parameter(parameter)
 {
-	this->reset();
+    this->reset();
 }
 
-template<typename T, unsigned int ScaleFactor>
-void
-modm::Pid<T, ScaleFactor>::reset()
+template <typename T, unsigned int ScaleFactor>
+void modm::Pid<T, ScaleFactor>::reset()
 {
-	this->errorSum = 0;
-	this->lastError = 0;
-	this->output = 0;
+    this->errorSum = 0;
+    this->lastError = 0;
+    this->output = 0;
 }
 
-template<typename T, unsigned int ScaleFactor>
-void
-modm::Pid<T, ScaleFactor>::setParameter(const Parameter& parameter)
+template <typename T, unsigned int ScaleFactor>
+void modm::Pid<T, ScaleFactor>::setParameter(const Parameter& parameter)
 {
-	this->parameter = parameter;
+    this->parameter = parameter;
 }
 
-template<typename T, unsigned int ScaleFactor>
-void
-modm::Pid<T, ScaleFactor>::update(const T& input, bool externalLimitation)
+template <typename T, unsigned int ScaleFactor>
+void modm::Pid<T, ScaleFactor>::update(const T& input, bool externalLimitation)
 {
-	bool limitation = externalLimitation;
+    bool limitation = externalLimitation;
 
-	T tempErrorSum = errorSum + input;
-	if (tempErrorSum > this->parameter.maxErrorSum) {
-		tempErrorSum = this->parameter.maxErrorSum;
-	}
-	else if (tempErrorSum < -this->parameter.maxErrorSum) {
-		tempErrorSum = -this->parameter.maxErrorSum;
-	}
+    T tempErrorSum = errorSum + input;
+    if (tempErrorSum > this->parameter.maxErrorSum)
+    {
+        tempErrorSum = this->parameter.maxErrorSum;
+    }
+    else if (tempErrorSum < -this->parameter.maxErrorSum)
+    {
+        tempErrorSum = -this->parameter.maxErrorSum;
+    }
 
-	WideType tmp = 0;
-	tmp += static_cast<WideType>(this->parameter.kp) * input;
-	tmp += static_cast<WideType>(this->parameter.ki) * (tempErrorSum);
-	tmp += static_cast<WideType>(this->parameter.kd) * (input - this->lastError);
+    WideType tmp = 0;
+    tmp += static_cast<WideType>(this->parameter.kp) * input;
+    tmp += static_cast<WideType>(this->parameter.ki) * (tempErrorSum);
+    tmp += static_cast<WideType>(this->parameter.kd) * (input - this->lastError);
 
-	tmp = tmp / ScaleFactor;
+    tmp = tmp / ScaleFactor;
 
-	if (tmp > this->parameter.maxOutput) {
-		this->output = this->parameter.maxOutput;
-		limitation = true;
-	}
-	else if (tmp < -this->parameter.maxOutput) {
-		this->output = -this->parameter.maxOutput;
-		limitation = true;
-	}
-	else {
-		this->output = tmp;
-	}
+    if (tmp > this->parameter.maxOutput)
+    {
+        this->output = this->parameter.maxOutput;
+        limitation = true;
+    }
+    else if (tmp < -this->parameter.maxOutput)
+    {
+        this->output = -this->parameter.maxOutput;
+        limitation = true;
+    }
+    else
+    {
+        this->output = tmp;
+    }
 
-	// If an external limitation (saturation somewhere in the control loop) is
-	// applied the error sum will only be decremented, never incremented.
-	// This is done to help the system to leave the saturated state.
-	if (not limitation or (std::abs(tempErrorSum) < std::abs(this->errorSum)))
-	{
-		this->errorSum = tempErrorSum;
-	}
+    // If an external limitation (saturation somewhere in the control loop) is
+    // applied the error sum will only be decremented, never incremented.
+    // This is done to help the system to leave the saturated state.
+    if (not limitation or (std::abs(tempErrorSum) < std::abs(this->errorSum)))
+    {
+        this->errorSum = tempErrorSum;
+    }
 
-	this->lastError = input;
+    this->lastError = input;
 }
 
-#endif // MODM_PID_IMPL_HPP
+#endif  // MODM_PID_IMPL_HPP

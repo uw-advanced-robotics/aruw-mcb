@@ -15,26 +15,25 @@
 // ----------------------------------------------------------------------------
 
 #pragma once
-#include "timestamp.hpp"
-#include <modm/math/utils/arithmetic_traits.hpp>
-#include <modm/architecture/interface/clock.hpp>
 #include <modm/architecture/interface/assert.hpp>
+#include <modm/architecture/interface/clock.hpp>
+#include <modm/math/utils/arithmetic_traits.hpp>
+
+#include "timestamp.hpp"
 
 namespace modm
 {
-
 /// Possible states of a timeout
 /// @ingroup	modm_processing_timer
-enum class
-TimerState : uint8_t
+enum class TimerState : uint8_t
 {
-	Stopped = 0b001,
-	Expired = 0b010,
-	Armed   = 0b100,
+    Stopped = 0b001,
+    Expired = 0b010,
+    Armed = 0b100,
 };
 
 // forward declaration for friending
-template< class Clock, class Duration >
+template <class Clock, class Duration>
 class GenericPeriodicTimer;
 
 /**
@@ -51,97 +50,88 @@ class GenericPeriodicTimer;
  * @author	Niklas Hauser
  * @ingroup	modm_processing_timer
  */
-template< class Clock, class Duration >
+template <class Clock, class Duration>
 class GenericTimeout
 {
 public:
-	using clock = Clock;
-	using period = typename Duration::period;
-	using rep = typename Duration::rep;
-	using time_point = std::chrono::time_point<Clock, Duration>;
-	using duration = Duration;
-	using wide_signed_duration = std::chrono::duration<
-							modm::WideType<std::make_signed_t<rep>>, period>;
+    using clock = Clock;
+    using period = typename Duration::period;
+    using rep = typename Duration::rep;
+    using time_point = std::chrono::time_point<Clock, Duration>;
+    using duration = Duration;
+    using wide_signed_duration =
+        std::chrono::duration<modm::WideType<std::make_signed_t<rep>>, period>;
 
-	/// Create a stopped timeout
-	GenericTimeout() = default;
+    /// Create a stopped timeout
+    GenericTimeout() = default;
 
-	/// Create and start the timeout
-	template< typename Rep, typename Period >
-	GenericTimeout(std::chrono::duration<Rep, Period> interval);
+    /// Create and start the timeout
+    template <typename Rep, typename Period>
+    GenericTimeout(std::chrono::duration<Rep, Period> interval);
 
-	/// Restart the timer with the current timeout.
-	void restart();
-	/// Set a new timeout value.
-	template< typename Rep, typename Period >
-	void restart(std::chrono::duration<Rep, Period> interval);
+    /// Restart the timer with the current timeout.
+    void restart();
+    /// Set a new timeout value.
+    template <typename Rep, typename Period>
+    void restart(std::chrono::duration<Rep, Period> interval);
 
-	/// Stops the timer and sets isStopped() to `true`, and isExpired() to `false`.
-	void
-	stop();
+    /// Stops the timer and sets isStopped() to `true`, and isExpired() to `false`.
+    void stop();
 
-	/// @return the time until (positive time) or since (negative time) expiration, or 0 if stopped
-	wide_signed_duration
-	remaining() const;
+    /// @return the time until (positive time) or since (negative time) expiration, or 0 if stopped
+    wide_signed_duration remaining() const;
 
-	/// @return the currently set interval
-	duration
-	interval() const;
+    /// @return the currently set interval
+    duration interval() const;
 
-	/// @return the current state of the timeout
-	TimerState
-	state() const;
+    /// @return the current state of the timeout
+    TimerState state() const;
 
-	/// @return `true` if the timeout is stopped, `false` otherwise
-	bool
-	isStopped() const;
+    /// @return `true` if the timeout is stopped, `false` otherwise
+    bool isStopped() const;
 
-	/// @return `true` if the timeout has expired, `false` otherwise
-	bool
-	isExpired() const;
+    /// @return `true` if the timeout has expired, `false` otherwise
+    bool isExpired() const;
 
-	/// @return `true` if the timeout is armed (not stopped and not expired), `false` otherwise
-	bool
-	isArmed() const;
+    /// @return `true` if the timeout is armed (not stopped and not expired), `false` otherwise
+    bool isArmed() const;
 
-	/// @return `true` exactly once, after the timeout expired
-	bool
-	execute();
+    /// @return `true` exactly once, after the timeout expired
+    bool execute();
 
-	/// @cond
-	[[deprecated("Use `std::chrono::{milli,micro}seconds` for interval instead!")]]
-	GenericTimeout(rep interval) :
-		GenericTimeout(duration(interval)) {}
-	[[deprecated("Use `std::chrono::{milli,micro}seconds` for interval instead!")]]
-	void restart(rep interval)
-	{ restart(duration(interval)); }
-	[[deprecated("Use `Timeout.state()` instead!")]]
-	TimerState getState() const { return state(); }
-	/// @endcond
+    /// @cond
+    [[deprecated("Use `std::chrono::{milli,micro}seconds` for interval instead!")]] GenericTimeout(
+        rep interval)
+        : GenericTimeout(duration(interval))
+    {
+    }
+    [[deprecated("Use `std::chrono::{milli,micro}seconds` for interval instead!")]] void restart(
+        rep interval)
+    {
+        restart(duration(interval));
+    }
+    [[deprecated("Use `Timeout.state()` instead!")]] TimerState getState() const { return state(); }
+    /// @endcond
 
 protected:
-	bool
-	checkExpiration() const;
+    bool checkExpiration() const;
 
-	time_point
-	now() const;
+    time_point now() const;
 
-	enum
-	InternalState : uint8_t
-	{
-		STOPPED  = int(TimerState::Stopped),
-		EXPIRED  = int(TimerState::Expired),
-		ARMED    = int(TimerState::Armed),
-		EXECUTED = 0b1000,
-		STATUS_MASK = (EXPIRED | ARMED | STOPPED)
-	};
+    enum InternalState : uint8_t
+    {
+        STOPPED = int(TimerState::Stopped),
+        EXPIRED = int(TimerState::Expired),
+        ARMED = int(TimerState::Armed),
+        EXECUTED = 0b1000,
+        STATUS_MASK = (EXPIRED | ARMED | STOPPED)
+    };
 
-	time_point _start{duration{0}};
-	duration _interval{0};
-	mutable uint8_t _state{STOPPED};
+    time_point _start{duration{0}};
+    duration _interval{0};
+    mutable uint8_t _state{STOPPED};
 
-	friend class
-	GenericPeriodicTimer<Clock, Duration>;
+    friend class GenericPeriodicTimer<Clock, Duration>;
 };
 
 /**
@@ -157,24 +147,24 @@ protected:
  *
  * @ingroup		modm_processing_timer
  */
-using        ShortTimeout = GenericTimeout< Clock, ShortDuration >;
+using ShortTimeout = GenericTimeout<Clock, ShortDuration>;
 
 /// Software timeout for up to 49 days with millisecond resolution.
 /// @ingroup	modm_processing_timer
-using             Timeout = GenericTimeout< Clock, Duration >;
+using Timeout = GenericTimeout<Clock, Duration>;
 
 /// Software timeout for up to 65 milliseconds with microsecond resolution.
 /// @ingroup	modm_processing_timer
-using ShortPreciseTimeout = GenericTimeout< PreciseClock, ShortPreciseDuration >;
+using ShortPreciseTimeout = GenericTimeout<PreciseClock, ShortPreciseDuration>;
 
 /// Software timeout for up to 71 minutes with microsecond resolution.
 /// @ingroup	modm_processing_timer
-using      PreciseTimeout = GenericTimeout< PreciseClock, PreciseDuration >;
+using PreciseTimeout = GenericTimeout<PreciseClock, PreciseDuration>;
 
 /// @cond
 using TimeoutState [[deprecated("Use `modm::TimerState` instead!")]] = TimerState;
 /// @endcond
 
-}	// namespace modm
+}  // namespace modm
 
 #include "timeout_impl.hpp"

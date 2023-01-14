@@ -14,76 +14,71 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_MOVING_AVERAGE_HPP
-	#error	"Don't include this file directly, use 'moving_average.hpp' instead!"
+#error "Don't include this file directly, use 'moving_average.hpp' instead!"
 #endif
 
 namespace modm
 {
-	namespace filter{
-		template<std::size_t N>
-		class MovingAverage<double, N >
-		{
-		private:
-			using Index = std::conditional_t<
-				(N >= 256),
-				uint_fast16_t,
-				uint_fast8_t
-			>;
-
-		public:
-
-			MovingAverage(const double& initialValue = 0);
-
-			/// Append new value
-			void
-			update(const double& input);
-
-			/// Get filtered value
-			double
-			getValue() const;
-
-		private:
-			Index index;
-			double buffer[N];
-			double sum;
-		};
-	}
-}
-
-//---------------------------------------------------------------------------------
-
-template<std::size_t N>
-modm::filter::MovingAverage<double, N>::MovingAverage(const double& initialValue) :
-	index(0), sum(N * initialValue)
+namespace filter
 {
-	for (Index i = 0; i < N; ++i) {
-		buffer[i] = initialValue;
-	}
-}
+template <std::size_t N>
+class MovingAverage<double, N>
+{
+private:
+    using Index = std::conditional_t<(N >= 256), uint_fast16_t, uint_fast8_t>;
 
+public:
+    MovingAverage(const double& initialValue = 0);
+
+    /// Append new value
+    void update(const double& input);
+
+    /// Get filtered value
+    double getValue() const;
+
+private:
+    Index index;
+    double buffer[N];
+    double sum;
+};
+}  // namespace filter
+}  // namespace modm
 
 //---------------------------------------------------------------------------------
-template<std::size_t N>
-void
-modm::filter::MovingAverage<double, N>::update(const double& input){
-	buffer[index] = input;
 
-	index++;
-	if (index >= N) {
-		index = 0;
-	}
+template <std::size_t N>
+modm::filter::MovingAverage<double, N>::MovingAverage(const double& initialValue)
+    : index(0),
+      sum(N * initialValue)
+{
+    for (Index i = 0; i < N; ++i)
+    {
+        buffer[i] = initialValue;
+    }
+}
 
-	sum = 0;
-	for (Index i = 0; i < N; ++i) {
-		sum+= buffer[i];
-	}
+//---------------------------------------------------------------------------------
+template <std::size_t N>
+void modm::filter::MovingAverage<double, N>::update(const double& input)
+{
+    buffer[index] = input;
 
+    index++;
+    if (index >= N)
+    {
+        index = 0;
+    }
+
+    sum = 0;
+    for (Index i = 0; i < N; ++i)
+    {
+        sum += buffer[i];
+    }
 }
 
 // ------------------------------------------------------------------------------
-template<std::size_t N>
-double
-modm::filter::MovingAverage<double, N>::getValue() const
+template <std::size_t N>
+double modm::filter::MovingAverage<double, N>::getValue() const
 {
-	return (sum / N);
+    return (sum / N);
 }

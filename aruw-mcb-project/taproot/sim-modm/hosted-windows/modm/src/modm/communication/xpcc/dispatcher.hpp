@@ -15,11 +15,11 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_DISPATCHER_HPP
-#define	XPCC_DISPATCHER_HPP
+#ifndef XPCC_DISPATCHER_HPP
+#define XPCC_DISPATCHER_HPP
 
-#include <modm/processing/timer.hpp>
 #include <modm/container/linked_list.hpp>
+#include <modm/processing/timer.hpp>
 
 #include "backend/backend_interface.hpp"
 #include "postman/postman.hpp"
@@ -28,143 +28,134 @@
 
 namespace xpcc
 {
-	/**
-	 * \brief
-	 *
-	 * \todo	Documentation
-	 *
-	 * \author	Georgi Grinshpun
-	 * \ingroup	modm_communication_xpcc
-	 */
-	class Dispatcher
-	{
-	public:
-		static constexpr std::chrono::milliseconds acknowledgeTimeout{ 100 };
-		static constexpr std::chrono::milliseconds responseTimeout{ 200 };
+/**
+ * \brief
+ *
+ * \todo	Documentation
+ *
+ * \author	Georgi Grinshpun
+ * \ingroup	modm_communication_xpcc
+ */
+class Dispatcher
+{
+public:
+    static constexpr std::chrono::milliseconds acknowledgeTimeout{100};
+    static constexpr std::chrono::milliseconds responseTimeout{200};
 
-	public:
-		Dispatcher(BackendInterface *backend, Postman* postman);
+public:
+    Dispatcher(BackendInterface* backend, Postman* postman);
 
-		void
-		update();
+    void update();
 
-	private:
-		/// Does not handle requests which are not acknowledge.
-		bool
-		handlePacket(const Header& header, const modm::SmartPointer& payload);
+private:
+    /// Does not handle requests which are not acknowledge.
+    bool handlePacket(const Header& header, const modm::SmartPointer& payload);
 
-		/// Sends messages which are waiting in the list.
-		void
-		handleWaitingMessages();
+    /// Sends messages which are waiting in the list.
+    void handleWaitingMessages();
 
-		/**
-		 * \brief 	This class holds information about a Message being send.
-		 * 			This is the superclass of all entries.
-		 */
-		class Entry
-		{
-		public:
-			enum class Type
-			{
-				Default,
-				Callback,
-			};
+    /**
+     * \brief 	This class holds information about a Message being send.
+     * 			This is the superclass of all entries.
+     */
+    class Entry
+    {
+    public:
+        enum class Type
+        {
+            Default,
+            Callback,
+        };
 
-			/// Communication info, state of sending and retrieving messages and acks.
-			enum State
-			{
-				TransmissionPending,
-				WaitForACK,
-				WaitForResponse,
-			};
+        /// Communication info, state of sending and retrieving messages and acks.
+        enum State
+        {
+            TransmissionPending,
+            WaitForACK,
+            WaitForResponse,
+        };
 
-		public:
-			/**
-			 * \brief 	Creates one Entry with given header.
-			 * 			this->next is initially set Null
-			 *
-			 * Creates one Entry with given header. this->next is initially
-			 * set Null. The const member this->typeInfo is set to typeInfo
-			 * and never else changed. this->typeInfo replaces runtime
-			 * information needed by handling of messages.
-			 */
-			Entry(Type type, const Header& inHeader, modm::SmartPointer& inPayload) :
-				type(type),
-				header(inHeader), payload(inPayload)
-			{
-			}
+    public:
+        /**
+         * \brief 	Creates one Entry with given header.
+         * 			this->next is initially set Null
+         *
+         * Creates one Entry with given header. this->next is initially
+         * set Null. The const member this->typeInfo is set to typeInfo
+         * and never else changed. this->typeInfo replaces runtime
+         * information needed by handling of messages.
+         */
+        Entry(Type type, const Header& inHeader, modm::SmartPointer& inPayload)
+            : type(type),
+              header(inHeader),
+              payload(inPayload)
+        {
+        }
 
-			Entry(const Header& inHeader, modm::SmartPointer& inPayload) :
-				header(inHeader), payload(inPayload)
-			{
-			}
+        Entry(const Header& inHeader, modm::SmartPointer& inPayload)
+            : header(inHeader),
+              payload(inPayload)
+        {
+        }
 
-			Entry(const Header& inHeader) :
-				header(inHeader)
-			{
-			}
+        Entry(const Header& inHeader) : header(inHeader) {}
 
-			Entry(const Header& inHeader,
-					modm::SmartPointer& inPayload, ResponseCallback& callback_) :
-				type(Type::Callback),
-				header(inHeader), payload(inPayload),
-				callback(callback_)
-			{
-			}
+        Entry(const Header& inHeader, modm::SmartPointer& inPayload, ResponseCallback& callback_)
+            : type(Type::Callback),
+              header(inHeader),
+              payload(inPayload),
+              callback(callback_)
+        {
+        }
 
-			/**
-			 * \brief 	Checks if a Response or Acknowledge fits to the
-			 * 			Message represented by this Entry.
-			 */
-			bool
-			headerFits(const Header& header) const;
+        /**
+         * \brief 	Checks if a Response or Acknowledge fits to the
+         * 			Message represented by this Entry.
+         */
+        bool headerFits(const Header& header) const;
 
-			inline void
-			callbackResponse(const Header& header, const modm::SmartPointer &payload) const
-			{
-				this->callback.call(header, payload);
-			}
+        inline void callbackResponse(const Header& header, const modm::SmartPointer& payload) const
+        {
+            this->callback.call(header, payload);
+        }
 
-			const Type type = Type::Default;
-			const Header header;
-			const modm::SmartPointer payload;
-			State state = State::TransmissionPending;
-			modm::ShortTimeout time;
-			uint8_t tries = 0;
-		private:
-			ResponseCallback callback;
-		};
+        const Type type = Type::Default;
+        const Header header;
+        const modm::SmartPointer payload;
+        State state = State::TransmissionPending;
+        modm::ShortTimeout time;
+        uint8_t tries = 0;
 
-		void
-		addMessage(const Header& header, modm::SmartPointer& smartPayload);
+    private:
+        ResponseCallback callback;
+    };
 
-		void
-		addMessage(const Header& header, modm::SmartPointer& smartPayload,
-				ResponseCallback& responseCallback);
+    void addMessage(const Header& header, modm::SmartPointer& smartPayload);
 
-		void
-		addResponse(const Header& header, modm::SmartPointer& smartPayload);
+    void addMessage(
+        const Header& header,
+        modm::SmartPointer& smartPayload,
+        ResponseCallback& responseCallback);
 
-		inline void
-		handleActionCall(const Header& header, const modm::SmartPointer& payload);
+    void addResponse(const Header& header, modm::SmartPointer& smartPayload);
 
-		void
-		sendAcknowledge(const Header& header);
+    inline void handleActionCall(const Header& header, const modm::SmartPointer& payload);
 
-		using EntryList = modm::LinkedList<Entry>;
-		using EntryIterator = EntryList::iterator;
+    void sendAcknowledge(const Header& header);
 
-		EntryIterator
-		sendMessageToInnerComponent(EntryIterator entry);
+    using EntryList = modm::LinkedList<Entry>;
+    using EntryIterator = EntryList::iterator;
 
-		BackendInterface * const backend;
-		Postman * const postman;
+    EntryIterator sendMessageToInnerComponent(EntryIterator entry);
 
-		EntryList entries;
+    BackendInterface* const backend;
+    Postman* const postman;
 
-	private:
-		friend class Communicator;
-	};
-}
+    EntryList entries;
 
-#endif // XPCC_DISPATCHER_HPP
+private:
+    friend class Communicator;
+};
+}  // namespace xpcc
+
+#endif  // XPCC_DISPATCHER_HPP

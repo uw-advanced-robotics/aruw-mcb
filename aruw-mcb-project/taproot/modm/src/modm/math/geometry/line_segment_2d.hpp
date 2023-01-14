@@ -15,122 +15,99 @@
 #define MODM_LINE_SEGMENT_2D_HPP
 
 #include "geometric_traits.hpp"
-
-#include "vector.hpp"
 #include "point_set_2d.hpp"
+#include "vector.hpp"
 
 namespace modm
 {
-	// forward declaration
-	template <typename T>
-	class Circle2D;
+// forward declaration
+template <typename T>
+class Circle2D;
 
-	template <typename T>
-	class Polygon2D;
+template <typename T>
+class Polygon2D;
 
-	/**
-	 * \brief	Line segment
-	 *
-	 * \author	Fabian Greif
-	 * \ingroup	modm_math_geometry
-	 */
-	template <typename T = int16_t>
-	class LineSegment2D
-	{
-	public:
-		typedef typename GeometricTraits<T>::WideType WideType;
-		typedef typename GeometricTraits<T>::FloatType FloatType;
+/**
+ * \brief	Line segment
+ *
+ * \author	Fabian Greif
+ * \ingroup	modm_math_geometry
+ */
+template <typename T = int16_t>
+class LineSegment2D
+{
+public:
+    typedef typename GeometricTraits<T>::WideType WideType;
+    typedef typename GeometricTraits<T>::FloatType FloatType;
 
-	public:
-		LineSegment2D();
+public:
+    LineSegment2D();
 
-		LineSegment2D(const Vector<T, 2>& start, const Vector<T, 2>& end);
+    LineSegment2D(const Vector<T, 2>& start, const Vector<T, 2>& end);
 
+    /// Set the starting point of the line segment
+    inline void setStartPoint(const Vector<T, 2>& point);
 
-		/// Set the starting point of the line segment
-		inline void
-		setStartPoint(const Vector<T, 2>& point);
+    inline const Vector<T, 2>& getStartPoint() const;
 
-		inline const Vector<T, 2>&
-		getStartPoint() const;
+    /// Set the end point of the line segment
+    inline void setEndPoint(const Vector<T, 2>& point);
 
-		/// Set the end point of the line segment
-		inline void
-		setEndPoint(const Vector<T, 2>& point);
+    inline const Vector<T, 2>& getEndPoint() const;
 
-		inline const Vector<T, 2>&
-		getEndPoint() const;
+    inline void set(const Vector<T, 2>& start, const Vector<T, 2>& end);
 
-		inline void
-		set(const Vector<T, 2>& start, const Vector<T, 2>& end);
+    void translate(const Vector<T, 2>& vector);
 
-		void
-		translate(const Vector<T, 2>& vector);
+    /**
+     * \brief	Length of the line segment
+     */
+    T getLength() const;
 
-		/**
-		 * \brief	Length of the line segment
-		 */
-		T
-		getLength() const;
+    Vector<T, 2> getDirectionVector() const;
 
-		Vector<T, 2>
-		getDirectionVector() const;
+    /// Shortest distance to a point
+    const T getDistanceTo(const Vector<T, 2>& point) const;
 
-		/// Shortest distance to a point
-		const T
-		getDistanceTo(const Vector<T, 2>& point) const;
+    /// Calculate the point on the line segment closes to the given point
+    const Vector<T, 2> getClosestPointTo(const Vector<T, 2>& point) const;
 
-		/// Calculate the point on the line segment closes to the given point
-		const Vector<T, 2>
-		getClosestPointTo(const Vector<T, 2>& point) const;
+    /**
+     * \brief	Check if two line segments intersect
+     *
+     * Uses Vector2D::ccw() to check if any intersection exists.
+     */
+    bool intersects(const LineSegment2D& other) const;
 
-		/**
-		 * \brief	Check if two line segments intersect
-		 *
-		 * Uses Vector2D::ccw() to check if any intersection exists.
-		 */
-		bool
-		intersects(const LineSegment2D& other) const;
+    /// Check if a intersection exists
+    bool intersects(const Polygon2D<T>& polygon) const;
 
-		/// Check if a intersection exists
-		bool
-		intersects(const Polygon2D<T>& polygon) const;
+    /**
+     * \brief	Calculate the intersection point
+     */
+    bool getIntersections(const LineSegment2D& other, PointSet2D<T>& intersectionPoints) const;
 
-		/**
-		 * \brief	Calculate the intersection point
-		 */
-		bool
-		getIntersections(const LineSegment2D& other,
-				PointSet2D<T>& intersectionPoints) const;
+    /**
+     * \brief	Calculate the intersection point(s)
+     *
+     * \see		http://local.wasp.uwa.edu.au/~pbourke/geometry/sphereline/
+     */
+    bool getIntersections(const Circle2D<T>& circle, PointSet2D<T>& intersectionPoints) const;
 
-		/**
-		 * \brief	Calculate the intersection point(s)
-		 *
-		 * \see		http://local.wasp.uwa.edu.au/~pbourke/geometry/sphereline/
-		 */
-		bool
-		getIntersections(const Circle2D<T>& circle,
-				PointSet2D<T>& intersectionPoints) const;
+    bool getIntersections(const Polygon2D<T>& polygon, PointSet2D<T>& intersectionPoints) const;
 
-		bool
-		getIntersections(const Polygon2D<T>& polygon,
-				PointSet2D<T>& intersectionPoints) const;
+    bool operator==(const LineSegment2D& other) const;
 
-		bool
-		operator == (const LineSegment2D &other) const;
+    bool operator!=(const LineSegment2D& other) const;
 
-		bool
-		operator != (const LineSegment2D &other) const;
-
-	protected:
-		modm::Vector<T, 2> startPoint;
-		modm::Vector<T, 2> endPoint;
-	};
-}
+protected:
+    modm::Vector<T, 2> startPoint;
+    modm::Vector<T, 2> endPoint;
+};
+}  // namespace modm
 
 #include "circle_2d.hpp"
+#include "line_segment_2d_impl.hpp"
 #include "polygon_2d.hpp"
 
-#include "line_segment_2d_impl.hpp"
-
-#endif // MODM_LINE_SEGMENT_2D_HPP
+#endif  // MODM_LINE_SEGMENT_2D_HPP

@@ -11,13 +11,15 @@
 // ----------------------------------------------------------------------------
 
 #include <stdlib.h>
-#include <cstdint>
-#include <modm/debug/logger.hpp>
-#include <modm/architecture/interface/assert.hpp>
 
-using modm::AssertionHandler;
+#include <cstdint>
+
+#include <modm/architecture/interface/assert.hpp>
+#include <modm/debug/logger.hpp>
+
 using modm::Abandonment;
 using modm::AbandonmentBehavior;
+using modm::AssertionHandler;
 
 // FIXME: Figure out how to access custom linker sections
 static AssertionHandler __assertion_table_start;
@@ -26,44 +28,45 @@ static AssertionHandler __assertion_table_start;
 // only included if something is put into these sections. Therefore we are placing
 // an empty assertion handler here, which does not influence assertion handling.
 Abandonment _modm_empty_assertion_handler(const modm::AssertionInfo &)
-{ return Abandonment::DontCare; }
+{
+    return Abandonment::DontCare;
+}
 MODM_ASSERTION_HANDLER(_modm_empty_assertion_handler);
 extern "C"
 {
+    void modm_assert_report(_modm_assertion_info *cinfo)
+    {
+        auto info = reinterpret_cast<modm::AssertionInfo *>(cinfo);
+        AbandonmentBehavior behavior(info->behavior);
 
-void
-modm_assert_report(_modm_assertion_info *cinfo)
-{
-	auto info = reinterpret_cast<modm::AssertionInfo *>(cinfo);
-	AbandonmentBehavior behavior(info->behavior);
+        for (const AssertionHandler *handler = &__assertion_table_start;
+             handler < &__assertion_table_end;
+             handler++)
+        {
+            behavior |= (*handler)(*info);
+        }
 
-	for (const AssertionHandler *handler = &__assertion_table_start;
-		 handler < &__assertion_table_end; handler++)
-	{
-		behavior |= (*handler)(*info);
-	}
-
-	info->behavior = behavior;
-	behavior.reset(Abandonment::Debug);
-	if ((behavior == Abandonment::DontCare) or
-		(behavior & Abandonment::Fail))
-	{
-		modm_abandon(*info);
-		abort();
-	}
-}
+        info->behavior = behavior;
+        behavior.reset(Abandonment::Debug);
+        if ((behavior == Abandonment::DontCare) or (behavior & Abandonment::Fail))
+        {
+            modm_abandon(*info);
+            abort();
+        }
+    }
 
 // Mingw64 :facepalm;
 #if defined(__MINGW64__) && !defined(__clang__)
 #define PRIuPTR "I64u"
 #endif
 
-modm_weak
-void modm_abandon(const modm::AssertionInfo &info)
-{
-	MODM_LOG_ERROR.printf("Assertion '%s'", info.name);
-	if (info.context != uintptr_t(-1)) { MODM_LOG_ERROR.printf(" @ %p (%" PRIuPTR ")", (void *)info.context, info.context); }
-	MODM_LOG_ERROR.printf(" failed!\n  %s\nAbandoning...\n", info.description) << modm::flush;
-}
-
+    modm_weak void modm_abandon(const modm::AssertionInfo &info)
+    {
+        MODM_LOG_ERROR.printf("Assertion '%s'", info.name);
+        if (info.context != uintptr_t(-1))
+        {
+            MODM_LOG_ERROR.printf(" @ %p (%" PRIuPTR ")", (void *)info.context, info.context);
+        }
+        MODM_LOG_ERROR.printf(" failed!\n  %s\nAbandoning...\n", info.description) << modm::flush;
+    }
 }

@@ -31,25 +31,22 @@ namespace modm
  *
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height>
+template <int16_t Width, int16_t Height>
 class MonochromeGraphicDisplayHorizontal
-	: public MonochromeGraphicDisplay<Width, Height, Width / 8, Height>
+    : public MonochromeGraphicDisplay<Width, Height, Width / 8, Height>
 {
-	// Height must be a multiple of 8
-	static_assert((Width % 8) == 0, "width must be a multiple of 8");
+    // Height must be a multiple of 8
+    static_assert((Width % 8) == 0, "width must be a multiple of 8");
 
 public:
-	virtual ~MonochromeGraphicDisplayHorizontal() = default;
+    virtual ~MonochromeGraphicDisplayHorizontal() = default;
 
 protected:
-	void
-	setPixel(int16_t x, int16_t y) final;
+    void setPixel(int16_t x, int16_t y) final;
 
-	void
-	clearPixel(int16_t x, int16_t y) final;
+    void clearPixel(int16_t x, int16_t y) final;
 
-	bool
-	getPixel(int16_t x, int16_t y) const final;
+    bool getPixel(int16_t x, int16_t y) const final;
 };
 }  // namespace modm
 

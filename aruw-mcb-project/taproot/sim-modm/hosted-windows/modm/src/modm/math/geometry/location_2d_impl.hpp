@@ -11,8 +11,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_LOCATION_2D_HPP
-	#error	"Don't include this file directly use 'location.hpp' instead!"
+#ifndef MODM_LOCATION_2D_HPP
+#error "Don't include this file directly use 'location.hpp' instead!"
 #endif
 
 #include <cmath>
@@ -20,151 +20,139 @@
 
 // -----------------------------------------------------------------------------
 template <typename T>
-modm::Location2D<T>::Location2D() :
-	position(), orientation()
+modm::Location2D<T>::Location2D() : position(),
+                                    orientation()
 {
 }
 
 template <typename T>
-modm::Location2D<T>::Location2D(const Vector<T, 2>& position,
-		const float& orientation) :
-	position(position),
-	orientation(orientation)
+modm::Location2D<T>::Location2D(const Vector<T, 2>& position, const float& orientation)
+    : position(position),
+      orientation(orientation)
 {
 }
 
 template <typename T>
-modm::Location2D<T>::Location2D(const T& x, const T& y, const float& orientation) :
-	position(x, y),
-	orientation(orientation)
+modm::Location2D<T>::Location2D(const T& x, const T& y, const float& orientation)
+    : position(x, y),
+      orientation(orientation)
 {
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-const modm::Vector<T, 2>&
-modm::Location2D<T>::getPosition() const
+const modm::Vector<T, 2>& modm::Location2D<T>::getPosition() const
 {
-	return this->position;
+    return this->position;
 }
 
 template <typename T>
-inline const T&
-modm::Location2D<T>::getX() const
+inline const T& modm::Location2D<T>::getX() const
 {
-	return this->position.x;
+    return this->position.x;
 }
 
 template <typename T>
-inline const T&
-modm::Location2D<T>::getY() const
+inline const T& modm::Location2D<T>::getY() const
 {
-	return this->position.y;
+    return this->position.y;
 }
 
 template <typename T>
-void
-modm::Location2D<T>::setPosition(const Vector<T, 2>& point)
+void modm::Location2D<T>::setPosition(const Vector<T, 2>& point)
 {
-	this->position = point;
+    this->position = point;
 }
 
 template <typename T>
-void
-modm::Location2D<T>::setPosition(const T& x, const T& y)
+void modm::Location2D<T>::setPosition(const T& x, const T& y)
 {
-	this->position.set(x, y);
+    this->position.set(x, y);
 }
 
 template <typename T>
-float
-modm::Location2D<T>::getOrientation() const
+float modm::Location2D<T>::getOrientation() const
 {
-	return this->orientation;
+    return this->orientation;
 }
 
 template <typename T>
-void
-modm::Location2D<T>::setOrientation(const float& orientation)
+void modm::Location2D<T>::setOrientation(const float& orientation)
 {
-	this->orientation = orientation;
+    this->orientation = orientation;
 }
 
 // -----------------------------------------------------------------------------
 template <typename T>
-void
-modm::Location2D<T>::move(const Location2D<T>& diff)
+void modm::Location2D<T>::move(const Location2D<T>& diff)
 {
-	Vector<T, 2> movement = diff.position;
-	movement.rotate(this->orientation);
+    Vector<T, 2> movement = diff.position;
+    movement.rotate(this->orientation);
 
-	this->position.translate(movement);
-	this->orientation = Angle::normalize(this->orientation + diff.orientation);
+    this->position.translate(movement);
+    this->orientation = Angle::normalize(this->orientation + diff.orientation);
 }
 
 template <typename T>
-void
-modm::Location2D<T>::move(const Vector<T, 2>& diff)
+void modm::Location2D<T>::move(const Vector<T, 2>& diff)
 {
-	Vector<T, 2> movement(diff);
-	movement.rotate(this->orientation);
+    Vector<T, 2> movement(diff);
+    movement.rotate(this->orientation);
 
-	this->position.translate(movement);
+    this->position.translate(movement);
 }
 
 template <typename T>
-void
-modm::Location2D<T>::move(T x, float phi)
+void modm::Location2D<T>::move(T x, float phi)
 {
-	Vector<T, 2> vector(GeometricTraits<T>::round(x * std::cos(this->orientation)),
-					   GeometricTraits<T>::round(x * std::sin(this->orientation)));
-	position.translate(vector);
+    Vector<T, 2> vector(
+        GeometricTraits<T>::round(x * std::cos(this->orientation)),
+        GeometricTraits<T>::round(x * std::sin(this->orientation)));
+    position.translate(vector);
 
-	this->orientation = Angle::normalize(this->orientation + phi);
+    this->orientation = Angle::normalize(this->orientation + phi);
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-modm::Vector<T, 2>
-modm::Location2D<T>::translated(const Vector<T, 2>& vector) const
+modm::Vector<T, 2> modm::Location2D<T>::translated(const Vector<T, 2>& vector) const
 {
-	Vector<T, 2> result(vector);
-	result.rotate(this->orientation);
-	result.translate(this->position);
+    Vector<T, 2> result(vector);
+    result.rotate(this->orientation);
+    result.translate(this->position);
 
-	return result;
+    return result;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T> template<typename U>
-modm::Location2D<U>
-modm::Location2D<T>::convert() const
+template <typename T>
+template <typename U>
+modm::Location2D<U> modm::Location2D<T>::convert() const
 {
-	return Location2D<U>(this->position.template convert<U>(), this->orientation);
+    return Location2D<U>(this->position.template convert<U>(), this->orientation);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Location2D<T>::operator == (const Location2D &other) const
+template <typename T>
+bool modm::Location2D<T>::operator==(const Location2D& other) const
 {
-	return ((this->position == other.position) &&
-			(std::abs(this->orientation - other.orientation) < __FLT_EPSILON__));
+    return (
+        (this->position == other.position) &&
+        (std::abs(this->orientation - other.orientation) < __FLT_EPSILON__));
 }
 
-template<typename T>
-bool
-modm::Location2D<T>::operator != (const Location2D &other) const
+template <typename T>
+bool modm::Location2D<T>::operator!=(const Location2D& other) const
 {
-	return ((this->position != other.position) ||
-			(std::abs(this->orientation - other.orientation) > __FLT_EPSILON__));
+    return (
+        (this->position != other.position) ||
+        (std::abs(this->orientation - other.orientation) > __FLT_EPSILON__));
 }
 
 // ----------------------------------------------------------------------------
-template<class T>
-modm::IOStream&
-modm::operator << (modm::IOStream& os, const modm::Location2D<T>& location)
+template <class T>
+modm::IOStream& modm::operator<<(modm::IOStream& os, const modm::Location2D<T>& location)
 {
-	os << location.position << ", phi=" << location.orientation;
-	return os;
+    os << location.position << ", phi=" << location.orientation;
+    return os;
 }

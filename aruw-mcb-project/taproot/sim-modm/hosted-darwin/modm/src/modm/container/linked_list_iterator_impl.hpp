@@ -12,8 +12,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_LINKED_LIST_HPP
-	#error	"Don't include this file directly, use 'linked_list.hpp' instead"
+#ifndef MODM_LINKED_LIST_HPP
+#error "Don't include this file directly, use 'linked_list.hpp' instead"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -22,170 +22,144 @@
 
 // const iterator
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::const_iterator::const_iterator() :
-	node(0)
+modm::LinkedList<T, Allocator>::const_iterator::const_iterator() : node(0)
 {
 }
 
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::const_iterator::const_iterator(
-		Node* node) :
-	node(node)
+modm::LinkedList<T, Allocator>::const_iterator::const_iterator(Node* node) : node(node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::const_iterator::const_iterator(
-		const iterator& other) :
-	node(other.node)
+modm::LinkedList<T, Allocator>::const_iterator::const_iterator(const iterator& other)
+    : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::const_iterator::const_iterator(
-		const const_iterator& other) :
-	node(other.node)
+modm::LinkedList<T, Allocator>::const_iterator::const_iterator(const const_iterator& other)
+    : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::const_iterator&
-modm::LinkedList<T, Allocator>::const_iterator::operator = (const const_iterator& other)
+typename modm::LinkedList<T, Allocator>::const_iterator& modm::LinkedList<T, Allocator>::
+    const_iterator::operator=(const const_iterator& other)
 {
-	this->node = other.node;
-	return *this;
+    this->node = other.node;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::const_iterator&
-modm::LinkedList<T, Allocator>::const_iterator::operator ++ ()
+typename modm::LinkedList<T, Allocator>::const_iterator& modm::LinkedList<T, Allocator>::
+    const_iterator::operator++()
 {
-	this->node = this->node->next;
-	return *this;
+    this->node = this->node->next;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-bool
-modm::LinkedList<T, Allocator>::const_iterator::operator == (
-		const const_iterator& other) const
+bool modm::LinkedList<T, Allocator>::const_iterator::operator==(const const_iterator& other) const
 {
-	return (node == other.node);
+    return (node == other.node);
 }
 
 template <typename T, typename Allocator>
-bool
-modm::LinkedList<T, Allocator>::const_iterator::operator != (
-		const const_iterator& other) const
+bool modm::LinkedList<T, Allocator>::const_iterator::operator!=(const const_iterator& other) const
 {
-	return (node != other.node);
+    return (node != other.node);
 }
 
 template <typename T, typename Allocator>
-const T&
-modm::LinkedList<T, Allocator>::const_iterator::operator * () const
+const T& modm::LinkedList<T, Allocator>::const_iterator::operator*() const
 {
-	return this->node->value;
+    return this->node->value;
 }
 
 template <typename T, typename Allocator>
-const T*
-modm::LinkedList<T, Allocator>::const_iterator::operator -> () const
+const T* modm::LinkedList<T, Allocator>::const_iterator::operator->() const
 {
-	return &this->node->value;
-}
-
-
-template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::const_iterator
-modm::LinkedList<T, Allocator>::begin() const
-{
-	return const_iterator(this->front);
+    return &this->node->value;
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::const_iterator
-modm::LinkedList<T, Allocator>::end() const
+typename modm::LinkedList<T, Allocator>::const_iterator modm::LinkedList<T, Allocator>::begin()
+    const
 {
-	return const_iterator(0);
+    return const_iterator(this->front);
+}
+
+template <typename T, typename Allocator>
+typename modm::LinkedList<T, Allocator>::const_iterator modm::LinkedList<T, Allocator>::end() const
+{
+    return const_iterator(0);
 }
 
 // iterator
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::iterator::iterator() :
-	node(0)
+modm::LinkedList<T, Allocator>::iterator::iterator() : node(0)
 {
 }
 
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::iterator::iterator(Node* node) :
-	node(node)
+modm::LinkedList<T, Allocator>::iterator::iterator(Node* node) : node(node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::LinkedList<T, Allocator>::iterator::iterator(
-		const iterator& other) :
-	node(other.node)
+modm::LinkedList<T, Allocator>::iterator::iterator(const iterator& other) : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::iterator&
-modm::LinkedList<T, Allocator>::iterator::operator = (const iterator& other)
+typename modm::LinkedList<T, Allocator>::iterator& modm::LinkedList<T, Allocator>::iterator::
+operator=(const iterator& other)
 {
-	this->node = other.node;
-	return *this;
+    this->node = other.node;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::iterator&
-modm::LinkedList<T, Allocator>::iterator::operator ++ ()
+typename modm::LinkedList<T, Allocator>::iterator& modm::LinkedList<T, Allocator>::iterator::
+operator++()
 {
-	this->node = this->node->next;
-	return *this;
+    this->node = this->node->next;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-bool
-modm::LinkedList<T, Allocator>::iterator::operator == (
-		const iterator& other) const
+bool modm::LinkedList<T, Allocator>::iterator::operator==(const iterator& other) const
 {
-	return (node == other.node);
+    return (node == other.node);
 }
 
 template <typename T, typename Allocator>
-bool
-modm::LinkedList<T, Allocator>::iterator::operator != (
-		const iterator& other) const
+bool modm::LinkedList<T, Allocator>::iterator::operator!=(const iterator& other) const
 {
-	return (node != other.node);
+    return (node != other.node);
 }
 
 template <typename T, typename Allocator>
-T&
-modm::LinkedList<T, Allocator>::iterator::operator * ()
+T& modm::LinkedList<T, Allocator>::iterator::operator*()
 {
-	return this->node->value;
+    return this->node->value;
 }
 
 template <typename T, typename Allocator>
-T*
-modm::LinkedList<T, Allocator>::iterator::operator -> ()
+T* modm::LinkedList<T, Allocator>::iterator::operator->()
 {
-	return &this->node->value;
-}
-
-
-template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::iterator
-modm::LinkedList<T, Allocator>::begin()
-{
-	return iterator(this->front);
+    return &this->node->value;
 }
 
 template <typename T, typename Allocator>
-typename modm::LinkedList<T, Allocator>::iterator
-modm::LinkedList<T, Allocator>::end()
+typename modm::LinkedList<T, Allocator>::iterator modm::LinkedList<T, Allocator>::begin()
 {
-	return iterator(0);
+    return iterator(this->front);
+}
+
+template <typename T, typename Allocator>
+typename modm::LinkedList<T, Allocator>::iterator modm::LinkedList<T, Allocator>::end()
+{
+    return iterator(0);
 }

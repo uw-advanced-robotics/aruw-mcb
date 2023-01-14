@@ -32,23 +32,30 @@ namespace modm
 /// @cond
 namespace aligned_storage_impl
 {
-template<size_t Cap>
+template <size_t Cap>
 union aligned_storage_helper
 {
-    struct double1 { double a; };
-    struct double4 { double a[4]; };
-    template<class T> using maybe = std::conditional_t<(Cap >= sizeof(T)), T, char>;
+    struct double1
+    {
+        double a;
+    };
+    struct double4
+    {
+        double a[4];
+    };
+    template <class T>
+    using maybe = std::conditional_t<(Cap >= sizeof(T)), T, char>;
     char real_data[Cap];
     maybe<int> a;
     maybe<long> b;
     maybe<long long> c;
     maybe<void*> d;
-    maybe<void(*)()> e;
+    maybe<void (*)()> e;
     maybe<double1> f;
     maybe<double4> g;
     maybe<long double> h;
 };
-} // namespace aligned_storage_impl
+}  // namespace aligned_storage_impl
 /// @endcond
 
 /**
@@ -59,17 +66,18 @@ union aligned_storage_helper
  * The implementation is derived from:
  * https://github.com/WG21-SG14/SG14/blob/master/SG14/inplace_function.h
  */
-template<size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storage_helper<Cap>)>
-struct aligned_storage {
+template <size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storage_helper<Cap>)>
+struct aligned_storage
+{
     using type = std::aligned_storage_t<Cap, Align>;
 };
 
-template<size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storage_helper<Cap>)>
+template <size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storage_helper<Cap>)>
 using aligned_storage_t = typename aligned_storage<Cap, Align>::type;
 
 static_assert(sizeof(aligned_storage_t<sizeof(void*)>) == sizeof(void*));
 static_assert(alignof(aligned_storage_t<sizeof(void*)>) == alignof(void*));
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_ALIGNED_STORAGE_HPP
+#endif  // MODM_ALIGNED_STORAGE_HPP

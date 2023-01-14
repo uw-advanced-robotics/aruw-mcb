@@ -18,140 +18,127 @@
 #ifndef MODM_VIEWSTACK_HPP
 #define MODM_VIEWSTACK_HPP
 
-#include <modm/ui/display/graphic_display.hpp>
-#include <modm/container/stack.hpp>
 #include <modm/container/linked_list.hpp>
-#include "menu_buttons.hpp"
+#include <modm/container/stack.hpp>
+#include <modm/ui/display/graphic_display.hpp>
+
 #include "abstract_view.hpp"
+#include "menu_buttons.hpp"
 
 namespace modm
 {
-	/**
-	* \brief Stack which handles the displaying
-	*        of views on the graphic display.
-	*
-	* This class also deallocates the views passed
-	* to the stack.
-	*
-	* \ingroup	modm_ui_menu
-	* \author	Thorsten Lajewski
-	*/
+/**
+ * \brief Stack which handles the displaying
+ *        of views on the graphic display.
+ *
+ * This class also deallocates the views passed
+ * to the stack.
+ *
+ * \ingroup	modm_ui_menu
+ * \author	Thorsten Lajewski
+ */
 
-	template<typename Allocator = allocator::Dynamic<IAbstractView> >
-	class ViewStack
-	{
-	public:
-		ViewStack(modm::GraphicDisplay* display, const Allocator allocator = Allocator()) :
-			display(display),
-			allocator(allocator)
-		{
-		}
+template <typename Allocator = allocator::Dynamic<IAbstractView> >
+class ViewStack
+{
+public:
+    ViewStack(modm::GraphicDisplay* display, const Allocator allocator = Allocator())
+        : display(display),
+          allocator(allocator)
+    {
+    }
 
-		virtual ~ViewStack()
-		{
-		}
+    virtual ~ViewStack() {}
 
-		/**
-		 * @brief get the top view from the stack
-		 * @return pointer to view from stack
-		 */
+    /**
+     * @brief get the top view from the stack
+     * @return pointer to view from stack
+     */
 
-		inline modm::AbstractView<Allocator>*
-		get()
-		{
-			return this->stack.get();
-		}
+    inline modm::AbstractView<Allocator>* get() { return this->stack.get(); }
 
-		/**
-		 * @brief push new view on top of stack the new
-		 *        view will be displayed instead of the old
-		 *        one
-		 *
-		 * @param view next displayed view
-		 */
-		inline void
-		push(modm::AbstractView<Allocator>* view)
-		{
-			this->stack.push(view);
-			this->getDisplay().clear();
-			modm::AbstractView<Allocator>* top = this->get();
-			top->draw();
-			this->display->update();
-		}
+    /**
+     * @brief push new view on top of stack the new
+     *        view will be displayed instead of the old
+     *        one
+     *
+     * @param view next displayed view
+     */
+    inline void push(modm::AbstractView<Allocator>* view)
+    {
+        this->stack.push(view);
+        this->getDisplay().clear();
+        modm::AbstractView<Allocator>* top = this->get();
+        top->draw();
+        this->display->update();
+    }
 
-		/**
-		 * @brief getDisplay access underlying GraphicDisplay
-		 */
-		inline modm::GraphicDisplay&
-		getDisplay()
-		{
-			return *this->display;
-		}
+    /**
+     * @brief getDisplay access underlying GraphicDisplay
+     */
+    inline modm::GraphicDisplay& getDisplay() { return *this->display; }
 
-		/**
-		 * @brief pop remove top view from the stack. The removed
-		 *        view is deleted
-		 */
+    /**
+     * @brief pop remove top view from the stack. The removed
+     *        view is deleted
+     */
 
-		void
-		pop()
-		{
-			modm::AbstractView<Allocator> *topElement = this->stack.get();
-			this->stack.pop();
+    void pop()
+    {
+        modm::AbstractView<Allocator>* topElement = this->stack.get();
+        this->stack.pop();
 
-			allocator.destroy(topElement);
-			allocator.deallocate(topElement);
-		}
+        allocator.destroy(topElement);
+        allocator.deallocate(topElement);
+    }
 
-		virtual void
-		update()
-		{
-			modm::AbstractView<Allocator>* top = this->get();
+    virtual void update()
+    {
+        modm::AbstractView<Allocator>* top = this->get();
 
-			if (top == NULL)
-				return;
+        if (top == NULL) return;
 
-			top->update();
-			if (top->isAlive())
-			{
-				if (top->hasChanged())
-				{
-					top->draw();
-					this->display->update();
-				}
-			}
-			else
-			{
-				// Remove old view
-				top->onRemove();
-				this->pop();
+        top->update();
+        if (top->isAlive())
+        {
+            if (top->hasChanged())
+            {
+                top->draw();
+                this->display->update();
+            }
+        }
+        else
+        {
+            // Remove old view
+            top->onRemove();
+            this->pop();
 
-				// Get new screen
-				top = this->get();
-				top->update();
-				this->display->clear();
-				top->draw();
-				this->display->update();
-			}
-		}
+            // Get new screen
+            top = this->get();
+            top->update();
+            this->display->clear();
+            top->draw();
+            this->display->update();
+        }
+    }
 
-		/**
-		 * @brief shortButtonPress pass the button press to the current top view
-		 * @param button the pressed button
-		 */
+    /**
+     * @brief shortButtonPress pass the button press to the current top view
+     * @param button the pressed button
+     */
 
-		void
-		shortButtonPress(modm::MenuButtons::Button button)
-		{
-			modm::AbstractView<Allocator>* top = this->get();
-			top->shortButtonPress(button);
-		}
+    void shortButtonPress(modm::MenuButtons::Button button)
+    {
+        modm::AbstractView<Allocator>* top = this->get();
+        top->shortButtonPress(button);
+    }
 
-	protected:
-		modm::GraphicDisplay* display;
-		modm::Stack< modm::AbstractView<Allocator>* , modm::LinkedList< modm::AbstractView<Allocator>* > > stack;
-		Allocator allocator;
-	};
-}
+protected:
+    modm::GraphicDisplay* display;
+    modm::Stack<modm::AbstractView<Allocator>*, modm::LinkedList<modm::AbstractView<Allocator>*> >
+        stack;
+    Allocator allocator;
+};
+}  // namespace modm
 
-#endif // MODM_VIEWSTACK_HPP
+#endif  // MODM_VIEWSTACK_HPP

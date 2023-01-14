@@ -14,11 +14,11 @@
 
 namespace modm
 {
-	/// @ingroup modm_math_filter
-	namespace filter
-	{
-	}
+/// @ingroup modm_math_filter
+namespace filter
+{
 }
+}  // namespace modm
 
 #include "filter/debounce.hpp"
 #include "filter/fir.hpp"

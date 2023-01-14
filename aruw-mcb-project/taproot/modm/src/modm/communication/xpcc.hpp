@@ -11,6 +11,6 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "xpcc/communicatable.hpp"
 #include "xpcc/abstract_component.hpp"
+#include "xpcc/communicatable.hpp"
 #include "xpcc/dispatcher.hpp"

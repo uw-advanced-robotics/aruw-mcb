@@ -16,72 +16,67 @@
 // ----------------------------------------------------------------------------
 namespace modm
 {
-	namespace filter
-	{
-		template <typename T>
-		class Median<T, 5>
-		{
-		public:
-			Median(const T& initialValue = 0);
+namespace filter
+{
+template <typename T>
+class Median<T, 5>
+{
+public:
+    Median(const T& initialValue = 0);
 
-			void
-			append(const T& input);
+    void append(const T& input);
 
-			void
-			update();
+    void update();
 
-			const T
-			getValue() const;
+    const T getValue() const;
 
-		private:
-			uint_fast8_t index;
-			T buffer[5];
-			T sorted[5];
-		};
-	}
-}
+private:
+    uint_fast8_t index;
+    T buffer[5];
+    T sorted[5];
+};
+}  // namespace filter
+}  // namespace modm
 
 // ----------------------------------------------------------------------------
 template <typename T>
-modm::filter::Median<T, 5>::Median(const T& initialValue) :
-	index(0)
+modm::filter::Median<T, 5>::Median(const T& initialValue) : index(0)
 {
-	for (uint_fast8_t i = 0; i < 5; ++i) {
-		buffer[i] = initialValue;
-		sorted[i] = initialValue;
-	}
+    for (uint_fast8_t i = 0; i < 5; ++i)
+    {
+        buffer[i] = initialValue;
+        sorted[i] = initialValue;
+    }
 }
 
 template <typename T>
-void
-modm::filter::Median<T, 5>::append(const T& input)
+void modm::filter::Median<T, 5>::append(const T& input)
 {
-	this->buffer[index] = input;
-	if (++index >= 5) {
-		index = 0;
-	}
+    this->buffer[index] = input;
+    if (++index >= 5)
+    {
+        index = 0;
+    }
 }
 
 template <typename T>
-void
-modm::filter::Median<T, 5>::update()
+void modm::filter::Median<T, 5>::update()
 {
-	// for small sample sizes it is the fastest way to just copy the
-	// buffer and sort it afterwards
-	std::memcpy((void *) sorted, (const void * const) buffer, sizeof(sorted));
+    // for small sample sizes it is the fastest way to just copy the
+    // buffer and sort it afterwards
+    std::memcpy((void*)sorted, (const void* const)buffer, sizeof(sorted));
 
-	MODM_MEDIAN_SORT(sorted[0], sorted[1]);
-	MODM_MEDIAN_SORT(sorted[3], sorted[4]);
-	MODM_MEDIAN_SORT(sorted[0], sorted[3]);
-	MODM_MEDIAN_SORT(sorted[1], sorted[4]);
-	MODM_MEDIAN_SORT(sorted[1], sorted[2]);
-	MODM_MEDIAN_SORT(sorted[2], sorted[3]);
-	MODM_MEDIAN_SORT(sorted[1], sorted[2]);
+    MODM_MEDIAN_SORT(sorted[0], sorted[1]);
+    MODM_MEDIAN_SORT(sorted[3], sorted[4]);
+    MODM_MEDIAN_SORT(sorted[0], sorted[3]);
+    MODM_MEDIAN_SORT(sorted[1], sorted[4]);
+    MODM_MEDIAN_SORT(sorted[1], sorted[2]);
+    MODM_MEDIAN_SORT(sorted[2], sorted[3]);
+    MODM_MEDIAN_SORT(sorted[1], sorted[2]);
 }
 
 template <typename T>
-const T
-modm::filter::Median<T, 5>::getValue() const
+const T modm::filter::Median<T, 5>::getValue() const
 {
-	return sorted[2];
+    return sorted[2];
 }

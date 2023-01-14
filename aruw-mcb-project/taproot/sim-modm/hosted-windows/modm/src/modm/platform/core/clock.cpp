@@ -11,16 +11,14 @@
 
 #include <modm/architecture/interface/clock.hpp>
 
-modm::chrono::milli_clock::time_point modm_weak
-modm::chrono::milli_clock::now() noexcept
+modm::chrono::milli_clock::time_point modm_weak modm::chrono::milli_clock::now() noexcept
 {
-	const auto time = std::chrono::steady_clock::now().time_since_epoch();
-	return time_point{std::chrono::duration_cast<duration>(time)};
+    const auto time = std::chrono::steady_clock::now().time_since_epoch();
+    return time_point{std::chrono::duration_cast<duration>(time)};
 }
 
-modm::chrono::micro_clock::time_point modm_weak
-modm::chrono::micro_clock::now() noexcept
+modm::chrono::micro_clock::time_point modm_weak modm::chrono::micro_clock::now() noexcept
 {
-	const auto time = std::chrono::high_resolution_clock::now().time_since_epoch();
-	return time_point{std::chrono::duration_cast<duration>(time)};
+    const auto time = std::chrono::high_resolution_clock::now().time_since_epoch();
+    return time_point{std::chrono::duration_cast<duration>(time)};
 }

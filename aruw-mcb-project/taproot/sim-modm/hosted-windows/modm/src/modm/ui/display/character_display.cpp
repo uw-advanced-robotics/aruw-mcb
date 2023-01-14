@@ -12,49 +12,42 @@
 
 #include "character_display.hpp"
 
-modm::CharacterDisplay::CharacterDisplay(uint8_t width, uint8_t height) :
-	IOStream(writer),
-	writer(this),
-	lineWidth(width), lineCount(height),
-	column(0), line(0)
+modm::CharacterDisplay::CharacterDisplay(uint8_t width, uint8_t height)
+    : IOStream(writer),
+      writer(this),
+      lineWidth(width),
+      lineCount(height),
+      column(0),
+      line(0)
 {
 }
 
-void
-modm::CharacterDisplay::write(char c)
+void modm::CharacterDisplay::write(char c)
 {
-	if (c == '\n')
-	{
-		line++;
-		if (line >= lineCount) {
-			line = 0;
-		}
-		column = 0;
-		this->setCursor(column, line);
-	}
-	else {
-		if (column >= lineWidth) {
-			this->write('\n');
-		}
-		this->writeRaw(c);
-		column++;
-	}
+    if (c == '\n')
+    {
+        line++;
+        if (line >= lineCount)
+        {
+            line = 0;
+        }
+        column = 0;
+        this->setCursor(column, line);
+    }
+    else
+    {
+        if (column >= lineWidth)
+        {
+            this->write('\n');
+        }
+        this->writeRaw(c);
+        column++;
+    }
 }
 
 // ----------------------------------------------------------------------------
-void
-modm::CharacterDisplay::Writer::write(char c)
-{
-	this->parent->write(c);
-}
+void modm::CharacterDisplay::Writer::write(char c) { this->parent->write(c); }
 
-void
-modm::CharacterDisplay::Writer::flush()
-{
-}
+void modm::CharacterDisplay::Writer::flush() {}
 
-bool
-modm::CharacterDisplay::Writer::read(char&)
-{
-	return false;
-}
+bool modm::CharacterDisplay::Writer::read(char&) { return false; }

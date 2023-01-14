@@ -17,13 +17,12 @@
 
 namespace modm
 {
-	/**
-	 * \ingroup	modm_utils
-	 *
-	 * Dummy function for default function pointers.
-	 */
-	void
-	dummy();
-}
+/**
+ * \ingroup	modm_utils
+ *
+ * Dummy function for default function pointers.
+ */
+void dummy();
+}  // namespace modm
 
-#endif // MODM_DUMMY_HPP
+#endif  // MODM_DUMMY_HPP

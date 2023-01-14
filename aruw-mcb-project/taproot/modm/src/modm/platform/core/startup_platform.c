@@ -24,18 +24,17 @@
  * In that case, consider using inline assembly to manage stack access
  * manually, until the memory is enabled.
  */
-void
-__modm_initialize_platform(void)
+void __modm_initialize_platform(void)
 {
-	// Enable SYSCFG
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+    // Enable SYSCFG
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 // Only the more powerful F4 targets have CCM or Backup SRAM
 #ifdef RCC_AHB1ENR_CCMDATARAMEN
-	// Enable power to backup domain
-	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-	// Enable write access to backup SRAM
-	PWR->CR |= PWR_CR_DBP;
-	// Enable Core Coupled Memory (CCM) and backup SRAM (BKPSRAM)
-	RCC->AHB1ENR |= RCC_AHB1ENR_CCMDATARAMEN | RCC_AHB1ENR_BKPSRAMEN;
+    // Enable power to backup domain
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    // Enable write access to backup SRAM
+    PWR->CR |= PWR_CR_DBP;
+    // Enable Core Coupled Memory (CCM) and backup SRAM (BKPSRAM)
+    RCC->AHB1ENR |= RCC_AHB1ENR_CCMDATARAMEN | RCC_AHB1ENR_BKPSRAMEN;
 #endif
 }

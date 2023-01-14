@@ -12,78 +12,77 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FILTER_RAMP_HPP
-	#error	"Don't include this file directly, use 'ramp.hpp' instead!"
+#error "Don't include this file directly, use 'ramp.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::filter::Ramp<T>::Ramp(const T& increment, const T& decrement, const T& initialValue) :
-	target(initialValue),
-	value(initialValue),
-	targetReached(true),
-	increment(increment),
-	decrement(decrement)
+template <typename T>
+modm::filter::Ramp<T>::Ramp(const T& increment, const T& decrement, const T& initialValue)
+    : target(initialValue),
+      value(initialValue),
+      targetReached(true),
+      increment(increment),
+      decrement(decrement)
 {
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::filter::Ramp<T>::setTarget(const T& target)
+template <typename T>
+void modm::filter::Ramp<T>::setTarget(const T& target)
 {
-	this->target = target;
-	this->targetReached = false;
+    this->target = target;
+    this->targetReached = false;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::filter::Ramp<T>::update()
+template <typename T>
+void modm::filter::Ramp<T>::update()
 {
-	if (target > value)
-	{
-		T variation = target - value;
-		if (variation > increment) {
-			value += increment;
-		}
-		else {
-			value = target;
-			targetReached = true;
-		}
-	}
-	else
-	{
-		T variation = value - target;
-		if (variation > decrement) {
-			value -= decrement;
-		}
-		else {
-			value = target;
-			targetReached = true;
-		}
-	}
+    if (target > value)
+    {
+        T variation = target - value;
+        if (variation > increment)
+        {
+            value += increment;
+        }
+        else
+        {
+            value = target;
+            targetReached = true;
+        }
+    }
+    else
+    {
+        T variation = value - target;
+        if (variation > decrement)
+        {
+            value -= decrement;
+        }
+        else
+        {
+            value = target;
+            targetReached = true;
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::filter::Ramp<T>::reset(const T& value)
+template <typename T>
+void modm::filter::Ramp<T>::reset(const T& value)
 {
-	this->value = value;
+    this->value = value;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-const T&
-modm::filter::Ramp<T>::getValue() const
+template <typename T>
+const T& modm::filter::Ramp<T>::getValue() const
 {
-	return this->value;
+    return this->value;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::filter::Ramp<T>::isTargetReached() const
+template <typename T>
+bool modm::filter::Ramp<T>::isTargetReached() const
 {
-	return targetReached;
+    return targetReached;
 }

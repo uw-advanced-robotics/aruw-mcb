@@ -14,32 +14,31 @@
 #define MODM_GPIO_HPP
 
 #include <stdint.h>
+
 #include <modm/architecture/utils.hpp>
 
 namespace modm
 {
-
 /// @ingroup modm_architecture_gpio
 struct Gpio
 {
-	/**
-	 * These constants refer to the *logical* state of the GPIO.
-	 * The physical state is determined by the configuration and external connection.
-	 * @{
-	 */
-	static constexpr bool Low = false;
-	static constexpr bool High = true;
-	/// @}
+    /**
+     * These constants refer to the *logical* state of the GPIO.
+     * The physical state is determined by the configuration and external connection.
+     * @{
+     */
+    static constexpr bool Low = false;
+    static constexpr bool High = true;
+    /// @}
 
-	/// Declares the direction of a GPIO
-	enum class
-	Direction
-	{
-		In = 0,			//< GPIO is an Input
-		Out = 1,		//< GPIO is an Output
-		InOut = 2,		//< GPIO is both Input and Output
-		Special = 3,	//< GPIO is configured with a special purpose
-	};
+    /// Declares the direction of a GPIO
+    enum class Direction
+    {
+        In = 0,       //< GPIO is an Input
+        Out = 1,      //< GPIO is an Output
+        InOut = 2,    //< GPIO is both Input and Output
+        Special = 3,  //< GPIO is configured with a special purpose
+    };
 };
 
 /**
@@ -52,17 +51,15 @@ struct Gpio
 class GpioInput : public Gpio
 {
 public:
-	/// Declares the Pin direction
-	static constexpr Direction direction = Direction::In;
+    /// Declares the Pin direction
+    static constexpr Direction direction = Direction::In;
 
 #ifdef __DOXYGEN__
-	/// configure pin as input
-	static void
-	setInput();
+    /// configure pin as input
+    static void setInput();
 
-	/// read input
-	static bool
-	read();
+    /// read input
+    static bool read();
 #endif
 };
 
@@ -76,38 +73,31 @@ public:
 class GpioOutput : public Gpio
 {
 public:
-	/// Declares the Pin direction
-	static constexpr Direction direction = Direction::Out;
+    /// Declares the Pin direction
+    static constexpr Direction direction = Direction::Out;
 
 #ifdef __DOXYGEN__
-	/// configure pin as output
-	static void
-	setOutput();
+    /// configure pin as output
+    static void setOutput();
 
-	/// configure pin as output and set high or low
-	static void
-	setOutput(bool value);
+    /// configure pin as output and set high or low
+    static void setOutput(bool value);
 
-	/// set output to high level
-	static void
-	set();
+    /// set output to high level
+    static void set();
 
-	/// set output to high or low level
-	static void
-	set(bool value);
+    /// set output to high or low level
+    static void set(bool value);
 
-	/// set output to low level
-	static void
-	reset();
+    /// set output to low level
+    static void reset();
 
-	/// toggle output level
-	static void
-	toggle();
+    /// toggle output level
+    static void toggle();
 
-	/// Returns the set logical output state of the pin.
-	/// This may be different from the physical state!
-	static bool
-	isSet();
+    /// Returns the set logical output state of the pin.
+    /// This may be different from the physical state!
+    static bool isSet();
 #endif
 };
 
@@ -118,13 +108,12 @@ public:
 class GpioIO : public GpioOutput, public GpioInput
 {
 public:
-	/// Declares the Pin direction
-	static constexpr Direction direction = Direction::InOut;
+    /// Declares the Pin direction
+    static constexpr Direction direction = Direction::InOut;
 
 #ifdef __DOXYGEN__
-	/// returns the pin direction at run-time
-	static Direction
-	getDirection();
+    /// returns the pin direction at run-time
+    static Direction getDirection();
 #endif
 };
 
@@ -141,50 +130,43 @@ public:
 class GpioPort
 {
 public:
-	/// This enum can be used to reverse the bit order of the Data.
-	enum class
-	DataOrder : bool
-	{
-		Normal = false, ///< bit order of data is the same as bit order of port
-		Reversed = true ///< bit order of data is the reverse bit order of port
-	};
+    /// This enum can be used to reverse the bit order of the Data.
+    enum class DataOrder : bool
+    {
+        Normal = false,  ///< bit order of data is the same as bit order of port
+        Reversed = true  ///< bit order of data is the reverse bit order of port
+    };
 #ifdef __DOXYGEN__
-	/// This holds the width of the port as number of bits
-	/// and can be used in drivers to assert the correct requirements
-	static constexpr uint8_t width;
+    /// This holds the width of the port as number of bits
+    /// and can be used in drivers to assert the correct requirements
+    static constexpr uint8_t width;
 
-	/// This holds the number of unique platform ports that this
-	/// implementation accesses. It's always at least 1.
-	static constexpr uint8_t number_of_ports;
+    /// This holds the number of unique platform ports that this
+    /// implementation accesses. It's always at least 1.
+    static constexpr uint8_t number_of_ports;
 
-	/// may also be uint8_t, depending on port width
-	using PortType = uint16_t;
+    /// may also be uint8_t, depending on port width
+    using PortType = uint16_t;
 
-	/// returns the chosen data order
-	static constexpr DataOrder
-	getDataOrder();
+    /// returns the chosen data order
+    static constexpr DataOrder getDataOrder();
 
 public:
-	static void
-	setOutput();
+    static void setOutput();
 
-	static void
-	setInput();
+    static void setInput();
 
-	/// The read data is always right-aligned regardless of physical mapping.
-	static PortType
-	read();
+    /// The read data is always right-aligned regardless of physical mapping.
+    static PortType read();
 
-	/// The write data is always right-aligned regardless of physical mapping.
-	static void
-	write(PortType data);
+    /// The write data is always right-aligned regardless of physical mapping.
+    static void write(PortType data);
 
-	/// Toggle the output states of all pins
-	static void
-	toggle();
+    /// Toggle the output states of all pins
+    static void toggle();
 #endif
 };
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_GPIO_HPP
+#endif  // MODM_GPIO_HPP

@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_ASSERTION_HPP
-#define	MODM_FONT_ASSERTION_HPP
+#define MODM_FONT_ASSERTION_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Assertion
-		 *
-		 * - preferred width : 7
-		 * - height          : 15
-		 * - hspace          : 0
-		 * - vspace          : 1
-		 * - first char      : 32
-		 * - last char       : 128
-		 * - number of chars : 96
-		 * - size in bytes   : 1304
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t Assertion[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Assertion
+ *
+ * - preferred width : 7
+ * - height          : 15
+ * - hspace          : 0
+ * - vspace          : 1
+ * - first char      : 32
+ * - last char       : 128
+ * - number of chars : 96
+ * - size in bytes   : 1304
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t Assertion[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_ASSERTION_HPP
-
+#endif  // MODM_FONT_ASSERTION_HPP

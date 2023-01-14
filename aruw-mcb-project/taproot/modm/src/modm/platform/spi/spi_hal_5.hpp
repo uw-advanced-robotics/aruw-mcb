@@ -19,10 +19,8 @@
 
 namespace modm
 {
-
 namespace platform
 {
-
 /**
  * Serial peripheral interface (SPI5)
  *
@@ -35,112 +33,95 @@ namespace platform
 class SpiHal5 : public SpiBase
 {
 public:
-	/// Enables the clock, resets the hardware and sets the SPE bit
-	static void
-	enable();
+    /// Enables the clock, resets the hardware and sets the SPE bit
+    static void enable();
 
-	/// Disables the hw module (by disabling its clock line)
-	static void
-	disable();
+    /// Disables the hw module (by disabling its clock line)
+    static void disable();
 
-	/**
-	 * Initialize Spi Peripheral
-	 *
-	 * Enables clocks, the UART peripheral
-	 * Sets baudrate and parity.
-	 */
-	static void
-	initialize(	Prescaler prescaler,
-				MasterSelection masterSelection = MasterSelection::Master,
-				DataMode dataMode   = DataMode::Mode0,
-				DataOrder dataOrder = DataOrder::MsbFirst,
-				DataSize  dataSize  = DataSize::Bit8);
+    /**
+     * Initialize Spi Peripheral
+     *
+     * Enables clocks, the UART peripheral
+     * Sets baudrate and parity.
+     */
+    static void initialize(
+        Prescaler prescaler,
+        MasterSelection masterSelection = MasterSelection::Master,
+        DataMode dataMode = DataMode::Mode0,
+        DataOrder dataOrder = DataOrder::MsbFirst,
+        DataSize dataSize = DataSize::Bit8);
 
-	static void
-	setDataMode(DataMode dataMode);
+    static void setDataMode(DataMode dataMode);
 
-	static void
-	setDataOrder(DataOrder dataOrder);
+    static void setDataOrder(DataOrder dataOrder);
 
-	static void
-	setDataSize(DataSize dataSize);
+    static void setDataSize(DataSize dataSize);
 
-	static void
-	setMasterSelection(MasterSelection masterSelection);
+    static void setMasterSelection(MasterSelection masterSelection);
 
-	/// Returns true if data has been received
-	static bool
-	isReceiveRegisterNotEmpty();
+    /// Returns true if data has been received
+    static bool isReceiveRegisterNotEmpty();
 
-	/// Returns true if data can be written
-	static bool
-	isTransmitRegisterEmpty();
+    /// Returns true if data can be written
+    static bool isTransmitRegisterEmpty();
 
-	/**
-	 * Write up to 16 Bit to the data register
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				is empty!
-	 */
-	static void
-	write(uint16_t data);
+    /**
+     * Write up to 16 Bit to the data register
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				is empty!
+     */
+    static void write(uint16_t data);
 
-	/**
-	 * Write 8 Bit to the data register
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				is empty!
-	 */
-	static void
-	write(uint8_t data);
+    /**
+     * Write 8 Bit to the data register
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				is empty!
+     */
+    static void write(uint8_t data);
 
-	/**
-	 * Returns the value of the data register
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				contains something useful!
-	 */
-	static void
-	read(uint8_t &data);
+    /**
+     * Returns the value of the data register
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				contains something useful!
+     */
+    static void read(uint8_t &data);
 
-	/**
-	 * Returns the value of the data register
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				contains something useful!
-	 */
-	static void
-	read(uint16_t &data);
+    /**
+     * Returns the value of the data register
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				contains something useful!
+     */
+    static void read(uint16_t &data);
 
-	static void
-	enableInterruptVector(bool enable, uint32_t priority);
+    static void enableInterruptVector(bool enable, uint32_t priority);
 
-	static void
-	enableInterrupt(Interrupt_t interrupt);
+    static void enableInterrupt(Interrupt_t interrupt);
 
-	static void
-	disableInterrupt(Interrupt_t interrupt);
+    static void disableInterrupt(Interrupt_t interrupt);
 
-	static InterruptFlag_t
-	getInterruptFlags();
+    static InterruptFlag_t getInterruptFlags();
 
-	/**
-	 *
-	 *
-	 * @warning 	Not all InterruptFlags can be cleared this way.
-	 */
-	static void
-	acknowledgeInterruptFlag(InterruptFlag_t flags);
+    /**
+     *
+     *
+     * @warning 	Not all InterruptFlags can be cleared this way.
+     */
+    static void acknowledgeInterruptFlag(InterruptFlag_t flags);
 };
 
-} // namespace platform
+}  // namespace platform
 
-} // namespace modm
+}  // namespace modm
 
 #include "spi_hal_5_impl.hpp"
 
-#endif // MODM_STM32_SPI_HAL5_HPP
+#endif  // MODM_STM32_SPI_HAL5_HPP

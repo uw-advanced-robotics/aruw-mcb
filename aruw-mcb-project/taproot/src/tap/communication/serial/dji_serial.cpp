@@ -21,13 +21,13 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "dji_serial.hpp"
+
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
-
-#include "dji_serial.hpp"
 
 /**
  * Macro that wraps uart read for ease of readability in code.

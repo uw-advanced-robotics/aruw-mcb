@@ -12,12 +12,25 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FILTER_MEDIAN_HPP
-	#error	"Don't include this file directly, use 'median.hpp' instead!"
+#error "Don't include this file directly, use 'median.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-#define MODM_MEDIAN_SORT(a,b) do { if (a > b) { MODM_MEDIAN_SWAP(a, b); } } while (0);
-#define MODM_MEDIAN_SWAP(a,b) do { T temp = a; a = b; b = temp; } while (0);
+#define MODM_MEDIAN_SORT(a, b)      \
+    do                              \
+    {                               \
+        if (a > b)                  \
+        {                           \
+            MODM_MEDIAN_SWAP(a, b); \
+        }                           \
+    } while (0);
+#define MODM_MEDIAN_SWAP(a, b) \
+    do                         \
+    {                          \
+        T temp = a;            \
+        a = b;                 \
+        b = temp;              \
+    } while (0);
 
 #include "median_3_impl.hpp"
 #include "median_5_impl.hpp"

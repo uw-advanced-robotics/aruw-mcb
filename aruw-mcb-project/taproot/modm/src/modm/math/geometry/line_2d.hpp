@@ -13,94 +13,81 @@
 #ifndef MODM_LINE_2D_HPP
 #define MODM_LINE_2D_HPP
 
-#include "vector.hpp"
-#include "point_set_2d.hpp"
-
 #include "geometric_traits.hpp"
+#include "point_set_2d.hpp"
+#include "vector.hpp"
 
 namespace modm
 {
-	// forward declaration
-	template <typename T>
-	class Circle2D;
+// forward declaration
+template <typename T>
+class Circle2D;
 
-	/**
-	 * \brief	Line
-	 *
-	 * \author	Fabian Greif
-	 * \ingroup	modm_math_geometry
-	 */
-	template <typename T>
-	class Line2D
-	{
-	public:
-		typedef typename GeometricTraits<T>::WideType WideType;
-		typedef typename GeometricTraits<T>::FloatType FloatType;
+/**
+ * \brief	Line
+ *
+ * \author	Fabian Greif
+ * \ingroup	modm_math_geometry
+ */
+template <typename T>
+class Line2D
+{
+public:
+    typedef typename GeometricTraits<T>::WideType WideType;
+    typedef typename GeometricTraits<T>::FloatType FloatType;
 
-	public:
-		/**
-		 * \brief	Default-Constructor
-		 */
-		Line2D();
+public:
+    /**
+     * \brief	Default-Constructor
+     */
+    Line2D();
 
-		/**
-		 * \brief	Construct a line
-		 *
-		 * \param	point			a point on the line
-		 * \param	directionVector	direction vector, the length doesn't matter
-		 */
-		Line2D(const Vector<T, 2>& point, const Vector<T, 2>& directionVector);
+    /**
+     * \brief	Construct a line
+     *
+     * \param	point			a point on the line
+     * \param	directionVector	direction vector, the length doesn't matter
+     */
+    Line2D(const Vector<T, 2>& point, const Vector<T, 2>& directionVector);
 
+    inline void setPoint(const Vector<T, 2>& point);
 
-		inline void
-		setPoint(const Vector<T, 2>& point);
+    inline const Vector<T, 2>& getPoint() const;
 
-		inline const Vector<T, 2>&
-		getPoint() const;
+    inline void setDirectionVector(const Vector<T, 2>& vector);
 
-		inline void
-		setDirectionVector(const Vector<T, 2>& vector);
+    inline const Vector<T, 2>& getDirectionVector() const;
 
-		inline const Vector<T, 2>&
-		getDirectionVector() const;
+    inline void set(const Vector<T, 2>& point, const Vector<T, 2>& directionVector);
 
-		inline void
-		set(const Vector<T, 2>& point, const Vector<T, 2>& directionVector);
+    /// Shortest distance to a point
+    T getDistanceTo(const Vector<T, 2>& point) const;
 
-		/// Shortest distance to a point
-		T
-		getDistanceTo(const Vector<T, 2>& point) const;
+    /**
+     * \brief	Calculate intersection point(s)
+     *
+     * \param[in]	other	Other line
+     * \param[out]	intersections	Intersection point
+     */
+    bool getIntersections(const Line2D& other, PointSet2D<T>& intersections) const;
 
-		/**
-		 * \brief	Calculate intersection point(s)
-		 *
-		 * \param[in]	other	Other line
-		 * \param[out]	intersections	Intersection point
-		 */
-		bool
-		getIntersections(const Line2D& other,
-				PointSet2D<T>& intersections) const;
+    /**
+     * \brief	Calculate intersection point(s)
+     *
+     * \param[in]	circle	A circle
+     * \param[out]	intersections	Intersection points
+     *
+     * \see		http://local.wasp.uwa.edu.au/~pbourke/geometry/sphereline/
+     */
+    bool getIntersections(const Circle2D<T>& circle, PointSet2D<T>& intersections) const;
 
-		/**
-		 * \brief	Calculate intersection point(s)
-		 *
-		 * \param[in]	circle	A circle
-		 * \param[out]	intersections	Intersection points
-		 *
-		 * \see		http://local.wasp.uwa.edu.au/~pbourke/geometry/sphereline/
-		 */
-		bool
-		getIntersections(const Circle2D<T>& circle,
-				PointSet2D<T>& intersections) const;
-
-	protected:
-		Vector<T, 2> point;
-		Vector<T, 2> directionVector;
-	};
-}
+protected:
+    Vector<T, 2> point;
+    Vector<T, 2> directionVector;
+};
+}  // namespace modm
 
 #include "circle_2d.hpp"
-
 #include "line_2d_impl.hpp"
 
-#endif // MODM_LINE_2D_HPP
+#endif  // MODM_LINE_2D_HPP

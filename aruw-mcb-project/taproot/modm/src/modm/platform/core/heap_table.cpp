@@ -10,15 +10,16 @@
  */
 // ----------------------------------------------------------------------------
 
+#include "heap_table.hpp"
+
 #include <stddef.h>
 #include <stdint.h>
-#include "heap_table.hpp"
 
 struct table_pool_t
 {
-	uint32_t traits;
-	uint8_t *const start;
-	uint8_t *const end;
+    uint32_t traits;
+    uint8_t* const start;
+    uint8_t* const end;
 } __attribute__((packed));
 
 extern "C" const table_pool_t __table_heap_start[];
@@ -26,85 +27,70 @@ extern "C" const table_pool_t __table_heap_end[];
 
 namespace modm::platform
 {
-HeapTable::Iterator
-HeapTable::begin()
+HeapTable::Iterator HeapTable::begin() { return Iterator(__table_heap_start); }
+
+HeapTable::Iterator HeapTable::end() { return Iterator(__table_heap_end); }
+
+HeapTable::Iterator::Iterator(const table_pool_t* table) : table(table) {}
+
+HeapTable::Iterator::Type HeapTable::Iterator::operator*() const
 {
-	return Iterator(__table_heap_start);
+    return {
+        MemoryTraits(table->traits),
+        table->start,
+        table->end,
+        static_cast<size_t>(table->end - table->start)};
 }
 
-HeapTable::Iterator
-HeapTable::end()
+HeapTable::Iterator& HeapTable::Iterator::operator++()
 {
-	return Iterator(__table_heap_end);
+    table++;
+    return *this;
 }
 
-HeapTable::Iterator::Iterator(const table_pool_t* table):
-	table(table)
-{}
-
-HeapTable::Iterator::Type
-HeapTable::Iterator::operator*() const
+HeapTable::Iterator HeapTable::Iterator::operator++(int)
 {
-	return {MemoryTraits(table->traits), table->start, table->end, static_cast<size_t>(table->end - table->start)};
+    Iterator it{table};
+    ++*this;
+    return it;
 }
 
-HeapTable::Iterator&
-HeapTable::Iterator::operator++()
-{
-	table++;
-	return *this;
-}
+bool HeapTable::Iterator::operator==(const Iterator& other) const { return table == other.table; }
 
-HeapTable::Iterator
-HeapTable::Iterator::operator++(int)
-{
-	Iterator it{table};
-	++*this;
-	return it;
-}
-
-bool
-HeapTable::Iterator::operator==(const Iterator& other) const
-{
-	return table == other.table;
-}
-
-bool
-HeapTable::Iterator::operator!=(const Iterator& other) const
-{
-	return table != other.table;
-}
+bool HeapTable::Iterator::operator!=(const Iterator& other) const { return table != other.table; }
 
 // Finds the largest heap with declared traits
-bool
-HeapTable::find_largest(const uint8_t **const start,
-						const uint8_t **const end,
-						const MemoryTraits trait_mask)
+bool HeapTable::find_largest(
+    const uint8_t** const start,
+    const uint8_t** const end,
+    const MemoryTraits trait_mask)
 {
-	size_t current_size = 0;
-	*start = nullptr;
-	*end = nullptr;
+    size_t current_size = 0;
+    *start = nullptr;
+    *end = nullptr;
 
-	for (const auto [ttraits, tstart, tend, tsize] : modm::platform::HeapTable())
-	{
-		// we only care for generic enough regions
-		if (ttraits & trait_mask)
-		{
-			// if the start address is equal to the end address
-			// we can extend the previous memory region with this one
-			if (tstart == *end) {
-				*end = tend;
-				current_size += tsize;
-			}
-			else if (tsize >= current_size) {
-				// otherwise we found a larger region
-				*start = tstart;
-				*end = tend;
-				current_size = tsize;
-			}
-		}
-	}
-	return *start;
+    for (const auto [ttraits, tstart, tend, tsize] : modm::platform::HeapTable())
+    {
+        // we only care for generic enough regions
+        if (ttraits & trait_mask)
+        {
+            // if the start address is equal to the end address
+            // we can extend the previous memory region with this one
+            if (tstart == *end)
+            {
+                *end = tend;
+                current_size += tsize;
+            }
+            else if (tsize >= current_size)
+            {
+                // otherwise we found a larger region
+                *start = tstart;
+                *end = tend;
+                current_size = tsize;
+            }
+        }
+    }
+    return *start;
 }
 
-} // namespace modm::platform
+}  // namespace modm::platform

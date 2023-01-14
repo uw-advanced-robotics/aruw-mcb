@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_UBUNTU_36_HPP
-#define	MODM_FONT_UBUNTU_36_HPP
+#define MODM_FONT_UBUNTU_36_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Ubuntu_36
-		 *
-		 * - preferred width : 16
-		 * - height          : 35
-		 * - hspace          : 1
-		 * - vspace          : 0
-		 * - first char      : 32
-		 * - last char       : 128
-		 * - number of chars : 96
-		 * - size in bytes   : 7389
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t Ubuntu_36[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Ubuntu_36
+ *
+ * - preferred width : 16
+ * - height          : 35
+ * - hspace          : 1
+ * - vspace          : 0
+ * - first char      : 32
+ * - last char       : 128
+ * - number of chars : 96
+ * - size in bytes   : 7389
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t Ubuntu_36[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_UBUNTU_36_HPP
-
+#endif  // MODM_FONT_UBUNTU_36_HPP

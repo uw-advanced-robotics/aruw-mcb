@@ -22,29 +22,25 @@
 
 namespace modm
 {
-	/// @ingroup modm_ui_menu
-	template<typename Allocator = allocator::Dynamic<IAbstractView> >
-	class MenuEntryCallback
-	{
-	public:
-			typedef void (modm::AbstractMenu<Allocator>::*Function)();
+/// @ingroup modm_ui_menu
+template <typename Allocator = allocator::Dynamic<IAbstractView> >
+class MenuEntryCallback
+{
+public:
+    typedef void (modm::AbstractMenu<Allocator>::*Function)();
 
-			template <typename M>
-			MenuEntryCallback(M *menu, void (M::*function)()) :
-				menu(reinterpret_cast<modm::AbstractMenu<Allocator> *>(menu)),
-				function(reinterpret_cast<Function>(function))
-			{
-			}
+    template <typename M>
+    MenuEntryCallback(M *menu, void (M::*function)())
+        : menu(reinterpret_cast<modm::AbstractMenu<Allocator> *>(menu)),
+          function(reinterpret_cast<Function>(function))
+    {
+    }
 
-			inline void
-			call() const
-			{
-				(menu->*function)();
-			}
+    inline void call() const { (menu->*function)(); }
 
-		protected:
-			modm::AbstractMenu<Allocator> * const menu;
-			Function const function;
-		};
-}
-#endif // MODM_MENU_ENTRY_CALLBACK
+protected:
+    modm::AbstractMenu<Allocator> *const menu;
+    Function const function;
+};
+}  // namespace modm
+#endif  // MODM_MENU_ENTRY_CALLBACK

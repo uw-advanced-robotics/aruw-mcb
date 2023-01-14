@@ -13,81 +13,81 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_LOG_STYLE_HPP
-	#error "Don't include this file directly, use 'style.hpp' instead!"
+#error "Don't include this file directly, use 'style.hpp' instead!"
 #endif
 
 #include <type_traits>
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-modm::log::Style<STYLE>::Style( STYLE style ) :
-	style( style ),
-	device ( 0 )
+template <typename STYLE>
+modm::log::Style<STYLE>::Style(STYLE style) : style(style),
+                                              device(0)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-modm::log::Style<STYLE>::Style( IODevice &outputDevice) :
-	device ( &outputDevice )
+template <typename STYLE>
+modm::log::Style<STYLE>::Style(IODevice& outputDevice) : device(&outputDevice)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
+template <typename STYLE>
 modm::log::Style<STYLE>::~Style()
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::Style<STYLE>::parseArg( int /*argc*/, char * /*argv*/ )
+template <typename STYLE>
+void modm::log::Style<STYLE>::parseArg(int /*argc*/, char* /*argv*/)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::Style<STYLE>::write( char c )
+template <typename STYLE>
+void modm::log::Style<STYLE>::write(char c)
 {
-	if ( std::is_same_v<STYLE, DefaultStyle > ) {
-		this->device->write( c );
-	}
-	else {
-		this->style.write( c );
-	}
+    if (std::is_same_v<STYLE, DefaultStyle>)
+    {
+        this->device->write(c);
+    }
+    else
+    {
+        this->style.write(c);
+    }
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::Style<STYLE>::write( const char* s )
+template <typename STYLE>
+void modm::log::Style<STYLE>::write(const char* s)
 {
-	if ( std::is_same_v<STYLE, DefaultStyle> ) {
-		this->device->write( s );
-	}
-	else {
-		this->style.write( s );
-	}
+    if (std::is_same_v<STYLE, DefaultStyle>)
+    {
+        this->device->write(s);
+    }
+    else
+    {
+        this->style.write(s);
+    }
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::Style<STYLE>::flush()
+template <typename STYLE>
+void modm::log::Style<STYLE>::flush()
 {
-	if ( std::is_same_v<STYLE, DefaultStyle > ) {
-		this->device->flush();
-	}
-	else {
-		this->style.flush();
-	}
+    if (std::is_same_v<STYLE, DefaultStyle>)
+    {
+        this->device->flush();
+    }
+    else
+    {
+        this->style.flush();
+    }
 }

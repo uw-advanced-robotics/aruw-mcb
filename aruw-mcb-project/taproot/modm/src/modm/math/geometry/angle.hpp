@@ -13,15 +13,16 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_ANGLE_HPP
-#define	MODM_ANGLE_HPP
+#ifndef MODM_ANGLE_HPP
+#define MODM_ANGLE_HPP
+
+#include <math.h>
 
 #include <cmath>
-#include <math.h>
 
 // The circumference of a circle with diameter 1
 #ifndef M_PI
-#define M_PI  3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #ifndef M_PI_2
@@ -46,83 +47,64 @@
 
 // The square root of 2.
 #ifndef M_SQRT2
-#define M_SQRT2  1.41421356237309504880
+#define M_SQRT2 1.41421356237309504880
 #endif
 
 namespace modm
 {
-	/// @ingroup modm_math_geometry
-	static constexpr float
-	toRadian(float angle)
-	{
-		return (angle * M_PI) / 180.f;
-	}
+/// @ingroup modm_math_geometry
+static constexpr float toRadian(float angle) { return (angle * M_PI) / 180.f; }
 
-	/// @ingroup modm_math_geometry
-	static constexpr float
-	toDegree(float angle)
-	{
-		return (angle * 180.f) / M_PI;
-	}
+/// @ingroup modm_math_geometry
+static constexpr float toDegree(float angle) { return (angle * 180.f) / M_PI; }
 
-	/**
-	 * \brief	Collection of functions for handling of angles
-	 *
-	 * Angles are always represented by float values in the range
-	 * from -Pi to Pi.
-	 *
-	 * @ingroup modm_math_geometry
-	 */
-	class Angle
-	{
-	public:
-		typedef float Type;
+/**
+ * \brief	Collection of functions for handling of angles
+ *
+ * Angles are always represented by float values in the range
+ * from -Pi to Pi.
+ *
+ * @ingroup modm_math_geometry
+ */
+class Angle
+{
+public:
+    typedef float Type;
 
-		/**
-		 * \brief	Normalize angle
-		 *
-		 * Normalize the given angle to [-Pi,Pi] by repeatedly
-		 * adding/subtracting 2*Pi.
-		 */
-		static float
-		normalize(float angle);
+    /**
+     * \brief	Normalize angle
+     *
+     * Normalize the given angle to [-Pi,Pi] by repeatedly
+     * adding/subtracting 2*Pi.
+     */
+    static float normalize(float angle);
 
-		/**
-		 * \brief	Reverse the angle
-		 *
-		 * Reverse the angle and keep it normalized to [-Pi,Pi].
-		 *
-		 * Equivalent to:
-		 * \code
-		 * float angle = modm::Angle::normalize(angle + M_PI);
-		 * \endcode
-		 */
-		static float
-		reverse(float angle);
+    /**
+     * \brief	Reverse the angle
+     *
+     * Reverse the angle and keep it normalized to [-Pi,Pi].
+     *
+     * Equivalent to:
+     * \code
+     * float angle = modm::Angle::normalize(angle + M_PI);
+     * \endcode
+     */
+    static float reverse(float angle);
 
-		/**
-		 * \brief	Find a perpendicular angle
-		 *
-		 * \param	angle
-		 * \param	cw	If cw is true the angle is rotated clockwise.
-		 * 				Ohterwise the angle is rotated anti clockwise.
-		 */
+    /**
+     * \brief	Find a perpendicular angle
+     *
+     * \param	angle
+     * \param	cw	If cw is true the angle is rotated clockwise.
+     * 				Ohterwise the angle is rotated anti clockwise.
+     */
 
-		static float
-		perpendicular(float angle, const bool cw);
+    static float perpendicular(float angle, const bool cw);
 
-		static constexpr float
-		toRadian(float angle)
-		{
-			return ::modm::toRadian(angle);
-		}
+    static constexpr float toRadian(float angle) { return ::modm::toRadian(angle); }
 
-		static constexpr float
-		toDegree(float angle)
-		{
-			return ::modm::toDegree(angle);
-		}
-	};
-}
+    static constexpr float toDegree(float angle) { return ::modm::toDegree(angle); }
+};
+}  // namespace modm
 
-#endif	// MODM_ANGLE_HPP
+#endif  // MODM_ANGLE_HPP

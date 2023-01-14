@@ -14,68 +14,47 @@
 
 #pragma once
 
-#include "../device.hpp"
 #include <modm/architecture/utils.hpp>
+
+#include "../device.hpp"
 
 /// @cond
 namespace modm::atomic
 {
-
 class Lock
 {
 public:
-	modm_always_inline
-	Lock() : cpsr(__get_PRIMASK())
-	{
-		__disable_irq();
-	}
+    modm_always_inline Lock() : cpsr(__get_PRIMASK()) { __disable_irq(); }
 
-	modm_always_inline
-	~Lock()
-	{
-		__set_PRIMASK(cpsr);
-	}
+    modm_always_inline ~Lock() { __set_PRIMASK(cpsr); }
 
 private:
-	uint32_t cpsr;
+    uint32_t cpsr;
 };
 
 class Unlock
 {
 public:
-	modm_always_inline
-	Unlock() : cpsr(__get_PRIMASK())
-	{
-		__enable_irq();
-	}
+    modm_always_inline Unlock() : cpsr(__get_PRIMASK()) { __enable_irq(); }
 
-	modm_always_inline
-	~Unlock()
-	{
-		__set_PRIMASK(cpsr);
-	}
+    modm_always_inline ~Unlock() { __set_PRIMASK(cpsr); }
 
 private:
-	uint32_t cpsr;
+    uint32_t cpsr;
 };
 
 class LockPriority
 {
 public:
-	modm_always_inline
-	LockPriority(uint32_t priority) : basepri(__get_BASEPRI())
-	{
-		__set_BASEPRI_MAX(priority << (8u - __NVIC_PRIO_BITS));
-	}
+    modm_always_inline LockPriority(uint32_t priority) : basepri(__get_BASEPRI())
+    {
+        __set_BASEPRI_MAX(priority << (8u - __NVIC_PRIO_BITS));
+    }
 
-	modm_always_inline
-	~LockPriority()
-	{
-		__set_BASEPRI(basepri);
-	}
+    modm_always_inline ~LockPriority() { __set_BASEPRI(basepri); }
 
 private:
-	uint32_t basepri;
+    uint32_t basepri;
 };
-}	// namespace modm::atomic
+}  // namespace modm::atomic
 /// @endcond

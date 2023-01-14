@@ -12,274 +12,241 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_VECTOR1_HPP
-	#error	"Don't include this file directly, use 'vector1.hpp' instead!"
+#error "Don't include this file directly, use 'vector1.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>::Vector() :
-	x()
+template <typename T>
+modm::Vector<T, 1>::Vector() : x()
 {
 }
 
-template<typename T>
-modm::Vector<T, 1>::Vector(T inX) :
-	x(inX)
+template <typename T>
+modm::Vector<T, 1>::Vector(T inX) : x(inX)
 {
 }
 
-template<typename T>
-modm::Vector<T, 1>::Vector(const modm::Matrix<T, 1, 1> &rhs) :
-	x(*reinterpret_cast<const T*>(&rhs))
+template <typename T>
+modm::Vector<T, 1>::Vector(const modm::Matrix<T, 1, 1> &rhs) : x(*reinterpret_cast<const T *>(&rhs))
 {
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::Vector<T, 1>::set(const T& value)
+template <typename T>
+void modm::Vector<T, 1>::set(const T &value)
 {
-	this->x = value;
+    this->x = value;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::Vector<T, 1>::setX(const T& value)
+template <typename T>
+void modm::Vector<T, 1>::setX(const T &value)
 {
-	this->x = value;
+    this->x = value;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-const T&
-modm::Vector<T, 1>::getX() const
+template <typename T>
+const T &modm::Vector<T, 1>::getX() const
 {
-	return this->x;
+    return this->x;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>&
-modm::Vector<T, 1>::operator = (const modm::Matrix<T, 1, 1> &rhs)
+template <typename T>
+modm::Vector<T, 1> &modm::Vector<T, 1>::operator=(const modm::Matrix<T, 1, 1> &rhs)
 {
-	x = *reinterpret_cast<const T*>(&rhs);
-	return *this;
+    x = *reinterpret_cast<const T *>(&rhs);
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator == (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator==(const modm::Vector<T, 1> &rhs) const
 {
-	return (rhs.x == x);
+    return (rhs.x == x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator != (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator!=(const modm::Vector<T, 1> &rhs) const
 {
-	return (rhs.x != x);
+    return (rhs.x != x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator < (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator<(const modm::Vector<T, 1> &rhs) const
 {
-	return (x < rhs.x);
+    return (x < rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator <= (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator<=(const modm::Vector<T, 1> &rhs) const
 {
-	return (x <= rhs.x);
+    return (x <= rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator > (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator>(const modm::Vector<T, 1> &rhs) const
 {
-	return (x > rhs.x);
+    return (x > rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::operator >= (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+bool modm::Vector<T, 1>::operator>=(const modm::Vector<T, 1> &rhs) const
 {
-	return (x >= rhs.x);
+    return (x >= rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-const T&
-modm::Vector<T, 1>::operator [] (uint8_t index) const
+template <typename T>
+const T &modm::Vector<T, 1>::operator[](uint8_t index) const
 {
-	return reinterpret_cast<const T*>(this)[index];
+    return reinterpret_cast<const T *>(this)[index];
 }
 
-template<typename T>
-T&
-modm::Vector<T, 1>::operator [] (uint8_t index)
+template <typename T>
+T &modm::Vector<T, 1>::operator[](uint8_t index)
 {
-	return reinterpret_cast<T*>(this)[index];
-}
-
-// ----------------------------------------------------------------------------
-template<typename T>
-T*
-modm::Vector<T, 1>::ptr()
-{
-	return reinterpret_cast<T*>(this);
-}
-
-template<typename T>
-const T*
-modm::Vector<T, 1>::ptr() const
-{
-	return reinterpret_cast<const T*>(this);
+    return reinterpret_cast<T *>(this)[index];
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>
-modm::Vector<T, 1>::operator + (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+T *modm::Vector<T, 1>::ptr()
 {
-	return modm::Vector<T, 1>(x+rhs.x);
+    return reinterpret_cast<T *>(this);
+}
+
+template <typename T>
+const T *modm::Vector<T, 1>::ptr() const
+{
+    return reinterpret_cast<const T *>(this);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>
-modm::Vector<T, 1>::operator - (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+modm::Vector<T, 1> modm::Vector<T, 1>::operator+(const modm::Vector<T, 1> &rhs) const
 {
-	return modm::Vector<T, 1>(x-rhs.x);
+    return modm::Vector<T, 1>(x + rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-T
-modm::Vector<T, 1>::operator * (const modm::Vector<T, 1> &rhs) const
+template <typename T>
+modm::Vector<T, 1> modm::Vector<T, 1>::operator-(const modm::Vector<T, 1> &rhs) const
 {
-	return x*rhs.x;
+    return modm::Vector<T, 1>(x - rhs.x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>
-modm::Vector<T, 1>::operator * (const T &rhs) const
+template <typename T>
+T modm::Vector<T, 1>::operator*(const modm::Vector<T, 1> &rhs) const
 {
-	return modm::Vector<T, 1>(x*rhs);
+    return x * rhs.x;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>
-modm::Vector<T, 1>::operator / (const T &rhs) const
+template <typename T>
+modm::Vector<T, 1> modm::Vector<T, 1>::operator*(const T &rhs) const
 {
-	return modm::Vector<T, 1>(x/rhs);
+    return modm::Vector<T, 1>(x * rhs);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>&
-modm::Vector<T, 1>::operator += (const modm::Vector<T, 1> &rhs)
+template <typename T>
+modm::Vector<T, 1> modm::Vector<T, 1>::operator/(const T &rhs) const
 {
-	x += rhs.x;
-	return *this;
+    return modm::Vector<T, 1>(x / rhs);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>&
-modm::Vector<T, 1>::operator -= (const modm::Vector<T, 1> &rhs)
+template <typename T>
+modm::Vector<T, 1> &modm::Vector<T, 1>::operator+=(const modm::Vector<T, 1> &rhs)
 {
-	x -= rhs.x;
-	return *this;
+    x += rhs.x;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>&
-modm::Vector<T, 1>::operator *= (const T &rhs)
+template <typename T>
+modm::Vector<T, 1> &modm::Vector<T, 1>::operator-=(const modm::Vector<T, 1> &rhs)
 {
-	x *= rhs;
-	return *this;
+    x -= rhs.x;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>&
-modm::Vector<T, 1>::operator /= (const T &rhs)
+template <typename T>
+modm::Vector<T, 1> &modm::Vector<T, 1>::operator*=(const T &rhs)
 {
-	x /= rhs;
-	return *this;
+    x *= rhs;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Vector<T, 1>
-modm::Vector<T, 1>::operator - () const
+template <typename T>
+modm::Vector<T, 1> &modm::Vector<T, 1>::operator/=(const T &rhs)
 {
-	return Vector<T, 1>(-x);
+    x /= rhs;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-T
-modm::Vector<T, 1>::getLength() const
+template <typename T>
+modm::Vector<T, 1> modm::Vector<T, 1>::operator-() const
 {
-	return std::abs(x);
+    return Vector<T, 1>(-x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-T
-modm::Vector<T, 1>::getLengthSquared() const
+template <typename T>
+T modm::Vector<T, 1>::getLength() const
 {
-	return x * x;
+    return std::abs(x);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Matrix<T, 1, 1>&
-modm::Vector<T, 1>::asMatrix()
+template <typename T>
+T modm::Vector<T, 1>::getLengthSquared() const
 {
-	return *(modm::Matrix<T, 1, 1>*) this;
+    return x * x;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-const modm::Matrix<T, 1, 1>&
-modm::Vector<T, 1>::asMatrix() const
+template <typename T>
+modm::Matrix<T, 1, 1> &modm::Vector<T, 1>::asMatrix()
 {
-	return *(modm::Matrix<T, 1, 1>*) this;
+    return *(modm::Matrix<T, 1, 1> *)this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::hasNan() const
+template <typename T>
+const modm::Matrix<T, 1, 1> &modm::Vector<T, 1>::asMatrix() const
 {
-	return std::isnan(x);
+    return *(modm::Matrix<T, 1, 1> *)this;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Vector<T, 1>::hasInf() const
+template <typename T>
+bool modm::Vector<T, 1>::hasNan() const
 {
-	return std::isinf(x);
+    return std::isnan(x);
 }
 
 // ----------------------------------------------------------------------------
-//template<typename U, typename T>
-//static modm::Vector<T, 1> operator * (const U &lhs, const modm::Vector<T, 1> &rhs)
+template <typename T>
+bool modm::Vector<T, 1>::hasInf() const
+{
+    return std::isinf(x);
+}
+
+// ----------------------------------------------------------------------------
+// template<typename U, typename T>
+// static modm::Vector<T, 1> operator * (const U &lhs, const modm::Vector<T, 1> &rhs)
 //{
 //	return rhs * lhs;
 //}

@@ -15,86 +15,85 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_RESPONSE_CALLBACK_HPP
-#define	XPCC_RESPONSE_CALLBACK_HPP
+#ifndef XPCC_RESPONSE_CALLBACK_HPP
+#define XPCC_RESPONSE_CALLBACK_HPP
 
 #include <modm/container/smart_pointer.hpp>
 
 #include "backend/backend_interface.hpp"
+
 #include "communicatable.hpp"
 
 namespace xpcc
 {
-	/**
-	 * \brief 		Callback type, which has to be passed to communication during
-	 *				actioncall in order to be able to receive a response.
-	 *
-	 * Is a \b Functor.
-	 *
-	 * \ingroup		modm_communication_xpcc
-	 */
-	class ResponseCallback
-	{
-	public:
-		typedef void (Communicatable::*Function)(const Header& header, const uint8_t *type);
+/**
+ * \brief 		Callback type, which has to be passed to communication during
+ *				actioncall in order to be able to receive a response.
+ *
+ * Is a \b Functor.
+ *
+ * \ingroup		modm_communication_xpcc
+ */
+class ResponseCallback
+{
+public:
+    typedef void (Communicatable::*Function)(const Header &header, const uint8_t *type);
 
-	public:
-		ResponseCallback() : component(nullptr), function(nullptr) {}
+public:
+    ResponseCallback() : component(nullptr), function(nullptr) {}
 
-		/**
-		 * Set the method that will be called when a response is received.
-		 *
-		 * \param	componentObject	Pointer to a component object
-		 * \param	memberFunction	Pointer to a function of the component object
-		 */
-		template <typename C, typename P>
-		ResponseCallback(C *componentObject, void (C::*memberFunction)(const Header& header, const P* packet)) :
-			component(reinterpret_cast<Communicatable *>(componentObject)),
-			function(reinterpret_cast<Function>(memberFunction))/*,
-			packetSize(sizeof(P))*/
-		{
-		}
+    /**
+     * Set the method that will be called when a response is received.
+     *
+     * \param	componentObject	Pointer to a component object
+     * \param	memberFunction	Pointer to a function of the component object
+     */
+    template <typename C, typename P>
+    ResponseCallback(
+        C *componentObject,
+        void (C::*memberFunction)(const Header &header, const P *packet))
+        : component(reinterpret_cast<Communicatable *>(componentObject)),
+          function(reinterpret_cast<Function>(memberFunction)) /*,
+           packetSize(sizeof(P))*/
+    {
+    }
 
-		/**
-		 * Set the method that will be called when a response is received.
-		 *
-		 * This specialization is to be used in case of no payload. The second
-		 * parameter of the method has to be a void*.
-		 *
-		 * \param	componentObject	Pointer to a component object
-		 * \param	memberFunction	Pointer to a function of the component object
-		 */
-		template <typename C>
-		ResponseCallback(C *componentObject, void (C::*memberFunction)(const Header& header)) :
-			component(reinterpret_cast<Communicatable *>(componentObject)),
-			function(reinterpret_cast<Function>(memberFunction))/*,
-			packetSize(0)*/
-		{
-		}
+    /**
+     * Set the method that will be called when a response is received.
+     *
+     * This specialization is to be used in case of no payload. The second
+     * parameter of the method has to be a void*.
+     *
+     * \param	componentObject	Pointer to a component object
+     * \param	memberFunction	Pointer to a function of the component object
+     */
+    template <typename C>
+    ResponseCallback(C *componentObject, void (C::*memberFunction)(const Header &header))
+        : component(reinterpret_cast<Communicatable *>(componentObject)),
+          function(reinterpret_cast<Function>(memberFunction)) /*,
+           packetSize(0)*/
+    {
+    }
 
-		inline bool
-		isCallable() const
-		{
-			return component != nullptr and function != nullptr;
-		}
+    inline bool isCallable() const { return component != nullptr and function != nullptr; }
 
-		/// \todo check packet size?
-		inline void
-		call(const Header& header, const modm::SmartPointer &payload) const
-		{
-			if (isCallable()) {
-				(component->*function)(header, payload.getPointer());
-			}
-			// TODO spezieller Aufruf für packetgröße = 0, funktioniert zwar
-			// auch ohne ist aber extrem unschön!
-		}
+    /// \todo check packet size?
+    inline void call(const Header &header, const modm::SmartPointer &payload) const
+    {
+        if (isCallable())
+        {
+            (component->*function)(header, payload.getPointer());
+        }
+        // TODO spezieller Aufruf für packetgröße = 0, funktioniert zwar
+        // auch ohne ist aber extrem unschön!
+    }
 
-	protected:
-		Communicatable * const component;
-		Function const function;
-		/*uint8_t packetSize;*/
-	};
+protected:
+    Communicatable *const component;
+    Function const function;
+    /*uint8_t packetSize;*/
+};
 
-}
+}  // namespace xpcc
 
-#endif // XPCC_RESPONSE_CALLBACK_HPP
+#endif  // XPCC_RESPONSE_CALLBACK_HPP

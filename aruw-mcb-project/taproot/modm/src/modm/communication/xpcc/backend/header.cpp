@@ -16,25 +16,21 @@
 #include "header.hpp"
 
 // ----------------------------------------------------------------------------
-bool
-xpcc::Header::operator == (const Header& other) const
+bool xpcc::Header::operator==(const Header& other) const
 {
-	return ((this->type == other.type) &&
-			(this->isAcknowledge == other.isAcknowledge) &&
-			(this->destination == other.destination) &&
-			(this->source == other.source) &&
-			(this->packetIdentifier == other.packetIdentifier));
+    return (
+        (this->type == other.type) && (this->isAcknowledge == other.isAcknowledge) &&
+        (this->destination == other.destination) && (this->source == other.source) &&
+        (this->packetIdentifier == other.packetIdentifier));
 }
 
 // ----------------------------------------------------------------------------
-modm::IOStream&
-modm::operator << (modm::IOStream& s, const xpcc::Header& header)
+modm::IOStream& modm::operator<<(modm::IOStream& s, const xpcc::Header& header)
 {
-	s	<< "(t=" << static_cast<int32_t>(header.type)
-		<< ",a=" << header.isAcknowledge
-		<< ",d=" << modm::hex << header.destination << modm::ascii
-		<< ",s=" << modm::hex << header.source << modm::ascii
-		<< ",i=" << modm::hex << header.packetIdentifier << modm::ascii << ")";
+    s << "(t=" << static_cast<int32_t>(header.type) << ",a=" << header.isAcknowledge
+      << ",d=" << modm::hex << header.destination << modm::ascii << ",s=" << modm::hex
+      << header.source << modm::ascii << ",i=" << modm::hex << header.packetIdentifier
+      << modm::ascii << ")";
 
-	return s;
+    return s;
 }

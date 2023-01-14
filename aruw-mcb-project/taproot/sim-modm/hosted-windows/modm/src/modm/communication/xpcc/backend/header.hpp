@@ -12,8 +12,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_HEADER_HPP
-#define	XPCC_HEADER_HPP
+#ifndef XPCC_HEADER_HPP
+#define XPCC_HEADER_HPP
 
 #include <stdint.h>
 
@@ -21,68 +21,63 @@
 
 namespace xpcc
 {
-	/**
-	 * \brief 	Header of a packet
-	 *
-	 * \ingroup	modm_communication_xpcc_backend
-	 * \author	Martin Rosekeit
-	 * \author	Fabian Greif
-	 */
-	struct Header
-	{
-	public:
-		enum class Type : uint8_t
-		{
-			REQUEST,
-			RESPONSE,
-			NEGATIVE_RESPONSE,
-			TIMEOUT,
-		};
+/**
+ * \brief 	Header of a packet
+ *
+ * \ingroup	modm_communication_xpcc_backend
+ * \author	Martin Rosekeit
+ * \author	Fabian Greif
+ */
+struct Header
+{
+public:
+    enum class Type : uint8_t
+    {
+        REQUEST,
+        RESPONSE,
+        NEGATIVE_RESPONSE,
+        TIMEOUT,
+    };
 
-	public:
-		Header() :
-			type(Type::REQUEST),
-			isAcknowledge(false),
-			destination(0),
-			source(0),
-			packetIdentifier(0)
-		{
-		}
+public:
+    Header()
+        : type(Type::REQUEST),
+          isAcknowledge(false),
+          destination(0),
+          source(0),
+          packetIdentifier(0)
+    {
+    }
 
-		Header(Type type, bool ack,
-				uint8_t dest, uint8_t src,
-				uint8_t id) :
-			type(type),
-			isAcknowledge(ack),
-			destination(dest),
-			source(src),
-			packetIdentifier(id)
-		{
-		}
+    Header(Type type, bool ack, uint8_t dest, uint8_t src, uint8_t id)
+        : type(type),
+          isAcknowledge(ack),
+          destination(dest),
+          source(src),
+          packetIdentifier(id)
+    {
+    }
 
-		Type type;
-		bool isAcknowledge;
+    Type type;
+    bool isAcknowledge;
 
-		uint8_t destination;
-		uint8_t source;
-		uint8_t packetIdentifier;
+    uint8_t destination;
+    uint8_t source;
+    uint8_t packetIdentifier;
 
-		bool
-		operator == (const Header& other) const;
-	};
+    bool operator==(const Header& other) const;
+};
 
-} // namespace xpcc
+}  // namespace xpcc
 
 namespace modm
 {
-
 /**
  * \brief	Stream operator for a packet header
  * \ingroup	backend
  */
-modm::IOStream&
-operator << (modm::IOStream& s, const xpcc::Header& header);
+modm::IOStream& operator<<(modm::IOStream& s, const xpcc::Header& header);
 
-} // modm namespace
+}  // namespace modm
 
-#endif	// XPCC_HEADER_HPP
+#endif  // XPCC_HEADER_HPP

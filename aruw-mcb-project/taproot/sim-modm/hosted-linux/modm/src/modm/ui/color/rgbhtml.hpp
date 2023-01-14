@@ -15,7 +15,6 @@
 
 namespace modm::color::html
 {
-
 /**
  * Constant HTML Colornames in RGB Colorspace
  *

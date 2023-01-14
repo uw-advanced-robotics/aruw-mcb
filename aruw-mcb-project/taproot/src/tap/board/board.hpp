@@ -150,44 +150,61 @@ using PowerOut4 = GpioOutputH5;
 using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
 
 // Initialize analog input pins
-        
+
 using AnalogInPinS = GpioA0;
 using AnalogInPinT = GpioA1;
 using AnalogInPinU = GpioA2;
 using AnalogInPinV = GpioA3;
 using AnalogInPinOledJoystick = GpioA6;
-        
-using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinT, AnalogInPinU, AnalogInPinV, AnalogInPinOledJoystick>;
+
+using AnalogInPins = SoftwareGpioPort<
+    AnalogInPinS,
+    AnalogInPinT,
+    AnalogInPinU,
+    AnalogInPinV,
+    AnalogInPinOledJoystick>;
 
 // Initialize PWM pins
-        
+
 using PWMOutPinW = GpioI5;
 using PWMOutPinX = GpioI6;
 using PWMOutPinY = GpioI7;
 using PWMOutPinZ = GpioI2;
 using PWMOutPinBuzzer = GpioH6;
 using PWMOutPinImuHeater = GpioB5;
-        
-using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer, PWMOutPinImuHeater>;
+
+using PWMOutPins = SoftwareGpioPort<
+    PWMOutPinW,
+    PWMOutPinX,
+    PWMOutPinY,
+    PWMOutPinZ,
+    PWMOutPinBuzzer,
+    PWMOutPinImuHeater>;
 
 // Initialize digital input pins
-        
+
 using DigitalInPinB = GpioH12;
 using DigitalInPinC = GpioH11;
 using DigitalInPinD = GpioH10;
 using DigitalInPinButton = GpioB2;
-        
-using DigitalInPins = SoftwareGpioPort<DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinButton>;
+
+using DigitalInPins =
+    SoftwareGpioPort<DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinButton>;
 
 // Initialize digital output pins
-        
+
 using DigitalOutPinE = GpioD15;
 using DigitalOutPinF = GpioD14;
 using DigitalOutPinG = GpioD13;
 using DigitalOutPinH = GpioD12;
 using DigitalOutPinLaser = GpioG13;
-        
-using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
+
+using DigitalOutPins = SoftwareGpioPort<
+    DigitalOutPinE,
+    DigitalOutPinF,
+    DigitalOutPinG,
+    DigitalOutPinH,
+    DigitalOutPinLaser>;
 
 // gpio pins used for SPI communication to the onboard MPU6500 IMU
 

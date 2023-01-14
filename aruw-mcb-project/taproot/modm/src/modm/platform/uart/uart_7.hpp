@@ -19,11 +19,11 @@
 #define MODM_STM32_UART_7_HPP
 #include <modm/architecture/interface/uart.hpp>
 #include <modm/platform/gpio/connector.hpp>
+
 #include "uart_base.hpp"
 #include "uart_hal_7.hpp"
 namespace modm::platform
 {
-
 /**
  * Universal asynchronous receiver transmitter (Uart7)
  *
@@ -34,87 +34,76 @@ namespace modm::platform
 class Uart7 : public UartBase, public ::modm::Uart
 {
 public:
-	using Hal = UartHal7;
-	// Expose jinja template parameters to be checked by e.g. drivers or application
-	static constexpr size_t RxBufferSize = 512;
-	static constexpr size_t TxBufferSize = 512;
+    using Hal = UartHal7;
+    // Expose jinja template parameters to be checked by e.g. drivers or application
+    static constexpr size_t RxBufferSize = 512;
+    static constexpr size_t TxBufferSize = 512;
 
 public:
-	template< template<Peripheral _> class... Signals >
-	static void
-	connect(Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
-	        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)
-	{
-		using Connector = GpioConnector<Peripheral::Uart7, Signals...>;
-		using Tx = typename Connector::template GetSignal< Gpio::Signal::Tx >;
-		using Rx = typename Connector::template GetSignal< Gpio::Signal::Rx >;
-		static_assert(((Connector::template IsValid<Tx> and Connector::template IsValid<Rx>) and sizeof...(Signals) == 2) or
-					  ((Connector::template IsValid<Tx> or  Connector::template IsValid<Rx>) and sizeof...(Signals) == 1),
-					  "Uart7::connect() requires one Tx and/or one Rx signal!");
+    template <template <Peripheral _> class... Signals>
+    static void connect(
+        Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
+        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)
+    {
+        using Connector = GpioConnector<Peripheral::Uart7, Signals...>;
+        using Tx = typename Connector::template GetSignal<Gpio::Signal::Tx>;
+        using Rx = typename Connector::template GetSignal<Gpio::Signal::Rx>;
+        static_assert(
+            ((Connector::template IsValid<Tx> and
+              Connector::template IsValid<Rx>)and sizeof...(Signals) == 2) or
+                ((Connector::template IsValid<Tx> or
+                  Connector::template IsValid<Rx>)and sizeof...(Signals) == 1),
+            "Uart7::connect() requires one Tx and/or one Rx signal!");
 
-		// Connector::disconnect();
-		Tx::setOutput(OutputTypeTx);
-		Rx::setInput(InputTypeRx);
-		Connector::connect();
-	}
+        // Connector::disconnect();
+        Tx::setOutput(OutputTypeTx);
+        Rx::setInput(InputTypeRx);
+        Connector::connect();
+    }
 
-	/// @warning Remember to set word length correctly when using the parity bit!
-	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(1) >
-	static inline void
-	initialize(Parity parity=Parity::Disabled, WordLength length=WordLength::Bit8)
-	{
-		UartHal7::initialize<SystemClock, baudrate, tolerance>(parity, length);
-		UartHal7::enableInterruptVector(true, 12);
-		UartHal7::enableInterrupt(Interrupt::RxNotEmpty);
-		UartHal7::setTransmitterEnable(true);
-		UartHal7::setReceiverEnable(true);
-		UartHal7::enableOperation();
-	}
+    /// @warning Remember to set word length correctly when using the parity bit!
+    template <class SystemClock, baudrate_t baudrate, percent_t tolerance = pct(1)>
+    static inline void initialize(
+        Parity parity = Parity::Disabled,
+        WordLength length = WordLength::Bit8)
+    {
+        UartHal7::initialize<SystemClock, baudrate, tolerance>(parity, length);
+        UartHal7::enableInterruptVector(true, 12);
+        UartHal7::enableInterrupt(Interrupt::RxNotEmpty);
+        UartHal7::setTransmitterEnable(true);
+        UartHal7::setReceiverEnable(true);
+        UartHal7::enableOperation();
+    }
 
-	static void
-	writeBlocking(uint8_t data);
+    static void writeBlocking(uint8_t data);
 
-	static void
-	writeBlocking(const uint8_t *data, std::size_t length);
+    static void writeBlocking(const uint8_t *data, std::size_t length);
 
-	static void
-	flushWriteBuffer();
+    static void flushWriteBuffer();
 
-	static bool
-	write(uint8_t data);
+    static bool write(uint8_t data);
 
-	static std::size_t
-	write(const uint8_t *data, std::size_t length);
+    static std::size_t write(const uint8_t *data, std::size_t length);
 
-	static bool
-	isWriteFinished();
+    static bool isWriteFinished();
 
-	static std::size_t
-	transmitBufferSize();
+    static std::size_t transmitBufferSize();
 
-	static std::size_t
-	discardTransmitBuffer();
+    static std::size_t discardTransmitBuffer();
 
-	static bool
-	read(uint8_t &data);
+    static bool read(uint8_t &data);
 
-	static std::size_t
-	read(uint8_t *buffer, std::size_t length);
+    static std::size_t read(uint8_t *buffer, std::size_t length);
 
-	static std::size_t
-	receiveBufferSize();
+    static std::size_t receiveBufferSize();
 
-	static std::size_t
-	discardReceiveBuffer();
+    static std::size_t discardReceiveBuffer();
 
-	static bool
-	hasError();
+    static bool hasError();
 
-	static void
-	clearError();
-
+    static void clearError();
 };
 
-}	// namespace modm::platform
+}  // namespace modm::platform
 
-#endif // MODM_STM32_UART_7_HPP
+#endif  // MODM_STM32_UART_7_HPP

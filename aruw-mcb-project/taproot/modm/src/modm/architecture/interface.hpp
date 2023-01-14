@@ -33,11 +33,11 @@
 #include "interface/i2c_transaction.hpp"
 #include "interface/interrupt.hpp"
 #include "interface/memory.hpp"
+#include "interface/peripheral.hpp"
 #include "interface/register.hpp"
 #include "interface/spi.hpp"
 #include "interface/spi_device.hpp"
 #include "interface/spi_master.hpp"
 #include "interface/uart.hpp"
-#include "interface/peripheral.hpp"
 
-#endif	// MODM_INTERFACE_HPP
+#endif  // MODM_INTERFACE_HPP

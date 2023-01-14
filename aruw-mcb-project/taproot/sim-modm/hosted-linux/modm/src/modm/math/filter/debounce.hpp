@@ -18,49 +18,44 @@
 
 namespace modm
 {
-	namespace filter
-	{
-		/**
-		 * \brief	Debouncing binary signals
-		 *
-		 * \ingroup	modm_math_filter
-		 */
-		template<typename T = uint8_t>
-		class Debounce
-		{
-		public:
-			/**
-			 * \brief	Constructor
-			 *
-			 * \param	maxValue	maximal value of the sum
-			 * \param	lowerBound	lower bound for the schmitt-trigger
-			 * \param	upperBound	upper bound for the schmitt-trigger. If
-			 * 						set to zero, the value of maxValue is used.
-			 */
-			Debounce(const T& maxValue,
-					 const T& lowerBound = 0,
-					 const T& upperBound = 0);
+namespace filter
+{
+/**
+ * \brief	Debouncing binary signals
+ *
+ * \ingroup	modm_math_filter
+ */
+template <typename T = uint8_t>
+class Debounce
+{
+public:
+    /**
+     * \brief	Constructor
+     *
+     * \param	maxValue	maximal value of the sum
+     * \param	lowerBound	lower bound for the schmitt-trigger
+     * \param	upperBound	upper bound for the schmitt-trigger. If
+     * 						set to zero, the value of maxValue is used.
+     */
+    Debounce(const T& maxValue, const T& lowerBound = 0, const T& upperBound = 0);
 
-			void
-			update(bool input);
+    void update(bool input);
 
-			bool
-			getValue() const;
+    bool getValue() const;
 
-			void
-			reset(const bool state);
+    void reset(const bool state);
 
-		private:
-			const T maxValue;
-			T sum;
+private:
+    const T maxValue;
+    T sum;
 
-			const T lowerBound;
-			const T upperBound;
-			bool state;
-		};
-	}
-}
+    const T lowerBound;
+    const T upperBound;
+    bool state;
+};
+}  // namespace filter
+}  // namespace modm
 
 #include "debounce_impl.hpp"
 
-#endif // MODM_FILTER_DEBOUNCE_HPP
+#endif  // MODM_FILTER_DEBOUNCE_HPP

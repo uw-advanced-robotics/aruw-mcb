@@ -16,7 +16,6 @@
 
 namespace modm
 {
-
 /**
  * Spin for nanoseconds.
  *
@@ -63,7 +62,7 @@ void delay(std::chrono::milliseconds ms);
 /// @ingroup modm_architecture_delay
 void delay_ms(uint32_t ms);
 
-}
+}  // namespace modm
 
 #else
 
@@ -73,50 +72,56 @@ void delay_ms(uint32_t ms);
 
 namespace modm
 {
-
 // Forward everything to specialized functions
-template< class Rep >
-void
-delay(std::chrono::duration<Rep, std::nano> ns_)
+template <class Rep>
+void delay(std::chrono::duration<Rep, std::nano> ns_)
 {
     const auto ns{std::chrono::duration_cast<std::chrono::nanoseconds>(ns_)};
     delay_ns(ns.count());
 }
 
-template< class Rep >
-void
-delay(std::chrono::duration<Rep, std::micro> us_)
+template <class Rep>
+void delay(std::chrono::duration<Rep, std::micro> us_)
 {
     const auto us{std::chrono::duration_cast<std::chrono::microseconds>(us_)};
     delay_us(us.count());
 }
 
-template< class Rep >
-void
-delay(std::chrono::duration<Rep, std::milli> ms_)
+template <class Rep>
+void delay(std::chrono::duration<Rep, std::milli> ms_)
 {
     const auto ms{std::chrono::duration_cast<std::chrono::milliseconds>(ms_)};
     delay_ms(ms.count());
 }
 
 // Everything else is cast to milliseconds
-template<class Rep, class Period>
+template <class Rep, class Period>
 inline void delay(std::chrono::duration<Rep, Period> time)
-{ delay(std::chrono::duration_cast<std::chrono::milliseconds>(time)); }
+{
+    delay(std::chrono::duration_cast<std::chrono::milliseconds>(time));
+}
 
 // The old methods are deprecated
-[[deprecated("Use `modm::delay_ns(uint32_t ns)` instead!")]]
-inline void delayNanoseconds(uint32_t ns) { delay_ns(ns); }
+[[deprecated("Use `modm::delay_ns(uint32_t ns)` instead!")]] inline void delayNanoseconds(
+    uint32_t ns)
+{
+    delay_ns(ns);
+}
 
-[[deprecated("Use `modm::delay_us(uint32_t us)` instead!")]]
-inline void delayMicroseconds(uint32_t us) { delay_us(us); }
+[[deprecated("Use `modm::delay_us(uint32_t us)` instead!")]] inline void delayMicroseconds(
+    uint32_t us)
+{
+    delay_us(us);
+}
 
-[[deprecated("Use `modm::delay_ms(uint32_t ms)` instead!")]]
-inline void delayMilliseconds(uint32_t ms) { delay_ms(ms); }
+[[deprecated("Use `modm::delay_ms(uint32_t ms)` instead!")]] inline void delayMilliseconds(
+    uint32_t ms)
+{
+    delay_ms(ms);
+}
 
 using namespace ::std::chrono_literals;
 
-} // namespace modm
+}  // namespace modm
 
 #endif
-

@@ -21,30 +21,56 @@
 
 namespace modm::color
 {
-
 // TODO Finish generalisation for uint16_t
-template<std::unsigned_integral T>
-template<std::unsigned_integral U>
+template <std::unsigned_integral T>
+template <std::unsigned_integral U>
 constexpr RgbT<T>::RgbT(const HsvT<U> &hsv)
 {
-	uint16_t vs = hsv.value * hsv.saturation;
-	uint16_t h6 = 6 * hsv.hue;
+    uint16_t vs = hsv.value * hsv.saturation;
+    uint16_t h6 = 6 * hsv.hue;
 
-	T p = ((hsv.value << 8) - vs) >> 8;
-	T i = h6 >> 8;
-	uint16_t f = ((i | 1) << 8) - h6;
-	if (i & 1) { f = -f; }
-	T u = (((uint32_t)hsv.value << 16) - (uint32_t)vs * f) >> 16;
+    T p = ((hsv.value << 8) - vs) >> 8;
+    T i = h6 >> 8;
+    uint16_t f = ((i | 1) << 8) - h6;
+    if (i & 1)
+    {
+        f = -f;
+    }
+    T u = (((uint32_t)hsv.value << 16) - (uint32_t)vs * f) >> 16;
 
-	switch (i)
-	{
-		case 0: red = hsv.value; green = u; blue = p; break;
-		case 1: red = u; green = hsv.value; blue = p; break;
-		case 2: red = p; green = hsv.value; blue = u; break;
-		case 3: red = p; green = u; blue = hsv.value; break;
-		case 4: red = u; green = p; blue = hsv.value; break;
-		case 5: red = hsv.value; green = p; blue = u; break;
-	}
+    switch (i)
+    {
+        case 0:
+            red = hsv.value;
+            green = u;
+            blue = p;
+            break;
+        case 1:
+            red = u;
+            green = hsv.value;
+            blue = p;
+            break;
+        case 2:
+            red = p;
+            green = hsv.value;
+            blue = u;
+            break;
+        case 3:
+            red = p;
+            green = u;
+            blue = hsv.value;
+            break;
+        case 4:
+            red = u;
+            green = p;
+            blue = hsv.value;
+            break;
+        case 5:
+            red = hsv.value;
+            green = p;
+            blue = u;
+            break;
+    }
 }
 
-}	// namespace modm::color
+}  // namespace modm::color

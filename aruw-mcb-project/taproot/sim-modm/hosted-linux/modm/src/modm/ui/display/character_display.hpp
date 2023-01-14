@@ -14,11 +14,11 @@
 #define MODM_CHARACTER_DISPLAY_HPP
 
 #include <stdint.h>
+
 #include <modm/io/iostream.hpp>
 
 namespace modm
 {
-
 /**
  * Base class for alpha-numeric LCDs (liquid crystal display)
  *
@@ -38,115 +38,102 @@ namespace modm
 class CharacterDisplay : public IOStream
 {
 public:
-	enum
-	Command
-	{
-		ClearDisplay		= 0b00000001,	///< Clear the display content
-		ResetCursor			= 0b00000010,	///< Set cursor to position (0,0)
+    enum Command
+    {
+        ClearDisplay = 0b00000001,  ///< Clear the display content
+        ResetCursor = 0b00000010,   ///< Set cursor to position (0,0)
 
-		IncrementCursor		= 0b00000110,	///< Increments address upon write
-		DecrementCursor		= 0b00000100,	///< Decrements address upon write
+        IncrementCursor = 0b00000110,  ///< Increments address upon write
+        DecrementCursor = 0b00000100,  ///< Decrements address upon write
 
-		DisableDisplay		= 0b00001000,	///< Disable display
-		EnableDisplay		= 0b00001100,	///< Enable display
-		DisableCursor		= 0b00001000,	///< Disable cursor
-		EnableCursor		= 0b00001010,	///< Enable cursor
-		DisableCursorBlink	= 0b00001000,	///< Disable blinking cursor
-		EnableCursorBlink	= 0b00001001,	///< Enable blinking cursor
+        DisableDisplay = 0b00001000,      ///< Disable display
+        EnableDisplay = 0b00001100,       ///< Enable display
+        DisableCursor = 0b00001000,       ///< Disable cursor
+        EnableCursor = 0b00001010,        ///< Enable cursor
+        DisableCursorBlink = 0b00001000,  ///< Disable blinking cursor
+        EnableCursorBlink = 0b00001001,   ///< Enable blinking cursor
 
-		ShiftCursorLeft		= 0b00010000,	///< Shift cursor left
-		ShiftCursorRight	= 0b00010100,	///< Shift cursor right
-	};
+        ShiftCursorLeft = 0b00010000,   ///< Shift cursor left
+        ShiftCursorRight = 0b00010100,  ///< Shift cursor right
+    };
 
 public:
-	/// Constructor
-	CharacterDisplay(uint8_t width, uint8_t height);
+    /// Constructor
+    CharacterDisplay(uint8_t width, uint8_t height);
 
-	/// Initialize the display
-	void
-	initialize();
+    /// Initialize the display
+    void initialize();
 
-	/**
-	 * Write a character
-	 *
-	 * This method provides an automatic wrap-round if the output reaches
-	 * the end of the current line or a newline character is detected.
-	 *
-	 * Use writeRaw() if this behavior is not wanted.
-	 */
-	void
-	write(char c);
+    /**
+     * Write a character
+     *
+     * This method provides an automatic wrap-round if the output reaches
+     * the end of the current line or a newline character is detected.
+     *
+     * Use writeRaw() if this behavior is not wanted.
+     */
+    void write(char c);
 
-	/**
-	 * Write a raw character at cursor position
-	 *
-	 * Unlike write() no further processing will occur.
-	 *
-	 * @see	write()
-	 */
-	virtual void
-	writeRaw(char c) = 0;
+    /**
+     * Write a raw character at cursor position
+     *
+     * Unlike write() no further processing will occur.
+     *
+     * @see	write()
+     */
+    virtual void writeRaw(char c) = 0;
 
-	/**
-	 * Excute a command.
-	 *
-	 * @see Command
-	 * @param	command		Command to execute
-	 */
-	void
-	execute(Command command);
+    /**
+     * Excute a command.
+     *
+     * @see Command
+     * @param	command		Command to execute
+     */
+    void execute(Command command);
 
-	/**
-	 * Set cursor to specified position
-	 *
-	 * @param	column	horizontal position
-	 * @param	line	vertical position
-	 */
-	virtual void
-	setCursor(uint8_t column, uint8_t line) = 0;
+    /**
+     * Set cursor to specified position
+     *
+     * @param	column	horizontal position
+     * @param	line	vertical position
+     */
+    virtual void setCursor(uint8_t column, uint8_t line) = 0;
 
-	/// clear the entire display and reset the cursor
-	void
-	clear();
+    /// clear the entire display and reset the cursor
+    void clear();
 
 protected:
-	// Interface class for the IOStream
-	class Writer : public IODevice
-	{
-	public:
-		Writer(CharacterDisplay *parent) :
-			parent(parent)
-		{
-		}
+    // Interface class for the IOStream
+    class Writer : public IODevice
+    {
+    public:
+        Writer(CharacterDisplay *parent) : parent(parent) {}
 
-		/// Draw a single character
-		virtual void
-		write(char c);
+        /// Draw a single character
+        virtual void write(char c);
 
-		using IODevice::write;
+        using IODevice::write;
 
-		/// unused
-		virtual void
-		flush();
+        /// unused
+        virtual void flush();
 
-		/// unused, returns always \c false
-		virtual bool
-		read(char& c);
+        /// unused, returns always \c false
+        virtual bool read(char &c);
 
-	private:
-		CharacterDisplay *parent;
-	};
+    private:
+        CharacterDisplay *parent;
+    };
 
 protected:
-	Writer writer;
+    Writer writer;
 
-	uint8_t lineWidth;
-	uint8_t lineCount;
+    uint8_t lineWidth;
+    uint8_t lineCount;
 
-	uint8_t column;
-	uint8_t line;
+    uint8_t column;
+    uint8_t line;
 };
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_CHARACTER_DISPLAY_HPP
+#endif  // MODM_CHARACTER_DISPLAY_HPP

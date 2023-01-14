@@ -16,101 +16,90 @@
 #define MODM_LOG_STYLE_WRAPPER_HPP
 
 #include <modm/io/iodevice.hpp>
+
 #include "style.hpp"
 
 namespace modm
 {
-	namespace log
-	{
-		/**
-		 * \brief 	Wrapper to use the Style as a IODevice in the Logger
-		 *
-		 * \ingroup modm_debug
-		 * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
-		 */
-		template < typename STYLE >
-		class StyleWrapper : public IODevice
-		{
-		public :
-			StyleWrapper( STYLE inStyle );
+namespace log
+{
+/**
+ * \brief 	Wrapper to use the Style as a IODevice in the Logger
+ *
+ * \ingroup modm_debug
+ * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
+ */
+template <typename STYLE>
+class StyleWrapper : public IODevice
+{
+public:
+    StyleWrapper(STYLE inStyle);
 
-			virtual
-			~StyleWrapper();
+    virtual ~StyleWrapper();
 
-			virtual void
-			write(char c);
+    virtual void write(char c);
 
-			virtual void
-			write(const char* str);
+    virtual void write(const char* str);
 
-			virtual void
-			flush();
+    virtual void flush();
 
-			virtual bool
-			read(char&);
+    virtual bool read(char&);
 
-		private :
-			StyleWrapper( const StyleWrapper& );
+private:
+    StyleWrapper(const StyleWrapper&);
 
-			StyleWrapper&
-			operator=( const StyleWrapper& );
+    StyleWrapper& operator=(const StyleWrapper&);
 
-			STYLE style;
-		};
-	}
-}
+    STYLE style;
+};
+}  // namespace log
+}  // namespace modm
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-modm::log::StyleWrapper<STYLE>::StyleWrapper( STYLE inStyle ) :
-	style( inStyle )
+template <typename STYLE>
+modm::log::StyleWrapper<STYLE>::StyleWrapper(STYLE inStyle) : style(inStyle)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
+template <typename STYLE>
 modm::log::StyleWrapper<STYLE>::~StyleWrapper()
 {
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::StyleWrapper<STYLE>::write( char c )
+template <typename STYLE>
+void modm::log::StyleWrapper<STYLE>::write(char c)
 {
-	this->style.write( c );
+    this->style.write(c);
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::StyleWrapper<STYLE>::write( const char* s )
+template <typename STYLE>
+void modm::log::StyleWrapper<STYLE>::write(const char* s)
 {
-	this->style.write( s );
+    this->style.write(s);
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-void
-modm::log::StyleWrapper<STYLE>::flush()
+template <typename STYLE>
+void modm::log::StyleWrapper<STYLE>::flush()
 {
-	this->style.flush( );
+    this->style.flush();
 }
 
 // -----------------------------------------------------------------------------
 
-template < typename STYLE >
-bool
-modm::log::StyleWrapper<STYLE>::read(char& c)
+template <typename STYLE>
+bool modm::log::StyleWrapper<STYLE>::read(char& c)
 {
-	(void) c;
-	return false;
+    (void)c;
+    return false;
 }
 
-
-#endif // MODM_LOG_STYLE_WRAPPER_HPP
+#endif  // MODM_LOG_STYLE_WRAPPER_HPP

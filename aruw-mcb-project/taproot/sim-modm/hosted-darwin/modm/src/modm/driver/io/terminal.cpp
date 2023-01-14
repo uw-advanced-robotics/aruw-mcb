@@ -12,32 +12,19 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <iostream>
-
 #include "terminal.hpp"
 
+#include <iostream>
+
 // ----------------------------------------------------------------------------
-void
-modm::Terminal::write(char c)
-{
-	std::cout << c;
-}
+void modm::Terminal::write(char c) { std::cout << c; }
 
-void
-modm::Terminal::write(const char* s)
-{
-	std::cout << s;
-}
+void modm::Terminal::write(const char* s) { std::cout << s; }
 
-void
-modm::Terminal::flush()
-{
-	std::cout << std::flush;
-}
+void modm::Terminal::flush() { std::cout << std::flush; }
 
-bool
-modm::Terminal::read(char& value)
+bool modm::Terminal::read(char& value)
 {
-	std::cin.get(value);
-	return std::cin.good();
+    std::cin.get(value);
+    return std::cin.good();
 }

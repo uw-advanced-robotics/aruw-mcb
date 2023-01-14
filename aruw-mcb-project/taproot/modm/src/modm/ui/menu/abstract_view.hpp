@@ -24,54 +24,47 @@
 
 namespace modm
 {
-	// forward declaration
-	template<typename T>
-	class ViewStack;
+// forward declaration
+template <typename T>
+class ViewStack;
 
-	/**
-	 * @brief The AbstractView class is the base class for all screens
-	 *        handled by the ViewStack class
-	 *
-	 *\author Thorsten Lajewski
-	 *\ingroup modm_ui_menu
-	 */
+/**
+ * @brief The AbstractView class is the base class for all screens
+ *        handled by the ViewStack class
+ *
+ *\author Thorsten Lajewski
+ *\ingroup modm_ui_menu
+ */
 
-	template<typename Allocator = allocator::Dynamic<IAbstractView> >
-	class AbstractView : public IAbstractView
-	{
-		template<typename T>
-		friend class ViewStack;
+template <typename Allocator = allocator::Dynamic<IAbstractView> >
+class AbstractView : public IAbstractView
+{
+    template <typename T>
+    friend class ViewStack;
 
-	public:
-		/**
-		 * @param stack pointer to the stack, the screen should be displayed on.
-		 * @param identifier can be used to determine which screen is the currently
-		 *        displayed on the graphicDisplay
-		 */
-		AbstractView(modm::ViewStack<Allocator>* stack, uint8_t identifier) :
-			IAbstractView(identifier), stack(stack)
-		{
-		}
+public:
+    /**
+     * @param stack pointer to the stack, the screen should be displayed on.
+     * @param identifier can be used to determine which screen is the currently
+     *        displayed on the graphicDisplay
+     */
+    AbstractView(modm::ViewStack<Allocator>* stack, uint8_t identifier)
+        : IAbstractView(identifier),
+          stack(stack)
+    {
+    }
 
-		virtual ~AbstractView() = default;
+    virtual ~AbstractView() = default;
 
-		inline modm::ViewStack<Allocator>*
-		getViewStack()
-		{
-			return stack;
-		}
+    inline modm::ViewStack<Allocator>* getViewStack() { return stack; }
 
-		modm::GraphicDisplay&
-		display()
-		{
-			return stack->getDisplay();
-		}
+    modm::GraphicDisplay& display() { return stack->getDisplay(); }
 
-	private:
-		modm::ViewStack<Allocator>* stack;
-	};
-}
+private:
+    modm::ViewStack<Allocator>* stack;
+};
+}  // namespace modm
 
 #include "view_stack.hpp"
 
-#endif // MODM_ABSTRACT_VIEW_HPP
+#endif  // MODM_ABSTRACT_VIEW_HPP

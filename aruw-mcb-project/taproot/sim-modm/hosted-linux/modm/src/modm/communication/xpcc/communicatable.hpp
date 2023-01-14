@@ -13,21 +13,21 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_COMMUNICATABLE_HPP
-#define	XPCC_COMMUNICATABLE_HPP
+#ifndef XPCC_COMMUNICATABLE_HPP
+#define XPCC_COMMUNICATABLE_HPP
 
 namespace xpcc
 {
-	/**
-	 * \brief	Base class for all classed which need to communicate
-	 *
-	 * Needed to have a common base class for the callback classes.
-	 *
-	 * \ingroup	modm_communication_xpcc
-	 */
-	class Communicatable
-	{
-	};
-}
+/**
+ * \brief	Base class for all classed which need to communicate
+ *
+ * Needed to have a common base class for the callback classes.
+ *
+ * \ingroup	modm_communication_xpcc
+ */
+class Communicatable
+{
+};
+}  // namespace xpcc
 
-#endif // XPCC_COMMUNICATABLE_HPP
+#endif  // XPCC_COMMUNICATABLE_HPP

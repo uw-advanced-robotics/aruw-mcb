@@ -15,47 +15,47 @@
 #ifndef MODM_LOG_LEVEL_HPP
 #define MODM_LOG_LEVEL_HPP
 
-#undef ERROR // avoid collision with ERROR defined macro in winsock.h
+#undef ERROR  // avoid collision with ERROR defined macro in winsock.h
 
 namespace modm
 {
-	namespace log
-	{
-		/**
-		 * \brief	Log levels
-		 *
-		 * DEBUG < INFO < WARNING < ERROR < DISABLED
-		 *
-		 * \ingroup modm_debug
-		 */
-		enum Level
-		{
-			DEBUG,
-			INFO,
-			WARNING,
-			ERROR,
-			DISABLED
-		};
-	}
-}
+namespace log
+{
+/**
+ * \brief	Log levels
+ *
+ * DEBUG < INFO < WARNING < ERROR < DISABLED
+ *
+ * \ingroup modm_debug
+ */
+enum Level
+{
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR,
+    DISABLED
+};
+}  // namespace log
+}  // namespace modm
 
 #ifndef MODM_LOG_LEVEL
-	/**
-	 * \brief	Default log level
-	 *
-	 * Define to set the level of the logging to a defined value for each file.
-	 * To change the logging level in a source file use \c \#undef
-	 *
-	 * \code
-	 * #undef  MODM_LOG_LEVEL
-	 * #define MODM_LOG_LEVEL modm::log::INFO
-	 * \endcode
-	 *
-	 * DEBUG < INFO < WARNING < ERROR < DISABLED
-	 *
-	 * \ingroup modm_debug
-	 */
-	#define MODM_LOG_LEVEL modm::log::DEBUG
-#endif // MODM_LOG_LEVEL
+/**
+ * \brief	Default log level
+ *
+ * Define to set the level of the logging to a defined value for each file.
+ * To change the logging level in a source file use \c \#undef
+ *
+ * \code
+ * #undef  MODM_LOG_LEVEL
+ * #define MODM_LOG_LEVEL modm::log::INFO
+ * \endcode
+ *
+ * DEBUG < INFO < WARNING < ERROR < DISABLED
+ *
+ * \ingroup modm_debug
+ */
+#define MODM_LOG_LEVEL modm::log::DEBUG
+#endif  // MODM_LOG_LEVEL
 
-#endif // MODM_LOG_LEVEL_HPP
+#endif  // MODM_LOG_LEVEL_HPP

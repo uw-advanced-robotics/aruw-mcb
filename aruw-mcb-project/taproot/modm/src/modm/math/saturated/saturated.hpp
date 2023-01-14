@@ -11,114 +11,94 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_SATURATED_HPP
-#define	MODM_SATURATED_HPP
+#ifndef MODM_SATURATED_HPP
+#define MODM_SATURATED_HPP
 
 #include <modm/math/utils/arithmetic_traits.hpp>
 
 namespace modm
 {
-	/**
-	 * \brief	Saturated arithmetics
-	 *
-	 * \see http://www.mikrocontroller.net/articles/AVR_Arithmetik/Saturierung
-	 *
-	 * \author	Fabian Greif <fabian.greif@rwth-aachen.de>
-	 *
-	 * \todo	extend implementation (multiplication etc.)
-	 * \todo	add 16-bit datetype assembler implementations for AVRs
-	 * \todo	documentation
-	 * \ingroup modm_math_saturated
-	 */
-	template<typename T>
-	class Saturated
-	{
-		typedef modm::SignedType<T> SignedType;
-		typedef modm::WideType<SignedType> WideType;
+/**
+ * \brief	Saturated arithmetics
+ *
+ * \see http://www.mikrocontroller.net/articles/AVR_Arithmetik/Saturierung
+ *
+ * \author	Fabian Greif <fabian.greif@rwth-aachen.de>
+ *
+ * \todo	extend implementation (multiplication etc.)
+ * \todo	add 16-bit datetype assembler implementations for AVRs
+ * \todo	documentation
+ * \ingroup modm_math_saturated
+ */
+template <typename T>
+class Saturated
+{
+    typedef modm::SignedType<T> SignedType;
+    typedef modm::WideType<SignedType> WideType;
 
-	public:
-		Saturated();
+public:
+    Saturated();
 
-		Saturated(const T& initialValue);
+    Saturated(const T& initialValue);
 
-		inline const T&
-		getValue() const
-		{
-			return value;
-		}
+    inline const T& getValue() const { return value; }
 
-		Saturated&
-		operator += (const Saturated& other);
+    Saturated& operator+=(const Saturated& other);
 
-		Saturated&
-		operator -= (const Saturated& other);
+    Saturated& operator-=(const Saturated& other);
 
-		void
-		absolute();
+    void absolute();
 
-	public:
-		template<typename U>
-		friend Saturated<U>
-		operator - (const Saturated<U>& x);
+public:
+    template <typename U>
+    friend Saturated<U> operator-(const Saturated<U>& x);
 
-		template<typename U>
-		friend Saturated<U>
-		abs(const Saturated<U>& x);
+    template <typename U>
+    friend Saturated<U> abs(const Saturated<U>& x);
 
-		template<typename U>
-		friend Saturated<U>
-		operator - (const Saturated<U>& a, const Saturated<U>& b);
+    template <typename U>
+    friend Saturated<U> operator-(const Saturated<U>& a, const Saturated<U>& b);
 
-		template<typename U>
-		friend Saturated<U>
-		operator + (const Saturated<U>& a, const Saturated<U>& b);
+    template <typename U>
+    friend Saturated<U> operator+(const Saturated<U>& a, const Saturated<U>& b);
 
-		template<typename U>
-		friend bool
-		operator == (const Saturated<U>& a, const Saturated<U>& b);
+    template <typename U>
+    friend bool operator==(const Saturated<U>& a, const Saturated<U>& b);
 
-		template<typename U>
-		friend bool
-		operator != (const Saturated<U>& a, const Saturated<U>& b);
+    template <typename U>
+    friend bool operator!=(const Saturated<U>& a, const Saturated<U>& b);
 
-		// TODO > >= < <=
+    // TODO > >= < <=
 
-	private:
-		void
-		setValue(WideType value);
+private:
+    void setValue(WideType value);
 
-		T value;
-	};
+    T value;
+};
 
-	// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
-	/// \brief	Invert value
-	template<typename U>
-	Saturated<U>
-	operator - (const Saturated<U>& x);
+/// \brief	Invert value
+template <typename U>
+Saturated<U> operator-(const Saturated<U>& x);
 
-	/// \brief	Calculate the absolute value
-	template<typename U>
-	Saturated<U>
-	abs(const Saturated<U>& x);
+/// \brief	Calculate the absolute value
+template <typename U>
+Saturated<U> abs(const Saturated<U>& x);
 
-	template<typename U>
-	Saturated<U>
-	operator - (const Saturated<U>& a, const Saturated<U>& b);
+template <typename U>
+Saturated<U> operator-(const Saturated<U>& a, const Saturated<U>& b);
 
-	template<typename U>
-	Saturated<U>
-	operator + (const Saturated<U>& a, const Saturated<U>& b);
+template <typename U>
+Saturated<U> operator+(const Saturated<U>& a, const Saturated<U>& b);
 
-	template<typename U>
-	inline bool
-	operator == (const Saturated<U>& a, const Saturated<U>& b);
+template <typename U>
+inline bool operator==(const Saturated<U>& a, const Saturated<U>& b);
 
-	template<typename U>
-	inline bool
-	operator != (const Saturated<U>& a, const Saturated<U>& b);
-}
+template <typename U>
+inline bool operator!=(const Saturated<U>& a, const Saturated<U>& b);
+}  // namespace modm
 
 #include "saturated_impl.hpp"
 
-#endif	// MODM_SATURATED_HPP
+#endif  // MODM_SATURATED_HPP

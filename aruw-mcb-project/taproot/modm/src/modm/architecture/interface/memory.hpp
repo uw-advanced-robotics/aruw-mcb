@@ -13,31 +13,30 @@
 #pragma once
 
 #include <stdint.h>
-#include <new>
-#include <modm/architecture/utils.hpp>
-#include <modm/architecture/interface/register.hpp>
 
+#include <new>
+
+#include <modm/architecture/interface/register.hpp>
+#include <modm/architecture/utils.hpp>
 
 namespace modm
 {
-
 /// Describes access and type of dynamic memory.
 /// @ingroup modm_architecture_memory
-enum class
-MemoryTrait : uint16_t
+enum class MemoryTrait : uint16_t
 {
-	AccessSBus = Bit0,			///< Memory is accessible via System-Bus
-	AccessDBus = Bit1,			///< Memory is accessible via Data-Bus
-	AccessIBus = Bit2,			///< Memory is accessible via Instruction-Bus
+    AccessSBus = Bit0,  ///< Memory is accessible via System-Bus
+    AccessDBus = Bit1,  ///< Memory is accessible via Data-Bus
+    AccessIBus = Bit2,  ///< Memory is accessible via Instruction-Bus
 
-	AccessDMA = Bit3,			///< Memory is accessible via DMA
-	AccessDMA2D = Bit4,			///< Memory is accessible via 2D DMA
+    AccessDMA = Bit3,    ///< Memory is accessible via DMA
+    AccessDMA2D = Bit4,  ///< Memory is accessible via 2D DMA
 
-	// Bit5 - Bit12 are reserved
+    // Bit5 - Bit12 are reserved
 
-	TypeCoreCoupled = Bit13,	///< Memory is coupled closely to the core
-	TypeNonVolatile = Bit14,	///< Memory is non-volatile (battery-backed)
-	TypeExternal = Bit15,		///< Memory is external RAM
+    TypeCoreCoupled = Bit13,  ///< Memory is coupled closely to the core
+    TypeNonVolatile = Bit14,  ///< Memory is non-volatile (battery-backed)
+    TypeExternal = Bit15,     ///< Memory is external RAM
 };
 
 /// A memory can have multiple traits.
@@ -76,7 +75,7 @@ constexpr MemoryTraits MemoryBackup = (MemoryTrait::AccessSBus | MemoryTrait::Ty
 /// @ingroup modm_architecture_memory
 constexpr MemoryTraits MemoryDefault = MemoryDMA;
 
-} // namespace modm
+}  // namespace modm
 
 /** Request object memory with defined traits.
  * @code
@@ -85,8 +84,7 @@ constexpr MemoryTraits MemoryDefault = MemoryDMA;
  *
  * @ingroup modm_architecture_memory
  */
-void *
-operator new(std::size_t size, modm::MemoryTraits traits);
+void* operator new(std::size_t size, modm::MemoryTraits traits);
 
 /** Request array memory with defined traits.
  * @code
@@ -95,8 +93,7 @@ operator new(std::size_t size, modm::MemoryTraits traits);
  *
  * @ingroup modm_architecture_memory
  */
-void *
-operator new[](std::size_t size, modm::MemoryTraits traits);
+void* operator new[](std::size_t size, modm::MemoryTraits traits);
 
 /** Request object memory with defined traits and return nullptr if out-of-memory!
  * @code
@@ -105,9 +102,7 @@ operator new[](std::size_t size, modm::MemoryTraits traits);
  *
  * @ingroup modm_architecture_memory
  */
-void *
-operator new(std::size_t size, modm::MemoryTraits traits,
-             const std::nothrow_t&) noexcept;
+void* operator new(std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept;
 
 /** Request array memory with defined traits and return nullptr if out-of-memory!
  * @code
@@ -116,6 +111,4 @@ operator new(std::size_t size, modm::MemoryTraits traits,
  *
  * @ingroup modm_architecture_memory
  */
-void *
-operator new[](std::size_t size, modm::MemoryTraits traits,
-               const std::nothrow_t&) noexcept;
+void* operator new[](std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept;

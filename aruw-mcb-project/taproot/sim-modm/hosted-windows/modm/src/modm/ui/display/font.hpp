@@ -21,14 +21,13 @@
  * The fonts are created with the "FontCreator 3.0", see \c tools/font_creator.
  */
 
-#include "font/scripto_narrow.hpp"
 #include "font/all_caps_3x5.hpp"
-#include "font/fixed_width_5x8.hpp"
-#include "font/assertion.hpp"
 #include "font/arcade_classic.hpp"
-#include "font/ubuntu_36.hpp"
-
+#include "font/assertion.hpp"
+#include "font/fixed_width_5x8.hpp"
+#include "font/matrix_8x8.hpp"
 #include "font/numbers_14x32.hpp"
 #include "font/numbers_40x56.hpp"
 #include "font/numbers_46x64.hpp"
-#include "font/matrix_8x8.hpp"
+#include "font/scripto_narrow.hpp"
+#include "font/ubuntu_36.hpp"

@@ -18,16 +18,15 @@
 #define MODM_STM32_SPI_MASTER1_HPP
 
 #include <modm/architecture/interface/spi_master.hpp>
-#include <modm/platform/gpio/connector.hpp>
 #include <modm/math/algorithm/prescaler.hpp>
+#include <modm/platform/gpio/connector.hpp>
+
 #include "spi_hal_1.hpp"
 
 namespace modm
 {
-
 namespace platform
 {
-
 /**
  * Serial peripheral interface (SPI1).
  *
@@ -38,115 +37,97 @@ namespace platform
  */
 class SpiMaster1 : public modm::SpiMaster
 {
-	static uint8_t state;
-	static uint8_t count;
-	static void *context;
-	static ConfigurationHandler configuration;
-public:
-	using Hal = SpiHal1;
-
-	/// Spi Data Mode, Mode0 is the most common mode
-	enum class
-	DataMode : uint32_t
-	{
-		Mode0 = 0b00,			///< clock normal,   sample on rising  edge
-		Mode1 = SPI_CR1_CPHA,	///< clock normal,   sample on falling edge
-		Mode2 = SPI_CR1_CPOL,	///< clock inverted, sample on falling  edge
-		Mode3 = SPI_CR1_CPOL | SPI_CR1_CPHA
-		///< clock inverted, sample on rising edge
-	};
-
-	/// Spi Data Order, MsbFirst is the most common mode
-	enum class
-	DataOrder : uint32_t
-	{
-		MsbFirst = 0b0,
-		LsbFirst = SPI_CR1_LSBFIRST
-	};
-
-	using DataSize = Hal::DataSize;
+    static uint8_t state;
+    static uint8_t count;
+    static void *context;
+    static ConfigurationHandler configuration;
 
 public:
-	template< template<Peripheral _> class... Signals >
-	static void
-	connect()
-	{
-		using Connector = GpioConnector<Peripheral::Spi1, Signals...>;
-		using Sck = typename Connector::template GetSignal<Gpio::Signal::Sck>;
-		using Mosi = typename Connector::template GetSignal<Gpio::Signal::Mosi>;
-		using Miso = typename Connector::template GetSignal<Gpio::Signal::Miso>;
+    using Hal = SpiHal1;
 
-		// Connector::disconnect();
-		Sck::setOutput(Gpio::OutputType::PushPull);
-		Mosi::setOutput(Gpio::OutputType::PushPull);
-		Miso::setInput(Gpio::InputType::Floating);
-		Connector::connect();
-	}
+    /// Spi Data Mode, Mode0 is the most common mode
+    enum class DataMode : uint32_t
+    {
+        Mode0 = 0b00,          ///< clock normal,   sample on rising  edge
+        Mode1 = SPI_CR1_CPHA,  ///< clock normal,   sample on falling edge
+        Mode2 = SPI_CR1_CPOL,  ///< clock inverted, sample on falling  edge
+        Mode3 = SPI_CR1_CPOL | SPI_CR1_CPHA
+        ///< clock inverted, sample on rising edge
+    };
 
-	// start documentation inherited
-	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(5) >
-	static void
-	initialize()
-	{
-		constexpr auto result = modm::Prescaler::from_power(SystemClock::Spi1, baudrate, 2, 256);
-		assertBaudrateInTolerance< result.frequency, baudrate, tolerance >();
+    /// Spi Data Order, MsbFirst is the most common mode
+    enum class DataOrder : uint32_t
+    {
+        MsbFirst = 0b0,
+        LsbFirst = SPI_CR1_LSBFIRST
+    };
 
-		// translate the prescaler into the bitmapping
-		constexpr SpiHal1::Prescaler prescaler{result.index << SPI_CR1_BR_Pos};
+    using DataSize = Hal::DataSize;
 
-		// initialize the Spi
-		SpiHal1::initialize(prescaler);
-		state = 0;
-	}
+public:
+    template <template <Peripheral _> class... Signals>
+    static void connect()
+    {
+        using Connector = GpioConnector<Peripheral::Spi1, Signals...>;
+        using Sck = typename Connector::template GetSignal<Gpio::Signal::Sck>;
+        using Mosi = typename Connector::template GetSignal<Gpio::Signal::Mosi>;
+        using Miso = typename Connector::template GetSignal<Gpio::Signal::Miso>;
 
-	static modm_always_inline void
-	setDataMode(DataMode mode)
-	{
-		SpiHal1::setDataMode(static_cast<SpiHal1::DataMode>(mode));
-	}
+        // Connector::disconnect();
+        Sck::setOutput(Gpio::OutputType::PushPull);
+        Mosi::setOutput(Gpio::OutputType::PushPull);
+        Miso::setInput(Gpio::InputType::Floating);
+        Connector::connect();
+    }
 
-	static modm_always_inline void
-	setDataOrder(DataOrder order)
-	{
-		SpiHal1::setDataOrder(static_cast<SpiHal1::DataOrder>(order));
-	}
-	static modm_always_inline void
-	setDataSize(DataSize size)
-	{
-		SpiHal1::setDataSize(static_cast<SpiHal1::DataSize>(size));
-	}
+    // start documentation inherited
+    template <class SystemClock, baudrate_t baudrate, percent_t tolerance = pct(5)>
+    static void initialize()
+    {
+        constexpr auto result = modm::Prescaler::from_power(SystemClock::Spi1, baudrate, 2, 256);
+        assertBaudrateInTolerance<result.frequency, baudrate, tolerance>();
 
+        // translate the prescaler into the bitmapping
+        constexpr SpiHal1::Prescaler prescaler{result.index << SPI_CR1_BR_Pos};
 
-	static uint8_t
-	acquire(void *ctx, ConfigurationHandler handler = nullptr);
+        // initialize the Spi
+        SpiHal1::initialize(prescaler);
+        state = 0;
+    }
 
-	static uint8_t
-	release(void *ctx);
+    static modm_always_inline void setDataMode(DataMode mode)
+    {
+        SpiHal1::setDataMode(static_cast<SpiHal1::DataMode>(mode));
+    }
 
+    static modm_always_inline void setDataOrder(DataOrder order)
+    {
+        SpiHal1::setDataOrder(static_cast<SpiHal1::DataOrder>(order));
+    }
+    static modm_always_inline void setDataSize(DataSize size)
+    {
+        SpiHal1::setDataSize(static_cast<SpiHal1::DataSize>(size));
+    }
 
-	static uint8_t
-	transferBlocking(uint8_t data)
-	{
-		return RF_CALL_BLOCKING(transfer(data));
-	}
+    static uint8_t acquire(void *ctx, ConfigurationHandler handler = nullptr);
 
-	static void
-	transferBlocking(const uint8_t *tx, uint8_t *rx, std::size_t length)
-	{
-		RF_CALL_BLOCKING(transfer(tx, rx, length));
-	}
+    static uint8_t release(void *ctx);
 
+    static uint8_t transferBlocking(uint8_t data) { return RF_CALL_BLOCKING(transfer(data)); }
 
-	static modm::ResumableResult<uint8_t>
-	transfer(uint8_t data);
+    static void transferBlocking(const uint8_t *tx, uint8_t *rx, std::size_t length)
+    {
+        RF_CALL_BLOCKING(transfer(tx, rx, length));
+    }
 
-	static modm::ResumableResult<void>
-	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
-	// end documentation inherited
+    static modm::ResumableResult<uint8_t> transfer(uint8_t data);
+
+    static modm::ResumableResult<void> transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
+    // end documentation inherited
 };
 
-} // namespace platform
+}  // namespace platform
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_STM32_SPI_MASTER1_HPP
+#endif  // MODM_STM32_SPI_MASTER1_HPP

@@ -17,7 +17,6 @@
 
 namespace modm
 {
-
 /**
  * Base class of an SPI Device.
  *
@@ -27,37 +26,25 @@ namespace modm
  * @author	Niklas Hauser
  * @ingroup modm_architecture_spi_device
  */
-template < class SpiMaster >
+template <class SpiMaster>
 class SpiDevice
 {
-	Spi::ConfigurationHandler configuration;
+    Spi::ConfigurationHandler configuration;
 
 public:
-	SpiDevice()
-	:	configuration(nullptr)
-	{
-	}
+    SpiDevice() : configuration(nullptr) {}
 
-	void inline
-	attachConfigurationHandler(Spi::ConfigurationHandler handler)
-	{
-		configuration = handler;
-	}
+    void inline attachConfigurationHandler(Spi::ConfigurationHandler handler)
+    {
+        configuration = handler;
+    }
 
 protected:
-	bool inline
-	acquireMaster()
-	{
-		return (SpiMaster::acquire(this, configuration) != 0);
-	}
+    bool inline acquireMaster() { return (SpiMaster::acquire(this, configuration) != 0); }
 
-	bool inline
-	releaseMaster()
-	{
-		return (SpiMaster::release(this) == 0);
-	}
+    bool inline releaseMaster() { return (SpiMaster::release(this) == 0); }
 };
 
-}	// namespace modm
+}  // namespace modm
 
-#endif // MODM_INTERFACE_SPI_DEVICE_HPP
+#endif  // MODM_INTERFACE_SPI_DEVICE_HPP

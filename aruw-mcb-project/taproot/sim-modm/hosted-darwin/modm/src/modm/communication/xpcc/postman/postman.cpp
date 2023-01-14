@@ -11,6 +11,4 @@
 
 #include "postman.hpp"
 
-xpcc::Postman::~Postman()
-{
-}
+xpcc::Postman::~Postman() {}

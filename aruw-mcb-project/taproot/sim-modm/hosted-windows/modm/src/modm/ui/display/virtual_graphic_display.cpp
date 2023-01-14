@@ -12,51 +12,49 @@
 
 #include "virtual_graphic_display.hpp"
 
-modm::VirtualGraphicDisplay::VirtualGraphicDisplay(modm::ColorGraphicDisplay* display,
-		modm::glcd::Point leftUpper, modm::glcd::Point rightLower):
-		display(display), leftUpper(leftUpper), rightLower(rightLower),
-		width(static_cast<uint16_t>(this->rightLower[0] - this->leftUpper[0])),
-		height(static_cast<uint16_t>(this->rightLower[1] - this->leftUpper[1]))
+modm::VirtualGraphicDisplay::VirtualGraphicDisplay(
+    modm::ColorGraphicDisplay* display,
+    modm::glcd::Point leftUpper,
+    modm::glcd::Point rightLower)
+    : display(display),
+      leftUpper(leftUpper),
+      rightLower(rightLower),
+      width(static_cast<uint16_t>(this->rightLower[0] - this->leftUpper[0])),
+      height(static_cast<uint16_t>(this->rightLower[1] - this->leftUpper[1]))
 {
 }
 
-void
-modm::VirtualGraphicDisplay::setDisplay(modm::ColorGraphicDisplay* display)
+void modm::VirtualGraphicDisplay::setDisplay(modm::ColorGraphicDisplay* display)
 {
-	this->display = display;
-	return;
+    this->display = display;
+    return;
 }
 
-void
-modm::VirtualGraphicDisplay::clear()
+void modm::VirtualGraphicDisplay::clear()
 {
-	//TODO switch black , white
-	this->display->setColor(color::Rgb(0, 0, 0));
-	this->display->fillRectangle(this->leftUpper, width, height);
-	this->display->setColor(color::Rgb(255, 255, 255));
+    // TODO switch black , white
+    this->display->setColor(color::Rgb(0, 0, 0));
+    this->display->fillRectangle(this->leftUpper, width, height);
+    this->display->setColor(color::Rgb(255, 255, 255));
 }
 
-void
-modm::VirtualGraphicDisplay::update()
+void modm::VirtualGraphicDisplay::update()
 {
-	this->display->update();
-	return;
+    this->display->update();
+    return;
 }
 
-void
-modm::VirtualGraphicDisplay::setPixel(int16_t x, int16_t y)
+void modm::VirtualGraphicDisplay::setPixel(int16_t x, int16_t y)
 {
-	this->display->setPixel(x + this->leftUpper[0], y + this->leftUpper[1]);
+    this->display->setPixel(x + this->leftUpper[0], y + this->leftUpper[1]);
 }
 
-void
-modm::VirtualGraphicDisplay::clearPixel(int16_t x, int16_t y)
+void modm::VirtualGraphicDisplay::clearPixel(int16_t x, int16_t y)
 {
-	this->display->clearPixel(x + this->leftUpper[0], y + this->leftUpper[1] );
+    this->display->clearPixel(x + this->leftUpper[0], y + this->leftUpper[1]);
 }
 
-modm::color::Rgb565
-modm::VirtualGraphicDisplay::getPixel(int16_t x, int16_t y) const
+modm::color::Rgb565 modm::VirtualGraphicDisplay::getPixel(int16_t x, int16_t y) const
 {
-	return this->display->getPixel(x + this->leftUpper[0], y + this->leftUpper[1] );
+    return this->display->getPixel(x + this->leftUpper[0], y + this->leftUpper[1]);
 }

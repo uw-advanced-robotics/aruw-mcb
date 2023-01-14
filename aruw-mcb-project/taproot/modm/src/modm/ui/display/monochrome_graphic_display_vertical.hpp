@@ -34,37 +34,34 @@ namespace modm
  * \author	Fabian Greif
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height>
+template <int16_t Width, int16_t Height>
 class MonochromeGraphicDisplayVertical
-	: public MonochromeGraphicDisplay<Width, Height, Width, Height / 8>
+    : public MonochromeGraphicDisplay<Width, Height, Width, Height / 8>
 {
-	static_assert((Height % 8) == 0, "height must be a multiple of 8");
+    static_assert((Height % 8) == 0, "height must be a multiple of 8");
 
 public:
-	virtual ~MonochromeGraphicDisplayVertical() = default;
+    virtual ~MonochromeGraphicDisplayVertical() = default;
 
-	// Faster version adapted for the RAM buffer
-	void
-	drawImageRaw(glcd::Point start, uint16_t width, uint16_t height,
-				 modm::accessor::Flash<uint8_t> data) final;
+    // Faster version adapted for the RAM buffer
+    void drawImageRaw(
+        glcd::Point start,
+        uint16_t width,
+        uint16_t height,
+        modm::accessor::Flash<uint8_t> data) final;
 
-	void
-	setPixel(int16_t x, int16_t y) final;
+    void setPixel(int16_t x, int16_t y) final;
 
-	void
-	clearPixel(int16_t x, int16_t y) final;
+    void clearPixel(int16_t x, int16_t y) final;
 
-	bool
-	getPixel(int16_t x, int16_t y) const final;
+    bool getPixel(int16_t x, int16_t y) const final;
 
 protected:
-	// Faster version adapted for the RAM buffer
-	void
-	drawHorizontalLine(glcd::Point start, uint16_t length) final;
+    // Faster version adapted for the RAM buffer
+    void drawHorizontalLine(glcd::Point start, uint16_t length) final;
 
-	// Faster version adapted for the RAM buffer
-	void
-	drawVerticalLine(glcd::Point start, uint16_t length) final;
+    // Faster version adapted for the RAM buffer
+    void drawVerticalLine(glcd::Point start, uint16_t length) final;
 };
 }  // namespace modm
 

@@ -13,62 +13,80 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <new>
-#include <stdlib.h> // for prototypes of malloc() and free()
-#include <modm/architecture/interface/memory.hpp>
-#include <modm/architecture/interface/assert.hpp>
+#include <stdlib.h>  // for prototypes of malloc() and free()
 
-extern "C" modm_weak
-void* malloc_traits(std::size_t size, uint32_t)
-{ return malloc(size); }
-template<bool with_traits>
-static inline void*
-new_assert(size_t size, modm_unused modm::MemoryTraits traits = modm::MemoryDefault)
+#include <new>
+
+#include <modm/architecture/interface/assert.hpp>
+#include <modm/architecture/interface/memory.hpp>
+
+extern "C" modm_weak void* malloc_traits(std::size_t size, uint32_t) { return malloc(size); }
+template <bool with_traits>
+static inline void* new_assert(
+    size_t size,
+    modm_unused modm::MemoryTraits traits = modm::MemoryDefault)
 {
-	void *ptr;
-	while(1)
-	{
-		if constexpr (with_traits) {
-			ptr = malloc_traits(size, traits.value);
-		} else {
-			ptr = malloc(size);
-		}
-		if (ptr) break;
-		/* See footnote 1) in https://en.cppreference.com/w/cpp/memory/new/operator_new
-		 *
-		 * In case of failure, the standard library implementation calls the
-		 * function pointer returned by std::get_new_handler and repeats
-		 * allocation attempts until new handler does not return or becomes a
-		 * null pointer, at which time it throws std::bad_alloc.
-		 */
-		if (std::get_new_handler()) std::get_new_handler()();
-		else break;
-	}
-	if (ptr == nullptr) {
-		modm_assert(0, "new",
-			"C++ new() operator failed to allocate!", size);
-	}
-	return ptr;
+    void* ptr;
+    while (1)
+    {
+        if constexpr (with_traits)
+        {
+            ptr = malloc_traits(size, traits.value);
+        }
+        else
+        {
+            ptr = malloc(size);
+        }
+        if (ptr) break;
+        /* See footnote 1) in https://en.cppreference.com/w/cpp/memory/new/operator_new
+         *
+         * In case of failure, the standard library implementation calls the
+         * function pointer returned by std::get_new_handler and repeats
+         * allocation attempts until new handler does not return or becomes a
+         * null pointer, at which time it throws std::bad_alloc.
+         */
+        if (std::get_new_handler())
+            std::get_new_handler()();
+        else
+            break;
+    }
+    if (ptr == nullptr)
+    {
+        modm_assert(0, "new", "C++ new() operator failed to allocate!", size);
+    }
+    return ptr;
 }
 
 // ----------------------------------------------------------------------------
-void* operator new  (std::size_t size) { return new_assert<false>(size); }
+void* operator new(std::size_t size) { return new_assert<false>(size); }
 void* operator new[](std::size_t size) { return new_assert<false>(size); }
 
-void* operator new  (std::size_t size, const std::nothrow_t&) noexcept { return malloc(size); }
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept { return malloc(size); }
 void* operator new[](std::size_t size, const std::nothrow_t&) noexcept { return malloc(size); }
 
-void* operator new  (std::size_t size, modm::MemoryTraits traits) { return new_assert<true>(size, traits); }
-void* operator new[](std::size_t size, modm::MemoryTraits traits) { return new_assert<true>(size, traits); }
+void* operator new(std::size_t size, modm::MemoryTraits traits)
+{
+    return new_assert<true>(size, traits);
+}
+void* operator new[](std::size_t size, modm::MemoryTraits traits)
+{
+    return new_assert<true>(size, traits);
+}
 
-void* operator new  (std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept { return malloc_traits(size, traits.value); }
-void* operator new[](std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept { return malloc_traits(size, traits.value); }
+void* operator new(std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept
+{
+    return malloc_traits(size, traits.value);
+}
+void* operator new[](std::size_t size, modm::MemoryTraits traits, const std::nothrow_t&) noexcept
+{
+    return malloc_traits(size, traits.value);
+}
 // ----------------------------------------------------------------------------
-void operator delete  (void *ptr) noexcept { free(ptr); }
+void operator delete(void* ptr) noexcept { free(ptr); }
 void operator delete[](void* ptr) noexcept { free(ptr); }
 
-void operator delete  (void* ptr, std::size_t) noexcept { free(ptr); }
+void operator delete(void* ptr, std::size_t) noexcept { free(ptr); }
 void operator delete[](void* ptr, std::size_t) noexcept { free(ptr); }
 
-void operator delete  (void* ptr, const std::nothrow_t&) noexcept { free(ptr); }
+void operator delete(void* ptr, const std::nothrow_t&) noexcept { free(ptr); }
 void operator delete[](void* ptr, const std::nothrow_t&) noexcept { free(ptr); }

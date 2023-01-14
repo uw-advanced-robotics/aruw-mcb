@@ -15,41 +15,38 @@
 #include "graphic_display.hpp"
 
 // ----------------------------------------------------------------------------
-void
-modm::GraphicDisplay::fillRectangle(glcd::Point start,
-		uint16_t width, uint16_t height)
+void modm::GraphicDisplay::fillRectangle(glcd::Point start, uint16_t width, uint16_t height)
 {
-	for (uint16_t i = start.x; (i < start.x + width) && (i < getWidth()); ++i)
-		for (uint16_t k = start.y; (k < start.y + height) && (k < getHeight()); ++k)
-			this->setPixel(i, k);
+    for (uint16_t i = start.x; (i < start.x + width) && (i < getWidth()); ++i)
+        for (uint16_t k = start.y; (k < start.y + height) && (k < getHeight()); ++k)
+            this->setPixel(i, k);
 }
 
-void
-modm::GraphicDisplay::fillCircle(glcd::Point center, uint16_t radius)
+void modm::GraphicDisplay::fillCircle(glcd::Point center, uint16_t radius)
 {
-	int16_t f = 1 - radius;
-	int16_t ddF_x = 0;
-	int16_t ddF_y = -2 * radius;
-	uint16_t x = 0;
-	uint16_t y = radius;
+    int16_t f = 1 - radius;
+    int16_t ddF_x = 0;
+    int16_t ddF_y = -2 * radius;
+    uint16_t x = 0;
+    uint16_t y = radius;
 
-	this->drawVerticalLine(glcd::Point(center.x, center.y - radius), 2 * radius);
+    this->drawVerticalLine(glcd::Point(center.x, center.y - radius), 2 * radius);
 
-	while(x < y)
-	{
-		if (f >= 0)
-		{
-			y--;
-			ddF_y += 2;
-			f += ddF_y;
-		}
-		x++;
-		ddF_x += 2;
-		f += ddF_x + 1;
+    while (x < y)
+    {
+        if (f >= 0)
+        {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x + 1;
 
-		this->drawVerticalLine(glcd::Point(center.x + x, center.y - y), 2 * y);
-		this->drawVerticalLine(glcd::Point(center.x + y, center.y - x), 2 * x);
-		this->drawVerticalLine(glcd::Point(center.x - x, center.y - y), 2 * y);
-		this->drawVerticalLine(glcd::Point(center.x - y, center.y - x), 2 * x);
-	}
+        this->drawVerticalLine(glcd::Point(center.x + x, center.y - y), 2 * y);
+        this->drawVerticalLine(glcd::Point(center.x + y, center.y - x), 2 * x);
+        this->drawVerticalLine(glcd::Point(center.x - x, center.y - y), 2 * y);
+        this->drawVerticalLine(glcd::Point(center.x - y, center.y - x), 2 * x);
+    }
 }

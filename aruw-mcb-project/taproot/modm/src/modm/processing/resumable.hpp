@@ -13,5 +13,5 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "resumable/resumable.hpp"
 #include "resumable/nested_resumable.hpp"
+#include "resumable/resumable.hpp"

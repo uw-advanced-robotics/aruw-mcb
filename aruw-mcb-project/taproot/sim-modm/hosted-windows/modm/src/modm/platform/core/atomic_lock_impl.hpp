@@ -12,31 +12,29 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_PLATFORM_ATOMIC_LOCK_HPP
-#define	MODM_PLATFORM_ATOMIC_LOCK_HPP
+#ifndef MODM_PLATFORM_ATOMIC_LOCK_HPP
+#define MODM_PLATFORM_ATOMIC_LOCK_HPP
 
 /// @cond
 namespace modm
 {
-
 namespace atomic
 {
-
 class Lock
 {
 public:
-	Lock() {}
+    Lock() {}
 };
 
 class Unlock
 {
 public:
-	Unlock() {}
+    Unlock() {}
 };
 
-}	// namespace atomic
+}  // namespace atomic
 
-}	// namespace modm
+}  // namespace modm
 
 /// @endcond
-#endif	// MODM_PLATFORM_ATOMIC_LOCK_HPP
+#endif  // MODM_PLATFORM_ATOMIC_LOCK_HPP

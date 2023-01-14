@@ -16,16 +16,15 @@
 
 #pragma once
 
-#include <modm/architecture/utils.hpp>
-#include <cstdint>
 #include <chrono>
+#include <cstdint>
+
+#include <modm/architecture/utils.hpp>
 
 namespace modm
 {
-
 namespace chrono
 {
-
 /**
  * Returns a time_point in milliseconds.
  *
@@ -45,15 +44,14 @@ namespace chrono
  */
 struct milli_clock
 {
-	using duration = std::chrono::duration<uint32_t, std::milli>;
-	using rep = duration::rep;
-	using period = duration::period;
-	using time_point = std::chrono::time_point<milli_clock, duration>;
+    using duration = std::chrono::duration<uint32_t, std::milli>;
+    using rep = duration::rep;
+    using period = duration::period;
+    using time_point = std::chrono::time_point<milli_clock, duration>;
 
-	static constexpr bool is_steady = false;
+    static constexpr bool is_steady = false;
 
-	static time_point
-	now() noexcept;
+    static time_point now() noexcept;
 };
 
 /**
@@ -75,51 +73,47 @@ struct milli_clock
  */
 struct micro_clock
 {
-	using duration = std::chrono::duration<uint32_t, std::micro>;
-	using rep = duration::rep;
-	using period = duration::period;
-	using time_point = std::chrono::time_point<micro_clock, duration>;
+    using duration = std::chrono::duration<uint32_t, std::micro>;
+    using rep = duration::rep;
+    using period = duration::period;
+    using time_point = std::chrono::time_point<micro_clock, duration>;
 
-	static constexpr bool is_steady = false;
+    static constexpr bool is_steady = false;
 
-	static time_point
-	now() noexcept;
+    static time_point now() noexcept;
 };
 
-} // namespace chrono
+}  // namespace chrono
 
 using Clock = chrono::milli_clock;
 using PreciseClock = chrono::micro_clock;
 using namespace ::std::chrono_literals;
 
-}	// namespace modm
+}  // namespace modm
 
 #if MODM_HAS_IOSTREAM
 #include <modm/io/iostream.hpp>
 
 namespace modm
 {
-
-template<class C, class D>
-modm::IOStream&
-operator << (modm::IOStream& s, const std::chrono::time_point<C, D>& m)
+template <class C, class D>
+modm::IOStream& operator<<(modm::IOStream& s, const std::chrono::time_point<C, D>& m)
 {
-	s << m.time_since_epoch();
-	return s;
+    s << m.time_since_epoch();
+    return s;
 }
 
-template<class T, class R>
-modm::IOStream&
-operator << (modm::IOStream& s, const std::chrono::duration<T, R>& m)
+template <class T, class R>
+modm::IOStream& operator<<(modm::IOStream& s, const std::chrono::duration<T, R>& m)
 {
-	s << m.count();
-	if constexpr (std::is_same_v<R, std::nano>)  s << "ns";
-	if constexpr (std::is_same_v<R, std::micro>) s << "us";
-	if constexpr (std::is_same_v<R, std::milli>) s << "ms";
-	if constexpr (std::is_same_v<R, std::ratio<60>>) s << "min";
-	if constexpr (std::is_same_v<R, std::ratio<3600>>) s << 'h';
-	return s;
+    s << m.count();
+    if constexpr (std::is_same_v<R, std::nano>) s << "ns";
+    if constexpr (std::is_same_v<R, std::micro>) s << "us";
+    if constexpr (std::is_same_v<R, std::milli>) s << "ms";
+    if constexpr (std::is_same_v<R, std::ratio<60>>) s << "min";
+    if constexpr (std::is_same_v<R, std::ratio<3600>>) s << 'h';
+    return s;
 }
 
-} // modm namespace
+}  // namespace modm
 #endif

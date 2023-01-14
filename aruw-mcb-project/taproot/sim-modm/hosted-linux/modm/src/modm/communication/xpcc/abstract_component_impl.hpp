@@ -12,86 +12,76 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_ABSTRACT_COMPONENT_HPP
-	#error	"Don't include this file directly, use 'abstract_component.hpp' instead"
+#ifndef XPCC_ABSTRACT_COMPONENT_HPP
+#error "Don't include this file directly, use 'abstract_component.hpp' instead"
 #endif
 
 // ----------------------------------------------------------------------------
-xpcc::Communicator *
-xpcc::AbstractComponent::getCommunicator()
+xpcc::Communicator* xpcc::AbstractComponent::getCommunicator() { return &this->communicator; }
+
+// ----------------------------------------------------------------------------
+void xpcc::AbstractComponent::callAction(uint8_t receiver, uint8_t actionIdentifier)
 {
-	return &this->communicator;
+    this->communicator.callAction(receiver, actionIdentifier);
+}
+
+void xpcc::AbstractComponent::callAction(
+    uint8_t receiver,
+    uint8_t actionIdentifier,
+    ResponseCallback& responseCallback)
+{
+    this->communicator.callAction(receiver, actionIdentifier, responseCallback);
 }
 
 // ----------------------------------------------------------------------------
-void
-xpcc::AbstractComponent::callAction(uint8_t receiver, uint8_t actionIdentifier)
+void xpcc::AbstractComponent::publishEvent(uint8_t eventIdentifier)
 {
-	this->communicator.callAction(receiver, actionIdentifier);
-}
-
-void
-xpcc::AbstractComponent::callAction(uint8_t receiver, uint8_t actionIdentifier, ResponseCallback& responseCallback)
-{
-	this->communicator.callAction(receiver, actionIdentifier, responseCallback);
-}
-
-
-// ----------------------------------------------------------------------------
-void
-xpcc::AbstractComponent::publishEvent(uint8_t eventIdentifier)
-{
-	this->communicator.publishEvent(eventIdentifier);
+    this->communicator.publishEvent(eventIdentifier);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::AbstractComponent::callAction(uint8_t receiver,
-		uint8_t actionIdentifier, const T& data)
+template <typename T>
+void xpcc::AbstractComponent::callAction(uint8_t receiver, uint8_t actionIdentifier, const T& data)
 {
-	this->communicator.callAction(receiver, actionIdentifier, data);
+    this->communicator.callAction(receiver, actionIdentifier, data);
 }
 
-template<typename T>
-void
-xpcc::AbstractComponent::callAction(uint8_t receiver, uint8_t actionIdentifier,
-		const T& data, ResponseCallback& responseCallback)
+template <typename T>
+void xpcc::AbstractComponent::callAction(
+    uint8_t receiver,
+    uint8_t actionIdentifier,
+    const T& data,
+    ResponseCallback& responseCallback)
 {
-	this->communicator.callAction(receiver, actionIdentifier, data, responseCallback);
-}
-
-// ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::AbstractComponent::publishEvent(uint8_t eventIdentifier, const T& data)
-{
-	communicator.publishEvent(eventIdentifier, data);
+    this->communicator.callAction(receiver, actionIdentifier, data, responseCallback);
 }
 
 // ----------------------------------------------------------------------------
-void
-xpcc::AbstractComponent::sendResponse(const ResponseHandle& handle)
+template <typename T>
+void xpcc::AbstractComponent::publishEvent(uint8_t eventIdentifier, const T& data)
 {
-	this->communicator.sendResponse(handle);
+    communicator.publishEvent(eventIdentifier, data);
 }
 
-template<typename T>
-void
-xpcc::AbstractComponent::sendResponse(const ResponseHandle& handle, const T& data)
+// ----------------------------------------------------------------------------
+void xpcc::AbstractComponent::sendResponse(const ResponseHandle& handle)
 {
-	this->communicator.sendResponse(handle, data);
+    this->communicator.sendResponse(handle);
 }
 
-void
-xpcc::AbstractComponent::sendNegativeResponse(const ResponseHandle& handle)
+template <typename T>
+void xpcc::AbstractComponent::sendResponse(const ResponseHandle& handle, const T& data)
 {
-	this->communicator.sendNegativeResponse(handle);
+    this->communicator.sendResponse(handle, data);
 }
 
-template<typename T>
-void
-xpcc::AbstractComponent::sendNegativeResponse(const ResponseHandle& handle, const T& data)
+void xpcc::AbstractComponent::sendNegativeResponse(const ResponseHandle& handle)
 {
-	this->communicator.sendNegativeResponse(handle, data);
+    this->communicator.sendNegativeResponse(handle);
+}
+
+template <typename T>
+void xpcc::AbstractComponent::sendNegativeResponse(const ResponseHandle& handle, const T& data)
+{
+    this->communicator.sendNegativeResponse(handle, data);
 }

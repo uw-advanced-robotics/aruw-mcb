@@ -11,65 +11,63 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_INTERPOLATION_LINEAR_HPP
-#define	MODM_INTERPOLATION_LINEAR_HPP
+#ifndef MODM_INTERPOLATION_LINEAR_HPP
+#define MODM_INTERPOLATION_LINEAR_HPP
 
 #include <stdint.h>
 
-#include <modm/math/utils/arithmetic_traits.hpp>
-#include <modm/container/pair.hpp>
 #include <modm/architecture/interface/accessor.hpp>
+#include <modm/container/pair.hpp>
+#include <modm/math/utils/arithmetic_traits.hpp>
 
 namespace modm
 {
-	namespace interpolation
-	{
-		/**
-		 * \tparam	T			Any specialization of modm::Pair<>
-		 * \tparam	Accessor	Accessor class. Can be modm::accessor::Ram,
-		 * 						modm::accessor::Flash or any self defined
-		 * 						accessor class.
-		 * 						Default is modm::accessor::Ram.
-		 *
-		 * \ingroup	modm_math_interpolation
-		 */
-		template <typename T,
-				  template <typename> class Accessor = ::modm::accessor::Ram>
-		class Linear
-		{
-		public:
-			typedef typename T::FirstType InputType;
-			typedef typename T::SecondType OutputType;
+namespace interpolation
+{
+/**
+ * \tparam	T			Any specialization of modm::Pair<>
+ * \tparam	Accessor	Accessor class. Can be modm::accessor::Ram,
+ * 						modm::accessor::Flash or any self defined
+ * 						accessor class.
+ * 						Default is modm::accessor::Ram.
+ *
+ * \ingroup	modm_math_interpolation
+ */
+template <typename T, template <typename> class Accessor = ::modm::accessor::Ram>
+class Linear
+{
+public:
+    typedef typename T::FirstType InputType;
+    typedef typename T::SecondType OutputType;
 
-			typedef modm::SignedType< OutputType > OutputSignedType;
-			typedef modm::WideType< OutputSignedType > WideType;
+    typedef modm::SignedType<OutputType> OutputSignedType;
+    typedef modm::WideType<OutputSignedType> WideType;
 
-		public:
-			/**
-			 * \brief	Constructor
-			 *
-			 * \param	supportingPoints	Supporting points of the curve.
-			 * 								Needs to be an Array of modm::Pair<>.
-			 * \param	numberOfPoints		length of \p supportingPoints
-			 */
-			Linear(Accessor<T> supportingPoints, uint8_t numberOfPoints);
+public:
+    /**
+     * \brief	Constructor
+     *
+     * \param	supportingPoints	Supporting points of the curve.
+     * 								Needs to be an Array of
+     * modm::Pair<>. \param	numberOfPoints		length of \p supportingPoints
+     */
+    Linear(Accessor<T> supportingPoints, uint8_t numberOfPoints);
 
-			/**
-			 * \brief	Perform a linear interpolation
-			 *
-			 * \param 	value	input value
-			 * \return	interpolated value
-			 */
-			OutputType
-			interpolate(const InputType& value) const;
+    /**
+     * \brief	Perform a linear interpolation
+     *
+     * \param 	value	input value
+     * \return	interpolated value
+     */
+    OutputType interpolate(const InputType& value) const;
 
-		private:
-			const Accessor<T> supportingPoints;
-			const uint8_t numberOfPoints;
-		};
-	}
-}
+private:
+    const Accessor<T> supportingPoints;
+    const uint8_t numberOfPoints;
+};
+}  // namespace interpolation
+}  // namespace modm
 
 #include "linear_impl.hpp"
 
-#endif	// MODM_INTERPOLATION_LINEAR_HPP
+#endif  // MODM_INTERPOLATION_LINEAR_HPP

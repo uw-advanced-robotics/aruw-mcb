@@ -16,18 +16,18 @@
 
 extern "C"
 {
+    void __cxa_pure_virtual()
+    {
+        modm_assert(0, "virt.pure", "A pure virtual function was called!");
+    }
+    void __cxa_deleted_virtual()
+    {
+        modm_assert(0, "virt.del", "A deleted virtual function was called!");
+    }
 
-void __cxa_pure_virtual()
-{ modm_assert(0, "virt.pure", "A pure virtual function was called!"); }
-void __cxa_deleted_virtual()
-{ modm_assert(0, "virt.del", "A deleted virtual function was called!"); }
-
-void* __dso_handle = (void*) &__dso_handle;
-// ARM EABI specifies __aeabi_atexit instead of __cxa_atexit
-int __aeabi_atexit(void (*)(void *), void *, void *)
-{
-	return 0;
-}
+    void *__dso_handle = (void *)&__dso_handle;
+    // ARM EABI specifies __aeabi_atexit instead of __cxa_atexit
+    int __aeabi_atexit(void (*)(void *), void *, void *) { return 0; }
 }
 
 #include <atomic>
@@ -36,32 +36,29 @@ int __aeabi_atexit(void (*)(void *), void *, void *)
  */
 enum
 {
-	UNINITIALIZED = 0,
-	INITIALIZED = 1,
-	INITIALIZING = 0x100,
+    UNINITIALIZED = 0,
+    INITIALIZED = 1,
+    INITIALIZING = 0x100,
 };
 
 // This function is only called when `(guard & 1) != 1`!
 extern "C" int __cxa_guard_acquire(int *guard)
 {
-	std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
-	if (atomic_guard->exchange(INITIALIZING) == INITIALIZING)
-	{
-		modm_assert(0, "stat.rec",
-				"Recursive initialization of a function static!", guard);
-	}
-	return 1;
+    std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
+    if (atomic_guard->exchange(INITIALIZING) == INITIALIZING)
+    {
+        modm_assert(0, "stat.rec", "Recursive initialization of a function static!", guard);
+    }
+    return 1;
 }
 
 // After this function the compiler expects `(guard & 1) == 1`!
 extern "C" void __cxa_guard_release(int *guard) noexcept
 {
-	std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
-	atomic_guard->store(INITIALIZED);
+    std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
+    atomic_guard->store(INITIALIZED);
 }
 
 // Called if the initialization terminates by throwing an exception.
 // After this function the compiler expects `(guard & 3) == 0`!
-extern "C" void __cxa_guard_abort([[maybe_unused]] int *guard) noexcept
-{
-}
+extern "C" void __cxa_guard_abort([[maybe_unused]] int *guard) noexcept {}

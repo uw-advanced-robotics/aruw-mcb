@@ -19,104 +19,79 @@
 
 namespace modm
 {
+/**
+ * @brief The ScrollableText class scrolls the text if the
+ *        required space of the string is less than the
+ *        available.
+ *
+ *\author Thorsten Lajewski
+ *\ingroup modm_ui_menu
+ *\warning This class only works in combination with modm::font::FixedWidth5x8
+ *\todo A better implementation is needed.
+ */
+class ScrollableText
+{
+public:
+    /**
+     * @param text string which should be displayed on the Graphic Display
+     * @param space number of letters, which can be displayed at once
+     */
+    ScrollableText(const char* text, uint16_t space);
 
-	 /**
-	 * @brief The ScrollableText class scrolls the text if the
-	 *        required space of the string is less than the
-	 *        available.
-	 *
-	 *\author Thorsten Lajewski
-	 *\ingroup modm_ui_menu
-	 *\warning This class only works in combination with modm::font::FixedWidth5x8
-	 *\todo A better implementation is needed.
-	 */
-	class ScrollableText
-	{
-	public:
-		/**
-		 * @param text string which should be displayed on the Graphic Display
-		 * @param space number of letters, which can be displayed at once
-		 */
-		ScrollableText(const char* text, uint16_t space);
+    ScrollableText(const ScrollableText& text);
 
-		ScrollableText(const ScrollableText& text);
+    ScrollableText& operator=(const ScrollableText& text);
 
-		ScrollableText& operator=(const ScrollableText& text);
+    ~ScrollableText();
 
-		~ScrollableText();
+    /**
+     *determines if the text can be displayed without scrolling
+     */
+    inline bool needsScrolling() { return length > space; }
 
-		/**
-		 *determines if the text can be displayed without scrolling
-		 */
-		inline bool
-		needsScrolling()
-		{
-			return length > space;
-		}
+    /**
+     * @brief getText return the part of the text which should be displayed next
+     *
+     * If the text needs scrolling and the scrolling is not paused, each call to this
+     * function returns another part of the text which is displaced by one letter.
+     *
+     * @return part of the text
+     */
+    const char* getText();
 
-		/**
-		 * @brief getText return the part of the text which should be displayed next
-		 *
-		 * If the text needs scrolling and the scrolling is not paused, each call to this
-		 * function returns another part of the text which is displaced by one letter.
-		 *
-		 * @return part of the text
-		 */
-		const char*
-		getText();
+    /**
+     * @brief toogle the scrolling
+     */
+    inline void toogle() { this->paused = !this->paused; }
 
-		/**
-		 * @brief toogle the scrolling
-		 */
-		inline void
-		toogle()
-		{
-			this->paused = !this->paused;
-		}
+    /**
+     * @brief start scrolling the text
+     */
+    inline void scroll() { this->paused = false; }
 
-		/**
-		 * @brief start scrolling the text
-		 */
-		inline void
-		scroll()
-		{
-			this->paused = false;
-		}
+    /**
+     * @brief pause scrolling the text
+     */
+    inline void pause() { this->paused = true; }
 
-		/**
-		 * @brief pause scrolling the text
-		 */
-		inline void
-		pause()
-		{
-			this->paused = true;
-		}
+    /**
+     * @brief setToStart getText returns the beginning of the text next time.
+     */
+    void setToStart();
 
-		/**
-		 * @brief setToStart getText returns the beginning of the text next time.
-		 */
-		void
-		setToStart();
+    /**
+     * @brief isPaused determines if the text is currently scrolling.
+     * @return
+     */
+    inline bool isPaused() { return this->paused; }
 
-		/**
-		 * @brief isPaused determines if the text is currently scrolling.
-		 * @return
-		 */
-		inline bool
-		isPaused()
-		{
-			return this->paused;
-		}
-
-	private:
-
-		bool paused;
-		const char* text;
-		uint16_t startPosition;
-		uint16_t length;
-		uint16_t space;
-		char* print;
-
-	};
-}
-#endif // MODM_SCROLLABLE_TEXT_HPP
+private:
+    bool paused;
+    const char* text;
+    uint16_t startPosition;
+    uint16_t length;
+    uint16_t space;
+    char* print;
+};
+}  // namespace modm
+#endif  // MODM_SCROLLABLE_TEXT_HPP

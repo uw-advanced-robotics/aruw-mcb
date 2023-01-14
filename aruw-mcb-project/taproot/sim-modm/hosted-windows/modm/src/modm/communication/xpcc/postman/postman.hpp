@@ -14,54 +14,52 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_POSTMAN_HPP
-#define	XPCC_POSTMAN_HPP
+#ifndef XPCC_POSTMAN_HPP
+#define XPCC_POSTMAN_HPP
 
 #include "../backend/backend_interface.hpp"
+
 #include "response.hpp"
 
 namespace xpcc
 {
-	/**
-	 * \brief	Postman interface
-	 *
-	 * The Postman class is responsible of delivering messages the the
-	 * components.
-	 *
-	 * \ingroup	modm_communication_xpcc
-	 */
-	class Postman
-	{
-	public:
-		enum DeliverInfo
-		{
-			OK = 0,
-			ERROR,
-			NO_COMPONENT,
-			NO_ACTION,
-			WRONG_ACTION_PARAMETER,
-			NO_EVENT,
-			WRONG_EVENT_PARAMETER,
-			NOT_IMPLEMENTED_YET_ERROR,
-		};
+/**
+ * \brief	Postman interface
+ *
+ * The Postman class is responsible of delivering messages the the
+ * components.
+ *
+ * \ingroup	modm_communication_xpcc
+ */
+class Postman
+{
+public:
+    enum DeliverInfo
+    {
+        OK = 0,
+        ERROR,
+        NO_COMPONENT,
+        NO_ACTION,
+        WRONG_ACTION_PARAMETER,
+        NO_EVENT,
+        WRONG_EVENT_PARAMETER,
+        NOT_IMPLEMENTED_YET_ERROR,
+    };
 
-	public:
-		virtual
-		~Postman();
+public:
+    virtual ~Postman();
 
-		virtual DeliverInfo
-		deliverPacket(const Header& header, const modm::SmartPointer& payload) = 0;
+    virtual DeliverInfo deliverPacket(const Header& header, const modm::SmartPointer& payload) = 0;
 
-		/**
-		 * \brief	Check if a component is available on this board
-		 *
-		 * \param	component	Id of the component
-		 * \return	\c true if the postman is available to delivier messages
-		 * 			to the given component, \c false otherwise.
-		 */
-		virtual bool
-		isComponentAvailable(uint8_t component) const = 0;
-	};
-}
+    /**
+     * \brief	Check if a component is available on this board
+     *
+     * \param	component	Id of the component
+     * \return	\c true if the postman is available to delivier messages
+     * 			to the given component, \c false otherwise.
+     */
+    virtual bool isComponentAvailable(uint8_t component) const = 0;
+};
+}  // namespace xpcc
 
-#endif // XPCC_POSTMAN_HPP
+#endif  // XPCC_POSTMAN_HPP

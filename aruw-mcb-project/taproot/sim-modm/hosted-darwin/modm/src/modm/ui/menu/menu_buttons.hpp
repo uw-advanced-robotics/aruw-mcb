@@ -18,25 +18,25 @@
 
 namespace modm
 {
-	namespace MenuButtons
-	{
-	   /**
-		 *
-		 * @brief The Button enum defines the five buttons, which are used in the views.
-		 *
-		 * \author Thorsten Lajewski
-		 *
-		 * \ingroup modm_ui_menu
-		 */
-		enum Button
-		{
-			LEFT,
-			RIGHT,
-			UP,
-			DOWN,
-			OK
-		};
-	}
-}
+namespace MenuButtons
+{
+/**
+ *
+ * @brief The Button enum defines the five buttons, which are used in the views.
+ *
+ * \author Thorsten Lajewski
+ *
+ * \ingroup modm_ui_menu
+ */
+enum Button
+{
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+    OK
+};
+}  // namespace MenuButtons
+}  // namespace modm
 
 #endif /* MODM_MENU_BUTTONS_HPP */

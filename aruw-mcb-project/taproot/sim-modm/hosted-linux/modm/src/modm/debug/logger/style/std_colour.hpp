@@ -18,66 +18,60 @@
 
 namespace modm
 {
-	namespace log
-	{
-		enum Colour
-		{
-			BLACK,
-			RED,
-			GREEN,
-			YELLOW,
-			BLUE,
-			MAGENTA,
-			TURQUOISE,
-			WHITE,
-			NONE
-		};
+namespace log
+{
+enum Colour
+{
+    BLACK,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    MAGENTA,
+    TURQUOISE,
+    WHITE,
+    NONE
+};
 
-		/**
-		 * \class 	StdColour
-		 * \brief 	This style colours the given stream in the color given by the
-		 * 			template argument.
-		 *
-		 * \see http://mathias-kettner.de/lw_farbige_ausgabe_auf_der_konsole.html
-		 *
-		 * \ingroup modm_debug
-		 * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
-		 */
-		template <Colour TEXT, Colour BACKGROUND, typename STYLE = DefaultStyle >
-		class StdColour : public Style<STYLE>
-		{
-		public:
-			StdColour(STYLE style);
+/**
+ * \class 	StdColour
+ * \brief 	This style colours the given stream in the color given by the
+ * 			template argument.
+ *
+ * \see http://mathias-kettner.de/lw_farbige_ausgabe_auf_der_konsole.html
+ *
+ * \ingroup modm_debug
+ * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
+ */
+template <Colour TEXT, Colour BACKGROUND, typename STYLE = DefaultStyle>
+class StdColour : public Style<STYLE>
+{
+public:
+    StdColour(STYLE style);
 
-			StdColour(IODevice &device);
+    StdColour(IODevice& device);
 
-			inline void
-			parseArg( int argc, char * argv);
+    inline void parseArg(int argc, char* argv);
 
-			~StdColour();
+    ~StdColour();
 
-			/// Write one char to the sink.
-			void
-			write( char c );
+    /// Write one char to the sink.
+    void write(char c);
 
-			/// Write a string that terminates with \c '\\0' to the sink.
-			void
-			write( const char* s );
+    /// Write a string that terminates with \c '\\0' to the sink.
+    void write(const char* s);
 
-			/// The message is complete and can be written/send/displayed.
-			void
-			flush();
+    /// The message is complete and can be written/send/displayed.
+    void flush();
 
-		private:
-			inline const char*
-			getTextColour();
+private:
+    inline const char* getTextColour();
 
-			inline const char*
-			getBackgroundColour();
-		};
-	}
-}
+    inline const char* getBackgroundColour();
+};
+}  // namespace log
+}  // namespace modm
 
 #include "std_colour_impl.hpp"
 
-#endif // MODM_LOG_STD_COLOUR_HPP
+#endif  // MODM_LOG_STD_COLOUR_HPP

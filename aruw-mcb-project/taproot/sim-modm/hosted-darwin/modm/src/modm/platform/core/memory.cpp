@@ -12,15 +12,18 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <modm/architecture/interface/memory.hpp>
 #include <stdlib.h>
 
-void* operator new  (size_t size, modm::MemoryTraits)
-{ return ::operator new  (size); }
-void* operator new[](size_t size, modm::MemoryTraits)
-{ return ::operator new[](size); }
+#include <modm/architecture/interface/memory.hpp>
 
-void* operator new  (size_t size, modm::MemoryTraits, const std::nothrow_t& t) noexcept
-{ return ::operator new  (size, t); }
+void* operator new(size_t size, modm::MemoryTraits) { return ::operator new(size); }
+void* operator new[](size_t size, modm::MemoryTraits) { return ::operator new[](size); }
+
+void* operator new(size_t size, modm::MemoryTraits, const std::nothrow_t& t) noexcept
+{
+    return ::operator new(size, t);
+}
 void* operator new[](size_t size, modm::MemoryTraits, const std::nothrow_t& t) noexcept
-{ return ::operator new[](size, t); }
+{
+    return ::operator new[](size, t);
+}

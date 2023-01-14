@@ -26,7 +26,7 @@
 
 namespace tap::communication::serial::bound_ports
 {
-    static constexpr Uart::UartPort REMOTE_SERIAL_UART_PORT = Uart::UartPort::Uart1;
+static constexpr Uart::UartPort REMOTE_SERIAL_UART_PORT = Uart::UartPort::Uart1;
 }  // namespace tap::communication::serial::bound_ports
 
 #endif  // TAPROOT_REMOTE_SERIAL_CONSTANTS_HPP_

@@ -16,10 +16,8 @@
 
 namespace modm
 {
-
 namespace platform
 {
-
 /**
  * Invert a pin in software.
  *
@@ -36,62 +34,38 @@ namespace platform
  * @author	Fabian Greif
  * @ingroup	modm_platform_gpio
  */
-template < class Pin >
+template <class Pin>
 class GpioInverted : public Pin
 {
 public:
-	using Output = GpioInverted<typename Pin::Output>;
-	using Input = GpioInverted<typename Pin::Input>;
-	using IO = GpioInverted<typename Pin::IO>;
-	using Type = typename Pin::Type;
-	static constexpr bool isInverted = not Pin::isInverted;
+    using Output = GpioInverted<typename Pin::Output>;
+    using Input = GpioInverted<typename Pin::Input>;
+    using IO = GpioInverted<typename Pin::IO>;
+    using Type = typename Pin::Type;
+    static constexpr bool isInverted = not Pin::isInverted;
 
 public:
-	using Pin::setOutput;
-	using Pin::set;
-	using Pin::reset;
-	using Pin::read;
-	using Pin::isSet;
+    using Pin::isSet;
+    using Pin::read;
+    using Pin::reset;
+    using Pin::set;
+    using Pin::setOutput;
 
-	inline static void
-	setOutput(bool value)
-	{
-		Pin::setOutput(!value);
-	}
+    inline static void setOutput(bool value) { Pin::setOutput(!value); }
 
-	inline static void
-	set()
-	{
-		Pin::reset();
-	}
+    inline static void set() { Pin::reset(); }
 
-	inline static void
-	set(bool value)
-	{
-		Pin::set(!value);
-	}
+    inline static void set(bool value) { Pin::set(!value); }
 
-	inline static void
-	reset()
-	{
-		Pin::set();
-	}
+    inline static void reset() { Pin::set(); }
 
-	inline static bool
-	read()
-	{
-		return !Pin::read();
-	}
+    inline static bool read() { return !Pin::read(); }
 
-	inline static bool
-	isSet()
-	{
-		return !Pin::isSet();
-	}
+    inline static bool isSet() { return !Pin::isSet(); }
 };
 
-}	// namespace platform
+}  // namespace platform
 
-}	// namespace modm
+}  // namespace modm
 
-#endif // MODM_GPIO_INVERTED_HPP
+#endif  // MODM_GPIO_INVERTED_HPP

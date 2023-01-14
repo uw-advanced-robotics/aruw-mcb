@@ -14,211 +14,209 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_DOUBLY_LINKED_LIST_HPP
-	#error	"Don't include this file directly, use 'doubly_linked_list.hpp' instead"
+#ifndef MODM_DOUBLY_LINKED_LIST_HPP
+#error "Don't include this file directly, use 'doubly_linked_list.hpp' instead"
 #endif
 
 // ----------------------------------------------------------------------------
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::DoublyLinkedList(const Allocator& allocator) :
-	nodeAllocator(allocator), front(0), back(0)
+modm::DoublyLinkedList<T, Allocator>::DoublyLinkedList(const Allocator& allocator)
+    : nodeAllocator(allocator),
+      front(0),
+      back(0)
 {
 }
 
 template <typename T, typename Allocator>
 modm::DoublyLinkedList<T, Allocator>::~DoublyLinkedList()
 {
-	while (this->front != 0)
-	{
-		Node *node = this->front;
-		this->front = this->front->next;
+    while (this->front != 0)
+    {
+        Node* node = this->front;
+        this->front = this->front->next;
 
-		Allocator::destroy(&node->value);
-		this->nodeAllocator.deallocate(node);
-	}
+        Allocator::destroy(&node->value);
+        this->nodeAllocator.deallocate(node);
+    }
 }
 
 template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::isEmpty() const
+bool modm::DoublyLinkedList<T, Allocator>::isEmpty() const
 {
-	return (this->front == 0);
+    return (this->front == 0);
 }
 
 template <typename T, typename Allocator>
-std::size_t
-modm::DoublyLinkedList<T, Allocator>::getSize() const
+std::size_t modm::DoublyLinkedList<T, Allocator>::getSize() const
 {
-	std::size_t count = 0;
-	for (const_iterator it = this->begin(); it != this->end(); ++it) {
-		count++;
-	}
-	return count;
-}
-
-// ----------------------------------------------------------------------------
-template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::prepend(const T& value)
-{
-	// allocate memory for the new node and copy the value into it
-	Node *node = this->nodeAllocator.allocate(1);
-	Allocator::construct(&node->value, value);
-
-	// hook the node into the list
-	node->next = this->front;
-	node->previous = 0;
-
-	if (this->front == 0)
-	{
-		// node it the first entry
-		this->back = node;
-	}
-	else {
-		this->front->previous = node;
-	}
-	this->front = node;
-
-	return true;
-}
-
-template <typename T, typename Allocator>
-void
-modm::DoublyLinkedList<T, Allocator>::append(const T& value)
-{
-	// allocate memory for the new node and copy the value into it
-	Node *node = this->nodeAllocator.allocate(1);
-	Allocator::construct(&node->value, value);
-
-	// hook the node into the list
-	node->next = 0;
-	node->previous = this->back;
-
-	if (this->back == 0)
-	{
-		// first entry in the list
-		this->front = node;
-	}
-	else {
-		this->back->next = node;
-	}
-	this->back = node;
+    std::size_t count = 0;
+    for (const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+        count++;
+    }
+    return count;
 }
 
 // ----------------------------------------------------------------------------
 template <typename T, typename Allocator>
-void
-modm::DoublyLinkedList<T, Allocator>::removeFront()
+bool modm::DoublyLinkedList<T, Allocator>::prepend(const T& value)
 {
-	// remove node from the list
-	Node *node = this->front;
+    // allocate memory for the new node and copy the value into it
+    Node* node = this->nodeAllocator.allocate(1);
+    Allocator::construct(&node->value, value);
 
-	if (this->front->next == 0)
-	{
-		// last entry in the list
-		this->front = 0;
-		this->back = 0;
-	}
-	else {
-		this->front = this->front->next;
-		this->front->previous = 0;
-	}
+    // hook the node into the list
+    node->next = this->front;
+    node->previous = 0;
 
-	// call destructor and free memory
-	Allocator::destroy(&node->value);
-	this->nodeAllocator.deallocate(node);
+    if (this->front == 0)
+    {
+        // node it the first entry
+        this->back = node;
+    }
+    else
+    {
+        this->front->previous = node;
+    }
+    this->front = node;
+
+    return true;
 }
 
 template <typename T, typename Allocator>
-void
-modm::DoublyLinkedList<T, Allocator>::removeBack()
+void modm::DoublyLinkedList<T, Allocator>::append(const T& value)
 {
-	// remove node from the list
-	Node *node = this->back;
+    // allocate memory for the new node and copy the value into it
+    Node* node = this->nodeAllocator.allocate(1);
+    Allocator::construct(&node->value, value);
 
-	if (this->back->previous == 0)
-	{
-		// last entry in the list
-		this->front = 0;
-		this->back = 0;
-	}
-	else {
-		this->back = this->back->previous;
-		this->back->next = 0;
-	}
+    // hook the node into the list
+    node->next = 0;
+    node->previous = this->back;
 
-	// call destructor and free memory
-	Allocator::destroy(&node->value);
-	this->nodeAllocator.deallocate(node);
-}
-
-// ----------------------------------------------------------------------------
-template <typename T, typename Allocator>
-inline const T&
-modm::DoublyLinkedList<T, Allocator>::getFront() const
-{
-	return this->front->value;
-}
-
-template <typename T, typename Allocator>
-inline const T&
-modm::DoublyLinkedList<T, Allocator>::getBack() const
-{
-	return this->back->value;
+    if (this->back == 0)
+    {
+        // first entry in the list
+        this->front = node;
+    }
+    else
+    {
+        this->back->next = node;
+    }
+    this->back = node;
 }
 
 // ----------------------------------------------------------------------------
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator
-modm::DoublyLinkedList<T, Allocator>::begin()
+void modm::DoublyLinkedList<T, Allocator>::removeFront()
 {
-	return iterator(this->front);
+    // remove node from the list
+    Node* node = this->front;
+
+    if (this->front->next == 0)
+    {
+        // last entry in the list
+        this->front = 0;
+        this->back = 0;
+    }
+    else
+    {
+        this->front = this->front->next;
+        this->front->previous = 0;
+    }
+
+    // call destructor and free memory
+    Allocator::destroy(&node->value);
+    this->nodeAllocator.deallocate(node);
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator
-modm::DoublyLinkedList<T, Allocator>::end()
+void modm::DoublyLinkedList<T, Allocator>::removeBack()
 {
-	return iterator(0);
+    // remove node from the list
+    Node* node = this->back;
+
+    if (this->back->previous == 0)
+    {
+        // last entry in the list
+        this->front = 0;
+        this->back = 0;
+    }
+    else
+    {
+        this->back = this->back->previous;
+        this->back->next = 0;
+    }
+
+    // call destructor and free memory
+    Allocator::destroy(&node->value);
+    this->nodeAllocator.deallocate(node);
+}
+
+// ----------------------------------------------------------------------------
+template <typename T, typename Allocator>
+inline const T& modm::DoublyLinkedList<T, Allocator>::getFront() const
+{
+    return this->front->value;
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::const_iterator
-modm::DoublyLinkedList<T, Allocator>::begin() const
+inline const T& modm::DoublyLinkedList<T, Allocator>::getBack() const
 {
-	return const_iterator(this->front);
+    return this->back->value;
+}
+
+// ----------------------------------------------------------------------------
+template <typename T, typename Allocator>
+typename modm::DoublyLinkedList<T, Allocator>::iterator modm::DoublyLinkedList<T, Allocator>::
+    begin()
+{
+    return iterator(this->front);
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::const_iterator
-modm::DoublyLinkedList<T, Allocator>::end() const
+typename modm::DoublyLinkedList<T, Allocator>::iterator modm::DoublyLinkedList<T, Allocator>::end()
 {
-	return const_iterator(0);
+    return iterator(0);
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator
-modm::DoublyLinkedList<T, Allocator>::erase(iterator position)
+typename modm::DoublyLinkedList<T, Allocator>::const_iterator modm::DoublyLinkedList<T, Allocator>::
+    begin() const
 {
+    return const_iterator(this->front);
+}
 
-	if(position.node->previous == 0) {
-		this->removeFront();
-		return this->begin();
-	}
+template <typename T, typename Allocator>
+typename modm::DoublyLinkedList<T, Allocator>::const_iterator modm::DoublyLinkedList<T, Allocator>::
+    end() const
+{
+    return const_iterator(0);
+}
 
-	if(position.node->next == 0) {
-		this->removeBack();
-		return this->end();
-	}
+template <typename T, typename Allocator>
+typename modm::DoublyLinkedList<T, Allocator>::iterator modm::DoublyLinkedList<T, Allocator>::erase(
+    iterator position)
+{
+    if (position.node->previous == 0)
+    {
+        this->removeFront();
+        return this->begin();
+    }
 
-	position.node->previous->next = position.node->next;
-	position.node->next->previous = position.node->previous;
+    if (position.node->next == 0)
+    {
+        this->removeBack();
+        return this->end();
+    }
 
-	Node* next = position.node->next;
+    position.node->previous->next = position.node->next;
+    position.node->next->previous = position.node->previous;
 
-	Allocator::destroy(&(position.node->value));
-	this->nodeAllocator.deallocate(position.node);
+    Node* next = position.node->next;
 
-	return iterator(next);
+    Allocator::destroy(&(position.node->value));
+    this->nodeAllocator.deallocate(position.node);
 
+    return iterator(next);
 }

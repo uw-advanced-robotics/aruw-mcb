@@ -18,8 +18,7 @@
  * Images are generated out of PBM format, see \c tools/bitmap.
  */
 
-#include "image/logo_rca_90x64.hpp"
-#include "image/logo_eurobot_90x64.hpp"
-#include "image/skull_64x64.hpp"
 #include "image/home_16x16.hpp"
-
+#include "image/logo_eurobot_90x64.hpp"
+#include "image/logo_rca_90x64.hpp"
+#include "image/skull_64x64.hpp"

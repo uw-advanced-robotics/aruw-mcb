@@ -13,80 +13,71 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_COMMUNICATOR_HPP
-	#error	"Don't include this file directly, use 'communicator.hpp' instead"
+#ifndef XPCC_COMMUNICATOR_HPP
+#error "Don't include this file directly, use 'communicator.hpp' instead"
 #endif
 
-
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::Communicator::callAction(uint8_t receiver,
-		uint8_t actionIdentifier, const T& data)
+template <typename T>
+void xpcc::Communicator::callAction(uint8_t receiver, uint8_t actionIdentifier, const T& data)
 {
-	Header header(Header::Type::REQUEST, false,
-			receiver,
-			this->ownIdentifier,
-			actionIdentifier);
+    Header header(Header::Type::REQUEST, false, receiver, this->ownIdentifier, actionIdentifier);
 
-	modm::SmartPointer payload(&data);
+    modm::SmartPointer payload(&data);
 
-	this->dispatcher.addMessage(header, payload);
+    this->dispatcher.addMessage(header, payload);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::Communicator::callAction(uint8_t receiver, uint8_t actionIdentifier,
-		const T& data, ResponseCallback& responseCallback)
+template <typename T>
+void xpcc::Communicator::callAction(
+    uint8_t receiver,
+    uint8_t actionIdentifier,
+    const T& data,
+    ResponseCallback& responseCallback)
 {
-	Header header(Header::Type::REQUEST, false,
-			receiver,
-			this->ownIdentifier,
-			actionIdentifier);
+    Header header(Header::Type::REQUEST, false, receiver, this->ownIdentifier, actionIdentifier);
 
-	modm::SmartPointer payload(&data);
+    modm::SmartPointer payload(&data);
 
-	this->dispatcher.addMessage(header, payload, responseCallback);
+    this->dispatcher.addMessage(header, payload, responseCallback);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::Communicator::publishEvent(uint8_t eventIdentifier, const T& data)
+template <typename T>
+void xpcc::Communicator::publishEvent(uint8_t eventIdentifier, const T& data)
 {
-	Header header(Header::Type::REQUEST, false,
-			0,
-			this->ownIdentifier,
-			eventIdentifier);
+    Header header(Header::Type::REQUEST, false, 0, this->ownIdentifier, eventIdentifier);
 
-	modm::SmartPointer payload(&data);	// no metadata is sent with Events
-	this->dispatcher.addMessage(header, payload);
+    modm::SmartPointer payload(&data);  // no metadata is sent with Events
+    this->dispatcher.addMessage(header, payload);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-xpcc::Communicator::sendResponse(const ResponseHandle& handle, const T& data)
+template <typename T>
+void xpcc::Communicator::sendResponse(const ResponseHandle& handle, const T& data)
 {
-	Header header(Header::Type::RESPONSE, false,
-			handle.destination,
-			this->ownIdentifier,
-			handle.packetIdentifier);
+    Header header(
+        Header::Type::RESPONSE,
+        false,
+        handle.destination,
+        this->ownIdentifier,
+        handle.packetIdentifier);
 
-	modm::SmartPointer payload(&data);
-	this->dispatcher.addResponse(header, payload);
+    modm::SmartPointer payload(&data);
+    this->dispatcher.addResponse(header, payload);
 }
 
-template<typename T>
-void
-xpcc::Communicator::sendNegativeResponse(const ResponseHandle& handle, const T& data)
+template <typename T>
+void xpcc::Communicator::sendNegativeResponse(const ResponseHandle& handle, const T& data)
 {
-	Header header(Header::Type::NEGATIVE_RESPONSE, false,
-			handle.destination,
-			this->ownIdentifier,
-			handle.packetIdentifier);
+    Header header(
+        Header::Type::NEGATIVE_RESPONSE,
+        false,
+        handle.destination,
+        this->ownIdentifier,
+        handle.packetIdentifier);
 
-	modm::SmartPointer payload(&data);
-	this->dispatcher.addResponse(header, payload);
+    modm::SmartPointer payload(&data);
+    this->dispatcher.addResponse(header, payload);
 }

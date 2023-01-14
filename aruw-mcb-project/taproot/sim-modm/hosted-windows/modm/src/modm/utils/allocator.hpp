@@ -14,21 +14,21 @@
 #ifndef MODM_ALLOCATOR_HPP
 #define MODM_ALLOCATOR_HPP
 
+#include "allocator/block.hpp"
 #include "allocator/dynamic.hpp"
 #include "allocator/static.hpp"
-#include "allocator/block.hpp"
 
 namespace modm
 {
-	/**
-	 * \ingroup	modm_utils
-	 * \defgroup modm_utils_allocator Memory allocators
-	 *
-	 * \author	Fabian Greif
-	 */
-	namespace allocator
-	{
-	}
+/**
+ * \ingroup	modm_utils
+ * \defgroup modm_utils_allocator Memory allocators
+ *
+ * \author	Fabian Greif
+ */
+namespace allocator
+{
 }
+}  // namespace modm
 
-#endif // MODM_ALLOCATOR_HPP
+#endif  // MODM_ALLOCATOR_HPP

@@ -22,95 +22,89 @@
 
 namespace modm
 {
-	/**
-	 * \brief	S-Curve trajectory generation with feedback
-	 *
-	 * closed-loop
-	 *
-	 * \code
-	 * SCurveController<int16_t> controller;
-	 *
-	 * controller.update(positionTarget - currentPosition, currentSpeed);
-	 * \endcode
-	 *
-	 * \todo	documentation
-	 *
-	 * \author	Fabian Greif
-	 * \author	Georgi Grinshpun
-	 *
-	 * \ingroup	modm_math_filter
-	 */
-	template<typename T>
-	class SCurveController
-	{
-	public:
-		/**
-		 * \todo	some helper programs/formula to choose the right
-		 * 			parameter values (e.g. the java tool from the last year)
-		 *
-		 * \param	increment	=> increment per timestep
-		 * \param	decreaseFactor => decrease per second
-		 */
-		struct Parameter
-		{
-			Parameter(const T& targetArea = T(),
-					const T& increment = T(),
-					const T& decreaseFactor = T(),
-					const T& kp = T(),
-					const T& speedMaximum = T(),
-					const T& speedMinimum = T(),
-					const T& speedTarget = T());
+/**
+ * \brief	S-Curve trajectory generation with feedback
+ *
+ * closed-loop
+ *
+ * \code
+ * SCurveController<int16_t> controller;
+ *
+ * controller.update(positionTarget - currentPosition, currentSpeed);
+ * \endcode
+ *
+ * \todo	documentation
+ *
+ * \author	Fabian Greif
+ * \author	Georgi Grinshpun
+ *
+ * \ingroup	modm_math_filter
+ */
+template <typename T>
+class SCurveController
+{
+public:
+    /**
+     * \todo	some helper programs/formula to choose the right
+     * 			parameter values (e.g. the java tool from the last year)
+     *
+     * \param	increment	=> increment per timestep
+     * \param	decreaseFactor => decrease per second
+     */
+    struct Parameter
+    {
+        Parameter(
+            const T& targetArea = T(),
+            const T& increment = T(),
+            const T& decreaseFactor = T(),
+            const T& kp = T(),
+            const T& speedMaximum = T(),
+            const T& speedMinimum = T(),
+            const T& speedTarget = T());
 
-			T targetArea;
-			T increment;
-			T decreaseFactor;
-			T kp;
-			T speedMaximum;
-			T speedMinimum;
-			T speedTarget;
-		};
+        T targetArea;
+        T increment;
+        T decreaseFactor;
+        T kp;
+        T speedMaximum;
+        T speedMinimum;
+        T speedTarget;
+    };
 
-	public:
-		SCurveController(const Parameter& parameter);
+public:
+    SCurveController(const Parameter& parameter);
 
-		/**
-		 * Reset the parameters of the controller.
-		 *
-		 * \param	parameter list of the controller
-		 **/
-		void
-		setParameter(const Parameter& parameter);
+    /**
+     * Reset the parameters of the controller.
+     *
+     * \param	parameter list of the controller
+     **/
+    void setParameter(const Parameter& parameter);
 
-		inline void
-		setSpeedMaximum(const T& speed);
+    inline void setSpeedMaximum(const T& speed);
 
-		inline void
-		setSpeedMinimim(const T& speed);
+    inline void setSpeedMinimim(const T& speed);
 
-		inline void
-		setSpeedTarget(const T& speed);
+    inline void setSpeedTarget(const T& speed);
 
-		inline bool
-		isTargetReached() const;
+    inline bool isTargetReached() const;
 
-		void
-		update(T error, const T& speed);
+    void update(T error, const T& speed);
 
-		/// setpoint output for the speed value
-		inline const T&
-		getValue() const;
+    /// setpoint output for the speed value
+    inline const T& getValue() const;
 
-	private:
-		T output;
-		bool targetReached;
+private:
+    T output;
+    bool targetReached;
 
-		Parameter parameter;
-		/// distance to add to the current error for speed calculation. This is automatically calculated from
-		/// speedtarget parameter.
-		T additionalDistanceToStop;
-	};
-}
+    Parameter parameter;
+    /// distance to add to the current error for speed calculation. This is automatically calculated
+    /// from speedtarget parameter.
+    T additionalDistanceToStop;
+};
+}  // namespace modm
 
 #include "s_curve_controller_impl.hpp"
 
-#endif // MODM_S_CURVE_CONTROLLER_HPP
+#endif  // MODM_S_CURVE_CONTROLLER_HPP

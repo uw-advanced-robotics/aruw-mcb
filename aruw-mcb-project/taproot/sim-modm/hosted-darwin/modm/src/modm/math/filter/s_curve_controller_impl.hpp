@@ -16,121 +16,128 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_S_CURVE_CONTROLLER_HPP
-	#error	"Don't include this file directly, use 's_curve_controller.hpp' instead!"
+#error "Don't include this file directly, use 's_curve_controller.hpp' instead!"
 #endif
-
 
 #include <modm/math/utils.hpp>
 
 // ----------------------------------------------------------------------------
-template<typename T>
+template <typename T>
 modm::SCurveController<T>::Parameter::Parameter(
-		const T& targetArea, const T& increment, const T& decreaseFactor, const T& kp,
-		const T& speedMaximum, const T& speedMinimum, const T& speedTarget) :
-	targetArea(targetArea), increment(increment), decreaseFactor(decreaseFactor), kp(kp),
-	speedMaximum(speedMaximum), speedMinimum(speedMinimum),
-	speedTarget(speedTarget)
+    const T& targetArea,
+    const T& increment,
+    const T& decreaseFactor,
+    const T& kp,
+    const T& speedMaximum,
+    const T& speedMinimum,
+    const T& speedTarget)
+    : targetArea(targetArea),
+      increment(increment),
+      decreaseFactor(decreaseFactor),
+      kp(kp),
+      speedMaximum(speedMaximum),
+      speedMinimum(speedMinimum),
+      speedTarget(speedTarget)
 {
 }
 
 // ----------------------------------------------------------------------------
 
-template<typename T>
-void
-modm::SCurveController<T>::setParameter(const Parameter& parameter)
+template <typename T>
+void modm::SCurveController<T>::setParameter(const Parameter& parameter)
 {
-	this->parameter = parameter;
-	this->additionalDistanceToStop = (parameter.speedTarget * parameter.speedTarget) / parameter.decreaseFactor / 2 ;
+    this->parameter = parameter;
+    this->additionalDistanceToStop =
+        (parameter.speedTarget * parameter.speedTarget) / parameter.decreaseFactor / 2;
 }
 
 // ----------------------------------------------------------------------------
 
-template<typename T>
-modm::SCurveController<T>::SCurveController(const Parameter& parameter) :
-	output(), targetReached(false), parameter(parameter)
+template <typename T>
+modm::SCurveController<T>::SCurveController(const Parameter& parameter)
+    : output(),
+      targetReached(false),
+      parameter(parameter)
 {
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-inline void
-modm::SCurveController<T>::setSpeedMaximum( const T& speed )
+template <typename T>
+inline void modm::SCurveController<T>::setSpeedMaximum(const T& speed)
 {
-	this->parameter.speedMaximum = speed;
+    this->parameter.speedMaximum = speed;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-inline void
-modm::SCurveController<T>::setSpeedMinimim( const T& speed )
+template <typename T>
+inline void modm::SCurveController<T>::setSpeedMinimim(const T& speed)
 {
-	this->parameter.speedMinimum = speed;
+    this->parameter.speedMinimum = speed;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-inline void
-modm::SCurveController<T>::setSpeedTarget( const T& speed )
+template <typename T>
+inline void modm::SCurveController<T>::setSpeedTarget(const T& speed)
 {
-	this->parameter.speedTarget = speed;
-	this->additionalDistanceToStop = (speed * speed) / parameter.decreaseFactor / 2;
+    this->parameter.speedTarget = speed;
+    this->additionalDistanceToStop = (speed * speed) / parameter.decreaseFactor / 2;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::SCurveController<T>::isTargetReached() const
+template <typename T>
+bool modm::SCurveController<T>::isTargetReached() const
 {
-	return this->targetReached;
+    return this->targetReached;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::SCurveController<T>::update(T error, const T& speed)
+template <typename T>
+void modm::SCurveController<T>::update(T error, const T& speed)
 {
-	// adjust sign to be always positive
-	bool invert = false;
-	T currentValue = speed;
-	if (error < 0)
-	{
-		invert = true;
-		error = -error;
-		currentValue = -currentValue;
-	}
+    // adjust sign to be always positive
+    bool invert = false;
+    T currentValue = speed;
+    if (error < 0)
+    {
+        invert = true;
+        error = -error;
+        currentValue = -currentValue;
+    }
 
-	T outputIncrement = currentValue + parameter.increment;
-	T outputDecrement;
+    T outputIncrement = currentValue + parameter.increment;
+    T outputDecrement;
 
-	targetReached = (error <= parameter.targetArea);
-	error += this->additionalDistanceToStop;
+    targetReached = (error <= parameter.targetArea);
+    error += this->additionalDistanceToStop;
 
-	if (error <= parameter.targetArea)
-	{
-		outputDecrement = error * parameter.kp;
-	}
-	else {
-		outputDecrement = std::sqrt(error * parameter.decreaseFactor * 2);
-	}
+    if (error <= parameter.targetArea)
+    {
+        outputDecrement = error * parameter.kp;
+    }
+    else
+    {
+        outputDecrement = std::sqrt(error * parameter.decreaseFactor * 2);
+    }
 
-	output = modm::min(outputIncrement, outputDecrement);
-	// TODO smooth breaking if the speedMaximum has changed to a lower value
-	output = modm::min(output, parameter.speedMaximum);
+    output = modm::min(outputIncrement, outputDecrement);
+    // TODO smooth breaking if the speedMaximum has changed to a lower value
+    output = modm::min(output, parameter.speedMaximum);
 
-	if (output < parameter.speedMinimum) {
-		output = parameter.speedMinimum;
-	}
+    if (output < parameter.speedMinimum)
+    {
+        output = parameter.speedMinimum;
+    }
 
-	// revert sign
-	if (invert) {
-		output = -output;
-	}
+    // revert sign
+    if (invert)
+    {
+        output = -output;
+    }
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-inline const T&
-modm::SCurveController<T>::getValue() const
+template <typename T>
+inline const T& modm::SCurveController<T>::getValue() const
 {
-	return this->output;
+    return this->output;
 }

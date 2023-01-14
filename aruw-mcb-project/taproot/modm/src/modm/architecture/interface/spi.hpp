@@ -19,32 +19,29 @@
 
 namespace modm
 {
-
 /// @ingroup modm_architecture_spi
 struct Spi
 {
-	/// The signature of the configuration function.
-	using ConfigurationHandler = void(*)();
+    /// The signature of the configuration function.
+    using ConfigurationHandler = void (*)();
 
-	/// Spi Data Mode, Mode0 is the most common mode
-	enum class
-	DataMode : uint8_t
-	{
-		Mode0 = 0b00,	///< clock normal,   sample on rising  edge
-		Mode1 = 0b01,	///< clock normal,   sample on falling edge
-		Mode2 = 0b10,	///< clock inverted, sample on rising  edge
-		Mode3 = 0b11,	///< clock inverted, sample on falling edge
-	};
+    /// Spi Data Mode, Mode0 is the most common mode
+    enum class DataMode : uint8_t
+    {
+        Mode0 = 0b00,  ///< clock normal,   sample on rising  edge
+        Mode1 = 0b01,  ///< clock normal,   sample on falling edge
+        Mode2 = 0b10,  ///< clock inverted, sample on rising  edge
+        Mode3 = 0b11,  ///< clock inverted, sample on falling edge
+    };
 
-	/// Spi Data Order, MsbFirst is the most common mode
-	enum class
-	DataOrder : uint8_t
-	{
-		MsbFirst = 0b0,
-		LsbFirst = 0b1,
-	};
+    /// Spi Data Order, MsbFirst is the most common mode
+    enum class DataOrder : uint8_t
+    {
+        MsbFirst = 0b0,
+        LsbFirst = 0b1,
+    };
 };
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_INTERFACE_SPI_HPP
+#endif  // MODM_INTERFACE_SPI_HPP

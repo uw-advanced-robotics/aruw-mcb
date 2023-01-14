@@ -18,128 +18,118 @@
 
 // Bit0: single transfer state
 // Bit1: block transfer state
-uint8_t
-modm::platform::SpiMaster5::state(0);
+uint8_t modm::platform::SpiMaster5::state(0);
 
-uint8_t
-modm::platform::SpiMaster5::count(0);
+uint8_t modm::platform::SpiMaster5::count(0);
 
-void *
-modm::platform::SpiMaster5::context(nullptr);
+void *modm::platform::SpiMaster5::context(nullptr);
 
-modm::Spi::ConfigurationHandler
-modm::platform::SpiMaster5::configuration(nullptr);
+modm::Spi::ConfigurationHandler modm::platform::SpiMaster5::configuration(nullptr);
 // ----------------------------------------------------------------------------
 
-uint8_t
-modm::platform::SpiMaster5::acquire(void *ctx, ConfigurationHandler handler)
+uint8_t modm::platform::SpiMaster5::acquire(void *ctx, ConfigurationHandler handler)
 {
-	if (context == nullptr)
-	{
-		context = ctx;
-		count = 1;
-		// if handler is not nullptr and is different from previous configuration
-		if (handler and configuration != handler) {
-			configuration = handler;
-			configuration();
-		}
-		return 1;
-	}
+    if (context == nullptr)
+    {
+        context = ctx;
+        count = 1;
+        // if handler is not nullptr and is different from previous configuration
+        if (handler and configuration != handler)
+        {
+            configuration = handler;
+            configuration();
+        }
+        return 1;
+    }
 
-	if (ctx == context)
-		return ++count;
+    if (ctx == context) return ++count;
 
-	return 0;
+    return 0;
 }
 
-uint8_t
-modm::platform::SpiMaster5::release(void *ctx)
+uint8_t modm::platform::SpiMaster5::release(void *ctx)
 {
-	if (ctx == context)
-	{
-		if (--count == 0)
-			context = nullptr;
-	}
-	return count;
+    if (ctx == context)
+    {
+        if (--count == 0) context = nullptr;
+    }
+    return count;
 }
 // ----------------------------------------------------------------------------
 
-modm::ResumableResult<uint8_t>
-modm::platform::SpiMaster5::transfer(uint8_t data)
+modm::ResumableResult<uint8_t> modm::platform::SpiMaster5::transfer(uint8_t data)
 {
-	// this is a manually implemented "fast resumable function"
-	// there is no context or nesting protection, since we don't need it.
-	// there are only two states encoded into 1 bit (LSB of state):
-	//   1. waiting to start, and
-	//   2. waiting to finish.
+    // this is a manually implemented "fast resumable function"
+    // there is no context or nesting protection, since we don't need it.
+    // there are only two states encoded into 1 bit (LSB of state):
+    //   1. waiting to start, and
+    //   2. waiting to finish.
 
-	// LSB != Bit0 ?
-	if ( !(state & Bit0) )
-	{
-		// wait for previous transfer to finish
-		if (!SpiHal5::isTransmitRegisterEmpty())
-			return {modm::rf::Running};
+    // LSB != Bit0 ?
+    if (!(state & Bit0))
+    {
+        // wait for previous transfer to finish
+        if (!SpiHal5::isTransmitRegisterEmpty()) return {modm::rf::Running};
 
-		// start transfer by copying data into register
-		SpiHal5::write(data);
+        // start transfer by copying data into register
+        SpiHal5::write(data);
 
-		// set LSB = Bit0
-		state |= Bit0;
-	}
+        // set LSB = Bit0
+        state |= Bit0;
+    }
 
-	if (!SpiHal5::isReceiveRegisterNotEmpty())
-		return {modm::rf::Running};
+    if (!SpiHal5::isReceiveRegisterNotEmpty()) return {modm::rf::Running};
 
-	SpiHal5::read(data);
+    SpiHal5::read(data);
 
-	// transfer finished
-	state &= ~Bit0;
-	return {modm::rf::Stop, data};
+    // transfer finished
+    state &= ~Bit0;
+    return {modm::rf::Stop, data};
 }
 
-modm::ResumableResult<void>
-modm::platform::SpiMaster5::transfer(
-		const uint8_t * tx, uint8_t * rx, std::size_t length)
+modm::ResumableResult<void> modm::platform::SpiMaster5::transfer(
+    const uint8_t *tx,
+    uint8_t *rx,
+    std::size_t length)
 {
-	// this is a manually implemented "fast resumable function"
-	// there is no context or nesting protection, since we don't need it.
-	// there are only two states encoded into 1 bit (Bit1 of state):
-	//   1. initialize index, and
-	//   2. wait for 1-byte transfer to finish.
+    // this is a manually implemented "fast resumable function"
+    // there is no context or nesting protection, since we don't need it.
+    // there are only two states encoded into 1 bit (Bit1 of state):
+    //   1. initialize index, and
+    //   2. wait for 1-byte transfer to finish.
 
-	// we need to globally remember which byte we are currently transferring
-	static std::size_t index = 0;
+    // we need to globally remember which byte we are currently transferring
+    static std::size_t index = 0;
 
-	// we are only interested in Bit1
-	switch(state & Bit1)
-	{
-		case 0:
-			// we will only visit this state once
-			state |= Bit1;
+    // we are only interested in Bit1
+    switch (state & Bit1)
+    {
+        case 0:
+            // we will only visit this state once
+            state |= Bit1;
 
-			// initialize index and check range
-			index = 0;
-			while (index < length)
-			{
-		default:
-		{
-				// if tx == 0, we use a dummy byte 0x00
-				// else we copy it from the array
-				// call the resumable function
-				modm::ResumableResult<uint8_t> result = transfer(tx ? tx[index] : 0);
+            // initialize index and check range
+            index = 0;
+            while (index < length)
+            {
+                default:
+                {
+                    // if tx == 0, we use a dummy byte 0x00
+                    // else we copy it from the array
+                    // call the resumable function
+                    modm::ResumableResult<uint8_t> result = transfer(tx ? tx[index] : 0);
 
-				// if the resumable function is still running, so are we
-				if (result.getState() > modm::rf::NestingError)
-					return {modm::rf::Running};
+                    // if the resumable function is still running, so are we
+                    if (result.getState() > modm::rf::NestingError) return {modm::rf::Running};
 
-				// if rx != 0, we copy the result into the array
-				if (rx) rx[index] = result.getResult();
-		}
-				index++;
-			}
+                    // if rx != 0, we copy the result into the array
+                    if (rx) rx[index] = result.getResult();
+                }
+                    index++;
+            }
 
-			// clear the state
-			state &= ~Bit1;
-			return {modm::rf::Stop};
-	}
+            // clear the state
+            state &= ~Bit1;
+            return {modm::rf::Stop};
+    }
 }

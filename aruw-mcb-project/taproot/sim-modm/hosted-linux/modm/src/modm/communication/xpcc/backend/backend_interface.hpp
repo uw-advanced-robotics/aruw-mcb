@@ -13,8 +13,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_BACKEND_INTERFACE_HPP
-#define	XPCC_BACKEND_INTERFACE_HPP
+#ifndef XPCC_BACKEND_INTERFACE_HPP
+#define XPCC_BACKEND_INTERFACE_HPP
 
 #include <stdint.h>
 
@@ -31,45 +31,37 @@
 
 namespace xpcc
 {
-	/**
-	 * \brief 		The BackendInterface provides a common interface for using
-	 * 				different hardware modules to transmit messages.
-	 *
-	 * All backends have to implement this interface.
-	 *
-	 * \ingroup		modm_communication_xpcc_backend
-	 * \author		Martin Rosekeit, Fabian Greif
-	 */
-	class BackendInterface
-	{
-	public:
-		virtual
-		~BackendInterface()
-		{
-		}
+/**
+ * \brief 		The BackendInterface provides a common interface for using
+ * 				different hardware modules to transmit messages.
+ *
+ * All backends have to implement this interface.
+ *
+ * \ingroup		modm_communication_xpcc_backend
+ * \author		Martin Rosekeit, Fabian Greif
+ */
+class BackendInterface
+{
+public:
+    virtual ~BackendInterface() {}
 
-		virtual void
-		update() = 0;
+    virtual void update() = 0;
 
-		/// Send a Message.
-		virtual void
-		sendPacket(const Header &header,
-				modm::SmartPointer payload = modm::SmartPointer()) = 0;
+    /// Send a Message.
+    virtual void sendPacket(
+        const Header& header,
+        modm::SmartPointer payload = modm::SmartPointer()) = 0;
 
-		/// Check if a new packet was received by the backend
-		virtual bool
-		isPacketAvailable() const = 0;
+    /// Check if a new packet was received by the backend
+    virtual bool isPacketAvailable() const = 0;
 
-		/// Access the packet.
-		virtual const Header&
-		getPacketHeader() const = 0;
+    /// Access the packet.
+    virtual const Header& getPacketHeader() const = 0;
 
-		virtual const modm::SmartPointer
-		getPacketPayload() const = 0;
+    virtual const modm::SmartPointer getPacketPayload() const = 0;
 
-		virtual void
-		dropPacket() = 0;
-	};
-}
+    virtual void dropPacket() = 0;
+};
+}  // namespace xpcc
 
-#endif	// XPCC_BACKEND_INTERFACE_HPP
+#endif  // XPCC_BACKEND_INTERFACE_HPP

@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_MATRIX_8X8_HPP
-#define	MODM_FONT_MATRIX_8X8_HPP
+#define MODM_FONT_MATRIX_8X8_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Matrix 8x8
-		 *
-		 * - fixed width     : 8
-		 * - height          : 8
-		 * - hspace          : 0
-		 * - vspace          : 0
-		 * - first char      : 48
-		 * - last char       : 58
-		 * - number of chars : 10
-		 * - size in bytes   : 98
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t Matrix8x8[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Matrix 8x8
+ *
+ * - fixed width     : 8
+ * - height          : 8
+ * - hspace          : 0
+ * - vspace          : 0
+ * - first char      : 48
+ * - last char       : 58
+ * - number of chars : 10
+ * - size in bytes   : 98
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t Matrix8x8[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_MATRIX_8X8_HPP
-
+#endif  // MODM_FONT_MATRIX_8X8_HPP

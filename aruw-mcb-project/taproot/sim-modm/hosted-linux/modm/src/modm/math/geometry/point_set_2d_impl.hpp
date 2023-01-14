@@ -13,100 +13,88 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_POINT_SET_2D_HPP
-	#error	"Don't include this file directly, use 'point_set_2d.hpp' instead!"
+#error "Don't include this file directly, use 'point_set_2d.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
 template <typename T>
-modm::PointSet2D<T>::PointSet2D(SizeType n) :
-	points(n)
+modm::PointSet2D<T>::PointSet2D(SizeType n) : points(n)
 {
 }
 
 template <typename T>
-modm::PointSet2D<T>::PointSet2D(std::initializer_list<modm::PointSet2D<T>::PointType> init) :
-	points(init)
+modm::PointSet2D<T>::PointSet2D(std::initializer_list<modm::PointSet2D<T>::PointType> init)
+    : points(init)
 {
 }
 
 template <typename T>
-modm::PointSet2D<T>::PointSet2D(const PointSet2D<T>& other) :
-	points(other.points)
+modm::PointSet2D<T>::PointSet2D(const PointSet2D<T>& other) : points(other.points)
 {
 }
 
 template <typename T>
-modm::PointSet2D<T>&
-modm::PointSet2D<T>::operator = (const PointSet2D<T>& other)
+modm::PointSet2D<T>& modm::PointSet2D<T>::operator=(const PointSet2D<T>& other)
 {
-	this->points = other.points;
-	return *this;
+    this->points = other.points;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-typename modm::PointSet2D<T>::SizeType
-modm::PointSet2D<T>::getNumberOfPoints() const
+typename modm::PointSet2D<T>::SizeType modm::PointSet2D<T>::getNumberOfPoints() const
 {
-	return points.getSize();
+    return points.getSize();
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-void
-modm::PointSet2D<T>::append(const modm::PointSet2D<T>::PointType& point)
+void modm::PointSet2D<T>::append(const modm::PointSet2D<T>::PointType& point)
 {
-	points.append(point);
+    points.append(point);
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-typename modm::PointSet2D<T>::PointType&
-modm::PointSet2D<T>::operator [](SizeType index)
+typename modm::PointSet2D<T>::PointType& modm::PointSet2D<T>::operator[](SizeType index)
 {
-	return points[index];
+    return points[index];
 }
 
 template <typename T>
-const typename modm::PointSet2D<T>::PointType&
-modm::PointSet2D<T>::operator [](SizeType index) const
+const typename modm::PointSet2D<T>::PointType& modm::PointSet2D<T>::operator[](SizeType index) const
 {
-	return points[index];
-}
-
-// ----------------------------------------------------------------------------
-template <typename T>
-void
-modm::PointSet2D<T>::removeAll()
-{
-	points.removeAll();
+    return points[index];
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-typename modm::PointSet2D<T>::iterator
-modm::PointSet2D<T>::begin()
+void modm::PointSet2D<T>::removeAll()
 {
-	return points.begin();
+    points.removeAll();
+}
+
+// ----------------------------------------------------------------------------
+template <typename T>
+typename modm::PointSet2D<T>::iterator modm::PointSet2D<T>::begin()
+{
+    return points.begin();
 }
 
 template <typename T>
-typename modm::PointSet2D<T>::iterator
-modm::PointSet2D<T>::end()
+typename modm::PointSet2D<T>::iterator modm::PointSet2D<T>::end()
 {
-	return points.end();
+    return points.end();
 }
 
 template <typename T>
-typename modm::PointSet2D<T>::const_iterator
-modm::PointSet2D<T>::begin() const
+typename modm::PointSet2D<T>::const_iterator modm::PointSet2D<T>::begin() const
 {
-	return points.begin();
+    return points.begin();
 }
 
 template <typename T>
-typename modm::PointSet2D<T>::const_iterator
-modm::PointSet2D<T>::end() const
+typename modm::PointSet2D<T>::const_iterator modm::PointSet2D<T>::end() const
 {
-	return points.end();
+    return points.end();
 }

@@ -18,4 +18,4 @@
 #include "architecture/interface.hpp"
 #include "architecture/utils.hpp"
 
-#endif	// MODM_ARCHITECTURE_HPP
+#endif  // MODM_ARCHITECTURE_HPP

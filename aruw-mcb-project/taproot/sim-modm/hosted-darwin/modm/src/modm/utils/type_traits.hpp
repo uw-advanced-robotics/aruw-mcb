@@ -10,39 +10,38 @@
 
 namespace modm
 {
-
 /// @cond
 namespace impl
 {
-	// Deduce signature from member function type
-	// e.g. gives R(Args...) for R(T::*)(Args...) const
-	template<typename F>
-	struct mem_fn_helper;
+// Deduce signature from member function type
+// e.g. gives R(Args...) for R(T::*)(Args...) const
+template <typename F>
+struct mem_fn_helper;
 
-	template<typename T, typename R, typename... Args>
-	struct mem_fn_helper<R(T::*)(Args...)>
-	{
-		using type = R(Args...);
-	};
+template <typename T, typename R, typename... Args>
+struct mem_fn_helper<R (T::*)(Args...)>
+{
+    using type = R(Args...);
+};
 
-	template<typename T, typename R, typename... Args>
-	struct mem_fn_helper<R(T::*)(Args...) const>
-	{
-		using type = R(Args...);
-	};
+template <typename T, typename R, typename... Args>
+struct mem_fn_helper<R (T::*)(Args...) const>
+{
+    using type = R(Args...);
+};
 
-	template<typename T, typename R, typename... Args>
-	struct mem_fn_helper<R(T::*)(Args...) &>
-	{
-		using type = R(Args...);
-	};
+template <typename T, typename R, typename... Args>
+struct mem_fn_helper<R (T::*)(Args...) &>
+{
+    using type = R(Args...);
+};
 
-	template<typename T, typename R, typename... Args>
-	struct mem_fn_helper<R(T::*)(Args...) const&>
-	{
-		using type = R(Args...);
-	};
-}
+template <typename T, typename R, typename... Args>
+struct mem_fn_helper<R (T::*)(Args...) const &>
+{
+    using type = R(Args...);
+};
+}  // namespace impl
 /// @endcond
 
 /**
@@ -58,23 +57,26 @@ namespace impl
  *
  * \warning Not applicable to overload sets
  */
-template<typename F>
+template <typename F>
 struct get_callable_signature;
 
-template<typename R, typename... Args>
-struct get_callable_signature<R(*)(Args...)>
+template <typename R, typename... Args>
+struct get_callable_signature<R (*)(Args...)>
 {
     using type = R(Args...);
 };
 
-template<typename R, typename... Args>
+template <typename R, typename... Args>
 struct get_callable_signature<R(Args...)>
 {
     using type = R(Args...);
 };
 
-template<typename F>
-    requires requires { &F::operator(); }
+template <typename F>
+requires requires
+{
+    &F::operator();
+}
 struct get_callable_signature<F>
 {
     using type = typename impl::mem_fn_helper<decltype(&F::operator())>::type;
@@ -83,4 +85,4 @@ struct get_callable_signature<F>
 template <typename T>
 using get_callable_signature_t = typename get_callable_signature<T>::type;
 
-}
+}  // namespace modm

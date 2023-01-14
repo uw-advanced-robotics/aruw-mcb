@@ -18,18 +18,19 @@
 #define MODM_CHOICE_MENU_ENTRY
 
 #include <stdint.h>
+
 #include "scrollable_text.hpp"
 
 namespace modm
 {
-	/// @ingroup modm_ui_menu
-	class ChoiceMenuEntry
-	{
-	public:
-		ChoiceMenuEntry(const char* text, uint16_t space, bool *valuePtr, bool defaultValue = true);
-		ScrollableText text;
-		bool *valuePtr;
-		bool defaultValue;
-	};
-}
-#endif // MODM_CHOICE_MENU_ENTRY
+/// @ingroup modm_ui_menu
+class ChoiceMenuEntry
+{
+public:
+    ChoiceMenuEntry(const char *text, uint16_t space, bool *valuePtr, bool defaultValue = true);
+    ScrollableText text;
+    bool *valuePtr;
+    bool defaultValue;
+};
+}  // namespace modm
+#endif  // MODM_CHOICE_MENU_ENTRY

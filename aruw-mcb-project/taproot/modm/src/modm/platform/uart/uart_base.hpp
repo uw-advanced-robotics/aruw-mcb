@@ -15,24 +15,24 @@
 #define MODM_STM32_UART_BASE_HPP
 
 #include <stdint.h>
-#include "../device.hpp"
-#include <modm/architecture/interface/register.hpp>
+
 #include <modm/architecture/interface/interrupt.hpp>
+#include <modm/architecture/interface/register.hpp>
+
+#include "../device.hpp"
 
 /// @cond
 // STM has some weird ideas about continuity
 #ifndef USART_BRR_DIV_MANTISSA
-#define	USART_BRR_DIV_MANTISSA	USART_BRR_DIV_Mantissa
+#define USART_BRR_DIV_MANTISSA USART_BRR_DIV_Mantissa
 #endif
 #ifndef USART_BRR_DIV_FRACTION
-#define	USART_BRR_DIV_FRACTION	USART_BRR_DIV_Fraction
+#define USART_BRR_DIV_FRACTION USART_BRR_DIV_Fraction
 #endif
 /// @endcond
 
-
 namespace modm::platform
 {
-
 /**
  * Base class for the UART classes
  *
@@ -43,85 +43,78 @@ namespace modm::platform
  */
 class UartBase
 {
-
 public:
-	enum class
-	Interrupt : uint32_t
-	{
-		/// Call interrupt when a parity error occurred.
-		ParityError	= USART_CR1_PEIE,
-		/// Call interrupt when transmit register is empty (i.e. the byte has been transfered to the shift out register
-		TxEmpty		= USART_CR1_TXEIE,
-		/// Called when the byte was completely transmitted
-		TxComplete	= USART_CR1_TCIE,
-		/// Call interrupt when char received (RXNE) or overrun occurred (ORE)
-		RxNotEmpty	= USART_CR1_RXNEIE,
-	};
-	MODM_FLAGS32(Interrupt);
+    enum class Interrupt : uint32_t
+    {
+        /// Call interrupt when a parity error occurred.
+        ParityError = USART_CR1_PEIE,
+        /// Call interrupt when transmit register is empty (i.e. the byte has been transfered to the
+        /// shift out register
+        TxEmpty = USART_CR1_TXEIE,
+        /// Called when the byte was completely transmitted
+        TxComplete = USART_CR1_TCIE,
+        /// Call interrupt when char received (RXNE) or overrun occurred (ORE)
+        RxNotEmpty = USART_CR1_RXNEIE,
+    };
+    MODM_FLAGS32(Interrupt);
 
-	enum class
-	InterruptFlag : uint32_t
-	{
-		/// Set if the transmit data register is empty.
-		TxEmpty			= USART_SR_TXE,
-		/// Set if the transmission is complete.
-		TxComplete		= USART_SR_TC,
-		/// Set if the receive data register is not empty.
-		RxNotEmpty		= USART_SR_RXNE,
-		/// Set if receive register was not cleared.
-		OverrunError	= USART_SR_ORE,
-		/// Set if a de-synchronization, excessive noise or a break character is detected
-		FramingError 	= USART_SR_FE,
-		/// Set if a parity error was detected.
-		ParityError		= USART_SR_PE,
-	};
-	MODM_FLAGS32(InterruptFlag);
+    enum class InterruptFlag : uint32_t
+    {
+        /// Set if the transmit data register is empty.
+        TxEmpty = USART_SR_TXE,
+        /// Set if the transmission is complete.
+        TxComplete = USART_SR_TC,
+        /// Set if the receive data register is not empty.
+        RxNotEmpty = USART_SR_RXNE,
+        /// Set if receive register was not cleared.
+        OverrunError = USART_SR_ORE,
+        /// Set if a de-synchronization, excessive noise or a break character is detected
+        FramingError = USART_SR_FE,
+        /// Set if a parity error was detected.
+        ParityError = USART_SR_PE,
+    };
+    MODM_FLAGS32(InterruptFlag);
 
-	enum class
-	Parity : uint32_t
-	{
-		Disabled 	= 0,
-		Even 		= USART_CR1_PCE,
-		Odd  		= USART_CR1_PCE | USART_CR1_PS,
-	};
+    enum class Parity : uint32_t
+    {
+        Disabled = 0,
+        Even = USART_CR1_PCE,
+        Odd = USART_CR1_PCE | USART_CR1_PS,
+    };
 
-	enum class
-	WordLength : uint32_t
-	{
+    enum class WordLength : uint32_t
+    {
 #ifdef USART_CR1_M1
-		Bit7 = USART_CR1_M1,
-		Bit8 = 0,
-		Bit9 = USART_CR1_M0,
+        Bit7 = USART_CR1_M1,
+        Bit8 = 0,
+        Bit9 = USART_CR1_M0,
 #else
-		Bit8 = 0,
-		Bit9 = USART_CR1_M,
+        Bit8 = 0,
+        Bit9 = USART_CR1_M,
 #endif
-	};
+    };
 
-	enum class
-	SpiClock : uint32_t
-	{
-		Disabled = 0b0,
-		Enabled  = USART_CR2_CLKEN,
-	};
+    enum class SpiClock : uint32_t
+    {
+        Disabled = 0b0,
+        Enabled = USART_CR2_CLKEN,
+    };
 
-	enum class
-	LastBitClockPulse : uint32_t
-	{
-		DoNotOutput = 0b0,
-		Output = USART_CR2_LBCL,
-	};
+    enum class LastBitClockPulse : uint32_t
+    {
+        DoNotOutput = 0b0,
+        Output = USART_CR2_LBCL,
+    };
 
-	enum class
-	SpiDataMode : uint32_t
-	{
-		Mode0 = 0b00,
-		Mode1 = USART_CR2_CPHA,
-		Mode2 = USART_CR2_CPOL,
-		Mode3 = USART_CR2_CPOL | USART_CR2_CPHA,
-	};
+    enum class SpiDataMode : uint32_t
+    {
+        Mode0 = 0b00,
+        Mode1 = USART_CR2_CPHA,
+        Mode2 = USART_CR2_CPOL,
+        Mode3 = USART_CR2_CPOL | USART_CR2_CPHA,
+    };
 };
 
-}	// namespace modm::platform
+}  // namespace modm::platform
 
-#endif // MODM_STM32_UART_BASE_HPP
+#endif  // MODM_STM32_UART_BASE_HPP

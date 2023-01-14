@@ -13,123 +13,110 @@
 #include <stdio.h>
 #undef _vsnprintf
 #include <stdarg.h>
-#include <modm/architecture/interface/accessor.hpp>
+
 #include <cmath>
+
+#include <modm/architecture/interface/accessor.hpp>
 
 #include "iostream.hpp"
 
 extern "C"
 {
-	// configure printf implementation
-	#define PRINTF_DEFAULT_FLOAT_PRECISION 5U
+// configure printf implementation
+#define PRINTF_DEFAULT_FLOAT_PRECISION 5U
 
-	// include source from modm/ext/printf
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wdouble-promotion"
-	#include "printf/printf.source"
-	#pragma GCC diagnostic pop
-	void _putchar(char) {};
-
+// include source from modm/ext/printf
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
+#include "printf/printf.source"
+#pragma GCC diagnostic pop
+    void _putchar(char){};
 }
 
 namespace
 {
 void out_char(char character, void* buffer, size_t, size_t)
 {
-	if (character)
-		reinterpret_cast<modm::IOStream*>(buffer)->write(character);
+    if (character) reinterpret_cast<modm::IOStream*>(buffer)->write(character);
 }
-}
+}  // namespace
 namespace modm
 {
-
-IOStream&
-IOStream::printf(const char *fmt, ...)
+IOStream& IOStream::printf(const char* fmt, ...)
 {
-	va_list va;
-	va_start(va, fmt);
-	vprintf(fmt, va);
-	va_end(va);
-	return *this;
+    va_list va;
+    va_start(va, fmt);
+    vprintf(fmt, va);
+    va_end(va);
+    return *this;
 }
 
-IOStream&
-IOStream::vprintf(const char *fmt, va_list ap)
+IOStream& IOStream::vprintf(const char* fmt, va_list ap)
 {
-	_vsnprintf(out_char, (char*)this, -1, fmt, ap);
-	return *this;
+    _vsnprintf(out_char, (char*)this, -1, fmt, ap);
+    return *this;
 }
-void
-IOStream::writeInteger(int16_t value)
+void IOStream::writeInteger(int16_t value)
 {
-	_ntoa_long(out_char, (char*)this,
-			   0, -1,
-			   uint16_t(value < 0 ? -value : value),
-			   value < 0,
-			   10, 0, 0,
-			   FLAGS_SHORT);
-}
-
-void
-IOStream::writeInteger(uint16_t value)
-{
-	_ntoa_long(out_char, (char*)this,
-			   0, -1,
-			   value,
-			   false,
-			   10, 0, 0,
-			   FLAGS_SHORT);
+    _ntoa_long(
+        out_char,
+        (char*)this,
+        0,
+        -1,
+        uint16_t(value < 0 ? -value : value),
+        value < 0,
+        10,
+        0,
+        0,
+        FLAGS_SHORT);
 }
 
-void
-IOStream::writeInteger(int32_t value)
+void IOStream::writeInteger(uint16_t value)
 {
-	_ntoa_long(out_char, (char*)this,
-			   0, -1,
-			   uint32_t(value < 0 ? -value : value),
-			   value < 0,
-			   10, 0, 0,
-			   FLAGS_LONG);
+    _ntoa_long(out_char, (char*)this, 0, -1, value, false, 10, 0, 0, FLAGS_SHORT);
 }
 
-void
-IOStream::writeInteger(uint32_t value)
+void IOStream::writeInteger(int32_t value)
 {
-	_ntoa_long(out_char, (char*)this,
-			   0, -1,
-			   value,
-			   false,
-			   10, 0, 0,
-			   FLAGS_LONG);
+    _ntoa_long(
+        out_char,
+        (char*)this,
+        0,
+        -1,
+        uint32_t(value < 0 ? -value : value),
+        value < 0,
+        10,
+        0,
+        0,
+        FLAGS_LONG);
 }
 
-void
-IOStream::writeInteger(int64_t value)
+void IOStream::writeInteger(uint32_t value)
 {
-	_ntoa_long_long(out_char, (char*)this,
-					0, -1,
-					uint64_t(value < 0 ? -value : value),
-					value < 0,
-					10, 0, 0,
-					FLAGS_LONG_LONG);
+    _ntoa_long(out_char, (char*)this, 0, -1, value, false, 10, 0, 0, FLAGS_LONG);
 }
 
-void
-IOStream::writeInteger(uint64_t value)
+void IOStream::writeInteger(int64_t value)
 {
-	_ntoa_long_long(out_char, (char*)this,
-					0, -1,
-					value,
-					false,
-					10, 0, 0,
-					FLAGS_LONG_LONG);
+    _ntoa_long_long(
+        out_char,
+        (char*)this,
+        0,
+        -1,
+        uint64_t(value < 0 ? -value : value),
+        value < 0,
+        10,
+        0,
+        0,
+        FLAGS_LONG_LONG);
 }
-void
-IOStream::writeDouble(const double& value)
+
+void IOStream::writeInteger(uint64_t value)
 {
-	_etoa(out_char, (char*)this,
-		  0, -1,
-		  value,
-		  0, 0, 0);
+    _ntoa_long_long(out_char, (char*)this, 0, -1, value, false, 10, 0, 0, FLAGS_LONG_LONG);
 }
-} // namespace modm
+void IOStream::writeDouble(const double& value)
+{
+    _etoa(out_char, (char*)this, 0, -1, value, 0, 0, 0);
+}
+}  // namespace modm

@@ -18,20 +18,21 @@
 
 /// @cond
 #include <stdint.h>
+
 #include <modm/architecture/utils.hpp>
 
 #define MODM_DELAY_NS_IS_ACCURATE 0
 
-extern "C" {
+extern "C"
+{
 #include <unistd.h>
 }
 
 namespace modm
 {
-
 inline void delay_ns(uint32_t ns) { usleep(ns / 1000ul); }
 inline void delay_us(uint32_t us) { usleep(us); }
 inline void delay_ms(uint32_t ms) { usleep(ms * 1000ul); }
 
-}	// namespace modm
-/// @endcond
+}  // namespace modm
+   /// @endcond

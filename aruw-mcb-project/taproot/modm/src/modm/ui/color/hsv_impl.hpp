@@ -23,49 +23,52 @@
  * @see http://de.wikipedia.org/wiki/HSV-Farbraum#Umrechnung_RGB_in_HSV.2FHSL
  * @param rgb
  */
-template<std::unsigned_integral T>
-template<std::unsigned_integral U>
+template <std::unsigned_integral T>
+template <std::unsigned_integral U>
 constexpr modm::color::HsvT<T>::HsvT(const modm::color::RgbT<U> &rgb)
 {
-	using CalcType = float;
-	const CalcType maxValue = std::numeric_limits<T>::max();
-	const CalcType _red = CalcType(rgb.red) / maxValue;
-	const CalcType _blue = CalcType(rgb.blue) / maxValue;
-	const CalcType _green = CalcType(rgb.green) / maxValue;
-	const CalcType _max = std::max(_red, std::max(_green, _blue));
-	const CalcType _min = std::min(_red, std::min(_green, _blue));
-	const CalcType _diff = _max - _min;
+    using CalcType = float;
+    const CalcType maxValue = std::numeric_limits<T>::max();
+    const CalcType _red = CalcType(rgb.red) / maxValue;
+    const CalcType _blue = CalcType(rgb.blue) / maxValue;
+    const CalcType _green = CalcType(rgb.green) / maxValue;
+    const CalcType _max = std::max(_red, std::max(_green, _blue));
+    const CalcType _min = std::min(_red, std::min(_green, _blue));
+    const CalcType _diff = _max - _min;
 
-	CalcType hue_temp;
+    CalcType hue_temp;
 
-	// CALCULATE HUE
-	if (_max == _min)
-	{
-		// all three color values are the same
-		hue_temp = 0;
-		value = _max * maxValue;
-	} else if (_max == _red)
-	{
-		hue_temp = 60 * (0 + (_green - _blue) / _diff);
-		value = rgb.red;
-	} else if (_max == _green)
-	{
-		hue_temp = 60 * (2 + (_blue - _red) / _diff);
-		value = rgb.green;
-	} else /*if(_max == _blue)*/
-	{
-		hue_temp = 60 * (4 + (_red - _green) / _diff);
-		value = rgb.blue;
-	}
+    // CALCULATE HUE
+    if (_max == _min)
+    {
+        // all three color values are the same
+        hue_temp = 0;
+        value = _max * maxValue;
+    }
+    else if (_max == _red)
+    {
+        hue_temp = 60 * (0 + (_green - _blue) / _diff);
+        value = rgb.red;
+    }
+    else if (_max == _green)
+    {
+        hue_temp = 60 * (2 + (_blue - _red) / _diff);
+        value = rgb.green;
+    }
+    else /*if(_max == _blue)*/
+    {
+        hue_temp = 60 * (4 + (_red - _green) / _diff);
+        value = rgb.blue;
+    }
 
-	if (hue_temp < 0)
-		hue = (hue_temp + 360) * (maxValue / 360);
-	else
-		hue = (hue_temp) * (maxValue / 360);
+    if (hue_temp < 0)
+        hue = (hue_temp + 360) * (maxValue / 360);
+    else
+        hue = (hue_temp) * (maxValue / 360);
 
-	// CALCULATE SATURATION
-	if (_max == 0)
-		saturation = 0;
-	else
-		saturation = _diff / _max * maxValue;
+    // CALCULATE SATURATION
+    if (_max == 0)
+        saturation = 0;
+    else
+        saturation = _diff / _max * maxValue;
 }

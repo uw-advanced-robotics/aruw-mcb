@@ -17,21 +17,20 @@
 
 namespace modm
 {
-
 /// @ingroup modm_utils
 /// @{
 
-constexpr uint8_t  Bit0  = uint8_t(1) << 0;
-constexpr uint8_t  Bit1  = uint8_t(1) << 1;
-constexpr uint8_t  Bit2  = uint8_t(1) << 2;
-constexpr uint8_t  Bit3  = uint8_t(1) << 3;
-constexpr uint8_t  Bit4  = uint8_t(1) << 4;
-constexpr uint8_t  Bit5  = uint8_t(1) << 5;
-constexpr uint8_t  Bit6  = uint8_t(1) << 6;
-constexpr uint8_t  Bit7  = uint8_t(1) << 7;
+constexpr uint8_t Bit0 = uint8_t(1) << 0;
+constexpr uint8_t Bit1 = uint8_t(1) << 1;
+constexpr uint8_t Bit2 = uint8_t(1) << 2;
+constexpr uint8_t Bit3 = uint8_t(1) << 3;
+constexpr uint8_t Bit4 = uint8_t(1) << 4;
+constexpr uint8_t Bit5 = uint8_t(1) << 5;
+constexpr uint8_t Bit6 = uint8_t(1) << 6;
+constexpr uint8_t Bit7 = uint8_t(1) << 7;
 
-constexpr uint16_t Bit8  = uint16_t(1) <<  8;
-constexpr uint16_t Bit9  = uint16_t(1) <<  9;
+constexpr uint16_t Bit8 = uint16_t(1) << 8;
+constexpr uint16_t Bit9 = uint16_t(1) << 9;
 constexpr uint16_t Bit10 = uint16_t(1) << 10;
 constexpr uint16_t Bit11 = uint16_t(1) << 11;
 constexpr uint16_t Bit12 = uint16_t(1) << 12;
@@ -91,6 +90,6 @@ constexpr uint64_t Bit63 = uint64_t(1) << 63;
 
 /// @}
 
-};	// namespace modm
+};  // namespace modm
 
-#endif	// MODM_BIT_CONSTANTS_HPP
+#endif  // MODM_BIT_CONSTANTS_HPP

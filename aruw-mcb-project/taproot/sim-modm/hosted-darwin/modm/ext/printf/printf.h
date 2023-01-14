@@ -16,10 +16,11 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void _putchar(char character);
+    void _putchar(char character);
 
 #ifdef __cplusplus
 }

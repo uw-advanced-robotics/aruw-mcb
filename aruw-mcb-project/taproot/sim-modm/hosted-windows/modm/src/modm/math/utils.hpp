@@ -15,12 +15,12 @@
 #ifndef MODM_MATH_UTILS_HPP
 #define MODM_MATH_UTILS_HPP
 
-#include "utils/misc.hpp"
 #include "utils/arithmetic_traits.hpp"
-#include "utils/bit_operation.hpp"
 #include "utils/bit_constants.hpp"
-#include "utils/operator.hpp"
-#include "utils/endianness.hpp"
+#include "utils/bit_operation.hpp"
 #include "utils/crc.hpp"
+#include "utils/endianness.hpp"
+#include "utils/misc.hpp"
+#include "utils/operator.hpp"
 
-#endif // MODM_MATH_UTILS_HPP
+#endif  // MODM_MATH_UTILS_HPP

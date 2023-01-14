@@ -18,57 +18,47 @@
 
 namespace modm
 {
-	namespace allocator
-	{
-		/**
-		 * \brief	Block allocator
-		 *
-		 * Allocates a big block of memory and then distribute small pieces of
-		 * it. The memory is not released until the destruction of the
-		 * allocator.
-		 * If more memory is needed a new block is allocated.
-		 *
-		 * This technique is known as "memory pool".
-		 *
-		 * \ingroup	modm_utils_allocator
-		 * \author	Fabian Greif
-		 */
-		template <typename T,
-				  std::size_t BLOCKSIZE>
-		class Block : public AllocatorBase<T>
-		{
-		public:
-			template <typename U>
-			struct rebind
-			{
-				typedef Block<U, BLOCKSIZE> other;
-			};
+namespace allocator
+{
+/**
+ * \brief	Block allocator
+ *
+ * Allocates a big block of memory and then distribute small pieces of
+ * it. The memory is not released until the destruction of the
+ * allocator.
+ * If more memory is needed a new block is allocated.
+ *
+ * This technique is known as "memory pool".
+ *
+ * \ingroup	modm_utils_allocator
+ * \author	Fabian Greif
+ */
+template <typename T, std::size_t BLOCKSIZE>
+class Block : public AllocatorBase<T>
+{
+public:
+    template <typename U>
+    struct rebind
+    {
+        typedef Block<U, BLOCKSIZE> other;
+    };
 
-		public:
-			Block() :
-				AllocatorBase<T>()
-			{
-			}
+public:
+    Block() : AllocatorBase<T>() {}
 
-			Block(const Block& other) :
-				AllocatorBase<T>(other)
-			{
-			}
+    Block(const Block& other) : AllocatorBase<T>(other) {}
 
-			template <typename U>
-			Block(const Block<U, BLOCKSIZE>&) :
-				AllocatorBase<T>()
-			{
-			}
+    template <typename U>
+    Block(const Block<U, BLOCKSIZE>&) : AllocatorBase<T>()
+    {
+    }
 
-			// TODO
-			T*
-			allocate();
+    // TODO
+    T* allocate();
 
-			void
-			deallocate(T*);
-		};
-	}
-}
+    void deallocate(T*);
+};
+}  // namespace allocator
+}  // namespace modm
 
-#endif // MODM_ALLOCATOR_BLOCK_HPP
+#endif  // MODM_ALLOCATOR_BLOCK_HPP

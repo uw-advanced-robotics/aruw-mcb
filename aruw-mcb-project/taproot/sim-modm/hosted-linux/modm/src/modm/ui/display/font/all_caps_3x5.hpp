@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_ALL_CAPS_3X5_HPP
-#define	MODM_FONT_ALL_CAPS_3X5_HPP
+#define MODM_FONT_ALL_CAPS_3X5_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	All Caps 3x5
-		 *
-		 * - preferred width : 3
-		 * - height          : 5
-		 * - hspace          : 1
-		 * - vspace          : 1
-		 * - first char      : 32
-		 * - last char       : 128
-		 * - number of chars : 96
-		 * - size in bytes   : 370
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t AllCaps3x5[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	All Caps 3x5
+ *
+ * - preferred width : 3
+ * - height          : 5
+ * - hspace          : 1
+ * - vspace          : 1
+ * - first char      : 32
+ * - last char       : 128
+ * - number of chars : 96
+ * - size in bytes   : 370
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t AllCaps3x5[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_ALL_CAPS_3X5_HPP
-
+#endif  // MODM_FONT_ALL_CAPS_3X5_HPP

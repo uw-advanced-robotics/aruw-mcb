@@ -14,100 +14,96 @@
 #ifndef MODM_VECTOR1_HPP
 #define MODM_VECTOR1_HPP
 
+#include <stdint.h>
+
 #include <cmath>
 #include <cstdlib>
-#include <stdint.h>
 
 #include "vector.hpp"
 
 namespace modm
 {
-	/**
-	 * \brief	Class for handling common vector operations (1D)
-	 *
-	 * Adapted from the implementation of Gaspard Petit (gaspardpetit@gmail.com).
-	 *
-	 * \see <a href"http://www-etud.iro.umontreal.ca/~petitg/cpp/point.html">Homepage</a>
-	 *
-	 * \ingroup	modm_math_geometry
-	 * \author	Niklas Hauser
-	 */
-	template<typename T>
-	class Vector<T, 1>
-	{
-	public:
-		Vector();
-		Vector(T inX);
-		Vector(const Matrix<T, 1, 1> &rhs);
+/**
+ * \brief	Class for handling common vector operations (1D)
+ *
+ * Adapted from the implementation of Gaspard Petit (gaspardpetit@gmail.com).
+ *
+ * \see <a href"http://www-etud.iro.umontreal.ca/~petitg/cpp/point.html">Homepage</a>
+ *
+ * \ingroup	modm_math_geometry
+ * \author	Niklas Hauser
+ */
+template <typename T>
+class Vector<T, 1>
+{
+public:
+    Vector();
+    Vector(T inX);
+    Vector(const Matrix<T, 1, 1> &rhs);
 
-		inline void
-		set(const T& x);
+    inline void set(const T &x);
 
-		inline void
-		setX(const T& value);
+    inline void setX(const T &value);
 
-		inline const T&
-		getX() const;
+    inline const T &getX() const;
 
-		Vector& operator = (const Matrix<T, 1, 1> &rhs);
+    Vector &operator=(const Matrix<T, 1, 1> &rhs);
 
-		bool operator == (const Vector &rhs) const;
-		bool operator != (const Vector &rhs) const;
-		bool operator < (const Vector &rhs) const;
-		bool operator <= (const Vector &rhs) const;
-		bool operator > (const Vector &rhs) const;
-		bool operator >= (const Vector &rhs) const;
+    bool operator==(const Vector &rhs) const;
+    bool operator!=(const Vector &rhs) const;
+    bool operator<(const Vector &rhs) const;
+    bool operator<=(const Vector &rhs) const;
+    bool operator>(const Vector &rhs) const;
+    bool operator>=(const Vector &rhs) const;
 
-		const T& operator [] (uint8_t index) const;
-		T& operator [] (uint8_t index);
-		T* ptr();
-		const T* ptr() const;
+    const T &operator[](uint8_t index) const;
+    T &operator[](uint8_t index);
+    T *ptr();
+    const T *ptr() const;
 
-		Vector operator - () const;
-		Vector operator + (const Vector &rhs) const;
-		Vector operator - (const Vector &rhs) const;
-		T operator * (const Vector &rhs) const;
-		Vector operator * (const T &rhs) const;
-		Vector operator / (const T &rhs) const;
+    Vector operator-() const;
+    Vector operator+(const Vector &rhs) const;
+    Vector operator-(const Vector &rhs) const;
+    T operator*(const Vector &rhs) const;
+    Vector operator*(const T &rhs) const;
+    Vector operator/(const T &rhs) const;
 
-		Vector& operator += (const Vector &rhs);
-		Vector& operator -= (const Vector &rhs);
-		Vector& operator *= (const T &rhs);
-		Vector& operator /= (const T &rhs);
+    Vector &operator+=(const Vector &rhs);
+    Vector &operator-=(const Vector &rhs);
+    Vector &operator*=(const T &rhs);
+    Vector &operator/=(const T &rhs);
 
-		T getLength() const;
-		T getLengthSquared() const;
+    T getLength() const;
+    T getLengthSquared() const;
 
-		Matrix<T, 1, 1>&
-		asMatrix();
+    Matrix<T, 1, 1> &asMatrix();
 
-		const Matrix<T, 1, 1>&
-		asMatrix() const;
+    const Matrix<T, 1, 1> &asMatrix() const;
 
-		bool hasNan() const;
-		bool hasInf() const;
+    bool hasNan() const;
+    bool hasInf() const;
 
-	public:
-		T x;
+public:
+    T x;
 
-	public:
-	#ifndef __DOXYGEN__
-		IMPLEMENT_VECTOR_ACCESSOR2(x,x)
-		IMPLEMENT_VECTOR_ACCESSOR3(x,x,x)
-		IMPLEMENT_VECTOR_ACCESSOR4(x,x,x,x)
-	#endif
-	};
+public:
+#ifndef __DOXYGEN__
+    IMPLEMENT_VECTOR_ACCESSOR2(x, x)
+    IMPLEMENT_VECTOR_ACCESSOR3(x, x, x)
+    IMPLEMENT_VECTOR_ACCESSOR4(x, x, x, x)
+#endif
+};
 
-	template<typename U, typename T>
-	static inline Vector<T, 1> operator * (const U &lhs, const Vector<T, 1> &rhs)
-	{
-		return rhs * lhs;
-	}
-
-	typedef Vector<float, 1> 	Vector1f;
-	typedef Vector<int16_t, 1> 	Vector1i;
+template <typename U, typename T>
+static inline Vector<T, 1> operator*(const U &lhs, const Vector<T, 1> &rhs)
+{
+    return rhs * lhs;
 }
+
+typedef Vector<float, 1> Vector1f;
+typedef Vector<int16_t, 1> Vector1i;
+}  // namespace modm
 
 #include "vector1_impl.hpp"
 
-#endif // MODM_VECTOR1_HPP
+#endif  // MODM_VECTOR1_HPP

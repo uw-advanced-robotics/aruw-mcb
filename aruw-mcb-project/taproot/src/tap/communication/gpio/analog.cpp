@@ -38,7 +38,12 @@ void Analog::init()
     AnalogInPins::setAnalogInput();
 
     // Initial ADC/Timer setup
-    Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1, AnalogInPinU::In2, AnalogInPinV::In3, AnalogInPinOledJoystick::In6>();
+    Adc1::connect<
+        AnalogInPinS::In0,
+        AnalogInPinT::In1,
+        AnalogInPinU::In2,
+        AnalogInPinV::In3,
+        AnalogInPinOledJoystick::In6>();
     Adc1::initialize<SystemClock, 22500000_Bd>();
 
     Adc1::setPinChannel<AnalogInPinS>();

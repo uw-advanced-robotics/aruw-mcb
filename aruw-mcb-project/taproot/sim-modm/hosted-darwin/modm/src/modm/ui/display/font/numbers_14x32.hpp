@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_NUMBERS_14X32_HPP
-#define	MODM_FONT_NUMBERS_14X32_HPP
+#define MODM_FONT_NUMBERS_14X32_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Numbers 14x32
-		 *
-		 * - fixed width     : 14
-		 * - height          : 32
-		 * - hspace          : 3
-		 * - vspace          : 4
-		 * - first char      : 48
-		 * - last char       : 58
-		 * - number of chars : 10
-		 * - size in bytes   : 578
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t Numbers14x32[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Numbers 14x32
+ *
+ * - fixed width     : 14
+ * - height          : 32
+ * - hspace          : 3
+ * - vspace          : 4
+ * - first char      : 48
+ * - last char       : 58
+ * - number of chars : 10
+ * - size in bytes   : 578
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t Numbers14x32[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_NUMBERS_14X32_HPP
-
+#endif  // MODM_FONT_NUMBERS_14X32_HPP

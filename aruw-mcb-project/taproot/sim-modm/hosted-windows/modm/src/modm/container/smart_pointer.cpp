@@ -17,65 +17,55 @@
 // ----------------------------------------------------------------------------
 // must allocate at least five bytes, so getPointer() does return
 // a valid address
-modm::SmartPointer::SmartPointer() :
-	ptr(new uint8_t[5])
+modm::SmartPointer::SmartPointer() : ptr(new uint8_t[5])
 {
-	ptr[0] = 1;
-	ptr[2] = 0;
-	ptr[3] = 0;
+    ptr[0] = 1;
+    ptr[2] = 0;
+    ptr[3] = 0;
 }
 
-modm::SmartPointer::SmartPointer(const SmartPointer& other) :
-	ptr(other.ptr)
-{
-	ptr[0]++;
-}
+modm::SmartPointer::SmartPointer(const SmartPointer& other) : ptr(other.ptr) { ptr[0]++; }
 
 // must allocate at least five bytes, so getPointer() does return
 // a valid address
-modm::SmartPointer::SmartPointer(uint16_t size) :
-	ptr(new uint8_t[size ? size + 4 : 5])
+modm::SmartPointer::SmartPointer(uint16_t size) : ptr(new uint8_t[size ? size + 4 : 5])
 {
-	ptr[0] = 1;
-	*reinterpret_cast<uint16_t*>(ptr + 2) = size;
+    ptr[0] = 1;
+    *reinterpret_cast<uint16_t*>(ptr + 2) = size;
 }
 
 modm::SmartPointer::~SmartPointer()
 {
-	if (--ptr[0] == 0) {
-		delete[] ptr;
-	}
+    if (--ptr[0] == 0)
+    {
+        delete[] ptr;
+    }
 }
 
 // ----------------------------------------------------------------------------
-bool
-modm::SmartPointer::operator == (const SmartPointer& other)
+bool modm::SmartPointer::operator==(const SmartPointer& other) { return (this->ptr == other.ptr); }
+
+modm::SmartPointer& modm::SmartPointer::operator=(const SmartPointer& other)
 {
-	return (this->ptr == other.ptr);
-}
+    if (--ptr[0] == 0)
+    {
+        delete[] ptr;
+    }
 
-modm::SmartPointer&
-modm::SmartPointer::operator = (const SmartPointer& other)
-{
-	if (--ptr[0] == 0) {
-		delete[] ptr;
-	}
+    ptr = other.ptr;
+    ptr[0]++;
 
-	ptr = other.ptr;
-	ptr[0]++;
-
-	return *this;
+    return *this;
 }
 
 // ----------------------------------------------------------------------------
-modm::IOStream&
-modm::operator << (modm::IOStream& s, const modm::SmartPointer& v)
+modm::IOStream& modm::operator<<(modm::IOStream& s, const modm::SmartPointer& v)
 {
-	s << "0x" << modm::hex;
-	for (uint8_t i = 4; i < v.getSize() + 4; i++)
-	{
-		s << v.ptr[i];
-	}
-	s << modm::ascii;
-	return s;
+    s << "0x" << modm::hex;
+    for (uint8_t i = 4; i < v.getSize() + 4; i++)
+    {
+        s << v.ptr[i];
+    }
+    s << modm::ascii;
+    return s;
 }

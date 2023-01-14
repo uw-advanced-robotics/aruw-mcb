@@ -12,34 +12,33 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_S_CURVE_GENERATOR_HPP
-	#error	"Don't include this file directly, use 's_curve_generator.hpp' instead!"
+#error "Don't include this file directly, use 's_curve_generator.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::SCurveGenerator<T>::SCurveGenerator(const T& initialValue) :
-	target(), value(initialValue), targetReached(false)
+template <typename T>
+modm::SCurveGenerator<T>::SCurveGenerator(const T& initialValue)
+    : target(),
+      value(initialValue),
+      targetReached(false)
 {
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-void
-modm::SCurveGenerator<T>::setTarget(const T& target)
+template <typename T>
+void modm::SCurveGenerator<T>::setTarget(const T& target)
 {
-	this->target = target;
-	targetReached = false;
+    this->target = target;
+    targetReached = false;
 }
 
-template<typename T>
-void
-modm::SCurveGenerator<T>::update()
+template <typename T>
+void modm::SCurveGenerator<T>::update()
 {
 }
 
-template<typename T>
-bool
-modm::SCurveGenerator<T>::isTargetReached() const
+template <typename T>
+bool modm::SCurveGenerator<T>::isTargetReached() const
 {
-	return targetReached;
+    return targetReached;
 }

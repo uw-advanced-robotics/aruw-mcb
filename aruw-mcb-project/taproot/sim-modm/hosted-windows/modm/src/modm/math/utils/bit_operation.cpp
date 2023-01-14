@@ -15,29 +15,25 @@
 #include "bit_operation.hpp"
 
 // ----------------------------------------------------------------------------
-std::size_t
-modm::bitCount(uint8_t n)
+std::size_t modm::bitCount(uint8_t n)
 {
-	n = ((uint8_t) (n >> 1) & 0x55) + (n & 0x55);
-	n = ((uint8_t) (n >> 2) & 0x33) + (n & 0x33);
-	n = ((uint8_t) (n >> 4) + n) & 0xf;
+    n = ((uint8_t)(n >> 1) & 0x55) + (n & 0x55);
+    n = ((uint8_t)(n >> 2) & 0x33) + (n & 0x33);
+    n = ((uint8_t)(n >> 4) + n) & 0xf;
 
-	return n;
+    return n;
 }
 
-std::size_t
-modm::bitCount(uint16_t n)
+std::size_t modm::bitCount(uint16_t n)
 {
-	return (bitCount((uint8_t) (n)) +
-			bitCount((uint8_t) (n >> 8)));
+    return (bitCount((uint8_t)(n)) + bitCount((uint8_t)(n >> 8)));
 }
 
-std::size_t
-modm::bitCount(uint32_t n)
+std::size_t modm::bitCount(uint32_t n)
 {
-	n = ((n >> 1) & 0x55555555) + (n & 0x55555555);
-	n = ((n >> 2) & 0x33333333) + (n & 0x33333333);
-	n = ((n >> 4) & 0x0f0f0f0f) + (n & 0x0f0f0f0f);
+    n = ((n >> 1) & 0x55555555) + (n & 0x55555555);
+    n = ((n >> 2) & 0x33333333) + (n & 0x33333333);
+    n = ((n >> 4) & 0x0f0f0f0f) + (n & 0x0f0f0f0f);
 
-	return n % 255;
+    return n % 255;
 }

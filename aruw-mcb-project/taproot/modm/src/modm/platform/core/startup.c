@@ -15,8 +15,10 @@
 // ----------------------------------------------------------------------------
 
 #include <stdint.h>
-#include <modm/architecture/utils.hpp>
+
 #include <modm/architecture/interface/assert.h>
+#include <modm/architecture/utils.hpp>
+
 #include "../device.hpp"
 
 // ----------------------------------------------------------------------------
@@ -41,7 +43,7 @@ extern const uint32_t __vector_table_rom_start[];
 
 // ----------------------------------------------------------------------------
 // Linker section start and end pointers for function hooks
-typedef void (* const FunctionPointer)(void);
+typedef void (*const FunctionPointer)(void);
 
 extern const FunctionPointer __hardware_init_start[];
 extern const FunctionPointer __hardware_init_end[];
@@ -51,78 +53,73 @@ extern const FunctionPointer __init_array_end[];
 
 // ----------------------------------------------------------------------------
 // Calls every function pointer in the section range
-static inline void
-table_call(const FunctionPointer *const start, const FunctionPointer *const end)
+static inline void table_call(const FunctionPointer *const start, const FunctionPointer *const end)
 {
-	for (const FunctionPointer *entry = start; entry < end; entry++)
-		(*entry)();
+    for (const FunctionPointer *entry = start; entry < end; entry++) (*entry)();
 }
 
 // Copies the section defined by a table of {loadaddr, dest start, dest end}
-static inline void
-table_copy(const uint32_t *const start, const uint32_t *const end)
+static inline void table_copy(const uint32_t *const start, const uint32_t *const end)
 {
-	uint32_t **table = (uint32_t **)start;
-	while(table < (uint32_t **)end)
-	{
-		const uint32_t *src  = table[0]; // load address
-		      uint32_t *dest = table[1]; // destination start
-		while (dest < table[2])          // destination end
-			*(dest++) = *(src++);
-		table += 3;
-	}
+    uint32_t **table = (uint32_t **)start;
+    while (table < (uint32_t **)end)
+    {
+        const uint32_t *src = table[0];  // load address
+        uint32_t *dest = table[1];       // destination start
+        while (dest < table[2])          // destination end
+            *(dest++) = *(src++);
+        table += 3;
+    }
 }
 
 // Zeros the section defined by a table of {start, end}
-static inline void
-table_zero(const uint32_t *const start, const uint32_t *const end)
+static inline void table_zero(const uint32_t *const start, const uint32_t *const end)
 {
-	uint32_t **table = (uint32_t **)start;
-	while(table < (uint32_t **)end)
-	{
-		uint32_t *dest = table[0]; // destination start
-		while (dest < table[1])    // destination end
-			*(dest++) = 0;
-		table += 2;
-	}
+    uint32_t **table = (uint32_t **)start;
+    while (table < (uint32_t **)end)
+    {
+        uint32_t *dest = table[0];  // destination start
+        while (dest < table[1])     // destination end
+            *(dest++) = 0;
+        table += 2;
+    }
 }
 
 // ----------------------------------------------------------------------------
 // Called by Reset_Handler in reset_handler.s
 void __modm_startup(void)
 {
-	// Copy and zero all internal memory
-	table_copy(__table_copy_intern_start, __table_copy_intern_end);
-	table_zero(__table_zero_intern_start, __table_zero_intern_end);
+    // Copy and zero all internal memory
+    table_copy(__table_copy_intern_start, __table_copy_intern_end);
+    table_zero(__table_zero_intern_start, __table_zero_intern_end);
 
-	// Enable FPU in privileged and user mode
-	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
-	// Set the vector table location
-	SCB->VTOR = (uint32_t)__vector_table_rom_start;
+    // Enable FPU in privileged and user mode
+    SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
+    // Set the vector table location
+    SCB->VTOR = (uint32_t)__vector_table_rom_start;
 
-	// Enable trapping of divide by zero for UDIV/SDIV instructions.
-	SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
-	// Call all hardware initialize hooks
-	table_call(__hardware_init_start, __hardware_init_end);
+    // Enable trapping of divide by zero for UDIV/SDIV instructions.
+    SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
+    // Call all hardware initialize hooks
+    table_call(__hardware_init_start, __hardware_init_end);
 
-	// Copy and zero all external memory
-	table_copy(__table_copy_extern_start, __table_copy_extern_end);
-	table_zero(__table_zero_extern_start, __table_zero_extern_end);
+    // Copy and zero all external memory
+    table_copy(__table_copy_extern_start, __table_copy_extern_end);
+    table_zero(__table_zero_extern_start, __table_zero_extern_end);
 
-	// Initialize heap as implemented by the heap option
-	extern void __modm_initialize_memory(void);
-	__modm_initialize_memory();
+    // Initialize heap as implemented by the heap option
+    extern void __modm_initialize_memory(void);
+    __modm_initialize_memory();
 
-	// Call all constructors of static objects
-	table_call(__init_array_start, __init_array_end);
+    // Call all constructors of static objects
+    table_call(__init_array_start, __init_array_end);
 
-	// Call the application's entry point
-	extern int main(void);
-	main();
+    // Call the application's entry point
+    extern int main(void);
+    main();
 
-	// If main exits, assert here in debug mode
-	(void) modm_assert_continue_fail_debug(0,
-			"main.exit", "The main() function returned!");
-	// Otherwise reboot
-	NVIC_SystemReset();
+    // If main exits, assert here in debug mode
+    (void)modm_assert_continue_fail_debug(0, "main.exit", "The main() function returned!");
+    // Otherwise reboot
+    NVIC_SystemReset();
 }

@@ -14,12 +14,12 @@
 #include <cstdint>
 #include <iterator>
 #include <tuple>
+
 #include <modm/architecture/interface/memory.hpp>
 
 struct table_pool_t;
 namespace modm::platform
 {
-
 /**
  * Provides information about the unused memory sections in RAM listed by
  * size and memory traits.
@@ -35,39 +35,40 @@ namespace modm::platform
 class HeapTable
 {
 public:
-	class Iterator;
-	Iterator begin();
-	Iterator end();
+    class Iterator;
+    Iterator begin();
+    Iterator end();
 
-	/// Find the largest *continuous* memory section which satisfies *at least*
-	/// the selected memory traits.
-	static bool
-	find_largest(const uint8_t **start,
-				 const uint8_t **end,
-				 MemoryTraits trait_mask = MemoryDefault);
+    /// Find the largest *continuous* memory section which satisfies *at least*
+    /// the selected memory traits.
+    static bool find_largest(
+        const uint8_t** start,
+        const uint8_t** end,
+        MemoryTraits trait_mask = MemoryDefault);
 
-	/// @cond
+    /// @cond
 public:
-	class Iterator
-	{
-		using Type = std::tuple<MemoryTraits, const uint8_t*, const uint8_t*, size_t>;
-		const table_pool_t* table;
-	public:
-		using iterator_category = std::input_iterator_tag;
-		using value_type = Type;
-		using difference_type = std::ptrdiff_t;
-		using pointer = Type*;
-		using reference = Type&;
+    class Iterator
+    {
+        using Type = std::tuple<MemoryTraits, const uint8_t*, const uint8_t*, size_t>;
+        const table_pool_t* table;
 
-		explicit Iterator(const table_pool_t* table);
-		Type operator*() const;
-		Iterator& operator++();
-		Iterator operator++(int);
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type = Type;
+        using difference_type = std::ptrdiff_t;
+        using pointer = Type*;
+        using reference = Type&;
 
-		bool operator==(const Iterator& other) const;
-		bool operator!=(const Iterator& other) const;
-	};
-	/// @endcond
+        explicit Iterator(const table_pool_t* table);
+        Type operator*() const;
+        Iterator& operator++();
+        Iterator operator++(int);
+
+        bool operator==(const Iterator& other) const;
+        bool operator!=(const Iterator& other) const;
+    };
+    /// @endcond
 };
 
-}
+}  // namespace modm::platform

@@ -20,49 +20,45 @@
 
 namespace modm
 {
-	namespace log
-	{
-		/**
-		 * \class 	Prefix
-		 * \brief 	Add a prefix to the log message
-		 *
-		 * \code
-		 *	modm::log::StyleWrapper< modm::log::Prefix< char[9] > > loggerDevicePrefix (
-		 * 			modm::log::Prefix< char[9] > ( "Prefix: ", loggerDevice ) );
-		 * 	modm::log::Logger loggerPrefix( loggerDevicePrefix );
-		 * \endcode
-		 *
-		 * \ingroup modm_debug
-		 * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
-		 */
-		template <typename T, typename STYLE = DefaultStyle>
-		class Prefix : public Style<STYLE>
-		{
-		public:
-			Prefix(const T& str, STYLE style);
+namespace log
+{
+/**
+ * \class 	Prefix
+ * \brief 	Add a prefix to the log message
+ *
+ * \code
+ *	modm::log::StyleWrapper< modm::log::Prefix< char[9] > > loggerDevicePrefix (
+ * 			modm::log::Prefix< char[9] > ( "Prefix: ", loggerDevice ) );
+ * 	modm::log::Logger loggerPrefix( loggerDevicePrefix );
+ * \endcode
+ *
+ * \ingroup modm_debug
+ * \author	Martin Rosekeit <martin.rosekeit@rwth-aachen.de>
+ */
+template <typename T, typename STYLE = DefaultStyle>
+class Prefix : public Style<STYLE>
+{
+public:
+    Prefix(const T& str, STYLE style);
 
-			Prefix(const T& str, IODevice &device);
+    Prefix(const T& str, IODevice& device);
 
-			/// Write one char to the sink.
-			void
-			write( char c );
+    /// Write one char to the sink.
+    void write(char c);
 
-			/// Write a string that terminates with \c '\\0' to the sink.
-			void
-			write( const char* s );
+    /// Write a string that terminates with \c '\\0' to the sink.
+    void write(const char* s);
 
-			/// The message is complete and can be written/send/displayed.
-			void
-			flush();
+    /// The message is complete and can be written/send/displayed.
+    void flush();
 
-		private:
-			bool	flushed;
-			T		value;
-
-		};
-	}
-}
+private:
+    bool flushed;
+    T value;
+};
+}  // namespace log
+}  // namespace modm
 
 #include "prefix_impl.hpp"
 
-#endif // MODM_LOG_PREFIX_HPP
+#endif  // MODM_LOG_PREFIX_HPP

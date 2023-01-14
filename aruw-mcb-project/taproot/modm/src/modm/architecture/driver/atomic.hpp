@@ -10,6 +10,6 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "atomic/flag.hpp"
 #include "atomic/container.hpp"
+#include "atomic/flag.hpp"
 #include "atomic/queue.hpp"

@@ -12,55 +12,57 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <modm/math/utils/misc.hpp>
-
 #include "angle.hpp"
 
-// ----------------------------------------------------------------------------
-float
-modm::Angle::normalize(float angle)
-{
-	if (isPositive(angle))
-	{
-		while (angle > M_PI) {
-			angle -= 2 * M_PI;
-		}
-	}
-	else {
-		while (angle < -M_PI) {
-			angle += 2 * M_PI;
-		}
-	}
+#include <modm/math/utils/misc.hpp>
 
-	return angle;
+// ----------------------------------------------------------------------------
+float modm::Angle::normalize(float angle)
+{
+    if (isPositive(angle))
+    {
+        while (angle > M_PI)
+        {
+            angle -= 2 * M_PI;
+        }
+    }
+    else
+    {
+        while (angle < -M_PI)
+        {
+            angle += 2 * M_PI;
+        }
+    }
+
+    return angle;
 }
 
 // ----------------------------------------------------------------------------
-float
-modm::Angle::reverse(float angle)
+float modm::Angle::reverse(float angle)
 {
-	if (isPositive(angle))
-	{
-		angle -= M_PI;
-	}
-	else {
-		angle += M_PI;
-	}
+    if (isPositive(angle))
+    {
+        angle -= M_PI;
+    }
+    else
+    {
+        angle += M_PI;
+    }
 
-	return angle;
+    return angle;
 }
 
 // ----------------------------------------------------------------------------
-float
-modm::Angle::perpendicular(float angle, const bool cw)
+float modm::Angle::perpendicular(float angle, const bool cw)
 {
-	if (cw)
-	{
-		angle = modm::Angle::normalize(angle - M_PI_2);
-	}
-	else {
-		angle = modm::Angle::normalize(angle + M_PI_2);
-	}
+    if (cw)
+    {
+        angle = modm::Angle::normalize(angle - M_PI_2);
+    }
+    else
+    {
+        angle = modm::Angle::normalize(angle + M_PI_2);
+    }
 
-	return angle;
+    return angle;
 }

@@ -21,14 +21,12 @@
 
 namespace modm
 {
-
 /// The preferred behavior when the IODevice buffer is full
 /// @ingroup	modm_io
-enum class
-IOBuffer
+enum class IOBuffer
 {
-	DiscardIfFull,
-	BlockIfFull
+    DiscardIfFull,
+    BlockIfFull
 };
 
 /**
@@ -36,70 +34,51 @@ IOBuffer
  * @tparam		Device		Peripheral which should be wrapped
  * @tparam		behavior	preferred behavior when the Device buffer is full
  */
-template< class Device, IOBuffer behavior >
+template <class Device, IOBuffer behavior>
 class IODeviceWrapper : public IODevice
 {
 public:
-	IODeviceWrapper() = default;
-	using IODevice::write;
+    IODeviceWrapper() = default;
+    using IODevice::write;
 
-	void
-	write(char c) override
-	{
-		bool written;
-		do
-		{
-			written = Device::write(uint8_t(c));
-		}
-		while(behavior == IOBuffer::BlockIfFull and not written);
-	}
+    void write(char c) override
+    {
+        bool written;
+        do
+        {
+            written = Device::write(uint8_t(c));
+        } while (behavior == IOBuffer::BlockIfFull and not written);
+    }
 
-	void
-	flush() override
-	{
-		Device::flushWriteBuffer();
-	}
+    void flush() override { Device::flushWriteBuffer(); }
 
-	bool
-	read(char& c) override
-	{
-		return Device::read(reinterpret_cast<uint8_t&>(c));
-	}
+    bool read(char& c) override { return Device::read(reinterpret_cast<uint8_t&>(c)); }
 };
 
 /// @ingroup modm_io
-template< class Device, IOBuffer behavior >
+template <class Device, IOBuffer behavior>
 class IODeviceObjectWrapper : public IODevice
 {
-	Device &device;
+    Device& device;
+
 public:
-	IODeviceObjectWrapper(Device& device) : device{device} {}
-	using IODevice::write;
+    IODeviceObjectWrapper(Device& device) : device{device} {}
+    using IODevice::write;
 
-	void
-	write(char c) override
-	{
-		bool written;
-		do
-		{
-			written = device.write(uint8_t(c));
-		}
-		while(behavior == IOBuffer::BlockIfFull and not written);
-	}
+    void write(char c) override
+    {
+        bool written;
+        do
+        {
+            written = device.write(uint8_t(c));
+        } while (behavior == IOBuffer::BlockIfFull and not written);
+    }
 
-	void
-	flush() override
-	{
-		device.flushWriteBuffer();
-	}
+    void flush() override { device.flushWriteBuffer(); }
 
-	bool
-	read(char& c) override
-	{
-		return device.read(reinterpret_cast<uint8_t&>(c));
-	}
+    bool read(char& c) override { return device.read(reinterpret_cast<uint8_t&>(c)); }
 };
 
-}
+}  // namespace modm
 
-#endif // MODM_IODEVICE_WRAPPER_HPP
+#endif  // MODM_IODEVICE_WRAPPER_HPP

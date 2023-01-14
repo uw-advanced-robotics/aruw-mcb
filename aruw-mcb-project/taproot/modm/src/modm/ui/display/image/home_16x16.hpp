@@ -18,18 +18,17 @@
 
 namespace bitmap
 {
-	/**
-	 * \brief	Generated bitmap
-	 *
-	 * Generated from file "src/modm/ui/display/image/home_16x16.pbm".
-	 *
-	 * - Width  : 16
-	 * - Height : 16
-	 *
-	 * \ingroup	modm_ui_display_image
-	 */
-	EXTERN_FLASH_STORAGE(uint8_t home_16x16[]);
-}
+/**
+ * \brief	Generated bitmap
+ *
+ * Generated from file "src/modm/ui/display/image/home_16x16.pbm".
+ *
+ * - Width  : 16
+ * - Height : 16
+ *
+ * \ingroup	modm_ui_display_image
+ */
+EXTERN_FLASH_STORAGE(uint8_t home_16x16[]);
+}  // namespace bitmap
 
-#endif // BITMAP_HOME_16X16_HPP
-
+#endif  // BITMAP_HOME_16X16_HPP

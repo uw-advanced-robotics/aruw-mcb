@@ -9,17 +9,16 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_COMMUNICATABLE_TASK_HPP
-#define	XPCC_COMMUNICATABLE_TASK_HPP
+#ifndef XPCC_COMMUNICATABLE_TASK_HPP
+#define XPCC_COMMUNICATABLE_TASK_HPP
+
+#include <modm/processing/task.hpp>
 
 #include "communicatable.hpp"
 #include "communicator.hpp"
 
-#include <modm/processing/task.hpp>
-
 namespace xpcc
 {
-
 /**
  * A state-machine able to communicate via xpcc
  *
@@ -35,15 +34,12 @@ namespace xpcc
 class CommunicatableTask : public modm::Task, public Communicatable
 {
 public:
-	CommunicatableTask(Communicator *parent) :
-		parent(parent)
-	{
-	}
+    CommunicatableTask(Communicator *parent) : parent(parent) {}
 
 protected:
-	Communicator *parent;
+    Communicator *parent;
 };
 
-}	// namespace xpcc
+}  // namespace xpcc
 
-#endif	// XPCC_COMMUNICATABLE_TASK_HPP
+#endif  // XPCC_COMMUNICATABLE_TASK_HPP

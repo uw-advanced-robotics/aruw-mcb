@@ -17,36 +17,29 @@
 
 namespace modm
 {
-
 namespace platform
 {
-
 /// @cond
-template< Peripheral peripheral, template<Peripheral _> class... Signals >
+template <Peripheral peripheral, template <Peripheral _> class... Signals>
 struct GpioConnector
 {
-	template< class GpioQuery >
-	static constexpr bool Contains = detail::GpioContains<peripheral, GpioQuery, Signals...>::value;
-	template< class GpioQuery >
-	static constexpr bool IsValid = not std::is_same_v<typename GpioQuery::Type, GpioUnused>;
-	template< Gpio::Signal signal >
-	using GetSignal = typename detail::GpioGetSignal<peripheral, signal, Signals...>::Gpio;
+    template <class GpioQuery>
+    static constexpr bool Contains = detail::GpioContains<peripheral, GpioQuery, Signals...>::value;
+    template <class GpioQuery>
+    static constexpr bool IsValid = not std::is_same_v<typename GpioQuery::Type, GpioUnused>;
+    template <Gpio::Signal signal>
+    using GetSignal = typename detail::GpioGetSignal<peripheral, signal, Signals...>::Gpio;
 
-	inline static void
-	connect()
-	{
-		detail::GpioSignalConnect<peripheral, Signals...>::connect();
-	}
-	inline static void
-	disconnect()
-	{
-		detail::GpioSignalConnect<peripheral, Signals...>::disconnect();
-	}
+    inline static void connect() { detail::GpioSignalConnect<peripheral, Signals...>::connect(); }
+    inline static void disconnect()
+    {
+        detail::GpioSignalConnect<peripheral, Signals...>::disconnect();
+    }
 };
 /// @endcond
 
-} // namespace platform
+}  // namespace platform
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_PLATFORM_GPIO_CONNECTOR_HPP
+#endif  // MODM_PLATFORM_GPIO_CONNECTOR_HPP

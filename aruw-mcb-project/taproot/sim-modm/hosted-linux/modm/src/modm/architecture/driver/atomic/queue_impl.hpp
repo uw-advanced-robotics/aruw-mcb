@@ -11,115 +11,113 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_ATOMIC_QUEUE_IMPL_HPP
-#define	MODM_ATOMIC_QUEUE_IMPL_HPP
+#ifndef MODM_ATOMIC_QUEUE_IMPL_HPP
+#define MODM_ATOMIC_QUEUE_IMPL_HPP
 
 #include <modm/architecture/detect.hpp>
 
-template<typename T, std::size_t N>
-modm::atomic::Queue<T, N>::Queue() :
-	head(0), tail(0)
+template <typename T, std::size_t N>
+modm::atomic::Queue<T, N>::Queue() : head(0),
+                                     tail(0)
 {
 #if defined(MODM_CPU_AVR)
-	static_assert(N <= 254, "A maximum of 254 elements is allowed for AVRs!");
+    static_assert(N <= 254, "A maximum of 254 elements is allowed for AVRs!");
 #endif
 }
 
-template<typename T, std::size_t N>
-modm_always_inline bool
-modm::atomic::Queue<T, N>::isFull() const
+template <typename T, std::size_t N>
+modm_always_inline bool modm::atomic::Queue<T, N>::isFull() const
 {
-	Index tmphead = this->head + 1;
-	if (tmphead >= (N+1)) {
-		tmphead = 0;
-	}
+    Index tmphead = this->head + 1;
+    if (tmphead >= (N + 1))
+    {
+        tmphead = 0;
+    }
 
-	return (tmphead == this->tail);
+    return (tmphead == this->tail);
 }
 
-template<typename T, std::size_t N>
-bool
-modm::atomic::Queue<T, N>::isNearlyFull() const
+template <typename T, std::size_t N>
+bool modm::atomic::Queue<T, N>::isNearlyFull() const
 {
-	static_assert(N > 3, "Not possible the check for 'nearly full' of such a small queue.");
-	return (getSize() > (N - 3));
+    static_assert(N > 3, "Not possible the check for 'nearly full' of such a small queue.");
+    return (getSize() > (N - 3));
 }
 
-template<typename T, std::size_t N>
-modm_always_inline bool
-modm::atomic::Queue<T, N>::isEmpty() const
+template <typename T, std::size_t N>
+modm_always_inline bool modm::atomic::Queue<T, N>::isEmpty() const
 {
-	return (this->head == this->tail);
+    return (this->head == this->tail);
 }
 
-template<typename T, std::size_t N>
-bool
-modm::atomic::Queue<T, N>::isNearlyEmpty() const
+template <typename T, std::size_t N>
+bool modm::atomic::Queue<T, N>::isNearlyEmpty() const
 {
-	static_assert(N > 3, "Not possible the check for 'nearly empty' of such a small queue. ");
-	return (getSize() < 3);
+    static_assert(N > 3, "Not possible the check for 'nearly empty' of such a small queue. ");
+    return (getSize() < 3);
 }
 
-
-template<typename T, std::size_t N>
-modm_always_inline typename modm::atomic::Queue<T, N>::Size
-modm::atomic::Queue<T, N>::getMaxSize() const
+template <typename T, std::size_t N>
+modm_always_inline typename modm::atomic::Queue<T, N>::Size modm::atomic::Queue<T, N>::getMaxSize()
+    const
 {
-	return N;
+    return N;
 }
 
-template<typename T, std::size_t N>
-typename modm::atomic::Queue<T, N>::Size
-modm::atomic::Queue<T, N>::getSize() const
+template <typename T, std::size_t N>
+typename modm::atomic::Queue<T, N>::Size modm::atomic::Queue<T, N>::getSize() const
 {
-	Index tmphead = this->head;
-	Index tmptail = this->tail;
+    Index tmphead = this->head;
+    Index tmptail = this->tail;
 
-	Index stored;
-	if (tmphead >= tmptail) {
-		stored = tmphead - tmptail;
-	}
-	else {
-		stored = (N + 1) - tmptail + tmphead;
-	}
+    Index stored;
+    if (tmphead >= tmptail)
+    {
+        stored = tmphead - tmptail;
+    }
+    else
+    {
+        stored = (N + 1) - tmptail + tmphead;
+    }
 
-	return stored;
+    return stored;
 }
 
-template<typename T, std::size_t N>
-modm_always_inline const T&
-modm::atomic::Queue<T, N>::get() const
+template <typename T, std::size_t N>
+modm_always_inline const T& modm::atomic::Queue<T, N>::get() const
 {
-	return this->buffer[this->tail];
+    return this->buffer[this->tail];
 }
 
-template<typename T, std::size_t N>
-modm_always_inline bool
-modm::atomic::Queue<T, N>::push(const T& value)
+template <typename T, std::size_t N>
+modm_always_inline bool modm::atomic::Queue<T, N>::push(const T& value)
 {
-	Index tmphead = this->head + 1;
-	if (tmphead >= (N+1)) {
-		tmphead = 0;
-	}
-	if (tmphead == this->tail) {
-		return false;
-	}
-	else {
-		this->buffer[this->head] = value;
-		this->head = tmphead;
-		return true;
-	}
+    Index tmphead = this->head + 1;
+    if (tmphead >= (N + 1))
+    {
+        tmphead = 0;
+    }
+    if (tmphead == this->tail)
+    {
+        return false;
+    }
+    else
+    {
+        this->buffer[this->head] = value;
+        this->head = tmphead;
+        return true;
+    }
 }
 
-template<typename T, std::size_t N>
-modm_always_inline void
-modm::atomic::Queue<T, N>::pop()
+template <typename T, std::size_t N>
+modm_always_inline void modm::atomic::Queue<T, N>::pop()
 {
-	Index tmptail = this->tail + 1;
-	if (tmptail >= (N+1)) {
-		tmptail = 0;
-	}
-	this->tail = tmptail;
+    Index tmptail = this->tail + 1;
+    if (tmptail >= (N + 1))
+    {
+        tmptail = 0;
+    }
+    this->tail = tmptail;
 }
 
-#endif	// MODM_ATOMIC_QUEUE_IMPL_HPP
+#endif  // MODM_ATOMIC_QUEUE_IMPL_HPP

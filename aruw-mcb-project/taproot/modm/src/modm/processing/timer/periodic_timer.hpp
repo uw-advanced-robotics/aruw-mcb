@@ -19,7 +19,6 @@
 
 namespace modm
 {
-
 /**
  * Generic periodic software timeout class for variable timebase and timestamp width.
  *
@@ -34,44 +33,44 @@ namespace modm
  * @author	Niklas Hauser
  * @ingroup	modm_processing_timer
  */
-template< class Clock, class Duration  >
+template <class Clock, class Duration>
 class GenericPeriodicTimer : public GenericTimeout<Clock, Duration>
 {
 public:
-	// Inherit all constructors
-	using GenericTimeout<Clock, Duration>::GenericTimeout;
+    // Inherit all constructors
+    using GenericTimeout<Clock, Duration>::GenericTimeout;
 
-	/**
-	 * For a duration of 0, this function will always expire, but only return 1.
-	 *
-	 * @return the number of missed periods, or zero if not expired yet
-	 */
-	size_t
-	execute()
-	{
-		if (GenericTimeout<Clock, Duration>::execute())
-		{
-			size_t count{0};
-			if (this->_interval.count())
-			{
-				const auto now = this->now();
-				while(1)
-				{
-					this->_start += this->_interval;
-					const auto diff{now - this->_start};
-					if (diff != this->_interval) count++;
-					if (diff < this->_interval) break;
-				}
-			}
-			else {
-				this->_start = this->now();
-				count = 1;
-			}
-			this->_state = this->ARMED;
-			return count;
-		}
-		return 0;
-	}
+    /**
+     * For a duration of 0, this function will always expire, but only return 1.
+     *
+     * @return the number of missed periods, or zero if not expired yet
+     */
+    size_t execute()
+    {
+        if (GenericTimeout<Clock, Duration>::execute())
+        {
+            size_t count{0};
+            if (this->_interval.count())
+            {
+                const auto now = this->now();
+                while (1)
+                {
+                    this->_start += this->_interval;
+                    const auto diff{now - this->_start};
+                    if (diff != this->_interval) count++;
+                    if (diff < this->_interval) break;
+                }
+            }
+            else
+            {
+                this->_start = this->now();
+                count = 1;
+            }
+            this->_state = this->ARMED;
+            return count;
+        }
+        return 0;
+    }
 };
 
 /**
@@ -87,22 +86,22 @@ public:
  *
  * @ingroup		modm_processing_timer
  */
-using        ShortPeriodicTimer = GenericPeriodicTimer< Clock, ShortDuration >;
+using ShortPeriodicTimer = GenericPeriodicTimer<Clock, ShortDuration>;
 
 /// Periodic software timer for up to 49 days with millisecond resolution.
 /// @ingroup	modm_processing_timer
-using             PeriodicTimer = GenericPeriodicTimer< Clock, Duration >;
+using PeriodicTimer = GenericPeriodicTimer<Clock, Duration>;
 
 /// Periodic software timer for up to 65 milliseconds with microsecond resolution.
 /// @ingroup	modm_processing_timer
-using ShortPrecisePeriodicTimer = GenericPeriodicTimer< PreciseClock, ShortPreciseDuration >;
+using ShortPrecisePeriodicTimer = GenericPeriodicTimer<PreciseClock, ShortPreciseDuration>;
 
 /// Periodic software timer for up to 71 minutes with microsecond resolution.
 /// @ingroup	modm_processing_timer
-using      PrecisePeriodicTimer = GenericPeriodicTimer< PreciseClock, PreciseDuration >;
+using PrecisePeriodicTimer = GenericPeriodicTimer<PreciseClock, PreciseDuration>;
 
 /// @cond
 using PeriodicTimerState [[deprecated("Use `modm::TimerState` instead!")]] = TimerState;
 /// @endcond
 
-}	// namespace
+}  // namespace modm

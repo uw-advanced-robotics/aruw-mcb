@@ -12,56 +12,59 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FILTER_DEBOUNCE_HPP
-	#error	"Don't include this file directly, use 'debounce.hpp' instead!"
+#error "Don't include this file directly, use 'debounce.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::filter::Debounce<T>::Debounce(const T& maxValue, const T& lowerBound, const T& upperBound) :
-	maxValue(maxValue),
-	sum(maxValue / 2),
-	lowerBound(lowerBound),
-	upperBound((upperBound != 0) ? upperBound : maxValue),
-	state(false)
+template <typename T>
+modm::filter::Debounce<T>::Debounce(const T& maxValue, const T& lowerBound, const T& upperBound)
+    : maxValue(maxValue),
+      sum(maxValue / 2),
+      lowerBound(lowerBound),
+      upperBound((upperBound != 0) ? upperBound : maxValue),
+      state(false)
 {
 }
 
-template<typename T>
-void
-modm::filter::Debounce<T>::update(bool input)
+template <typename T>
+void modm::filter::Debounce<T>::update(bool input)
 {
-	if (input && (sum < maxValue)) {
-		sum++;
-	}
-	else if (!input && (sum > 0)) {
-		sum--;
-	}
+    if (input && (sum < maxValue))
+    {
+        sum++;
+    }
+    else if (!input && (sum > 0))
+    {
+        sum--;
+    }
 
-	if (state && (sum <= lowerBound)) {
-		state = false;
-	}
-	else if (!state && (sum >= upperBound)) {
-		state = true;
-	}
+    if (state && (sum <= lowerBound))
+    {
+        state = false;
+    }
+    else if (!state && (sum >= upperBound))
+    {
+        state = true;
+    }
 }
 
-template<typename T>
-bool
-modm::filter::Debounce<T>::getValue() const
+template <typename T>
+bool modm::filter::Debounce<T>::getValue() const
 {
-	return state;
+    return state;
 }
 
-template<typename T>
-void
-modm::filter::Debounce<T>::reset(const bool state)
+template <typename T>
+void modm::filter::Debounce<T>::reset(const bool state)
 {
-	if (state) {
-		sum = maxValue;
-		this->state = true;
-	}
-	else {
-		sum = 0;
-		this->state = false;
-	}
+    if (state)
+    {
+        sum = maxValue;
+        this->state = true;
+    }
+    else
+    {
+        sum = 0;
+        this->state = false;
+    }
 }

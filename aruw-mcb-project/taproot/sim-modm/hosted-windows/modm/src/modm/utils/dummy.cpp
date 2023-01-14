@@ -13,8 +13,7 @@
 
 #include "dummy.hpp"
 
-void
-modm::dummy()
+void modm::dummy()
 {
-	// get coffee
+    // get coffee
 }

@@ -11,8 +11,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_DOUBLY_LINKED_LIST_HPP
-	#error	"Don't include this file directly, use 'doubly_linked_list.hpp' instead"
+#ifndef MODM_DOUBLY_LINKED_LIST_HPP
+#error "Don't include this file directly, use 'doubly_linked_list.hpp' instead"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -21,158 +21,137 @@
 
 // const iterator
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator() :
-	node(0)
+modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator() : node(0)
 {
 }
 
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(
-		const Node* node) :
-	node(node)
+modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(const Node* node) : node(node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(
-		const iterator& other) :
-	node(other.node)
+modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(const iterator& other)
+    : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(
-		const const_iterator& other) :
-	node(other.node)
+modm::DoublyLinkedList<T, Allocator>::const_iterator::const_iterator(const const_iterator& other)
+    : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::const_iterator&
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator = (
-		const const_iterator& other)
+typename modm::DoublyLinkedList<T, Allocator>::const_iterator& modm::
+    DoublyLinkedList<T, Allocator>::const_iterator::operator=(const const_iterator& other)
 {
-	this->node = other.node;
-	return *this;
+    this->node = other.node;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::const_iterator&
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator ++ ()
+typename modm::DoublyLinkedList<T, Allocator>::const_iterator& modm::
+    DoublyLinkedList<T, Allocator>::const_iterator::operator++()
 {
-	this->node = this->node->next;
-	return *this;
+    this->node = this->node->next;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::const_iterator&
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator -- ()
+typename modm::DoublyLinkedList<T, Allocator>::const_iterator& modm::
+    DoublyLinkedList<T, Allocator>::const_iterator::operator--()
 {
-	this->node = this->node->previous;
-	return *this;
+    this->node = this->node->previous;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator == (
-		const const_iterator& other) const
+bool modm::DoublyLinkedList<T, Allocator>::const_iterator::operator==(
+    const const_iterator& other) const
 {
-	return (node == other.node);
+    return (node == other.node);
 }
 
 template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator != (
-		const const_iterator& other) const
+bool modm::DoublyLinkedList<T, Allocator>::const_iterator::operator!=(
+    const const_iterator& other) const
 {
-	return (node != other.node);
+    return (node != other.node);
 }
 
 template <typename T, typename Allocator>
-const T&
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator * () const
+const T& modm::DoublyLinkedList<T, Allocator>::const_iterator::operator*() const
 {
-	return this->node->value;
+    return this->node->value;
 }
 
 template <typename T, typename Allocator>
-const T*
-modm::DoublyLinkedList<T, Allocator>::const_iterator::operator -> () const
+const T* modm::DoublyLinkedList<T, Allocator>::const_iterator::operator->() const
 {
-	return &this->node->value;
+    return &this->node->value;
 }
-
 
 // iterator
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::iterator::iterator() :
-	node(0)
+modm::DoublyLinkedList<T, Allocator>::iterator::iterator() : node(0)
 {
 }
 
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::iterator::iterator(Node* node) :
-	node(node)
+modm::DoublyLinkedList<T, Allocator>::iterator::iterator(Node* node) : node(node)
 {
 }
 
 template <typename T, typename Allocator>
-modm::DoublyLinkedList<T, Allocator>::iterator::iterator(
-		const iterator& other) :
-	node(other.node)
+modm::DoublyLinkedList<T, Allocator>::iterator::iterator(const iterator& other) : node(other.node)
 {
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator&
-modm::DoublyLinkedList<T, Allocator>::iterator::operator = (const iterator& other)
+typename modm::DoublyLinkedList<T, Allocator>::iterator& modm::DoublyLinkedList<T, Allocator>::
+    iterator::operator=(const iterator& other)
 {
-	this->node = other.node;
-	return *this;
+    this->node = other.node;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator&
-modm::DoublyLinkedList<T, Allocator>::iterator::operator ++ ()
+typename modm::DoublyLinkedList<T, Allocator>::iterator& modm::DoublyLinkedList<T, Allocator>::
+    iterator::operator++()
 {
-	this->node = this->node->next;
-	return *this;
+    this->node = this->node->next;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-typename modm::DoublyLinkedList<T, Allocator>::iterator&
-modm::DoublyLinkedList<T, Allocator>::iterator::operator -- ()
+typename modm::DoublyLinkedList<T, Allocator>::iterator& modm::DoublyLinkedList<T, Allocator>::
+    iterator::operator--()
 {
-	this->node = this->node->previous;
-	return *this;
+    this->node = this->node->previous;
+    return *this;
 }
 
 template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::iterator::operator == (
-		const iterator& other) const
+bool modm::DoublyLinkedList<T, Allocator>::iterator::operator==(const iterator& other) const
 {
-	return (node == other.node);
+    return (node == other.node);
 }
 
 template <typename T, typename Allocator>
-bool
-modm::DoublyLinkedList<T, Allocator>::iterator::operator != (
-		const iterator& other) const
+bool modm::DoublyLinkedList<T, Allocator>::iterator::operator!=(const iterator& other) const
 {
-	return (node != other.node);
+    return (node != other.node);
 }
 
 template <typename T, typename Allocator>
-T&
-modm::DoublyLinkedList<T, Allocator>::iterator::operator * ()
+T& modm::DoublyLinkedList<T, Allocator>::iterator::operator*()
 {
-	return this->node->value;
+    return this->node->value;
 }
 
 template <typename T, typename Allocator>
-T*
-modm::DoublyLinkedList<T, Allocator>::iterator::operator -> ()
+T* modm::DoublyLinkedList<T, Allocator>::iterator::operator->()
 {
-	return &this->node->value;
+    return &this->node->value;
 }

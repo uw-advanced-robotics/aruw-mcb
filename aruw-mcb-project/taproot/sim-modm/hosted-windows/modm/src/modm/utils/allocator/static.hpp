@@ -18,56 +18,46 @@
 
 namespace modm
 {
-	namespace allocator
-	{
-		/**
-		 * \brief	Static memory allocator
-		 *
-		 * Allocates a big static block and distributes pieces of it during
-		 * run-time. No reallocation is done when no more pieces are available.
-		 *
-		 * \ingroup	modm_utils_allocator
-		 * \author	Fabian Greif
-		 */
-		template <typename T,
-				  std::size_t N>
-		class Static : public AllocatorBase<T>
-		{
-		public:
-			template <typename U>
-			struct rebind
-			{
-				typedef Static<U, N> other;
-			};
+namespace allocator
+{
+/**
+ * \brief	Static memory allocator
+ *
+ * Allocates a big static block and distributes pieces of it during
+ * run-time. No reallocation is done when no more pieces are available.
+ *
+ * \ingroup	modm_utils_allocator
+ * \author	Fabian Greif
+ */
+template <typename T, std::size_t N>
+class Static : public AllocatorBase<T>
+{
+public:
+    template <typename U>
+    struct rebind
+    {
+        typedef Static<U, N> other;
+    };
 
-		public:
-			Static() :
-				AllocatorBase<T>()
-			{
-			}
+public:
+    Static() : AllocatorBase<T>() {}
 
-			Static(const Static& other) :
-				AllocatorBase<T>(other)
-			{
-			}
+    Static(const Static& other) : AllocatorBase<T>(other) {}
 
-			template <typename U>
-			Static(const Static<U, N>&) :
-				AllocatorBase<T>()
-			{
-			}
+    template <typename U>
+    Static(const Static<U, N>&) : AllocatorBase<T>()
+    {
+    }
 
-			// TODO
-			T*
-			allocate(std::size_t other);
+    // TODO
+    T* allocate(std::size_t other);
 
-			void
-			deallocate(T*);
+    void deallocate(T*);
 
-		private:
-			T memory[N];
-		};
-	}
-}
+private:
+    T memory[N];
+};
+}  // namespace allocator
+}  // namespace modm
 
-#endif // MODM_ALLOCATOR_STATIC_HPP
+#endif  // MODM_ALLOCATOR_STATIC_HPP

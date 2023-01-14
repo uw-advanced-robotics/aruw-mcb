@@ -24,46 +24,34 @@ namespace modm
 class VirtualGraphicDisplay : public modm::ColorGraphicDisplay
 {
 public:
-	VirtualGraphicDisplay(modm::ColorGraphicDisplay* display, modm::glcd::Point leftUpper,
-						  modm::glcd::Point rightLower);
+    VirtualGraphicDisplay(
+        modm::ColorGraphicDisplay* display,
+        modm::glcd::Point leftUpper,
+        modm::glcd::Point rightLower);
 
-	void
-	setDisplay(modm::ColorGraphicDisplay* display);
+    void setDisplay(modm::ColorGraphicDisplay* display);
 
-	virtual inline uint16_t
-	getWidth() const
-	{
-		return this->width;
-	}
+    virtual inline uint16_t getWidth() const { return this->width; }
 
-	virtual inline uint16_t
-	getHeight() const
-	{
-		return this->height;
-	}
+    virtual inline uint16_t getHeight() const { return this->height; }
 
-	virtual void
-	clear();
+    virtual void clear();
 
-	virtual void
-	update();
+    virtual void update();
 
 protected:
-	void
-	setPixel(int16_t x, int16_t y) final;
+    void setPixel(int16_t x, int16_t y) final;
 
-	void
-	clearPixel(int16_t x, int16_t y) final;
+    void clearPixel(int16_t x, int16_t y) final;
 
-	color::Rgb565
-	getPixel(int16_t x, int16_t y) const final;
+    color::Rgb565 getPixel(int16_t x, int16_t y) const final;
 
 private:
-	modm::ColorGraphicDisplay* display;
-	modm::glcd::Point leftUpper;
-	modm::glcd::Point rightLower;
-	const uint16_t width;
-	const uint16_t height;
+    modm::ColorGraphicDisplay* display;
+    modm::glcd::Point leftUpper;
+    modm::glcd::Point rightLower;
+    const uint16_t width;
+    const uint16_t height;
 };
 
 }  // namespace modm

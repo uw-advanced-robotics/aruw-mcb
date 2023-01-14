@@ -17,39 +17,35 @@
 #ifndef MODM_ABSTRACT_MENU_HPP
 #define MODM_ABSTRACT_MENU_HPP
 
-#include "view_stack.hpp"
 #include "abstract_view.hpp"
+#include "view_stack.hpp"
 
-namespace modm{
+namespace modm
+{
+/**
+ * @brief The AbstractMenu class is the same as the AbstractView class,
+ *        except it forces the developer to reimplement the handling
+ *        of button presses.
+ *
+ * \author Thorsten Lajewski
+ * \ingroup modm_ui_menu
+ */
+template <typename Allocator = allocator::Dynamic<IAbstractView> >
+class AbstractMenu : public AbstractView<Allocator>
+{
+public:
+    AbstractMenu(modm::ViewStack<Allocator>* stack, uint8_t identifier)
+        : modm::AbstractView<Allocator>(stack, identifier)
+    {
+    }
 
-	 /**
-	 * @brief The AbstractMenu class is the same as the AbstractView class,
-	 *        except it forces the developer to reimplement the handling
-	 *        of button presses.
-	 *
-	 * \author Thorsten Lajewski
-	 * \ingroup modm_ui_menu
-	 */
-	template<typename Allocator = allocator::Dynamic<IAbstractView> >
-	class AbstractMenu : public AbstractView<Allocator>
-	{
-		public:
+    virtual ~AbstractMenu() {}
 
-			AbstractMenu(modm::ViewStack<Allocator>* stack, uint8_t identifier) :
-				modm::AbstractView<Allocator>(stack, identifier)
-			{
-			}
+    virtual void shortButtonPress(modm::MenuButtons::Button button) = 0;
 
-			virtual ~AbstractMenu() {}
+private:
+};
 
-			virtual void
-			shortButtonPress(modm::MenuButtons::Button button) = 0;
+}  // namespace modm
 
-		private:
-
-
-	};
-
-}
-
-#endif // MODM_ABSTRACT_MENU_HPP
+#endif  // MODM_ABSTRACT_MENU_HPP

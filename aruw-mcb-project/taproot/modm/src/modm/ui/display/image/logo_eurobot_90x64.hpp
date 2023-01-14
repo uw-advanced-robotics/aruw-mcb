@@ -18,18 +18,17 @@
 
 namespace bitmap
 {
-	/**
-	 * \brief	Generated bitmap
-	 *
-	 * Generated from file "src/modm/ui/display/image/logo_eurobot_90x64.pbm".
-	 *
-	 * - Width  : 90
-	 * - Height : 64
-	 *
-	 * \ingroup	modm_ui_display_image
-	 */
-	EXTERN_FLASH_STORAGE(uint8_t logo_eurobot_90x64[]);
-}
+/**
+ * \brief	Generated bitmap
+ *
+ * Generated from file "src/modm/ui/display/image/logo_eurobot_90x64.pbm".
+ *
+ * - Width  : 90
+ * - Height : 64
+ *
+ * \ingroup	modm_ui_display_image
+ */
+EXTERN_FLASH_STORAGE(uint8_t logo_eurobot_90x64[]);
+}  // namespace bitmap
 
-#endif // BITMAP_LOGO_EUROBOT_90X64_HPP
-
+#endif  // BITMAP_LOGO_EUROBOT_90X64_HPP

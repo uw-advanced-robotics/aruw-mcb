@@ -10,65 +10,62 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_RAY_2D_HPP
-	#error	"Don't include this file directly, use 'ray_2d.hpp' instead!"
+#error "Don't include this file directly, use 'ray_2d.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Ray2D<T>::Ray2D() :
-	basePoint(), direction()
+template <typename T>
+modm::Ray2D<T>::Ray2D() : basePoint(),
+                          direction()
 {
 }
 
-template<typename T>
-modm::Ray2D<T>::Ray2D(const Vector<T, 2>& start, const Vector<T, 2>& direction) :
-	basePoint(start), direction(direction)
+template <typename T>
+modm::Ray2D<T>::Ray2D(const Vector<T, 2>& start, const Vector<T, 2>& direction)
+    : basePoint(start),
+      direction(direction)
 {
 }
 
 // ----------------------------------------------------------------------------
 template <typename T>
-inline void
-modm::Ray2D<T>::setStartPoint(const Vector<T, 2>& point)
+inline void modm::Ray2D<T>::setStartPoint(const Vector<T, 2>& point)
 {
-	this->basePoint = point;
+    this->basePoint = point;
 }
 
 template <typename T>
-inline const modm::Vector<T, 2>&
-modm::Ray2D<T>::getStartPoint() const
+inline const modm::Vector<T, 2>& modm::Ray2D<T>::getStartPoint() const
 {
-	return this->basePoint;
+    return this->basePoint;
 }
 
 template <typename T>
-inline void
-modm::Ray2D<T>::setDirectionVector(const Vector<T, 2>& direction)
+inline void modm::Ray2D<T>::setDirectionVector(const Vector<T, 2>& direction)
 {
-	this->direction = direction;
+    this->direction = direction;
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-const modm::Vector<T, 2>&
-modm::Ray2D<T>::getDirectionVector() const
+template <typename T>
+const modm::Vector<T, 2>& modm::Ray2D<T>::getDirectionVector() const
 {
-	return direction;
+    return direction;
 }
 //
 //// ----------------------------------------------------------------------------
-//template<typename T>
-//void
-//modm::Ray2D<T>::translate(const Vector<T, 2>& vector)
+// template<typename T>
+// void
+// modm::Ray2D<T>::translate(const Vector<T, 2>& vector)
 //{
 //	this->startPoint.translate(vector);
 //	this->endPoint.translate(vector);
 //}
 //
 //// ----------------------------------------------------------------------------
-//template<typename T>
-//T
-//modm::Ray2D<T>::getLength() const
+// template<typename T>
+// T
+// modm::Ray2D<T>::getLength() const
 //{
 //	Vector<T, 2> directionVector = this->endPoint - this->startPoint;
 //
@@ -76,9 +73,9 @@ modm::Ray2D<T>::getDirectionVector() const
 //}
 //
 //// ----------------------------------------------------------------------------
-//template<typename T>
-//const T
-//modm::Ray2D<T>::getDistanceTo(const Vector<T, 2>& point) const
+// template<typename T>
+// const T
+// modm::Ray2D<T>::getDistanceTo(const Vector<T, 2>& point) const
 //{
 //	// vector from the base point of the line to the new point
 //	Vector<T, 2> startToPoint = point - this->startPoint;
@@ -111,9 +108,9 @@ modm::Ray2D<T>::getDirectionVector() const
 //}
 //
 //// ----------------------------------------------------------------------------
-//template<typename T>
-//const modm::Vector<T, 2>
-//modm::Ray2D<T>::getClosestPointTo(const Vector<T, 2>& point) const
+// template<typename T>
+// const modm::Vector<T, 2>
+// modm::Ray2D<T>::getClosestPointTo(const Vector<T, 2>& point) const
 //{
 //	// vector from the base point of the line to the new point
 //	Vector<T, 2> startToPoint = point - this->startPoint;
@@ -140,43 +137,44 @@ modm::Ray2D<T>::getDirectionVector() const
 //}
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
+template <typename T>
+bool modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 {
-	// vector from the base point of the line to the new point
-	Vector<T, 2> startToPoint = line.getStartPoint() - this->basePoint;
-	Vector<T, 2> endToPoint = line.getEndPoint() - this->basePoint;
-	Vector<T, 2> dt = this->direction.toOrthogonalVector();
+    // vector from the base point of the line to the new point
+    Vector<T, 2> startToPoint = line.getStartPoint() - this->basePoint;
+    Vector<T, 2> endToPoint = line.getEndPoint() - this->basePoint;
+    Vector<T, 2> dt = this->direction.toOrthogonalVector();
 
-	if ((startToPoint.dot(dt) * endToPoint.dot(dt)) < 0) {
-		// Points are on different sides of the ray (interpreted as
-		// continuous line)
+    if ((startToPoint.dot(dt) * endToPoint.dot(dt)) < 0)
+    {
+        // Points are on different sides of the ray (interpreted as
+        // continuous line)
 
-		Vector<T, 2> pointToStart = this->basePoint - line.getStartPoint();
-		Vector<T, 2> lt = line.getDirectionVector().toOrthogonalVector();
-		if ((pointToStart.dot(lt) * this->direction.dot(lt)) < 0) {
-			// Point and
-			return true;
-		}
-	}
+        Vector<T, 2> pointToStart = this->basePoint - line.getStartPoint();
+        Vector<T, 2> lt = line.getDirectionVector().toOrthogonalVector();
+        if ((pointToStart.dot(lt) * this->direction.dot(lt)) < 0)
+        {
+            // Point and
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 //// ----------------------------------------------------------------------------
-//template<typename T>
-//bool
-//modm::Ray2D<T>::intersects(const Polygon2D<T>& polygon) const
+// template<typename T>
+// bool
+// modm::Ray2D<T>::intersects(const Polygon2D<T>& polygon) const
 //{
 //	return polygon.intersects(*this);
 //	''
 //}
 //
 //// ----------------------------------------------------------------------------
-//template <typename T>
-//bool
-//modm::Ray2D<T>::getIntersections(const Ray2D& other,
+// template <typename T>
+// bool
+// modm::Ray2D<T>::getIntersections(const Ray2D& other,
 //		PointSet2D<T>& intersectionPoints) const
 //{
 //	modm::Vector<T, 2> ownDirectionVector = this->endPoint - this->startPoint;
@@ -191,13 +189,13 @@ modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 //
 //		if (0.f <= t2 and t2 <= 1.f)
 //		{
-//			FloatType t1 = static_cast<FloatType>(otherDirectionVector.cross(connectionVector)) /
-//					   static_cast<FloatType>(d);
+//			FloatType t1 =
+//static_cast<FloatType>(otherDirectionVector.cross(connectionVector)) / 					   static_cast<FloatType>(d);
 //
 //			if (0.f <= t1 and t1 <= 1.f)
 //			{
-//				intersectionPoints.append(this->startPoint + ownDirectionVector * t1);
-//				return true;
+//				intersectionPoints.append(this->startPoint + ownDirectionVector *
+//t1); 				return true;
 //			}
 //		}
 //	}
@@ -205,9 +203,9 @@ modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 //}
 //
 //// ----------------------------------------------------------------------------
-//template <typename T>
-//bool
-//modm::Ray2D<T>::getIntersections(const Circle2D<T>& circle,
+// template <typename T>
+// bool
+// modm::Ray2D<T>::getIntersections(const Circle2D<T>& circle,
 //		PointSet2D<T>& intersectionPoints) const
 //{
 //	// Direction vector of line, from start to end
@@ -219,7 +217,8 @@ modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 //	WideType a = directionVector.dot(directionVector);
 //	WideType b = 2 * circleToLine.dot(directionVector);
 //	WideType c = circleToLine.dot(circleToLine) -
-//			static_cast<WideType>(circle.radius) * static_cast<WideType>(circle.radius);;
+//			static_cast<WideType>(circle.radius) *
+//static_cast<WideType>(circle.radius);;
 //
 //	WideType discriminant = (b * b - 4 * a * c);
 //
@@ -256,9 +255,9 @@ modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 //}
 //
 //// ----------------------------------------------------------------------------
-//template <typename T>
-//bool
-//modm::Ray2D<T>::getIntersections(const Polygon2D<T>& polygon,
+// template <typename T>
+// bool
+// modm::Ray2D<T>::getIntersections(const Polygon2D<T>& polygon,
 //		PointSet2D<T>& intersectionPoints) const
 //{
 //	// invoke intersection method of the polygon
@@ -266,32 +265,27 @@ modm::Ray2D<T>::intersects(const LineSegment2D<T>& line) const
 //}
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Ray2D<T>::ccw(const modm::Vector<T, 2>& point)
+template <typename T>
+bool modm::Ray2D<T>::ccw(const modm::Vector<T, 2>& point)
 {
-	// vector from the base point of the line to the new point
-	Vector<T, 2> startToPoint = point - this->basePoint;
-	Vector<T, 2> t = direction.toOrthogonalVector();
+    // vector from the base point of the line to the new point
+    Vector<T, 2> startToPoint = point - this->basePoint;
+    Vector<T, 2> t = direction.toOrthogonalVector();
 
-	FloatType c1 = startToPoint.dot(t);
+    FloatType c1 = startToPoint.dot(t);
 
-	return (c1 <= 0);
+    return (c1 <= 0);
 }
 
 // ----------------------------------------------------------------------------
-template<typename T>
-bool
-modm::Ray2D<T>::operator == (const Ray2D &other) const
+template <typename T>
+bool modm::Ray2D<T>::operator==(const Ray2D& other) const
 {
-	return ((this->basePoint == other.basePoint) &&
-			(this->direction == other.direction));
+    return ((this->basePoint == other.basePoint) && (this->direction == other.direction));
 }
 
-template<typename T>
-bool
-modm::Ray2D<T>::operator != (const Ray2D &other) const
+template <typename T>
+bool modm::Ray2D<T>::operator!=(const Ray2D& other) const
 {
-	return ((this->basePoint != other.basePoint) ||
-			(this->direction != other.direction));
+    return ((this->basePoint != other.basePoint) || (this->direction != other.direction));
 }

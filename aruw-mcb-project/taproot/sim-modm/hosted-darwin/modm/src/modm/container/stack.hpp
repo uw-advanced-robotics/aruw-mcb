@@ -10,101 +10,67 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_STACK_HPP
-#define	MODM_STACK_HPP
+#ifndef MODM_STACK_HPP
+#define MODM_STACK_HPP
+
+#include <stdint.h>
 
 #include <cstddef>
-#include <stdint.h>
 
 #include "deque.hpp"
 
 namespace modm
 {
-	/**
-	 * \brief	LIFO stack
-	 *
-	 * Elements are pushed/popped from the "back" of the specific container,
-	 * which is known as the top of the stack.
-	 *
-	 * getFront(), removeFront(), prepend()
-	 *
-	 * \see		Deque()
-	 *
-	 * \author	Fabian Greif
-	 * \ingroup		modm_container
-	 */
-	template<typename T,
-			 typename Container>
-	class Stack
-	{
-	public:
-		typedef typename Container::Size Size;
+/**
+ * \brief	LIFO stack
+ *
+ * Elements are pushed/popped from the "back" of the specific container,
+ * which is known as the top of the stack.
+ *
+ * getFront(), removeFront(), prepend()
+ *
+ * \see		Deque()
+ *
+ * \author	Fabian Greif
+ * \ingroup		modm_container
+ */
+template <typename T, typename Container>
+class Stack
+{
+public:
+    typedef typename Container::Size Size;
 
-	public:
-		bool
-		isEmpty()
-		{
-			return c.isEmpty();
-		}
+public:
+    bool isEmpty() { return c.isEmpty(); }
 
-		bool
-		isFull()
-		{
-			return c.isFull();
-		}
+    bool isFull() { return c.isFull(); }
 
-		Size
-		getSize()
-		{
-			return c.getSize();
-		}
+    Size getSize() { return c.getSize(); }
 
-		Size
-		getMaxSize()
-		{
-			return c.getMaxSize();
-		}
+    Size getMaxSize() { return c.getMaxSize(); }
 
-		T&
-		get()
-		{
-			return c.getFront();
-		}
+    T& get() { return c.getFront(); }
 
-		const T&
-		get() const
-		{
-			return c.getFront();
-		}
+    const T& get() const { return c.getFront(); }
 
-		bool
-		push(const T& value)
-		{
-			return c.prepend(value);
-		}
+    bool push(const T& value) { return c.prepend(value); }
 
-		void
-		pop()
-		{
-			c.removeFront();
-		}
+    void pop() { c.removeFront(); }
 
-	protected:
-		Container c;
-	};
+protected:
+    Container c;
+};
 
-	// ------------------------------------------------------------------------
-	/**
-	 * \brief		Bounded stack
-	 *
-	 * \ingroup		modm_container
-	 */
-	template<typename T,
-			 std::size_t N,
-			 typename Container = BoundedDeque<T, N> >
-	class BoundedStack : public Stack<T, Container>
-	{
-	};
-}
+// ------------------------------------------------------------------------
+/**
+ * \brief		Bounded stack
+ *
+ * \ingroup		modm_container
+ */
+template <typename T, std::size_t N, typename Container = BoundedDeque<T, N> >
+class BoundedStack : public Stack<T, Container>
+{
+};
+}  // namespace modm
 
-#endif	// MODM_STACK_HPP
+#endif  // MODM_STACK_HPP

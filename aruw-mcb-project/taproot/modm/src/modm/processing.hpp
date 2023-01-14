@@ -12,7 +12,7 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_PROCESSING_HPP
-#define	MODM_PROCESSING_HPP
+#define MODM_PROCESSING_HPP
 
 #include "processing/protothread.hpp"
 #include "processing/protothread/macros.hpp"
@@ -27,6 +27,5 @@
 #include "processing/timer/periodic_timer.hpp"
 #include "processing/timer/timeout.hpp"
 #include "processing/timer/timestamp.hpp"
-#include "processing/task.hpp"
 
-#endif	// MODM_PROCESSING_HPP
+#endif  // MODM_PROCESSING_HPP

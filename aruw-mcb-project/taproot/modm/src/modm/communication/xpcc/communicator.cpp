@@ -15,72 +15,64 @@
 #include "communicator.hpp"
 
 // ----------------------------------------------------------------------------
-xpcc::Communicator::Communicator(
-		const uint8_t ownIdentifier,
-		Dispatcher &inDispatcher) :
-	ownIdentifier(ownIdentifier), dispatcher(inDispatcher)
+xpcc::Communicator::Communicator(const uint8_t ownIdentifier, Dispatcher& inDispatcher)
+    : ownIdentifier(ownIdentifier),
+      dispatcher(inDispatcher)
 {
 }
 
 // ----------------------------------------------------------------------------
-void
-xpcc::Communicator::callAction(uint8_t receiver, uint8_t actionIdentifier)
+void xpcc::Communicator::callAction(uint8_t receiver, uint8_t actionIdentifier)
 {
-	Header header(Header::Type::REQUEST, false,
-			receiver,
-			this->ownIdentifier,
-			actionIdentifier);
+    Header header(Header::Type::REQUEST, false, receiver, this->ownIdentifier, actionIdentifier);
 
-	modm::SmartPointer payload;
-	this->dispatcher.addMessage(header, payload);
+    modm::SmartPointer payload;
+    this->dispatcher.addMessage(header, payload);
 }
 
-void
-xpcc::Communicator::callAction(uint8_t receiver, uint8_t actionIdentifier, ResponseCallback& responseCallback)
+void xpcc::Communicator::callAction(
+    uint8_t receiver,
+    uint8_t actionIdentifier,
+    ResponseCallback& responseCallback)
 {
-	Header header(Header::Type::REQUEST, false,
-			receiver,
-			this->ownIdentifier,
-			actionIdentifier);
+    Header header(Header::Type::REQUEST, false, receiver, this->ownIdentifier, actionIdentifier);
 
-	modm::SmartPointer payload;
-	this->dispatcher.addMessage(header, payload, responseCallback);
+    modm::SmartPointer payload;
+    this->dispatcher.addMessage(header, payload, responseCallback);
 }
 
 // ----------------------------------------------------------------------------
-void
-xpcc::Communicator::publishEvent(uint8_t eventIdentifier)
+void xpcc::Communicator::publishEvent(uint8_t eventIdentifier)
 {
-	Header header(Header::Type::REQUEST, false,
-			0,
-			this->ownIdentifier,
-			eventIdentifier);
+    Header header(Header::Type::REQUEST, false, 0, this->ownIdentifier, eventIdentifier);
 
-	modm::SmartPointer payload;
-	this->dispatcher.addMessage(header, payload);
+    modm::SmartPointer payload;
+    this->dispatcher.addMessage(header, payload);
 }
 
 // ----------------------------------------------------------------------------
-void
-xpcc::Communicator::sendResponse(const ResponseHandle& handle)
+void xpcc::Communicator::sendResponse(const ResponseHandle& handle)
 {
-	Header header(Header::Type::RESPONSE, false,
-			handle.destination,
-			this->ownIdentifier,
-			handle.packetIdentifier);
+    Header header(
+        Header::Type::RESPONSE,
+        false,
+        handle.destination,
+        this->ownIdentifier,
+        handle.packetIdentifier);
 
-	modm::SmartPointer payload;
-	this->dispatcher.addResponse(header, payload);
+    modm::SmartPointer payload;
+    this->dispatcher.addResponse(header, payload);
 }
 
-void
-xpcc::Communicator::sendNegativeResponse(const ResponseHandle& handle)
+void xpcc::Communicator::sendNegativeResponse(const ResponseHandle& handle)
 {
-	Header header(Header::Type::NEGATIVE_RESPONSE, false,
-			handle.destination,
-			this->ownIdentifier,
-			handle.packetIdentifier);
+    Header header(
+        Header::Type::NEGATIVE_RESPONSE,
+        false,
+        handle.destination,
+        this->ownIdentifier,
+        handle.packetIdentifier);
 
-	modm::SmartPointer payload;
-	this->dispatcher.addResponse(header, payload);
+    modm::SmartPointer payload;
+    this->dispatcher.addResponse(header, payload);
 }

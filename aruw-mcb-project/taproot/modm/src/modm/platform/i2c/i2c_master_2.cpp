@@ -150,20 +150,21 @@
 #define SERIAL_DEBUGGING 0
 
 #if SERIAL_DEBUGGING
-#	include "../../uart/stm32/uart_5.hpp"
-	typedef modm::platform::Uart5 DebugUart;
-#	include <modm/io/iostream.hpp>
-	extern modm::IOStream stream;
-#	define DEBUG_STREAM(x) stream << x << "\n"
-#	define DEBUG_STREAM_N(x) stream << x;
-#	define DEBUG(x) modm::platform::Uart5::write(x)
+#include "../../uart/stm32/uart_5.hpp"
+typedef modm::platform::Uart5 DebugUart;
+#include <modm/io/iostream.hpp>
+extern modm::IOStream stream;
+#define DEBUG_STREAM(x) stream << x << "\n"
+#define DEBUG_STREAM_N(x) stream << x;
+#define DEBUG(x) modm::platform::Uart5::write(x)
 #else
-#	define DEBUG_STREAM(x)
-#	define DEBUG_STREAM_N(x)
-#	define DEBUG(x)
+#define DEBUG_STREAM(x)
+#define DEBUG_STREAM_N(x)
+#define DEBUG(x)
 #endif
 
 #include "i2c_master_2.hpp"
+
 #include <modm/architecture/interface/accessor.hpp>
 #include <modm/architecture/interface/atomic_lock.hpp>
 #include <modm/architecture/interface/interrupt.hpp>
@@ -174,503 +175,494 @@ MODM_ISR_DECL(I2C2_ER);
 
 namespace
 {
-	// parameter advice
-	static modm::I2c::Operation nextOperation;
-	enum class CheckNextOperation : uint8_t
-	{
-		NO,
-		NO_WAIT_FOR_BTF, ///< Do not wait for Byte Transfer Finished
-		YES,
-		YES_NO_STOP_BIT,
-	};
+// parameter advice
+static modm::I2c::Operation nextOperation;
+enum class CheckNextOperation : uint8_t
+{
+    NO,
+    NO_WAIT_FOR_BTF,  ///< Do not wait for Byte Transfer Finished
+    YES,
+    YES_NO_STOP_BIT,
+};
 
-	static CheckNextOperation checkNextOperation = CheckNextOperation::NO;
+static CheckNextOperation checkNextOperation = CheckNextOperation::NO;
 
-	// transaction queue management
-	struct ConfiguredTransaction
-	{
-		ConfiguredTransaction()
-		:	transaction(nullptr), configuration(nullptr) {}
+// transaction queue management
+struct ConfiguredTransaction
+{
+    ConfiguredTransaction() : transaction(nullptr), configuration(nullptr) {}
 
-		ConfiguredTransaction(modm::I2cTransaction *transaction, modm::I2c::ConfigurationHandler configuration)
-		:	transaction(transaction), configuration(configuration) {}
+    ConfiguredTransaction(
+        modm::I2cTransaction *transaction,
+        modm::I2c::ConfigurationHandler configuration)
+        : transaction(transaction),
+          configuration(configuration)
+    {
+    }
 
-		modm::I2cTransaction *transaction;
-		modm::I2c::ConfigurationHandler configuration;
-	};
+    modm::I2cTransaction *transaction;
+    modm::I2c::ConfigurationHandler configuration;
+};
 
-	static modm::BoundedQueue<ConfiguredTransaction, 8> queue;
-	static modm::I2c::ConfigurationHandler configuration(nullptr);
+static modm::BoundedQueue<ConfiguredTransaction, 8> queue;
+static modm::I2c::ConfigurationHandler configuration(nullptr);
 
-	// delegating
-	static modm::I2cTransaction *transaction(nullptr);
-	static modm::I2cMaster::Error error(modm::I2cMaster::Error::NoError);
+// delegating
+static modm::I2cTransaction *transaction(nullptr);
+static modm::I2cMaster::Error error(modm::I2cMaster::Error::NoError);
 
-	// buffer management
-	static modm::I2cTransaction::Starting starting(0, modm::I2c::OperationAfterStart::Stop);
-	static modm::I2cTransaction::Writing writing(nullptr, 0, modm::I2c::OperationAfterWrite::Stop);
-	static modm::I2cTransaction::Reading reading(nullptr, 0, modm::I2c::OperationAfterRead::Stop);
+// buffer management
+static modm::I2cTransaction::Starting starting(0, modm::I2c::OperationAfterStart::Stop);
+static modm::I2cTransaction::Writing writing(nullptr, 0, modm::I2c::OperationAfterWrite::Stop);
+static modm::I2cTransaction::Reading reading(nullptr, 0, modm::I2c::OperationAfterRead::Stop);
 
-	// helper functions
-	static inline void
-	callStarting()
-	{
-		uint_fast32_t deadlockPreventer = 100'000;
-		while ((I2C2->CR1 & I2C_CR1_STOP) and (deadlockPreventer-- > 0))
-			;
+// helper functions
+static inline void callStarting()
+{
+    uint_fast32_t deadlockPreventer = 100'000;
+    while ((I2C2->CR1 & I2C_CR1_STOP) and (deadlockPreventer-- > 0))
+        ;
 
-		// If the bus is busy during a starting condition, we generate an error and detach the transaction
-		// Before a restart condition the clock line is pulled low, and this check would trigger falsely.
-		if ((I2C2->SR2 & I2C_SR2_BUSY) and (nextOperation != modm::I2c::Operation::Restart))
-		{
-			// we wait a short amount of time for the bus to become free.
-			deadlockPreventer = 10'000;
-			while ((I2C2->SR2 & I2C_SR2_BUSY) and (deadlockPreventer-- > 0))
-				;
+    // If the bus is busy during a starting condition, we generate an error and detach the
+    // transaction Before a restart condition the clock line is pulled low, and this check would
+    // trigger falsely.
+    if ((I2C2->SR2 & I2C_SR2_BUSY) and (nextOperation != modm::I2c::Operation::Restart))
+    {
+        // we wait a short amount of time for the bus to become free.
+        deadlockPreventer = 10'000;
+        while ((I2C2->SR2 & I2C_SR2_BUSY) and (deadlockPreventer-- > 0))
+            ;
 
-			if (I2C2->SR2 & I2C_SR2_BUSY)
-			{
-				// either SDA or SCL is low, which leads to irrecoverable deadlock.
-				// Call error handler manually to detach the transaction object and resolve the deadlock.
-				// Further transactions may not succeed either, but will not lead to a deadlock.
-				error = modm::I2cMaster::Error::BusBusy;
-				MODM_ISR_CALL(I2C2_ER);
-				return;
-			}
-		}
+        if (I2C2->SR2 & I2C_SR2_BUSY)
+        {
+            // either SDA or SCL is low, which leads to irrecoverable deadlock.
+            // Call error handler manually to detach the transaction object and resolve the
+            // deadlock. Further transactions may not succeed either, but will not lead to a
+            // deadlock.
+            error = modm::I2cMaster::Error::BusBusy;
+            MODM_ISR_CALL(I2C2_ER);
+            return;
+        }
+    }
 
-		DEBUG_STREAM("callStarting");
-		checkNextOperation = CheckNextOperation::NO;
-		error = modm::I2cMaster::Error::NoError;
+    DEBUG_STREAM("callStarting");
+    checkNextOperation = CheckNextOperation::NO;
+    error = modm::I2cMaster::Error::NoError;
 
-		I2C2->CR1 &= ~I2C_CR1_POS;
-		I2C2->SR1 = 0;
-		I2C2->SR2 = 0;
+    I2C2->CR1 &= ~I2C_CR1_POS;
+    I2C2->SR1 = 0;
+    I2C2->SR2 = 0;
 
-		// and enable interrupts
-		DEBUG_STREAM("enable interrupts");
-		I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
-		I2C2->CR2 |= I2C_CR2_ITEVTEN | I2C_CR2_ITERREN;
+    // and enable interrupts
+    DEBUG_STREAM("enable interrupts");
+    I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
+    I2C2->CR2 |= I2C_CR2_ITEVTEN | I2C_CR2_ITERREN;
 
-		// generate startcondition
-		I2C2->CR1 |= I2C_CR1_START;
-	}
-
-	static inline void
-	callNextTransaction()
-	{
-		if (queue.isNotEmpty())
-		{
-			// wait until the stop condition has been generated
-			uint_fast32_t deadlockPreventer = 100'000;
-			while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
-				;
-
-			ConfiguredTransaction next = queue.get();
-			queue.pop();
-			// configure the peripheral
-			if (next.configuration and configuration != next.configuration) {
-				configuration = next.configuration;
-				configuration();
-			}
-
-			DEBUG_STREAM("\n###\n");
-			::transaction = next.transaction;
-			// start the transaction
-			callStarting();
-		}
-	}
+    // generate startcondition
+    I2C2->CR1 |= I2C_CR1_START;
 }
+
+static inline void callNextTransaction()
+{
+    if (queue.isNotEmpty())
+    {
+        // wait until the stop condition has been generated
+        uint_fast32_t deadlockPreventer = 100'000;
+        while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
+            ;
+
+        ConfiguredTransaction next = queue.get();
+        queue.pop();
+        // configure the peripheral
+        if (next.configuration and configuration != next.configuration)
+        {
+            configuration = next.configuration;
+            configuration();
+        }
+
+        DEBUG_STREAM("\n###\n");
+        ::transaction = next.transaction;
+        // start the transaction
+        callStarting();
+    }
+}
+}  // namespace
 
 // ----------------------------------------------------------------------------
 MODM_ISR(I2C2_EV)
 {
-	DEBUG_STREAM("\n--- interrupt ---");
+    DEBUG_STREAM("\n--- interrupt ---");
 
-	uint16_t sr1 = I2C2->SR1;
+    uint16_t sr1 = I2C2->SR1;
 
-	if (sr1 & I2C_SR1_SB)
-	{
-		// Start condition generated.
-		// EV5: SB=1, cleared by reading SR1 register followed by writing DR register with Address.
-		DEBUG_STREAM("startbit set");
+    if (sr1 & I2C_SR1_SB)
+    {
+        // Start condition generated.
+        // EV5: SB=1, cleared by reading SR1 register followed by writing DR register with Address.
+        DEBUG_STREAM("startbit set");
 
-		starting = transaction->starting();
-		uint8_t addressMode = modm::I2c::Write;
+        starting = transaction->starting();
+        uint8_t addressMode = modm::I2c::Write;
 
-		switch (starting.next)
-		{
-			case modm::I2c::OperationAfterStart::Read:
-				addressMode = modm::I2c::Read;
-				reading = transaction->reading();
-				nextOperation = static_cast<modm::I2c::Operation>(reading.next);
+        switch (starting.next)
+        {
+            case modm::I2c::OperationAfterStart::Read:
+                addressMode = modm::I2c::Read;
+                reading = transaction->reading();
+                nextOperation = static_cast<modm::I2c::Operation>(reading.next);
 
-				if (reading.length < 2)
-				{
-					DEBUG_STREAM("NACK");
-					I2C2->CR1 &= ~I2C_CR1_ACK;
-				}
-				else
-				{
-					DEBUG_STREAM("ACK");
-					I2C2->CR1 |= I2C_CR1_ACK;
-				}
-				if (reading.length == 2)
-				{
-					DEBUG_STREAM("POS");
-					I2C2->CR1 |= I2C_CR1_POS;
-				}
-				DEBUG_STREAM("read op: reading=" << reading.length);
-				break;
+                if (reading.length < 2)
+                {
+                    DEBUG_STREAM("NACK");
+                    I2C2->CR1 &= ~I2C_CR1_ACK;
+                }
+                else
+                {
+                    DEBUG_STREAM("ACK");
+                    I2C2->CR1 |= I2C_CR1_ACK;
+                }
+                if (reading.length == 2)
+                {
+                    DEBUG_STREAM("POS");
+                    I2C2->CR1 |= I2C_CR1_POS;
+                }
+                DEBUG_STREAM("read op: reading=" << reading.length);
+                break;
 
-			case modm::I2c::OperationAfterStart::Write:
-				writing = transaction->writing();
-				nextOperation = static_cast<modm::I2c::Operation>(writing.next);
+            case modm::I2c::OperationAfterStart::Write:
+                writing = transaction->writing();
+                nextOperation = static_cast<modm::I2c::Operation>(writing.next);
 
-				DEBUG_STREAM("write op: writing=" << writing.length);
-				break;
+                DEBUG_STREAM("write op: writing=" << writing.length);
+                break;
 
-			default:
-			case modm::I2c::OperationAfterStart::Stop:
-				writing.length = 0;
-				reading.length = 0;
-				nextOperation = modm::I2c::Operation::Stop;
+            default:
+            case modm::I2c::OperationAfterStart::Stop:
+                writing.length = 0;
+                reading.length = 0;
+                nextOperation = modm::I2c::Operation::Stop;
 
-				DEBUG_STREAM("stop op");
-				break;
-		}
+                DEBUG_STREAM("stop op");
+                break;
+        }
 
-		I2C2->DR = addressMode | (starting.address & 0xfe);
-	}
+        I2C2->DR = addressMode | (starting.address & 0xfe);
+    }
 
+    else if (sr1 & I2C_SR1_ADDR)
+    {
+        // End of address transmission
+        modm::atomic::Lock lock;
+        starting.address = 0;
+        // EV6: ADDR=1, cleared by reading SR1 register followed by reading SR2.
+        DEBUG_STREAM("address sent");
+        DEBUG_STREAM("writing.length=" << writing.length);
+        DEBUG_STREAM("reading.length=" << reading.length);
 
+        if ((writing.length > 0) or (reading.length > 3))
+        {
+            DEBUG_STREAM("enable buffers");
+            I2C2->CR2 |= I2C_CR2_ITBUFEN;
+        }
+        if ((!reading.length) and (!writing.length))
+        {
+            checkNextOperation = CheckNextOperation::YES;
+        }
 
-	else if (sr1 & I2C_SR1_ADDR)
-	{
-		// End of address transmission
-		modm::atomic::Lock lock;
-		starting.address = 0;
-		// EV6: ADDR=1, cleared by reading SR1 register followed by reading SR2.
-		DEBUG_STREAM("address sent");
-		DEBUG_STREAM("writing.length=" << writing.length);
-		DEBUG_STREAM("reading.length=" << reading.length);
+        DEBUG_STREAM("clearing ADDR");
+        (void)I2C2->SR2;
+        //		uint16_t sr2 = I2C2->SR2;
+        //		(void) sr2;
 
-		if ((writing.length > 0) or (reading.length > 3))
-		{
-			DEBUG_STREAM("enable buffers");
-			I2C2->CR2 |= I2C_CR2_ITBUFEN;
-		}
-		if ((!reading.length) and (!writing.length))
-		{
-			checkNextOperation = CheckNextOperation::YES;
-		}
+        if (reading.length == 1)
+        {
+            DEBUG_STREAM("STOP");
+            I2C2->CR1 |= I2C_CR1_STOP;
 
+            DEBUG_STREAM("waiting for stop");
+            uint_fast32_t deadlockPreventer = 100'000;
+            while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
+                ;
 
-		DEBUG_STREAM("clearing ADDR");
-		(void) I2C2->SR2;
-//		uint16_t sr2 = I2C2->SR2;
-//		(void) sr2;
+            uint16_t dr = I2C2->DR;
+            *reading.buffer++ = dr & 0xff;
+            reading.length = 0;
+            checkNextOperation = CheckNextOperation::YES_NO_STOP_BIT;
+        }
+        else if (reading.length == 2)
+        {
+            DEBUG_STREAM("NACK");
+            I2C2->CR1 &= ~I2C_CR1_ACK;
+        }
+    }
 
+    else if (sr1 & I2C_SR1_TXE)
+    {
+        // EV8_1: TxE=1, shift register empty, data register empty, write Data1 in DR
+        // EV8: TxE=1, shift register not empty, data register empty, cleared by writing DR
+        if (writing.length > 0)
+        {
+            DEBUG_STREAM("tx more bytes");
+            I2C2->DR = *writing.buffer++;  // write data
+            --writing.length;
 
-		if (reading.length == 1)
-		{
-			DEBUG_STREAM("STOP");
-			I2C2->CR1 |= I2C_CR1_STOP;
+            DEBUG_STREAM("TXE: writing.length=" << writing.length);
 
-			DEBUG_STREAM("waiting for stop");
-			uint_fast32_t deadlockPreventer = 100'000;
-			while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
-				;
+            checkNextOperation = CheckNextOperation::NO_WAIT_FOR_BTF;
+        }
+        // no else!
+        if (writing.length == 0)
+        {
+            // disable TxE, and wait for EV8_2
+            DEBUG_STREAM("last byte transmitted, wait for btf");
+            I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
+        }
+    }
 
-			uint16_t dr = I2C2->DR;
-			*reading.buffer++ = dr & 0xff;
-			reading.length = 0;
-			checkNextOperation = CheckNextOperation::YES_NO_STOP_BIT;
-		}
-		else if (reading.length == 2)
-		{
-			DEBUG_STREAM("NACK");
-			I2C2->CR1 &= ~I2C_CR1_ACK;
-		}
-	}
+    else if (sr1 & I2C_SR1_RXNE)
+    {
+        // Data register not empty.
+        if (reading.length > 3)
+        {
+            // EV7: RxNE=1, cleared by reading DR register
+            uint16_t dr = I2C2->DR;
+            *reading.buffer++ = dr & 0xff;
+            --reading.length;
 
+            DEBUG_STREAM("RXNE: reading.length=" << reading.length);
+        }
 
+        if (reading.length <= 3)
+        {
+            // disable RxNE, and wait for BTF
+            DEBUG_STREAM("fourth last byte received, wait for btf");
+            I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
+        }
+    }
 
-	else if (sr1 & I2C_SR1_TXE)
-	{
-		// EV8_1: TxE=1, shift register empty, data register empty, write Data1 in DR
-		// EV8: TxE=1, shift register not empty, data register empty, cleared by writing DR
-		if (writing.length > 0)
-		{
-			DEBUG_STREAM("tx more bytes");
-			I2C2->DR = *writing.buffer++; // write data
-			--writing.length;
+    if (sr1 & I2C_SR1_BTF)
+    {
+        // EV8_2
+        DEBUG_STREAM("BTF");
 
-			DEBUG_STREAM("TXE: writing.length=" << writing.length);
+        if (reading.length == 2)
+        {
+            modm::atomic::Lock lock;
+            // EV7_1: RxNE=1, cleared by reading DR register, programming STOP=1
+            DEBUG_STREAM("STOP");
+            I2C2->CR1 |= I2C_CR1_STOP;
 
-			checkNextOperation = CheckNextOperation::NO_WAIT_FOR_BTF;
-		}
-		// no else!
-		if (writing.length == 0)
-		{
-			// disable TxE, and wait for EV8_2
-			DEBUG_STREAM("last byte transmitted, wait for btf");
-			I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
-		}
-	}
+            DEBUG_STREAM("reading data1");
+            uint16_t dr = I2C2->DR;
+            *reading.buffer++ = dr & 0xff;
 
+            DEBUG_STREAM("waiting for stop");
+            uint_fast32_t deadlockPreventer = 100'000;
+            while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
+                ;
 
+            DEBUG_STREAM("reading data2");
+            dr = I2C2->DR;
+            *reading.buffer++ = dr & 0xff;
 
-	else if (sr1 & I2C_SR1_RXNE)
-	{
-		// Data register not empty.
-		if (reading.length > 3)
-		{
-			// EV7: RxNE=1, cleared by reading DR register
-			uint16_t dr = I2C2->DR;
-			*reading.buffer++ = dr & 0xff;
-			--reading.length;
+            reading.length = 0;
+            checkNextOperation = CheckNextOperation::YES_NO_STOP_BIT;
+        }
 
-			DEBUG_STREAM("RXNE: reading.length=" << reading.length);
-		}
+        if (reading.length == 3)
+        {
+            // EV7_1: RxNE=1, cleared by reading DR register, programming ACK=0
+            I2C2->CR1 &= ~I2C_CR1_ACK;
+            DEBUG_STREAM("NACK");
 
-		if (reading.length <= 3)
-		{
-			// disable RxNE, and wait for BTF
-			DEBUG_STREAM("fourth last byte received, wait for btf");
-			I2C2->CR2 &= ~I2C_CR2_ITBUFEN;
-		}
-	}
+            uint16_t dr = I2C2->DR;
+            *reading.buffer++ = dr & 0xff;
+            reading.length--;
 
+            DEBUG_STREAM("BTF: reading.length=2");
+        }
 
+        if (checkNextOperation == CheckNextOperation::NO_WAIT_FOR_BTF && writing.length == 0)
+        {
+            // EV8_2: TxE=1, BTF = 1, Program Stop request.
+            // TxE and BTF are cleared by hardware by the Stop condition
+            DEBUG_STREAM("BTF, write=0");
+            checkNextOperation = CheckNextOperation::YES;
+        }
+    }
 
-	if (sr1 & I2C_SR1_BTF)
-	{
-		// EV8_2
-		DEBUG_STREAM("BTF");
+    if (checkNextOperation >= CheckNextOperation::YES)
+    {
+        switch (nextOperation)
+        {
+            case modm::I2c::Operation::Write:
+                if (checkNextOperation != CheckNextOperation::YES_NO_STOP_BIT)
+                {
+                    writing = transaction->writing();
+                    nextOperation = static_cast<modm::I2c::Operation>(writing.next);
+                    // reenable TXE
+                    I2C2->CR2 |= I2C_CR2_ITBUFEN;
+                    DEBUG_STREAM("write op");
+                }
+                break;
 
-		if (reading.length == 2)
-		{
-			modm::atomic::Lock lock;
-			// EV7_1: RxNE=1, cleared by reading DR register, programming STOP=1
-			DEBUG_STREAM("STOP");
-			I2C2->CR1 |= I2C_CR1_STOP;
+            case modm::I2c::Operation::Restart:
+                callStarting();
+                DEBUG_STREAM("restart op");
+                break;
 
-			DEBUG_STREAM("reading data1");
-			uint16_t dr = I2C2->DR;
-			*reading.buffer++ = dr & 0xff;
+            default:
+                if (checkNextOperation != CheckNextOperation::YES_NO_STOP_BIT)
+                {
+                    I2C2->CR1 |= I2C_CR1_STOP;
+                    DEBUG_STREAM("STOP");
+                }
 
-			DEBUG_STREAM("waiting for stop");
-			uint_fast32_t deadlockPreventer = 100'000;
-			while (I2C2->CR1 & I2C_CR1_STOP && deadlockPreventer-- > 0)
-				;
-
-			DEBUG_STREAM("reading data2");
-			dr = I2C2->DR;
-			*reading.buffer++ = dr & 0xff;
-
-			reading.length = 0;
-			checkNextOperation = CheckNextOperation::YES_NO_STOP_BIT;
-		}
-
-		if (reading.length == 3)
-		{
-			// EV7_1: RxNE=1, cleared by reading DR register, programming ACK=0
-			I2C2->CR1 &= ~I2C_CR1_ACK;
-			DEBUG_STREAM("NACK");
-
-			uint16_t dr = I2C2->DR;
-			*reading.buffer++ = dr & 0xff;
-			reading.length--;
-
-			DEBUG_STREAM("BTF: reading.length=2");
-		}
-
-		if (checkNextOperation == CheckNextOperation::NO_WAIT_FOR_BTF
-			&& writing.length == 0)
-		{
-			// EV8_2: TxE=1, BTF = 1, Program Stop request.
-			// TxE and BTF are cleared by hardware by the Stop condition
-			DEBUG_STREAM("BTF, write=0");
-			checkNextOperation = CheckNextOperation::YES;
-		}
-	}
-
-
-
-	if (checkNextOperation >= CheckNextOperation::YES)
-	{
-		switch (nextOperation)
-		{
-			case modm::I2c::Operation::Write:
-				if (checkNextOperation != CheckNextOperation::YES_NO_STOP_BIT)
-				{
-					writing = transaction->writing();
-					nextOperation = static_cast<modm::I2c::Operation>(writing.next);
-					// reenable TXE
-					I2C2->CR2 |= I2C_CR2_ITBUFEN;
-					DEBUG_STREAM("write op");
-				}
-				break;
-
-			case modm::I2c::Operation::Restart:
-				callStarting();
-				DEBUG_STREAM("restart op");
-				break;
-
-			default:
-				if (checkNextOperation != CheckNextOperation::YES_NO_STOP_BIT)
-				{
-					I2C2->CR1 |= I2C_CR1_STOP;
-					DEBUG_STREAM("STOP");
-				}
-
-				DEBUG_STREAM("disable interrupts");
-				I2C2->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-				if (transaction) transaction->detaching(modm::I2c::DetachCause::NormalStop);
-				transaction = nullptr;
-				DEBUG_STREAM("transaction finished");
-				callNextTransaction();
-				break;
-		}
-		checkNextOperation = CheckNextOperation::NO;
-	}
+                DEBUG_STREAM("disable interrupts");
+                I2C2->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
+                if (transaction) transaction->detaching(modm::I2c::DetachCause::NormalStop);
+                transaction = nullptr;
+                DEBUG_STREAM("transaction finished");
+                callNextTransaction();
+                break;
+        }
+        checkNextOperation = CheckNextOperation::NO;
+    }
 }
 
 // ----------------------------------------------------------------------------
 MODM_ISR(I2C2_ER)
 {
-	DEBUG_STREAM("ERROR!");
-	uint16_t sr1 = I2C2->SR1;
+    DEBUG_STREAM("ERROR!");
+    uint16_t sr1 = I2C2->SR1;
 
-	if (sr1 & I2C_SR1_BERR)
-	{
-		DEBUG_STREAM("BUS ERROR");
-		I2C2->CR1 |= I2C_CR1_STOP;
-		error = modm::I2cMaster::Error::BusCondition;
-	}
-	else if (sr1 & I2C_SR1_AF)
-	{	// acknowledge fail
-		I2C2->CR1 |= I2C_CR1_STOP;
-		DEBUG_STREAM("ACK FAIL");
-		 // may also be ADDRESS_NACK
-		error = starting.address ? modm::I2cMaster::Error::AddressNack : modm::I2cMaster::Error::DataNack;
-	}
-	else if (sr1 & I2C_SR1_ARLO)
-	{	// arbitration lost
-		DEBUG_STREAM("ARBITRATION LOST");
-		error = modm::I2cMaster::Error::ArbitrationLost;
-	}
-	else if (error == modm::I2cMaster::Error::NoError)
-	{
-		DEBUG_STREAM("UNKNOWN");
-		error = modm::I2cMaster::Error::Unknown;
-	}
+    if (sr1 & I2C_SR1_BERR)
+    {
+        DEBUG_STREAM("BUS ERROR");
+        I2C2->CR1 |= I2C_CR1_STOP;
+        error = modm::I2cMaster::Error::BusCondition;
+    }
+    else if (sr1 & I2C_SR1_AF)
+    {  // acknowledge fail
+        I2C2->CR1 |= I2C_CR1_STOP;
+        DEBUG_STREAM("ACK FAIL");
+        // may also be ADDRESS_NACK
+        error = starting.address ? modm::I2cMaster::Error::AddressNack
+                                 : modm::I2cMaster::Error::DataNack;
+    }
+    else if (sr1 & I2C_SR1_ARLO)
+    {  // arbitration lost
+        DEBUG_STREAM("ARBITRATION LOST");
+        error = modm::I2cMaster::Error::ArbitrationLost;
+    }
+    else if (error == modm::I2cMaster::Error::NoError)
+    {
+        DEBUG_STREAM("UNKNOWN");
+        error = modm::I2cMaster::Error::Unknown;
+    }
 
-	if (transaction) transaction->detaching(modm::I2c::DetachCause::ErrorCondition);
-	transaction = nullptr;
+    if (transaction) transaction->detaching(modm::I2c::DetachCause::ErrorCondition);
+    transaction = nullptr;
 
-	// Overrun error is not handled here separately
+    // Overrun error is not handled here separately
 
-	// Clear flags and interrupts
-	I2C2->CR1 &= ~I2C_CR1_POS;
-	I2C2->SR1 = 0;
-	I2C2->SR2 = 0;
-	writing.length = 0;
-	reading.length = 0;
-	checkNextOperation = CheckNextOperation::NO;
+    // Clear flags and interrupts
+    I2C2->CR1 &= ~I2C_CR1_POS;
+    I2C2->SR1 = 0;
+    I2C2->SR2 = 0;
+    writing.length = 0;
+    reading.length = 0;
+    checkNextOperation = CheckNextOperation::NO;
 
-	DEBUG_STREAM("disable interrupts");
-	I2C2->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-	callNextTransaction();
+    DEBUG_STREAM("disable interrupts");
+    I2C2->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
+    callNextTransaction();
 }
 
 // ----------------------------------------------------------------------------
 
-void
-modm::platform::I2cMaster2::initializeWithPrescaler(uint8_t peripheralFrequency, uint8_t riseTime, uint16_t prescaler)
+void modm::platform::I2cMaster2::initializeWithPrescaler(
+    uint8_t peripheralFrequency,
+    uint8_t riseTime,
+    uint16_t prescaler)
 {
-	// no reset, since we want to keep the transaction attached!
+    // no reset, since we want to keep the transaction attached!
 
-	Rcc::enable<Peripheral::I2c2>();
+    Rcc::enable<Peripheral::I2c2>();
 
-	I2C2->CR1 = I2C_CR1_SWRST; 		// reset module
-	I2C2->CR1 = 0;
+    I2C2->CR1 = I2C_CR1_SWRST;  // reset module
+    I2C2->CR1 = 0;
 
-	NVIC_SetPriority(I2C2_ER_IRQn, 10);
-	NVIC_EnableIRQ(I2C2_ER_IRQn);
-	NVIC_SetPriority(I2C2_EV_IRQn, 10);
-	NVIC_EnableIRQ(I2C2_EV_IRQn);
+    NVIC_SetPriority(I2C2_ER_IRQn, 10);
+    NVIC_EnableIRQ(I2C2_ER_IRQn);
+    NVIC_SetPriority(I2C2_EV_IRQn, 10);
+    NVIC_EnableIRQ(I2C2_EV_IRQn);
 
-	I2C2->CR2 = peripheralFrequency;
-	I2C2->CCR = prescaler;
-	I2C2->TRISE = riseTime;
+    I2C2->CR2 = peripheralFrequency;
+    I2C2->CCR = prescaler;
+    I2C2->TRISE = riseTime;
 #ifdef I2C_FLTR_ANOFF_Msk
-	// analog filter on, digital filter = 2
-	I2C2->FLTR = I2C_FLTR_ANOFF_Msk | 4;
-# endif
+    // analog filter on, digital filter = 2
+    I2C2->FLTR = I2C_FLTR_ANOFF_Msk | 4;
+#endif
 
-	I2C2->CR1 |= I2C_CR1_PE; // Enable peripheral
+    I2C2->CR1 |= I2C_CR1_PE;  // Enable peripheral
 }
 
-void
-modm::platform::I2cMaster2::reset()
+void modm::platform::I2cMaster2::reset()
 {
-	reading.length = 0;
-	writing.length = 0;
-	error = Error::SoftwareReset;
-	if (transaction) transaction->detaching(DetachCause::ErrorCondition);
-	transaction = nullptr;
-	// remove all queued transactions
-	while(!queue.isEmpty())
-	{
-		ConfiguredTransaction next = queue.get();
-		if (next.transaction) next.transaction->detaching(DetachCause::ErrorCondition);
-		queue.pop();
-	}
+    reading.length = 0;
+    writing.length = 0;
+    error = Error::SoftwareReset;
+    if (transaction) transaction->detaching(DetachCause::ErrorCondition);
+    transaction = nullptr;
+    // remove all queued transactions
+    while (!queue.isEmpty())
+    {
+        ConfiguredTransaction next = queue.get();
+        if (next.transaction) next.transaction->detaching(DetachCause::ErrorCondition);
+        queue.pop();
+    }
 }
 
 // MARK: - ownership
-bool
-modm::platform::I2cMaster2::start(I2cTransaction *transaction, ConfigurationHandler handler)
+bool modm::platform::I2cMaster2::start(I2cTransaction *transaction, ConfigurationHandler handler)
 {
-	modm::atomic::Lock lock;
-	// if we have a place in the queue and the transaction object is valid
-	if (queue.isNotFull() && transaction)
-	{
-		// if the transaction object wants to attach to the queue
-		if (transaction->attaching())
-		{
-			// if no current transaction is taking place
-			if (!modm::accessor::asVolatile(::transaction))
-			{
-				// configure the peripheral
-				if (handler and configuration != handler) {
-					configuration = handler;
-					configuration();
-				}
+    modm::atomic::Lock lock;
+    // if we have a place in the queue and the transaction object is valid
+    if (queue.isNotFull() && transaction)
+    {
+        // if the transaction object wants to attach to the queue
+        if (transaction->attaching())
+        {
+            // if no current transaction is taking place
+            if (!modm::accessor::asVolatile(::transaction))
+            {
+                // configure the peripheral
+                if (handler and configuration != handler)
+                {
+                    configuration = handler;
+                    configuration();
+                }
 
-				DEBUG_STREAM("\n###\n");
-				::transaction = transaction;
-				// start the transaction
-				callStarting();
-			}
-			else
-			{
-				// queue the transaction for later execution
-				queue.push(ConfiguredTransaction(transaction, configuration));
-			}
-			return true;
-		}
-		else {
-			transaction->detaching(modm::I2c::DetachCause::FailedToAttach);
-		}
-	}
-	return false;
+                DEBUG_STREAM("\n###\n");
+                ::transaction = transaction;
+                // start the transaction
+                callStarting();
+            }
+            else
+            {
+                // queue the transaction for later execution
+                queue.push(ConfiguredTransaction(transaction, configuration));
+            }
+            return true;
+        }
+        else
+        {
+            transaction->detaching(modm::I2c::DetachCause::FailedToAttach);
+        }
+    }
+    return false;
 }
 
-modm::I2cMaster::Error
-modm::platform::I2cMaster2::getErrorState()
-{
-	return error;
-}
+modm::I2cMaster::Error modm::platform::I2cMaster2::getErrorState() { return error; }

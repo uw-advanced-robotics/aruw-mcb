@@ -15,31 +15,30 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_FONT_ARCADE_CLASSIC_HPP
-#define	MODM_FONT_ARCADE_CLASSIC_HPP
+#define MODM_FONT_ARCADE_CLASSIC_HPP
 
 #include <modm/architecture/interface/accessor.hpp>
 
 namespace modm
 {
-	namespace font
-	{
-		/**
-		 * \brief	Arcade Classic
-		 *
-		 * - fixed width     : 7
-		 * - height          : 8
-		 * - hspace          : 0
-		 * - vspace          : 1
-		 * - first char      : 32
-		 * - last char       : 128
-		 * - number of chars : 96
-		 * - size in bytes   : 776
-		 *
-		 * \ingroup	modm_ui_display_font
-		 */
-		EXTERN_FLASH_STORAGE(uint8_t ArcadeClassic[]);
-	}
-}
+namespace font
+{
+/**
+ * \brief	Arcade Classic
+ *
+ * - fixed width     : 7
+ * - height          : 8
+ * - hspace          : 0
+ * - vspace          : 1
+ * - first char      : 32
+ * - last char       : 128
+ * - number of chars : 96
+ * - size in bytes   : 776
+ *
+ * \ingroup	modm_ui_display_font
+ */
+EXTERN_FLASH_STORAGE(uint8_t ArcadeClassic[]);
+}  // namespace font
+}  // namespace modm
 
-#endif	// MODM_FONT_ARCADE_CLASSIC_HPP
-
+#endif  // MODM_FONT_ARCADE_CLASSIC_HPP

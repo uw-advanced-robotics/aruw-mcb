@@ -11,18 +11,16 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #ifdef __AVR__
 #include <util/crc16.h>
 #endif
 
 namespace modm::math
 {
-
 /// @ingroup modm_math_utils
-inline uint8_t
-crc8_ccitt_update(uint8_t crc, uint8_t data)
+inline uint8_t crc8_ccitt_update(uint8_t crc, uint8_t data)
 {
 #ifdef __AVR__
     return _crc8_ccitt_update(crc, data);
@@ -38,27 +36,25 @@ crc8_ccitt_update(uint8_t crc, uint8_t data)
 }
 
 /// @ingroup modm_math_utils
-inline uint16_t
-crc16_ccitt_update(uint16_t crc, uint8_t data)
+inline uint16_t crc16_ccitt_update(uint16_t crc, uint8_t data)
 {
 #ifdef __AVR__
     return _crc_ccitt_update(crc, data);
 #else
-    data ^= uint8_t(crc); data ^= data << 4;
-    return (((uint16_t(data) << 8) | uint8_t(crc >> 8)) ^
-            uint8_t(data >> 4) ^ (uint16_t(data) << 3));
+    data ^= uint8_t(crc);
+    data ^= data << 4;
+    return (
+        ((uint16_t(data) << 8) | uint8_t(crc >> 8)) ^ uint8_t(data >> 4) ^ (uint16_t(data) << 3));
 #endif
 }
 
 /// @see https://github.com/stbrumme/crc32
 /// @ingroup modm_math_utils
-inline uint32_t
-crc32_update(uint32_t crc, uint8_t data)
+inline uint32_t crc32_update(uint32_t crc, uint8_t data)
 {
     static constexpr uint32_t polynomial{0xEDB88320};
     crc ^= data;
-    for (uint_fast8_t ii = 0; ii < 8; ii++)
-        crc = (crc >> 1) ^ (-int32_t(crc & 1) & polynomial);
+    for (uint_fast8_t ii = 0; ii < 8; ii++) crc = (crc >> 1) ^ (-int32_t(crc & 1) & polynomial);
     return crc;
 }
 
@@ -70,8 +66,7 @@ static constexpr uint16_t crc16_ccitt_init{0xFFFFu};
 static constexpr uint32_t crc32_init{0xFFFFFFFFul};
 
 /// @ingroup modm_math_utils
-inline uint8_t
-crc8_ccitt(const uint8_t *data, size_t length)
+inline uint8_t crc8_ccitt(const uint8_t *data, size_t length)
 {
     uint8_t crc{crc8_ccitt_init};
     while (length--) crc = crc8_ccitt_update(crc, *data++);
@@ -79,8 +74,7 @@ crc8_ccitt(const uint8_t *data, size_t length)
 }
 
 /// @ingroup modm_math_utils
-inline uint16_t
-crc16_ccitt(const uint8_t *data, size_t length)
+inline uint16_t crc16_ccitt(const uint8_t *data, size_t length)
 {
     uint16_t crc{crc16_ccitt_init};
     while (length--) crc = crc16_ccitt_update(crc, *data++);
@@ -89,13 +83,11 @@ crc16_ccitt(const uint8_t *data, size_t length)
 
 /// Slow, but table-less computation of CRC32.
 /// @ingroup modm_math_utils
-inline uint32_t
-crc32(const uint8_t *data, size_t length)
+inline uint32_t crc32(const uint8_t *data, size_t length)
 {
     uint32_t crc{crc32_init};
     while (length--) crc = crc32_update(crc, *data++);
     return ~crc;
 }
 
-} // namespace modm::math
-
+}  // namespace modm::math

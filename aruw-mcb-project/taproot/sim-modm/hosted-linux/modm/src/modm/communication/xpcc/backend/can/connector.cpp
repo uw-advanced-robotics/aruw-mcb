@@ -12,105 +12,104 @@
  */
 // ----------------------------------------------------------------------------
 
-#include <stdlib.h>
-
 #include "connector.hpp"
+
+#include <stdlib.h>
 
 // ----------------------------------------------------------------------------
 uint8_t xpcc::CanConnectorBase::messageCounter = 0;
 
 // ----------------------------------------------------------------------------
-uint32_t
-xpcc::CanConnectorBase::convertToIdentifier(const Header & header,
-		bool fragmentated)
+uint32_t xpcc::CanConnectorBase::convertToIdentifier(const Header &header, bool fragmentated)
 {
-	uint32_t identifier = 0;
+    uint32_t identifier = 0;
 
-	switch (header.type)
-	{
-		case xpcc::Header::Type::REQUEST:
-			identifier = 0;
-			break;
-		case xpcc::Header::Type::RESPONSE:
-			identifier = 1;
-			break;
-		case xpcc::Header::Type::NEGATIVE_RESPONSE:
-			identifier = 2;
-			break;
-		case xpcc::Header::Type::TIMEOUT:
-			identifier = 3;
-			break;
-	}
+    switch (header.type)
+    {
+        case xpcc::Header::Type::REQUEST:
+            identifier = 0;
+            break;
+        case xpcc::Header::Type::RESPONSE:
+            identifier = 1;
+            break;
+        case xpcc::Header::Type::NEGATIVE_RESPONSE:
+            identifier = 2;
+            break;
+        case xpcc::Header::Type::TIMEOUT:
+            identifier = 3;
+            break;
+    }
 
-	identifier = identifier << 1;
-	if (header.isAcknowledge){
-		identifier |= 1;
-	}
-	identifier = identifier << 1;
-	// Message counter
-	identifier = identifier << 1;
+    identifier = identifier << 1;
+    if (header.isAcknowledge)
+    {
+        identifier |= 1;
+    }
+    identifier = identifier << 1;
+    // Message counter
+    identifier = identifier << 1;
 
-	if (fragmentated){
-		identifier |= 1;
-	}
-	identifier = identifier << 8;
-	identifier |= header.destination;
-	identifier = identifier << 8;
-	identifier |= header.source;
-	identifier = identifier << 8;
-	identifier |= header.packetIdentifier;
+    if (fragmentated)
+    {
+        identifier |= 1;
+    }
+    identifier = identifier << 8;
+    identifier |= header.destination;
+    identifier = identifier << 8;
+    identifier |= header.source;
+    identifier = identifier << 8;
+    identifier |= header.packetIdentifier;
 
-	return identifier;
+    return identifier;
 }
 
 // ----------------------------------------------------------------------------
-bool
-xpcc::CanConnectorBase::convertToHeader(const uint32_t & identifier,
-		xpcc::Header & header)
+bool xpcc::CanConnectorBase::convertToHeader(const uint32_t &identifier, xpcc::Header &header)
 {
-	const uint8_t *ptr = reinterpret_cast<const uint8_t *>(&identifier);
+    const uint8_t *ptr = reinterpret_cast<const uint8_t *>(&identifier);
 
-	header.packetIdentifier = ptr[0];
-	header.source 			= ptr[1];
-	header.destination		= ptr[2];
+    header.packetIdentifier = ptr[0];
+    header.source = ptr[1];
+    header.destination = ptr[2];
 
-	uint8_t flags = ptr[3];
+    uint8_t flags = ptr[3];
 
-	if (flags & 0x04) {
-		header.isAcknowledge = true;
-	}
-	else {
-		header.isAcknowledge = false;
-	}
+    if (flags & 0x04)
+    {
+        header.isAcknowledge = true;
+    }
+    else
+    {
+        header.isAcknowledge = false;
+    }
 
-	switch (flags & 0x18)
-	{
-		case 0x00:
-			header.type = xpcc::Header::Type::REQUEST;
-			break;
-		case 0x08:
-			header.type = xpcc::Header::Type::RESPONSE;
-			break;
-		case 0x10:
-			header.type = xpcc::Header::Type::NEGATIVE_RESPONSE;
-			break;
-		case 0x18:
-			header.type = xpcc::Header::Type::TIMEOUT;
-			break;
-		default:
-			// unknown type
-			//MODM_LOG_ERROR << "Unknown Type" << modm::flush;
-			header.type = xpcc::Header::Type::REQUEST;
-	}
+    switch (flags & 0x18)
+    {
+        case 0x00:
+            header.type = xpcc::Header::Type::REQUEST;
+            break;
+        case 0x08:
+            header.type = xpcc::Header::Type::RESPONSE;
+            break;
+        case 0x10:
+            header.type = xpcc::Header::Type::NEGATIVE_RESPONSE;
+            break;
+        case 0x18:
+            header.type = xpcc::Header::Type::TIMEOUT;
+            break;
+        default:
+            // unknown type
+            // MODM_LOG_ERROR << "Unknown Type" << modm::flush;
+            header.type = xpcc::Header::Type::REQUEST;
+    }
 
-	// check if the message is a fragment
-	return isFragment(identifier);
+    // check if the message is a fragment
+    return isFragment(identifier);
 }
 
 // ----------------------------------------------------------------------------
-uint8_t
-xpcc::CanConnectorBase::getNumberOfFragments(uint8_t messageSize)
+uint8_t xpcc::CanConnectorBase::getNumberOfFragments(uint8_t messageSize)
 {
-	div_t n = div(messageSize, 6);
-	return (n.rem > 0) ? n.quot + 1 : n.quot;
+    div_t n = div(messageSize, 6);
+    return (n.rem > 0) ? n.quot + 1 : n.quot;
 }

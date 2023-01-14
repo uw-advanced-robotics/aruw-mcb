@@ -15,14 +15,15 @@
 #ifndef MODM_STM32_UARTHAL_6_HPP
 #define MODM_STM32_UARTHAL_6_HPP
 #include <stdint.h>
-#include "../device.hpp"
-#include "uart_base.hpp"
+
 #include <modm/architecture/interface/peripheral.hpp>
 
+#include "../device.hpp"
+
+#include "uart_base.hpp"
 
 namespace modm::platform
 {
-
 /**
  * Universal asynchronous receiver transmitter (UsartHal6)
  *
@@ -37,92 +38,72 @@ namespace modm::platform
 class UsartHal6 : public UartBase
 {
 public:
-	static constexpr bool isExtended = false;
+    static constexpr bool isExtended = false;
 
-	/// Enables the clock, resets the hardware
-	/// @warning Call `enableOperation()` to start the peripheral!
-	static inline void
-	enable();
+    /// Enables the clock, resets the hardware
+    /// @warning Call `enableOperation()` to start the peripheral!
+    static inline void enable();
 
-	/// Disables the hw module (by disabling its clock line)
-	static inline void
-	disable();
+    /// Disables the hw module (by disabling its clock line)
+    static inline void disable();
 
-	/// Set the UE (USART enable) bit
-	static inline void
-	enableOperation();
+    /// Set the UE (USART enable) bit
+    static inline void enableOperation();
 
-	/// Clear the UE (USART enable) bit
-	static inline void
-	disableOperation();
+    /// Clear the UE (USART enable) bit
+    static inline void disableOperation();
 
-	/// @warning Call `enableOperation()` after this to start the peripheral!
-	template< class SystemClock, baudrate_t baudrate, percent_t tolerance >
-	static inline void
-	initialize(Parity parity, WordLength length);
+    /// @warning Call `enableOperation()` after this to start the peripheral!
+    template <class SystemClock, baudrate_t baudrate, percent_t tolerance>
+    static inline void initialize(Parity parity, WordLength length);
 
-	static inline void
-	setSpiClock(SpiClock clk, LastBitClockPulse pulse);
+    static inline void setSpiClock(SpiClock clk, LastBitClockPulse pulse);
 
-	static inline void
-	setSpiDataMode(SpiDataMode mode);
-	/**
-	 * \brief	Write a single byte to the transmit register
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				is empty!
-	 */
-	static inline void
-	write(uint16_t data);
+    static inline void setSpiDataMode(SpiDataMode mode);
+    /**
+     * \brief	Write a single byte to the transmit register
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				is empty!
+     */
+    static inline void write(uint16_t data);
 
-	/**
-	 * Saves the value of the receive register to data
-	 *
-	 * @warning 	This method does NOT do any sanity checks!!
-	 *				It is your responsibility to check if the register
-	 *				contains something useful!
-	 */
-	static inline void
-	read(uint8_t &data);
+    /**
+     * Saves the value of the receive register to data
+     *
+     * @warning 	This method does NOT do any sanity checks!!
+     *				It is your responsibility to check if the register
+     *				contains something useful!
+     */
+    static inline void read(uint8_t &data);
 
-	static inline void
-	read(uint16_t &data);
+    static inline void read(uint16_t &data);
 
-	static inline void
-	setTransmitterEnable(bool enable);
+    static inline void setTransmitterEnable(bool enable);
 
-	static inline void
-	setReceiverEnable(bool enable);
+    static inline void setReceiverEnable(bool enable);
 
-	/// Returns true if data has been received
-	static inline bool
-	isReceiveRegisterNotEmpty();
+    /// Returns true if data has been received
+    static inline bool isReceiveRegisterNotEmpty();
 
-	/// Returns true if data can be written
-	static inline bool
-	isTransmitRegisterEmpty();
+    /// Returns true if data can be written
+    static inline bool isTransmitRegisterEmpty();
 
-	static inline void
-	enableInterruptVector(bool enable, uint32_t priority);
+    static inline void enableInterruptVector(bool enable, uint32_t priority);
 
-	static inline void
-	enableInterrupt(Interrupt_t interrupt);
+    static inline void enableInterrupt(Interrupt_t interrupt);
 
-	static inline void
-	disableInterrupt(Interrupt_t interrupt);
+    static inline void disableInterrupt(Interrupt_t interrupt);
 
-	static inline void
-	setInterruptPriority(uint32_t priority);
+    static inline void setInterruptPriority(uint32_t priority);
 
-	static inline InterruptFlag_t
-	getInterruptFlags();
+    static inline InterruptFlag_t getInterruptFlags();
 
-	static inline void
-	acknowledgeInterruptFlags(InterruptFlag_t flags);
+    static inline void acknowledgeInterruptFlags(InterruptFlag_t flags);
 };
 
-}	// namespace modm::platform
+}  // namespace modm::platform
 
 #include "uart_hal_6_impl.hpp"
 #endif

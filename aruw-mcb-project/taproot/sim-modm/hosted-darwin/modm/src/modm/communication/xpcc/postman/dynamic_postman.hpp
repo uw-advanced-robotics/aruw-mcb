@@ -14,20 +14,20 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	XPCC_DYNAMIC_POSTMAN_HPP
-#define	XPCC_DYNAMIC_POSTMAN_HPP
+#ifndef XPCC_DYNAMIC_POSTMAN_HPP
+#define XPCC_DYNAMIC_POSTMAN_HPP
 
-#include "postman.hpp"
-#include "../response_callback.hpp"
+#include <functional>
+#include <map>
+
 #include "../backend/header.hpp"
+#include "../response_callback.hpp"
 #include "../response_handle.hpp"
 
-#include <map>
-#include <functional>
+#include "postman.hpp"
 
 namespace xpcc
 {
-
 /**
  * The Dynamic Postman is a generic Postman, which allows components to
  * add Action Handlers and Event Listeners at runtime.
@@ -42,85 +42,89 @@ namespace xpcc
 class DynamicPostman : public Postman
 {
 public:
-	DynamicPostman();
+    DynamicPostman();
 
-	DeliverInfo
-	deliverPacket(const Header &header, const modm::SmartPointer& payload) override;
+    DeliverInfo deliverPacket(const Header& header, const modm::SmartPointer& payload) override;
 
-	bool
-	isComponentAvailable(uint8_t component) const override;
+    bool isComponentAvailable(uint8_t component) const override;
 
 public:
-	template< class C >
-	bool
-	registerEventListener(const uint8_t eventId, C *componentObject,
-						  void (C::*memberFunction)(const Header&));
+    template <class C>
+    bool registerEventListener(
+        const uint8_t eventId,
+        C* componentObject,
+        void (C::*memberFunction)(const Header&));
 
-	template< class C, typename P >
-	bool
-	registerEventListener(const uint8_t eventId, C *componentObject,
-						  void (C::*memberFunction)(const Header&, const P&));
+    template <class C, typename P>
+    bool registerEventListener(
+        const uint8_t eventId,
+        C* componentObject,
+        void (C::*memberFunction)(const Header&, const P&));
 
-	template< class C >
-	bool
-	registerActionHandler(const uint8_t componentId, const uint8_t actionId, C *componentObject,
-						  void (C::*memberFunction)(const ResponseHandle&));
+    template <class C>
+    bool registerActionHandler(
+        const uint8_t componentId,
+        const uint8_t actionId,
+        C* componentObject,
+        void (C::*memberFunction)(const ResponseHandle&));
 
-	template< class C, typename P >
-	bool
-	registerActionHandler(const uint8_t componentId, const uint8_t actionId, C *componentObject,
-						  void (C::*memberFunction)(const ResponseHandle&, const P&));
-
-private:
-	typedef std::function<void (const Header&, const uint8_t&)> EventCallback;
-	typedef std::function<void (const Header&)> EventCallbackSimple;
-
-	typedef std::function<void (const ResponseHandle&, const uint8_t&)> ActionCallback;
-	typedef std::function<void (const ResponseHandle&)> ActionCallbackSimple;
-
-	class EventListener
-	{
-		EventCallback call;
-		EventCallbackSimple callSimple;
-		int8_t hasPayload;
-
-	public:
-		EventListener();
-		EventListener(EventCallback call);
-		EventListener(EventCallbackSimple call);
-
-		void operator()(const Header& header, const modm::SmartPointer& payload) const;
-	};
-
-	class ActionHandler
-	{
-		ActionCallback call;
-		ActionCallbackSimple callSimple;
-		int8_t hasPayload;
-
-	public:
-		ActionHandler();
-		ActionHandler(ActionCallback call);
-		ActionHandler(ActionCallbackSimple call);
-
-		void operator()(const ResponseHandle& response, const modm::SmartPointer& payload) const;
-	};
-
-	/// packetIdentifier -> callback
-	typedef std::multimap<uint8_t, EventListener> EventMap;
-
-	/// packetIdentifier -> callback
-	typedef std::map<uint8_t, ActionHandler > CallbackMap;
-	///< destination -> callbackMap
-	typedef std::map<uint8_t, CallbackMap > ActionMap;
+    template <class C, typename P>
+    bool registerActionHandler(
+        const uint8_t componentId,
+        const uint8_t actionId,
+        C* componentObject,
+        void (C::*memberFunction)(const ResponseHandle&, const P&));
 
 private:
-	EventMap eventMap;
-	ActionMap actionMap;
+    typedef std::function<void(const Header&, const uint8_t&)> EventCallback;
+    typedef std::function<void(const Header&)> EventCallbackSimple;
+
+    typedef std::function<void(const ResponseHandle&, const uint8_t&)> ActionCallback;
+    typedef std::function<void(const ResponseHandle&)> ActionCallbackSimple;
+
+    class EventListener
+    {
+        EventCallback call;
+        EventCallbackSimple callSimple;
+        int8_t hasPayload;
+
+    public:
+        EventListener();
+        EventListener(EventCallback call);
+        EventListener(EventCallbackSimple call);
+
+        void operator()(const Header& header, const modm::SmartPointer& payload) const;
+    };
+
+    class ActionHandler
+    {
+        ActionCallback call;
+        ActionCallbackSimple callSimple;
+        int8_t hasPayload;
+
+    public:
+        ActionHandler();
+        ActionHandler(ActionCallback call);
+        ActionHandler(ActionCallbackSimple call);
+
+        void operator()(const ResponseHandle& response, const modm::SmartPointer& payload) const;
+    };
+
+    /// packetIdentifier -> callback
+    typedef std::multimap<uint8_t, EventListener> EventMap;
+
+    /// packetIdentifier -> callback
+    typedef std::map<uint8_t, ActionHandler> CallbackMap;
+    ///< destination -> callbackMap
+    typedef std::map<uint8_t, CallbackMap> ActionMap;
+
+private:
+    EventMap eventMap;
+    ActionMap actionMap;
 };
 
-}	// namespace xpcc
+}  // namespace xpcc
 
 #include "dynamic_postman_impl.hpp"
 
-#endif	// XPCC_DYNAMIC_POSTMAN_HPP
+#endif  // XPCC_DYNAMIC_POSTMAN_HPP

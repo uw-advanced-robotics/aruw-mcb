@@ -12,55 +12,52 @@
 // ----------------------------------------------------------------------------
 
 #ifndef MODM_LOG_PREFIX_HPP
-	#error "Don't include this file directly, use 'prefix.hpp' instead!"
+#error "Don't include this file directly, use 'prefix.hpp' instead!"
 #endif
 
 // ----------------------------------------------------------------------------
 template <typename T, typename STYLE>
-modm::log::Prefix<T, STYLE>::Prefix( const T& str, STYLE style ) :
-	Style<STYLE> ( style ),
-	flushed ( true )
+modm::log::Prefix<T, STYLE>::Prefix(const T& str, STYLE style) : Style<STYLE>(style),
+                                                                 flushed(true)
 {
-	std::memcpy( &this->value, &str, sizeof(T) );
+    std::memcpy(&this->value, &str, sizeof(T));
 }
 
 template <typename T, typename STYLE>
-modm::log::Prefix<T, STYLE>::Prefix( const T& str, IODevice &device ) :
-	Style<STYLE> ( device ),
-	flushed ( true )
+modm::log::Prefix<T, STYLE>::Prefix(const T& str, IODevice& device)
+    : Style<STYLE>(device),
+      flushed(true)
 {
-	std::memcpy( &this->value, &str, sizeof(T) );
+    std::memcpy(&this->value, &str, sizeof(T));
 }
 
 // ----------------------------------------------------------------------------
 template <typename T, typename STYLE>
-void
-modm::log::Prefix<T, STYLE>::write( char c )
+void modm::log::Prefix<T, STYLE>::write(char c)
 {
-	if( this->flushed ) {
-		this->flushed = false;
-		this->Style<STYLE>::write( this->value );
-	}
-	this->Style<STYLE>::write( c );
+    if (this->flushed)
+    {
+        this->flushed = false;
+        this->Style<STYLE>::write(this->value);
+    }
+    this->Style<STYLE>::write(c);
 }
 
 template <typename T, typename STYLE>
-void
-modm::log::Prefix<T, STYLE>::write( const char* s )
+void modm::log::Prefix<T, STYLE>::write(const char* s)
 {
-	if( this->flushed ) {
-		this->flushed = false;
-		this->Style<STYLE>::write( this->value );
-	}
-	this->Style<STYLE>::write( s );
+    if (this->flushed)
+    {
+        this->flushed = false;
+        this->Style<STYLE>::write(this->value);
+    }
+    this->Style<STYLE>::write(s);
 }
 
 // ----------------------------------------------------------------------------
 template <typename T, typename STYLE>
-void
-modm::log::Prefix<T, STYLE>::flush()
+void modm::log::Prefix<T, STYLE>::flush()
 {
-	this->flushed = true;
-	this->Style<STYLE>::flush();
+    this->flushed = true;
+    this->Style<STYLE>::flush();
 }
-

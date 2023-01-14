@@ -11,6 +11,6 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "timer/timestamp.hpp"
-#include "timer/timeout.hpp"
 #include "timer/periodic_timer.hpp"
+#include "timer/timeout.hpp"
+#include "timer/timestamp.hpp"

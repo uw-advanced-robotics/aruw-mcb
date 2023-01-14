@@ -15,43 +15,36 @@
 
 namespace modm
 {
-	/**
-	 * \brief	Trapezoidal S-Curve Trajectory
-	 *
-	 * open-loop control
-	 *
-	 * \todo	documentation
-	 * \todo	implementation
-	 * \ingroup	modm_math_filter
-	 */
-	template<typename T>
-	class SCurveGenerator
-	{
-	public:
-		SCurveGenerator(const T& initialValue = T());
+/**
+ * \brief	Trapezoidal S-Curve Trajectory
+ *
+ * open-loop control
+ *
+ * \todo	documentation
+ * \todo	implementation
+ * \ingroup	modm_math_filter
+ */
+template <typename T>
+class SCurveGenerator
+{
+public:
+    SCurveGenerator(const T& initialValue = T());
 
-		inline void
-		setTarget(const T& target);
+    inline void setTarget(const T& target);
 
-		void
-		update();
+    void update();
 
-		inline const T&
-		getValue() const
-		{
-			return value;
-		}
+    inline const T& getValue() const { return value; }
 
-		inline bool
-		isTargetReached() const;
+    inline bool isTargetReached() const;
 
-	private:
-		T target;
-		T value;
-		bool targetReached;
-	};
-}
+private:
+    T target;
+    T value;
+    bool targetReached;
+};
+}  // namespace modm
 
 #include "s_curve_generator_impl.hpp"
 
-#endif // MODM_S_CURVE_GENERATOR_HPP
+#endif  // MODM_S_CURVE_GENERATOR_HPP
