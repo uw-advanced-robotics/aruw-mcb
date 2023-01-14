@@ -96,7 +96,15 @@ public:
         NUM_TAGS = 2,
     };
 
-    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36,12}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
+    enum messageWidths : uint8_t {
+        FLAGS = 3,
+        TIMESTAMP = 4,
+        FIRERATE = 1,
+        PVA = 37,    //9 floats and 1 byte (from firerate)
+        TIMING = 12,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {messageWidths::PVA,messageWidths::TIMING}; // indices correspond to Tags // DOUBLE CHECKERS OWA OWA
 
     enum class MessageBits : uint8_t 
     {
@@ -110,6 +118,8 @@ public:
      */
 
     struct PositionData {
+        unsigned char firerate;
+
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -137,7 +147,6 @@ public:
     struct TurretAimData {
         struct PositionData pva;
         uint32_t timestamp; 
-        FireRate firerate;
         struct TimingData timing;
     } modm_packed;
     
@@ -299,9 +308,7 @@ private:
     uint32_t prevRisingEdgeTime = 0;
 
     /// The last aim data received from the xavier.
-    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; // this line was the old implementation
-    PositionData lastPvaData[control::turret::NUM_TURRETS] = {}; // new implementation UwU
-    TimingData lastTimingData[control::turret::NUM_TURRETS] = {};
+    TurretAimData lastAimData[control::turret::NUM_TURRETS] = {}; 
 
     // CV online variables.
     /// Timer for determining if serial is offline.
