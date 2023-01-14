@@ -32,7 +32,7 @@ class Drivers;
 
 namespace aruwsrc::chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 
 /**
  * A command that allows the user to control the translation and rotation of the chassis. Can be
@@ -76,7 +76,7 @@ public:
      */
     ChassisImuDriveCommand(
         aruwsrc::Drivers* drivers,
-        ChassisSubsystem* chassis,
+        HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor);
 
     void initialize() override;
@@ -91,7 +91,7 @@ public:
 
 private:
     aruwsrc::Drivers* drivers;
-    ChassisSubsystem* chassis;
+    HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     tap::algorithms::ContiguousFloat rotationSetpoint;
     bool imuSetpointInitialized = false;
