@@ -86,6 +86,16 @@ public:
         HIGH = 3,
     };
 
+<<<<<<< HEAD
+    static constexpr uint8_t NUM_TAGS = 2;
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {36, 12};
+
+    /**
+     * AutoAim data to receive from Jetson.
+     */
+    struct positionData
+    {
+=======
     enum Tags : uint8_t
     {
         PVA = 0,
@@ -117,6 +127,7 @@ public:
     struct PositionData {
         unsigned char firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -129,6 +140,24 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
+<<<<<<< HEAD
+    struct timingData
+    {
+        float duration;
+        float pulseInterval;
+        float offset;
+    };
+
+    struct TurretAimData
+    {
+        uint8_t hasTarget;
+        uint8_t recommendUseTimedShots;
+        struct positionData pva;
+        uint32_t timestamp;
+        FireRate firerate;
+        struct timingData timing;
+    } modm_packed;
+=======
         bool updated; ///< whether or not this came from the most recent message
 
     } modm_packed;
@@ -149,6 +178,7 @@ public:
         uint32_t timestamp;     ///< timestamp in microseconds
         struct TimingData timing;
     } modm_packed;
+>>>>>>> 6637cbb8333e91e1a6ab528a521d23db95e4dd11
 
     /**
      * Chassis odometry data to send to Jetson.
