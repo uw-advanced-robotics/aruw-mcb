@@ -22,7 +22,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER) || defined(TARGET_TESTBED)
 #include "standard_turret_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
 #include "hero_turret_constants.hpp"

@@ -111,7 +111,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 #endif
 
-#if defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO_CYCLONE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;

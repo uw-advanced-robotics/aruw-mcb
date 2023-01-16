@@ -87,13 +87,13 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE) || defined(TARGET_TESTBED)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+//            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
         }
         modm::delay_us(10);
     }
@@ -115,9 +115,9 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->visionCoprocessor.initializeCV();
+//    drivers->visionCoprocessor.initializeCV();
     drivers->mpu6500TerminalSerialHandler.init();
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE) || defined(TARGET_TESTBED)
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
@@ -132,5 +132,5 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->remote.read();
     drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->visionCoprocessor.updateSerial();
+//    drivers->visionCoprocessor.updateSerial();
 }
