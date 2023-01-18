@@ -61,22 +61,22 @@ namespace aruwsrc::algorithms {
     :
 
     // Transforms that are dynamically updated
-    worldToChassisIMUTransform(Transform<WorldFrame, ChassisIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    TurretIMUToCameraTransform(Transform<TurretIMUFrame,CameraFrame>(0., 94.04, 0., 0. ,0., 0.)),
-    turretIMUToGunTransform(Transform<TurretIMUFrame, GunFrame> (0., 11.94, 41.97, 0., 0., 0.)),
+    // worldToChassisIMUTransform(Transform<WorldFrame, ChassisIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // TurretIMUToCameraTransform(Transform<TurretIMUFrame,CameraFrame>(0., 94.04, 0., 0. ,0., 0.)),
+    // turretIMUToGunTransform(Transform<TurretIMUFrame, GunFrame> (0., 11.94, 41.97, 0., 0., 0.)),
 
     // Transforms that are compositions
-    worldToTurretIMUTransform(Transform<WorldFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // worldToTurretIMUTransform(Transform<WorldFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
 
     // Transforms that are inverses
-    chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    turretIMUToChassisTransform(Transform<TurretIMUFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    cameraToTurretIMUTransform(Transform<CameraFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // turretIMUToChassisTransform(Transform<TurretIMUFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    // cameraToTurretIMUTransform(Transform<CameraFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
 
     // Constant transforms
-    chassisToTurretIMUTransform(Transform<ChassisFrame,TurretIMUFrame>(0., 0., 401.44, 0., 0., 0.)),
-    chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame> (105.68, 0., 121.72, 0., 0., 0.)),
+    // chassisToTurretIMUTransform(Transform<ChassisFrame,TurretIMUFrame>(0., 0., 401.44, 0., 0., 0.)),
+    // chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame> (105.68, 0., 121.72, 0., 0., 0.)),
 
     leftBackMotor(leftBackMotor),
     rightBackMotor(rightBackMotor),
@@ -107,40 +107,40 @@ namespace aruwsrc::algorithms {
         updateTransforms();
     }
 
-    const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform() {
-        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
-        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
-        return worldToChassisTransform;
-    }
+    // const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform() {
+    //     worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+    //     (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+    //     return worldToChassisTransform;
+    // }
 
-    const Transform<WorldFrame, TurretIMUFrame>& StandardTransformer::getWorldToTurretIMUTransform() {
-        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
-        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
-        worldToTurretIMUTransform = compose<WorldFrame, ChassisFrame, TurretIMUFrame>
-        (worldToChassisTransform, chassisToTurretIMUTransform);
-        return worldToTurretIMUTransform;
-    }
+    // const Transform<WorldFrame, TurretIMUFrame>& StandardTransformer::getWorldToTurretIMUTransform() {
+    //     worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+    //     (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+    //     worldToTurretIMUTransform = compose<WorldFrame, ChassisFrame, TurretIMUFrame>
+    //     (worldToChassisTransform, chassisToTurretIMUTransform);
+    //     return worldToTurretIMUTransform;
+    // }
 
-    const Transform<ChassisFrame, TurretIMUFrame>& StandardTransformer::getChassisToTurretIMUTransform() {
-        return chassisToTurretIMUTransform;
-    }
+    // const Transform<ChassisFrame, TurretIMUFrame>& StandardTransformer::getChassisToTurretIMUTransform() {
+    //     return chassisToTurretIMUTransform;
+    // }
 
-    const Transform<ChassisFrame, WorldFrame>& StandardTransformer::getChassisToWorldTransform() {
-        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
-        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
-        chassisToWorldTransform = worldToChassisTransform.getInverse();
-        return chassisToWorldTransform;
-    }
+    // const Transform<ChassisFrame, WorldFrame>& StandardTransformer::getChassisToWorldTransform() {
+    //     worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+    //     (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+    //     chassisToWorldTransform = worldToChassisTransform.getInverse();
+    //     return chassisToWorldTransform;
+    // }
 
-    const Transform<TurretIMUFrame, ChassisFrame>& StandardTransformer::getTurretIMUToChassisTransform() {
-        turretIMUToChassisTransform = chassisToTurretIMUTransform.getInverse();
-        return turretIMUToChassisTransform;
-    }
+    // const Transform<TurretIMUFrame, ChassisFrame>& StandardTransformer::getTurretIMUToChassisTransform() {
+    //     turretIMUToChassisTransform = chassisToTurretIMUTransform.getInverse();
+    //     return turretIMUToChassisTransform;
+    // }
 
-    const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTurretIMUTransform() {
-        cameraToTurretIMUTransform = TurretIMUToCameraTransform.getInverse();
-        return cameraToTurretIMUTransform;
-    }
+    // const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTurretIMUTransform() {
+    //     cameraToTurretIMUTransform = TurretIMUToCameraTransform.getInverse();
+    //     return cameraToTurretIMUTransform;
+    // }
 
     void StandardTransformer::updateTransforms() {
 
@@ -154,17 +154,17 @@ namespace aruwsrc::algorithms {
         //     (-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL,
         //       PLACEHOLDER_VAL, PLACEHOLDER_VAL, -chassisYaw);
 
-        worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>
-        (-chassisWorldPosition.getX(), -chassisWorldPosition.getY(), -chassisWorldPosition.getZ(),
-         -chassisWorldOrientation.getX(), -chassisWorldOrientation.getY(),-chassisWorldOrientation.getZ());
+        // worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>
+        // (-chassisWorldPosition.getX(), -chassisWorldPosition.getY(), -chassisWorldPosition.getZ(),
+        //  -chassisWorldOrientation.getX(), -chassisWorldOrientation.getY(),-chassisWorldOrientation.getZ());
 
-        TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>
-        (0., 94.04, 0., 
-        turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
+        // TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>
+        // (0., 94.04, 0., 
+        // turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
 
-        turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>
-        (0.                , 11.94               ,             41.97,
-        turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
+        // turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>
+        // (0.                , 11.94               ,             41.97,
+        // turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
     }
 
     void StandardTransformer::updateOdometry() {
