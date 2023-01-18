@@ -28,45 +28,45 @@ namespace tap::algorithms::transforms
 {
 template <typename SOURCE, typename TARGET>
 Transform<SOURCE, TARGET>::Transform(CMSISMat<3, 3>& rotation, CMSISMat<3, 1>& position)
-    : rotation(rotation),
-      position(position),
-      tRotation()
 {
+    this->rotation = std::move(rotation);
+    this->position = std::move(position);
     arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
 };
 
 template <typename SOURCE, typename TARGET>
-Transform<SOURCE, TARGET>::Transform(float& x, float& y, float& z, float& A, float& B, float& C)
+Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B, float C)
 {
     // For x forward z down coordinate system,
     // constructs rotation matrix where C, B, A = yaw, pitch, roll
-    float data[3][3] = {
-        {std::cos(C) * std::cos(B),
-         (std::cos(C) * std::sin(B) * std::sin(A)) - (std::sin(C) * std::cos(A)),
-         (std::cos(C) * std::sin(B) * std::cos(A)) + std::sin(C) * std::sin(A)},
-        {std::sin(C) * std::cos(B),
-         std::sin(C) * std::sin(B) * std::sin(A) + std::cos(C) * std::cos(A),
-         std::sin(C) * std::sin(B) * std::cos(A) - std::cos(C) * std::sin(A)},
-        {-std::sin(B), std::cos(B) * std::sin(A), std::cos(B) * std::cos(A)}};
+    float data[9] = {
+        std::cos(C) * std::cos(B),
+        (std::cos(C) * std::sin(B) * std::sin(A)) - (std::sin(C) * std::cos(A)),
+        (std::cos(C) * std::sin(B) * std::cos(A)) + std::sin(C) * std::sin(A),
+        std::sin(C) * std::cos(B),
+        std::sin(C) * std::sin(B) * std::sin(A) + std::cos(C) * std::cos(A),
+        std::sin(C) * std::sin(B) * std::cos(A) - std::cos(C) * std::sin(A),
+        -std::sin(B),
+        std::cos(B) * std::sin(A),
+        std::cos(B) * std::cos(A)};
     CMSISMat<3, 3> rot = CMSISMat<3, 3>(data);
     CMSISMat<3, 1> pos = CMSISMat<3, 1>({x, y, z});
-    Transform(&rot, &pos);
+    Transform(rot, pos);
 };
 
-template <typename SOURCE, typename TARGET, typename NEWTARGET>
-Transform<SOURCE, NEWTARGET> compose(
-    Transform<SOURCE, TARGET>& source,
-    Transform<TARGET, NEWTARGET>& target)
+template <typename SRC, typename TARG, typename NEWTARGET>
+Transform<SRC, NEWTARGET> compose(Transform<SRC, TARG>& source, Transform<TARG, NEWTARGET>& target)
 {
     // left multiply source transformation matrix with target transformation matrix to get
     // composition.
     CMSISMat<3, 3> newRot = source.rotation.matrix * target.rotation.matrix;
-    CMSISMat<3, 1> newPos = source.position.matrix * target.position.matrix;
-    return Transform<SOURCE, NEWTARGET>(&newRot, &newPos);
+    CMSISMat<3, 1> newPos =
+        source.position.matrix + source.rotation.matrix * target.position.matrix;
+    return Transform<SRC, NEWTARGET>(&newRot, &newPos);
 };
 
 template <typename SOURCE, typename TARGET>
-Transform<SOURCE, TARGET> Transform<SOURCE, TARGET>::getInverse(Transform<SOURCE, TARGET>& tf)
+Transform<TARGET, SOURCE> Transform<SOURCE, TARGET>::getInverse()
 {
     // negative transposed rotation matrix times original position = new position
     CMSISMat<3, 1> invPos = tRotation * position;
@@ -74,33 +74,51 @@ Transform<SOURCE, TARGET> Transform<SOURCE, TARGET>::getInverse(Transform<SOURCE
     {
         invPos.data[i] = -invPos.data[i];
     }
-    return Transform<SOURCE, TARGET>(&tRotation, &invPos);
+    return Transform<TARGET, SOURCE>(&tRotation, &invPos);
 };
 
 template <typename SOURCE, typename TARGET>
 CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToPosition(CMSISMat<3, 1>& pos)
 {
-    CMSISMat<3, 1> newRot = rotation * (pos + position);
-    return newRot;
+    CMSISMat<3, 1> newPos = rotation * (pos + position);
+    return newPos;
 };
 
 template <typename SOURCE, typename TARGET>
 CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToVector(CMSISMat<3, 1>& pos)
 {
-    CMSISMat<3, 1> newRot = (rotation * pos) + position;
-    return newRot;
+    CMSISMat<3, 1> newVec = rotation * pos;
+    return newVec;
 };
 
 template <typename SOURCE, typename TARGET>
 void Transform<SOURCE, TARGET>::updateRotation(CMSISMat<3, 3>& newRot)
 {
-    this->rotation = newRot;
+    this->rotation = std::move(newRot);
+    arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
+}
+
+template <typename SOURCE, typename TARGET>
+void Transform<SOURCE, TARGET>::updateRotation(float A, float B, float C)
+{
+    float data[9] = {
+        std::cos(C) * std::cos(B),
+        (std::cos(C) * std::sin(B) * std::sin(A)) - (std::sin(C) * std::cos(A)),
+        (std::cos(C) * std::sin(B) * std::cos(A)) + std::sin(C) * std::sin(A),
+        std::sin(C) * std::cos(B),
+        std::sin(C) * std::sin(B) * std::sin(A) + std::cos(C) * std::cos(A),
+        std::sin(C) * std::sin(B) * std::cos(A) - std::cos(C) * std::sin(A),
+        -std::sin(B),
+        std::cos(B) * std::sin(A),
+        std::cos(B) * std::cos(A)};
+    CMSISMat<3, 3> newRot = CMSISMat<3, 3>(data);
+    updateRotation(newRot);
 }
 
 template <typename SOURCE, typename TARGET>
 void Transform<SOURCE, TARGET>::updatePosition(CMSISMat<3, 1>& newPos)
 {
-    this->position = newPos;
+    this->position = std::move(newPos);
 };
 }  // namespace tap::algorithms::transforms
 #endif

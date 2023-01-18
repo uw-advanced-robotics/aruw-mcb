@@ -23,10 +23,6 @@
 #ifndef TAPROOT_TRANSFORMER_HPP_
 #define TAPROOT_TRANSFORMER_HPP_
 
-#include <functional>
-
-#include "transform.hpp"
-
 namespace tap::algorithms
 {
 /**
