@@ -29,9 +29,15 @@ class WorldFrame : public tap::algorithms::Frame { } ;
 
 class ChassisFrame : public tap::algorithms::Frame { } ;
 
-class TurretFrame : public tap::algorithms::Frame { } ;
+class GunFrame : public tap::algorithms::Frame { } ;
 
-class TurretPivotFrame : public tap::algorithms::Frame { } ;
+// class TurretPivotFrame : public tap::algorithms::Frame { } ;
+
+class CameraFrame : public tap::algorithms::Frame { } ;
+
+class TurretIMUFrame : public tap::algorithms::Frame { } ;
+
+class ChassisIMUFrame : public tap::algorithms::Frame { } ;
 
 }
 

@@ -42,31 +42,61 @@
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
+
+
+// TODO: take in pitch motor, yaw motor
+// later: don't take in chassis subystem
+
 namespace aruwsrc::algorithms {
 
     StandardTransformer::StandardTransformer
     (
-      const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-      tap::communication::sensors::imu::ImuInterface& chassisImu,
-      tap::communication::sensors::imu::ImuInterface& turretImu
-    ) 
+        const tap::motor::DjiMotor& leftBackMotor,
+        const tap::motor::DjiMotor& rightBackMotor,
+        const tap::motor::DjiMotor& leftFrontMotor,
+        const tap::motor::DjiMotor& rightFrontMotor,
+        tap::communication::sensors::imu::ImuInterface& chassisImu,
+        tap::communication::sensors::imu::ImuInterface& turretImu
+    )
     :
 
-    // ugly hack for since transform has no default constructor
-    // but also allows us to set up any values in static transforms
+    // Transforms that are dynamically updated
+    worldToChassisIMUTransform(Transform<WorldFrame, ChassisIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    TurretIMUToCameraTransform(Transform<TurretIMUFrame,CameraFrame>(0., 94.04, 0., 0. ,0., 0.)),
+    turretIMUToGunTransform(Transform<TurretIMUFrame, GunFrame> (0., 11.94, 41.97, 0., 0., 0.)),
+
+    // Transforms that are compositions
+    worldToTurretIMUTransform(Transform<WorldFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
     worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    worldToTurretTransform(Transform<WorldFrame, TurretFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    chassisToTurretTransform(Transform<ChassisFrame, TurretFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+
+    // Transforms that are inverses
     chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    turretToChassisTransform(Transform<TurretFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    turretToWorldTransform(Transform<TurretFrame, WorldFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    // chassisToTurretPivotTransform = static
-    chassisToTurretPivotTransform(Transform<ChassisFrame, TurretPivotFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
-    chassisSubsystem(chassisSubsystem),
+    turretIMUToChassisTransform(Transform<TurretIMUFrame, ChassisFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+    cameraToTurretIMUTransform(Transform<CameraFrame, TurretIMUFrame>(PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL, PLACEHOLDER_VAL)),
+
+    // Constant transforms
+    chassisToTurretIMUTransform(Transform<ChassisFrame,TurretIMUFrame>(0., 0., 401.44, 0., 0., 0.)),
+    chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame> (105.68, 0., 121.72, 0., 0., 0.)),
+
+    leftBackMotor(leftBackMotor),
+    rightBackMotor(rightBackMotor),
+    leftFrontMotor(leftFrontMotor),
+    rightFrontMotor(rightFrontMotor),
     chassisImu(chassisImu),
     turretImu(turretImu),
-    kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
+    kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+          chassisAccelerationToMeasurementCovarianceInterpolator(
+          CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
+          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
     {  
+        wheelVelToChassisVelMat[X][LF] = 1;
+        wheelVelToChassisVelMat[X][RF] = -1;
+        wheelVelToChassisVelMat[X][LB] = 1;
+        wheelVelToChassisVelMat[X][RB] = -1;
+        wheelVelToChassisVelMat[Y][LF] = -1;
+        wheelVelToChassisVelMat[Y][RF] = -1;
+        wheelVelToChassisVelMat[Y][LB] = 1;
+        wheelVelToChassisVelMat[Y][RB] = 1;
         update();
     }
 
@@ -75,6 +105,41 @@ namespace aruwsrc::algorithms {
         updateOdometry();
         // update transforms with odometry data
         updateTransforms();
+    }
+
+    const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform() {
+        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+        return worldToChassisTransform;
+    }
+
+    const Transform<WorldFrame, TurretIMUFrame>& StandardTransformer::getWorldToTurretIMUTransform() {
+        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+        worldToTurretIMUTransform = compose<WorldFrame, ChassisFrame, TurretIMUFrame>
+        (worldToChassisTransform, chassisToTurretIMUTransform);
+        return worldToTurretIMUTransform;
+    }
+
+    const Transform<ChassisFrame, TurretIMUFrame>& StandardTransformer::getChassisToTurretIMUTransform() {
+        return chassisToTurretIMUTransform;
+    }
+
+    const Transform<ChassisFrame, WorldFrame>& StandardTransformer::getChassisToWorldTransform() {
+        worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
+        (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+        chassisToWorldTransform = worldToChassisTransform.getInverse();
+        return chassisToWorldTransform;
+    }
+
+    const Transform<TurretIMUFrame, ChassisFrame>& StandardTransformer::getTurretIMUToChassisTransform() {
+        turretIMUToChassisTransform = chassisToTurretIMUTransform.getInverse();
+        return turretIMUToChassisTransform;
+    }
+
+    const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTurretIMUTransform() {
+        cameraToTurretIMUTransform = TurretIMUToCameraTransform.getInverse();
+        return cameraToTurretIMUTransform;
     }
 
     void StandardTransformer::updateTransforms() {
@@ -89,31 +154,17 @@ namespace aruwsrc::algorithms {
         //     (-pos2D.getX(), -pos2D.getY(), PLACEHOLDER_VAL,
         //       PLACEHOLDER_VAL, PLACEHOLDER_VAL, -chassisYaw);
 
-        worldToChassisTransform = Transform<WorldFrame, ChassisFrame>
+        worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>
         (-chassisWorldPosition.getX(), -chassisWorldPosition.getY(), -chassisWorldPosition.getZ(),
          -chassisWorldOrientation.getX(), -chassisWorldOrientation.getY(),-chassisWorldOrientation.getZ());
-        
-        chassisToWorldTransform = worldToChassisTransform.getInverse(worldToChassisTransform);
 
+        TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>
+        (0., 94.04, 0., 
+        turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
 
-
-        // chassisframe to turret pitch should be completely static
-        
-        // turretpitch to turret should have static position, dynamic
-        // rotation coming from turret imu
-
-        // transforms left to do
-
-        // for turret transforms:
-            // with current odometry, we can't do any turret transforms
-            // chassis -> turret pivot can be static
-            // turret pivot -> end of turret is dynamic only in rotation
-            // chassis -> end of turret is just the composition of those
-        
-            // turret -> camera also static
-            // chassis -> camera = chassis->turret * turret -> camera
-
-            
+        turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>
+        (0.                , 11.94               ,             41.97,
+        turretImu.getRoll(), turretImu.getPitch(), turretImu.getYaw());
     }
 
     void StandardTransformer::updateOdometry() {
@@ -122,7 +173,14 @@ namespace aruwsrc::algorithms {
       float chassisYaw = chassisImu.getYaw();
     
       // get chassis velocity
-      auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+        modm::Matrix<float, NUM_MOTORS, 1> wheelVelocity;
+
+        wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
+        wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
+        wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
+        wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+
+      auto chassisVelocity = getActualVelocityChassisRelative();
       // transform chassis velocity to world frame
       tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
         chassisVelocity,
@@ -162,13 +220,6 @@ namespace aruwsrc::algorithms {
       chassisWorldPosition.setY(state[int(OdomState::POS_Y)]);
       chassisWorldPosition.setZ(state[int(OdomState::POS_Z)]);
 
-      // Update chassis orientation
-      // @note: rotation is not tracked by KF, so not 
-      //  sure how orientation is handled
-        //  ask Manoli how rotations are stored in imu: is the 
-        //  is the 0,0,0 orientation the one that the 
-        //  chassis starts with. If so, each imu has 
-        //  a different world frame
       chassisWorldOrientation.setX(chassisImu.getRoll());
       chassisWorldOrientation.setY(chassisImu.getPitch());
       chassisWorldOrientation.setZ(chassisImu.getYaw()
@@ -181,6 +232,82 @@ namespace aruwsrc::algorithms {
     }
 
     void StandardTransformer::updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity) {
+        const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
+        const uint32_t dt = curTime - prevTime;
+        prevTime = curTime;
+
+        if (prevTime == 0) 
+        {
+            return;
+        }
+
+        chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
+            chassisMeasuredDeltaVelocity.x,
+            chassisVelocity[0][0] - prevChassisVelocity[0][0],
+            CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+        chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
+            chassisMeasuredDeltaVelocity.y,
+            chassisVelocity[1][0] - prevChassisVelocity[1][0],
+            CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+        chassisMeasuredDeltaVelocity.z = tap::algorithms::lowPassFilter(
+            chassisMeasuredDeltaVelocity.z,
+            chassisVelocity[2][0] - prevChassisVelocity[2][0],
+            CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+        // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
+        // convert dt in microseconds to seconds
+        const float accelMagnitude =
+            chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
+
+        const float velocityCovariance =
+            chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
+
+        kf.getMeasurementCovariance()[0] = velocityCovariance;
+        kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
+            velocityCovariance;
 
     }
+
+    modm::Matrix<float, 3, 1> StandardTransformer::getActualVelocityChassisRelative() {
+        modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
+
+        wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
+        wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
+        wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
+        wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+        modm::Matrix<float, 2, 1> planarXYVelocity = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+        modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>();
+        chassisVelocity[0][0] = planarXYVelocity[0][0];
+        chassisVelocity[1][0] = planarXYVelocity[1][0];
+        chassisVelocity[1][0] = 0;
+        return chassisVelocity;
+    }
+
+      void StandardTransformer::getVelocityWorldRelative(
+        modm::Matrix<float, 3, 1>& chassisRelativeVelocity) {
+
+            // construct an updated transform using chassis roll, pitch, yaw 
+            // to transform chassis velocity to world frame
+            Transform<ChassisIMUFrame, WorldFrame> tempTransform = 
+                Transform<ChassisIMUFrame, WorldFrame>
+                (0.0, 0.0, 0.0, chassisImu.getRoll(), chassisImu.getPitch(), chassisImu.getYaw());
+
+
+            // create temporary CMSISMats to get around parameter type mismatch
+            float data[3] = {chassisRelativeVelocity[0][0], chassisRelativeVelocity[1][0], chassisRelativeVelocity[2][0]};
+            CMSISMat<3, 1> temp = CMSISMat<3, 1>(data);
+
+            // apply the transform
+            CMSISMat<3, 1> chassisVWorldRelative = tempTransform.applyToVector(temp);
+
+
+            // copy transformed positions back to original vector
+            chassisRelativeVelocity[0][0] = chassisVWorldRelative.data[0];
+            chassisRelativeVelocity[1][0] = chassisVWorldRelative.data[1];
+            chassisRelativeVelocity[2][0] = chassisVWorldRelative.data[2];
+            // Now xyz velocity is transformed to world frame
+        }
+
 }

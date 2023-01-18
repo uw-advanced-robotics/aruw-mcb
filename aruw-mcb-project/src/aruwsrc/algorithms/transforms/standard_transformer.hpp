@@ -36,6 +36,7 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
+// #include ""
 
 
 using namespace tap::algorithms;
@@ -54,51 +55,82 @@ namespace aruwsrc::algorithms
         */
         StandardTransformer
         (      
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        const tap::motor::DjiMotor& leftBackMotor,
+        const tap::motor::DjiMotor& rightBackMotor,
+        const tap::motor::DjiMotor& leftFrontMotor,
+        const tap::motor::DjiMotor& rightFrontMotor,
         tap::communication::sensors::imu::ImuInterface& chassisImu,
-        tap::communication::sensors::imu::ImuInterface& turretImu);
-        
+        tap::communication::sensors::imu::ImuInterface& turretImu
+        );
+
         /**
          * Update each transform with most recent encoder and IMU odometry data. This method
          * should be called every refresh.
         */
         void update();
 
+        enum ChassisVelIndex
+        {
+            X = 0,
+            Y = 1,
+        };
+
+        enum WheelRPMIndex
+        {
+            LF = 0,
+            RF,
+            LB,
+            RB,
+            NUM_MOTORS,
+        };
+
+        modm::Matrix<float, 2, 4> wheelVelToChassisVelMat;
+
         /**
          * Get World to Chassis transform
          * 
          * @returns World to Chassis transform
         */
-        Transform<WorldFrame, ChassisFrame> getWorldToChassisTranform();
+        const Transform<WorldFrame, ChassisFrame>& getWorldToChassisTransform();
 
         /**
          * Get World to Turret transform
          * 
          * @returns World to Turret transform
         */
-        Transform<WorldFrame, TurretFrame> getWorldToTurretTranform();
+       const Transform<WorldFrame, TurretIMUFrame>& getWorldToTurretIMUTransform();
 
         /**
          * Get Chassis to Turret transform
          * 
          * @returns Chassis to Turret transform
         */
-        Transform<ChassisFrame, TurretFrame> getChassisToTurretTranform();
+        const Transform<ChassisFrame, TurretIMUFrame>& getChassisToTurretIMUTransform();
 
         /**
          * Get Chassis to World transform
          * 
          * @returns Chassis to World transform
         */
-        Transform<ChassisFrame, WorldFrame> getChassisToWorldTranform();
+        const Transform<ChassisFrame, WorldFrame>& getChassisToWorldTransform();
         
         /**
          * Get Turret to Chassis transform
          * 
          * @returns Turret to Chassis transform
         */
-        Transform<TurretFrame, ChassisFrame> getTurretToChassisTranform();
+        const Transform<TurretIMUFrame, ChassisFrame>& getTurretIMUToChassisTransform();
+
+        /**
+         * Get Camera to Turret transform
+         * 
+         * @returns Camera to Turret transform
+        */
+        const Transform<CameraFrame, TurretIMUFrame>& getCameraToTurretIMUTransform();
      private:
+        float turretIMUToChassisYawOffset   = -1.0f;
+        float turretIMUToChassisPitchOffset = -1.0f;
+        float turretIMUToChassisRollOffset  = -1.0f;
         /**
          * Updates the stored transforms for this cycle
         */
@@ -112,17 +144,29 @@ namespace aruwsrc::algorithms
 
         float PLACEHOLDER_VAL = 0.0f;
 
-        // Transforms to take care of 
+        // Transforms that are dynamically updated
+        Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
+        Transform<TurretIMUFrame, CameraFrame> TurretIMUToCameraTransform;
+        Transform<TurretIMUFrame, GunFrame> turretIMUToGunTransform;
+
+        // Transforms that are compositions
+        Transform<WorldFrame, TurretIMUFrame> worldToTurretIMUTransform;
         Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
-        Transform<WorldFrame, TurretFrame> worldToTurretTransform;
-        Transform<ChassisFrame, TurretFrame> chassisToTurretTransform;
+
+        // Transforms that are inverses
         Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
-        Transform<TurretFrame, ChassisFrame> turretToChassisTransform;
-        Transform<TurretFrame, WorldFrame> turretToWorldTransform;
-        Transform<ChassisFrame, TurretPivotFrame> chassisToTurretPivotTransform;
+        Transform<TurretIMUFrame, ChassisFrame> turretIMUToChassisTransform;
+        Transform<CameraFrame, TurretIMUFrame> cameraToTurretIMUTransform;
+
+        // Constant transforms
+        Transform<ChassisFrame, TurretIMUFrame> chassisToTurretIMUTransform;
+        Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
         // References to all devices necessary for tracking odometry
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+        const tap::motor::DjiMotor& leftBackMotor;
+        const tap::motor::DjiMotor& rightBackMotor;
+        const tap::motor::DjiMotor& leftFrontMotor;
+        const tap::motor::DjiMotor& rightFrontMotor;
         tap::communication::sensors::imu::ImuInterface& chassisImu;
         tap::communication::sensors::imu::ImuInterface& turretImu;
 
@@ -151,6 +195,9 @@ namespace aruwsrc::algorithms
             ACC_Z,
             NUM_INPUTS,
         };
+
+
+        static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 
         static constexpr int STATES_SQUARED =
@@ -237,12 +284,47 @@ namespace aruwsrc::algorithms
         //  (seems likely)
         modm::Vector3f turretWorldOrientation;
 
-        
-
-
         void updateInternalOdomFromKF();
 
         void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+        static constexpr float MAX_ACCELERATION = 8.0f;
+
+        static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
+        {
+            {0, 1E0},
+            {MAX_ACCELERATION, 1E2},
+        };
+
+        static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
+
+        /// Chassis measured change in velocity since the last time `update` was called, in the chassis
+        /// frame
+        modm::Vector3f chassisMeasuredDeltaVelocity;
+
+        modm::interpolation::Linear<modm::Pair<float, float>>
+            chassisAccelerationToMeasurementCovarianceInterpolator;
+
+        /// Previous time `update` was called, in microseconds
+        uint32_t prevTime = 0;
+        modm::Matrix<float, 3, 1> prevChassisVelocity;
+
+
+        modm::Matrix<float, 3, 1> getActualVelocityChassisRelative();
+
+        inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+        {
+            static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+            return mat * ratio;
+        }
+
+
+            /**
+     * Transforms the chassis relative velocity of the form <vx, vy, vz> (where z is an
+     * orientation) into world relative frame, given some particular chassis heading (z direction,
+     * assumed to be in radians). Transforms the input matrix chassisRelativeVelocity. Units: m/s
+     */
+    void getVelocityWorldRelative(
+        modm::Matrix<float, 3, 1>& chassisRelativeVelocity);
     };
 }
 
