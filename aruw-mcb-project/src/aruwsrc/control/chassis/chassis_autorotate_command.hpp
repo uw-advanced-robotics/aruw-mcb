@@ -31,7 +31,7 @@ class Drivers;
 
 namespace aruwsrc::chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 
 /**
  * A command that continuously attempts to rotate the chasis so that the turret is
@@ -65,7 +65,7 @@ public:
      */
     ChassisAutorotateCommand(
         aruwsrc::Drivers* drivers,
-        ChassisSubsystem* chassis,
+        HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
 
@@ -87,7 +87,7 @@ public:
 
 protected:
     aruwsrc::Drivers* drivers;
-    ChassisSubsystem* chassis;
+    HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
 
     /** Autorotation setpoint, smoothed using a low pass filter. */

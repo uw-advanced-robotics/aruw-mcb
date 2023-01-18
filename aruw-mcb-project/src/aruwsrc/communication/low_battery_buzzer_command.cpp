@@ -17,32 +17,35 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BEYBLADE_COMMAND_MOCK_HPP_
-#define BEYBLADE_COMMAND_MOCK_HPP_
+#include "low_battery_buzzer_command.hpp"
 
-#include <gmock/gmock.h>
-
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/drivers.hpp"
 
-namespace aruwsrc
+namespace aruwsrc::communication
 {
-namespace mock
+LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
+    aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
+    aruwsrc::Drivers* drivers)
+    : buzzer(buzzer),
+      drivers(drivers)
 {
-class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
+    addSubsystemRequirement(&buzzer);
+}
+
+void LowBatteryBuzzerCommand::initialize() {}
+
+void LowBatteryBuzzerCommand::execute()
 {
-public:
-    BeybladeCommandMock(
-        aruwsrc::Drivers *drivers,
-        chassis::HolonomicChassisSubsystem *chassis,
-        aruwsrc::control::turret::TurretMotor *yawMotor);
+    if (drivers->refSerial.getRobotData().chassis.volt < LOW_BATTERY_THRESHOLD)
+    {
+        buzzer.playNoise();
+    }
+    else
+    {
+        buzzer.stop();
+    }
+}
 
-    virtual ~BeybladeCommandMock();
+void LowBatteryBuzzerCommand::end(bool) { buzzer.stop(); }
 
-    MOCK_METHOD(void, initialize, (), ());
-    MOCK_METHOD(void, execute, (), ());
-};  // class BeybladeCommandMock
-}  // namespace mock
-}  // namespace aruwsrc
-
-#endif  // BEYBLADE_COMMAND_MOCK_HPP_
+}  // namespace aruwsrc::communication
