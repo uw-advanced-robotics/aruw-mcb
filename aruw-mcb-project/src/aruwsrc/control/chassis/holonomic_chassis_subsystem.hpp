@@ -106,7 +106,7 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    mockable virtual void setDesiredOutput(float x, float y, float r) = 0;
+    void virtual setDesiredOutput(float x, float y, float r) = 0;
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
@@ -145,10 +145,14 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-   virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
-    virtual int getNumChassisMotors() const override {return 4;};
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
+     *      encoders. Units: m/s
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     const char* getName() override { return "Chassis"; }
     virtual bool allMotorsOnline() const override {return false;};
