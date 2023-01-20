@@ -60,7 +60,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].hasTarget = 0;
+        this->lastAimData[i].pva.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -106,11 +106,41 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != sizeof(lastAimData))
+    int expectedLength = messageWidths::FLAGS_BITS + messageWidths::TIMESTAMP_BITS;
+    for (int i = 0; i < NUM_TAGS; i++)
     {
-        return false;
+        if (message.data[i] == 1)
+        {
+            expectedLength += LEN_FIELDS[i];
+        }
     }
-    memcpy(lastAimData, &message.data, sizeof(lastAimData));
+    if (expectedLength != message.header.dataLength) return false;
+
+    lastAimData[0].pva.updated = 0;
+    lastAimData[0].timing.updated = 0;
+
+    int currIndex = 0;
+    memcpy(&lastAimData[0].timestamp, &message.data[0], messageWidths::TIMESTAMP_BITS);
+    currIndex += messageWidths::TIMESTAMP_BITS;
+    for (int i = 0; i < NUM_TAGS; ++i)
+    {
+        if (message.data[i] == 1)
+        {
+            switch (i)
+            {
+                case 0:
+                    memcpy(&lastAimData[0].pva, &message.data[currIndex], LEN_FIELDS[i]);
+                    lastAimData[0].pva.updated = 1;
+                    break;
+                case 1:
+                    memcpy(&lastAimData[0].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                    lastAimData[0].timing.updated = 1;
+                    currIndex += LEN_FIELDS[i];
+                    break;
+            }
+            currIndex += (int)LEN_FIELDS[i];
+        }
+    }
     return true;
 }
 
