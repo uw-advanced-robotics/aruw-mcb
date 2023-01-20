@@ -95,16 +95,16 @@ public:
 
     enum messageWidths : uint8_t
     {
-        FLAGS_BITS = 3,
-        TIMESTAMP_BITS = 4,
-        FIRERATE_BITS = 1,
-        TARGET_DATA_BITS = 37,  // 9 floats and 1 byte (from firerate)
-        SHOT_TIMING_BITS = 12,
+        FLAGS_BYTES = 1,
+        TIMESTAMP_BYTES = 4,
+        FIRERATE_BYTES = 1,
+        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
+        SHOT_TIMING_BYTES = 12,
     };
 
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
-        messageWidths::TARGET_DATA_BITS,
-        messageWidths::SHOT_TIMING_BITS};  // indices correspond to Tags
+        messageWidths::TARGET_DATA_BYTES,
+        messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
 
     /**
      * AutoAim data to receive from Jetson.
