@@ -135,19 +135,21 @@ static constexpr uint32_t FLOATING_POINT_FUDGE_MICROS = 1;
 
 namespace auto_aim  // Must be in a namespace so the operator<< can be discovered by googletest
 {
-struct TestParamsAimData
-{
-    struct pva {
-        bool updated;
-    };
-    uint32_t timestamp;
-
-    struct timing {
+struct TestParamsPositionData {
+    bool updated;
+};
+struct TestParamsTimingData {
         uint32_t duration;
         uint32_t pulseInterval;
         uint32_t offset;
         bool updated;
-    };
+};
+
+struct TestParamsAimData
+{
+    TestParamsPositionData pva;
+    uint32_t timestamp;
+    TestParamsTimingData timing;
 
     friend std::ostream& operator<<(std::ostream& os, const TestParamsAimData& p)
     {
