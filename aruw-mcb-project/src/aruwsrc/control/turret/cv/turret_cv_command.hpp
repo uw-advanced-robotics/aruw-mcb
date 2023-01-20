@@ -89,6 +89,7 @@ public:
      */
     TurretCVCommand(
         aruwsrc::Drivers *drivers,
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -120,6 +121,7 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
 
     uint8_t turretID;
 

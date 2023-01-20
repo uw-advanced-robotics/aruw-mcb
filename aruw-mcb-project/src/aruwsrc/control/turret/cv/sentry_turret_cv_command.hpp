@@ -121,7 +121,7 @@ public:
      * for more information.
      */
     SentryTurretCVCommand(
-        aruwsrc::Drivers *drivers,
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -158,7 +158,7 @@ public:
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
-    aruwsrc::Drivers *drivers;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
 
     RobotTurretSubsystem *turretSubsystem;
 

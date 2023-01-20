@@ -36,6 +36,7 @@ namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
     aruwsrc::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
@@ -44,6 +45,7 @@ TurretCVCommand::TurretCVCommand(
     const float userPitchInputScalar,
     uint8_t turretID)
     : drivers(drivers),
+      visionCoprocessor(visionCoprocessor),
       turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
@@ -65,7 +67,7 @@ void TurretCVCommand::initialize()
     pitchController->initialize();
     yawController->initialize();
     prevTime = getTimeMilliseconds();
-    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+    visionCoprocessor->sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()
