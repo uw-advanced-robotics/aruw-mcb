@@ -37,17 +37,17 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint8_t turretId)
 {
     auto aimData = this->visionCoprocessor->getLastAimData(turretId);
-    if (!aimData.hasTarget)
+    if (!aimData.pva.updated)
     {
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.recommendUseTimedShots)
+    if (!aimData.timing.updated)
     {
         return LaunchInclination::UNGATED;
     }
 
-    if (aimData.targetPulseInterval == 0)
+    if (aimData.timing.pulseInterval == 0)
     {
         return LaunchInclination::GATED_DENY;
     }
@@ -68,19 +68,19 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t now = tap::arch::clock::getTimeMicroseconds();
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
-    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.targetHitTimeOffset;
+    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
     int64_t projectedHitTimeAfterFirstWindow =
         int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
 
-    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.targetPulseInterval;
+    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.timing.pulseInterval;
     if (offsetInFiringWindow < 0)
     {
-        offsetInFiringWindow += aimData.targetPulseInterval;
+        offsetInFiringWindow += aimData.timing.pulseInterval;
     }
 
-    uint32_t maxHitTimeError = aimData.targetIntervalDuration / 2;
+    uint32_t maxHitTimeError = aimData.timing.duration / 2;
     if (offsetInFiringWindow <= maxHitTimeError ||
-        offsetInFiringWindow >= aimData.targetPulseInterval - maxHitTimeError)
+        offsetInFiringWindow >= aimData.timing.pulseInterval - maxHitTimeError)
     {
         return LaunchInclination::GATED_ALLOW;
     }
