@@ -80,20 +80,25 @@ void SwerveModule::intialize()
     azimuthMotor.initialize();
 }
 
-float SwerveModule::calculateTotalModuleError()
+bool SwerveModule::allMotorsOnline() const
+{
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
+}
+
+float SwerveModule::calculateTotalModuleError() const
 {
     return ANGULAR_ERROR_POWER_BIAS * getAzimuthError() + getDriveError();
 }
 
 
 //radians
-float SwerveModule::getAzimuthError()
+float SwerveModule::getAzimuthError() const
 {
     return azimuthPid.getLastError();
 }
 
 //
-float SwerveModule::getDriveError()
+float SwerveModule::getDriveError() const
 {
     return drivePid.getLastError();
 }

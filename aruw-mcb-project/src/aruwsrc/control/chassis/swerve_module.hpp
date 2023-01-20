@@ -86,6 +86,8 @@ public:
         float positionWithinChassisX,
         float positionWithinChassisY);
 
+    const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
+
     void setDesiredState(float metersPerSecond, float radianOutput);
 
     void scaleAndSet(float scaleCoeff);
@@ -100,16 +102,18 @@ public:
 
     void refresh();
 
-    float calculateTotalModuleError();
+    float calculateTotalModuleError() const;
 
-    const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
+    
 
-    float getAzimuthError();
-    float getDriveError();
+    float getAzimuthError() const;
+    float getDriveError() const;
+    bool allMotorsOnline() const;
 
     std::vector<float> getModuleVelocity();
 
     void limitPower(float frac);
+    
 
 private:
     float mpsToRpm(float mps) const;

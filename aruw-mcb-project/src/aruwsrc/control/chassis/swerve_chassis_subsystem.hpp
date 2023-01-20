@@ -80,6 +80,18 @@ public:
 
     void refresh() override;
 
+    inline int getNumChassisMotors() const override { return 8; }
+
+    inline bool allMotorsOnline() const override
+    {
+        return modules[0].allMotorsOnline() &&
+            modules[1].allMotorsOnline() &&
+            modules[2].allMotorsOnline() &&
+            modules[3].allMotorsOnline();
+    }
+
+
+
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
      */

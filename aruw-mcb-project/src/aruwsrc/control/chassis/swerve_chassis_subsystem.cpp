@@ -62,18 +62,6 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
     }
 {
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
 }
 
 void SwerveChassisSubsystem::initialize()

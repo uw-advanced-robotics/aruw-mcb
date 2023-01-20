@@ -148,10 +148,10 @@ public:
    virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
-    virtual int getNumChassisMotors() const override {}
+    virtual int getNumChassisMotors() const override {return 4;};
 
     const char* getName() override { return "Chassis"; }
-    virtual bool allMotorsOnline() const override {}
+    virtual bool allMotorsOnline() const override {return false;};
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
