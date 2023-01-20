@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
@@ -169,7 +170,7 @@ public:
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
+            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
         });
     }
 

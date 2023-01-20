@@ -77,7 +77,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 1311,
+    .startEncoderValue = 1363,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -112,6 +112,20 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
+    .kp = 35.0f,
+    .ki = 0.0f,
+    .kd = 0.8f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kp = 20'000.0f,
     .ki = 100.0f,
@@ -128,8 +142,22 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .kp = 22.0f,
-    .ki = 0.02f,
+    .ki = 0.0f,
     .kd = 0.0f,
+    .maxICumulative = 0.5f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
+    .kp = 45.0f,
+    .ki = 0.6f,
+    .kd = 1.0f,
     .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
