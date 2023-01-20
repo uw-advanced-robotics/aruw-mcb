@@ -118,7 +118,7 @@ class CommandScheduler
 {
 public:
     CommandScheduler(
-        Drivers* drivers,
+        tap::errors::ErrorController& errorController,
         bool masterScheduler = false,
         SafeDisconnectFunction* safeDisconnectFunction =
             &CommandScheduler::defaultSafeDisconnectFunction);

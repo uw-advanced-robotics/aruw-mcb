@@ -27,11 +27,6 @@
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 
-namespace tap
-{
-class Drivers;
-}
-
 namespace tap::control::chassis
 {
 /**
@@ -69,7 +64,6 @@ public:
     /**
      * Constructs a power limiter helper object.
      *
-     * @param[in] drivers Global drivers object.
      * @param[in] currentSensor `CurrentSensorInterface` that will be used when power limiting.
      *      The current sensor should be connected in parallel with the main chassis power line.
      * @param[in] energyBufferLimitThreshold Energy in Joules. The amount of energy left in the
@@ -78,8 +72,8 @@ public:
      *      buffer is equal or less than this value, the power limiting fraction will be 0.
      */
     PowerLimiter(
-        const tap::Drivers *drivers,
-        tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+        tap::communication::serial::RefSerial &refSerial,
+        tap::communication::sensors::current::CurrentSensorInterface &currentSensor,
         float startingEnergyBuffer,
         float energyBufferLimitThreshold,
         float energyBufferCritThreshold);
@@ -100,8 +94,8 @@ public:
     float getPowerLimitRatio();
 
 private:
-    const tap::Drivers *drivers;
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor;
+    tap::communication::serial::RefSerial &refSerial;
+    tap::communication::sensors::current::CurrentSensorInterface &currentSensor;
     const float startingEnergyBuffer;
     const float energyBufferLimitThreshold;
     const float energyBufferCritThreshold;

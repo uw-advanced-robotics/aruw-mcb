@@ -57,7 +57,7 @@ namespace control
 class ComprisedCommand : public Command
 {
 public:
-    ComprisedCommand(Drivers *drivers) : Command(), comprisedCommandScheduler(drivers) {}
+    ComprisedCommand(tap::errors::ErrorController& errorController) : Command(), comprisedCommandScheduler(errorController) {}
 
 protected:
     CommandScheduler comprisedCommandScheduler;

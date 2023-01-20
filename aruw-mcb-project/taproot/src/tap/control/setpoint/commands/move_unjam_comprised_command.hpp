@@ -73,8 +73,8 @@ public:
      *      passed on directly to this command's constructor.
      */
     MoveUnjamComprisedCommand(
-        tap::Drivers* drivers,
-        SetpointSubsystem* setpointSubsystem,
+        tap::errors::ErrorController& errorController,
+        SetpointSubsystem& setpointSubsystem,
         float moveDisplacement,
         uint32_t moveTime,
         uint32_t pauseAfterMoveTime,

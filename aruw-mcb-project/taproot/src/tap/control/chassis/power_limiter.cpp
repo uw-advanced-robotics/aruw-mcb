@@ -33,12 +33,12 @@ using std::max;
 namespace tap::control::chassis
 {
 PowerLimiter::PowerLimiter(
-    const tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::serial::RefSerial &refSerial,
+    tap::communication::sensors::current::CurrentSensorInterface &currentSensor,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
-    : drivers(drivers),
+    : refSerial(refSerial),
       currentSensor(currentSensor),
       startingEnergyBuffer(startingEnergyBuffer),
       energyBufferLimitThreshold(energyBufferLimitThreshold),
@@ -52,7 +52,7 @@ PowerLimiter::PowerLimiter(
 
 float PowerLimiter::getPowerLimitRatio()
 {
-    if (!drivers->refSerial.getRefSerialReceivingData())
+    if (!refSerial.getRefSerialReceivingData())
     {
         return 1.0f;
     }
@@ -77,9 +77,9 @@ float PowerLimiter::getPowerLimitRatio()
 
 void PowerLimiter::updatePowerAndEnergyBuffer()
 {
-    const auto &robotData = drivers->refSerial.getRobotData();
+    const auto &robotData = refSerial.getRobotData();
     const auto &chassisData = robotData.chassis;
-    const float current = currentSensor->getCurrentMa();
+    const float current = currentSensor.getCurrentMa();
     const float newChassisPower = chassisData.volt * current / 1'000'000.0f;
 
     // Manually compute energy buffer using consumedPower read from current sensor.

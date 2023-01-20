@@ -53,7 +53,7 @@ class Command;
 class Subsystem
 {
 public:
-    Subsystem(Drivers* drivers);
+    Subsystem();
 
     virtual ~Subsystem();
 
@@ -118,8 +118,6 @@ public:
     mockable inline int getGlobalIdentifier() const { return globalIdentifier; }
 
 protected:
-    Drivers* drivers;
-
     bool hardwareTestsComplete = false;
 
     virtual void onHardwareTestStart() {}

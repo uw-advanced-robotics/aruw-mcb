@@ -29,9 +29,8 @@ namespace tap
 {
 namespace control
 {
-Subsystem::Subsystem(Drivers* drivers)
-    : drivers(drivers),
-      defaultCommand(nullptr),
+Subsystem::Subsystem()
+    : defaultCommand(nullptr),
       globalIdentifier(CommandScheduler::constructSubsystem(this))
 {
 }
@@ -50,8 +49,7 @@ const char* Subsystem::getName() { return "Subsystem"; }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 Subsystem::Subsystem()
-    : drivers(nullptr),
-      defaultCommand(nullptr),
+    : defaultCommand(nullptr),
       globalIdentifier(CommandScheduler::constructSubsystem(this))
 {
 }

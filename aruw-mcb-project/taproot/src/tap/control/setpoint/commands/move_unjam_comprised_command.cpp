@@ -39,8 +39,8 @@ namespace control
 namespace setpoint
 {
 MoveUnjamComprisedCommand::MoveUnjamComprisedCommand(
-    tap::Drivers* drivers,
-    SetpointSubsystem* setpointSubsystem,
+    tap::errors::ErrorController& errorController,
+    SetpointSubsystem& setpointSubsystem,
     float moveDisplacement,
     uint32_t moveTime,
     uint32_t pauseAfterMoveTime,
@@ -50,8 +50,8 @@ MoveUnjamComprisedCommand::MoveUnjamComprisedCommand(
     float unjamThreshold,
     uint32_t maxUnjamWaitTime,
     uint_fast16_t unjamCycleCount)
-    : tap::control::ComprisedCommand(drivers),
-      setpointSubsystem(setpointSubsystem),
+    : tap::control::ComprisedCommand(errorController),
+      setpointSubsystem(&setpointSubsystem),
       agitatorRotateCommand(
           setpointSubsystem,
           moveDisplacement,
@@ -68,8 +68,8 @@ MoveUnjamComprisedCommand::MoveUnjamComprisedCommand(
       unjamSequenceCommencing(false),
       agitatorDisconnectFault(false)
 {
-    this->comprisedCommandScheduler.registerSubsystem(setpointSubsystem);
-    this->addSubsystemRequirement(setpointSubsystem);
+    this->comprisedCommandScheduler.registerSubsystem(&setpointSubsystem);
+    this->addSubsystemRequirement(&setpointSubsystem);
 }
 
 void MoveUnjamComprisedCommand::initialize()
