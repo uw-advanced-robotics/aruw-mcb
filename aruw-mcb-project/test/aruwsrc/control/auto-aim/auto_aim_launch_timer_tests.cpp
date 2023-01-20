@@ -500,7 +500,7 @@ static constexpr TestParams
                 .pulseInterval = SMALL_PULSE_INTERVAL_MICROS,
                 .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
                                     DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-                .recommendUseTimedShots = true,
+                .updated = true,
             }
         },
         .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
