@@ -32,7 +32,7 @@
 #include "sentry_chassis_kf_odometry.hpp"
 
 // Forward declarations
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -61,13 +61,13 @@ class SentryOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
 {
 public:
     /**
-     * @param[in] drivers reference to aruwsrc drivers
+     * @param[in] drivers reference to tap drivers
      * @param[in] chassis const reference to aruwsrc SentryDriveSubsystem
      * @param[in] turret const reference to a TurretMotor object, @see OttoChassisWorldYawObserver
      * for how it is used
      */
     SentryOttoKFOdometry2DSubsystem(
-        aruwsrc::Drivers& drivers,
+        tap::Drivers& drivers,
         const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
         const aruwsrc::control::turret::TurretSubsystem& turret);
 

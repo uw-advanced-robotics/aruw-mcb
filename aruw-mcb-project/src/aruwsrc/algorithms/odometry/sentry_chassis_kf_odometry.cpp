@@ -19,12 +19,12 @@
 
 #include "sentry_chassis_kf_odometry.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 SentryChassisKFOdometry::SentryChassisKFOdometry(
-    aruwsrc::Drivers& drivers,
+    tap::Drivers& drivers,
     const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
     const aruwsrc::control::turret::TurretSubsystem& turret)
     : chassis(chassis),
