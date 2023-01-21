@@ -148,7 +148,7 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-    VisionCoprocessor(aruwsrc::Drivers* drivers);
+    VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
 
