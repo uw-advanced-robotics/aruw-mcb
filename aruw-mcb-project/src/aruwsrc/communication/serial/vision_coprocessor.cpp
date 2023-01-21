@@ -110,7 +110,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     uint8_t flags = message.data[0];
     for (int i = 0; i < NUM_TAGS; i++)
     {
-        if (flags & (1 << i) == 1)
+        if (flags & (1 << i))
         {
             expectedLength += LEN_FIELDS[i];
         }
@@ -125,7 +125,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     currIndex += messageWidths::TIMESTAMP_BYTES;
     for (int i = 0; i < NUM_TAGS; ++i)
     {
-        if (flags & (1 << i) == 1)
+        if (flags & (1 << i))
         {
             switch (i)
             {
