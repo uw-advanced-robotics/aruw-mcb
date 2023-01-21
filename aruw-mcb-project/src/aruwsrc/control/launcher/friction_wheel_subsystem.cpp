@@ -29,7 +29,7 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,

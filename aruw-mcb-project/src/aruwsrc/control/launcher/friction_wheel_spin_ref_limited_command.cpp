@@ -24,24 +24,24 @@
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
-    aruwsrc::Drivers *drivers,
+    tap::communication::serial::RefSerial *refSerial,
     FrictionWheelSubsystem *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
     tap::communication::serial::RefSerialData::Rx::MechanismID barrel)
-    : drivers(drivers),
+    : refSerial(refSerial),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       alwaysUseDefaultLaunchSpeed(alwaysUseDefaultLaunchSpeed),
       barrel(barrel)
 {
-    modm_assert(drivers != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
+    modm_assert(refSerial != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
     addSubsystemRequirement(frictionWheels);
 }
 
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
-    if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
+    if (alwaysUseDefaultLaunchSpeed || !refSerial->getRefSerialReceivingData())
     {
         frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);
     }
@@ -52,13 +52,13 @@ void FrictionWheelSpinRefLimitedCommand::execute()
         switch (barrel)
         {
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
+                maxBarrelSpeed = refSerial->getRobotData().turret.barrelSpeedLimit17ID1;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
+                maxBarrelSpeed = refSerial->getRobotData().turret.barrelSpeedLimit17ID2;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
+                maxBarrelSpeed = refSerial->getRobotData().turret.barrelSpeedLimit42;
                 break;
         }
 
