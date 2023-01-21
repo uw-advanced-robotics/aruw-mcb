@@ -23,7 +23,7 @@
 
 namespace aruwsrc::communication::serial
 {
-SentryRequestSubsystem::SentryRequestSubsystem(aruwsrc::Drivers *drivers)
+SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
     : tap::control::Subsystem(drivers),
       sentryRequestTransmitter(drivers)
 {
