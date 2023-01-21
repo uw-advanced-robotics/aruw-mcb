@@ -25,8 +25,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "aruwsrc/drivers.hpp"
-
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "tap/control/command_scheduler.hpp"
 namespace aruwsrc::control::auto_aim
 {
 /**
@@ -44,15 +44,19 @@ public:
     static constexpr float HIGH_RPS = 20;
 
     /**
-     * @param[in] drivers Pointer to global drivers object.
+     * @param[in] visionCoprocessor reference to the vision coprocessor
+     * @param[in] commandScheduler refence to the command scheduler
      * @param[in] turretCVCommand
      * @param[in] turretID ID of the turret that this governor controls
      */
     AutoAimFireRateReselectionManager(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        serial::VisionCoprocessor &visionCoprocessor,
+        tap::control::CommandScheduler &commandScheduler,
         const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         const uint8_t turretID)
-        : drivers(drivers),
+        : visionCoprocessor(visionCoprocessor),
+          commandScheduler(commandScheduler),
           turretCVCommand(turretCVCommand),
           turretID(turretID)
     {
@@ -60,7 +64,7 @@ public:
 
     inline uint32_t getFireRatePeriod() final
     {
-        auto fireRate = drivers.visionCoprocessor.getLastAimData(turretID).firerate;
+        auto fireRate = visionCoprocessor.getLastAimData(turretID).firerate;
         switch (fireRate)
         {
             case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:
@@ -79,19 +83,19 @@ public:
 
     inline control::agitator::FireRateReadinessState getFireRateReadinessState() final
     {
-        if (!drivers.commandScheduler.isCommandScheduled(&turretCVCommand))
+        if (!commandScheduler.isCommandScheduled(&turretCVCommand))
         {
             // Don't limit firing if in manual fire mode
             return control::agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING;
         }
 
-        if (!drivers.visionCoprocessor.isCvOnline())
+        if (!visionCoprocessor.isCvOnline())
         {
             // We're in CV mode; prevent firing altogether if CV offline
             return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
-        if (drivers.visionCoprocessor.getLastAimData(turretID).firerate ==
+        if (visionCoprocessor.getLastAimData(turretID).firerate ==
             aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
         {
             return control::agitator::FireRateReadinessState::NOT_READY;
@@ -101,7 +105,9 @@ public:
     }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
+    serial::VisionCoprocessor &visionCoprocessor;
+    tap::control::CommandScheduler &commandScheduler;
     const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     const uint8_t turretID;
 };
