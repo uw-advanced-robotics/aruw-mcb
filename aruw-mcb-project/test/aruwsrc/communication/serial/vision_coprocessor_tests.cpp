@@ -46,12 +46,13 @@ static void initAndRunAutoAimRxTest(
     DJISerial::ReceivedSerialMessage message;
     message.header.headByte = 0xA5;
     message.messageType = 2;
-    message.header.dataLength = expectedAimData.size() * sizeof(VisionCoprocessor::TurretAimData);
+    message.header.dataLength = expectedAimData.size() * (1 + sizeof(VisionCoprocessor::TurretAimData)); //+1 for byte containing flag bits 
 
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
+        memcpy(message.data + i * (1+sizeof(VisionCoprocessor::TurretAimData)),(const void*)3,1);
         memcpy(
-            message.data + i * sizeof(VisionCoprocessor::TurretAimData),
+            message.data + i * (1+sizeof(VisionCoprocessor::TurretAimData)) + 1,
             &expectedAimData[i],
             sizeof(VisionCoprocessor::TurretAimData));
     }
