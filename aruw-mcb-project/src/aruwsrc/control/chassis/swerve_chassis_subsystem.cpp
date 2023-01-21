@@ -68,7 +68,7 @@ void SwerveChassisSubsystem::initialize()
 {
     for(int i = 0; i<4; i++)
     {
-        modules[i].intialize();
+        modules[i].initialize();
     }
 }
 

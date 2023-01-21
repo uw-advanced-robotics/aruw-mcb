@@ -74,7 +74,7 @@ SwerveModule::SwerveModule(
     rotationVectorY = positionWithinChassisX;
 }
 
-void SwerveModule::intialize()
+void SwerveModule::initialize()
 {
     driveMotor.initialize();
     azimuthMotor.initialize();

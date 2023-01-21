@@ -98,7 +98,7 @@ public:
 
     float getAngle() const;
 
-    void intialize();
+    void initialize();
 
     void refresh();
 
