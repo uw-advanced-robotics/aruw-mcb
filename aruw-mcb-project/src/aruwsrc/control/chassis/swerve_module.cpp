@@ -158,9 +158,7 @@ void SwerveModule::refresh()
  */
 float SwerveModule::getDriveVelocity() const
 {
-    float currentMotorRPM = driveMotor.getShaftRPM();
-    float wheelMPS = rpmToMps(currentMotorRPM);
-    return wheelMPS;
+    return rpmToMps(driveMotor.getShaftRPM());
 }
 
 /**
@@ -168,9 +166,8 @@ float SwerveModule::getDriveVelocity() const
  */
 float SwerveModule::getAngle() const
 {
-    float motorEncoderPositionDegree =
-        azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped());
-    return modm::toRadian(motorEncoderPositionDegree / config.azimuthMotorGearing);
+    return modm::toRadian(azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped()) 
+        / config.azimuthMotorGearing);
 }
 
 float SwerveModule::mpsToRpm(float mps) const
