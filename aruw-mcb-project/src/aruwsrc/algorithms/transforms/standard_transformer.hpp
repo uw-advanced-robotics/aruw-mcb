@@ -275,12 +275,8 @@ namespace aruwsrc::algorithms
         // (roll, pitch, yaw)
         modm::Vector3f chassisWorldOrientation;
 
-
-        // is this world frame????????????????????
-        // more specifically: is turret imu data relative
-        // to world frame?
-        // is turret world frame different than chassis world frame
-        //  (seems likely)
+        // rotation of turret about x, y, z axes in world frame
+        // (roll, pitch, yaw)
         modm::Vector3f turretWorldOrientation;
 
         void updateInternalOdomFromKF();
@@ -315,10 +311,9 @@ namespace aruwsrc::algorithms
             return mat * ratio;
         }
 
-
         /**
          * Transforms the chassis relative velocity of the form <vx, vy, vz> 
-         * into world relative frame, given some particular chassis heading 
+         * into world relative frame, given some particular chassis
          * Transforms the input matrix chassisRelativeVelocity. Units: m/s
          */
         void getVelocityWorldRelative(modm::Matrix<float, 3, 1>& chassisRelativeVelocity);

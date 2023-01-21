@@ -256,8 +256,6 @@ namespace aruwsrc::algorithms {
             chassisVelocity[2][0] - prevChassisVelocity[2][0],
             CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
 
-        // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
-        // convert dt in microseconds to seconds
         const float accelMagnitude =
             chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
