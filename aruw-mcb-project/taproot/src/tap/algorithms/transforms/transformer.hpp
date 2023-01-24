@@ -23,6 +23,10 @@
 #ifndef TAPROOT_TRANSFORMER_HPP_
 #define TAPROOT_TRANSFORMER_HPP_
 
+#include <functional>
+
+#include "transform.hpp"
+
 namespace tap::algorithms
 {
 /**
@@ -35,11 +39,7 @@ namespace tap::algorithms
 class Transformer
 {
 public:
-    /**
-     * Instantiate a new Transformer
-     */
-    Transformer();
-
+    Transformer() {}
     // Disable copy constructor and assignment
     Transformer(const Transformer& other) = delete;
     Transformer& operator=(const Transformer& other) = delete;

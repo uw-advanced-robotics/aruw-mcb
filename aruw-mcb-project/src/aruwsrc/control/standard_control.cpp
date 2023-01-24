@@ -74,6 +74,8 @@
 #include "turret/user/turret_quick_turn_command.hpp"
 #include "turret/user/turret_user_world_relative_command.hpp"
 
+#include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
+
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
@@ -354,6 +356,14 @@ ClientDisplayCommand clientDisplayCommand(
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
+
+
+/* Standard transformer =====================================================*/
+aruwsrc::algorithms::StandardTransformer standardTransformer(
+  chassis,
+  drivers()->mpu6500,
+  getTurretMCBCanComm()
+);
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings

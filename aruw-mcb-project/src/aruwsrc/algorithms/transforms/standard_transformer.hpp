@@ -17,8 +17,8 @@
 //  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 //  */
 
-#ifndef STANDARD_TRANFORMER_HPP_
-#define STANDARD_TRANFORMER_HPP_
+#ifndef STANDARD_TRANSFORMER_HPP_
+#define STANDARD_TRANSFORMER_HPP_
 // NOTE: this implementation wraps kfodometry to try to mimic the behavior
 // 
 
@@ -36,7 +36,11 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
-// #include ""
+
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+
 
 
 using namespace tap::algorithms;
@@ -55,12 +59,14 @@ namespace aruwsrc::algorithms
         */
         StandardTransformer
         (      
-        const tap::motor::DjiMotor& leftBackMotor,
-        const tap::motor::DjiMotor& rightBackMotor,
-        const tap::motor::DjiMotor& leftFrontMotor,
-        const tap::motor::DjiMotor& rightFrontMotor,
+        aruwsrc::chassis::MecanumChassisSubsystem &chassis,
+        // const tap::motor::DjiMotor& leftBackMotor,
+        // const tap::motor::DjiMotor& rightBackMotor,
+        // const tap::motor::DjiMotor& leftFrontMotor,
+        // const tap::motor::DjiMotor& rightFrontMotor,
         tap::communication::sensors::imu::ImuInterface& chassisImu,
-        tap::communication::sensors::imu::ImuInterface& turretImu
+        // tap::communication::sensors::imu::ImuInterface& turretImu
+        aruwsrc::can::TurretMCBCanComm& turretMCB
         );
 
         /**
@@ -72,7 +78,7 @@ namespace aruwsrc::algorithms
         enum ChassisVelIndex
         {
             X = 0,
-            Y = 1,
+            Y,
         };
 
         enum WheelRPMIndex
@@ -145,30 +151,33 @@ namespace aruwsrc::algorithms
         float PLACEHOLDER_VAL = 0.0f;
 
         // Transforms that are dynamically updated
-        // Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
-        // Transform<TurretIMUFrame, CameraFrame> TurretIMUToCameraTransform;
-        // Transform<TurretIMUFrame, GunFrame> turretIMUToGunTransform;
+        Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
+        Transform<TurretIMUFrame, CameraFrame> TurretIMUToCameraTransform;
+        Transform<TurretIMUFrame, GunFrame> turretIMUToGunTransform;
 
         // Transforms that are compositions
-        // Transform<WorldFrame, TurretIMUFrame> worldToTurretIMUTransform;
-        // Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
+        Transform<WorldFrame, TurretIMUFrame> worldToTurretIMUTransform;
+        Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
 
         // Transforms that are inverses
-        // Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
-        // Transform<TurretIMUFrame, ChassisFrame> turretIMUToChassisTransform;
-        // Transform<CameraFrame, TurretIMUFrame> cameraToTurretIMUTransform;
+        Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
+        Transform<TurretIMUFrame, ChassisFrame> turretIMUToChassisTransform;
+        Transform<CameraFrame, TurretIMUFrame> cameraToTurretIMUTransform;
 
         // Constant transforms
-        // Transform<ChassisFrame, TurretIMUFrame> chassisToTurretIMUTransform;
-        // Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
+        Transform<ChassisFrame, TurretIMUFrame> chassisToTurretIMUTransform;
+        Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
         // References to all devices necessary for tracking odometry
-        const tap::motor::DjiMotor& leftBackMotor;
-        const tap::motor::DjiMotor& rightBackMotor;
-        const tap::motor::DjiMotor& leftFrontMotor;
-        const tap::motor::DjiMotor& rightFrontMotor;
+        aruwsrc::chassis::MecanumChassisSubsystem& chassis;
+        // const tap::motor::DjiMotor& leftBackMotor;
+        // const tap::motor::DjiMotor& rightBackMotor;
+        // const tap::motor::DjiMotor& leftFrontMotor;
+        // const tap::motor::DjiMotor& rightFrontMotor;
         tap::communication::sensors::imu::ImuInterface& chassisImu;
-        tap::communication::sensors::imu::ImuInterface& turretImu;
+        // tap::communication::sensors::imu::ImuInterface& turretImu;
+        aruwsrc::can::TurretMCBCanComm& turretMCB;
+
 
         // kalman filter stuff for keeping track of chassis position
         enum class OdomState
@@ -321,4 +330,4 @@ namespace aruwsrc::algorithms
 }
 
 
-#endif // STANDARD_TRANFORMER_HPP_
+#endif // STANDARD_TRANSFORMER_HPP_
