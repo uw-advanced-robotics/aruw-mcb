@@ -1,10 +1,3 @@
-// // NOtes
-// // maintain internal odometry stuff, pretty much copying chassis_kf_odometry
-// // 
-
-
-
-
 // /*
 //  * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
 //  *
@@ -24,8 +17,6 @@
 //  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 //  */
 
-
-
 #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
 #include "tap/algorithms/transforms/transformer.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -35,17 +26,10 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-
-
-// #include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
-
-
 // TODO: take in pitch motor, yaw motor
-// later: don't take in chassis subystem
 
 namespace aruwsrc::algorithms {
 
@@ -97,7 +81,6 @@ namespace aruwsrc::algorithms {
         wheelVelToChassisVelMat[Y][RF] = -1;
         wheelVelToChassisVelMat[Y][LB] = 1;
         wheelVelToChassisVelMat[Y][RB] = 1;
-        update();
     }
 
     void StandardTransformer::update() {
@@ -168,19 +151,9 @@ namespace aruwsrc::algorithms {
     }
 
     void StandardTransformer::updateOdometry() {
-      // @todo: look into get to get yaw more confidently later, I'm 
-      // not sure this getYaw() gives world-relative yaw
       float chassisYaw = chassisImu.getYaw();
     
-      // get chassis velocity
-        modm::Matrix<float, NUM_MOTORS, 1> wheelVelocity;
-
-        wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
-        wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
-        wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
-        wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
-
-      auto chassisVelocity = getActualVelocityChassisRelative();
+      modm::Matrix<float, 3, 1> chassisVelocity = getActualVelocityChassisRelative();
       // transform chassis velocity to world frame
       tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
         chassisVelocity,
@@ -272,25 +245,27 @@ namespace aruwsrc::algorithms {
         modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
 
         wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
-        wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
-        wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
-        wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+        wheelVelocity[RF][1] = rightFrontMotor.getShaftRPM();
+        wheelVelocity[LB][2] = leftBackMotor.getShaftRPM();
+        wheelVelocity[RB][3] = rightBackMotor.getShaftRPM();
+
         modm::Matrix<float, 2, 1> planarXYVelocity = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
         modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>();
+
         chassisVelocity[0][0] = planarXYVelocity[0][0];
         chassisVelocity[1][0] = planarXYVelocity[1][0];
         chassisVelocity[1][0] = 0;
         return chassisVelocity;
     }
 
-      void StandardTransformer::getVelocityWorldRelative(
+      void StandardTransformer::transformChassisVelocityToWorldRelative(
         modm::Matrix<float, 3, 1>& chassisRelativeVelocity) {
 
             // construct an updated transform using chassis roll, pitch, yaw 
             // to transform chassis velocity to world frame
             Transform<ChassisIMUFrame, WorldFrame> tempTransform = 
                 Transform<ChassisIMUFrame, WorldFrame>
-                (0.0, 0.0, 0.0, chassisImu.getRoll(), chassisImu.getPitch(), chassisImu.getYaw());
+                (0.0, 0.0, 0.0, chassisImu.getRoll(), chassisImu.getPitch(), chassisImu.getYaw() + serial::VisionCoprocessor::MCB_ROTATION_OFFSET);
 
 
             // create temporary CMSISMats to get around parameter type mismatch
@@ -299,7 +274,6 @@ namespace aruwsrc::algorithms {
 
             // apply the transform
             CMSISMat<3, 1> chassisVWorldRelative = tempTransform.applyToVector(temp);
-
 
             // copy transformed positions back to original vector
             chassisRelativeVelocity[0][0] = chassisVWorldRelative.data[0];

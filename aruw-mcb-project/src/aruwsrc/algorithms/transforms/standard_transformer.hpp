@@ -275,7 +275,7 @@ namespace aruwsrc::algorithms
         // (roll, pitch, yaw)
         modm::Vector3f chassisWorldOrientation;
 
-        // rotation of turret about x, y, z axes in world frame
+        // rotation of chassis about x, y, z axes in world frame
         // (roll, pitch, yaw)
         modm::Vector3f turretWorldOrientation;
 
@@ -316,7 +316,7 @@ namespace aruwsrc::algorithms
          * into world relative frame, given some particular chassis
          * Transforms the input matrix chassisRelativeVelocity. Units: m/s
          */
-        void getVelocityWorldRelative(modm::Matrix<float, 3, 1>& chassisRelativeVelocity);
+        void transformChassisVelocityToWorldRelative(modm::Matrix<float, 3, 1>& chassisRelativeVelocity);
     };
 }
 
