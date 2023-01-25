@@ -110,7 +110,7 @@ static inline void updateYawWorldFrameSetpoint(
 }
 
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     TurretMotor &yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(yawMotor),
