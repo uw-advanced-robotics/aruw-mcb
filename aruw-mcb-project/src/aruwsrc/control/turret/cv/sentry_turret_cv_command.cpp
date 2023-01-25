@@ -28,7 +28,6 @@
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
@@ -37,13 +36,13 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::control::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    aruwsrc::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const uint8_t turretID)
-    : drivers(drivers),
+    : visionCoprocessor(visionCoprocessor),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
@@ -74,7 +73,7 @@ void SentryTurretCVCommand::initialize()
 
     prevTime = getTimeMilliseconds();
 
-    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+    visionCoprocessor->sendSelectNewTargetMessage();
 
     enterScanMode(yawController->getSetpoint(), pitchController->getSetpoint());
 }
@@ -162,7 +161,7 @@ void SentryTurretCVCommand::end(bool)
 void SentryTurretCVCommand::requestNewTarget()
 {
     // TODO is there anything else the turret or firing system should do?
-    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+    visionCoprocessor->sendSelectNewTargetMessage();
 }
 
 void SentryTurretCVCommand::changeScanningQuadrant()

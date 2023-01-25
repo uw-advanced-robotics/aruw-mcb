@@ -158,7 +158,7 @@ public:
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
-    aruwsrc::Drivers *drivers;
+    serial::VisionCoprocessor *visionCoprocessor;
 
     RobotTurretSubsystem *turretSubsystem;
 
