@@ -120,6 +120,8 @@ public:
 
 private:
     aruwsrc::Drivers *drivers;
+    serial::VisionCoprocessor *visionCoprocessor;
+    control::ControlOperatorInterface *controlOperatorInterface;
 
     uint8_t turretID;
 
