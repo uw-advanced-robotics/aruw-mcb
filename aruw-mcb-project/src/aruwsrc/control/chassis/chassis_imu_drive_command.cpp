@@ -20,8 +20,10 @@
 #include "chassis_imu_drive_command.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
@@ -31,11 +33,13 @@ using namespace tap::communication::sensors::imu::mpu6500;
 namespace aruwsrc::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor)
     : tap::control::Command(),
       drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
       rotationSetpoint(0, 0, M_TWOPI)
@@ -45,9 +49,8 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
 
 void ChassisImuDriveCommand::initialize()
 {
-    imuSetpointInitialized =
-        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
-        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
+    imuSetpointInitialized = drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+                             drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
 
     if (imuSetpointInitialized)
     {
@@ -78,7 +81,7 @@ void ChassisImuDriveCommand::execute()
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
             // to get to the same position that it was at previously.
-            float chassisRInput = drivers->controlOperatorInterface.getChassisRInput() *
+            float chassisRInput = operatorInterface->getChassisRInput() *
                                   USER_INPUT_TO_ANGLE_DELTA_SCALAR;
             if (abs(angleFromDesiredRotation) > MAX_ROTATION_ERR)
             {
@@ -117,13 +120,14 @@ void ChassisImuDriveCommand::execute()
     else
     {
         imuSetpointInitialized = false;
-        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput();
+        chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput();
     }
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;
 
     ChassisRelDrive::computeDesiredUserTranslation(
+        operatorInterface,
         drivers,
         chassis,
         chassisRotationDesiredWheelspeed,

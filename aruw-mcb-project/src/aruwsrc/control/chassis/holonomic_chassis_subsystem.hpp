@@ -26,6 +26,7 @@
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
+#include "tap/drivers.hpp"
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
@@ -39,11 +40,6 @@
 #else
 #include "tap/motor/dji_motor.hpp"
 #endif
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc
 {
@@ -61,7 +57,7 @@ class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystem
 {
 public:
     HolonomicChassisSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     /**

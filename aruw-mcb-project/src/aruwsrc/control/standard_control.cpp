@@ -32,6 +32,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/manual_fire_rate_reselection_manager.hpp"
@@ -175,19 +176,28 @@ aruwsrc::communication::serial::
     PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
-    drivers(),
+    ((tap::Drivers *)drivers()),
+    &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+    ((tap::Drivers *)drivers()),
+    &drivers()->controlOperatorInterface,
+    &chassis);
 
 aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-    drivers(),
+    ((tap::Drivers *)drivers()),
+    &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-aruwsrc::chassis::BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
+aruwsrc::chassis::BeybladeCommand beybladeCommand(
+    ((tap::Drivers *)drivers()),
+    &chassis,
+    &turret.yawMotor,
+    &drivers()->controlOperatorInterface);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
