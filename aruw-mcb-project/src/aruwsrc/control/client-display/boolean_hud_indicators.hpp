@@ -32,11 +32,6 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
-
 namespace aruwsrc::control::client_display
 {
 /**
@@ -48,7 +43,7 @@ public:
     /**
      * Construct a BooleanHudIndicators object.
      *
-     * @param[in] drivers Global drivers instance.
+     * @param[in] commandScheduler  CommandScheduler instance.
      * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
      * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
@@ -60,7 +55,7 @@ public:
      * movement state of the sentry.
      */
     BooleanHudIndicators(
-        aruwsrc::Drivers &drivers,
+        tap::control::CommandScheduler &commandScheduler,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -143,7 +138,7 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
         };
 
-    aruwsrc::Drivers &drivers;
+    tap::control::CommandScheduler &commandScheduler;
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
