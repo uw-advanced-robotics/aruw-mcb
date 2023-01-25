@@ -30,6 +30,8 @@
 
 #include "setpoint_scanner.hpp"
 #include "turret_cv_command_interface.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 
 namespace tap::control::odometry
 {
@@ -107,7 +109,7 @@ public:
     /**
      * Constructs a TurretCVCommand
      *
-     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] visionCoprocessor Pointer to a global visionCoprocessor object.
      * @param[in] turretSubsystem Pointer to the turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
@@ -121,7 +123,7 @@ public:
      * for more information.
      */
     SentryTurretCVCommand(
-        aruwsrc::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor,
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,

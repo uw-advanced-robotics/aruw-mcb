@@ -253,7 +253,8 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     USER_PITCH_INPUT_SCALAR);
 
 cv::TurretCVCommand turretCVCommand(
-    drivers(),
+    &drivers()->visionCoprocessor,
+    &drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawTurretImuControllerCv,
     &worldFramePitchTurretImuControllerCv,
