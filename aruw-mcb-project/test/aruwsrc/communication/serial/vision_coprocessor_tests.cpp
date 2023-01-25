@@ -50,9 +50,8 @@ static void initAndRunAutoAimRxTest(
 
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
-        memcpy(message.data + i * (1+sizeof(VisionCoprocessor::TurretAimData)),(const void*)3,1);
         memcpy(
-            message.data + i * (1+sizeof(VisionCoprocessor::TurretAimData)) + 1,
+            message.data + i * sizeof(VisionCoprocessor::TurretAimData),
             &expectedAimData[i],
             sizeof(VisionCoprocessor::TurretAimData));
     }
