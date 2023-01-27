@@ -217,7 +217,8 @@ TurretMotorMock::TurretMotorMock(
 TurretMotorMock::~TurretMotorMock() {}
 
 TurretCVCommandMock::TurretCVCommandMock(
-    aruwsrc::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    control::ControlOperatorInterface *controlOperatorInterface,
     aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
@@ -226,7 +227,8 @@ TurretCVCommandMock::TurretCVCommandMock(
     const float userYawInputScalar,
     uint8_t turretID)
     : aruwsrc::control::turret::cv::TurretCVCommand(
-          drivers,
+          visionCoprocessor,
+          controlOperatorInterface,
           turretSubsystem,
           yawController,
           pitchController,
