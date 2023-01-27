@@ -303,6 +303,8 @@ private:
 
     uint32_t prevRisingEdgeTime = 0;
 
+    uint8_t testMessageBytes[256];
+
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
