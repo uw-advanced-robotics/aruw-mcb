@@ -38,40 +38,39 @@ using namespace testing;
 using namespace tap::arch::clock;
 using namespace aruwsrc::control::turret;
 
-    struct TestPositionData
-    {
-        VisionCoprocessor::FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
+struct TestPositionData
+{
+    VisionCoprocessor::FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
-        float xPos;  ///< x position of the target (in m).
-        float yPos;  ///< y position of the target (in m).
-        float zPos;  ///< z position of the target (in m).
+    float xPos;  ///< x position of the target (in m).
+    float yPos;  ///< y position of the target (in m).
+    float zPos;  ///< z position of the target (in m).
 
-        float xVel;  ///< x velocity of the target (in m/s).
-        float yVel;  ///< y velocity of the target (in m/s).
-        float zVel;  ///< z velocity of the target (in m/s).
+    float xVel;  ///< x velocity of the target (in m/s).
+    float yVel;  ///< y velocity of the target (in m/s).
+    float zVel;  ///< z velocity of the target (in m/s).
 
-        float xAcc;  ///< x acceleration of the target (in m/s^2).
-        float yAcc;  ///< y acceleration of the target (in m/s^2).
-        float zAcc;  ///< z acceleration of the target (in m/s^2).
+    float xAcc;  ///< x acceleration of the target (in m/s^2).
+    float yAcc;  ///< y acceleration of the target (in m/s^2).
+    float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-    } modm_packed;
+} modm_packed;
 
-    struct TestTimingData
-    {
-        uint32_t duration;       ///< duration during which the plate is at the target point
-        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
-        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
-                                 ///< next shot should ideally hit
-    } modm_packed;
+struct TestTimingData
+{
+    uint32_t duration;       ///< duration during which the plate is at the target point
+    uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+    uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+                             ///< next shot should ideally hit
+} modm_packed;
 
-    struct TestTurretAimDataMessage
-    {
-        uint8_t flags;
-        uint32_t timestamp;  ///< timestamp in microseconds
-        struct TestPositionData pva;
-        struct TestTimingData timing;
-    } modm_packed;
-
+struct TestTurretAimDataMessage
+{
+    uint8_t flags;
+    uint32_t timestamp;  ///< timestamp in microseconds
+    struct TestPositionData pva;
+    struct TestTimingData timing;
+} modm_packed;
 
 static void initAndRunAutoAimRxTest(
     std::array<TestTurretAimDataMessage, NUM_TURRETS> expectedAimData)
@@ -82,11 +81,10 @@ static void initAndRunAutoAimRxTest(
     message.header.headByte = 0xA5;
     message.messageType = 2;
 
-
-
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
-        int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES + VisionCoprocessor::messageWidths::TIMESTAMP_BYTES;
+        int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES +
+                         VisionCoprocessor::messageWidths::TIMESTAMP_BYTES;
         for (int j = 0; j < VisionCoprocessor::NUM_TAGS; j++)
         {
             if (expectedAimData[i].flags & (1 << j))
@@ -95,13 +93,9 @@ static void initAndRunAutoAimRxTest(
             }
         }
 
-    message.header.dataLength = dataLength;
-        memcpy(
-            message.data + i * dataLength,
-            &expectedAimData[i],
-            dataLength);
+        message.header.dataLength = dataLength;
+        memcpy(message.data + i * dataLength, &expectedAimData[i], dataLength);
     }
-
 
     serial.messageReceiveCallback(message);
 
@@ -138,119 +132,108 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_message_has_target)
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
 {
-    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {
-        TestTurretAimDataMessage{
-            .flags = 0x1,
-            .timestamp = 1234,
-            .pva =
-                {.firerate = VisionCoprocessor::FireRate::ZERO,
-                 .xPos = 1,
-                 .yPos = 2,
-                 .zPos = 3,
-                 .xVel = 4,
-                 .yVel = 5,
-                 .zVel = 6,
-                 .xAcc = 7,
-                 .yAcc = 8,
-                 .zAcc = 9},
-            .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
+        .flags = 0x1,
+        .timestamp = 1234,
+        .pva =
+            {.firerate = VisionCoprocessor::FireRate::ZERO,
+             .xPos = 1,
+             .yPos = 2,
+             .zPos = 3,
+             .xVel = 4,
+             .yVel = 5,
+             .zVel = 6,
+             .xAcc = 7,
+             .yAcc = 8,
+             .zAcc = 9},
+        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
     initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
 {
-    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {
-        TestTurretAimDataMessage{
-            .flags = 0x1,
-            .timestamp = 1234,
-            .pva = {
-                .firerate = VisionCoprocessor::FireRate::ZERO,
-                 .xPos = -1,
-                 .yPos = -2,
-                 .zPos = -3,
-                 .xVel = -4,
-                 .yVel = -5,
-                 .zVel = -6,
-                 .xAcc = -7,
-                 .yAcc = -8,
-                 .zAcc = -9
-                },
-            .timing = {
-                .duration = 0,
-                .pulseInterval = 0,
-                .offset = 0}
-                }};
+    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
+        .flags = 0x1,
+        .timestamp = 1234,
+        .pva =
+            {.firerate = VisionCoprocessor::FireRate::ZERO,
+             .xPos = -1,
+             .yPos = -2,
+             .zPos = -3,
+             .xVel = -4,
+             .yVel = -5,
+             .zVel = -6,
+             .xAcc = -7,
+             .yAcc = -8,
+             .zAcc = -9},
+        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
     initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
 {
-    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {
-            TestTurretAimDataMessage{
-            .flags = 0x1,
-            .timestamp = 1234,
-            .pva =
-                {.firerate = VisionCoprocessor::FireRate::ZERO,
-                 .xPos = -0.45,
-                 .yPos = -0.35,
-                 .zPos = -0.25,
-                 .xVel = -0.15,
-                 .yVel = -0.05,
-                 .zVel = 0.05,
-                 .xAcc = 0.15,
-                 .yAcc = 0.25,
-                 .zAcc = 0.35},
-            .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
+        .flags = 0x1,
+        .timestamp = 1234,
+        .pva =
+            {.firerate = VisionCoprocessor::FireRate::ZERO,
+             .xPos = -0.45,
+             .yPos = -0.35,
+             .zPos = -0.25,
+             .xVel = -0.15,
+             .yVel = -0.05,
+             .zVel = 0.05,
+             .xAcc = 0.15,
+             .yAcc = 0.25,
+             .zAcc = 0.35},
+        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
     initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
 {
-    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {
-        TestTurretAimDataMessage{
-            .flags = 0x1,
-            .timestamp = 1234,
-            .pva = {
-                 .firerate = VisionCoprocessor::FireRate::ZERO,
-                 .xPos = 123456789.0f,
-                 .yPos = 123456789.0f,
-                 .zPos = 123456789.0f,
-                 .xVel = 123456789.0f,
-                 .yVel = 123456789.0f,
-                 .zVel = 123456789.0f,
-                 .xAcc = 123456789.0f,
-                 .yAcc = 123456789.0f,
-                 .zAcc = 123456789.0f,
+    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
+        .flags = 0x1,
+        .timestamp = 1234,
+        .pva =
+            {
+                .firerate = VisionCoprocessor::FireRate::ZERO,
+                .xPos = 123456789.0f,
+                .yPos = 123456789.0f,
+                .zPos = 123456789.0f,
+                .xVel = 123456789.0f,
+                .yVel = 123456789.0f,
+                .zVel = 123456789.0f,
+                .xAcc = 123456789.0f,
+                .yAcc = 123456789.0f,
+                .zAcc = 123456789.0f,
             },
-            .timing = {
-                .duration = 0, 
-                .pulseInterval = 0, 
-                .offset = 0, 
-                }
-            }};
+        .timing = {
+            .duration = 0,
+            .pulseInterval = 0,
+            .offset = 0,
+        }}};
 
     initAndRunAutoAimRxTest(aimData);
 }
 
 TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
 {
-    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {
-        TestTurretAimDataMessage{
-            .flags = 0x1,
-            .timestamp = 1234,
-            .pva = {
-                 .firerate = VisionCoprocessor::FireRate::ZERO,
-                 .xPos = -10,
-                 .yPos = -0.32,
-                 .zPos = 234.523,
-                 .xVel = 12.2,
-                 .yVel = -90,
-                 .zVel = 0,
-                 .xAcc = 76,
-                 .yAcc = 42,
-                 .zAcc = -14.2
-                 },
-            .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
+        .flags = 0x1,
+        .timestamp = 1234,
+        .pva =
+            {.firerate = VisionCoprocessor::FireRate::ZERO,
+             .xPos = -10,
+             .yPos = -0.32,
+             .zPos = 234.523,
+             .xVel = 12.2,
+             .yVel = -90,
+             .zVel = 0,
+             .xAcc = 76,
+             .yAcc = 42,
+             .zAcc = -14.2},
+        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
 
     // if there are > 1 turret, fill in aim data
     for (size_t i = 1; i < aimData.size(); i++)
