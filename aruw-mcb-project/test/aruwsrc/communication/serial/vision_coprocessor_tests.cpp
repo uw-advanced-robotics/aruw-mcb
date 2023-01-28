@@ -93,7 +93,7 @@ static void initAndRunAutoAimRxTest(
                 dataLength += VisionCoprocessor::LEN_FIELDS[j];
             }
         }
-        
+
         message.header.dataLength += dataLength;
         memcpy(message.data + currIndex, &expectedAimData[i], dataLength);
         currIndex += dataLength;
