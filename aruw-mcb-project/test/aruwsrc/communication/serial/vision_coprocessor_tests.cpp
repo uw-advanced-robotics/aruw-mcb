@@ -81,6 +81,7 @@ static void initAndRunAutoAimRxTest(
     message.header.headByte = 0xA5;
     message.messageType = 2;
 
+    int currIndex = 0;
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES +
@@ -92,9 +93,10 @@ static void initAndRunAutoAimRxTest(
                 dataLength += VisionCoprocessor::LEN_FIELDS[j];
             }
         }
-
-        message.header.dataLength = dataLength;
-        memcpy(message.data + i * dataLength, &expectedAimData[i], dataLength);
+        
+        message.header.dataLength += dataLength;
+        memcpy(message.data + currIndex, &expectedAimData[i], dataLength);
+        currIndex += dataLength;
     }
 
     serial.messageReceiveCallback(message);
