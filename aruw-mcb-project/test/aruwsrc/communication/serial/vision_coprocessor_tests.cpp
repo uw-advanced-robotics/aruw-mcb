@@ -82,19 +82,20 @@ static void initAndRunAutoAimRxTest(
     message.header.headByte = 0xA5;
     message.messageType = 2;
 
-    int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES + VisionCoprocessor::messageWidths::TIMESTAMP_BYTES;
-    for (int i = 0; i < VisionCoprocessor::NUM_TAGS; i++)
-    {
-        if (expectedAimData[0].flags & (1 << i))
-        {
-            dataLength += VisionCoprocessor::LEN_FIELDS[i];
-        }
-    }
 
-    message.header.dataLength = dataLength;
 
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
+        int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES + VisionCoprocessor::messageWidths::TIMESTAMP_BYTES;
+        for (int i = 0; i < VisionCoprocessor::NUM_TAGS; i++)
+        {
+            if (expectedAimData[0].flags & (1 << i))
+            {
+                dataLength += VisionCoprocessor::LEN_FIELDS[i];
+            }
+        }
+
+    message.header.dataLength = dataLength;
         memcpy(
             message.data + i * dataLength,
             &expectedAimData[i],
