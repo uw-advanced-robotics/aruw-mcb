@@ -123,7 +123,8 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     int currIndex = messageWidths::FLAGS_BYTES;
     memcpy(&lastAimData[0].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
     currIndex += messageWidths::TIMESTAMP_BYTES;
-    for (int j = 0; j < control::turret::NUM_TURRETS; j++) {
+    for (int j = 0; j < control::turret::NUM_TURRETS; j++)
+    {
         for (int i = 0; i < NUM_TAGS; ++i)
         {
             if (flags & (1 << i))
