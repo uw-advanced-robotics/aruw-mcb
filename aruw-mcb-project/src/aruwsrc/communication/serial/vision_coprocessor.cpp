@@ -123,23 +123,25 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     int currIndex = messageWidths::FLAGS_BYTES;
     memcpy(&lastAimData[0].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
     currIndex += messageWidths::TIMESTAMP_BYTES;
-    for (int i = 0; i < NUM_TAGS; ++i)
-    {
-        if (flags & (1 << i))
+    for (int j = 0; j < control::turret::NUM_TURRETS; j++) {
+        for (int i = 0; i < NUM_TAGS; ++i)
         {
-            switch (i)
+            if (flags & (1 << i))
             {
-                case 0:
-                    memcpy(&lastAimData[0].pva, &message.data[currIndex], LEN_FIELDS[i]);
-                    lastAimData[0].pva.updated = 1;
-                    break;
-                case 1:
-                    memcpy(&lastAimData[0].timing, &message.data[currIndex], LEN_FIELDS[i]);
-                    lastAimData[0].timing.updated = 1;
-                    currIndex += LEN_FIELDS[i];
-                    break;
+                switch (i)
+                {
+                    case 0:
+                        memcpy(&lastAimData[j].pva, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].pva.updated = 1;
+                        break;
+                    case 1:
+                        memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].timing.updated = 1;
+                        currIndex += LEN_FIELDS[i];
+                        break;
+                }
+                currIndex += (int)LEN_FIELDS[i];
             }
-            currIndex += (int)LEN_FIELDS[i];
         }
     }
     return true;
