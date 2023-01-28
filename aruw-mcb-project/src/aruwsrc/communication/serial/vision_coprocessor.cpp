@@ -106,25 +106,16 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    int expectedLength = messageWidths::FLAGS_BYTES + messageWidths::TIMESTAMP_BYTES;
-    uint8_t flags = message.data[0];
-    for (int i = 0; i < NUM_TAGS; i++)
-    {
-        if (flags & (1 << i))
-        {
-            expectedLength += LEN_FIELDS[i];
-        }
-    }
-    if (expectedLength != message.header.dataLength) return false;
-
-    lastAimData[0].pva.updated = 0;
-    lastAimData[0].timing.updated = 0;
-
-    int currIndex = messageWidths::FLAGS_BYTES;
-    memcpy(&lastAimData[0].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
-    currIndex += messageWidths::TIMESTAMP_BYTES;
+    int currIndex = 0;
     for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
+        uint8_t flags = message.data[currIndex];
+        lastAimData[j].pva.updated = 0;
+        lastAimData[j].timing.updated = 0;
+
+        currIndex += messageWidths::FLAGS_BYTES;
+        memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
+        currIndex += messageWidths::TIMESTAMP_BYTES;
         for (int i = 0; i < NUM_TAGS; ++i)
         {
             if (flags & (1 << i))
@@ -138,7 +129,6 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
                     case 1:
                         memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
                         lastAimData[j].timing.updated = 1;
-                        currIndex += LEN_FIELDS[i];
                         break;
                 }
                 currIndex += (int)LEN_FIELDS[i];
