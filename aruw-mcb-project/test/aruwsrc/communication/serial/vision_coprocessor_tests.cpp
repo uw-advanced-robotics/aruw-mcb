@@ -87,11 +87,11 @@ static void initAndRunAutoAimRxTest(
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         int dataLength = VisionCoprocessor::messageWidths::FLAGS_BYTES + VisionCoprocessor::messageWidths::TIMESTAMP_BYTES;
-        for (int i = 0; i < VisionCoprocessor::NUM_TAGS; i++)
+        for (int j = 0; j < VisionCoprocessor::NUM_TAGS; j++)
         {
-            if (expectedAimData[0].flags & (1 << i))
+            if (expectedAimData[i].flags & (1 << j))
             {
-                dataLength += VisionCoprocessor::LEN_FIELDS[i];
+                dataLength += VisionCoprocessor::LEN_FIELDS[j];
             }
         }
 
