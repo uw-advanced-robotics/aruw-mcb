@@ -120,7 +120,23 @@ private:
      */
     void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
-    chassis::SwerveModule modules[4];        
+    chassis::SwerveModule modules[4];  
+
+    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftFrontModule;
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftBackModule;
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> rightFrontModule;
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> rightBackModule;
+
+private:
+#else
+    // individual motors
+    chassis::SwerveModule leftFrontModule;
+    chassis::SwerveModule leftBackModule;
+    chassis::SwerveModule rightFrontModule;
+    chassis::SwerveModule rightBackModule;
+#endif      
 
 };  // class SwerveChassisSubsystem
 

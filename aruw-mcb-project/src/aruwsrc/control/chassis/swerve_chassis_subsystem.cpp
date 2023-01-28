@@ -62,6 +62,10 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
     }
 {
+    modules[LF] = &leftFrontModule;
+    modules[RF] = &rightFrontModule;
+    modules[LB] = &leftBackModule;
+    modules[RB] = &rightBackModule;
 }
 
 void SwerveChassisSubsystem::initialize()
