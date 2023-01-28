@@ -96,9 +96,9 @@ static void initAndRunAutoAimRxTest(
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         memcpy(
-            message.data + i * sizeof(TestTurretAimDataMessage),
+            message.data + i * dataLength,
             &expectedAimData[i],
-            sizeof(TestTurretAimDataMessage));
+            dataLength);
     }
 
 
