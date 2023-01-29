@@ -53,7 +53,10 @@ public:
                    0.0f,
                    1) &&
                frictionWheel.getCurrentFrictionWheelSpeed() >=
-                   frictionWheel.getDesiredFrictionWheelSpeed() * MINIMUM_SPEED_THRESHOLD_FRACTION;
+                   frictionWheel.getDesiredFrictionWheelSpeed() *
+                       MINIMUM_SPEED_THRESHOLD_FRACTION &&
+               frictionWheel.getCurrentFrictionWheelSpeed() <=
+                   frictionWheel.getDesiredFrictionWheelSpeed() * MAXIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
@@ -61,7 +64,8 @@ public:
 private:
     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel;
 
-    static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.8;
+    static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.9;
+    static constexpr float MAXIMUM_SPEED_THRESHOLD_FRACTION = 1.02;
 };
 }  // namespace aruwsrc::control::governor
 
