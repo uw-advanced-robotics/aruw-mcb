@@ -22,10 +22,9 @@
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "tap/drivers.hpp"
+#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
@@ -47,7 +46,7 @@ protected:
     BeybladeCommandTest()
         : t(&d),
           cs(&d),
-          bc(&d, &cs, &t.yawMotor, &oi),
+          bc(&d, &cs, &t.yawMotor, &(d.controlOperatorInterface)),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -59,8 +58,8 @@ protected:
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
         ON_CALL(t.yawMotor, getAngleFromCenter).WillByDefault(ReturnPointee(&yawAngle));
         ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
-        ON_CALL(oi, getChassisXInput()).WillByDefault(ReturnPointee(&x));
-        ON_CALL(oi, getChassisYInput()).WillByDefault(ReturnPointee(&y));
+        ON_CALL(d.controlOperatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
+        ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
         ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));
         ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));
@@ -81,10 +80,9 @@ protected:
                 FloatNear(rotation, 1E-3)));
     }
 
-    tap::Drivers d;
+    aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
-    NiceMock<aruwsrc::control::ControlOperatorInterface> oi;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};
     float yawAngle = 0;
