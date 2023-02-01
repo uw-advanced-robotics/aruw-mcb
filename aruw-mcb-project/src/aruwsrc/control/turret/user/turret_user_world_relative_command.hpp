@@ -68,7 +68,8 @@ public:
      */
     TurretUserWorldRelativeCommand(
         tap::Drivers *drivers,
-        control::ControlOperatorInterface &controlOperatorInterface,
+        float (*getTurretPitchInput) (uint8_t),
+        float (*getTurretYawInput) (uint8_t),
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *chassisImuYawController,
         algorithms::TurretPitchControllerInterface *chassisImuPitchController,

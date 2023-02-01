@@ -26,7 +26,8 @@ namespace aruwsrc::control::turret::user
 {
 TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     tap::Drivers *drivers,
-    control::ControlOperatorInterface& controlOperatorInterface,
+    float (*getTurretPitchInput) (uint8_t),
+    float (*getTurretYawInput) (uint8_t),
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *chassisImuYawController,
     algorithms::TurretPitchControllerInterface *chassisImuPitchController,
@@ -37,7 +38,8 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     uint8_t turretID)
     : tap::control::ComprisedCommand(drivers),
       turretWRChassisImuCommand(
-          controlOperatorInterface,
+          getTurretPitchInput,
+          getTurretYawInput,
           turretSubsystem,
           chassisImuYawController,
           chassisImuPitchController,
@@ -45,7 +47,8 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
           userPitchInputScalar,
           turretID),
       turretWRTurretImuCommand(
-          controlOperatorInterface,
+          getTurretPitchInput,
+          getTurretYawInput,
           turretSubsystem,
           turretImuYawController,
           turretImuPitchController,

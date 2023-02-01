@@ -25,14 +25,16 @@
 namespace aruwsrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
-    control::ControlOperatorInterface &controlOperatorInterface,
+    float (*getTurretPitchInput) (uint8_t),
+    float (*getTurretYawInput) (uint8_t),
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
-    : controlOperatorInterface(controlOperatorInterface),
+    : getTurretPitchInput(),
+      getTurretYawInput(),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
@@ -60,12 +62,12 @@ void TurretUserControlCommand::execute()
 
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
+        userPitchInputScalar * getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
         yawController->getSetpoint() +
-        userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
+        userYawInputScalar * getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);
 }
 

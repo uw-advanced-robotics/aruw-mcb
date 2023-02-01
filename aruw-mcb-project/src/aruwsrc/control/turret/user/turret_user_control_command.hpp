@@ -51,7 +51,8 @@ public:
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
     TurretUserControlCommand(
-        control::ControlOperatorInterface &controlOperatorInterface,
+        float (*getTurretPitchInput) (uint8_t),
+        float (*getTurretYawInput) (uint8_t),
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -72,7 +73,8 @@ public:
     void end(bool) override;
 
 private:
-    control::ControlOperatorInterface &controlOperatorInterface;
+    float (*getTurretPitchInput) (uint8_t);
+    float (*getTurretYawInput) (uint8_t);
     TurretSubsystem *turretSubsystem;
 
     uint32_t prevTime = 0;
