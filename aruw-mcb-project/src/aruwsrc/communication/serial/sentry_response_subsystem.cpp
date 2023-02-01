@@ -26,7 +26,7 @@
 namespace aruwsrc::communication::serial
 {
 SentryResponseSubsystem::SentryResponseSubsystem(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand)
     : tap::control::Subsystem(&drivers),
       drivers(drivers),

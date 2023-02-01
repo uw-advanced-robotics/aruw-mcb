@@ -41,14 +41,14 @@ namespace aruwsrc::communication::serial
 class SentryRequestTransmitter : public modm::pt::Protothread
 {
 public:
-    SentryRequestTransmitter(aruwsrc::Drivers *drivers);
+    SentryRequestTransmitter(tap::Drivers *drivers);
 
     bool send();
 
     void queueRequest(SentryRequestMessageType type);
 
 private:
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
 #ifdef ENV_UNIT_TESTS
 public:
