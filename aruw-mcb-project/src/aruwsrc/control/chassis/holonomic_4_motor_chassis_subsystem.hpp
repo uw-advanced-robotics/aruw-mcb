@@ -75,7 +75,25 @@ public:
 
     void refresh() override;
 
+    /**
+     * Used to index into the desiredWheelRPM matrix and velocityPid array.
+     */
+    enum WheelRPMIndex
+    {
+        LF = 0,
+        RF = 1,
+        LB = 2,
+        RB = 3,
+    };
+
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
+    /**
+     * Stores the desired RPM of each of the motors in a matrix, indexed by WheelRPMIndex
+     */
+    modm::Matrix<float, 4, 1> desiredWheelRPM;
+
+    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
 private:
     /**
