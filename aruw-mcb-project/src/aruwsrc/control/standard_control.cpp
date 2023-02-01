@@ -32,6 +32,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/drivers.hpp"
 
 #include "agitator/constants/agitator_constants.hpp"
 #include "agitator/manual_fire_rate_reselection_manager.hpp"
@@ -300,10 +301,12 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
-    *drivers(),
+    ((tap::Drivers*) (drivers())),
+    drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
