@@ -244,6 +244,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
+    drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
