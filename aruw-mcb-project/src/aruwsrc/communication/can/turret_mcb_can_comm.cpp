@@ -27,7 +27,7 @@
 
 namespace aruwsrc::can
 {
-TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus)
+TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus)
     : canBus(canBus),
       drivers(drivers),
       currProcessingImuData{},
@@ -166,7 +166,7 @@ void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     uint32_t id,
     tap::can::CanBus cB,
     TurretMCBCanComm* msgHandler,
