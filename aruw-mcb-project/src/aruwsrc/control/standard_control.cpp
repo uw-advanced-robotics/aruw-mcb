@@ -243,7 +243,9 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
-    drivers(),
+    static_cast<tap::Drivers*>(drivers()),
+    &(drivers()->controlOperatorInterface.getTurretPitchInput),
+    &getTurretYawInput(turretID),
     &turret,
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
