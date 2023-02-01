@@ -76,9 +76,9 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
-static constexpr float AUTOROTATION_PID_MAX_P = 2'000.0f;
+static constexpr float AUTOROTATION_PID_KP = 6'000.0f;
+static constexpr float AUTOROTATION_PID_KD = 55.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 3'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
@@ -102,6 +102,9 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
  * Distance from center of the front and rear wheels (m).
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
+
+static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
  */
@@ -115,12 +118,12 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.85f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.9f;
 
 /**
  * Fraction between [0, 1], what we multiply user translational input by when beyblading.
  */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.75f;
+static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.70f;
 
 /**
  * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade

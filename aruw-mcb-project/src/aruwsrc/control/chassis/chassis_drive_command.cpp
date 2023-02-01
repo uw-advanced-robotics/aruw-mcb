@@ -25,13 +25,15 @@
 #include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(
+    aruwsrc::Drivers* drivers,
+    HolonomicChassisSubsystem* chassis)
     : drivers(drivers),
       chassis(chassis)
 {

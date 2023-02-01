@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_SUBSYSTEM_HPP_
-#define CHASSIS_SUBSYSTEM_HPP_
+#ifndef HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
+#define HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
@@ -50,22 +50,19 @@ namespace aruwsrc
 namespace chassis
 {
 /**
- * This subsystem encapsulates a chassis with mecanum wheels (with a standard layout, e.g. not
- * swerve drive or similar).
+ * Abstract subsystem for a holonomic chassis
  *
  * The chassis is in a right handed coordinate system with the x coordinate pointing torwards the
  * front of the chassis. As such, when looking down at the robot from above, the positive y
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
  */
-class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
+class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    enum class ChassisType
-    {
-        MECANUM = 0,
-        X_DRIVE = 1,
-    };
+    HolonomicChassisSubsystem(
+        aruwsrc::Drivers* drivers,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -96,17 +93,6 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
-    ChassisSubsystem(
-        aruwsrc::Drivers* drivers,
-        ChassisType chassisType,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
-
-    void initialize() override;
-
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
      * movement. See the class comment for x and y terminology (should be in right hand coordinate
@@ -120,13 +106,13 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    mockable void setDesiredOutput(float x, float y, float r);
+    void virtual setDesiredOutput(float x, float y, float r) = 0;
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    mockable void setZeroRPM();
+    mockable inline void setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -138,8 +124,6 @@ public:
      * @retval a desired rotation speed (wheel speed)
      */
     mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
-
-    void refresh() override;
 
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
@@ -154,8 +138,6 @@ public:
      */
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
-    const char* getName() override { return "Chassis"; }
-
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
      *      where vz is rotational velocity. This is the desired velocity calculated before any
@@ -163,33 +145,14 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    /**
-     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
-     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
-     *      encoders. Units: m/s
-     */
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
-    inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
+    const char* getName() override { return "Chassis"; }
 
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
+    mockable inline float getDesiredRotation() const { return desiredRotation; }
 
-    inline bool allMotorsOnline() const override
-    {
-        return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
-               leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
-    }
-
-    void onHardwareTestStart() override;
-
-    mockable float getDesiredRotation() const { return desiredRotation; }
-
-private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     /**
@@ -203,9 +166,6 @@ private:
         RB = 3,
     };
 
-    // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
-
     /**
      * Stores the desired RPM of each of the motors in a matrix, indexed by WheelRPMIndex
      */
@@ -215,40 +175,11 @@ private:
 
     float desiredRotation = 0;
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
-
-private:
-#else
-    // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
-#endif
-
-    tap::motor::DjiMotor* motors[4];
-
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
-    /**
-     * When you input desired x, y, an r values, this function translates
-     * and sets the RPM of individual chassis motors.
-     */
-    void mecanumDriveCalculate(float x, float y, float r, float maxWheelSpeed);
-
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
-
-    void limitChassisPower();
+    virtual void limitChassisPower() = 0;
 
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
@@ -258,10 +189,11 @@ private:
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
-};  // class ChassisSubsystem
+
+};  // class HolonomicChassisSubsystem
 
 }  // namespace chassis
 
 }  // namespace aruwsrc
 
-#endif  // CHASSIS_SUBSYSTEM_HPP_
+#endif  // HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
