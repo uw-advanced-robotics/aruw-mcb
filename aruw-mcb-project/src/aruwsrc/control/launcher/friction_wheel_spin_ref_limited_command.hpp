@@ -56,7 +56,7 @@ public:
      *      limit will be used to determine the projectile launch speed.
      */
     FrictionWheelSpinRefLimitedCommand(
-        tap::communication::serial::RefSerial *refSerial,
+        tap::Drivers *drivers,
         FrictionWheelSubsystem *frictionWheels,
         float defaultLaunchSpeed,
         bool alwaysUseDefaultLaunchSpeed,
@@ -73,7 +73,7 @@ public:
     const char *getName() const override { return "friction wheel spin ref limited"; }
 
 private:
-    tap::communication::serial::RefSerial *refSerial;
+    tap::Drivers *drivers;
 
     FrictionWheelSubsystem *frictionWheels;
 
