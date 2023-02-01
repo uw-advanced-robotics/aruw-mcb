@@ -90,7 +90,7 @@ public:
 
     void setDesiredState(float metersPerSecond, float radianOutput);
 
-    void scaleAndSet(float scaleCoeff);
+    void scaleAndSetDesiredState(float scaleCoeff);
 
     float calculate(float x, float y, float r);
 
@@ -99,6 +99,8 @@ public:
     float getAngle() const;
 
     void initialize();
+
+    void zeroAzimuth();
 
     void refresh();
 
@@ -137,6 +139,7 @@ private:
     // motors
     Motor driveMotor;
     Motor azimuthMotor;
+    int64_t azimuthZeroOffset = 0;
 
     modm::Pid<float> drivePid;
     modm::Pid<float> azimuthPid;

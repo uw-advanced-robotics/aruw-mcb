@@ -78,6 +78,12 @@ void SwerveModule::initialize()
 {
     driveMotor.initialize();
     azimuthMotor.initialize();
+    zeroAzimuth();
+}
+
+void SwerveModule::zeroAzimuth()
+{
+    azimuthZeroOffset = azimuthMotor.getEncoderUnwrapped();
 }
 
 bool SwerveModule::allMotorsOnline() const
@@ -110,7 +116,6 @@ float SwerveModule::calculate(float x, float y, float r)
     float moveVectorY = y + r * rotationVectorY;
 
     if(moveVectorX==0 && moveVectorY==0)
-    //todo: maybe do smart braking by keeping
     //todo: dont use exact comparison? not sure
     {
         preScaledSpeedSetpoint = 0;
@@ -123,7 +128,7 @@ float SwerveModule::calculate(float x, float y, float r)
     return preScaledSpeedSetpoint;
 }
 
-void SwerveModule::scaleAndSet(float scaleCoeff)
+void SwerveModule::scaleAndSetDesiredState(float scaleCoeff)
 {
     setDesiredState(scaleCoeff*preScaledSpeedSetpoint, preOptimizedRotationSetpoint);
 }
@@ -166,8 +171,8 @@ float SwerveModule::getDriveVelocity() const
  */
 float SwerveModule::getAngle() const
 {
-    return modm::toRadian(azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped()) 
-        / config.azimuthMotorGearing);
+    return modm::toRadian(azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped() 
+        - azimuthZeroOffset) / config.azimuthMotorGearing);
 }
 
 float SwerveModule::mpsToRpm(float mps) const
