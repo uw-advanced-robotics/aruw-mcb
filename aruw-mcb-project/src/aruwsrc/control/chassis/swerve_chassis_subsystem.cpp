@@ -105,7 +105,7 @@ void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, flo
 
     for(int i = 0; i<4; i++)
     {
-        modules[i].scaleAndSet(scaleCoeff);
+        modules[i].scaleAndSetDesiredState(scaleCoeff);
     }
 }
 
