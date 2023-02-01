@@ -28,7 +28,7 @@ using namespace tap::communication::sensors::imu::mpu6500;
 namespace aruwsrc::control::imu
 {
 ImuCalibrateCommand::ImuCalibrateCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     chassis::HolonomicChassisSubsystem *chassis)
     : tap::control::Command(),
