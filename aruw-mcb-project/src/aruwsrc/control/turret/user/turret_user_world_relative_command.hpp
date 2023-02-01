@@ -67,7 +67,8 @@ public:
      * use. Doesn't strictly have to be world relative.
      */
     TurretUserWorldRelativeCommand(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
+        control::ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *chassisImuYawController,
         algorithms::TurretPitchControllerInterface *chassisImuPitchController,

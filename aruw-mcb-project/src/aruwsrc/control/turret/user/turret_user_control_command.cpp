@@ -17,22 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "turret_user_control_command.hpp"
+
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
-
+#include "turret_user_control_command.hpp"
 namespace aruwsrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
-    aruwsrc::Drivers *drivers,
+    control::ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
-    : drivers(drivers),
+    : controlOperatorInterface(controlOperatorInterface),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
@@ -60,12 +60,12 @@ void TurretUserControlCommand::execute()
 
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
+        userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
         yawController->getSetpoint() +
-        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+        userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);
 }
 

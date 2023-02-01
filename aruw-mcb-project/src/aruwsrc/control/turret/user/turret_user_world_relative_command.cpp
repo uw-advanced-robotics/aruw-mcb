@@ -25,7 +25,8 @@
 namespace aruwsrc::control::turret::user
 {
 TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
+    control::ControlOperatorInterface& controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *chassisImuYawController,
     algorithms::TurretPitchControllerInterface *chassisImuPitchController,
@@ -36,7 +37,7 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     uint8_t turretID)
     : tap::control::ComprisedCommand(drivers),
       turretWRChassisImuCommand(
-          drivers,
+          controlOperatorInterface,
           turretSubsystem,
           chassisImuYawController,
           chassisImuPitchController,
@@ -44,7 +45,7 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
           userPitchInputScalar,
           turretID),
       turretWRTurretImuCommand(
-          drivers,
+          controlOperatorInterface,
           turretSubsystem,
           turretImuYawController,
           turretImuPitchController,

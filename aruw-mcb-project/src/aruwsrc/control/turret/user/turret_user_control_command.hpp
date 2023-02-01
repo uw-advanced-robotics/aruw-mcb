@@ -51,7 +51,7 @@ public:
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
     TurretUserControlCommand(
-        aruwsrc::Drivers *drivers,
+        control::ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -72,7 +72,7 @@ public:
     void end(bool) override;
 
 private:
-    aruwsrc::Drivers *drivers;
+    control::ControlOperatorInterface &controlOperatorInterface;
     TurretSubsystem *turretSubsystem;
 
     uint32_t prevTime = 0;

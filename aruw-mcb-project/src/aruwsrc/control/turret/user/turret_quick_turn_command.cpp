@@ -19,8 +19,6 @@
 
 #include "turret_quick_turn_command.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 namespace aruwsrc::control::turret::user
 {
 TurretQuickTurnCommand::TurretQuickTurnCommand(
