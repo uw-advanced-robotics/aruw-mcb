@@ -495,6 +495,8 @@ void setDefaultStandardCommands(aruwsrc::Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    
+    // If going insane from buzzer, comment out this line of code
     buzzer.setDefaultCommand(&lowBatteryCommand);
 }
 

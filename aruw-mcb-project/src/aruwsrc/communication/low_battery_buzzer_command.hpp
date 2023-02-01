@@ -26,8 +26,9 @@
 
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "modm/math/filter/moving_average.hpp"
 
-#define LOW_BATTERY_THRESHOLD 23500
+#define LOW_BATTERY_THRESHOLD_VOLTAGE 23500
 
 namespace aruwsrc::communication
 {
@@ -42,7 +43,7 @@ public:
 
     void execute() override;
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
     void end(bool interrupt) override;
 
@@ -51,6 +52,8 @@ public:
 private:
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer;
     aruwsrc::Drivers* drivers;
+    tap::arch::PeriodicMilliTimer timer;
+    modm::filter::MovingAverage<uint16_t, 500> filter;
 };
 
 }  // namespace aruwsrc::communication

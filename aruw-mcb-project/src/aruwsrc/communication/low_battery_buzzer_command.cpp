@@ -32,20 +32,25 @@ LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
     addSubsystemRequirement(&buzzer);
 }
 
-void LowBatteryBuzzerCommand::initialize() {}
+void LowBatteryBuzzerCommand::initialize()
+{
+    // 10s timer
+    timer.restart(10'000);
+}
 
 void LowBatteryBuzzerCommand::execute()
 {
-    if (drivers->refSerial.getRobotData().chassis.volt < LOW_BATTERY_THRESHOLD)
+    filter.update(drivers->refSerial.getRobotData().chassis.volt);
+}
+
+void LowBatteryBuzzerCommand::end(bool)
+{
+    if (filter.getValue() < LOW_BATTERY_THRESHOLD_VOLTAGE)
     {
         buzzer.playNoise();
     }
-    else
-    {
-        buzzer.stop();
-    }
 }
 
-void LowBatteryBuzzerCommand::end(bool) { buzzer.stop(); }
+bool LowBatteryBuzzerCommand::isFinished() const { return timer.isStopped(); }
 
 }  // namespace aruwsrc::communication
