@@ -29,11 +29,6 @@
 
 #include "hud_indicator.hpp"
 
-namespace tap
-{
-class Drivers;
-}
-
 namespace aruwsrc::control::client_display
 {
 /**
@@ -47,14 +42,12 @@ public:
     /**
      * Construct a ClientDisplayCommand.
      *
-     * @param[in] drivers Global drivers instance.
      * @param[in] refSerialTransmitter Transmitter that stores ref serial transmission state for the
      * protothread that this indicator is used in.
      * @param[in] turretSubsystem Turret used when updating chassis orientation relative to the
      * turret and to print turret angles (if turret chassis relative angles are being printed).
      */
     ChassisOrientationIndicator(
-        tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem);
 
@@ -81,8 +74,6 @@ private:
     static constexpr uint16_t CHASSIS_BARREL_WIDTH = 10;
     /** The length of the animated turret barrel, in pixels. */
     static constexpr uint16_t CHASSIS_BARREL_LENGTH = 90;
-
-    tap::Drivers &drivers;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**

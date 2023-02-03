@@ -59,7 +59,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           agitatorSubsystem,
           imuCalibrateCommand,
           sentryResponseHandler),
-      chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
+      chassisOrientationIndicator(refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
           visionCoprocessor,

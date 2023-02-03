@@ -22,18 +22,14 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 
-#include "tap/drivers.hpp"
-
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
 ChassisOrientationIndicator::ChassisOrientationIndicator(
-    tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem)
     : HudIndicator(refSerialTransmitter),
-      drivers(drivers),
       turretSubsystem(turretSubsystem)
 {
 }
