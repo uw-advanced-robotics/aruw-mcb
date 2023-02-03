@@ -23,19 +23,21 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/drivers.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
 #include "tap/motor/dji_motor.hpp"
 #endif
 
+#include "tap/drivers.hpp"
+
 using namespace tap::gpio;
 
 namespace aruwsrc::control::sentry::drive
 {
 SentryDriveSubsystem::SentryDriveSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch,
     tap::motor::MotorId leftMotorId,

@@ -40,7 +40,7 @@ class SentryDriveSubsystem;
 class SentryAutoDriveComprisedCommand : public tap::control::ComprisedCommand
 {
 public:
-    SentryAutoDriveComprisedCommand(aruwsrc::Drivers *drivers, SentryDriveSubsystem *sentryChassis);
+    SentryAutoDriveComprisedCommand(tap::Drivers *drivers, SentryDriveSubsystem *sentryChassis);
 
     const char *getName() const override { return "sentry random drive"; }
     void initialize() override;
@@ -61,7 +61,7 @@ private:
     /// Speed in wheel RPM at which the sentry will drive to the right side of the rail.
     static constexpr float MOVE_TO_RIGHT_DRIVE_SPEED_RPM = 3'000;
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
     tap::arch::MilliTimeout aggressiveEvadeTimer;
     SentryDriveEvadeCommand aggressiveEvadeCommand;
     SentryDriveEvadeCommand passiveEvadeCommand;
