@@ -84,13 +84,19 @@ public:
 
     inline bool allMotorsOnline() const override
     {
-        return modules[0].allMotorsOnline() &&
-            modules[1].allMotorsOnline() &&
-            modules[2].allMotorsOnline() &&
-            modules[3].allMotorsOnline();
+        return modules[0]->allMotorsOnline() &&
+            modules[1]->allMotorsOnline() &&
+            modules[2]->allMotorsOnline() &&
+            modules[3]->allMotorsOnline();
     }
 
-
+    inline void setZeroRPM() override
+    {
+        modules[0]->setZeroRPM();
+        modules[1]->setZeroRPM();
+        modules[2]->setZeroRPM();
+        modules[3]->setZeroRPM();
+    }
 
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
@@ -106,7 +112,7 @@ public:
     /**
      * Stores the desired state of each of the modules in a matrix, indexed by ModuleIndex
      */
-    modm::Matrix<float, 4, 2> desiredModuleStates;
+    modm::Matrix<float, 4, 1> desiredModuleSpeeds;
 
     modm::Matrix<float, 3, 8> swerveWheelVelToChassisVelMat;
 
@@ -120,7 +126,7 @@ private:
      */
     void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
-    chassis::SwerveModule modules[4];  
+    chassis::SwerveModule* modules[4];  
 
     #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

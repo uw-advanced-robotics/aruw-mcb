@@ -100,13 +100,13 @@ public:
 
     void initialize();
 
-    void zeroAzimuth();
+    void calibrateAzimuth();
 
     void refresh();
 
     float calculateTotalModuleError() const;
 
-    
+    void setZeroRPM();
 
     float getAzimuthError() const;
     float getDriveError() const;

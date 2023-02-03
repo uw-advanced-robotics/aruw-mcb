@@ -78,12 +78,17 @@ void SwerveModule::initialize()
 {
     driveMotor.initialize();
     azimuthMotor.initialize();
-    zeroAzimuth();
+    calibrateAzimuth();
 }
 
-void SwerveModule::zeroAzimuth()
+void SwerveModule::calibrateAzimuth()
 {
     azimuthZeroOffset = azimuthMotor.getEncoderUnwrapped();
+}
+
+void SwerveModule::setZeroRPM()
+{
+    speedSetpoint = 0;
 }
 
 bool SwerveModule::allMotorsOnline() const
@@ -109,7 +114,10 @@ float SwerveModule::getDriveError() const
     return drivePid.getLastError();
 }
 
-
+/**
+ * computes initial candidate for module state
+ * @return pre-scaled module speed
+*/
 float SwerveModule::calculate(float x, float y, float r)
 {
     float moveVectorX = x + r * rotationVectorX;

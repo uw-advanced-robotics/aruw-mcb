@@ -57,6 +57,8 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
 {
 }
 
+HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
+
 float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
     // P
@@ -102,11 +104,6 @@ chassisRotationDesiredWheelspeed)
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-}
-
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
-{
-    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
 }  // namespace chassis

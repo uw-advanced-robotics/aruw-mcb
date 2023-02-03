@@ -64,6 +64,8 @@ public:
         aruwsrc::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
+    virtual ~HolonomicChassisSubsystem();
+
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
      */
@@ -106,13 +108,13 @@ public:
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    void virtual setDesiredOutput(float x, float y, float r) = 0;
+    virtual void setDesiredOutput(float x, float y, float r) = 0;
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    mockable inline void setZeroRPM() { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
+    virtual void setZeroRPM() = 0;
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
@@ -139,23 +141,17 @@ public:
     mockable float calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed);
 
     /**
-     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
-     *      where vz is rotational velocity. This is the desired velocity calculated before any
-     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
-     * @note Equations slightly modified from this paper:
-     *      https://www.hindawi.com/journals/js/2015/347379/.
-     */
-    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
-
-    /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+    virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
 
     const char* getName() override { return "Chassis"; }
+
     virtual bool allMotorsOnline() const override {return false;};
+
+    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 

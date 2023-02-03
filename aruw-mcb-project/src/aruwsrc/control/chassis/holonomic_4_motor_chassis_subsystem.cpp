@@ -218,6 +218,11 @@ modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChas
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
 }
 
+modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
+}
+
 }  // namespace chassis
 
 }  // namespace aruwsrc
