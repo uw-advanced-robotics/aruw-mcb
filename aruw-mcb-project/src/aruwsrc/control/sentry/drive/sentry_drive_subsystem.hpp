@@ -36,11 +36,6 @@
 
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
-
 namespace aruwsrc::control::sentry::drive
 {
 class SentryDriveSubsystem : public tap::control::chassis::ChassisSubsystemInterface
@@ -69,7 +64,7 @@ public:
     static constexpr float MINIMUM_SENTRY_SPEED_MULTIPLIER = 0.1f;
 
     SentryDriveSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         tap::gpio::Digital::InputPin leftLimitSwitch,
         tap::gpio::Digital::InputPin rightLimitSwitch,
         tap::motor::MotorId leftMotorId = LEFT_MOTOR_ID,

@@ -20,8 +20,8 @@
 #include "sentry_auto_drive_comprised_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 #include "sentry_drive_subsystem.hpp"
@@ -31,7 +31,7 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::sentry::drive
 {
 SentryAutoDriveComprisedCommand::SentryAutoDriveComprisedCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     SentryDriveSubsystem *sentryChassis)
     : tap::control::ComprisedCommand(drivers),
       drivers(drivers),

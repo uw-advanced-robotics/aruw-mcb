@@ -21,19 +21,19 @@
 
 #include "tap/communication/serial/remote.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 #include "sentry_drive_subsystem.hpp"
+
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using tap::control::Subsystem;
 
 namespace aruwsrc::control::sentry::drive
 {
 SentryDriveManualCommand::SentryDriveManualCommand(
-    aruwsrc::Drivers* drivers,
+    control::ControlOperatorInterface* controlOperatorInterface,
     SentryDriveSubsystem* subsystem)
     : Command(),
-      drivers(drivers),
+      controlOperatorInterface(controlOperatorInterface),
       subsystemSentryDrive(subsystem)
 {
     addSubsystemRequirement(dynamic_cast<Subsystem*>(subsystem));
@@ -43,7 +43,7 @@ void SentryDriveManualCommand::initialize() {}
 
 void SentryDriveManualCommand::execute()
 {
-    subsystemSentryDrive->setDesiredRpm(drivers->controlOperatorInterface.getSentrySpeedInput());
+    subsystemSentryDrive->setDesiredRpm(controlOperatorInterface->getSentrySpeedInput());
 }
 
 void SentryDriveManualCommand::end(bool) { subsystemSentryDrive->setDesiredRpm(0); }

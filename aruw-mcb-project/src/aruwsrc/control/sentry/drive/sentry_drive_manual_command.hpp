@@ -21,11 +21,7 @@
 #define SENTRY_DRIVE_MANUAL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 namespace aruwsrc::control::sentry::drive
 {
@@ -34,7 +30,7 @@ class SentryDriveSubsystem;
 class SentryDriveManualCommand : public tap::control::Command
 {
 public:
-    SentryDriveManualCommand(aruwsrc::Drivers* drivers, SentryDriveSubsystem* subsystem);
+    SentryDriveManualCommand(ControlOperatorInterface* controlOperatorInterface, SentryDriveSubsystem* subsystem);
 
     void initialize() override;
 
@@ -47,7 +43,7 @@ public:
     const char* getName() const override { return "sentry drive manual"; }
 
 private:
-    aruwsrc::Drivers* drivers;
+    ControlOperatorInterface* controlOperatorInterface;
 
     SentryDriveSubsystem* subsystemSentryDrive;
 };
