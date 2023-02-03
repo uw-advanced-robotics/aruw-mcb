@@ -155,7 +155,7 @@ ClientDisplaySubsystem clientDisplay(drivers());
 TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
 OttoBallisticsSolver ballisticsSolver(
-    *drivers(),
+    drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,
     frictionWheels,
@@ -353,6 +353,7 @@ aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*dri
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *((tap::Drivers*) drivers()),
+    drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
     &hopperCover,

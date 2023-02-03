@@ -101,6 +101,7 @@ public:
     ClientDisplayCommand(
         tap::Drivers &drivers,
         tap::control::CommandScheduler &commandScheduler,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -126,10 +127,9 @@ public:
 
 private:
     tap::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
-
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-
     BooleanHudIndicators booleanHudIndicators;
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;

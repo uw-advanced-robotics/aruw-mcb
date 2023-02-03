@@ -20,9 +20,9 @@
 #include "client_display_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "tap/drivers.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 #include "client_display_subsystem.hpp"
@@ -34,6 +34,7 @@ namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
     tap::Drivers &drivers,
+    tap::control::CommandScheduler &commandScheduler,
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
@@ -50,9 +51,10 @@ ClientDisplayCommand::ClientDisplayCommand(
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
+      commandScheduler(commandScheduler),
       refSerialTransmitter(&drivers),
       booleanHudIndicators(
-          drivers,
+          commandScheduler,
           refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,

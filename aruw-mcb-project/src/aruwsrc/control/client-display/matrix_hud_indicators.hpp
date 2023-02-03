@@ -86,6 +86,7 @@ public:
      */
     MatrixHudIndicators(
         tap::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -200,6 +201,8 @@ private:
     };
 
     tap::Drivers &drivers;
+
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
 
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 
