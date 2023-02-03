@@ -52,7 +52,7 @@ public:
      */
     CVMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        communication::serial::VisionCoprocessor *visionCoprocessor);
 
     void draw() override;
 
@@ -70,6 +70,7 @@ private:
 
     static constexpr int CV_MENU_ID = 8;
 
+    communication::serial::VisionCoprocessor visionCoprocessor;
     aruwsrc::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler verticalScroll;
 

@@ -42,7 +42,7 @@ MainMenu::MainMenu(
       imuMenu(stack, &drivers->mpu6500),
       turretStatusMenuBus1(stack, drivers->turretMCBCanCommBus1),
       turretStatusMenuBus2(stack, drivers->turretMCBCanCommBus2),
-      aboutMenu(stack, drivers)
+      aboutMenu(stack)
 {
 }
 
@@ -174,7 +174,7 @@ void MainMenu::addTurretMCBMenuBus2Callback()
 
 void MainMenu::addAboutMenuCallback()
 {
-    AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack(), drivers);
+    AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
     getViewStack()->push(abtm);
 }
 }  // namespace display

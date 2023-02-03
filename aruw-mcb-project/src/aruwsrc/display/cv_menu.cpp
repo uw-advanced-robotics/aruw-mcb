@@ -27,7 +27,7 @@ namespace aruwsrc::display
 {
 CVMenu::CVMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::Drivers *drivers)
+    communication::serial::VisionCoprocessor *visionCoprocessor)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, CV_MENU_ID),
       drivers(drivers),
       verticalScroll(
