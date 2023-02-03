@@ -56,7 +56,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 {
     const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
-    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
+    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;
@@ -103,15 +103,21 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
+
         ballistics::MeasuredKinematicState targetState = {
             .position =
-                {aimData.xPos - turretPosition.x,
-                 aimData.yPos - turretPosition.y,
-                 aimData.zPos - turretPosition.z},
-            .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
+                {aimData.pva.xPos - turretPosition.x,
+                 aimData.pva.yPos - turretPosition.y,
+                 aimData.pva.zPos - turretPosition.z},
+            .velocity =
+                {aimData.pva.xVel - chassisVel.x,
+                 aimData.pva.yVel - chassisVel.y,
+                 aimData.pva.zVel},
             .acceleration =
-                {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
-                                                             // acceleration from IMU
+                {aimData.pva.xAcc,
+                 aimData.pva.yAcc,
+                 aimData.pva.zAcc},  // TODO consider using chassis
+                                     // acceleration from IMU
         };
 
         // time in microseconds to project the target position ahead by

@@ -110,7 +110,7 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_not_ready_zero_fire
         .WillByDefault(Return(true));
     ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
-    aimData.firerate = VisionCoprocessor::FireRate::ZERO;
+    aimData.pva.firerate = VisionCoprocessor::FireRate::ZERO;
 
     EXPECT_EQ(FireRateReadinessState::NOT_READY, fireRateManager.getFireRateReadinessState());
 }
@@ -121,15 +121,15 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_ready_nonzero_firer
         .WillByDefault(Return(true));
     ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
-    aimData.firerate = VisionCoprocessor::FireRate::LOW;
+    aimData.pva.firerate = VisionCoprocessor::FireRate::LOW;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
-    aimData.firerate = VisionCoprocessor::FireRate::MEDIUM;
+    aimData.pva.firerate = VisionCoprocessor::FireRate::MEDIUM;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
-    aimData.firerate = VisionCoprocessor::FireRate::HIGH;
+    aimData.pva.firerate = VisionCoprocessor::FireRate::HIGH;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
@@ -142,7 +142,7 @@ class AutoAimFireRateManagerTestParameterized : public AutoAimFireRateManagerTes
 {
     void SetUp() override
     {
-        aimData.firerate = std::get<1>(GetParam());
+        aimData.pva.firerate = std::get<1>(GetParam());
         AutoAimFireRateManagerTest::SetUp();
     }
 };
