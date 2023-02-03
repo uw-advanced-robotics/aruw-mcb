@@ -31,7 +31,7 @@ namespace aruwsrc::control::buzzer
 class BuzzerSubsystem : public tap::control::Subsystem
 {
 public:
-    BuzzerSubsystem(aruwsrc::Drivers* drivers);
+    BuzzerSubsystem(tap::Drivers* drivers);
 
     const char* getName() override { return "Buzzer"; }
 
