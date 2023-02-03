@@ -31,6 +31,11 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::control
+{
+class ControlOperatorInterface;
+}
+
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
@@ -67,7 +72,8 @@ public:
      * use. Doesn't strictly have to be world relative.
      */
     TurretUserWorldRelativeCommand(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
+        ControlOperatorInterface& controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *chassisImuYawController,
         algorithms::TurretPitchControllerInterface *chassisImuPitchController,
