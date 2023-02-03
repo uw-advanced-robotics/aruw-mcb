@@ -28,6 +28,8 @@
 
 #include "modm/processing/resumable.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
 #include "hud_indicator.hpp"
 #include "reticle_indicator.hpp"
 

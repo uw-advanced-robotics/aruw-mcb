@@ -351,7 +351,8 @@ aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*dri
 
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
+    *((tap::Drivers*) drivers()),
+    drivers()->visionCoprocessor,
     clientDisplay,
     &hopperCover,
     frictionWheels,
