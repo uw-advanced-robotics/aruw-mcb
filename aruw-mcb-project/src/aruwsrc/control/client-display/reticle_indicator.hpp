@@ -28,7 +28,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -52,7 +52,7 @@ public:
      * @param[in] drivers Global drivers instance.
      */
     ReticleIndicator(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -94,7 +94,7 @@ private:
     /** The color of the verticle line that connects the horizontal reticle lines. */
     static constexpr Tx::GraphicColor RETICLE_VERTICAL_COLOR = Tx::GraphicColor::YELLOW;
 
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     /**
      * Array of `Graphic5Message`s that will be used to send all of the reticle related graphics.

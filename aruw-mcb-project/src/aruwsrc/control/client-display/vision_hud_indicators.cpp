@@ -21,17 +21,17 @@
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
 VisionHudIndicators::VisionHudIndicators(
-    aruwsrc::Drivers &drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
-      drivers(drivers)
+      visionCoprocessor(visionCoprocessor)
 {
 }
 
@@ -57,12 +57,12 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
     RF_BEGIN(2);
 
     {
-        bool hasTarget = drivers.visionCoprocessor.isCvOnline() &&
-                         drivers.visionCoprocessor.getSomeTurretHasTarget();
+        bool hasTarget = visionCoprocessor.isCvOnline() &&
+                         visionCoprocessor.getSomeTurretHasTarget();
 
         if (hasTarget)
         {
-            bool shotTimingMode = drivers.visionCoprocessor.getSomeTurretUsingTimedShots();
+            bool shotTimingMode = visionCoprocessor.getSomeTurretUsingTimedShots();
             newVisionIndicatorColor =
                 shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
         }

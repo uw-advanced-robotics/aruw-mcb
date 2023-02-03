@@ -44,7 +44,7 @@ namespace tap::control
 class Subsystem;
 }
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -98,7 +98,8 @@ public:
      * movement state of the sentry.
      */
     ClientDisplayCommand(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -123,7 +124,9 @@ public:
     bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
+
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
 
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 

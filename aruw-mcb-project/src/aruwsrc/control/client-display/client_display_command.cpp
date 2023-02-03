@@ -22,7 +22,8 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 #include "client_display_subsystem.hpp"
 #include "hud_indicator.hpp"
@@ -32,7 +33,8 @@ using namespace tap::control;
 namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -47,6 +49,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : Command(),
       drivers(drivers),
+      visionCoprocessor(visionCoprocessor),
       refSerialTransmitter(&drivers),
       booleanHudIndicators(
           drivers,
@@ -59,6 +62,7 @@ ClientDisplayCommand::ClientDisplayCommand(
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
+          visionCoprocessor,
           refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
@@ -69,7 +73,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(drivers, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
 }
