@@ -57,7 +57,7 @@ protected:
               &ballisticsSolver,
               0,
               0),
-          fireRateManager(drivers, turretCvCommand, 0)
+          fireRateManager(tapDrivers, drivers.visionCoprocessor, drivers.commandScheduler, turretCvCommand, 0)
     {
     }
 
@@ -67,6 +67,7 @@ protected:
     }
 
     aruwsrc::Drivers drivers;
+    tap::Drivers tapDrivers;
 
 private:
     NiceMock<tap::mock::MotorInterfaceMock> yawM;
