@@ -19,12 +19,12 @@
 
 #include "sentry_otto_kf_odometry_2d_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 SentryOttoKFOdometry2DSubsystem::SentryOttoKFOdometry2DSubsystem(
-    aruwsrc::Drivers& drivers,
+    tap::Drivers& drivers,
     const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
     const aruwsrc::control::turret::TurretSubsystem& turret)
     : Subsystem(&drivers),

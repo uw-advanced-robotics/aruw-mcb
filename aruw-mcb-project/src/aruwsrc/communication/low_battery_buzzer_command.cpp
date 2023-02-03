@@ -25,7 +25,7 @@ namespace aruwsrc::communication
 {
 LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
-    aruwsrc::Drivers* drivers)
+    tap::Drivers* drivers)
     : buzzer(buzzer),
       drivers(drivers)
 {

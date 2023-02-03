@@ -57,7 +57,7 @@ public:
      * qualify this class as an `Odometry2DInterface`.
      */
     SentryChassisKFOdometry(
-        aruwsrc::Drivers& drivers,
+        tap::Drivers& drivers,
         const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
         const aruwsrc::control::turret::TurretSubsystem& turret);
 

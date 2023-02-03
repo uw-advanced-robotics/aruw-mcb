@@ -36,7 +36,7 @@ class SentryResponseHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
 public:
-    SentryResponseHandler(aruwsrc::Drivers &drivers);
+    SentryResponseHandler(tap::Drivers &drivers);
 
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
@@ -45,7 +45,7 @@ public:
     inline bool getSentryMoving() const { return this->sentryMoving; }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     bool sentryMoving = true;
 };

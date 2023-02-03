@@ -47,11 +47,13 @@ class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterfa
 {
 public:
     CvOnTargetGovernor(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
         CvOnTargetGovernorMode mode)
         : drivers(drivers),
+          visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand),
           launchTimer(launchTimer),
           mode(mode)
@@ -71,7 +73,7 @@ public:
      */
     mockable bool isGovernorGating() const
     {
-        bool isCvOnline = drivers.visionCoprocessor.isCvOnline();
+        bool isCvOnline = visionCoprocessor.isCvOnline();
 
         bool isCvRunning = drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
 
@@ -132,7 +134,8 @@ public:
     }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;

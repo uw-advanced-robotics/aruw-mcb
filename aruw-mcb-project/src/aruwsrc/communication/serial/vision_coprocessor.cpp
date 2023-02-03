@@ -43,7 +43,7 @@ MODM_ISR(EXTI0)
 }
 #endif
 
-VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
+VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),
