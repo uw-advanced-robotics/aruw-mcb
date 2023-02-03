@@ -310,10 +310,12 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
-    *drivers(),
+    ((tap::Drivers*) (drivers())),
+    drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,

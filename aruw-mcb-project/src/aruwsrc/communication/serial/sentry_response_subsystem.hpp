@@ -47,13 +47,13 @@ public:
      * check if the robot is driving or not.
      */
     SentryResponseSubsystem(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand);
 
     void refresh() override;
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
     aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand;
 
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
