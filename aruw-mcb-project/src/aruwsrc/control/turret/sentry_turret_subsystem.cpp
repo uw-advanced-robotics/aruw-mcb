@@ -24,7 +24,7 @@
 namespace aruwsrc::control::turret
 {
 SentryTurretSubsystem::SentryTurretSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers *drivers,
     tap::motor::MotorInterface* pitchMotor,
     tap::motor::MotorInterface* yawMotor,
     const TurretMotorConfig& pitchMotorConfig,
