@@ -44,10 +44,9 @@ class BeybladeCommandTest : public Test, public WithParamInterface<std::tuple<fl
 {
 protected:
     BeybladeCommandTest()
-        : d(),
-          t(&d),
+        : t(&d),
           cs(&d),
-          bc(&d, &cs, &t.yawMotor),
+          bc(&d, &cs, &t.yawMotor, &(d.controlOperatorInterface)),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))

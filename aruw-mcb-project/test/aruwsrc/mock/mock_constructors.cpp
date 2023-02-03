@@ -72,7 +72,7 @@ BeybladeCommandMock::BeybladeCommandMock(
     aruwsrc::Drivers *drivers,
     chassis::HolonomicChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor)
-    : BeybladeCommand(drivers, chassis, yawMotor)
+    : BeybladeCommand(drivers, chassis, yawMotor, &(drivers->controlOperatorInterface))
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
@@ -80,7 +80,7 @@ BeybladeCommandMock::~BeybladeCommandMock() {}
 ChassisDriveCommandMock::ChassisDriveCommandMock(
     aruwsrc::Drivers *d,
     chassis::HolonomicChassisSubsystem *cs)
-    : chassis::ChassisDriveCommand(d, cs)
+    : chassis::ChassisDriveCommand(d, &(d->controlOperatorInterface), cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}

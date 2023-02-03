@@ -19,7 +19,9 @@
 
 #include "chassis_rel_drive.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 
@@ -28,13 +30,14 @@ using namespace tap::algorithms;
 namespace aruwsrc::chassis
 {
 void ChassisRelDrive::computeDesiredUserTranslation(
-    aruwsrc::Drivers *drivers,
+    aruwsrc::control::ControlOperatorInterface *operatorInterface,
+    tap::Drivers *drivers,
     HolonomicChassisSubsystem *chassis,
     float chassisRotation,
     float *chassisXDesiredWheelspeed,
     float *chassisYDesiredWheelspeed)
 {
-    if (drivers == nullptr || chassis == nullptr || chassisXDesiredWheelspeed == nullptr ||
+    if (drivers == nullptr || operatorInterface == nullptr || chassis == nullptr || chassisXDesiredWheelspeed == nullptr ||
         chassisYDesiredWheelspeed == nullptr)
     {
         return;
@@ -49,24 +52,26 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
-        drivers->controlOperatorInterface.getChassisXInput(),
+        operatorInterface -> getChassisXInput(),
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
-        drivers->controlOperatorInterface.getChassisYInput(),
+        operatorInterface -> getChassisYInput(),
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 }
 
-void ChassisRelDrive::onExecute(aruwsrc::Drivers *drivers, HolonomicChassisSubsystem *chassis)
+void ChassisRelDrive::onExecute(aruwsrc::control::ControlOperatorInterface *operatorInterface,
+    tap::Drivers *drivers, HolonomicChassisSubsystem *chassis)
 {
-    float chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput();
+    float chassisRotationDesiredWheelspeed = operatorInterface -> getChassisRInput();
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;
 
     computeDesiredUserTranslation(
+        operatorInterface,
         drivers,
         chassis,
         chassisRotationDesiredWheelspeed,

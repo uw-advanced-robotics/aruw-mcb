@@ -31,10 +31,7 @@
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -47,7 +44,7 @@ class XDriveChassisSubsystem : public Holonomic4MotorChassisSubsystem
 {
 public:
     XDriveChassisSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,

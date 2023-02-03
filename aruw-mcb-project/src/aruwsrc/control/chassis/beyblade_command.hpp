@@ -25,10 +25,8 @@
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/control/control_operator_interface.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -41,9 +39,10 @@ class BeybladeCommand : public tap::control::Command
 {
 public:
     BeybladeCommand(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
-        const aruwsrc::control::turret::TurretMotor* yawMotor);
+        const aruwsrc::control::turret::TurretMotor* yawMotor,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface);
 
     /**
      * Sets rotational input target on Ramp
@@ -67,9 +66,11 @@ private:
 
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
+
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis

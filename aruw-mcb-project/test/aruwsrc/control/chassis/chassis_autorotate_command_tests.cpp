@@ -65,7 +65,7 @@ class TurretOfflineTest : public ChassisAutorotateCommandTest,
 
 TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(drivers.controlOperatorInterface) ,&chassis, &turret.yawMotor);
 
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
@@ -88,13 +88,13 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 
 TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(drivers.controlOperatorInterface), &chassis, &turret.yawMotor);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
 }
 
 TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(drivers.controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
@@ -104,7 +104,7 @@ TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 
 TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers,&(drivers.controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_FALSE(cac.isFinished());
 }
@@ -141,7 +141,7 @@ public:
                                  -M_PI,
                                  M_PI)
                                  .getValue()),
-          cac(&drivers, &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
+          cac(&drivers, &(drivers.controlOperatorInterface), &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
           turretAngleActual(GetParam().yawAngle, 0, M_TWOPI)
     {
     }
