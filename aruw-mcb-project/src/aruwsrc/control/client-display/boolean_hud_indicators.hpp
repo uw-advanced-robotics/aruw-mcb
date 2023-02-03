@@ -32,7 +32,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -60,7 +60,7 @@ public:
      * movement state of the sentry.
      */
     BooleanHudIndicators(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -143,7 +143,7 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
         };
 
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.

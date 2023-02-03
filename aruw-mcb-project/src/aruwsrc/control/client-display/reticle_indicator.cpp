@@ -21,14 +21,14 @@
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
 ReticleIndicator::ReticleIndicator(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers)

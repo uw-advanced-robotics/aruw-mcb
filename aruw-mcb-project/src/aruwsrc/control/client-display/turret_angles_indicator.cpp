@@ -23,15 +23,13 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 using namespace tap::communication::serial;
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::client_display
 {
 TurretAnglesIndicator::TurretAnglesIndicator(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem)
     : HudIndicator(refSerialTransmitter),
