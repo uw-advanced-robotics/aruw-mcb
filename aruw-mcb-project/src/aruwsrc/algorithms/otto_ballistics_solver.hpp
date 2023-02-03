@@ -34,9 +34,9 @@ namespace aruwsrc::control::turret
 class RobotTurretSubsystem;
 }
 
-namespace aruwsrc
+namespace aruwsrc::serial
 {
-class Drivers;
+class VisionCoprocessor;
 }
 
 namespace aruwsrc::control::launcher
@@ -106,6 +106,7 @@ public:
     }
 
     /**
+     * @param[in] visionCoprocessor Pointer to a vision coprocessor object.
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
@@ -116,7 +117,7 @@ public:
      * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
-        const aruwsrc::Drivers &drivers,
+        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -136,7 +137,7 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const Drivers &drivers;
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;

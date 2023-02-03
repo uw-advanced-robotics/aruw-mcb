@@ -22,7 +22,7 @@
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 
 namespace aruwsrc::can

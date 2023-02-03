@@ -20,14 +20,14 @@
 #include "otto_chassis_world_yaw_observer.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
     : drivers(drivers),
       turretSubsystem(turretSubsystem)
