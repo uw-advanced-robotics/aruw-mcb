@@ -49,7 +49,8 @@ protected:
           turretSubsystem(&drivers),
           ballisticsSolver(drivers, odometry, turretSubsystem, launcher, 0, 0),
           turretCvCommand(
-              &drivers,
+              &drivers.visionCoprocessor,
+              &drivers.controlOperatorInterface,
               &turretSubsystem,
               &yawController,
               &pitchController,
