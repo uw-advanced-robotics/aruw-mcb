@@ -60,7 +60,7 @@ public:
 
     inline uint32_t getFireRatePeriod() final
     {
-        auto fireRate = drivers.visionCoprocessor.getLastAimData(turretID).firerate;
+        auto fireRate = drivers.visionCoprocessor.getLastAimData(turretID).pva.firerate;
         switch (fireRate)
         {
             case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:
@@ -91,7 +91,7 @@ public:
             return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
-        if (drivers.visionCoprocessor.getLastAimData(turretID).firerate ==
+        if (drivers.visionCoprocessor.getLastAimData(turretID).pva.firerate ==
             aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
         {
             return control::agitator::FireRateReadinessState::NOT_READY;

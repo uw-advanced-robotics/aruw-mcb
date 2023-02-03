@@ -65,7 +65,7 @@ TEST_F(
     getCurrentLaunchInclination_no_target_from_coprocessor_gives_no_target_inclination)
 {
     VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = 0;
+    aimData.pva.updated = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -78,7 +78,7 @@ TEST_F(
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_retrieves_data_for_specified_turret)
 {
     VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = 0;
+    aimData.pva.updated = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(1)).WillOnce(ReturnPointee(&aimData));
 
@@ -91,8 +91,8 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_retrieves_data_for_sp
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_valid_non_timed_target_returns_ungated)
 {
     VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = 1;
-    aimData.recommendUseTimedShots = 0;
+    aimData.pva.updated = 1;
+    aimData.timing.updated = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -105,11 +105,11 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_valid_non_timed_targe
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns_deny)
 {
     VisionCoprocessor::TurretAimData aimData;
-    aimData.hasTarget = 1;
-    aimData.recommendUseTimedShots = 1;
-    aimData.targetHitTimeOffset = 100;
-    aimData.targetIntervalDuration = 100;
-    aimData.targetPulseInterval = 0;
+    aimData.pva.updated = 1;
+    aimData.timing.updated = 1;
+    aimData.timing.offset = 100;
+    aimData.timing.duration = 100;
+    aimData.timing.pulseInterval = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -135,21 +135,29 @@ static constexpr uint32_t FLOATING_POINT_FUDGE_MICROS = 1;
 
 namespace auto_aim  // Must be in a namespace so the operator<< can be discovered by googletest
 {
+struct TestParamsPositionData
+{
+    bool updated;
+};
+struct TestParamsTimingData
+{
+    uint32_t duration;
+    uint32_t pulseInterval;
+    uint32_t offset;
+    bool updated;
+};
+
 struct TestParamsAimData
 {
-    bool hasTarget;
+    TestParamsPositionData pva;
     uint32_t timestamp;
-
-    bool recommendUseTimedShots;
-    uint32_t targetHitTimeOffset;
-    uint32_t targetPulseInterval;
-    uint32_t targetIntervalDuration;
+    TestParamsTimingData timing;
 
     friend std::ostream& operator<<(std::ostream& os, const TestParamsAimData& p)
     {
-        return os << "{" << p.hasTarget << ", " << p.timestamp << ", " << p.recommendUseTimedShots
-                  << ", " << p.targetHitTimeOffset << ", " << p.targetPulseInterval << ", "
-                  << p.targetIntervalDuration << "}";
+        return os << "{" << p.pva.updated << ", " << p.timestamp << ", " << p.timing.updated << ", "
+                  << p.timing.offset << ", " << p.timing.pulseInterval << ", "
+                  << p.timing.pulseInterval << "}";
     }
 };
 
@@ -192,27 +200,33 @@ TEST_P(
     clock.time = TIME_MICROS / 1000;
 
     VisionCoprocessor::TurretAimData aimData = {
-        .xPos{0},
-        .yPos{0},
-        .zPos{0},
+        .pva =
+            {
+                .firerate{VisionCoprocessor::FireRate::ZERO},
 
-        .xVel{0},
-        .yVel{0},
-        .zVel{0},
+                .xPos{0},
+                .yPos{0},
+                .zPos{0},
 
-        .xAcc{0},
-        .yAcc{0},
-        .zAcc{0},
+                .xVel{0},
+                .yVel{0},
+                .zVel{0},
 
-        .hasTarget{params.aimData.hasTarget},
+                .xAcc{0},
+                .yAcc{0},
+                .zAcc{0},
+
+                .updated{params.aimData.pva.updated},
+            },
         .timestamp{params.aimData.timestamp},
 
-        .firerate{VisionCoprocessor::FireRate::ZERO},
-
-        .recommendUseTimedShots{params.aimData.recommendUseTimedShots},
-        .targetHitTimeOffset{params.aimData.targetHitTimeOffset},
-        .targetPulseInterval{params.aimData.targetPulseInterval},
-        .targetIntervalDuration{params.aimData.targetIntervalDuration},
+        .timing =
+            {
+                .duration{params.aimData.timing.duration},
+                .pulseInterval{params.aimData.timing.pulseInterval},
+                .offset{params.aimData.timing.offset},
+                .updated{params.aimData.timing.updated},
+            },
     };
     EXPECT_CALL(visionCoprocessor, getLastAimData(params.turretNumber))
         .WillOnce(ReturnPointee(&aimData));
@@ -244,14 +258,17 @@ static constexpr TestParams TEST_FAILED_BALISTICS_DENIES_FIRE{
     .ballisticsSuccess = false,
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = 2,
-    },
+        .timing{
+            .duration = 2,
+            .pulseInterval = REALLY_LONG_TIME,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_DENY,
 };
 
@@ -259,14 +276,14 @@ static constexpr TestParams TEST_FAILED_BALISTICS_DENIES_FIRE{
 static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_NARROW_ALLOWS_FIRE{
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{.updated = true},
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = 1,
-    },
+        .timing{
+            .duration = 1,
+            .pulseInterval = REALLY_LONG_TIME,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true}},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 static constexpr TestParams TEST_TIMING_ONE_MICROSECOND_EARLY_IN_FIRST_WINDOW_NARROW_DENIES_FIRE{
@@ -284,28 +301,33 @@ static constexpr TestParams TEST_TIMING_ONE_MICROSECOND_LATE_IN_FIRST_WINDOW_NAR
 static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_FIRST_WINDOW_WIDE_ALLOWS_FIRE{
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = 600'000,
-    },
+        .timing{
+            .duration = 600'000,
+            .pulseInterval = REALLY_LONG_TIME,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true}},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 
 static constexpr TestParams TEST_TIMING_WITHIN_WINDOW_LARGER_THAN_INTERVAL_ALLOWS_FIRE{
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = 100'000,
-        .targetIntervalDuration = 600'000,
-    },
+        .timing{
+            .duration = 600'000,
+            .pulseInterval = 100'000,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 
@@ -313,14 +335,17 @@ static constexpr TestParams TEST_TIMING_WITHIN_WINDOW_LARGER_THAN_INTERVAL_ALLOW
 static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE{
     .ballisticsTimeOfFlight = DEFAULT_FLIGHT_LATENCY_MICROS - SMALL_TIMING_ERROR,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = REALLY_LONG_TIME,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
-    },
+        .timing{
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = REALLY_LONG_TIME,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_FIRST_WINDOW_ALLOWS_FIRE{
@@ -347,14 +372,17 @@ static constexpr uint32_t LARGE_PULSE_INTERVAL_MICROS = 600'000;
 static constexpr TestParams TEST_TIMING_EXACTLY_ON_TARGET_IN_SECOND_WINDOW_NARROW_ALLOWS_FIRE{
     .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = 1,
-    },
+        .timing{
+            .duration = 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 static constexpr TestParams TEST_TIMING_ONE_MICROSECOND_EARLY_IN_SECOND_WINDOW_NARROW_DENIES_FIRE{
@@ -377,14 +405,17 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_SECOND_WINDOW_ALLO
     .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS -
                               SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
-    },
+        .timing{
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_ALLOWS_FIRE{
@@ -412,14 +443,17 @@ static constexpr TestParams TEST_TIMING_SHOT_IN_EARLY_HALF_OF_THIRD_WINDOW_ALLOW
     .ballisticsTimeOfFlight = LARGE_PULSE_INTERVAL_MICROS * 2 + DEFAULT_FLIGHT_LATENCY_MICROS -
                               SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
     .aimData{
-        .hasTarget = true,
+        .pva{
+            .updated = true,
+        },
         .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-        .recommendUseTimedShots = true,
-        .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                               DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-        .targetPulseInterval = LARGE_PULSE_INTERVAL_MICROS,
-        .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
-    },
+        .timing{
+            .duration = SMALL_TIMING_ERROR * 2 + 1,
+            .pulseInterval = LARGE_PULSE_INTERVAL_MICROS,
+            .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                      DEFAULT_FLIGHT_LATENCY_MICROS,
+            .updated = true,
+        }},
     .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
 };
 static constexpr TestParams TEST_TIMING_SHOT_IN_LATE_HALF_OF_THIRD_WINDOW_ALLOWS_FIRE{
@@ -449,14 +483,17 @@ static constexpr TestParams
         .ballisticsTimeOfFlight = SMALL_PULSE_INTERVAL_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS -
                                   SMALL_TIMING_ERROR + FLOATING_POINT_FUDGE_MICROS,
         .aimData{
-            .hasTarget = true,
+            .pva{
+                .updated = true,
+            },
             .timestamp = TIME_MICROS - DEFAULT_TIME_SINCE_MESSAGE_RECEIPT,
-            .recommendUseTimedShots = true,
-            .targetHitTimeOffset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT +
-                                   DEFAULT_AGITATOR_LATENCY_MICROS + DEFAULT_FLIGHT_LATENCY_MICROS,
-            .targetPulseInterval = SMALL_PULSE_INTERVAL_MICROS,
-            .targetIntervalDuration = SMALL_TIMING_ERROR * 2 + 1,
-        },
+            .timing{
+                .duration = SMALL_TIMING_ERROR * 2 + 1,
+                .pulseInterval = SMALL_PULSE_INTERVAL_MICROS,
+                .offset = DEFAULT_TIME_SINCE_MESSAGE_RECEIPT + DEFAULT_AGITATOR_LATENCY_MICROS +
+                          DEFAULT_FLIGHT_LATENCY_MICROS,
+                .updated = true,
+            }},
         .expectedResult = AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW,
     };
 static constexpr TestParams
