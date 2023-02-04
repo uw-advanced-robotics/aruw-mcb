@@ -27,7 +27,7 @@
 
 #include "turret_cv_command_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace tap::control::odometry
 {

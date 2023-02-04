@@ -33,9 +33,9 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "agitator/agitator_subsystem.hpp"
-#include "agitator/constants/agitator_constants.hpp"
-#include "agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
@@ -46,32 +46,32 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "chassis/beyblade_command.hpp"
-#include "chassis/chassis_diagonal_drive_command.hpp"
-#include "chassis/chassis_drive_command.hpp"
-#include "chassis/chassis_imu_drive_command.hpp"
-#include "chassis/holonomic_chassis_subsystem.hpp"
-#include "chassis/wiggle_drive_command.hpp"
-#include "chassis/x_drive_chassis_subsystem.hpp"
-#include "client-display/client_display_command.hpp"
-#include "client-display/client_display_subsystem.hpp"
-#include "governor/cv_on_target_governor.hpp"
-#include "governor/friction_wheels_on_governor.hpp"
-#include "governor/heat_limit_governor.hpp"
-#include "governor/limit_switch_depressed_governor.hpp"
-#include "governor/yellow_carded_governor.hpp"
-#include "imu/imu_calibrate_command.hpp"
-#include "launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "turret/constants/turret_constants.hpp"
-#include "turret/hero_turret_subsystem.hpp"
-#include "turret/user/turret_quick_turn_command.hpp"
-#include "turret/user/turret_user_world_relative_command.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_diagonal_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/client-display/client_display_command.hpp"
+#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
+#include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
+#include "aruwsrc/control/governor/yellow_carded_governor.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 
-#include "cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -158,7 +158,7 @@ HeroTurretSubsystem turret(
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 OttoBallisticsSolver ballisticsSolver(
-    *drivers(),
+    drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,
     frictionWheels,

@@ -21,7 +21,7 @@
 #define SENTRY_DRIVE_MANUAL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::sentry::drive
 {

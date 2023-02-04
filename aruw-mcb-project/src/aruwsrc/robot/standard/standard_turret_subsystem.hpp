@@ -20,7 +20,7 @@
 #ifndef STANDARD_TURRET_SUBSYSTEM_HPP_
 #define STANDARD_TURRET_SUBSYSTEM_HPP_
 
-#include "robot_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {

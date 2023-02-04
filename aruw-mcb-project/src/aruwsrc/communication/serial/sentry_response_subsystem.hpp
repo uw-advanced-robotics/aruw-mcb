@@ -23,7 +23,7 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/sentry/drive/sentry_auto_drive_comprised_command.hpp"
+#include "aruwsrc/robot/sentry/drive/sentry_auto_drive_comprised_command.hpp"
 #include "modm/processing/protothread.hpp"
 
 namespace aruwsrc

@@ -24,7 +24,7 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers.hpp"
-#include "chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::serial;

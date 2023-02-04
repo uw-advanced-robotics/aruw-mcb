@@ -22,7 +22,7 @@
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
-#include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"

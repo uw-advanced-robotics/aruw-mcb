@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 

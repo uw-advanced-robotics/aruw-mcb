@@ -23,7 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../turret_motor_config.hpp"
+#include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.

@@ -25,7 +25,7 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "../velocity_agitator_subsystem_config.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
