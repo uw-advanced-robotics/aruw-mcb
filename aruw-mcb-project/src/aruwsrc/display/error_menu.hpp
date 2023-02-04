@@ -37,8 +37,7 @@ class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::I
 {
 public:
     ErrorMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
 
     void draw() override;
 
@@ -52,8 +51,6 @@ public:
 
 private:
     static constexpr int ERROR_MENU_ID = 3;
-
-    aruwsrc::Drivers *drivers;
 };  // class ErrorMenu
 }  // namespace display
 }  // namespace aruwsrc
