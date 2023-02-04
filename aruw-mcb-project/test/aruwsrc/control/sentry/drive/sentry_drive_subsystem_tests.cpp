@@ -20,7 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace aruwsrc::control::sentry::drive;
 using namespace tap::gpio;
@@ -43,7 +43,7 @@ class SentryDriveSubsystemTest : public Test
 protected:
     SentryDriveSubsystemTest() : sentryDrive(&drivers, LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH) {}
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     SentryDriveSubsystem sentryDrive;
 };
 
@@ -58,7 +58,7 @@ TEST_F(SentryDriveSubsystemTest, initialize_initializes_both_motors_and_configs_
 
 TEST_F(SentryDriveSubsystemTest, initialize_with_same_input_pins_raises_error)
 {
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     SentryDriveSubsystem sentryDrive(&drivers, LEFT_LIMIT_SWITCH, LEFT_LIMIT_SWITCH);
 
     EXPECT_CALL(drivers.errorController, addToErrorList);

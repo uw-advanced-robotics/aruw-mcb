@@ -23,10 +23,10 @@
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/util_macros.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {
-class Drivers;
 namespace control
 {
 /**

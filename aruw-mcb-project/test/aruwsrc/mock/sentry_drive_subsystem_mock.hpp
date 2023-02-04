@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
 
 namespace aruwsrc::mock
 {
