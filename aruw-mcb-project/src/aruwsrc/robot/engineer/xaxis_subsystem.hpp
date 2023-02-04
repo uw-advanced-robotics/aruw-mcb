@@ -24,7 +24,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -41,7 +41,7 @@ namespace engineer
 class XAxisSubsystem : public tap::control::Subsystem
 {
 public:
-    XAxisSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
+    XAxisSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
 
     mockable void setExtended(bool isExtended);
 
