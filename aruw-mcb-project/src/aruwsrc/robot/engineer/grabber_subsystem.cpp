@@ -19,13 +19,13 @@
 
 #include "grabber_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
-GrabberSubsystem::GrabberSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+GrabberSubsystem::GrabberSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : tap::control::Subsystem(drivers),
       pin(pin),
       isGrabberSqueezed(false)

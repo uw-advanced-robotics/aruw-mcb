@@ -41,7 +41,7 @@ namespace engineer
 class GrabberSubsystem : public tap::control::Subsystem
 {
 public:
-    GrabberSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
+    GrabberSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
 
     mockable void setSqueezed(bool isGrabberSqueezed);
 

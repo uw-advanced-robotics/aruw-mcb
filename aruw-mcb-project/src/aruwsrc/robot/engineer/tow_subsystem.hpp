@@ -24,7 +24,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -44,7 +44,7 @@ class TowSubsystem : public tap::control::Subsystem
 {
 public:
     TowSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::gpio::Digital::OutputPin leftTowPin,
         tap::gpio::Digital::OutputPin rightTowPin,
         tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
