@@ -25,7 +25,7 @@ namespace aruwsrc
 {
 namespace engineer
 {
-XAxisSubsystem::XAxisSubsystem(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+XAxisSubsystem::XAxisSubsystem(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : tap::control::Subsystem(drivers),
       pin(pin),
       extended(false)
