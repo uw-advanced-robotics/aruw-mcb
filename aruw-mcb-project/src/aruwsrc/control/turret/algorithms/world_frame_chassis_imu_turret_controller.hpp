@@ -26,7 +26,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "turret_controller_interface.hpp"
 
@@ -57,7 +57,7 @@ public:
      * @param[in] pidConfig PID configuration struct for the controller.
      */
     WorldFrameYawChassisImuTurretController(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         TurretMotor &yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
@@ -88,7 +88,7 @@ public:
     float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     tap::algorithms::SmoothPid pid;
 
