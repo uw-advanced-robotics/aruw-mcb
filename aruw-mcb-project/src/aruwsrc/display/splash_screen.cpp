@@ -83,11 +83,17 @@ FLASH_STORAGE(uint8_t aruwImage[]) = {
 
 SplashScreen::SplashScreen(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
-    aruwsrc::Drivers* drivers)
+    tap::Drivers* drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    can::TurretMCBCanComm *turretMCBCanCommBus1,
+    can::TurretMCBCanComm *turretMCBCanCommBus2)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),
-      drivers(drivers)
+      drivers(drivers),
+      visionCoprocessor(visionCoprocessor),
+      turretMCBCanCommBus1(turretMCBCanCommBus1),
+      turretMCBCanCommBus2(turretMCBCanCommBus2)
 {
 }
 
@@ -110,7 +116,7 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
             break;
         case modm::MenuButtons::RIGHT:
         {
-            MainMenu* mm = new MainMenu(getViewStack(), drivers);
+            MainMenu* mm = new MainMenu(getViewStack(), drivers, visionCoprocessor, turretMCBCanCommBus1, turretMCBCanCommBus2);
             mm->initialize();
             getViewStack()->push(mm);
             break;

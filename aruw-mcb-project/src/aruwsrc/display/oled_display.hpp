@@ -43,7 +43,10 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(aruwsrc::Drivers *drivers);
+    explicit OledDisplay(tap::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    can::TurretMCBCanComm *turretMCBCanCommBus1,
+    can::TurretMCBCanComm *turretMCBCanCommBus2);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 
@@ -85,7 +88,7 @@ private:
 
     SplashScreen splashScreen;
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
