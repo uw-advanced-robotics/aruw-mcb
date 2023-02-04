@@ -38,11 +38,6 @@
 
 namespace aruwsrc
 {
-class Drivers;
-}
-
-namespace aruwsrc
-{
 namespace agitator
 {
 /**

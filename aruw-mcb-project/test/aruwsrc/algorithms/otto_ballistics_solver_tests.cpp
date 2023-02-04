@@ -20,10 +20,11 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 
@@ -102,15 +103,16 @@ class OttoBallisticsSolverTest : public Test
 protected:
     OttoBallisticsSolverTest()
         : turret(&drivers),
-          solver(drivers, odometry, turret, launcher, 15, 0)
+          vc(&drivers),
+          solver(vc, odometry, turret, launcher, 15, 0)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(ReturnPointee(&cvOnline));
+        ON_CALL(vc, isCvOnline).WillByDefault(ReturnPointee(&cvOnline));
 
-        ON_CALL(drivers.visionCoprocessor, getLastAimData).WillByDefault(ReturnRef(aimData));
+        ON_CALL(vc, getLastAimData).WillByDefault(ReturnRef(aimData));
 
         ON_CALL(odometry, getLastComputedOdometryTime)
             .WillByDefault(ReturnPointee(&lastComputedOdomTime));
@@ -120,7 +122,9 @@ protected:
         ON_CALL(launcher, getPredictedLaunchSpeed).WillByDefault(ReturnPointee(&launchSpeed));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
+    aruwsrc::serial::VisionCoprocessor vc;
+
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
