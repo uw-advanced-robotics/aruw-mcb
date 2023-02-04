@@ -31,10 +31,9 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "tap/drivers.hpp"
 
-using aruwsrc::Drivers;
 using aruwsrc::control::ControlOperatorInterface;
 using namespace tap::communication::serial;
 using namespace testing;
@@ -53,7 +52,7 @@ protected:
         ON_CALL(drivers.remote, getUpdateCounter).WillByDefault(ReturnPointee(&updateCounter));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     ClockStub clock;
     ControlOperatorInterface operatorInterface;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;

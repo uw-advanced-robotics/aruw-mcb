@@ -20,8 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/engineer/manual_tow_command.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/engineer/manual_tow_command.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
 
 using aruwsrc::engineer::ManualTowCommand;
@@ -47,7 +47,7 @@ protected:
     {
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     TowSubsystemMock ts;
     ManualTowCommand tc;
 };

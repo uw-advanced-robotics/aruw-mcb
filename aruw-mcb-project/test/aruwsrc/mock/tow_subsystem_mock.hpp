@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/tow_subsystem.hpp"
+#include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 
 namespace aruwsrc
 {

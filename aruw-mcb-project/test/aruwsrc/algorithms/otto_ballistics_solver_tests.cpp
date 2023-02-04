@@ -24,6 +24,7 @@
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
@@ -102,8 +103,8 @@ class OttoBallisticsSolverTest : public Test
 {
 protected:
     OttoBallisticsSolverTest()
-        : turret(&drivers),
-          vc(&drivers),
+        : vc(&drivers),
+          turret(&drivers),
           solver(vc, odometry, turret, launcher, 15, 0)
     {
     }
@@ -123,8 +124,8 @@ protected:
     }
 
     tap::Drivers drivers;
-    aruwsrc::serial::VisionCoprocessor vc;
-
+    
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;

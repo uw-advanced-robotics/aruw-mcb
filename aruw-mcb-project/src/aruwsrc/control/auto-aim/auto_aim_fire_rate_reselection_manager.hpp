@@ -22,7 +22,7 @@
 
 #include "tap/control/command_scheduler.hpp"
 #include "tap/errors/create_errors.hpp"
-
+#include "tap/drivers.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
