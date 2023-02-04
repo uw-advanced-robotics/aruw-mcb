@@ -77,7 +77,7 @@ public:
     static constexpr float MAX_ACCELERATION_R = 40'000.0f;
     static constexpr float MAX_DECELERATION_R = 50'000.0f;
 
-    ControlOperatorInterface(aruwsrc::Drivers *drivers) : drivers(drivers) {}
+    ControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
@@ -132,7 +132,7 @@ public:
     bool isSlowMode();
 
 private:
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
