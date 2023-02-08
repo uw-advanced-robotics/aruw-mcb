@@ -123,7 +123,14 @@ GrabberSubsystemMock::GrabberSubsystemMock(
 }
 GrabberSubsystemMock::~GrabberSubsystemMock() {}
 
-OledDisplayMock::OledDisplayMock(aruwsrc::Drivers *drivers) : display::OledDisplay(drivers) {}
+OledDisplayMock::OledDisplayMock(
+    tap::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor *vc,
+    can::TurretMCBCanComm *turretMCBCanCommBus1,
+    can::TurretMCBCanComm *turretMCBCanCommBus2
+    ) : 
+    display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
+    {}
 OledDisplayMock::~OledDisplayMock() {}
 
 TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers, tap::can::CanBus canBus)
