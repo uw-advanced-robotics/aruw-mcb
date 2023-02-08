@@ -39,11 +39,11 @@ namespace aruwsrc::algorithms {
 
     StandardTransformer::StandardTransformer
     (
-        aruwsrc::chassis::MecanumChassisSubsystem& chassis,
-        // const tap::motor::DjiMotor& leftBackMotor,
-        // const tap::motor::DjiMotor& rightBackMotor,
-        // const tap::motor::DjiMotor& leftFrontMotor,
-        // const tap::motor::DjiMotor& rightFrontMotor,
+        // aruwsrc::chassis::MecanumChassisSubsystem& chassis,
+        const tap::motor::DjiMotor& leftBackMotor,
+        const tap::motor::DjiMotor& rightBackMotor,
+        const tap::motor::DjiMotor& leftFrontMotor,
+        const tap::motor::DjiMotor& rightFrontMotor,
         tap::communication::sensors::imu::ImuInterface& chassisImu,
         // tap::communication::sensors::imu::ImuInterface& turretImu
         aruwsrc::can::TurretMCBCanComm& turretMCB
@@ -68,11 +68,11 @@ namespace aruwsrc::algorithms {
     chassisToTurretIMUTransform(Transform<ChassisFrame,TurretIMUFrame>(0., 0., 401.44, 0., 0., 0.)),
     chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame> (105.68, 0., 121.72, 0., 0., 0.)),
 
-    chassis(chassis),
-    // leftBackMotor(leftBackMotor),
-    // rightBackMotor(rightBackMotor),
-    // leftFrontMotor(leftFrontMotor),
-    // rightFrontMotor(rightFrontMotor),
+    // chassis(chassis),
+    leftBackMotor(leftBackMotor),
+    rightBackMotor(rightBackMotor),
+    leftFrontMotor(leftFrontMotor),
+    rightFrontMotor(rightFrontMotor),
     chassisImu(chassisImu),
     // turretImu(turretImu),
     turretMCB(turretMCB),
@@ -207,7 +207,12 @@ namespace aruwsrc::algorithms {
       // a more sophisticated way for more accurate transforms
       // so all turret to something transforms don't work 
       // if chassis is rolling (maybe also pitching )
+
+      // We may neeed to transform from chassis to turret to 
+      // get roll?
+      // or is it just chassis roll?
       turretWorldOrientation.setX(0);
+      // are these in the world frame or something else?
       turretWorldOrientation.setY(turretMCB.getPitch());
       turretWorldOrientation.setZ(turretMCB.getYaw());
     }
@@ -252,16 +257,15 @@ namespace aruwsrc::algorithms {
     modm::Matrix<float, 3, 1> StandardTransformer::getActualVelocityChassisRelative() {
         modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
 
-        // wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
-        // wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
-        // wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
-        // wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+        wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
+        wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
+        wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
+        wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
 
-        wheelVelocity[LF][0] = chassis.getLeftFrontRpmActual();
-        wheelVelocity[RF][0] = chassis.getRightFrontRpmActual();
-        wheelVelocity[LB][0] = chassis.getLeftBackRpmActual();
-        wheelVelocity[RB][0] = chassis.getRightBackRpmActual();
-
+        // wheelVelocity[LF][0] = chassis.getLeftFrontRpmActual();
+        // wheelVelocity[RF][0] = chassis.getRightFrontRpmActual();
+        // wheelVelocity[LB][0] = chassis.getLeftBackRpmActual();
+        // wheelVelocity[RB][0] = chassis.getRightBackRpmActual();
 
         modm::Matrix<float, 2, 1> planarXYVelocity = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
         modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>();

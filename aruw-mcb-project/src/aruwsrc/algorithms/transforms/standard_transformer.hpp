@@ -59,13 +59,13 @@ namespace aruwsrc::algorithms
         */
         StandardTransformer
         (      
-        aruwsrc::chassis::MecanumChassisSubsystem &chassis,
-        // const tap::motor::DjiMotor& leftBackMotor,
-        // const tap::motor::DjiMotor& rightBackMotor,
-        // const tap::motor::DjiMotor& leftFrontMotor,
-        // const tap::motor::DjiMotor& rightFrontMotor,
+        // aruwsrc::chassis::MecanumChassisSubsystem &chassis,
+        const tap::motor::DjiMotor& leftBackMotor,
+        const tap::motor::DjiMotor& rightBackMotor,
+        const tap::motor::DjiMotor& leftFrontMotor,
+        const tap::motor::DjiMotor& rightFrontMotor,
         tap::communication::sensors::imu::ImuInterface& chassisImu,
-        // tap::communication::sensors::imu::ImuInterface& turretImu
+        // tap::communication::sensors::imu::ImuInterface& turretImu,
         aruwsrc::can::TurretMCBCanComm& turretMCB
         );
 
@@ -169,15 +169,14 @@ namespace aruwsrc::algorithms
         Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
         // References to all devices necessary for tracking odometry
-        aruwsrc::chassis::MecanumChassisSubsystem& chassis;
-        // const tap::motor::DjiMotor& leftBackMotor;
-        // const tap::motor::DjiMotor& rightBackMotor;
-        // const tap::motor::DjiMotor& leftFrontMotor;
-        // const tap::motor::DjiMotor& rightFrontMotor;
+        // aruwsrc::chassis::MecanumChassisSubsystem& chassis;
+        const tap::motor::DjiMotor& leftBackMotor;
+        const tap::motor::DjiMotor& rightBackMotor;
+        const tap::motor::DjiMotor& leftFrontMotor;
+        const tap::motor::DjiMotor& rightFrontMotor;
         tap::communication::sensors::imu::ImuInterface& chassisImu;
         // tap::communication::sensors::imu::ImuInterface& turretImu;
         aruwsrc::can::TurretMCBCanComm& turretMCB;
-
 
         // kalman filter stuff for keeping track of chassis position
         enum class OdomState
@@ -205,7 +204,6 @@ namespace aruwsrc::algorithms
             NUM_INPUTS,
         };
 
-
         static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
         static constexpr int STATES_SQUARED =
@@ -218,6 +216,7 @@ namespace aruwsrc::algorithms
         /// Assumed time difference between calls to `update`, in seconds
         static constexpr float DT = 0.002f;
         
+        // Kalman Filter matrices to keep track of chassis world position / velocity
         // clang-format off
         static constexpr float KF_A[STATES_SQUARED] = {
           1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0, 0,
