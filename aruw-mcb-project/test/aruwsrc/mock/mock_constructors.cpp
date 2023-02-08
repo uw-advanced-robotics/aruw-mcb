@@ -44,7 +44,7 @@
 namespace aruwsrc::mock
 {
 AgitatorSubsystemMock::AgitatorSubsystemMock(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     const tap::algorithms::SmoothPidConfig &pidConfig,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
