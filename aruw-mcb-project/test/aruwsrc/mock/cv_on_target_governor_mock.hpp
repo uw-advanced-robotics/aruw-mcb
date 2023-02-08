@@ -30,7 +30,7 @@ class CvOnTargetGovernorMock : public aruwsrc::control::governor::CvOnTargetGove
 {
 public:
     CvOnTargetGovernorMock(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         aruwsrc::control::governor::AutoAimLaunchTimer &launchTimer,
         aruwsrc::control::governor::CvOnTargetGovernorMode mode);

@@ -23,7 +23,7 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::mock
 {
@@ -31,7 +31,7 @@ class RefereeFeedbackFrictionWheelSubsystemMock
     : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<10>
 {
 public:
-    RefereeFeedbackFrictionWheelSubsystemMock(aruwsrc::Drivers *drivers);
+    RefereeFeedbackFrictionWheelSubsystemMock(tap::Drivers *drivers);
     virtual ~RefereeFeedbackFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

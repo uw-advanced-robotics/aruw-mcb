@@ -30,7 +30,7 @@ class SentryDriveSubsystemMock : public control::sentry::drive::SentryDriveSubsy
 {
 public:
     SentryDriveSubsystemMock(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::gpio::Digital::InputPin leftLimitSwitch,
         tap::gpio::Digital::InputPin rightLimitSwitch);
     virtual ~SentryDriveSubsystemMock();
