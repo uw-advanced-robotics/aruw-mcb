@@ -31,7 +31,7 @@ OttoVelocityOdometry2DSubsystem::OttoVelocityOdometry2DSubsystem(
     tap::control::chassis::ChassisSubsystemInterface* chassis)
     : Subsystem(drivers),
       Odometry2DTracker(&orientationObserver, &displacementObserver),
-      orientationObserver(drivers, turret),
+      orientationObserver(turret),
       displacementObserver(chassis)
 {
 }

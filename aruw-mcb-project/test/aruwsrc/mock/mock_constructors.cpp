@@ -35,7 +35,9 @@
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
+#include "turret_motor_mock.hpp"
 #include "turret_subsystem_mock.hpp"
+#include "vision_coprocessor_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
@@ -69,18 +71,21 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
-    tap::Drivers *drivers,
+    tap::Drivers &drivers,
     chassis::HolonomicChassisSubsystem *chassis,
-    aruwsrc::control::turret::TurretMotor *yawMotor)
-    : BeybladeCommand(drivers, chassis, yawMotor, &(drivers->controlOperatorInterface))
+    aruwsrc::control::turret::TurretMotor *yawMotor,
+    aruwsrc::control::ControlOperatorInterface &operatorInterface
+    )
+    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
 ChassisDriveCommandMock::ChassisDriveCommandMock(
     tap::Drivers *d,
+    aruwsrc::control::ControlOperatorInterface *operatorInterface,
     chassis::HolonomicChassisSubsystem *cs)
-    : chassis::ChassisDriveCommand(d, &(d->controlOperatorInterface), cs)
+    : chassis::ChassisDriveCommand(d, operatorInterface, cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}

@@ -28,7 +28,7 @@ SentryChassisKFOdometry::SentryChassisKFOdometry(
     const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
     const aruwsrc::control::turret::TurretSubsystem& turret)
     : chassis(chassis),
-      chassisYawObserver(&drivers, turret),
+      chassisYawObserver(turret),
       chassisIMU(drivers.mpu6500),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
