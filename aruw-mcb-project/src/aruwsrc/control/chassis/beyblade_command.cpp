@@ -38,10 +38,10 @@ namespace aruwsrc
 namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
-    tap::Drivers* drivers,
+    tap::Drivers& drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface* operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -73,13 +73,13 @@ void BeybladeCommand::execute()
         // Note: pass in 0 as rotation since we don't want to take into consideration
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
-        ChassisRelDrive::computeDesiredUserTranslation(operatorInterface, drivers, chassis, 0, &x, &y);
+        ChassisRelDrive::computeDesiredUserTranslation(&operatorInterface, &drivers, chassis, 0, &x, &y);
         x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+            drivers.refSerial.getRefSerialReceivingData(),
+            drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
@@ -111,7 +111,7 @@ void BeybladeCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+        ChassisRelDrive::onExecute(&operatorInterface, &drivers, chassis);
     }
 }
 
