@@ -50,8 +50,8 @@ protected:
           turretSubsystem(&drivers),
           ballisticsSolver(drivers, odometry, turretSubsystem, launcher, 0, 0),
           turretCvCommand(
-              &drivers.visionCoprocessor,
-              &drivers.controlOperatorInterface,
+              &visionCoprocessor,
+              &controlOperatorInterface,
               &turretSubsystem,
               &yawController,
               &pitchController,
@@ -76,9 +76,11 @@ protected:
         ON_CALL(drivers.commandScheduler, isCommandScheduled).WillByDefault(Return(false));
     }
 
-    aruwsrc::Drivers drivers;
-
+    tap::Drivers drivers;
+    
 private:
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<tap::mock::MotorInterfaceMock> yawM;
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
     aruwsrc::mock::TurretMotorMock yawMotor;
