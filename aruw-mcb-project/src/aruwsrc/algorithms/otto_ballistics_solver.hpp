@@ -106,7 +106,6 @@ public:
     }
 
     /**
-     * @param[in] visionCoprocessor Pointer to a vision coprocessor object.
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading

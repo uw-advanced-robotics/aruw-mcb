@@ -23,10 +23,6 @@
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 
 // Forward declarations
-namespace tap
-{
-class Drivers;
-}
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
@@ -54,7 +50,6 @@ public:
      * CAN bus 1 is attached to.
      */
     OttoChassisWorldYawObserver(
-        tap::Drivers* drivers,
         const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
 
     /**
@@ -71,7 +66,6 @@ public:
     bool getChassisWorldYaw(float* yaw) const final;
 
 private:
-    tap::Drivers* drivers;
     const aruwsrc::control::turret::TurretSubsystem& turretSubsystem;
 };
 
