@@ -39,6 +39,8 @@ class TurretUserWorldRelativeCommandTest : public Test
 protected:
     TurretUserWorldRelativeCommandTest()
         : turret(&drivers),
+          controlOperatorInterface(&drivers),
+          turretMCBCanCommBus1(&drivers, tap::can::CanBus::CAN_BUS1),
           chassisFramePitchTurretController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFrameYawChassisImuController(
               drivers,
@@ -47,17 +49,18 @@ protected:
           posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFramePitchTurretImuController(
-              drivers.turretMCBCanCommBus1,
+              turretMCBCanCommBus1,
               turret.pitchMotor,
               posPid,
               velPid),
           worldFrameYawTurretImuController(
-              drivers.turretMCBCanCommBus1,
+              turretMCBCanCommBus1,
               turret.yawMotor,
               posPid,
               velPid),
           turretCmd(
               &drivers,
+              controlOperatorInterface,
               &turret,
               &worldFrameYawChassisImuController,
               &chassisFramePitchTurretController,
@@ -80,7 +83,7 @@ protected:
             .WillByDefault(ReturnRef(currentPitchValue));
         ON_CALL(turret.yawMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
-        ON_CALL(drivers.turretMCBCanCommBus1, isConnected)
+        ON_CALL(turretMCBCanCommBus1, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&yawSetpoint));
@@ -90,8 +93,10 @@ protected:
         ON_CALL(turret.pitchMotor, getConfig).WillByDefault(ReturnRef(config));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<TurretSubsystemMock> turret;
+    NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
+    aruwsrc::mock::TurretMCBCanCommMock turretMCBCanCommBus1;
     ChassisFramePitchTurretController chassisFramePitchTurretController;
     WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController;
     tap::algorithms::SmoothPid posPid;
@@ -127,7 +132,7 @@ TEST_F(
     turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
-    EXPECT_CALL(drivers.turretMCBCanCommBus1, getYawUnwrapped).Times(AtLeast(1));
+    EXPECT_CALL(turretMCBCanCommBus1, getYawUnwrapped).Times(AtLeast(1));
 
     turretCmd.initialize();
     turretCmd.execute();
@@ -141,7 +146,7 @@ TEST_F(
     turretOnline = true;
 
     // The turret MCB comm will be queried if the turret IMU command is running
-    EXPECT_CALL(drivers.turretMCBCanCommBus1, getYawUnwrapped).Times(0);
+    EXPECT_CALL(turretMCBCanCommBus1, getYawUnwrapped).Times(0);
 
     turretCmd.initialize();
     turretCmd.execute();
