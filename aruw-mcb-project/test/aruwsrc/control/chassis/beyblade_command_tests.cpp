@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
@@ -84,7 +85,6 @@ protected:
     aruwsrc::control::ControlOperatorInterface &operatorInterface;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
-    aruwsrc::control::ControlOperatorInterface& operatorInterface;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};
     float yawAngle = 0;
