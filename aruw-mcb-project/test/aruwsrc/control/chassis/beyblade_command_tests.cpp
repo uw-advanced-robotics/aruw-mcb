@@ -46,7 +46,7 @@ protected:
     BeybladeCommandTest()
         : t(&d),
           cs(&d),
-          bc(&d, &cs, &t.yawMotor, &(d.controlOperatorInterface)),
+          bc(&d, &cs, &t.yawMotor, &operatorInterface),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -80,9 +80,10 @@ protected:
                 FloatNear(rotation, 1E-3)));
     }
 
-    aruwsrc::Drivers d;
+    tap::Drivers d;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
+    aruwsrc::control::ControlOperatorInterface& operatorInterface;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};
     float yawAngle = 0;

@@ -277,11 +277,12 @@ TurretControllerInterfaceMock::TurretControllerInterfaceMock(
 TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
 
 CvOnTargetGovernorMock::CvOnTargetGovernorMock(
-    tap::Drivers &drivers,
+    tap::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
     aruwsrc::control::governor::AutoAimLaunchTimer &launchTimer,
-    aruwsrc::control::governor::CvOnTargetGovernorMode mode)
-    : aruwsrc::control::governor::CvOnTargetGovernor(drivers, turretCVCommand, launchTimer, mode)
+    aruwsrc::control::governor::CvOnTargetGovernorMode mode) : 
+     aruwsrc::control::governor::CvOnTargetGovernor(drivers, visionCoprocessor, turretCVCommand, launchTimer, mode)
 {
 }
 
