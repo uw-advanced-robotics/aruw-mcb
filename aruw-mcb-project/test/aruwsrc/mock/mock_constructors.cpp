@@ -248,14 +248,14 @@ TurretCVCommandMock::TurretCVCommandMock(
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
-    const tap::Drivers &drivers,
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
-          drivers,
+          visionCoprocessor,
           odometryInterface,
           turretSubsystem,
           frictionWheels,

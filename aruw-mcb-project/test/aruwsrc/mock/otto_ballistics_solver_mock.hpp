@@ -35,7 +35,7 @@ class OttoBallisticsSolverMock : public OttoBallisticsSolver
 {
 public:
     OttoBallisticsSolverMock(
-        const aruwsrc::Drivers &drivers,
+        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
