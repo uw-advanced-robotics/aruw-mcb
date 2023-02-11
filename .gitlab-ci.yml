@@ -71,11 +71,11 @@ before_script:
         -p ./aruw-mcb-project/src/
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
-            aruwsrc/control/engineer_control.cpp
-            aruwsrc/control/sentry_control.cpp
-            aruwsrc/control/standard_control.cpp
-            aruwsrc/control/drone_control.cpp
-            aruwsrc/control/hero_control.cpp
+            aruwsrc/robot/engineer_control.cpp
+            aruwsrc/robot/sentry_control.cpp
+            aruwsrc/robot/standard_control.cpp
+            aruwsrc/robot/drone_control.cpp
+            aruwsrc/robot/hero_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
