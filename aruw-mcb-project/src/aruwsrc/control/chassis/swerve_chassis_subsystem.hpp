@@ -65,7 +65,6 @@ public:
         tap::motor::MotorId rightFrontDriveMotorId = RIGHT_FRONT_MOTOR_ID,
         tap::motor::MotorId rightBackAzimuthMotorId = RIGHT_BACK_AZIMUTH_MOTOR_ID,
         tap::motor::MotorId rightBackDriveMotorId = RIGHT_BACK_MOTOR_ID,
-        chassis::SwerveModuleConfig config = chassis::SwerveModule::SWERVE_CONFIG,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 

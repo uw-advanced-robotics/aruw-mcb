@@ -48,17 +48,16 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::motor::MotorId rightFrontDriveMotorId,
     tap::motor::MotorId rightBackAzimuthMotorId,
     tap::motor::MotorId rightBackDriveMotorId,
-    chassis::SwerveModuleConfig config,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
     leftFrontModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
     leftBackModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
     rightFrontModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, 
-            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
     rightBackModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
-            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config)
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
     // modules{
     //     SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config, 
     //         -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),

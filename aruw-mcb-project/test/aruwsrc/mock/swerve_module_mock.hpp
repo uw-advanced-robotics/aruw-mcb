@@ -37,8 +37,7 @@ public:
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
         float positionWithinChassisX,
-        float positionWithinChassisY,
-        chassis::SwerveModuleConfig config = chassis::SwerveModule::SWERVE_CONFIG);
+        float positionWithinChassisY);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());

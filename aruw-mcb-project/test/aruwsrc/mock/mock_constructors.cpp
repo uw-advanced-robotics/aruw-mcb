@@ -111,9 +111,8 @@ SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers,
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
         float positionWithinChassisX,
-        float positionWithinChassisY,
-        chassis::SwerveModuleConfig config)
-    : SwerveModule(drivers, driveMotorId, azimuthMotorId, positionWithinChassisX, positionWithinChassisY, config)
+        float positionWithinChassisY)
+    : SwerveModule(drivers, driveMotorId, azimuthMotorId, positionWithinChassisX, positionWithinChassisY)
 {
 }
 SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers)
