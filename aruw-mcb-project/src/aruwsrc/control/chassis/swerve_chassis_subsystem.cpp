@@ -51,14 +51,14 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     chassis::SwerveModuleConfig config,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
-    leftFrontModule(SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)),
-    leftBackModule(SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, config, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)),
-    rightFrontModule(SwerveModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, config, 
-            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)),
-    rightBackModule(SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, config, 
-            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET))
+    leftFrontModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+    leftBackModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+    rightFrontModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config),
+    rightBackModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, config)
     // modules{
     //     SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, config, 
     //         -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
@@ -197,7 +197,10 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelati
     return randomOutput;
 }
 
-
+modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return getActualVelocityChassisRelative();
+}
 
 
 }

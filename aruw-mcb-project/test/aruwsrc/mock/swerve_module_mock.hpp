@@ -32,10 +32,17 @@ class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
 {
 public:
     SwerveModuleMock(aruwsrc::Drivers *drivers);
+
+    SwerveModuleMock(aruwsrc::Drivers *drivers,
+        tap::motor::MotorId driveMotorId,
+        tap::motor::MotorId azimuthMotorId,
+        float positionWithinChassisX,
+        float positionWithinChassisY,
+        chassis::SwerveModuleConfig config = chassis::SwerveModule::SWERVE_CONFIG);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());
-    MOCK_METHOD(void, scaleAndSet, (float), ());
+    MOCK_METHOD(void, scaleAndSetDesiredState, (float), ());
     MOCK_METHOD(float, calculate, (float, float, float));
     MOCK_METHOD(float, getDriveVelocity, (float, float), (const));
     MOCK_METHOD(float, getAngle, (), (const));

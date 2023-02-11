@@ -21,6 +21,10 @@
 #include "beyblade_command_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
 #include "chassis_subsystem_mock.hpp"
+#include "swerve_chassis_subsystem_mock.hpp"
+#include "swerve_module_mock.hpp"
+#include "mecanum_chassis_subsystem_mock.hpp"
+#include "x_drive_chassis_subsystem_mock.hpp"
 #include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
@@ -90,6 +94,33 @@ ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
 {
 }
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
+
+MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(aruwsrc::Drivers *drivers)
+    : MecanumChassisSubsystem(drivers)
+{
+}
+MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
+
+SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(aruwsrc::Drivers *drivers)
+    : SwerveChassisSubsystem(drivers)
+{
+}
+SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
+
+SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers,
+        tap::motor::MotorId driveMotorId,
+        tap::motor::MotorId azimuthMotorId,
+        float positionWithinChassisX,
+        float positionWithinChassisY,
+        chassis::SwerveModuleConfig config)
+    : SwerveModule(drivers, driveMotorId, azimuthMotorId, positionWithinChassisX, positionWithinChassisY, config)
+{
+}
+SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers)
+    : SwerveModule(drivers, tap::motor::MOTOR1, tap::motor::MOTOR2, 10, 10)
+{
+}
+SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
     : FrictionWheelSubsystem(

@@ -35,7 +35,7 @@ using namespace testing;
 class SwerveModuleTest : public Test
 {
 protected:
-    SwerveModuleTest() : module(&drivers) {}
+    SwerveModuleTest() : module(&drivers, tap::motor::MOTOR1, tap::motor::MOTOR2, 10, 10) {}
 
     void SetUp() override
     {
@@ -76,15 +76,22 @@ TEST_F(SwerveModuleTest, initialize)
     module.initialize();
 }
 
-TEST_F(MecanumChassisSubsystemTest, getAngle)//change test value to smth more useful lol?
+TEST_F(SwerveModuleTest, getAngle)//change test value to smth more useful lol?
 {
     ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);
 }
 
-TEST_F(MecanumChassisSubsystemTest, getDriveVelocity)
+TEST_F(SwerveModuleTest, getDriveVelocity)
 {
     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
+}
+
+TEST_F(SwerveModuleTest, calibrateAzimuth)
+{
+    ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(1000));
+    module.calibrateAzimuth();
+    EXPECT_NEAR(0, module.getAngle(), 1E-3);
 }
 

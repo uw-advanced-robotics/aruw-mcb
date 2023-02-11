@@ -64,7 +64,7 @@ public:
         aruwsrc::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-    virtual ~HolonomicChassisSubsystem();
+    //virtual ~HolonomicChassisSubsystem();
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().

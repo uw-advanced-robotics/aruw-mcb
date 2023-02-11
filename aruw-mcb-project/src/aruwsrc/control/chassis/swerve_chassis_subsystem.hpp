@@ -38,9 +38,7 @@
 #include "modm/math/matrix.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "tap/mock/dji_motor_mock.hpp"
-#else
-#include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/mock/swerve_module_mock.hpp"
 #endif
 
 
@@ -57,19 +55,18 @@ namespace chassis
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
 public:
-
     SwerveChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId leftFrontAzimuthMotorId,
-        tap::motor::MotorId leftFrontDriveMotorId,
-        tap::motor::MotorId leftBackAzimuthMotorId,
-        tap::motor::MotorId leftBackDriveMotorId,
-        tap::motor::MotorId rightFrontAzimuthMotorId,
-        tap::motor::MotorId rightFrontDriveMotorId,
-        tap::motor::MotorId rightBackAzimuthMotorId,
-        tap::motor::MotorId rightBackDriveMotorId,
-        chassis::SwerveModuleConfig config,
-        tap::gpio::Analog::Pin currentPin
+        tap::motor::MotorId leftFrontAzimuthMotorId = LEFT_FRONT_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId leftFrontDriveMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackAzimuthMotorId = LEFT_BACK_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId leftBackDriveMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontAzimuthMotorId = RIGHT_FRONT_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId rightFrontDriveMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackAzimuthMotorId = RIGHT_BACK_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId rightBackDriveMotorId = RIGHT_BACK_MOTOR_ID,
+        chassis::SwerveModuleConfig config = chassis::SwerveModule::SWERVE_CONFIG,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 
     void initialize() override;
@@ -118,6 +115,14 @@ public:
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
+    modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+
+    //only to satisfy chassis subsystem interface
+    inline int16_t getLeftFrontRpmActual() const override { return leftFrontModule.getDriveRPM(); }
+    inline int16_t getLeftBackRpmActual() const override { return leftBackModule.getDriveRPM(); }
+    inline int16_t getRightFrontRpmActual() const override { return rightFrontModule.getDriveRPM(); }
+    inline int16_t getRightBackRpmActual() const override { return rightBackModule.getDriveRPM(); }
+
 private:
 
     /**
@@ -128,7 +133,7 @@ private:
 
     chassis::SwerveModule* modules[4];  
 
-    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftFrontModule;
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftBackModule;

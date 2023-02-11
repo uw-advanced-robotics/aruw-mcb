@@ -50,18 +50,18 @@ struct SwerveModuleConfig
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
     // Whether any motor is inverted
-    const bool driveMotorInverted, azimuthMotorInverted;
+    const bool driveMotorInverted = false, azimuthMotorInverted = false;
     // Gear ratios for motors
-    const float driveMotorGearing, azimuthMotorGearing;
+    const float driveMotorGearing = 1, azimuthMotorGearing = 1;
 
-    const float drivePidKp = 0.0f;
+    const float drivePidKp = 1.0f;
     const float drivePidKi = 0.0f;
     const float drivePidKd = 0.0f;
     const float drivePidMaxIntegralErrorSum = 0.0f;
     const float drivePidMaxOutput = 16'384.0f;
     const float drivePidFeedForwardConstant = 0.0f;
 
-    const float azimuthPidKp = 0.0f;
+    const float azimuthPidKp = 1.0f;
     const float azimuthPidKi = 0.0f;
     const float azimuthPidKd = 0.0f;
     const float azimuthPidMaxIntegralErrorSum = 0.0f;
@@ -78,13 +78,15 @@ struct SwerveModuleConfig
 class SwerveModule
 {
 public:
+    static SwerveModuleConfig SWERVE_CONFIG;
+
     SwerveModule(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId driveMotorId,
         tap::motor::MotorId azimuthMotorId,
-        SwerveModuleConfig& swerveModuleConfig,
         float positionWithinChassisX,
-        float positionWithinChassisY);
+        float positionWithinChassisY,
+        SwerveModuleConfig& swerveModuleConfig = SWERVE_CONFIG);
 
     const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
 
@@ -95,6 +97,8 @@ public:
     float calculate(float x, float y, float r);
 
     float getDriveVelocity() const;
+
+    float getDriveRPM() const;
 
     float getAngle() const;
 
@@ -139,6 +143,8 @@ private:
     // motors
     Motor driveMotor;
     Motor azimuthMotor;
+#endif
+
     int64_t azimuthZeroOffset = 0;
 
     modm::Pid<float> drivePid;
@@ -148,7 +154,6 @@ private:
     float speedSetpoint, rotationSetpoint;
     SwerveModuleConfig config;
 
-#endif
 };  // class SwerveModule
 
 }  // namespace chassis

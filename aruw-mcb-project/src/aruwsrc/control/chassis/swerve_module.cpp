@@ -39,9 +39,9 @@ SwerveModule::SwerveModule(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId driveMotorId,
     tap::motor::MotorId azimuthMotorId,
-    SwerveModuleConfig& swerveModuleConfig,
     float positionWithinChassisX,
-    float positionWithinChassisY)
+    float positionWithinChassisY,
+    SwerveModuleConfig& swerveModuleConfig)
     : driveMotor(
           drivers,
           driveMotorId,
@@ -172,6 +172,14 @@ void SwerveModule::refresh()
 float SwerveModule::getDriveVelocity() const
 {
     return rpmToMps(driveMotor.getShaftRPM());
+}
+
+/**
+ * Returns RPM of the wheel
+ */
+float SwerveModule::getDriveRPM() const
+{
+    return driveMotor.getShaftRPM();
 }
 
 /**

@@ -62,7 +62,7 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const = 0;
+    //virtual modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const = 0;
 
     /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
