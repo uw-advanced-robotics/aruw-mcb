@@ -25,7 +25,7 @@
 #include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
@@ -45,7 +45,7 @@ class BeybladeCommandTest : public Test, public WithParamInterface<std::tuple<fl
 {
 protected:
     BeybladeCommandTest()
-        : operatorInterface(d),
+        : operatorInterface(&d),
           t(&d),
           cs(&d),
           bc(d, &cs, &t.yawMotor, operatorInterface),
@@ -83,7 +83,7 @@ protected:
     }
 
     tap::Drivers d;
-    aruwsrc::control::ControlOperatorInterface &operatorInterface;
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
     BeybladeCommand bc;

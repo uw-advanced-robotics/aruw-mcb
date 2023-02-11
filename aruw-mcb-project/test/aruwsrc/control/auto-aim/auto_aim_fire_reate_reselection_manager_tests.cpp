@@ -21,15 +21,17 @@
 
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::auto_aim;
@@ -47,27 +49,26 @@ protected:
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
-          ballisticsSolver(drivers, odometry, turretSubsystem, launcher, 0, 0),
+          visionCoprocessor(&drivers),
+          operatorInterface(&drivers),
+          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
           turretCvCommand(
-              &drivers.visionCoprocessor,
-              &drivers.controlOperatorInterface,
+              &visionCoprocessor,
+              &operatorInterface,
               &turretSubsystem,
               &yawController,
               &pitchController,
               &ballisticsSolver,
               0,
               0),
-          fireRateManager(tapDrivers, drivers.visionCoprocessor, drivers.commandScheduler, turretCvCommand, 0)
+          fireRateManager(drivers, visionCoprocessor, drivers.commandScheduler, turretCvCommand, 0)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(drivers.visionCoprocessor, getLastAimData(0)).WillByDefault(ReturnRef(aimData));
+        ON_CALL(visionCoprocessor, getLastAimData(0)).WillByDefault(ReturnRef(aimData));
     }
-
-    aruwsrc::Drivers drivers;
-    tap::Drivers tapDrivers;
 
 private:
     NiceMock<tap::mock::MotorInterfaceMock> yawM;
@@ -82,7 +83,10 @@ private:
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
 
 protected:
+    tap::Drivers drivers;
     NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     AutoAimFireRateReselectionManager fireRateManager;
     VisionCoprocessor::TurretAimData aimData = {};
 };
@@ -101,7 +105,7 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_not_ready_cv_runnin
 {
     ON_CALL(drivers.commandScheduler, isCommandScheduled(&turretCvCommand))
         .WillByDefault(Return(true));
-    ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(Return(false));
+    ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(false));
 
     EXPECT_EQ(FireRateReadinessState::NOT_READY, fireRateManager.getFireRateReadinessState());
 }
@@ -110,7 +114,7 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_not_ready_zero_fire
 {
     ON_CALL(drivers.commandScheduler, isCommandScheduled(&turretCvCommand))
         .WillByDefault(Return(true));
-    ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(Return(true));
+    ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
     aimData.pva.firerate = VisionCoprocessor::FireRate::ZERO;
 
@@ -121,7 +125,7 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_ready_nonzero_firer
 {
     ON_CALL(drivers.commandScheduler, isCommandScheduled(&turretCvCommand))
         .WillByDefault(Return(true));
-    ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(Return(true));
+    ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
     aimData.pva.firerate = VisionCoprocessor::FireRate::LOW;
     EXPECT_EQ(
