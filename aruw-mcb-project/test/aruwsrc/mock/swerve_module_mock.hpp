@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(float, calculate, (float, float, float));
     MOCK_METHOD(float, getDriveVelocity, (float, float), (const));
     MOCK_METHOD(float, getAngle, (), (const));
-    MOCK_METHOD(void, initialize, (float), ());
+    MOCK_METHOD(void, initialize, (), ());
     MOCK_METHOD(void, refresh, (), ());
     MOCK_METHOD(float, calculateTotalModuleError, (), (const));
     MOCK_METHOD(float, getAzimuthError, (), (const));

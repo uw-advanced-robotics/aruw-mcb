@@ -17,9 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
 
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_

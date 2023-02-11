@@ -23,14 +23,14 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
-#include "aruwsrc/mock/chassis_subsystem_mock.hpp"
+#include "aruwsrc/mock/mecanum_chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
 using namespace testing;
 using namespace tap::algorithms;
-using aruwsrc::mock::ChassisSubsystemMock;
+using aruwsrc::mock::MecanumChassisSubsystemMock;
 using aruwsrc::mock::TurretSubsystemMock;
 using namespace tap::communication::serial;
 
@@ -83,7 +83,7 @@ protected:
 
     aruwsrc::Drivers d;
     NiceMock<TurretSubsystemMock> t;
-    NiceMock<ChassisSubsystemMock> cs;
+    NiceMock<MecanumChassisSubsystemMock> cs;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};
     float yawAngle = 0;

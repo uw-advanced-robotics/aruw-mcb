@@ -20,7 +20,6 @@
 #include "agitator_subsystem_mock.hpp"
 #include "beyblade_command_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
-#include "chassis_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
 #include "mecanum_chassis_subsystem_mock.hpp"
@@ -74,7 +73,7 @@ AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
     aruwsrc::Drivers *drivers,
-    chassis::HolonomicChassisSubsystem *chassis,
+    chassis::MecanumChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor)
     : BeybladeCommand(drivers, chassis, yawMotor)
 {
@@ -83,17 +82,11 @@ BeybladeCommandMock::~BeybladeCommandMock() {}
 
 ChassisDriveCommandMock::ChassisDriveCommandMock(
     aruwsrc::Drivers *d,
-    chassis::HolonomicChassisSubsystem *cs)
+    chassis::MecanumChassisSubsystem *cs)
     : chassis::ChassisDriveCommand(d, cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
-
-ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
-    : Holonomic4MotorChassisSubsystem(drivers)
-{
-}
-ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(aruwsrc::Drivers *drivers)
     : MecanumChassisSubsystem(drivers)

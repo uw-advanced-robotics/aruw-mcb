@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -77,10 +77,10 @@ TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)//4 
 TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)//4 motor, swerve
 {
     bool lfOnline, lbOnline, rfOnline, rbOnline;
-    ON_CALL(chassis.leftFrontModule, allMotorsOnline).WillByDefault(ReturnPointee(&lfOnline));
-    ON_CALL(chassis.leftBackModule, allMotorsOnline).WillByDefault(ReturnPointee(&lbOnline));
-    ON_CALL(chassis.rightFrontModule, allMotorsOnline).WillByDefault(ReturnPointee(&rfOnline));
-    ON_CALL(chassis.rightBackModule, allMotorsOnline).WillByDefault(ReturnPointee(&rbOnline));
+    ON_CALL(chassis.modules[0], allMotorsOnline).WillByDefault(ReturnPointee(&lfOnline));
+    ON_CALL(chassis.modules[1], allMotorsOnline).WillByDefault(ReturnPointee(&lbOnline));
+    ON_CALL(chassis.modules[2], allMotorsOnline).WillByDefault(ReturnPointee(&rfOnline));
+    ON_CALL(chassis.modules[3], allMotorsOnline).WillByDefault(ReturnPointee(&rbOnline));
 
     for (int i = 0; i < 0xf; i++)
     {
@@ -114,10 +114,10 @@ TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)//swer
 
 TEST_F(SwerveChassisSubsystemTest, initialize)//4 motor, swerve
 {
-    EXPECT_CALL(chassis.leftFrontModule, initialize);
-    EXPECT_CALL(chassis.leftBackModule, initialize);
-    EXPECT_CALL(chassis.rightFrontModule, initialize);
-    EXPECT_CALL(chassis.rightBackModule, initialize);
+    EXPECT_CALL(chassis.modules[0], initialize);
+    EXPECT_CALL(chassis.modules[1], initialize);
+    EXPECT_CALL(chassis.modules[2], initialize);
+    EXPECT_CALL(chassis.modules[3], initialize);
 
     chassis.initialize();
 }

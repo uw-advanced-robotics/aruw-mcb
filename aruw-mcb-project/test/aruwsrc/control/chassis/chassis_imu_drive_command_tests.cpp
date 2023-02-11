@@ -24,7 +24,7 @@
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
-#include "aruwsrc/mock/chassis_subsystem_mock.hpp"
+#include "aruwsrc/mock/mecanum_chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -62,7 +62,7 @@ protected:
     }
 
     Drivers drivers;
-    NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis;
+    NiceMock<aruwsrc::mock::MecanumChassisSubsystemMock> chassis;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     Mpu6500::ImuState imuState = Mpu6500::ImuState::IMU_CALIBRATED;
     float imuYaw = 0;

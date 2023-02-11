@@ -80,18 +80,18 @@ public:
 
     inline bool allMotorsOnline() const override
     {
-        return modules[0]->allMotorsOnline() &&
-            modules[1]->allMotorsOnline() &&
-            modules[2]->allMotorsOnline() &&
-            modules[3]->allMotorsOnline();
+        return modules[0].allMotorsOnline() &&
+            modules[1].allMotorsOnline() &&
+            modules[2].allMotorsOnline() &&
+            modules[3].allMotorsOnline();
     }
 
     inline void setZeroRPM() override
     {
-        modules[0]->setZeroRPM();
-        modules[1]->setZeroRPM();
-        modules[2]->setZeroRPM();
-        modules[3]->setZeroRPM();
+        modules[0].setZeroRPM();
+        modules[1].setZeroRPM();
+        modules[2].setZeroRPM();
+        modules[3].setZeroRPM();
     }
 
     /**
@@ -117,10 +117,10 @@ public:
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     //only to satisfy chassis subsystem interface
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontModule.getDriveRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackModule.getDriveRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontModule.getDriveRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackModule.getDriveRPM(); }
+    inline int16_t getLeftFrontRpmActual() const override { return modules[LF].getDriveRPM(); }
+    inline int16_t getLeftBackRpmActual() const override { return modules[LB].getDriveRPM(); }
+    inline int16_t getRightFrontRpmActual() const override { return modules[RF].getDriveRPM(); }
+    inline int16_t getRightBackRpmActual() const override { return modules[RB].getDriveRPM(); }
 
 private:
 
@@ -130,22 +130,12 @@ private:
      */
     void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
-    chassis::SwerveModule* modules[4];  
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftFrontModule;
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> leftBackModule;
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> rightFrontModule;
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> rightBackModule;
-
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> modules[4];  
 private:
 #else
-    // individual motors
-    chassis::SwerveModule leftFrontModule;
-    chassis::SwerveModule leftBackModule;
-    chassis::SwerveModule rightFrontModule;
-    chassis::SwerveModule rightBackModule;
+    chassis::SwerveModule* modules[4];  
 #endif      
 
 };  // class SwerveChassisSubsystem

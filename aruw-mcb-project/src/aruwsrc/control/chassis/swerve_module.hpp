@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -69,6 +69,8 @@ struct SwerveModuleConfig
     const float azimuthPidFeedForwardConstant = 0.0f;
 };
 
+static SwerveModuleConfig SWERVE_CONFIG;
+
 /**
  *
  * This class encapsultes a swerve module using two motors.
@@ -78,8 +80,6 @@ struct SwerveModuleConfig
 class SwerveModule
 {
 public:
-    static SwerveModuleConfig SWERVE_CONFIG;
-
     SwerveModule(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId driveMotorId,
