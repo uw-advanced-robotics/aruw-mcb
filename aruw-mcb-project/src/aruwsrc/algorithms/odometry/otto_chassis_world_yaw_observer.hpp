@@ -49,8 +49,7 @@ public:
      * to get yaw angle of chassis relative to turret. This must be the same turret that the IMU on
      * CAN bus 1 is attached to.
      */
-    OttoChassisWorldYawObserver(
-        const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
+    OttoChassisWorldYawObserver(const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
 
     /**
      * Get the current chassis yaw in radians.

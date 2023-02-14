@@ -43,10 +43,11 @@ namespace display
 class OledDisplay : public ::modm::pt::Protothread
 {
 public:
-    explicit OledDisplay(tap::Drivers *drivers,
-    serial::VisionCoprocessor *visionCoprocessor,
-    can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2);
+    explicit OledDisplay(
+        tap::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor,
+        can::TurretMCBCanComm *turretMCBCanCommBus1,
+        can::TurretMCBCanComm *turretMCBCanCommBus2);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 

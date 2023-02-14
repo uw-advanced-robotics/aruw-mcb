@@ -57,8 +57,8 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
     RF_BEGIN(2);
 
     {
-        bool hasTarget = visionCoprocessor.isCvOnline() &&
-                         visionCoprocessor.getSomeTurretHasTarget();
+        bool hasTarget =
+            visionCoprocessor.isCvOnline() && visionCoprocessor.getSomeTurretHasTarget();
 
         if (hasTarget)
         {

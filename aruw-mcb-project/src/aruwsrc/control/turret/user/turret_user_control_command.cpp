@@ -26,7 +26,7 @@ namespace aruwsrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
     tap::Drivers *drivers,
-    ControlOperatorInterface& controlOperatorInterface,
+    ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,

@@ -26,12 +26,11 @@
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/drivers.hpp"
 
 #include "constants/chassis_constants.hpp"
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
-
-#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {

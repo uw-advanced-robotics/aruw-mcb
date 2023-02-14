@@ -21,7 +21,6 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-
 #include "tap/control/command_scheduler.hpp"
 
 using namespace tap::communication::serial;

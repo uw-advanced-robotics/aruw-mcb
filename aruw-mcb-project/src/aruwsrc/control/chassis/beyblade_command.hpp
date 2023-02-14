@@ -22,11 +22,10 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
 #include "aruwsrc/robot/control_operator_interface.hpp"
-#include "tap/drivers.hpp"
 
 namespace aruwsrc::chassis
 {

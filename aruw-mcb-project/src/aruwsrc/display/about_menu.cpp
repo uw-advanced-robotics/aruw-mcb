@@ -23,8 +23,7 @@
 
 namespace aruwsrc::display
 {
-AboutMenu::AboutMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
+AboutMenu::AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID)
 
 {

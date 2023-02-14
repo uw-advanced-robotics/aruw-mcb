@@ -21,10 +21,10 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
-
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::serial;

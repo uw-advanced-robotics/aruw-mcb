@@ -37,8 +37,8 @@ void ChassisRelDrive::computeDesiredUserTranslation(
     float *chassisXDesiredWheelspeed,
     float *chassisYDesiredWheelspeed)
 {
-    if (drivers == nullptr || operatorInterface == nullptr || chassis == nullptr || chassisXDesiredWheelspeed == nullptr ||
-        chassisYDesiredWheelspeed == nullptr)
+    if (drivers == nullptr || operatorInterface == nullptr || chassis == nullptr ||
+        chassisXDesiredWheelspeed == nullptr || chassisYDesiredWheelspeed == nullptr)
     {
         return;
     }
@@ -52,20 +52,22 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
-        operatorInterface -> getChassisXInput(),
+        operatorInterface->getChassisXInput(),
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
-        operatorInterface -> getChassisYInput(),
+        operatorInterface->getChassisYInput(),
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 }
 
-void ChassisRelDrive::onExecute(aruwsrc::control::ControlOperatorInterface *operatorInterface,
-    tap::Drivers *drivers, HolonomicChassisSubsystem *chassis)
+void ChassisRelDrive::onExecute(
+    aruwsrc::control::ControlOperatorInterface *operatorInterface,
+    tap::Drivers *drivers,
+    HolonomicChassisSubsystem *chassis)
 {
-    float chassisRotationDesiredWheelspeed = operatorInterface -> getChassisRInput();
+    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput();
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;

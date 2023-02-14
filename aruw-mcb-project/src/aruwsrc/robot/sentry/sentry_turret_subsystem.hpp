@@ -31,7 +31,7 @@ class SentryTurretSubsystem final : public RobotTurretSubsystem
 {
 public:
     SentryTurretSubsystem(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,

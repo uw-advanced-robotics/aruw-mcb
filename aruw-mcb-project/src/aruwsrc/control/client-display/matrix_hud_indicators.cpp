@@ -21,8 +21,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/util_macros.hpp"
 

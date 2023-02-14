@@ -92,7 +92,13 @@ void WiggleDriveCommand::execute()
 
         float x = 0.0f;
         float y = 0.0f;
-        ChassisRelDrive::computeDesiredUserTranslation(operatorInterface, drivers, chassis, r, &x, &y);
+        ChassisRelDrive::computeDesiredUserTranslation(
+            operatorInterface,
+            drivers,
+            chassis,
+            r,
+            &x,
+            &y);
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret

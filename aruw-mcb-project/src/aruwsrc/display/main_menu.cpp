@@ -30,9 +30,9 @@ namespace display
 MainMenu::MainMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
     tap::Drivers* drivers,
-    serial::VisionCoprocessor *visionCoprocessor,
-    can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2)
+    serial::VisionCoprocessor* visionCoprocessor,
+    can::TurretMCBCanComm* turretMCBCanCommBus1,
+    can::TurretMCBCanComm* turretMCBCanCommBus2)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),

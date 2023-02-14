@@ -78,7 +78,8 @@ private:
         }
 
         // otherwise, iterate through message types until you find one that is queued
-        auto nextMessageType = [](SentryRequestMessageType type) {
+        auto nextMessageType = [](SentryRequestMessageType type)
+        {
             return static_cast<SentryRequestMessageType>(
                 (static_cast<uint8_t>(type) + 1) %
                 static_cast<uint8_t>(SentryRequestMessageType::NUM_MESSAGE_TYPES));

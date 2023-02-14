@@ -21,12 +21,10 @@
 #define SPLASH_SCREEN_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
-
-#include "modm/ui/menu/abstract_menu.hpp"
-
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
 {

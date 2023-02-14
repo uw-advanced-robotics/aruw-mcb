@@ -26,7 +26,6 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-
 #include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc::control

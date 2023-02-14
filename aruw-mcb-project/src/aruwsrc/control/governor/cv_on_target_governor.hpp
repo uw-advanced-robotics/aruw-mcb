@@ -47,7 +47,7 @@ class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterfa
 {
 public:
     CvOnTargetGovernor(
-        tap::Drivers* drivers,
+        tap::Drivers *drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
@@ -134,7 +134,7 @@ public:
     }
 
 private:
-    tap::Drivers* drivers;
+    tap::Drivers *drivers;
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;

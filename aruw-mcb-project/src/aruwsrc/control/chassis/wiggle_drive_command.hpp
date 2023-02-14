@@ -27,7 +27,6 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
-
 namespace aruwsrc
 {
 namespace chassis

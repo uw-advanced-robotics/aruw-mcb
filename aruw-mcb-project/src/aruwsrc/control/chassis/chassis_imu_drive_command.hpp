@@ -21,13 +21,11 @@
 #define CHASSIS_IMU_DRIVE_COMMAND_HPP_
 
 #include "tap/algorithms/contiguous_float.hpp"
-#include "tap/control/command.hpp"
-
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::chassis

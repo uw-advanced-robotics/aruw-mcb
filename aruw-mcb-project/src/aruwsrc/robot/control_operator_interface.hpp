@@ -22,8 +22,8 @@
 
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/algorithms/ramp.hpp"
-#include "tap/util_macros.hpp"
 #include "tap/drivers.hpp"
+#include "tap/util_macros.hpp"
 
 namespace aruwsrc
 {

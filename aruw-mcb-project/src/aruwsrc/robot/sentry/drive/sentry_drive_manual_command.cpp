@@ -21,9 +21,9 @@
 
 #include "tap/communication/serial/remote.hpp"
 
-#include "sentry_drive_subsystem.hpp"
-
 #include "aruwsrc/robot/control_operator_interface.hpp"
+
+#include "sentry_drive_subsystem.hpp"
 
 using tap::control::Subsystem;
 

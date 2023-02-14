@@ -20,9 +20,9 @@
 #include "turret_mcb_can_comm.hpp"
 
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "tap/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 
 namespace aruwsrc::can

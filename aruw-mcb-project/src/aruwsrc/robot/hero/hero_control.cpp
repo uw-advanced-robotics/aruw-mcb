@@ -33,19 +33,16 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
-#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
+#include "aruwsrc/control/agitator/agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
-#include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_diagonal_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -55,6 +52,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -63,15 +61,16 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -179,7 +178,7 @@ aruwsrc::communication::serial::
     PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
-    ((tap::Drivers *) drivers()),
+    ((tap::Drivers *)drivers()),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
@@ -197,20 +196,20 @@ ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
     ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(
-    ((tap::Drivers *) drivers()),
+    ((tap::Drivers *)drivers()),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
-    ((tap::Drivers *) drivers()),
+    ((tap::Drivers *)drivers()),
     &frictionWheels,
     10.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
-    ((tap::Drivers *) drivers()),
+    ((tap::Drivers *)drivers()),
     &frictionWheels,
     0.0f,
     true,

@@ -21,11 +21,10 @@
 #define CHASSIS_DIAGONAL_DRIVE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
-
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
-
 
 #include "chassis_autorotate_command.hpp"
 

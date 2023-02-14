@@ -44,7 +44,10 @@ ChassisDriveCommand::ChassisDriveCommand(
 
 void ChassisDriveCommand::initialize() {}
 
-void ChassisDriveCommand::execute() { ChassisRelDrive::onExecute(operatorInterface, drivers, chassis); }
+void ChassisDriveCommand::execute()
+{
+    ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+}
 
 void ChassisDriveCommand::end(bool) { chassis->setZeroRPM(); }
 

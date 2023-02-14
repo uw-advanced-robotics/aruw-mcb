@@ -21,9 +21,9 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/robot/control_operator_interface.hpp"
-#include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
@@ -49,8 +49,9 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
 
 void ChassisImuDriveCommand::initialize()
 {
-    imuSetpointInitialized = drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
-                             drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
+    imuSetpointInitialized =
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED ||
+        drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_NOT_CALIBRATED;
 
     if (imuSetpointInitialized)
     {
@@ -81,8 +82,8 @@ void ChassisImuDriveCommand::execute()
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
             // to get to the same position that it was at previously.
-            float chassisRInput = operatorInterface->getChassisRInput() *
-                                  USER_INPUT_TO_ANGLE_DELTA_SCALAR;
+            float chassisRInput =
+                operatorInterface->getChassisRInput() * USER_INPUT_TO_ANGLE_DELTA_SCALAR;
             if (abs(angleFromDesiredRotation) > MAX_ROTATION_ERR)
             {
                 // doesn't have to be in the if statement but this is more computationally intensive

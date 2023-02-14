@@ -63,8 +63,7 @@ public:
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
     static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
 
-    AboutMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
+    AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
     void draw() override;
 
     void update() override;

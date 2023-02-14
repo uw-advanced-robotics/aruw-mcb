@@ -25,9 +25,9 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "tap/drivers.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 

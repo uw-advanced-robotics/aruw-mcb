@@ -24,10 +24,10 @@
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-
-#include "turret_cv_command_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+
+#include "turret_cv_command_interface.hpp"
 
 namespace tap::control::odometry
 {

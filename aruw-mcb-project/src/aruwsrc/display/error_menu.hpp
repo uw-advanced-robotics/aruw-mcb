@@ -36,8 +36,7 @@ namespace display
 class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    ErrorMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
+    ErrorMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
 
     void draw() override;
 

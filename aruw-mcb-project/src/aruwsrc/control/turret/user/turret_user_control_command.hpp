@@ -33,7 +33,7 @@ namespace control
 {
 class ControlOperatorInterface;
 }
-}
+}  // namespace aruwsrc
 
 namespace aruwsrc::control::turret::user
 {
@@ -57,7 +57,7 @@ public:
      */
     TurretUserControlCommand(
         tap::Drivers *drivers,
-        ControlOperatorInterface& controlOperatorInterface,
+        ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -79,7 +79,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    ControlOperatorInterface& controlOperatorInterface;
+    ControlOperatorInterface &controlOperatorInterface;
     TurretSubsystem *turretSubsystem;
 
     uint32_t prevTime = 0;

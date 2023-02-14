@@ -24,9 +24,9 @@
 
 #include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "tap/drivers.hpp"
 
 #include "turret_controller_interface.hpp"
 

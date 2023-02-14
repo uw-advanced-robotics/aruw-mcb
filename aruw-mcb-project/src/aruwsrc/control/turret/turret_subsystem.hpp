@@ -70,7 +70,7 @@ public:
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
      */
     explicit TurretSubsystem(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,

@@ -20,7 +20,6 @@
 #include "reticle_indicator.hpp"
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-
 #include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;

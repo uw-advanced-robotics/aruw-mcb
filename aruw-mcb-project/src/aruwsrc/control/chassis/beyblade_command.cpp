@@ -73,7 +73,13 @@ void BeybladeCommand::execute()
         // Note: pass in 0 as rotation since we don't want to take into consideration
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
-        ChassisRelDrive::computeDesiredUserTranslation(&operatorInterface, drivers, chassis, 0, &x, &y);
+        ChassisRelDrive::computeDesiredUserTranslation(
+            &operatorInterface,
+            drivers,
+            chassis,
+            0,
+            &x,
+            &y);
         x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
