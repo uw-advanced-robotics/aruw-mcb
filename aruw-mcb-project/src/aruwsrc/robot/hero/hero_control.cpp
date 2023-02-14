@@ -178,27 +178,39 @@ aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrant
 aruwsrc::communication::serial::
     PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
-ChassisImuDriveCommand chassisImuDriveCommand(drivers(), &chassis, &turret.yawMotor);
+ChassisImuDriveCommand chassisImuDriveCommand(
+    ((tap::Drivers *) drivers()),
+    &drivers()->controlOperatorInterface,
+    &chassis,
+    &turret.yawMotor);
 
-ChassisDriveCommand chassisDriveCommand(drivers(), &chassis);
+ChassisDriveCommand chassisDriveCommand(
+    ((tap::Drivers *)drivers()),
+    &drivers()->controlOperatorInterface,
+    &chassis);
 
 ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
-    drivers(),
+    ((tap::Drivers *)drivers()),
+    &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
     ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
-BeybladeCommand beybladeCommand(drivers(), &chassis, &turret.yawMotor);
+BeybladeCommand beybladeCommand(
+    ((tap::Drivers *) drivers()),
+    &chassis,
+    &turret.yawMotor,
+    (drivers()->controlOperatorInterface));
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
-    drivers(),
+    ((tap::Drivers *) drivers()),
     &frictionWheels,
     10.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
-    drivers(),
+    ((tap::Drivers *) drivers()),
     &frictionWheels,
     0.0f,
     true,

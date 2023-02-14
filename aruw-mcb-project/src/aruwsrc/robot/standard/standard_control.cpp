@@ -194,10 +194,10 @@ aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
-    ((tap::Drivers *)drivers()),
+    ((tap::Drivers *) drivers()),
     &chassis,
     &turret.yawMotor,
-    &drivers()->controlOperatorInterface);
+    (drivers()->controlOperatorInterface));
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

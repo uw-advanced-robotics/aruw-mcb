@@ -22,11 +22,11 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command_scheduler.hpp"
 
-#include "aruwsrc/control/engineer/extend_xaxis_command.hpp"
-#include "aruwsrc/control/engineer/grabber_subsystem.hpp"
-#include "aruwsrc/control/engineer/squeeze_grabber_command.hpp"
-#include "aruwsrc/control/engineer/tow_subsystem.hpp"
-#include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/extend_xaxis_command.hpp"
+#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
+#include "aruwsrc/robot/engineer/squeeze_grabber_command.hpp"
+#include "aruwsrc/robot/engineer/tow_subsystem.hpp"
+#include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 

@@ -39,7 +39,7 @@ class BeybladeCommand : public tap::control::Command
 {
 public:
     BeybladeCommand(
-        tap::Drivers& drivers,
+        tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
@@ -66,7 +66,7 @@ private:
 
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    tap::Drivers& drivers;
+    tap::Drivers* drivers;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
