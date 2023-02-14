@@ -47,12 +47,12 @@ protected:
         : frictionWheels(&drivers),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
-          ballistics(drivers, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
 
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

@@ -23,11 +23,11 @@
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/cv_on_target_governor_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
@@ -48,10 +48,12 @@ protected:
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
-          ballisticsSolver(drivers, odometry, turretSubsystem, launcher, 0, 0),
+          visionCoprocessor(&drivers),
+          operatorInterface(&drivers),
+          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
           turretCvCommand(
-              &drivers.visionCoprocessor,
-              &drivers.controlOperatorInterface,
+              &visionCoprocessor,
+              &operatorInterface,
               &turretSubsystem,
               &yawController,
               &pitchController,
@@ -63,7 +65,8 @@ protected:
               tap::communication::serial::Remote::Switch::LEFT_SWITCH,
               tap::communication::serial::Remote::SwitchState::UP),
           cvOnTargetGovernor(
-              drivers,
+              &drivers,
+              visionCoprocessor,
               turretCvCommand,
               launchTimer,
               aruwsrc::control::governor::CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
@@ -76,8 +79,8 @@ protected:
         ON_CALL(drivers.commandScheduler, isCommandScheduled).WillByDefault(Return(false));
     }
 
-    aruwsrc::Drivers drivers;
-
+    tap::Drivers drivers;
+    
 private:
     NiceMock<tap::mock::MotorInterfaceMock> yawM;
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
@@ -86,6 +89,8 @@ private:
     aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController yawController;
     aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;

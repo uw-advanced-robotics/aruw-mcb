@@ -22,9 +22,10 @@
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;
@@ -44,9 +45,10 @@ class BeybladeCommandTest : public Test, public WithParamInterface<std::tuple<fl
 {
 protected:
     BeybladeCommandTest()
-        : t(&d),
+        : operatorInterface(&d),
+          t(&d),
           cs(&d),
-          bc(&d, &cs, &t.yawMotor, &(d.controlOperatorInterface)),
+          bc(d, &cs, &t.yawMotor, operatorInterface),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -58,8 +60,8 @@ protected:
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
         ON_CALL(t.yawMotor, getAngleFromCenter).WillByDefault(ReturnPointee(&yawAngle));
         ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
-        ON_CALL(d.controlOperatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
-        ON_CALL(d.controlOperatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
+        ON_CALL(operatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
+        ON_CALL(operatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
         ON_CALL(cs, calculateRotationTranslationalGain).WillByDefault(Return(1));
         ON_CALL(d.refSerial, getRobotData).WillByDefault(ReturnRef(rd));
@@ -80,7 +82,8 @@ protected:
                 FloatNear(rotation, 1E-3)));
     }
 
-    aruwsrc::Drivers d;
+    tap::Drivers d;
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<ChassisSubsystemMock> cs;
     BeybladeCommand bc;
