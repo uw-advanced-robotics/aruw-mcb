@@ -117,7 +117,7 @@ public:
      * @return `true` if the agitator unjam timer has expired, signaling that the agitator has
      * jammed, `false` otherwise.
      */
-    bool isJammed() override { return config.jamLogicEnabled && subsystemJamStatus; }
+    bool isJammed() override { return false; }
 
     /**
      * Clear the jam status of the subsystem, indicating that it has been unjammed.
