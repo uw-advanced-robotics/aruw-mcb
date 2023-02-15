@@ -148,7 +148,7 @@ public:
               &config.turretMCBCanComm,
               config.turretID),
           ballisticsSolver(
-              drivers()->visionCoprocessor,
+              drivers->visionCoprocessor,
               odometrySubsystem,
               turretSubsystem,
               frictionWheels,
@@ -176,7 +176,7 @@ public:
               worldFrameYawTurretImuVelPid),
           turretManual(
               &drivers,
-              drivers()->operatorInterface,
+              drivers->operatorInterface,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
@@ -198,12 +198,12 @@ public:
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           cvOnTargetGovernor(
               drivers,
-              drivers()->visionCoprocessor,
+              drivers->visionCoprocessor,
               turretCVCommand,
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
-          cvOnlineGovernor(drivers, drivers()->visionCoprocessor, turretCVCommand),
-          autoAimFireRateManager(drivers, drivers()->visionCoprocessor, drivers()->commandScheduler, turretCVCommand, config.turretID),
+          cvOnlineGovernor(drivers, drivers->visionCoprocessor, turretCVCommand),
+          autoAimFireRateManager(drivers, drivers->visionCoprocessor, drivers->commandScheduler, turretCVCommand, config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
           pauseCommandGovernor(
               aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
@@ -218,8 +218,11 @@ public:
                &pauseCommandGovernor}),
           rotateAndUnjamAgitatorWithHeatAndCvLimiting(
               {&agitator},
-              rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-            {&heatLimitGovernor, &cvOnTargetGovernor})
+              rotateAndUnjamAgitator,
+              {&heatLimitGovernor,
+               &frictionWheelsOnGovernor,
+               &cvOnTargetGovernor,
+               &fireRateLimitGovernor})
     {
     }
 
@@ -316,8 +319,8 @@ SentryOttoKFOdometry2DSubsystem odometrySubsystem(
 
 /* define commands ----------------------------------------------------------*/
 // Two identical drive commands since you can't map an identical command to two different mappings
-SentryDriveManualCommand sentryDriveManual1(drivers()->controlOperatorInterface, &sentryDrive);
-SentryDriveManualCommand sentryDriveManual2(drivers()->controlOperatorInterface, &sentryDrive);
+SentryDriveManualCommand sentryDriveManual1(drivers->controlOperatorInterface, &sentryDrive);
+SentryDriveManualCommand sentryDriveManual2(drivers->controlOperatorInterface, &sentryDrive);
 
 SentryAutoDriveComprisedCommand sentryAutoDrive(drivers(), &sentryDrive);
 
@@ -344,7 +347,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
-void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+void selectNewRobotMessageHandler() { drivers->visionCoprocessor.sendSelectNewTargetMessage(); }
 
 void targetNewQuadrantMessageHandler()
 {
