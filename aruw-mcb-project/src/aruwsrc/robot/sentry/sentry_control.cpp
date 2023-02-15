@@ -30,7 +30,6 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/algorithms/odometry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
