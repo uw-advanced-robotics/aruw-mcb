@@ -48,7 +48,7 @@ protected:
         : operatorInterface(&d),
           t(&d),
           cs(&d),
-          bc(d, &cs, &t.yawMotor, operatorInterface),
+          bc(&d, &cs, &t.yawMotor, operatorInterface),
           yawAngle(std::get<2>(GetParam())),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
