@@ -265,6 +265,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
+    drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
@@ -274,7 +275,8 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     USER_PITCH_INPUT_SCALAR);
 
 cv::TurretCVCommand turretCVCommand(
-    drivers(),
+    &drivers()->visionCoprocessor,
+    &drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawTurretImuControllerCv,
     &worldFramePitchTurretImuController,
@@ -344,7 +346,8 @@ HeatLimitGovernor heatLimitGovernor(
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
 CvOnTargetGovernor cvOnTargetGovernor(
-    *drivers(),
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
@@ -362,7 +365,9 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
+    *((tap::Drivers *)drivers()),
+    drivers()->commandScheduler,
+    drivers()->visionCoprocessor,
     clientDisplay,
     nullptr,
     frictionWheels,
