@@ -71,8 +71,8 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
-    tap::Drivers &drivers,
-    chassis::HolonomicChassisSubsystem *chassis,
+    tap::Drivers* drivers,
+    chassis::HolonomicChassisSubsystem* chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor,
     aruwsrc::control::ControlOperatorInterface &operatorInterface
     )
