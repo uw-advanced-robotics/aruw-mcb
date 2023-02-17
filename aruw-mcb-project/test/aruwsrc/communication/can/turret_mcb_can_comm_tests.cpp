@@ -21,9 +21,9 @@
 
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "tap/drivers.hpp"
 
 using namespace aruwsrc::can;
 using namespace testing;
