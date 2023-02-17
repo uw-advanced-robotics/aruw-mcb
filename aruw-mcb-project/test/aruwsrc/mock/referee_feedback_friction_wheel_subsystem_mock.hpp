@@ -22,8 +22,9 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 namespace aruwsrc::mock
 {

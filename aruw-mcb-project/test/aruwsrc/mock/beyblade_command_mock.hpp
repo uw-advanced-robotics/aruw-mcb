@@ -32,7 +32,7 @@ class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
 {
 public:
     BeybladeCommandMock(
-        tap::Drivers* drivers,
+        tap::Drivers *drivers,
         chassis::HolonomicChassisSubsystem *chassis,
         aruwsrc::control::turret::TurretMotor *yawMotor,
         aruwsrc::control::ControlOperatorInterface &operatorInterface);

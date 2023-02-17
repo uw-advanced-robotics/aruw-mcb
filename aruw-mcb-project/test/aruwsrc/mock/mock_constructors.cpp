@@ -71,11 +71,10 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
-    tap::Drivers* drivers,
-    chassis::HolonomicChassisSubsystem* chassis,
+    tap::Drivers *drivers,
+    chassis::HolonomicChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor,
-    aruwsrc::control::ControlOperatorInterface &operatorInterface
-    )
+    aruwsrc::control::ControlOperatorInterface &operatorInterface)
     : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
 {
 }
@@ -120,9 +119,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::OutputPin pin)
+GrabberSubsystemMock::GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::GrabberSubsystem(drivers, pin)
 {
 }
@@ -132,10 +129,10 @@ OledDisplayMock::OledDisplayMock(
     tap::Drivers *drivers,
     aruwsrc::serial::VisionCoprocessor *vc,
     can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2
-    ) : 
-    display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
-    {}
+    can::TurretMCBCanComm *turretMCBCanCommBus2)
+    : display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
+{
+}
 OledDisplayMock::~OledDisplayMock() {}
 
 TurretMCBCanCommMock::TurretMCBCanCommMock(tap::Drivers *drivers, tap::can::CanBus canBus)
@@ -281,8 +278,13 @@ CvOnTargetGovernorMock::CvOnTargetGovernorMock(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
     aruwsrc::control::governor::AutoAimLaunchTimer &launchTimer,
-    aruwsrc::control::governor::CvOnTargetGovernorMode mode) : 
-     aruwsrc::control::governor::CvOnTargetGovernor(drivers, visionCoprocessor, turretCVCommand, launchTimer, mode)
+    aruwsrc::control::governor::CvOnTargetGovernorMode mode)
+    : aruwsrc::control::governor::CvOnTargetGovernor(
+          drivers,
+          visionCoprocessor,
+          turretCVCommand,
+          launchTimer,
+          mode)
 {
 }
 
