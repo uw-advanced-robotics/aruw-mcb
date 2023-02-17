@@ -45,7 +45,7 @@ enum class CvOnTargetGovernorMode
  */
 class CvOnTargetGovernor : public tap::control::governor::CommandGovernorInterface
 {
-public:   
+public:
     CvOnTargetGovernor(
         tap::Drivers *drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
