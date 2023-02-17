@@ -19,11 +19,11 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/command_mock.hpp"
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
@@ -80,7 +80,7 @@ protected:
     }
 
     tap::Drivers drivers;
-    
+
 private:
     NiceMock<tap::mock::MotorInterfaceMock> yawM;
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
