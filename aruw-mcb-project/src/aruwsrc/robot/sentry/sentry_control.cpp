@@ -148,7 +148,7 @@ public:
               &config.turretMCBCanComm,
               config.turretID),
           ballisticsSolver(
-              drivers->visionCoprocessor,
+              drivers.visionCoprocessor,
               odometrySubsystem,
               turretSubsystem,
               frictionWheels,
@@ -175,8 +175,8 @@ public:
               worldFrameYawTurretImuPosPid,
               worldFrameYawTurretImuVelPid),
           turretManual(
-              &drivers,
-              drivers->operatorInterface,
+              (tap::Drivers*)&drivers,
+              drivers.controlOperatorInterface,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
@@ -184,8 +184,7 @@ public:
               USER_PITCH_INPUT_SCALAR,
               config.turretID),
           turretCVCommand(
-              &drivers->visionCoprocessor,
-              &drivers->controlOperatorInterface,
+              &drivers.visionCoprocessor,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
@@ -198,13 +197,13 @@ public:
           frictionWheelsOnGovernor(frictionWheels),
           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
           cvOnTargetGovernor(
-              drivers,
-              drivers->visionCoprocessor,
+              &drivers,
+              drivers.visionCoprocessor,
               turretCVCommand,
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
-          cvOnlineGovernor(drivers, drivers->visionCoprocessor, turretCVCommand),
-          autoAimFireRateManager(drivers, drivers->visionCoprocessor, drivers->commandScheduler, turretCVCommand, config.turretID),
+          cvOnlineGovernor(drivers, drivers.visionCoprocessor, turretCVCommand),
+          autoAimFireRateManager(drivers, drivers.visionCoprocessor, drivers.commandScheduler, turretCVCommand, config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
           pauseCommandGovernor(
               aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
