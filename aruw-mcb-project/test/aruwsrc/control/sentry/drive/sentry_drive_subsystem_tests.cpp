@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
 
 using namespace aruwsrc::control::sentry::drive;
 using namespace tap::gpio;

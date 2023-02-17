@@ -19,19 +19,19 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
-#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::auto_aim;

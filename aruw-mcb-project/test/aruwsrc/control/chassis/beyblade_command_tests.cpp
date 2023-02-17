@@ -19,13 +19,14 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
-#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::turret;

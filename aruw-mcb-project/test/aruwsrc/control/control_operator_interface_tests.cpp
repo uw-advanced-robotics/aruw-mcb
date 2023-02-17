@@ -29,10 +29,10 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
-#include "tap/drivers.hpp"
 
 using aruwsrc::control::ControlOperatorInterface;
 using namespace tap::communication::serial;

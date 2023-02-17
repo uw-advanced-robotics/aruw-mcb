@@ -25,9 +25,8 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::turret;
@@ -46,7 +45,14 @@ protected:
           controlOperatorInterface(&drivers),
           pitchController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           yawController(turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          turretCmd(&drivers, controlOperatorInterface, &turret, &yawController, &pitchController, 1.0f, 1.0f)
+          turretCmd(
+              &drivers,
+              controlOperatorInterface,
+              &turret,
+              &yawController,
+              &pitchController,
+              1.0f,
+              1.0f)
     {
     }
 

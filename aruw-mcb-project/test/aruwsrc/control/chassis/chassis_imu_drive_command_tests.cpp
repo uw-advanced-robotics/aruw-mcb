@@ -234,7 +234,11 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {
     NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);
-    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &(drivers.controlOperatorInterface), &chassis, &turret.yawMotor);
+    ChassisImuDriveCommand chassisImuDriveCommand(
+        &drivers,
+        &(drivers.controlOperatorInterface),
+        &chassis,
+        &turret.yawMotor);
 
     setupUserInput(MAX_SPEED, 0, 0);
 

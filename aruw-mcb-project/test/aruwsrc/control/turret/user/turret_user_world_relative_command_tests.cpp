@@ -53,11 +53,7 @@ protected:
               turret.pitchMotor,
               posPid,
               velPid),
-          worldFrameYawTurretImuController(
-              turretMCBCanCommBus1,
-              turret.yawMotor,
-              posPid,
-              velPid),
+          worldFrameYawTurretImuController(turretMCBCanCommBus1, turret.yawMotor, posPid, velPid),
           turretCmd(
               &drivers,
               controlOperatorInterface,
