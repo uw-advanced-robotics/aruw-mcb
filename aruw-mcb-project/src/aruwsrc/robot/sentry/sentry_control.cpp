@@ -30,7 +30,6 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
@@ -59,6 +58,7 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
 #include "drive/sentry_auto_drive_comprised_command.hpp"
 #include "drive/sentry_drive_manual_command.hpp"
@@ -175,7 +175,7 @@ public:
               worldFrameYawTurretImuPosPid,
               worldFrameYawTurretImuVelPid),
           turretManual(
-              (tap::Drivers*)&drivers,
+              (tap::Drivers *)&drivers,
               drivers.controlOperatorInterface,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
@@ -203,7 +203,12 @@ public:
               autoAimLaunchTimer,
               CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
           cvOnlineGovernor(drivers, drivers.visionCoprocessor, turretCVCommand),
-          autoAimFireRateManager(drivers, drivers.visionCoprocessor, drivers.commandScheduler, turretCVCommand, config.turretID),
+          autoAimFireRateManager(
+              drivers,
+              drivers.visionCoprocessor,
+              drivers.commandScheduler,
+              turretCVCommand,
+              config.turretID),
           fireRateLimitGovernor(autoAimFireRateManager),
           pauseCommandGovernor(
               aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
