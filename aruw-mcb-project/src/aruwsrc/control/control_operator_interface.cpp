@@ -230,6 +230,11 @@ float ControlOperatorInterface::getSentrySpeedInput()
     return (-drivers->remote.getChannel(Remote::Channel::WHEEL) / 660.0f) *
            USER_STICK_SENTRY_DRIVE_SCALAR;
 }
+
+ float ControlOperatorInterface::getRemoteWheelInput() 
+ {
+    return (drivers->remote.getChannel(Remote::Channel::WHEEL));
+ }
 }  // namespace control
 
 }  // namespace aruwsrc

@@ -131,6 +131,11 @@ public:
      */
     bool isSlowMode();
 
+    /**
+     * @returns whether or not the wheel to calibrate the IMU is pressed.
+    */
+    mockable float getRemoteWheelInput();
+
 private:
     aruwsrc::Drivers *drivers;
 
