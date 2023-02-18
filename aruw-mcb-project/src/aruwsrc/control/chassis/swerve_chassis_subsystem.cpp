@@ -35,6 +35,7 @@ namespace aruwsrc
 namespace chassis
 {
 
+/* 
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     aruwsrc::Drivers* drivers,
     tap::motor::MotorId leftFrontAzimuthMotorId,
@@ -47,8 +48,8 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::motor::MotorId rightBackDriveMotorId,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
+    modules {
     #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    modules{
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
             -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
@@ -57,32 +58,122 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
-    }
     #else
-    modules{
         SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, SWERVE1_CONFIG),
         SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
-            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET, SWERVE2_CONFIG),
         SwerveModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, 
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
         SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
             WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
-    }
     #endif
+    }
+{
+    NUM_MODULES = 4;
+}
+
+
+SwerveChassisSubsystem::SwerveChassisSubsystem(
+    aruwsrc::Drivers* drivers,
+    unsigned int numModules,
+    tap::motor::MotorId leftFrontAzimuthMotorId,
+    tap::motor::MotorId leftFrontDriveMotorId,
+    tap::motor::MotorId leftBackAzimuthMotorId,
+    tap::motor::MotorId leftBackDriveMotorId,
+    tap::motor::MotorId rightFrontAzimuthMotorId,
+    tap::motor::MotorId rightFrontDriveMotorId,
+    tap::motor::MotorId rightBackAzimuthMotorId,
+    tap::motor::MotorId rightBackDriveMotorId,
+    tap::gpio::Analog::Pin currentPin)
+    : HolonomicChassisSubsystem(drivers, currentPin),
+    modules {
+    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
+            -WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
+    #else
+        SwerveModule(drivers, leftFrontDriveMotorId, leftFrontAzimuthMotorId, 
+            -0.05, -0.18, SWERVE1_CONFIG),
+        SwerveModule(drivers, leftBackDriveMotorId, leftBackAzimuthMotorId, 
+            -0.05, 0.18, SWERVE2_CONFIG),
+        SwerveModule(drivers, rightFrontDriveMotorId, rightFrontAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET),
+        SwerveModule(drivers, rightBackDriveMotorId, rightBackAzimuthMotorId, 
+            WIDTH_BETWEEN_WHEELS_X/2 - GIMBAL_X_OFFSET, -WIDTH_BETWEEN_WHEELS_Y/2 - GIMBAL_Y_OFFSET)
+    #endif
+    }
+{
+    NUM_MODULES = numModules;
+} */
+
+
+SwerveChassisSubsystem::SwerveChassisSubsystem(
+    aruwsrc::Drivers* drivers,
+    SwerveModuleConfig config1,
+    SwerveModuleConfig config2,
+    tap::gpio::Analog::Pin currentPin)
+    : HolonomicChassisSubsystem(drivers, currentPin),
+    modules{SwerveModule(drivers, config1), 
+            SwerveModule(drivers, config2), 
+            SwerveModule(drivers, DEFAULT_SWERVE_CONFIG), 
+            SwerveModule(drivers, DEFAULT_SWERVE_CONFIG)}
 {
 }
 
+SwerveChassisSubsystem::SwerveChassisSubsystem(
+    aruwsrc::Drivers* drivers,
+    SwerveModuleConfig config1,
+    SwerveModuleConfig config2,
+    SwerveModuleConfig config3,
+    SwerveModuleConfig config4,
+    tap::gpio::Analog::Pin currentPin)
+    : HolonomicChassisSubsystem(drivers, currentPin),
+    modules{SwerveModule(drivers, config1), 
+            SwerveModule(drivers, config2), 
+            SwerveModule(drivers, config3), 
+            SwerveModule(drivers, config4)}
+{
+}
+
+
 void SwerveChassisSubsystem::initialize()
 {
-    for(int i = 0; i<4; i++)
+    for(unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].initialize();
     }
 }
 
+
+bool SwerveChassisSubsystem::allMotorsOnline() const
+{
+    bool online = true;
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+        online &= modules[i].allMotorsOnline();
+    return online;
+}
+
+
+void SwerveChassisSubsystem::setZeroRPM()
+{
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+        modules[i].setZeroRPM();
+}
+
+
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
+    //convert inputs from motor rpm to m/s
+    x = modules[0].rpmToMps(x);
+    y = modules[0].rpmToMps(y);
+    r = modules[0].rpmToMps(r) / WIDTH_BETWEEN_WHEELS_X * 2;
+    //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
         x,
         y,
@@ -93,11 +184,13 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 }
 
 
-void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed)
+void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
-    desiredRotation = r;
+    desiredRotation = modules[0].mpsToRpm(r) * WIDTH_BETWEEN_WHEELS_X / 2;
+    lastXInput = x;
+    lastYInput = y;
     float maxInitialSpeed = 0;
-    for(int i = 0; i<4; i++)
+    for(unsigned int i = 0; i < NUM_MODULES; i++)
     {
         desiredModuleSpeeds[i][0] = modules[i].calculate(x, y, r);
         if(desiredModuleSpeeds[i][0] > maxInitialSpeed)
@@ -107,26 +200,26 @@ void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, flo
     }
 
     float scaleCoeff = 1;
-    if(maxInitialSpeed > maxWheelSpeed) scaleCoeff = maxWheelSpeed / maxInitialSpeed;
+    if(maxInitialSpeed > maxWheelRPM) scaleCoeff = maxWheelRPM / maxInitialSpeed;
 
-    for(int i = 0; i<4; i++)
+    for(unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].scaleAndSetDesiredState(scaleCoeff);
     }
 }
 
+
 void SwerveChassisSubsystem::refresh()
 {
-    for(int i = 0; i<4; i++)
+    for(unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].refresh();
     }
 }
 
+
 void SwerveChassisSubsystem::limitChassisPower()
 {
-    int NUM_MOTORS = 4;
-
     // use power limiting object to compute initial power limiting fraction
     currentSensor.update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
@@ -139,7 +232,7 @@ void SwerveChassisSubsystem::limitChassisPower()
 
     // total velocity error for all wheels
     float totalError = 0.0f;
-    for (int i = 0; i < 4; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         totalError += abs(modules[i].calculateTotalModuleError());
 
@@ -149,13 +242,13 @@ void SwerveChassisSubsystem::limitChassisPower()
 
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
-    for (int i = 0; i < 4; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
         // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
         // values for all motors is 1.
         float velocityErrorFrac = totalErrorZero
-                                      ? (1.0f / 4)
+                                      ? (1.0f / NUM_MODULES)
                                       : (abs(modules[i].calculateTotalModuleError()) / totalError);
         // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
         // based on the current velocity error. In this way, if the velocity error is large, the
@@ -164,9 +257,9 @@ void SwerveChassisSubsystem::limitChassisPower()
         // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
         // velocityErrorFrac for each motor.
         float modifiedPowerLimitFrac =
-            limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
+            limitVal(NUM_MODULES * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
         //motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
-        modules[i].limitPower(modifiedPowerLimitFrac);
+        //modules[i].limitPower(modifiedPowerLimitFrac);
     }
 }
 
@@ -174,7 +267,7 @@ void SwerveChassisSubsystem::limitChassisPower()
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
     // modm::Matrix<float, MODM_ARRAY_SIZE(modules)*2, 1> wheelVelocity;
-    // for(int i = 0; i<4; i++)
+    // for(unsigned int i = 0; i < NUM_MODULES; i++)
     // {
     //     float ang = modules[i].getAngle();
     //     float mag = modules[i].getDriveVelocity();
@@ -194,6 +287,7 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelati
     randomOutput[2][0] = 0;
     return randomOutput;
 }
+
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {

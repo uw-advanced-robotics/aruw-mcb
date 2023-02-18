@@ -24,6 +24,7 @@
 
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -44,33 +45,6 @@ namespace aruwsrc
 namespace chassis
 {
 
-struct SwerveModuleConfig
-{
-    const float WHEEL_DIAMETER_M = 0.076f;
-    const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
-
-    // Whether any motor is inverted
-    const bool driveMotorInverted = false, azimuthMotorInverted = false;
-    // Gear ratios for motors
-    const float driveMotorGearing = 1, azimuthMotorGearing = 1;
-
-    const float drivePidKp = 1.0f;
-    const float drivePidKi = 0.0f;
-    const float drivePidKd = 0.0f;
-    const float drivePidMaxIntegralErrorSum = 0.0f;
-    const float drivePidMaxOutput = 16'384.0f;
-    const float drivePidFeedForwardConstant = 0.0f;
-
-    const float azimuthPidKp = 1.0f;
-    const float azimuthPidKi = 0.0f;
-    const float azimuthPidKd = 0.0f;
-    const float azimuthPidMaxIntegralErrorSum = 0.0f;
-    const float azimuthPidMaxOutput = 16'384.0f;
-    const float azimuthPidFeedForwardConstant = 0.0f;
-};
-
-static SwerveModuleConfig SWERVE_CONFIG;
-
 /**
  *
  * This class encapsultes a swerve module using two motors.
@@ -80,13 +54,18 @@ static SwerveModuleConfig SWERVE_CONFIG;
 class SwerveModule
 {
 public:
+    // SwerveModule(
+    //     aruwsrc::Drivers* drivers,
+    //     tap::motor::MotorId driveMotorId,
+    //     tap::motor::MotorId azimuthMotorId,
+    //     float positionWithinChassisX,
+    //     float positionWithinChassisY,
+    //     SwerveModuleConfig& swerveModuleConfig = SWERVE_CONFIG,
+    //     tap::algorithms::SmoothPidConfig azimuthPidConfig = SWERVE_CONFIG.azimuthPidConfig);
+    
     SwerveModule(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId driveMotorId,
-        tap::motor::MotorId azimuthMotorId,
-        float positionWithinChassisX,
-        float positionWithinChassisY,
-        SwerveModuleConfig& swerveModuleConfig = SWERVE_CONFIG);
+        SwerveModuleConfig& swerveModuleConfig);
 
     const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
 
@@ -101,6 +80,8 @@ public:
     float getDriveRPM() const;
 
     float getAngle() const;
+
+    float getAngularVelocity() const;
 
     void initialize();
 
@@ -120,12 +101,18 @@ public:
 
     void limitPower(float frac);
     
-
-private:
     float mpsToRpm(float mps) const;
     float rpmToMps(float rpm) const;
 
+private:
+
     float optimizeAngle(float desiredAngle);
+
+    inline float unwrapAngle(float angle, float denomination)
+    {
+        return fmod(fmod(angle, denomination) + M_TWOPI, denomination);
+        //double % needed to ensure output is positive, bc % can be negative
+    }
 
     
     float rotationVectorX;
@@ -145,15 +132,26 @@ private:
     Motor azimuthMotor;
 #endif
 
-    int64_t azimuthZeroOffset = 0;
+    //int64_t azimuthZeroOffset = 0;
+
+    bool isCalibrated = false;
+
 
     modm::Pid<float> drivePid;
-    modm::Pid<float> azimuthPid;
+    tap::algorithms::SmoothPid azimuthPid;
 
-    float preScaledSpeedSetpoint{0}, preOptimizedRotationSetpoint{0};
-    float speedSetpoint, rotationSetpoint;
-    SwerveModuleConfig config;
+    float preScaledSpeedSetpoint{0}, rotationSetpointRadians{0};
+    float speedSetpointRPM, rotationSetpoint;
+    
+    //handles wrapping desired rotation and reversing module (in radians, will always be a multiple of PI)
+    float rotationOffset{0}, wrappingRotationOffset{0}, reversingRotationOffset{0};
+    bool reversed{false};
 
+    const SwerveModuleConfig config;
+
+    //extra debug stuff
+    float drivePIDOutput, driveOutputDesired;
+    int desiredAziWrapNum = 0;
 };  // class SwerveModule
 
 }  // namespace chassis

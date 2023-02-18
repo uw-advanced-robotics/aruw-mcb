@@ -32,60 +32,86 @@ namespace aruwsrc
 namespace chassis
 {
 
+// SwerveModule::SwerveModule(
+//     aruwsrc::Drivers* drivers,
+//     tap::motor::MotorId driveMotorId,
+//     tap::motor::MotorId azimuthMotorId,
+//     float positionWithinChassisX,
+//     float positionWithinChassisY,
+//     SwerveModuleConfig& config,
+//     tap::algorithms::SmoothPidConfig azimuthPidConfig)
+//     : driveMotor(
+//         drivers,
+//         driveMotorId,
+//         CAN_BUS_MOTORS,
+//         config.driveMotorInverted,
+//         "Drive motor"),
+//     azimuthMotor(
+//         drivers,
+//         azimuthMotorId,
+//         CAN_BUS_MOTORS,
+//         config.azimuthMotorInverted,
+//         "Azimuth motor"),
+//     drivePid(
+//         config.drivePidKp,
+//         config.drivePidKi,
+//         config.drivePidKd,
+//         config.drivePidMaxIntegralErrorSum,
+//         config.drivePidMaxOutput),
+//     azimuthPid(azimuthPidConfig),
+//     config(config)
+// {
+//     rotationSetpoint = 0;
+//     speedSetpointRPM = 0;
+//     rotationVectorX = -positionWithinChassisY;
+//     rotationVectorY = positionWithinChassisX;
+// }
+
 SwerveModule::SwerveModule(
     aruwsrc::Drivers* drivers,
-    tap::motor::MotorId driveMotorId,
-    tap::motor::MotorId azimuthMotorId,
-    float positionWithinChassisX,
-    float positionWithinChassisY,
-    SwerveModuleConfig& swerveModuleConfig)
+    SwerveModuleConfig& config)
     : driveMotor(
           drivers,
-          driveMotorId,
+          config.driveMotorId,
           CAN_BUS_MOTORS,
-          swerveModuleConfig.driveMotorInverted,
+          config.driveMotorInverted,
           "Drive motor"),
       azimuthMotor(
           drivers,
-          azimuthMotorId,
+          config.azimuthMotorId,
           CAN_BUS_MOTORS,
-          swerveModuleConfig.azimuthMotorInverted,
+          config.azimuthMotorInverted,
           "Azimuth motor"),
       drivePid(
-          swerveModuleConfig.drivePidKp,
-          swerveModuleConfig.drivePidKi,
-          swerveModuleConfig.drivePidKd,
-          swerveModuleConfig.drivePidMaxIntegralErrorSum,
-          swerveModuleConfig.drivePidMaxOutput),
-      azimuthPid(
-          swerveModuleConfig.azimuthPidKp,
-          swerveModuleConfig.azimuthPidKi,
-          swerveModuleConfig.azimuthPidKd,
-          swerveModuleConfig.azimuthPidMaxIntegralErrorSum,
-          swerveModuleConfig.azimuthPidMaxOutput),
-      config(swerveModuleConfig)
+          config.drivePidKp,
+          config.drivePidKi,
+          config.drivePidKd,
+          config.drivePidMaxIntegralErrorSum,
+          config.drivePidMaxOutput),
+      azimuthPid(config.azimuthPidConfig),
+      config(config)
 {
     rotationSetpoint = 0;
-    speedSetpoint = 0;
-    rotationVectorX = -positionWithinChassisY;
-    rotationVectorY = positionWithinChassisX;
+    speedSetpointRPM = 0;
+    rotationVectorX = -config.positionWithinChassisY;
+    rotationVectorY = config.positionWithinChassisX;
 }
 
 void SwerveModule::initialize()
 {
     driveMotor.initialize();
     azimuthMotor.initialize();
-    calibrateAzimuth();
 }
 
 void SwerveModule::calibrateAzimuth()
 {
-    azimuthZeroOffset = azimuthMotor.getEncoderUnwrapped();
+    //azimuthZeroOffset = azimuthMotor.getEncoderUnwrapped();
+    //isCalibrated = true;
 }
 
 void SwerveModule::setZeroRPM()
 {
-    speedSetpoint = 0;
+    speedSetpointRPM = 0;
 }
 
 bool SwerveModule::allMotorsOnline() const
@@ -102,7 +128,7 @@ float SwerveModule::calculateTotalModuleError() const
 //radians
 float SwerveModule::getAzimuthError() const
 {
-    return azimuthPid.getLastError();
+    return 0;//azimuthPid.getLastError();  //**FIX THIS SMOOTHPID DOESNT HAVE GETLASTERROR**
 }
 
 //
@@ -113,6 +139,9 @@ float SwerveModule::getDriveError() const
 
 /**
  * computes initial candidate for module state
+ * @param x desired chassis x velocity in m/s
+ * @param y desired chassis y velocity in m/s
+ * @param r desired chassis angular velocity in rad/s
  * @return pre-scaled module speed
 */
 float SwerveModule::calculate(float x, float y, float r)
@@ -120,33 +149,40 @@ float SwerveModule::calculate(float x, float y, float r)
     float moveVectorX = x + r * rotationVectorX;
     float moveVectorY = y + r * rotationVectorY;
 
-    if(moveVectorX==0 && moveVectorY==0)
-    //todo: dont use exact comparison? not sure
+    if(compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
         preScaledSpeedSetpoint = 0;
     }
     else
     {
-        preOptimizedRotationSetpoint = atan2f(moveVectorY, moveVectorX);
-        preScaledSpeedSetpoint = sqrtf(moveVectorX*moveVectorX + moveVectorY*moveVectorY);
+        float newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
+        float newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
+        
+        if (abs(newRotationSetpointRadians - rotationSetpointRadians) > M_PI)
+        {
+            rotationOffset -= getSign(newRotationSetpointRadians - rotationSetpointRadians) * M_TWOPI;//TWOPI == 2*PI
+        }
+        newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
+        if(abs(newRotationSetpointRadians - rotationSetpointRadians) > M_PI_2)//PI_2 == PI/2
+        {
+            rotationOffset -= getSign(newRotationSetpointRadians - rotationSetpointRadians) * M_PI;
+            //reversed &= false;
+        }
+        rotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
+        preScaledSpeedSetpoint = mpsToRpm(sqrtf(moveVectorX*moveVectorX + moveVectorY*moveVectorY));
+        if(compareFloatClose(unwrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1)) preScaledSpeedSetpoint *= -1;
     }
     return preScaledSpeedSetpoint;
 }
 
 void SwerveModule::scaleAndSetDesiredState(float scaleCoeff)
 {
-    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, preOptimizedRotationSetpoint);
+    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, rotationSetpointRadians);
 }
 
-void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
+void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 {
-    radianTarget = optimizeAngle(radianTarget);
-    if (abs(modm::toDegree(radianTarget - getAngle())) >= 90)
-    {
-        metersPerSecond = -metersPerSecond;
-        radianTarget += M_PI;
-    }
-    speedSetpoint = metersPerSecond;
+    speedSetpointRPM = driveRpm;
     rotationSetpoint = radianTarget;
 }
 
@@ -156,11 +192,15 @@ void SwerveModule::setDesiredState(float metersPerSecond, float radianTarget)
  */
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpoint - getDriveVelocity());
-    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() + drivePid.getValue());
+    drivePid.update(speedSetpointRPM - getDriveRPM());
+    drivePIDOutput = drivePid.getValue();
+    driveMotor.setDesiredOutput(drivePIDOutput);
 
-    azimuthPid.update(rotationSetpoint - getAngle());
-    azimuthMotor.setDesiredOutput(azimuthPid.getValue());
+    azimuthPid.runController(
+            rotationSetpoint - getAngle(),
+            getAngularVelocity(),
+            2.0f);
+    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
 /**
@@ -180,35 +220,42 @@ float SwerveModule::getDriveRPM() const
 }
 
 /**
- * This returns Radian position of motor, CCW+
+ * This returns Radian position of azimuth motor, CCW+
  */
 float SwerveModule::getAngle() const
 {
     return modm::toRadian(azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped() 
-        - azimuthZeroOffset) / config.azimuthMotorGearing);
+        - config.azimuthZeroOffset) * config.azimuthMotorGearing);//azimuthZeroOffset temporarily replaced w 0
+}
+
+/**
+ * This returns deg/sec velocity of azimuth motor, CCW+
+ */
+float SwerveModule::getAngularVelocity() const
+{
+    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * config.azimuthMotorGearing;
 }
 
 float SwerveModule::mpsToRpm(float mps) const
 {
-    return (mps / config.WHEEL_CIRCUMFRENCE_M) * 60.0f * config.driveMotorGearing;
+    return (mps / config.WHEEL_CIRCUMFRENCE_M) / CHASSIS_GEARBOX_RATIO * 60.0f / config.driveMotorGearing;
 }
 
 float SwerveModule::rpmToMps(float rpm) const
 {
-    return rpm / 60.0f / config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
+    return rpm * CHASSIS_GEARBOX_RATIO / 60.0f * config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
 }
 
 float SwerveModule::optimizeAngle(float desiredAngle)
 {
-    desiredAngle = modm::toDegree(desiredAngle);
-    float rotationScalar = modm::toDegree(getAngle()) / 360;
-    desiredAngle = desiredAngle + rotationScalar * 360;
-    if (abs(desiredAngle - modm::toDegree(getAngle()) > 180))
+    desiredAziWrapNum = 0;
+    while (abs(desiredAngle - getAngle() > M_PI))
     {
         // minus cuz if less than you'ld want to add but this would return a negative with get sign
-        desiredAngle = desiredAngle - getSign(desiredAngle - modm::toDegree(getAngle()) * 360);
+        desiredAngle = desiredAngle - getSign(desiredAngle - getAngle()) * M_TWOPI;//TWOPI = 2*PI
+        desiredAziWrapNum++;
     }
-    return modm::toRadian(desiredAngle);
+    return desiredAngle;
 }
 
 void SwerveModule::limitPower(float frac)

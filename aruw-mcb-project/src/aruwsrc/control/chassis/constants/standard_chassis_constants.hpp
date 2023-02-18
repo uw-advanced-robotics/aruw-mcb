@@ -25,6 +25,8 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+#include "../swerve_module_config.hpp"
+
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
@@ -119,6 +121,26 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 
 #endif
+
+
+static constexpr SwerveModuleConfig SWERVE1_CONFIG {
+    .azimuthZeroOffset = 5500,
+    .driveMotorId = tap::motor::MOTOR1,
+    .azimuthMotorId = tap::motor::MOTOR5,
+    .positionWithinChassisX = -0.05,
+    .positionWithinChassisY = -0.18,
+};
+
+static constexpr SwerveModuleConfig SWERVE2_CONFIG {
+  
+    .azimuthZeroOffset = 6883,
+    .driveMotorId = tap::motor::MOTOR2,
+    .azimuthMotorId = tap::motor::MOTOR6,
+    .positionWithinChassisX = -0.05,
+    .positionWithinChassisY = 0.18,
+};
+
+static constexpr std::array<SwerveModuleConfig, 2> SWASSY_CONFIG = {{SWERVE1_CONFIG, SWERVE2_CONFIG}};
 
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)

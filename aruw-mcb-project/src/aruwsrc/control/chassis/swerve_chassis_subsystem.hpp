@@ -36,6 +36,7 @@
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
+#include <array>
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/swerve_module_mock.hpp"
@@ -55,7 +56,7 @@ namespace chassis
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
 public:
-    SwerveChassisSubsystem(
+    /* SwerveChassisSubsystem(
         aruwsrc::Drivers* drivers,
         tap::motor::MotorId leftFrontAzimuthMotorId = LEFT_FRONT_AZIMUTH_MOTOR_ID,
         tap::motor::MotorId leftFrontDriveMotorId = LEFT_FRONT_MOTOR_ID,
@@ -68,6 +69,38 @@ public:
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 
+    SwerveChassisSubsystem(
+        aruwsrc::Drivers* drivers,
+        unsigned int numModules,
+        tap::motor::MotorId leftFrontAzimuthMotorId = LEFT_FRONT_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId leftFrontDriveMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackAzimuthMotorId = LEFT_BACK_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId leftBackDriveMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontAzimuthMotorId = RIGHT_FRONT_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId rightFrontDriveMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackAzimuthMotorId = RIGHT_BACK_AZIMUTH_MOTOR_ID,
+        tap::motor::MotorId rightBackDriveMotorId = RIGHT_BACK_MOTOR_ID,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
+    ); */
+
+    SwerveChassisSubsystem(
+        aruwsrc::Drivers* drivers,
+        SwerveModuleConfig config1,
+        SwerveModuleConfig config2,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
+    );
+
+    SwerveChassisSubsystem(
+        aruwsrc::Drivers* drivers,
+        SwerveModuleConfig config1,
+        SwerveModuleConfig config2,
+        SwerveModuleConfig config3,
+        SwerveModuleConfig config4,
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
+    );
+
+
+
     void initialize() override;
 
     void setDesiredOutput(float x, float y, float r) override;
@@ -78,21 +111,9 @@ public:
 
     inline int getNumChassisMotors() const override { return 8; }
 
-    inline bool allMotorsOnline() const override
-    {
-        return modules[0].allMotorsOnline() &&
-            modules[1].allMotorsOnline() &&
-            modules[2].allMotorsOnline() &&
-            modules[3].allMotorsOnline();
-    }
+    bool allMotorsOnline() const override;
 
-    inline void setZeroRPM() override
-    {
-        modules[0].setZeroRPM();
-        modules[1].setZeroRPM();
-        modules[2].setZeroRPM();
-        modules[3].setZeroRPM();
-    }
+    void setZeroRPM() override;
 
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
@@ -129,14 +150,28 @@ private:
      * and sets the target azimuth and drive RPM of individual chassis modules.
      */
     void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
+    
+    // inline std::array<SwerveModule, MODULES>& createModules(aruwsrc::Drivers* drivers,
+    //         std::array<SwerveModuleConfig, MODULES> moduleConfigs)
+    // {
+    //     std::array<SwerveModule, MODULES> moduleArray;
+    //     for (unsigned int i = 0; i < MODULES; i++)
+    //         moduleArray[i] = SwerveModule(drivers, moduleConfigs[i]);
+    //     return moduleArray;
+    // }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> modules[4];  
+    std::array<testing::NiceMock<aruwsrc::mock::SwerveModuleMock>, 4> modules;  
 private:
 #else
-    chassis::SwerveModule* modules[4];  
-#endif      
+    std::array<chassis::SwerveModule, 4> modules;
+#endif
+
+    unsigned int NUM_MODULES;
+
+    //extra debug stuff
+    float lastXInput, lastYInput;
 
 };  // class SwerveChassisSubsystem
 
