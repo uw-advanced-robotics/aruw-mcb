@@ -21,7 +21,7 @@
 
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/sentry_drive_subsystem_mock.hpp"
-#include "aruwsrc/robot/sentry/drive/sentry_drive_evade_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_evade_command.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::sentry::drive;

@@ -60,9 +60,9 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
-#include "drive/sentry_auto_drive_comprised_command.hpp"
-#include "drive/sentry_drive_manual_command.hpp"
-#include "drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;

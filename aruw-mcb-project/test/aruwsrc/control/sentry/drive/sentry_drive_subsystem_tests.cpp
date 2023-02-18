@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 
 using namespace aruwsrc::control::sentry::drive;
 using namespace tap::gpio;

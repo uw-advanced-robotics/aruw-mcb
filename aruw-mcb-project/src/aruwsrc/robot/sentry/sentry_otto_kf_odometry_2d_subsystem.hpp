@@ -26,7 +26,7 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 #include "sentry_chassis_kf_odometry.hpp"
