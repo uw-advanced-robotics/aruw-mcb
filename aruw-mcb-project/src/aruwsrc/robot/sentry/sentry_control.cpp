@@ -40,6 +40,9 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/cv_online_governor.hpp"
@@ -60,9 +63,6 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
