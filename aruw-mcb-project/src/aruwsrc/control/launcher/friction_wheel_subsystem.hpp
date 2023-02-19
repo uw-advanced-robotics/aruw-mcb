@@ -57,7 +57,7 @@ public:
      * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
@@ -113,7 +113,7 @@ protected:
     /// measured launch speed in case the measured launch speed is garbage.
     static constexpr float MAX_MEASURED_LAUNCH_SPEED = MAX_DESIRED_LAUNCH_SPEED + 10.0f;
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;

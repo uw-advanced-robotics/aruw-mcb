@@ -34,11 +34,13 @@ using namespace aruwsrc::control::turret;
 namespace aruwsrc::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
       chassisSymmetry(chassisSymmetry),
@@ -141,12 +143,12 @@ void ChassisAutorotateCommand::execute()
             maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
         float chassisXDesiredWheelspeed = limitVal(
-            drivers->controlOperatorInterface.getChassisXInput(),
+            operatorInterface->getChassisXInput(),
             -rotationLimitedMaxTranslationalSpeed,
             rotationLimitedMaxTranslationalSpeed);
 
         float chassisYDesiredWheelspeed = limitVal(
-            drivers->controlOperatorInterface.getChassisYInput(),
+            operatorInterface->getChassisYInput(),
             -rotationLimitedMaxTranslationalSpeed,
             rotationLimitedMaxTranslationalSpeed);
 
@@ -160,7 +162,7 @@ void ChassisAutorotateCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(drivers, chassis);
+        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
     }
 }
 

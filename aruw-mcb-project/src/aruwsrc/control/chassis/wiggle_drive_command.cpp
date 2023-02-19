@@ -38,12 +38,14 @@ namespace aruwsrc
 namespace chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
-    const aruwsrc::control::turret::TurretMotor* yawMotor)
+    const aruwsrc::control::turret::TurretMotor* yawMotor,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
+      operatorInterface(operatorInterface),
       rotationSpeedRamp(0)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -90,7 +92,13 @@ void WiggleDriveCommand::execute()
 
         float x = 0.0f;
         float y = 0.0f;
-        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, r, &x, &y);
+        ChassisRelDrive::computeDesiredUserTranslation(
+            operatorInterface,
+            drivers,
+            chassis,
+            r,
+            &x,
+            &y);
         x *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         y *= TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING;
         // Apply a rotation matrix to the user input so you drive turret
@@ -101,7 +109,7 @@ void WiggleDriveCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(drivers, chassis);
+        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
     }
 }
 

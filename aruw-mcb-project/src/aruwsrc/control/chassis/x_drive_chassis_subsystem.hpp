@@ -26,15 +26,11 @@
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/drivers.hpp"
 
 #include "constants/chassis_constants.hpp"
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc
 {
@@ -47,7 +43,7 @@ class XDriveChassisSubsystem : public Holonomic4MotorChassisSubsystem
 {
 public:
     XDriveChassisSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,

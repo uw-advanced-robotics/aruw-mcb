@@ -33,7 +33,7 @@ namespace mock
 class TurretSubsystemMock : public aruwsrc::control::turret::TurretSubsystem
 {
 public:
-    TurretSubsystemMock(aruwsrc::Drivers *drivers);
+    TurretSubsystemMock(tap::Drivers *drivers);
     virtual ~TurretSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

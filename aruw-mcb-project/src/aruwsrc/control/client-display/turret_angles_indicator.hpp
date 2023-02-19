@@ -29,7 +29,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -51,7 +51,7 @@ public:
      * printed).
      */
     TurretAnglesIndicator(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem);
 
@@ -81,7 +81,7 @@ private:
     /** Color of the turret angles message. */
     static constexpr Tx::GraphicColor TURRET_ANGLES_COLOR = Tx::GraphicColor::ORANGE;
 
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem;
 

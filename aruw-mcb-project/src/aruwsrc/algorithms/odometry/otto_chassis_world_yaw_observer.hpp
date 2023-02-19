@@ -23,10 +23,6 @@
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 
 // Forward declarations
-namespace aruwsrc
-{
-class Drivers;
-}
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
@@ -47,15 +43,13 @@ class OttoChassisWorldYawObserver
 {
 public:
     /**
-     * @param[in] drivers a pointer to the aruwsrc drivers struct. Used for accessing the
+     * @param[in] drivers a pointer to the tap drivers struct. Used for accessing the
      * turretMCB IMU
      * @param[in] turretSubsystem a reference to the turret used for getting world frame axes. Used
      * to get yaw angle of chassis relative to turret. This must be the same turret that the IMU on
      * CAN bus 1 is attached to.
      */
-    OttoChassisWorldYawObserver(
-        aruwsrc::Drivers* drivers,
-        const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
+    OttoChassisWorldYawObserver(const aruwsrc::control::turret::TurretSubsystem& turretSubsystem);
 
     /**
      * Get the current chassis yaw in radians.
@@ -71,7 +65,6 @@ public:
     bool getChassisWorldYaw(float* yaw) const final;
 
 private:
-    aruwsrc::Drivers* drivers;
     const aruwsrc::control::turret::TurretSubsystem& turretSubsystem;
 };
 

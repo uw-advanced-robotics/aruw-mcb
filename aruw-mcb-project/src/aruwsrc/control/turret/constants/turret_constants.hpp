@@ -23,13 +23,13 @@
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
-#include "standard_turret_constants.hpp"
+#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
-#include "hero_turret_constants.hpp"
+#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
-#include "drone_turret_constants.hpp"
+#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
-#include "sentry_beehive_turret_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_

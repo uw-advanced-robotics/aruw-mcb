@@ -40,7 +40,7 @@ using namespace tap::motor;
 namespace aruwsrc::agitator
 {
 VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     const tap::algorithms::SmoothPidConfig& pidParams,
     const VelocityAgitatorSubsystemConfig& agitatorSubsystemConfig)
     : tap::control::Subsystem(drivers),

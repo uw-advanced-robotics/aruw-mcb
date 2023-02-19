@@ -49,7 +49,7 @@ class SentryRequestHandler
 public:
     using MessageReceivedCallback = void (*)();
 
-    SentryRequestHandler(aruwsrc::Drivers *drivers);
+    SentryRequestHandler(tap::Drivers *drivers);
 
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
@@ -72,7 +72,7 @@ public:
     }
 
 private:
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
     MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
     MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
     MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;

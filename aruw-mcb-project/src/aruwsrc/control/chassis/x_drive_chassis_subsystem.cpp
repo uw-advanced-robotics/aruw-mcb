@@ -25,9 +25,9 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/drivers.hpp"
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
@@ -38,7 +38,7 @@ namespace aruwsrc
 namespace chassis
 {
 XDriveChassisSubsystem::XDriveChassisSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,

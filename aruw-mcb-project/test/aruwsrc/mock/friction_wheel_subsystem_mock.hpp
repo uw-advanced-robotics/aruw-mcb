@@ -22,8 +22,9 @@
 
 #include <gmock/gmock.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -32,7 +33,7 @@ namespace mock
 class FrictionWheelSubsystemMock : public aruwsrc::control::launcher::FrictionWheelSubsystem
 {
 public:
-    FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers);
+    FrictionWheelSubsystemMock(tap::Drivers *drivers);
     virtual ~FrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
