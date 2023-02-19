@@ -19,17 +19,17 @@
 
 #include "otto_kf_odometry_2d_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     const aruwsrc::control::turret::TurretSubsystem &turret,
     tap::control::chassis::ChassisSubsystemInterface &chassis)
     : Subsystem(&drivers),
       ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
-      orientationObserver(&drivers, turret)
+      orientationObserver(turret)
 {
 }
 

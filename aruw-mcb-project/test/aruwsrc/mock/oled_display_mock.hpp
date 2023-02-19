@@ -22,6 +22,8 @@
 
 #include <gmock/gmock.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc
@@ -31,7 +33,11 @@ namespace mock
 class OledDisplayMock : public display::OledDisplay
 {
 public:
-    explicit OledDisplayMock(aruwsrc::Drivers *drivers);
+    explicit OledDisplayMock(
+        tap::Drivers *drivers,
+        aruwsrc::serial::VisionCoprocessor *vc,
+        can::TurretMCBCanComm *turretMCBCanCommBus1,
+        can::TurretMCBCanComm *turretMCBCanCommBus2);
     virtual ~OledDisplayMock();
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(bool, updateDisplay, (), (override));

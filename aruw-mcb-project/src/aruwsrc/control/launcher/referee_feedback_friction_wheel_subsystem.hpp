@@ -52,7 +52,7 @@ public:
      * projectle speed when computing a new predicted launch speed.
      */
     RefereeFeedbackFrictionWheelSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,

@@ -23,7 +23,7 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/sentry/drive/sentry_auto_drive_comprised_command.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
 #include "modm/processing/protothread.hpp"
 
 namespace aruwsrc
@@ -47,13 +47,13 @@ public:
      * check if the robot is driving or not.
      */
     SentryResponseSubsystem(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand);
 
     void refresh() override;
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
     aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand;
 
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;

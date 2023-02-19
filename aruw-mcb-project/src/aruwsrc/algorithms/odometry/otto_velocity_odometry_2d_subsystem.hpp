@@ -30,7 +30,7 @@
 #include "otto_chassis_world_yaw_observer.hpp"
 
 // Forward declarations
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -68,13 +68,13 @@ class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
 {
 public:
     /**
-     * @param[in] drivers pointer to aruwsrc drivers
+     * @param[in] drivers pointer to tap drivers
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
      * it is used
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
      */
     OttoVelocityOdometry2DSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
         tap::control::chassis::ChassisSubsystemInterface* chassis);
 

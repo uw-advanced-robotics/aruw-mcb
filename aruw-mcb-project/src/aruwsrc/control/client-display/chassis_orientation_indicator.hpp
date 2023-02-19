@@ -29,7 +29,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -54,7 +54,7 @@ public:
      * turret and to print turret angles (if turret chassis relative angles are being printed).
      */
     ChassisOrientationIndicator(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem);
 
@@ -82,7 +82,7 @@ private:
     /** The length of the animated turret barrel, in pixels. */
     static constexpr uint16_t CHASSIS_BARREL_LENGTH = 90;
 
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
     /**

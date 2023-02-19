@@ -51,7 +51,7 @@ public:
      */
     ImuCalibrateMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        tap::Drivers *drivers);
 
     void draw() override;
 
@@ -73,7 +73,7 @@ private:
         "WAITING FOR CALIBRATION\nCOMPLETE",
     };
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
     control::imu::ImuCalibrateCommand::CalibrationState currCalibrationState =
         control::imu::ImuCalibrateCommand::CalibrationState::WAITING_CALIBRATION_COMPLETE;

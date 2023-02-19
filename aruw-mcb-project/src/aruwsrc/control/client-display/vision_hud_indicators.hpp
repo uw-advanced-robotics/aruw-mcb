@@ -26,15 +26,11 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
 #include "reticle_indicator.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::client_display
 {
@@ -48,10 +44,10 @@ public:
     /**
      * Construct a VisionHudIndicators object.
      *
-     * @param[in] drivers Global drivers instance.
+     * @param[in] visionCoprocessor visionCoprocessor instance.
      */
     VisionHudIndicators(
-        aruwsrc::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -74,7 +70,7 @@ private:
     /** The maximum refresh rate of the vision target found squares. */
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
-    aruwsrc::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
 
     Tx::Graphic2Message visionTargetFoundGraphics;
 

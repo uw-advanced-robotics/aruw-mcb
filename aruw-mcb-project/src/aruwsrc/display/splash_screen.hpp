@@ -21,7 +21,9 @@
 #define SPLASH_SCREEN_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
+#include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
@@ -38,7 +40,10 @@ class SplashScreen : public modm::AbstractMenu<tap::display::DummyAllocator<modm
 public:
     SplashScreen(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        tap::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor,
+        can::TurretMCBCanComm *turretMCBCanCommBus1,
+        can::TurretMCBCanComm *turretMCBCanCommBus2);
 
     void draw() override;
 
@@ -54,7 +59,10 @@ private:
     static constexpr int SPLASH_SCREEN_MENU_ID = 1;
 
     bool drawn = false;
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
+    serial::VisionCoprocessor *visionCoprocessor;
+    can::TurretMCBCanComm *turretMCBCanCommBus1;
+    can::TurretMCBCanComm *turretMCBCanCommBus2;
 };
 }  // namespace display
 }  // namespace aruwsrc

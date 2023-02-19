@@ -21,8 +21,9 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::communication::referee;
@@ -53,7 +54,8 @@ static inline void updateGraphicYLocation(
 }
 
 MatrixHudIndicators::MatrixHudIndicators(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -65,6 +67,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
+      visionCoprocessor(visionCoprocessor),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       turretSubsystem(turretSubsystem),
@@ -191,7 +194,7 @@ void MatrixHudIndicators::updateIndicatorState()
 
     CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
 
-    if (drivers.visionCoprocessor.isCvOnline())
+    if (visionCoprocessor.isCvOnline())
     {
         if (cvOnTargetGovernor == nullptr)
         {

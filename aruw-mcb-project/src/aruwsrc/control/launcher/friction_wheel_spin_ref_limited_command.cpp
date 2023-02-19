@@ -24,7 +24,7 @@
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     FrictionWheelSubsystem *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
