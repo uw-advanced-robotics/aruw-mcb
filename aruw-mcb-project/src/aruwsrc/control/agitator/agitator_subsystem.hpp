@@ -38,11 +38,6 @@
 
 namespace aruwsrc
 {
-class Drivers;
-}
-
-namespace aruwsrc
-{
 namespace agitator
 {
 /**
@@ -80,7 +75,7 @@ public:
      * @param[in] jamLogicEnabled whether or not to enable jam detection
      */
     AgitatorSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         const tap::algorithms::SmoothPidConfig& pidParams,
         float agitatorGearRatio,
         tap::motor::MotorId agitatorMotorId,

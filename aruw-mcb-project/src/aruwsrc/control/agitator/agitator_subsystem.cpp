@@ -42,7 +42,7 @@ namespace aruwsrc
 namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     const tap::algorithms::SmoothPidConfig& pidParams,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,

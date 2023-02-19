@@ -21,11 +21,9 @@
 #define CHASSIS_DRIVE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc
 {
@@ -39,7 +37,10 @@ class HolonomicChassisSubsystem;
 class ChassisDriveCommand : public tap::control::Command
 {
 public:
-    ChassisDriveCommand(aruwsrc::Drivers* drivers, HolonomicChassisSubsystem* chassis);
+    ChassisDriveCommand(
+        tap::Drivers* drivers,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface,
+        HolonomicChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -57,7 +58,8 @@ public:
     const char* getName() const override { return "chassis drive"; }
 
 private:
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
     HolonomicChassisSubsystem* chassis;
 };  // class ChassisDriveCommand
 

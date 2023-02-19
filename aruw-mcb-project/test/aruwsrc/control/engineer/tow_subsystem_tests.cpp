@@ -20,8 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/engineer/tow_subsystem.hpp"
 #include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 
 using aruwsrc::engineer::TowSubsystem;
 using tap::gpio::Digital;

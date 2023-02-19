@@ -25,7 +25,7 @@
 #include "tap/motor/servo.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc::control
@@ -39,7 +39,7 @@ class TurretMCBHopperSubsystem : public tap::control::Subsystem
 {
 public:
     TurretMCBHopperSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm)
         : tap::control::Subsystem(drivers),
           turretMCBCanComm(turretMCBCanComm)

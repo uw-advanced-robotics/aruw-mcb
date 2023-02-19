@@ -36,7 +36,7 @@ class LowBatteryBuzzerCommand : public tap::control::Command
 public:
     LowBatteryBuzzerCommand(
         aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
-        aruwsrc::Drivers* drivers);
+        tap::Drivers* drivers);
 
     void initialize() override;
 
@@ -50,7 +50,7 @@ public:
 
 private:
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer;
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
 };
 
 }  // namespace aruwsrc::communication

@@ -22,13 +22,13 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/xaxis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 
 namespace aruwsrc::mock
 {
 class XAxisSubsystemMock : public engineer::XAxisSubsystem
 {
-    XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
+    XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
     virtual ~XAxisSubsystemMock();
 
     MOCK_METHOD(void, setExtended, (bool), (override));

@@ -23,11 +23,8 @@ namespace aruwsrc
 {
 namespace display
 {
-ErrorMenu::ErrorMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, ERROR_MENU_ID),
-      drivers(drivers)
+ErrorMenu::ErrorMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, ERROR_MENU_ID)
 {
 }
 
