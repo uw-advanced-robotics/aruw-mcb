@@ -17,29 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SAFE_DISCONNECT_HPP_
-#define SAFE_DISCONNECT_HPP_
+#ifndef HERO_DRIVERS_SINGLETON_HPP_
+#define HERO_DRIVERS_SINGLETON_HPP_
 
-#include "tap/control/command_scheduler.hpp"
+#ifndef ENV_UNIT_TESTS
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/robot/hero/hero_drivers.hpp"
 
+namespace aruwsrc
+{
 /**
- * Defines the condition for a robot to be "safely disconnected" to be
- * when the remote is disconnected. Ends running of all current Commands and
- * disallows new Commands from being added.
+ * @return The singleton instance of the Drivers class. This is the only instance of the
+ *      Drivers class that should be created anywhere in the non-unit test framework.
+ * @note It is likely that you will never have to use this. There are only two files you
+ *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
+ *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
-namespace aruwsrc::control
-{
-class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
-{
-public:
-    RemoteSafeDisconnectFunction(tap::Drivers *drivers);
-    virtual bool operator()();
+aruwsrc::HeroDrivers *DoNotUse_getHeroDrivers();
+using heroDriversFunc = aruwsrc::HeroDrivers *(*)();
+}  // namespace aruwsrc
 
-private:
-    tap::Drivers *drivers;
-};
-}  // namespace aruwsrc::control
+#endif
 
-#endif  // SAFE_DISCONNECT_HPP_
+#endif  // HERO_DRIVERS_SINGLETON_HPP_

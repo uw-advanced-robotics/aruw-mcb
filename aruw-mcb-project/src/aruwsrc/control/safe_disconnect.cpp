@@ -25,7 +25,7 @@
 
 namespace aruwsrc::control
 {
-RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers)
+RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(tap::Drivers *drivers)
 {
     this->drivers = drivers;
 }

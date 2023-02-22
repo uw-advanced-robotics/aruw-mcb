@@ -17,29 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SAFE_DISCONNECT_HPP_
-#define SAFE_DISCONNECT_HPP_
+#ifndef ENV_UNIT_TESTS
 
-#include "tap/control/command_scheduler.hpp"
+#include "hero_drivers_singleton.hpp"
 
-#include "tap/drivers.hpp"
-
-/**
- * Defines the condition for a robot to be "safely disconnected" to be
- * when the remote is disconnected. Ends running of all current Commands and
- * disallows new Commands from being added.
- */
-namespace aruwsrc::control
+namespace aruwsrc
 {
-class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
+/**
+ * Class that allows one to construct a Drivers instance because of friendship
+ * with the Drivers class.
+ */
+class DriversSingleton
 {
 public:
-    RemoteSafeDisconnectFunction(tap::Drivers *drivers);
-    virtual bool operator()();
+    static aruwsrc::HeroDrivers drivers;
+};  // class DriversSingleton
 
-private:
-    tap::Drivers *drivers;
-};
-}  // namespace aruwsrc::control
+aruwsrc::HeroDrivers DriversSingleton::drivers;
 
-#endif  // SAFE_DISCONNECT_HPP_
+aruwsrc::HeroDrivers *DoNotUse_getHeroDrivers() { return &DriversSingleton::drivers; }
+}  // namespace aruwsrc
+
+#endif
