@@ -70,8 +70,8 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
+#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -184,10 +184,7 @@ ChassisImuDriveCommand chassisImuDriveCommand(
     &chassis,
     &turret.yawMotor);
 
-ChassisDriveCommand chassisDriveCommand(
-    drivers(),
-    &drivers()->controlOperatorInterface,
-    &chassis);
+ChassisDriveCommand chassisDriveCommand(drivers(), &drivers()->controlOperatorInterface, &chassis);
 
 ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
     drivers(),
