@@ -231,9 +231,9 @@ float ControlOperatorInterface::getSentrySpeedInput()
            USER_STICK_SENTRY_DRIVE_SCALAR;
 }
 
- float ControlOperatorInterface::getRemoteWheelInput() 
+ bool ControlOperatorInterface::calibrateImu() 
  {
-    return (drivers->remote.getChannel(Remote::Channel::WHEEL));
+    return (drivers->remote.getChannel(Remote::Channel::WHEEL) > 0.7); //or similar logic
  }
 }  // namespace control
 

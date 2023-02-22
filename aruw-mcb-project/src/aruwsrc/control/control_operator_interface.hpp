@@ -134,7 +134,7 @@ public:
     /**
      * @returns whether or not the wheel to calibrate the IMU is pressed.
     */
-    mockable float getRemoteWheelInput();
+    mockable bool calibrateImu();
 
 private:
     aruwsrc::Drivers *drivers;

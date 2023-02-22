@@ -99,6 +99,9 @@ static inline bool turretReachedCenterAndNotMoving(
 
 void ImuCalibrateCommand::execute()
 {
+    if(drivers->controlOperatorInterface.calibrateImu()) {
+        calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
+    }
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
