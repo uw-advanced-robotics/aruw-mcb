@@ -21,7 +21,6 @@
 #define SAFE_DISCONNECT_HPP_
 
 #include "tap/control/command_scheduler.hpp"
-
 #include "tap/drivers.hpp"
 
 /**
