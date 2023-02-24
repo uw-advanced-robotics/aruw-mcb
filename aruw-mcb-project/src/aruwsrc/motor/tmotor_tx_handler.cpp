@@ -190,4 +190,4 @@ Tmotor_AK809 const* TMotorTxHandler::getCan2Motor(TMotorId motorId)
     uint32_t index = TMOTOR_TO_NORMALIZED_ID(motorId);
     return index > TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR8) ? nullptr : can2MotorStore[index];
 }
-}  // namespace tap::motor
+}  // namespace aruwsrc::motor

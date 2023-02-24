@@ -31,6 +31,11 @@
 
 #include "../taproot/src/tap/motor/motor_interface.hpp"
 
+namespace aruwsrc
+{
+class Drivers;
+}   // namespace aruwsrc
+
 namespace aruwsrc::motor
 {
 /**
@@ -233,6 +238,6 @@ private:
     tap::arch::MilliTimeout motorDisconnectTimeout;
 };
 
-}  // namespace tap::motor
+}  // namespace aruwsrc::motor
 
-#endif  // TAPROOT_DJI_MOTOR_HPP_
+#endif  // TMOTOR_AK809_HPP_
