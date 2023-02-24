@@ -57,7 +57,7 @@ static void initializeIo(tap::Drivers *drivers);
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(aruwsrc::Drivers *drivers);
+static void updateIo(tap::Drivers *drivers);
 
 int main()
 {
