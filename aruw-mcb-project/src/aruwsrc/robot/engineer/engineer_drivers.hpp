@@ -17,29 +17,35 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_CONTROL_HPP_
-#define ROBOT_CONTROL_HPP_
+#ifndef ENGINEER_DRIVERS_HPP_
+#define ENGINEER_DRIVERS_HPP_
 
-#include "aruwsrc/drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
+#include "tap/drivers.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+
+#else
+
+#endif
 
 namespace aruwsrc
 {
-namespace control
+class EngineerDrivers : public tap::Drivers
 {
-#ifdef TARGET_HERO_CYCLONE
-void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
+    friend class EngineerDriversSingleton;
+
+#ifdef ENV_UNIT_TESTS
+public:
 #endif
+    EngineerDrivers() : tap::Drivers() {}
 
-#ifdef TARGET_ENGINEER
-void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers);
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+
+#else
+public:
+
 #endif
-
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
-
-}  // namespace control
-
+};  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc
 
-#endif  // ROBOT_CONTROL_HPP_
+#endif  // ENGINEER_DRIVERS_HPP_

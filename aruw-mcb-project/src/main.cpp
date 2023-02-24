@@ -32,6 +32,7 @@
 
 /* communication includes ---------------------------------------------------*/
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
@@ -72,6 +73,8 @@ int main()
      */
 #ifdef TARGET_HERO_CYCLONE
     aruwsrc::HeroDrivers *drivers = aruwsrc::DoNotUse_getHeroDrivers();
+#elif defined(TARGET_ENGINEER)
+    aruwsrc::EngineerDrivers *drivers = aruwsrc::DoNotUse_getEngineerDrivers();
 #else
     aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
 #endif
@@ -91,14 +94,20 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+#if !defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
+
+#if !defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
         }
         modm::delay_us(10);
     }

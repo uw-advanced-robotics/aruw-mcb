@@ -23,12 +23,13 @@
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
 #include "aruwsrc/robot/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 #include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
+
+#include "engineer_drivers_singleton.hpp"
 
 using namespace aruwsrc::engineer;
 using namespace tap::gpio;
@@ -40,7 +41,7 @@ using tap::control::CommandMapper;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+aruwsrc::engineerDriversFunc drivers = aruwsrc::DoNotUse_getEngineerDrivers;
 
 namespace aruwsrc
 {
@@ -72,22 +73,22 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::Drivers *drivers)
+void registerEngineerSubsystems(tap::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::Drivers *) {}
+void setDefaultEngineerCommands(tap::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::Drivers *) {}
+void startEngineerCommands(tap::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::Drivers *) {}
+void registerEngineerIoMappings(tap::Drivers *) {}
 
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(tap::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
     initializeSubsystems();
