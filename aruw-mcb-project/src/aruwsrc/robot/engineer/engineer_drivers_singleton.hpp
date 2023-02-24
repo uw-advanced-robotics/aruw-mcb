@@ -17,29 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_CONTROL_HPP_
-#define ROBOT_CONTROL_HPP_
+#ifndef ENGINEER_DRIVERS_SINGLETON_HPP_
+#define ENGINEER_DRIVERS_SINGLETON_HPP_
 
-#include "aruwsrc/drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
+#ifndef ENV_UNIT_TESTS
+
+#include "engineer_drivers.hpp"
 
 namespace aruwsrc
 {
-namespace control
-{
-#ifdef TARGET_HERO_CYCLONE
-void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
-#endif
-
-#ifdef TARGET_ENGINEER
-void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers);
-#endif
-
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
-
-}  // namespace control
-
+/**
+ * @return The singleton instance of the Drivers class. This is the only instance of the
+ *      Drivers class that should be created anywhere in the non-unit test framework.
+ * @note It is likely that you will never have to use this. There are only two files you
+ *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
+ *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
+ */
+aruwsrc::EngineerDrivers *DoNotUse_getEngineerDrivers();
+using engineerDriversFunc = aruwsrc::EngineerDrivers *(*)();
 }  // namespace aruwsrc
 
-#endif  // ROBOT_CONTROL_HPP_
+#endif
+
+#endif  // ENGINEER_DRIVERS_SINGLETON_HPP_

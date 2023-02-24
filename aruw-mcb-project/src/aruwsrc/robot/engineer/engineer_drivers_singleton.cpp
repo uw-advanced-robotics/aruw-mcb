@@ -17,29 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_CONTROL_HPP_
-#define ROBOT_CONTROL_HPP_
+#ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
+#include "engineer_drivers_singleton.hpp"
 
 namespace aruwsrc
 {
-namespace control
+/**
+ * Class that allows one to construct a Drivers instance because of friendship
+ * with the Drivers class.
+ */
+class EngineerDriversSingleton
 {
-#ifdef TARGET_HERO_CYCLONE
-void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
-#endif
+public:
+    static aruwsrc::EngineerDrivers drivers;
+};  // class DriversSingleton
 
-#ifdef TARGET_ENGINEER
-void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers);
-#endif
+aruwsrc::EngineerDrivers EngineerDriversSingleton::drivers;
 
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
-
-}  // namespace control
-
+aruwsrc::EngineerDrivers *DoNotUse_getEngineerDrivers()
+{
+    return &EngineerDriversSingleton::drivers;
+}
 }  // namespace aruwsrc
 
-#endif  // ROBOT_CONTROL_HPP_
+#endif
