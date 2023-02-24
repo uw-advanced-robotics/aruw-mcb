@@ -36,6 +36,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/motor/tmotor_tx_handler.hpp"
 #endif
 
 namespace aruwsrc
@@ -54,7 +55,8 @@ public:
           oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          tMotorTxHandler(this)
     {
     }
 
@@ -73,6 +75,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    motor::TMotorTxHandler tMotorTxHandler;
 #endif
 };  // class aruwsrc::Drivers
 }  // namespace aruwsrc
