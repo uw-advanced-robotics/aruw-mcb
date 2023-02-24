@@ -88,7 +88,7 @@ void startEngineerCommands(tap::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(tap::Drivers *) {}
 
-void initSubsystemCommands(tap::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
     initializeSubsystems();
