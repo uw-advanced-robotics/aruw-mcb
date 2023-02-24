@@ -511,12 +511,14 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwsrc::HeroDrivers *drivers)
+void startHeroCommands(tap::Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    ((aruwsrc::HeroDrivers *)drivers)
+        ->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    ((aruwsrc::HeroDrivers *)drivers)
+        ->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,

@@ -26,7 +26,11 @@ namespace aruwsrc
 {
 namespace control
 {
+#ifdef TARGET_HERO_CYCLONE
+void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
+#else
 void initSubsystemCommands(aruwsrc::Drivers *drivers);
+#endif
 }  // namespace control
 
 }  // namespace aruwsrc

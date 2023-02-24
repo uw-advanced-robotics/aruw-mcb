@@ -32,6 +32,7 @@
 
 /* communication includes ---------------------------------------------------*/
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -69,7 +70,11 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
+#ifdef TARGET_HERO_CYCLONE
+    aruwsrc::HeroDrivers *drivers = aruwsrc::DoNotUse_getHeroDrivers();
+#else
     aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
+#endif
 
     Board::initialize();
     initializeIo(drivers);
@@ -100,7 +105,7 @@ int main()
     return 0;
 }
 
-static void initializeIo(aruwsrc::Drivers *drivers)
+static void initializeIo(tap::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -112,25 +117,34 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
-    drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->visionCoprocessor.initializeCV();
-    drivers->mpu6500TerminalSerialHandler.init();
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
-    drivers->turretMCBCanCommBus1.init();
+
+#ifdef TARGET_HERO_CYCLONE
+    ((aruwsrc::HeroDrivers *)drivers)->visionCoprocessor.initializeCV();
+    ((aruwsrc::HeroDrivers *)drivers)->mpu6500TerminalSerialHandler.init();
+    ((aruwsrc::HeroDrivers *)drivers)->turretMCBCanCommBus1.init();
+    ((aruwsrc::HeroDrivers *)drivers)->oledDisplay.initialize();
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
+    // drivers->turretMCBCanCommBus1.init();
+    // drivers->oledDisplay.initialize();
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
     drivers->turretMCBCanCommBus2.init();
 #endif
 }
 
-static void updateIo(aruwsrc::Drivers *drivers)
+static void updateIo(tap::Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->visionCoprocessor.updateSerial();
+    
+#ifdef TARGET_HERO_CYCLONE
+    ((aruwsrc::HeroDrivers *)drivers)->oledDisplay.updateDisplay();
+    ((aruwsrc::HeroDrivers *)drivers)->visionCoprocessor.updateSerial();
+    #endif
 }
