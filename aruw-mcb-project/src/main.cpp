@@ -35,6 +35,7 @@
 #include "aruwsrc/robot/drone/drone_drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -78,6 +79,8 @@ int main()
     aruwsrc::EngineerDrivers *drivers = aruwsrc::DoNotUse_getEngineerDrivers();
 #elif defined(TARGET_DRONE)
     aruwsrc::DroneDrivers *drivers = aruwsrc::DoNotUse_getDroneDrivers();
+#elif defined(ALL_STANDARDS)
+    aruwsrc::StandardDrivers *drivers = aruwsrc::DoNotUse_getStandardDrivers();
 #else
     aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
 #endif
@@ -97,18 +100,20 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-#if !defined(TARGET_ENGINEER) && !defined(TARGET_DRONE)
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
+
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
-#if !defined(TARGET_ENGINEER) && !defined(TARGET_DRONE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
@@ -139,11 +144,18 @@ static void initializeIo(tap::Drivers *drivers)
     ((aruwsrc::HeroDrivers *)drivers)->oledDisplay.initialize();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS)
+    ((aruwsrc::StandardDrivers *)drivers)->visionCoprocessor.initializeCV();
+    ((aruwsrc::StandardDrivers *)drivers)->mpu6500TerminalSerialHandler.init();
+    ((aruwsrc::StandardDrivers *)drivers)->turretMCBCanCommBus1.init();
+    ((aruwsrc::StandardDrivers *)drivers)->oledDisplay.initialize();
+#endif
+
+#if defined(TARGET_SENTRY_BEEHIVE)
+    // drivers->visionCoprocessor.initializeCV();
+    // drivers->mpu6500TerminalSerialHandler.init();
     // drivers->turretMCBCanCommBus1.init();
     // drivers->oledDisplay.initialize();
-#endif
-#if defined(TARGET_SENTRY_BEEHIVE)
     // drivers->turretMCBCanCommBus2.init();
 #endif
 }
@@ -158,5 +170,9 @@ static void updateIo(tap::Drivers *drivers)
 #ifdef TARGET_HERO_CYCLONE
     ((aruwsrc::HeroDrivers *)drivers)->oledDisplay.updateDisplay();
     ((aruwsrc::HeroDrivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#ifdef ALL_STANDARDS
+    ((aruwsrc::StandardDrivers *)drivers)->oledDisplay.updateDisplay();
+    ((aruwsrc::StandardDrivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 }
