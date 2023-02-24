@@ -32,10 +32,9 @@
 
 /* communication includes ---------------------------------------------------*/
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/drone/drone_drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
-#include "aruwsrc/robot/drone/drone_drivers_singleton.hpp"
-
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"

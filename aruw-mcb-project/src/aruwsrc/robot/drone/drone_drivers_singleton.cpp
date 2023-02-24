@@ -35,10 +35,7 @@ public:
 
 aruwsrc::DroneDrivers DroneDriversSingleton::drivers;
 
-aruwsrc::DroneDrivers *DoNotUse_getDroneDrivers()
-{
-    return &DroneDriversSingleton::drivers;
-}
+aruwsrc::DroneDrivers *DoNotUse_getDroneDrivers() { return &DroneDriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

@@ -20,6 +20,7 @@
 #if defined(TARGET_DRONE)
 
 #include "aruwsrc/control/safe_disconnect.hpp"
+
 #include "drone_drivers_singleton.hpp"
 
 /*
