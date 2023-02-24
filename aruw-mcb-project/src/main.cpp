@@ -34,6 +34,8 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
+#include "aruwsrc/robot/drone/drone_drivers_singleton.hpp"
+
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -75,6 +77,8 @@ int main()
     aruwsrc::HeroDrivers *drivers = aruwsrc::DoNotUse_getHeroDrivers();
 #elif defined(TARGET_ENGINEER)
     aruwsrc::EngineerDrivers *drivers = aruwsrc::DoNotUse_getEngineerDrivers();
+#elif defined(TARGET_DRONE)
+    aruwsrc::DroneDrivers *drivers = aruwsrc::DoNotUse_getDroneDrivers();
 #else
     aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
 #endif
@@ -94,7 +98,7 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-#if !defined(TARGET_ENGINEER)
+#if !defined(TARGET_ENGINEER) && !defined(TARGET_DRONE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -105,7 +109,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
-#if !defined(TARGET_ENGINEER)
+#if !defined(TARGET_ENGINEER) && !defined(TARGET_DRONE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
