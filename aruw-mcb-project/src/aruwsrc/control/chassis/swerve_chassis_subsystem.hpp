@@ -126,12 +126,12 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     std::array<testing::NiceMock<aruwsrc::mock::SwerveModuleMock>, 4> modules;
-    unsigned int NUM_MODULES;
+    const unsigned int NUM_MODULES{4};
 private:
 #else
 private:
     std::array<chassis::SwerveModule, 4> modules;
-    unsigned int NUM_MODULES {4};
+    const unsigned int NUM_MODULES {4};
 #endif
 
     /**

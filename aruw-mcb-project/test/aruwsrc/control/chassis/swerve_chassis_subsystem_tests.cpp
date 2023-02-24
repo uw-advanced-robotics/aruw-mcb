@@ -48,9 +48,8 @@ class SwerveChassisSubsystemTest : public Test
 protected:
     SwerveChassisSubsystemTest() : chassis(&drivers, 
             SWERVE1_CONFIG,
-            SWERVE2_CONFIG,
-            SWERVE1_CONFIG,
-            SWERVE2_CONFIG) {}
+            SWERVE2_CONFIG
+            ) {}
 
     void SetUp() override
     {
@@ -62,6 +61,11 @@ protected:
     SwerveChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
+
+TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)
+{
+    EXPECT_EQ(2, chassis.NUM_MODULES);//has to be manually changed to reflect chasis constructor
+}
 
 TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
 {

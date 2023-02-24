@@ -119,6 +119,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     SwerveModuleConfig config2,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
+    NUM_MODULES(2),
     modules {
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
             testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, config1), 
@@ -133,7 +134,6 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
 #endif
             }
 {
-    NUM_MODULES = 2;
 }
 
 SwerveChassisSubsystem::SwerveChassisSubsystem(
@@ -144,6 +144,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     SwerveModuleConfig config4,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
+    NUM_MODULES(4),
     modules{
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
             testing::NiceMock<aruwsrc::mock::SwerveModuleMock>(drivers, config1), 
@@ -158,7 +159,6 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
 #endif
             }
 {
-    NUM_MODULES = 4;
 }
 
 // SwerveChassisSubsystem::SwerveChassisSubsystem(
