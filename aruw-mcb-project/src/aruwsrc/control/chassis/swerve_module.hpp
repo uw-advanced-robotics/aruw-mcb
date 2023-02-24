@@ -26,6 +26,7 @@
 #include "modm/math/filter/pid.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -54,18 +55,9 @@ namespace chassis
 class SwerveModule
 {
 public:
-    // SwerveModule(
-    //     aruwsrc::Drivers* drivers,
-    //     tap::motor::MotorId driveMotorId,
-    //     tap::motor::MotorId azimuthMotorId,
-    //     float positionWithinChassisX,
-    //     float positionWithinChassisY,
-    //     SwerveModuleConfig& swerveModuleConfig = SWERVE_CONFIG,
-    //     tap::algorithms::SmoothPidConfig azimuthPidConfig = SWERVE_CONFIG.azimuthPidConfig);
-    
     SwerveModule(
         aruwsrc::Drivers* drivers,
-        SwerveModuleConfig& swerveModuleConfig);
+        SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
     const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
 
@@ -73,20 +65,40 @@ public:
 
     void scaleAndSetDesiredState(float scaleCoeff);
 
+    /**
+     * computes initial candidate for module state
+     * @param x desired chassis x velocity in m/s
+     * @param y desired chassis y velocity in m/s
+     * @param r desired chassis angular velocity in rad/s
+     * @return pre-scaled module speed in rpm
+    */
     float calculate(float x, float y, float r);
 
+    /**
+     * Returns MPS of the wheel
+     */
     float getDriveVelocity() const;
 
+    /**
+     * Returns RPM of the wheel
+     */
     float getDriveRPM() const;
 
+    /**
+     * This returns Radian position of azimuth motor, CCW+
+     */
     float getAngle() const;
 
+    /**
+     * This returns deg/sec velocity of azimuth motor, CCW+
+     */
     float getAngularVelocity() const;
 
     void initialize();
 
-    void calibrateAzimuth();
-
+    /**
+     * Updates drive and azimuth PIDs
+     */
     void refresh();
 
     float calculateTotalModuleError() const;
@@ -104,54 +116,34 @@ public:
     float mpsToRpm(float mps) const;
     float rpmToMps(float rpm) const;
 
-private:
-
-    float optimizeAngle(float desiredAngle);
-
-    inline float unwrapAngle(float angle, float denomination)
-    {
-        return fmod(fmod(angle, denomination) + M_TWOPI, denomination);
-        //double % needed to ensure output is positive, bc % can be negative
-    }
-
-    
-    float rotationVectorX;
-    float rotationVectorY;
-
-    
-
+// motors
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
     testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
     testing::NiceMock<tap::mock::DjiMotorMock> azimuthMotor;
-
 private:
 #else
-    // motors
+private:
     Motor driveMotor;
     Motor azimuthMotor;
 #endif
 
-    //int64_t azimuthZeroOffset = 0;
+    inline float wrapAngle(float angle, float denomination)
+    {
+        return fmod(fmod(angle, denomination) + M_TWOPI, denomination);//replace M_TWOPI with denomination? doesn't matter for its one use case currently
+        //double fmod needed to ensure output is positive bc fmod can be negative
+    }
 
-    bool isCalibrated = false;
-
+    const SwerveModuleConfig config;
 
     modm::Pid<float> drivePid;
     tap::algorithms::SmoothPid azimuthPid;
 
-    float preScaledSpeedSetpoint{0}, rotationSetpointRadians{0};
-    float speedSetpointRPM, rotationSetpoint;
+    const float rotationVectorX, rotationVectorY;
+    float preScaledSpeedSetpoint{0}, rotationSetpointRadians{0}, speedSetpointRPM, rotationSetpoint;
     
     //handles wrapping desired rotation and reversing module (in radians, will always be a multiple of PI)
-    float rotationOffset{0}, wrappingRotationOffset{0}, reversingRotationOffset{0};
-    bool reversed{false};
+    float rotationOffset{0};
 
-    const SwerveModuleConfig config;
-
-    //extra debug stuff
-    float drivePIDOutput, driveOutputDesired;
-    int desiredAziWrapNum = 0;
 };  // class SwerveModule
 
 }  // namespace chassis

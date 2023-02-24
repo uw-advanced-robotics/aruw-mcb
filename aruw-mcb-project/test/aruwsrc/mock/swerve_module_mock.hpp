@@ -23,6 +23,7 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/chassis/swerve_module.hpp"
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
 namespace aruwsrc
 {
@@ -34,10 +35,7 @@ public:
     SwerveModuleMock(aruwsrc::Drivers *drivers);
 
     SwerveModuleMock(aruwsrc::Drivers *drivers,
-        tap::motor::MotorId driveMotorId,
-        tap::motor::MotorId azimuthMotorId,
-        float positionWithinChassisX,
-        float positionWithinChassisY);
+        aruwsrc::chassis::SwerveModuleConfig& config);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());

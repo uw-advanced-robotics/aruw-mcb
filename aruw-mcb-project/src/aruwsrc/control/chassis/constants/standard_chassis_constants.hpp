@@ -25,7 +25,7 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-#include "../swerve_module_config.hpp"
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
@@ -139,8 +139,6 @@ static constexpr SwerveModuleConfig SWERVE2_CONFIG {
     .positionWithinChassisX = -0.05,
     .positionWithinChassisY = 0.18,
 };
-
-static constexpr std::array<SwerveModuleConfig, 2> SWASSY_CONFIG = {{SWERVE1_CONFIG, SWERVE2_CONFIG}};
 
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)

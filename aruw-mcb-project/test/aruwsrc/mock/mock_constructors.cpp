@@ -101,15 +101,12 @@ SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(aruwsrc::Drivers *drivers
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
 SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers,
-        tap::motor::MotorId driveMotorId,
-        tap::motor::MotorId azimuthMotorId,
-        float positionWithinChassisX,
-        float positionWithinChassisY)
-    : SwerveModule(drivers, driveMotorId, azimuthMotorId, positionWithinChassisX, positionWithinChassisY)
+        aruwsrc::chassis::SwerveModuleConfig& config)
+    : SwerveModule(drivers, config)
 {
 }
 SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers)
-    : SwerveModule(drivers, tap::motor::MOTOR1, tap::motor::MOTOR2, 10, 10)
+    : SwerveModule(drivers)
 {
 }
 SwerveModuleMock::~SwerveModuleMock() {}

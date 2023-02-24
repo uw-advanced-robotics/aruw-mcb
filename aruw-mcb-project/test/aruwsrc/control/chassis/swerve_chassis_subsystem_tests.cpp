@@ -46,7 +46,11 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class SwerveChassisSubsystemTest : public Test
 {
 protected:
-    SwerveChassisSubsystemTest() : chassis(&drivers) {}
+    SwerveChassisSubsystemTest() : chassis(&drivers, 
+            SWERVE1_CONFIG,
+            SWERVE2_CONFIG,
+            SWERVE1_CONFIG,
+            SWERVE2_CONFIG) {}
 
     void SetUp() override
     {
@@ -59,13 +63,13 @@ protected:
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
-TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)//4 motor, swerve
+TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
 }
 
-TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)//4 motor, swerve??
+TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     chassis.setZeroRPM();
@@ -74,33 +78,36 @@ TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)//4 
     EXPECT_NEAR(0, desiredVelocity[2][0], 1E-3);
 }
 
-TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)//4 motor, swerve
+TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)
 {
-    bool lfOnline, lbOnline, rfOnline, rbOnline;
-    ON_CALL(chassis.modules[0], allMotorsOnline).WillByDefault(ReturnPointee(&lfOnline));
-    ON_CALL(chassis.modules[1], allMotorsOnline).WillByDefault(ReturnPointee(&lbOnline));
-    ON_CALL(chassis.modules[2], allMotorsOnline).WillByDefault(ReturnPointee(&rfOnline));
-    ON_CALL(chassis.modules[3], allMotorsOnline).WillByDefault(ReturnPointee(&rbOnline));
+    bool online1, online2, online3, online4;
+    ON_CALL(chassis.modules[0], allMotorsOnline).WillByDefault(ReturnPointee(&online1));
+    ON_CALL(chassis.modules[1], allMotorsOnline).WillByDefault(ReturnPointee(&online2));
+    ON_CALL(chassis.modules[2], allMotorsOnline).WillByDefault(ReturnPointee(&online3));
+    ON_CALL(chassis.modules[3], allMotorsOnline).WillByDefault(ReturnPointee(&online4));
 
-    for (int i = 0; i < 0xf; i++)
+    int cases = 1;
+    for(unsigned int i = 0; i < chassis.NUM_MODULES; i++) {cases *= 2;}
+    cases -= 1;
+    for (int i = 0; i < cases; i++)
     {
-        lfOnline = i & 1;
-        lbOnline = (i >> 1) & 1;
-        rfOnline = (i >> 2) & 1;
-        rbOnline = (i >> 3) & 1;
+        online1 = i & 1;
+        online2 = (i >> 1) & 1;
+        online3 = (i >> 2) & 1;
+        online4 = (i >> 3) & 1;
 
         EXPECT_FALSE(chassis.allMotorsOnline());
     }
 
-    lfOnline = true;
-    lbOnline = true;
-    rfOnline = true;
-    rbOnline = true;
+    online1 = true;
+    online2 = true;
+    online3 = true;
+    online4 = true;
 
     EXPECT_TRUE(chassis.allMotorsOnline());
 }
 
-TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)//swerve, 4 motor
+TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
 {
     chassis.setDesiredOutput(1000, 1000, 1000);
     chassis.onHardwareTestStart();
@@ -112,13 +119,12 @@ TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)//swer
     EXPECT_NEAR(0, chassiSVelocity[2][0], 1E-3);
 }
 
-TEST_F(SwerveChassisSubsystemTest, initialize)//4 motor, swerve
+TEST_F(SwerveChassisSubsystemTest, initialize)
 {
-    EXPECT_CALL(chassis.modules[0], initialize);
-    EXPECT_CALL(chassis.modules[1], initialize);
-    EXPECT_CALL(chassis.modules[2], initialize);
-    EXPECT_CALL(chassis.modules[3], initialize);
+    for(unsigned int i = 0; i < chassis.NUM_MODULES; i++)
+    {
+        EXPECT_CALL(chassis.modules[i], initialize);
+    }
 
     chassis.initialize();
 }
-

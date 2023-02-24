@@ -56,42 +56,15 @@ namespace chassis
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
 public:
-    /* SwerveChassisSubsystem(
+    SwerveChassisSubsystem(
         aruwsrc::Drivers* drivers,
-        tap::motor::MotorId leftFrontAzimuthMotorId = LEFT_FRONT_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId leftFrontDriveMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackAzimuthMotorId = LEFT_BACK_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId leftBackDriveMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontAzimuthMotorId = RIGHT_FRONT_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId rightFrontDriveMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackAzimuthMotorId = RIGHT_BACK_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId rightBackDriveMotorId = RIGHT_BACK_MOTOR_ID,
+        SwerveModuleConfig config1 = SWERVE1_CONFIG,
+        SwerveModuleConfig config2 = SWERVE2_CONFIG,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 
     SwerveChassisSubsystem(
-        aruwsrc::Drivers* drivers,
-        unsigned int numModules,
-        tap::motor::MotorId leftFrontAzimuthMotorId = LEFT_FRONT_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId leftFrontDriveMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackAzimuthMotorId = LEFT_BACK_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId leftBackDriveMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontAzimuthMotorId = RIGHT_FRONT_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId rightFrontDriveMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackAzimuthMotorId = RIGHT_BACK_AZIMUTH_MOTOR_ID,
-        tap::motor::MotorId rightBackDriveMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    ); */
-
-    SwerveChassisSubsystem(
-        aruwsrc::Drivers* drivers,
-        SwerveModuleConfig config1,
-        SwerveModuleConfig config2,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    );
-
-    SwerveChassisSubsystem(
-        aruwsrc::Drivers* drivers,
+        aruwsrc::Drivers* drivers, 
         SwerveModuleConfig config1,
         SwerveModuleConfig config2,
         SwerveModuleConfig config3,
@@ -99,7 +72,21 @@ public:
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 
+    // SwerveChassisSubsystem(
+    //     aruwsrc::Drivers* drivers,
+    //     SwerveModule& module1,
+    //     SwerveModule& module2,
+    //     tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
+    // );
 
+    // SwerveChassisSubsystem(
+    //     aruwsrc::Drivers* drivers,
+    //     SwerveModule& module1,
+    //     SwerveModule& module2,
+    //     SwerveModule& module3,
+    //     SwerveModule& module4,
+    //     tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
+    // );
 
     void initialize() override;
 
@@ -126,13 +113,6 @@ public:
         RB = 3,
     };
 
-    /**
-     * Stores the desired state of each of the modules in a matrix, indexed by ModuleIndex
-     */
-    modm::Matrix<float, 4, 1> desiredModuleSpeeds;
-
-    modm::Matrix<float, 3, 8> swerveWheelVelToChassisVelMat;
-
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
@@ -143,35 +123,27 @@ public:
     inline int16_t getRightFrontRpmActual() const override { return modules[RF].getDriveRPM(); }
     inline int16_t getRightBackRpmActual() const override { return modules[RB].getDriveRPM(); }
 
-private:
-
-    /**
-     * When you input desired x, y, an r rpm, this function translates
-     * and sets the target azimuth and drive RPM of individual chassis modules.
-     */
-    void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
-    
-    // inline std::array<SwerveModule, MODULES>& createModules(aruwsrc::Drivers* drivers,
-    //         std::array<SwerveModuleConfig, MODULES> moduleConfigs)
-    // {
-    //     std::array<SwerveModule, MODULES> moduleArray;
-    //     for (unsigned int i = 0; i < MODULES; i++)
-    //         moduleArray[i] = SwerveModule(drivers, moduleConfigs[i]);
-    //     return moduleArray;
-    // }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    std::array<testing::NiceMock<aruwsrc::mock::SwerveModuleMock>, 4> modules;  
+    std::array<testing::NiceMock<aruwsrc::mock::SwerveModuleMock>, 4> modules;
+    unsigned int NUM_MODULES;
 private:
 #else
+private:
     std::array<chassis::SwerveModule, 4> modules;
+    unsigned int NUM_MODULES {4};
 #endif
 
-    unsigned int NUM_MODULES;
+    /**
+     * Stores the desired wheel rpm of each of the modules in a matrix, indexed by ModuleIndex
+     */
+    modm::Matrix<float, 4, 1> desiredModuleSpeeds;
 
-    //extra debug stuff
-    float lastXInput, lastYInput;
+    /**
+     * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it
+     *   for the delegated kinematics calculation, as well as limits the maximum wheel speed
+     */
+    void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
 };  // class SwerveChassisSubsystem
 

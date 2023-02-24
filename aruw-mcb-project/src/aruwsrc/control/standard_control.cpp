@@ -130,6 +130,9 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
+// aruwsrc::chassis::SwerveModule swerveModule1(drivers(), aruwsrc::chassis::SWERVE1_CONFIG);
+// aruwsrc::chassis::SwerveModule swerveModule2(drivers(), aruwsrc::chassis::SWERVE2_CONFIG);
+
 aruwsrc::chassis::SwerveChassisSubsystem chassis(
     drivers(), aruwsrc::chassis::SWERVE1_CONFIG, aruwsrc::chassis::SWERVE2_CONFIG);
 

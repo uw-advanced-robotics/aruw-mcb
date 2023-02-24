@@ -35,7 +35,7 @@ using namespace testing;
 class SwerveModuleTest : public Test
 {
 protected:
-    SwerveModuleTest() : module(&drivers, tap::motor::MOTOR1, tap::motor::MOTOR2, 10, 10) {}
+    SwerveModuleTest() : module(&drivers) {}
 
     void SetUp() override
     {
@@ -87,11 +87,3 @@ TEST_F(SwerveModuleTest, getDriveVelocity)
     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
 }
-
-TEST_F(SwerveModuleTest, calibrateAzimuth)
-{
-    ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(1000));
-    module.calibrateAzimuth();
-    EXPECT_NEAR(0, module.getAngle(), 1E-3);
-}
-
