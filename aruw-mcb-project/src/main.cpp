@@ -142,9 +142,9 @@ static void updateIo(tap::Drivers *drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-    
+
 #ifdef TARGET_HERO_CYCLONE
     ((aruwsrc::HeroDrivers *)drivers)->oledDisplay.updateDisplay();
     ((aruwsrc::HeroDrivers *)drivers)->visionCoprocessor.updateSerial();
-    #endif
+#endif
 }
