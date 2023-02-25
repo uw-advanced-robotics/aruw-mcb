@@ -54,7 +54,7 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
     }
 
-    tap::drivers drivers;
+    tap::Drivers drivers;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

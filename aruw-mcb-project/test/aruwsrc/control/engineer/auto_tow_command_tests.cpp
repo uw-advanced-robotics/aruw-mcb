@@ -47,7 +47,7 @@ protected:
     {
     }
 
-    tap::drivers drivers;
+    tap::Drivers drivers;
     TowSubsystemMock ts;
     AutoTowCommand tc;
 };

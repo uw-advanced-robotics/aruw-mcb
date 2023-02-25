@@ -43,7 +43,8 @@ class MultiShotCvCommandMappingTest : public Test
 {
 protected:
     MultiShotCvCommandMappingTest()
-        : yawMotor(&yawM, {}),
+        : drivers(),
+          yawMotor(&yawM, {}),
           pitchMotor(&pitM, {}),
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),

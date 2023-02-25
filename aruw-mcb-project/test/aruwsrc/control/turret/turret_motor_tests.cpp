@@ -64,7 +64,7 @@ protected:
         encoderWrapped = encoderUnwrapped % DjiMotor::ENC_RESOLUTION;
     }
 
-    Drivers drivers;
+   tap::Drivers drivers;
     NiceMock<DjiMotorMock> motor;
     TurretMotor turretMotor;
     bool motorOnline = true;

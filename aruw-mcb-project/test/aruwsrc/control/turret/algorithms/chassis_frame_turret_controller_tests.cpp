@@ -58,7 +58,7 @@ protected:
         ON_CALL(turretSubsystem.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
     }
 
-    tap::drivers drivers;
+    tap::Drivers drivers;
     NiceMock<TurretSubsystemMock> turretSubsystem;
     float setpoint;
     ContiguousFloat currentAngle;

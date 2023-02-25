@@ -59,7 +59,7 @@ protected:
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(TURRET_MOTOR_CONFIG));
     }
 
-    tap::drivers drivers;
+    tap::Drivers drivers;
     testing::NiceMock<tap::mock::MotorInterfaceMock> motor;
     testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;

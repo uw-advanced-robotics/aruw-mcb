@@ -21,6 +21,8 @@
 
 #include "tap/drivers.hpp"
 
+#include "modm/architecture/interface/assert.hpp"
+
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(

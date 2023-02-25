@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
-using tap::drivers;
+using tap::Drivers;
 using aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand;
 using namespace testing;
 using namespace tap::communication::serial;
@@ -40,7 +40,7 @@ protected:
             .WillByDefault(ReturnPointee(&refSerialOnline));
     }
 
-    Drivers drivers;
+   tap::Drivers drivers;
     aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
     RefSerialData::Rx::RobotData robotData{};
     bool refSerialOnline = false;

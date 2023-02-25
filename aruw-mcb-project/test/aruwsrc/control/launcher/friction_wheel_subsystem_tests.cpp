@@ -22,7 +22,7 @@
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "tap/drivers.hpp"
 
-using tap::drivers;
+using tap::Drivers;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
@@ -41,7 +41,7 @@ protected:
     }
 
     ClockStub clock;
-    Drivers drivers;
+   tap::Drivers drivers;
     FrictionWheelSubsystem frictionWheels;
 };
 
