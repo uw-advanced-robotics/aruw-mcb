@@ -57,14 +57,14 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     SwerveChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
 TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)
 {
-    EXPECT_EQ(2, chassis.NUM_MODULES);//has to be manually changed to reflect chasis constructor
+    EXPECT_EQ(2, chassis.NUM_MODULES);//has to be manually changed to reflect chassis constructor
 }
 
 TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)

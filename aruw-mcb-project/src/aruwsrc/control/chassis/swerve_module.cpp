@@ -20,11 +20,6 @@
 
 #include "swerve_module.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-
-#include "aruwsrc/drivers.hpp"
-#include "modm/math/geometry/angle.hpp"
-
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -32,7 +27,7 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     SwerveModuleConfig& config)
     : driveMotor(
           drivers,

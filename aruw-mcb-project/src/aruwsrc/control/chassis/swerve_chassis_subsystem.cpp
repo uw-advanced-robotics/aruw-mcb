@@ -17,16 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "swerve_chassis_subsystem.hpp"
-
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/serial/remote.hpp"
-
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/drivers.hpp"
-
-#include "swerve_module.hpp"
 
 using namespace tap::algorithms;
 
@@ -36,7 +27,7 @@ namespace chassis
 {
 
 SwerveChassisSubsystem::SwerveChassisSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     SwerveModuleConfig config1,
     SwerveModuleConfig config2,
     tap::gpio::Analog::Pin currentPin)
@@ -59,7 +50,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
 }
 
 SwerveChassisSubsystem::SwerveChassisSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     SwerveModuleConfig config1,
     SwerveModuleConfig config2,
     SwerveModuleConfig config3,
@@ -84,7 +75,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
 }
 
 // SwerveChassisSubsystem::SwerveChassisSubsystem(
-//     aruwsrc::Drivers* drivers,
+//     tap::Drivers* drivers,
 //     SwerveModule& module1,
 //     SwerveModule& module2,
 //     tap::gpio::Analog::Pin currentPin)
@@ -97,7 +88,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
 // }
 
 // SwerveChassisSubsystem::SwerveChassisSubsystem(
-//     aruwsrc::Drivers* drivers,
+//     tap::Drivers* drivers,
 //     SwerveModule& module1,
 //     SwerveModule& module2,
 //     SwerveModule& module3,

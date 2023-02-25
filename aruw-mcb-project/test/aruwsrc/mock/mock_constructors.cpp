@@ -98,18 +98,18 @@ MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(tap::Drivers *drivers)
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
-SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(aruwsrc::Drivers *drivers)
+SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(tap::Drivers *drivers)
     : SwerveChassisSubsystem(drivers)
 {
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
-SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers,
+SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers,
         aruwsrc::chassis::SwerveModuleConfig& config)
     : SwerveModule(drivers, config)
 {
 }
-SwerveModuleMock::SwerveModuleMock(aruwsrc::Drivers *drivers)
+SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers)
     : SwerveModule(drivers)
 {
 }

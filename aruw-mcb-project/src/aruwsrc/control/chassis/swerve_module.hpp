@@ -21,12 +21,16 @@
 #define SWERVE_MODULE_HPP_
 
 #include "tap/motor/m3508_constants.hpp"
+#include "tap/drivers.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+
+#include "modm/math/filter/pid.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 #include "constants/chassis_constants.hpp"
-#include "modm/math/filter/pid.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
-#include "modm/math/geometry/angle.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -56,7 +60,7 @@ class SwerveModule
 {
 public:
     SwerveModule(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
     const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;

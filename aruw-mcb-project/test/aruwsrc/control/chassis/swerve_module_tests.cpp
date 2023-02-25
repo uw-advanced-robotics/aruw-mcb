@@ -43,7 +43,7 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     SwerveModule module;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

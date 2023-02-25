@@ -32,9 +32,9 @@ namespace mock
 class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
 {
 public:
-    SwerveModuleMock(aruwsrc::Drivers *drivers);
+    SwerveModuleMock(tap::Drivers *drivers);
 
-    SwerveModuleMock(aruwsrc::Drivers *drivers,
+    SwerveModuleMock(tap::Drivers *drivers,
         aruwsrc::chassis::SwerveModuleConfig& config);
     virtual ~SwerveModuleMock();
 
