@@ -19,13 +19,14 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
-#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::mock;
 using namespace aruwsrc::chassis;
@@ -68,11 +69,7 @@ class TurretOfflineTest : public ChassisAutorotateCommandTest,
 
 TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 {
-    ChassisAutorotateCommand cac(
-        &drivers,
-        &(controlOperatorInterface),
-        &chassis,
-        &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
@@ -95,21 +92,13 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 
 TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
 {
-    ChassisAutorotateCommand cac(
-        &drivers,
-        &(controlOperatorInterface),
-        &chassis,
-        &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
 }
 
 TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
-    ChassisAutorotateCommand cac(
-        &drivers,
-        &(controlOperatorInterface),
-        &chassis,
-        &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
@@ -119,11 +108,7 @@ TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 
 TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
-    ChassisAutorotateCommand cac(
-        &drivers,
-        &(controlOperatorInterface),
-        &chassis,
-        &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_FALSE(cac.isFinished());
 }
@@ -175,12 +160,9 @@ public:
 
         ON_CALL(drivers.mpu6500, getGz).WillByDefault(Return(0));
 
-        ON_CALL(controlOperatorInterface, getChassisXInput)
-            .WillByDefault(Return(GetParam().x));
-        ON_CALL(controlOperatorInterface, getChassisYInput)
-            .WillByDefault(Return(GetParam().y));
-        ON_CALL(controlOperatorInterface, getChassisRInput)
-            .WillByDefault(Return(GetParam().r));
+        ON_CALL(controlOperatorInterface, getChassisXInput).WillByDefault(Return(GetParam().x));
+        ON_CALL(controlOperatorInterface, getChassisYInput).WillByDefault(Return(GetParam().y));
+        ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(GetParam().r));
 
         turretConfig.limitMotorAngles = GetParam().yawLimited;
 
@@ -192,9 +174,10 @@ public:
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
-        });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float angle, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d); });
     }
 
     float yawAngleFromCenter;
@@ -358,7 +341,8 @@ INSTANTIATE_TEST_SUITE_P(
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         }),
-    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info)
+    {
         std::stringstream ss;
         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
            << PrintToString(info.param.r) << "_yawAngle_"

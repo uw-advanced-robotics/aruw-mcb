@@ -19,12 +19,12 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 
@@ -88,14 +88,14 @@ protected:
         });
     }
 
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     tap::algorithms::SmoothPid posPid;
     tap::algorithms::SmoothPid velPid;
     float chassisFrameUnwrappedMeasurement = 0;
     float turretFrameImuValue = 0;
     float turretFrameImuVelocity = 0;
     TurretMotorConfig motorConfig;
-    NiceMock<tap::mock::DjiMotorMock> djiMotor; 
+    NiceMock<tap::mock::DjiMotorMock> djiMotor;
     NiceMock<aruwsrc::mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
 };
 

@@ -19,11 +19,12 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"

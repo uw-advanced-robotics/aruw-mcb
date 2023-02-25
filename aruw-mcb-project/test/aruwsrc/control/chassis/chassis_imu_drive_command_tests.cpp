@@ -21,13 +21,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
-#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace aruwsrc::chassis;
@@ -39,18 +39,27 @@ static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
 class ChassisImuDriveCommandTest : public Test
 {
 protected:
-    ChassisImuDriveCommandTest() : drivers(), chassis(&drivers), controlOperatorInterface(&drivers), robotData{} {}
+    ChassisImuDriveCommandTest()
+        : drivers(),
+          chassis(&drivers),
+          controlOperatorInterface(&drivers),
+          robotData{}
+    {
+    }
 
     void SetUp() override
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-            return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
-        });
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d);
-        });
+        ON_CALL(chassis, calculateRotationTranslationalGain)
+            .WillByDefault(
+                [&](float r) {
+                    return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
+                });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float r, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d); });
 
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
         ON_CALL(drivers.mpu6500, getImuState).WillByDefault(ReturnPointee(&imuState));
@@ -63,7 +72,7 @@ protected:
         ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(userR));
     }
 
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;

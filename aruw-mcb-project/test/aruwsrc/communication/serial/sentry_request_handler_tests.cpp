@@ -20,8 +20,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;
