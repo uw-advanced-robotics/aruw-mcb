@@ -21,7 +21,7 @@
 
 #include "tap/control/command_scheduler.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control
 {

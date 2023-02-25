@@ -19,7 +19,7 @@
 
 #include "oled_display.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::display;
 using namespace modm::literals;

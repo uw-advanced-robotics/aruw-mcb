@@ -22,7 +22,7 @@
 #include "tap/mock/motor_interface_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace testing;
@@ -59,7 +59,7 @@ protected:
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(TURRET_MOTOR_CONFIG));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::drivers drivers;
     testing::NiceMock<tap::mock::MotorInterfaceMock> motor;
     testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;

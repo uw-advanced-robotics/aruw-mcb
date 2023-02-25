@@ -20,26 +20,26 @@
 #ifndef ROBOT_CONTROL_HPP_
 #define ROBOT_CONTROL_HPP_
 
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
+#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
-#ifdef TARGET_HERO_CYCLONE
+#if defined(ALL_STANDARDS)
+void initSubsystemCommands(aruwsrc::StandardDrivers *drivers);
+#elif defined(TARGET_HERO_CYCLONE)
 void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
 #elif defined(TARGET_ENGINEER)
 void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers);
 #elif defined(TARGET_DRONE)
 void initSubsystemCommands(aruwsrc::DroneDrivers *drivers);
-#elif defined(ALL_STANDARDS)
-void initSubsystemCommands(aruwsrc::StandardDrivers *drivers);
-#else
-void initSubsystemCommands(aruwsrc::Drivers *drivers);
+#elif defined(TARGET_SENTRY_BEEHIVE)
+void initSubsystemCommands(aruwsrc::SentryDrivers *drivers);
 #endif
 }  // namespace control
 

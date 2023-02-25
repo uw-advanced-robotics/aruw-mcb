@@ -25,7 +25,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"

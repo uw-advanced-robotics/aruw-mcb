@@ -21,7 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;
@@ -41,7 +41,7 @@ protected:
     static void selectNewRobotMessageHandlerCallback() { i++; };
     static void targetNewQuadrantMessageHandlerCallback() { i++; };
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     tap::communication::serial::DJISerial::ReceivedSerialMessage message{};
     SentryRequestHandler handler;
     static int i;

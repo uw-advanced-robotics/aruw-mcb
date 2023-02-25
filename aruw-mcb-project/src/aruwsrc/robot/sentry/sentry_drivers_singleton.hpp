@@ -17,25 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef SENTRY_DRIVERS_SINGLETON_HPP_
+#define SENTRY_DRIVERS_SINGLETON_HPP_
+
 #ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 
 namespace aruwsrc
 {
 /**
- * Class that allows one to construct a Drivers instance because of frienship
- * with the Drivers class.
+ * @return The singleton instance of the Drivers class. This is the only instance of the
+ *      Drivers class that should be created anywhere in the non-unit test framework.
+ * @note It is likely that you will never have to use this. There are only two files you
+ *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
+ *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
-class DriversSingleton
-{
-public:
-    static aruwsrc::Drivers drivers;
-};  // class DriversSingleton
-
-aruwsrc::Drivers DriversSingleton::drivers;
-
-aruwsrc::Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
+aruwsrc::SentryDrivers *DoNotUse_getSentryDrivers();
+using sentryDriversFunc = aruwsrc::SentryDrivers *(*)();
 }  // namespace aruwsrc
 
 #endif
+
+#endif  // SENTRY_DRIVERS_SINGLETON_HPP_

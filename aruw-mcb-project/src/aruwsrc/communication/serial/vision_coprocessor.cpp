@@ -24,7 +24,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;

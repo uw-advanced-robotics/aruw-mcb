@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
-using aruwsrc::Drivers;
+using tap::drivers;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
