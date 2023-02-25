@@ -19,12 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "tap/drivers.hpp"
+#include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc;
@@ -41,7 +42,8 @@ protected:
         : posPid({100, 0, 0, 0, 100, 1, 0, 1, 0, 0}),
           velPid({100, 0, 0, 0, 100, 1, 0, 1, 0, 0}),
           motorConfig{.limitMotorAngles = false},
-          djiMotor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor")
+          djiMotor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor"),
+          turretMCBCanCommBus1(&drivers, tap::can::CanBus::CAN_BUS1)
     {
     }
 
@@ -59,14 +61,14 @@ protected:
             return djiMotor.DjiMotor::getOutputDesired();
         });
 
-        ON_CALL(drivers.turretMCBCanCommBus1, getYawUnwrapped)
+        ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(drivers.turretMCBCanCommBus1, getYawVelocity)
+        ON_CALL(turretMCBCanCommBus1, getYawVelocity)
             .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
 
-        ON_CALL(drivers.turretMCBCanCommBus1, getPitchUnwrapped)
+        ON_CALL(turretMCBCanCommBus1, getPitchUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(drivers.turretMCBCanCommBus1, getPitchVelocity)
+        ON_CALL(turretMCBCanCommBus1, getPitchVelocity)
             .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
     }
 
@@ -86,7 +88,7 @@ protected:
         });
     }
 
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     tap::algorithms::SmoothPid posPid;
     tap::algorithms::SmoothPid velPid;
     float chassisFrameUnwrappedMeasurement = 0;
@@ -94,6 +96,7 @@ protected:
     float turretFrameImuVelocity = 0;
     TurretMotorConfig motorConfig;
     NiceMock<tap::mock::DjiMotorMock> djiMotor;
+    NiceMock<aruwsrc::mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
 };
 
 TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_setpoint_limited)
@@ -110,7 +113,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -146,7 +149,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -164,7 +167,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -187,7 +190,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -210,7 +213,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -234,7 +237,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -257,7 +260,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -279,7 +282,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFrameYawTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -318,7 +321,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_fram
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -354,7 +357,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -372,7 +375,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -395,7 +398,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -418,7 +421,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -442,7 +445,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -465,7 +468,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);
@@ -487,7 +490,7 @@ TEST_F(
     turretMotor.updateMotorAngle();
 
     WorldFramePitchTurretImuCascadePidTurretController turretController(
-        drivers.turretMCBCanCommBus1,
+        turretMCBCanCommBus1,
         turretMotor,
         posPid,
         velPid);

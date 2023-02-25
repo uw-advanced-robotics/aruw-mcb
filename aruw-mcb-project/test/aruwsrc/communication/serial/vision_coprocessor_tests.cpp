@@ -22,10 +22,10 @@
 #include "tap/algorithms/crc.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 

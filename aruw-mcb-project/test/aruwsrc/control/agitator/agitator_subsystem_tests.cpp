@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "tap/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::agitator;

@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/communication/serial/sentry_request_transmitter.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/communication/serial/sentry_request_transmitter.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;

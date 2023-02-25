@@ -28,6 +28,7 @@
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/cv_on_target_governor_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
@@ -35,6 +36,7 @@
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::control::agitator;
