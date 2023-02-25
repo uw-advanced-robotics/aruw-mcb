@@ -59,8 +59,7 @@ TEST_F(SentryRequestTransmitterTest, send_sends_select_new_target_when_message_q
             [](tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage* robotToRobotMsg,
                uint16_t,
                tap::communication::serial::RefSerialData::RobotId,
-               uint16_t)
-            {
+               uint16_t) {
                 EXPECT_EQ(
                     static_cast<uint8_t>(SentryRequestMessageType::SELECT_NEW_ROBOT),
                     robotToRobotMsg->dataAndCRC16[0]);
@@ -78,8 +77,7 @@ TEST_F(SentryRequestTransmitterTest, send_sends_target_new_quadrant_when_message
             [](tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage* robotToRobotMsg,
                uint16_t,
                tap::communication::serial::RefSerialData::RobotId,
-               uint16_t)
-            {
+               uint16_t) {
                 EXPECT_EQ(
                     static_cast<uint8_t>(SentryRequestMessageType::TARGET_NEW_QUADRANT),
                     robotToRobotMsg->dataAndCRC16[0]);
