@@ -61,7 +61,7 @@ protected:
         ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(userR));
     }
 
-    Drivers drivers;
+   tap::Drivers drivers;
     NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     Mpu6500::ImuState imuState = Mpu6500::ImuState::IMU_CALIBRATED;

@@ -65,7 +65,7 @@ protected:
     }
 
     tap::arch::clock::ClockStub clock;
-    Drivers drivers;
+    tap::Drivers drivers;
     AgitatorSubsystem agitator;
 
     int32_t encUnwrapped = 0;

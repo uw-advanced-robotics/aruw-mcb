@@ -47,7 +47,7 @@ protected:
     }
 
 private:
-    tap::drivers drivers;
+    tap::Drivers drivers;
 
 protected:
     NiceMock<aruwsrc::mock::SentryDriveSubsystemMock> sub;

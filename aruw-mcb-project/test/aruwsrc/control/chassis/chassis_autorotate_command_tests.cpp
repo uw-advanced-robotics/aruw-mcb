@@ -51,7 +51,7 @@ protected:
         ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(turretConfig));
     }
 
-    tap::drivers drivers;
+    tap::Drivers drivers;
     NiceMock<ChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
