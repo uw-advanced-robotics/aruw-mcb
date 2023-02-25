@@ -35,10 +35,7 @@ public:
 
 aruwsrc::SentryDrivers SentryDriversSingleton::drivers;
 
-aruwsrc::SentryDrivers *DoNotUse_getSentryDrivers()
-{
-    return &SentryDriversSingleton::drivers;
-}
+aruwsrc::SentryDrivers *DoNotUse_getSentryDrivers() { return &SentryDriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

@@ -19,8 +19,9 @@
 
 #include "imu_calibrate_menu.hpp"
 
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 
 /**
  * Default function if getImuCalibrateCommand not defined by the user.

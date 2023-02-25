@@ -23,7 +23,6 @@
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/control/subsystem.hpp"
-
 #include "tap/drivers.hpp"
 
 namespace aruwsrc::control::buzzer

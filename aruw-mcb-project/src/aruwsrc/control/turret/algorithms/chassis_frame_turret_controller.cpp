@@ -19,9 +19,10 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
-#include "tap/drivers.hpp"
 
 #include "turret_gravity_compensation.hpp"
 

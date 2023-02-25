@@ -21,9 +21,9 @@
 #define CV_ONLINE_GOVERNOR_HPP_
 
 #include "tap/control/governor/command_governor_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {

@@ -34,8 +34,8 @@
 #include "aruwsrc/robot/drone/drone_drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
-#include "aruwsrc/robot/standard/standard_drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -179,5 +179,4 @@ static void updateIo(tap::Drivers *drivers)
     ((aruwsrc::SentryDrivers *)drivers)->oledDisplay.updateDisplay();
     ((aruwsrc::SentryDrivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
-
 }
