@@ -24,7 +24,7 @@
 
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {

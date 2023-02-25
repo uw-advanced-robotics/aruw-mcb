@@ -25,7 +25,7 @@
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 
@@ -75,7 +75,7 @@ struct TestTurretAimDataMessage
 static void initAndRunAutoAimRxTest(
     std::array<TestTurretAimDataMessage, NUM_TURRETS> expectedAimData)
 {
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
     DJISerial::ReceivedSerialMessage message;
     message.header.headByte = 0xA5;
@@ -271,7 +271,7 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
 {
     ClockStub clock;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     testing::NiceMock<tap::mock::Odometry2DInterfaceMock> odometryInterface;
@@ -394,7 +394,7 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_not_expired_nothing_sent)
 {
     ClockStub clock;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     EXPECT_CALL(drivers.uart, write(_, _, _)).Times(0);
@@ -406,7 +406,7 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
 {
     ClockStub clock;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
@@ -448,7 +448,7 @@ TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
 {
     ClockStub clock;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
@@ -482,7 +482,7 @@ TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
 {
     ClockStub clock;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;
@@ -517,7 +517,7 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
     ClockStub clock;
     clock.time = 10'000;
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
 
     static constexpr int HEADER_LEN = 7;

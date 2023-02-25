@@ -20,10 +20,10 @@
 #include <gtest/gtest.h>
 
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
-using aruwsrc::Drivers;
+using tap::drivers;
 using aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand;
 using namespace testing;
 using namespace tap::communication::serial;

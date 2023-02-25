@@ -22,7 +22,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::agitator;

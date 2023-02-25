@@ -22,7 +22,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
@@ -51,7 +51,7 @@ protected:
         ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(turretConfig));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::drivers drivers;
     NiceMock<ChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;

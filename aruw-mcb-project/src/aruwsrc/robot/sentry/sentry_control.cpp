@@ -60,7 +60,7 @@
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-#include "aruwsrc/drivers_singleton.hpp"
+#include "sentry_drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
 
@@ -87,7 +87,7 @@ using namespace tap::communication::serial;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+aruwsrc::sentryDriversFunc drivers = aruwsrc::DoNotUse_getSentryDrivers;
 
 namespace sentry_control
 {
@@ -118,7 +118,7 @@ public:
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
     };
 
-    SentryTurret(aruwsrc::Drivers &drivers, const Config &config)
+    SentryTurret(aruwsrc::SentryDrivers &drivers, const Config &config)
         : agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
           frictionWheels(
               &drivers,
@@ -175,7 +175,7 @@ public:
               worldFrameYawTurretImuPosPid,
               worldFrameYawTurretImuVelPid),
           turretManual(
-              (tap::Drivers *)&drivers,
+              &drivers,
               drivers.controlOperatorInterface,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
@@ -411,7 +411,7 @@ void initializeSubsystems()
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(aruwsrc::Drivers *drivers)
+void registerSentrySubsystems(aruwsrc::SentryDrivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryDrive);
     drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
@@ -429,7 +429,7 @@ void registerSentrySubsystems(aruwsrc::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(aruwsrc::Drivers *)
+void setDefaultSentryCommands(aruwsrc::SentryDrivers *)
 {
     sentryDrive.setDefaultCommand(&sentryAutoDrive);
     turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
@@ -443,7 +443,7 @@ void setDefaultSentryCommands(aruwsrc::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(aruwsrc::Drivers *drivers)
+void startSentryCommands(aruwsrc::SentryDrivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
@@ -460,7 +460,7 @@ void startSentryCommands(aruwsrc::Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings(aruwsrc::Drivers *drivers)
+void registerSentryIoMappings(aruwsrc::SentryDrivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -471,7 +471,7 @@ void registerSentryIoMappings(aruwsrc::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::SentryDrivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &sentry_control::remoteSafeDisconnectFunction);

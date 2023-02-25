@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRIVERS_HPP_
-#define DRIVERS_HPP_
+#ifndef SENTRY_DRIVERS_HPP_
+#define SENTRY_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
@@ -40,14 +40,14 @@
 
 namespace aruwsrc
 {
-class Drivers : public tap::Drivers
+class SentryDrivers : public tap::Drivers
 {
-    friend class DriversSingleton;
+    friend class SentryDriversSingleton;
 
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers()
+    SentryDrivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
@@ -74,7 +74,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 #endif
-};  // class aruwsrc::Drivers
+};  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc
 
-#endif  // DRIVERS_HPP_
+#endif  // SENTRY_DRIVERS_HPP_
