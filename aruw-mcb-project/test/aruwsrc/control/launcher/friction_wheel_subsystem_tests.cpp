@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
 using tap::Drivers;
 using namespace testing;

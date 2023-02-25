@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/mock/sentry_request_subsystem_mock.hpp"
 
 using namespace testing;

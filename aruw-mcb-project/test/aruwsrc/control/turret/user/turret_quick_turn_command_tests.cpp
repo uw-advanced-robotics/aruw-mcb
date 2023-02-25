@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::mock;
