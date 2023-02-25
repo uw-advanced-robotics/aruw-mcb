@@ -41,7 +41,7 @@ protected:
     }
 
     ClockStub clock;
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     FrictionWheelSubsystem frictionWheels;
 };
 

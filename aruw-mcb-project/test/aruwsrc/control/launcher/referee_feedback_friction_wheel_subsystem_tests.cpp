@@ -48,7 +48,7 @@ protected:
     }
 
     tap::arch::clock::ClockStub clock;
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     RefereeFeedbackFrictionWheelSubsystem<10> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

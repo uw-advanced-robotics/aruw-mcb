@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 
 using aruwsrc::engineer::TowSubsystem;

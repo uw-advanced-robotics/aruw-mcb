@@ -19,9 +19,8 @@
 
 #include "sentry_response_handler.hpp"
 
-#include "tap/errors/create_errors.hpp"
-
 #include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 namespace aruwsrc::communication::serial
 {

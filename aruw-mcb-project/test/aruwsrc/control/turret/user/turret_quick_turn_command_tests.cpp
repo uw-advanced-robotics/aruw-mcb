@@ -34,7 +34,7 @@ class TurretQuickTurnCommandTest : public Test
 protected:
     TurretQuickTurnCommandTest() : turret(&drivers), turretUturnCommand(&turret, 180) {}
 
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     TurretSubsystemMock turret;
     TurretQuickTurnCommand turretUturnCommand;
 };
@@ -49,7 +49,7 @@ TEST_F(TurretQuickTurnCommandTest, isReady_return_true_when_turret_online)
 
 TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_setpoint_offset)
 {
-   tap::Drivers drivers;
+    tap::Drivers drivers;
     TurretSubsystemMock turret(&drivers);
     TurretSubsystemMock turret2(&drivers);
     TurretQuickTurnCommand turretUturnCommand180Deg(&turret, M_PI);
