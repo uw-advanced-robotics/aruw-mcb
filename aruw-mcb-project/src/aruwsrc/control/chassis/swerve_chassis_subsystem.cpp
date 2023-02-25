@@ -211,9 +211,10 @@ void SwerveChassisSubsystem::limitChassisPower()
         // compensation, a total of NUM_MOTORS * powerLimitFrac fractional limiting is divided
         // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
         // velocityErrorFrac for each motor.
+        
         float modifiedPowerLimitFrac =
             limitVal(NUM_MODULES * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
-        //modules[i].limitPower(modifiedPowerLimitFrac);
+        modules[i].limitPower(modifiedPowerLimitFrac);
     }
 }
 

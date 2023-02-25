@@ -41,6 +41,7 @@ SwerveModule::SwerveModule(
           CAN_BUS_MOTORS,
           config.azimuthMotorInverted,
           "Azimuth motor"),
+      config(config),
       drivePid(
           config.drivePidKp,
           config.drivePidKi,
@@ -49,8 +50,7 @@ SwerveModule::SwerveModule(
           config.drivePidMaxOutput),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
-      rotationVectorY(config.positionWithinChassisX),
-      config(config)
+      rotationVectorY(config.positionWithinChassisX)
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
@@ -187,8 +187,8 @@ float SwerveModule::rpmToMps(float rpm) const
 void SwerveModule::limitPower(float frac)
 {
     //TODO: is getOutputDesired what i want to do here
-    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
-    azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);
+    // driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
+    // azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);
 }
 
 }  // namespace chassis
