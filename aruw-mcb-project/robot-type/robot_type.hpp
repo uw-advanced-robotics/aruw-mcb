@@ -24,7 +24,7 @@
 // when building (assuming define has been passed in through command line)
 #if defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_WOODY) || defined(TARGET_DRONE) ||      \
     defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_BEEHIVE) || \
-    defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
+    defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER) || defined(TARGET_DART)
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 

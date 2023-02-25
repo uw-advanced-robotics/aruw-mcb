@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,9 +23,12 @@
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #else
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc
@@ -37,13 +40,20 @@ class DartDrivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    DartDrivers() : tap::Drivers() {}
+    DartDrivers()
+        : tap::Drivers(),
+          controlOperatorInterface(this),
+          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1)
+    {
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
 #else
 public:
-
+    control::ControlOperatorInterface controlOperatorInterface;
+    can::TurretMCBCanComm turretMCBCanCommBus1;
 #endif
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc
