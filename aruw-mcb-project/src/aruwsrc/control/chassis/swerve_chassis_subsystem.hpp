@@ -61,8 +61,8 @@ class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 public:
     SwerveChassisSubsystem(
         tap::Drivers* drivers,
-        SwerveModuleConfig config1 = SWERVE1_CONFIG,
-        SwerveModuleConfig config2 = SWERVE2_CONFIG,
+        SwerveModuleConfig config1 = DEFAULT_SWERVE_CONFIG,
+        SwerveModuleConfig config2 = DEFAULT_SWERVE_CONFIG,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
 
