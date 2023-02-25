@@ -21,7 +21,7 @@
 
 #include "mecanum_chassis_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 
@@ -32,7 +32,7 @@ namespace aruwsrc
 namespace chassis
 {
 MecanumChassisSubsystem::MecanumChassisSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,

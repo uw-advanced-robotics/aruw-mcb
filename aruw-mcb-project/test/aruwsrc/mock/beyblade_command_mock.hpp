@@ -24,7 +24,6 @@
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -34,9 +33,10 @@ class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
 {
 public:
     BeybladeCommandMock(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         chassis::MecanumChassisSubsystem *chassis,
-        aruwsrc::control::turret::TurretMotor *yawMotor);
+        aruwsrc::control::turret::TurretMotor *yawMotor,
+        aruwsrc::control::ControlOperatorInterface &operatorInterface);
 
     virtual ~BeybladeCommandMock();
 

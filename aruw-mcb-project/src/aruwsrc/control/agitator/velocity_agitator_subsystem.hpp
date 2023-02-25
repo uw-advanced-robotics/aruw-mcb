@@ -69,7 +69,7 @@ public:
      * agitator-specific parameters including motor ID and unjam parameters.
      */
     VelocityAgitatorSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         const tap::algorithms::SmoothPidConfig& pidParams,
         const VelocityAgitatorSubsystemConfig& agitatorSubsystemConfig);
 

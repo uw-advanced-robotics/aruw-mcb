@@ -62,7 +62,7 @@ public:
     };
     MODM_FLAGS8(TxCommandMsgBitmask);
 
-    TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus);
+    TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
     mockable void init();
@@ -160,7 +160,7 @@ private:
     {
     public:
         TurretMcbRxHandler(
-            aruwsrc::Drivers* drivers,
+            tap::Drivers* drivers,
             uint32_t id,
             tap::can::CanBus cB,
             TurretMCBCanComm* msgHandler,
@@ -193,7 +193,7 @@ private:
 
     const tap::can::CanBus canBus;
 
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
 
     ImuData currProcessingImuData;
     ImuData lastCompleteImuData;

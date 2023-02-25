@@ -28,11 +28,20 @@ namespace aruwsrc
 {
 namespace display
 {
-OledDisplay::OledDisplay(aruwsrc::Drivers *drivers)
+OledDisplay::OledDisplay(
+    tap::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    can::TurretMCBCanComm *turretMCBCanCommBus1,
+    can::TurretMCBCanComm *turretMCBCanCommBus2)
     : display(),
       viewStack(&display),
       buttonHandler(drivers),
-      splashScreen(&viewStack, drivers),
+      splashScreen(
+          &viewStack,
+          drivers,
+          visionCoprocessor,
+          turretMCBCanCommBus1,
+          turretMCBCanCommBus2),
       drivers(drivers)
 {
 }

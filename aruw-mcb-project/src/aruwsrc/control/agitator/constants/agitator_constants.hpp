@@ -21,11 +21,11 @@
 #define AGITATOR_CONSTANTS_HPP_
 
 #if defined(ALL_STANDARDS)
-#include "standard_agitator_constants.hpp"
+#include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
-#include "sentry_beehive_agitator_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_beehive_agitator_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
-#include "hero_agitator_constants.hpp"
+#include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_

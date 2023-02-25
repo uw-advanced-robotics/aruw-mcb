@@ -20,14 +20,14 @@
 #include "turret_mcb_can_comm.hpp"
 
 #include "tap/architecture/endianness_wrappers.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
 #include "modm/architecture/interface/can.hpp"
 
 namespace aruwsrc::can
 {
-TurretMCBCanComm::TurretMCBCanComm(aruwsrc::Drivers* drivers, tap::can::CanBus canBus)
+TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus)
     : canBus(canBus),
       drivers(drivers),
       currProcessingImuData{},
@@ -166,7 +166,7 @@ void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     uint32_t id,
     tap::can::CanBus cB,
     TurretMCBCanComm* msgHandler,

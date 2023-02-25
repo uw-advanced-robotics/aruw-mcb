@@ -34,8 +34,8 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc
@@ -51,7 +51,7 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-          oledDisplay(this),
+          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500)

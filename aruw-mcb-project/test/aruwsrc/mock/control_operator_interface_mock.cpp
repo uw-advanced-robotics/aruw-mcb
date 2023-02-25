@@ -21,7 +21,7 @@
 
 namespace aruwsrc::mock
 {
-ControlOperatorInterfaceMock::ControlOperatorInterfaceMock(aruwsrc::Drivers *drivers)
+ControlOperatorInterfaceMock::ControlOperatorInterfaceMock(tap::Drivers *drivers)
     : aruwsrc::control::ControlOperatorInterface(drivers)
 {
 }

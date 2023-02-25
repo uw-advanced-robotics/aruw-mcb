@@ -32,9 +32,11 @@ namespace aruwsrc
 namespace chassis
 {
 ChassisDriveCommand::ChassisDriveCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
     HolonomicChassisSubsystem* chassis)
     : drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -42,7 +44,10 @@ ChassisDriveCommand::ChassisDriveCommand(
 
 void ChassisDriveCommand::initialize() {}
 
-void ChassisDriveCommand::execute() { ChassisRelDrive::onExecute(drivers, chassis); }
+void ChassisDriveCommand::execute()
+{
+    ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+}
 
 void ChassisDriveCommand::end(bool) { chassis->setZeroRPM(); }
 

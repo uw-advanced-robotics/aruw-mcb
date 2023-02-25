@@ -36,11 +36,6 @@
 
 namespace aruwsrc
 {
-class Drivers;
-}
-
-namespace aruwsrc
-{
 namespace control
 {
 class HopperSubsystem : public tap::control::Subsystem
@@ -63,7 +58,7 @@ public:
      *                 a PWM value (between 0 and 1)
      */
     HopperSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::gpio::Pwm::Pin pwmPin,
         float open,
         float close,

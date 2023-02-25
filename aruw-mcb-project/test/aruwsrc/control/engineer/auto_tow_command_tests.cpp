@@ -20,9 +20,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/engineer/auto_tow_command.hpp"
 #include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/tow_subsystem_mock.hpp"
+#include "aruwsrc/robot/engineer/auto_tow_command.hpp"
 
 using aruwsrc::engineer::AutoTowCommand;
 using aruwsrc::mock::TowSubsystemMock;
