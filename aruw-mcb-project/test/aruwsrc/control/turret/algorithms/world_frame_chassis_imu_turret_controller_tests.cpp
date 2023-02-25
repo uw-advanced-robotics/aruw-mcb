@@ -19,10 +19,10 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace testing;
