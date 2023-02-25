@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 using namespace aruwsrc::mock;
 using namespace aruwsrc::chassis;
@@ -39,6 +40,7 @@ protected:
         : drivers(),
           chassis(&drivers),
           turret(&drivers),
+          controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
     {
     }
@@ -54,6 +56,7 @@ protected:
     tap::Drivers drivers;
     NiceMock<ChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
+    NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
     TurretMotorConfig turretConfig;
 };
@@ -67,17 +70,17 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 {
     ChassisAutorotateCommand cac(
         &drivers,
-        &(drivers.controlOperatorInterface),
+        &(controlOperatorInterface),
         &chassis,
         &turret.yawMotor);
 
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
-    ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
+    ON_CALL(controlOperatorInterface, getChassisXInput)
         .WillByDefault(Return(std::get<0>(GetParam())));
-    ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
+    ON_CALL(controlOperatorInterface, getChassisYInput)
         .WillByDefault(Return(std::get<1>(GetParam())));
-    ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
+    ON_CALL(controlOperatorInterface, getChassisRInput)
         .WillByDefault(Return(std::get<2>(GetParam())));
 
     EXPECT_CALL(
@@ -94,7 +97,7 @@ TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
 {
     ChassisAutorotateCommand cac(
         &drivers,
-        &(drivers.controlOperatorInterface),
+        &(controlOperatorInterface),
         &chassis,
         &turret.yawMotor);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
@@ -104,7 +107,7 @@ TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
     ChassisAutorotateCommand cac(
         &drivers,
-        &(drivers.controlOperatorInterface),
+        &(controlOperatorInterface),
         &chassis,
         &turret.yawMotor);
 
@@ -118,7 +121,7 @@ TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
     ChassisAutorotateCommand cac(
         &drivers,
-        &(drivers.controlOperatorInterface),
+        &(controlOperatorInterface),
         &chassis,
         &turret.yawMotor);
 
@@ -158,7 +161,7 @@ public:
                                  M_PI)
                                  .getValue()),
           cac(&drivers,
-              &(drivers.controlOperatorInterface),
+              &(controlOperatorInterface),
               &chassis,
               &turret.yawMotor,
               GetParam().chassisSymmetry),
@@ -172,11 +175,11 @@ public:
 
         ON_CALL(drivers.mpu6500, getGz).WillByDefault(Return(0));
 
-        ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
+        ON_CALL(controlOperatorInterface, getChassisXInput)
             .WillByDefault(Return(GetParam().x));
-        ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
+        ON_CALL(controlOperatorInterface, getChassisYInput)
             .WillByDefault(Return(GetParam().y));
-        ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
+        ON_CALL(controlOperatorInterface, getChassisRInput)
             .WillByDefault(Return(GetParam().r));
 
         turretConfig.limitMotorAngles = GetParam().yawLimited;

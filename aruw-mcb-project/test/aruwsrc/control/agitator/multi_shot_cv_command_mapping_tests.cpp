@@ -35,6 +35,9 @@
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+
 
 using namespace testing;
 using namespace aruwsrc::control::agitator;
