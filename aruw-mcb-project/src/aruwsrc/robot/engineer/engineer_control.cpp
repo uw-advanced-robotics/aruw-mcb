@@ -73,20 +73,20 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(tap::Drivers *drivers)
+void registerEngineerSubsystems(aruwsrc::EngineerDrivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(tap::Drivers *) {}
+void setDefaultEngineerCommands(aruwsrc::EngineerDrivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(tap::Drivers *) {}
+void startEngineerCommands(aruwsrc::EngineerDrivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(tap::Drivers *) {}
+void registerEngineerIoMappings(aruwsrc::EngineerDrivers *) {}
 
 void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers)
 {
