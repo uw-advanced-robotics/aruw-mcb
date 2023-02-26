@@ -46,10 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class SwerveChassisSubsystemTest : public Test
 {
 protected:
-    SwerveChassisSubsystemTest() : chassis(&drivers, 
-            SWERVE1_CONFIG,
-            SWERVE2_CONFIG
-            ) {}
+    SwerveChassisSubsystemTest() : chassis(&drivers) {}
 
     void SetUp() override
     {
