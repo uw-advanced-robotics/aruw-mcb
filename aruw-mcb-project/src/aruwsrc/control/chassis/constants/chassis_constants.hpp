@@ -32,23 +32,13 @@
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif
 
-#if defined(TARGET_SENTRY_BEEHIVE)
-#include "sentry_chassis_constants.hpp"
-#endif
-
 namespace aruwsrc::chassis
 {
 // hardware constants, not specific to any particular chassis
-static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR2;
-static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
-
-//TEMPORARY, for testing/getting it to build without mcb-lite
-static constexpr tap::motor::MotorId LEFT_FRONT_AZIMUTH_MOTOR_ID = tap::motor::MOTOR5;
-static constexpr tap::motor::MotorId LEFT_BACK_AZIMUTH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId RIGHT_FRONT_AZIMUTH_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr tap::motor::MotorId RIGHT_BACK_AZIMUTH_MOTOR_ID = tap::motor::MOTOR8;
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::chassis
