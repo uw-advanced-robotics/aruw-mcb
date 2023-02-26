@@ -187,7 +187,7 @@ float SwerveModule::rpmToMps(float rpm) const
 void SwerveModule::limitPower(float frac)
 {
     //TODO: is getOutputDesired what i want to do here
-    // driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
+    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
     // azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);
 }
 
