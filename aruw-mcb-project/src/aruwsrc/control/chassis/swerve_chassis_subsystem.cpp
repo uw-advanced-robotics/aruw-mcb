@@ -187,13 +187,13 @@ void SwerveChassisSubsystem::limitChassisPower()
     }
 
     // total velocity error for all wheels
-    float totalError = 0.0f;
+    /* float totalError = 0.0f;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         totalError += abs(modules[i].calculateTotalModuleError());
     }
 
-    bool totalErrorZero = compareFloatClose(0.0f, totalError, 1E-3);
+    bool totalErrorZero = compareFloatClose(0.0f, totalError, 1E-3); */
 
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
@@ -202,9 +202,9 @@ void SwerveChassisSubsystem::limitChassisPower()
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
         // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
         // values for all motors is 1.
-        float velocityErrorFrac = totalErrorZero
+        /* float velocityErrorFrac = totalErrorZero
                                       ? (1.0f / NUM_MODULES)
-                                      : (abs(modules[i].calculateTotalModuleError()) / totalError);
+                                      : (abs(modules[i].calculateTotalModuleError()) / totalError); */
         // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
         // based on the current velocity error. In this way, if the velocity error is large, the
         // motor requires more current to be directed to it than other motors. Without this
@@ -212,9 +212,9 @@ void SwerveChassisSubsystem::limitChassisPower()
         // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
         // velocityErrorFrac for each motor.
         
-        float modifiedPowerLimitFrac =
-            limitVal(NUM_MODULES * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
-        modules[i].limitPower(modifiedPowerLimitFrac);
+        /* float modifiedPowerLimitFrac =
+            limitVal(NUM_MODULES * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f); */
+        modules[i].limitPower(powerLimitFrac);
     }
 }
 
