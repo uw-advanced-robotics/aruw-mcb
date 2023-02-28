@@ -43,7 +43,11 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/swerve_module_mock.hpp"
+using Module = testing::NiceMock<aruwsrc::mock::SwerveModuleMock>;
+#else
+using Module = aruwsrc::chassis::SwerveModule;
 #endif
+
 
 
 namespace aruwsrc
@@ -74,22 +78,6 @@ public:
         SwerveModuleConfig config4,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
     );
-
-    // SwerveChassisSubsystem(
-    //     tap::Drivers* drivers,
-    //     SwerveModule& module1,
-    //     SwerveModule& module2,
-    //     tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    // );
-
-    // SwerveChassisSubsystem(
-    //     tap::Drivers* drivers,
-    //     SwerveModule& module1,
-    //     SwerveModule& module2,
-    //     SwerveModule& module3,
-    //     SwerveModule& module4,
-    //     tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    // );
 
     void initialize() override;
 
@@ -129,12 +117,12 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     const unsigned int NUM_MODULES{4};
-    std::array<testing::NiceMock<aruwsrc::mock::SwerveModuleMock>, 4> modules;
+    std::array<Module, 4> modules;
 private:
 #else
 private:
     const unsigned int NUM_MODULES {4};
-    std::array<chassis::SwerveModule, 4> modules;
+    std::array<Module, 4> modules;
 #endif
 
     /**
