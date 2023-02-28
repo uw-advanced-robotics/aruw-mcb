@@ -118,14 +118,10 @@ public:
     void processMessage(const modm::can::Message& message) override;
 
     /**
-     * Set the desired output for the motor. The meaning of this value is motor
-     * controller specific.
+     * Set the desired output for the motor. The meaning is a current value between -60 and 60 A, in mA (AKA -60,000 to 60,000)
      *
-     * @param[in] desiredOutput the desired motor output. Limited to the range of a 16-bit int.
+     * @param[in] desiredOutput the desired motor output. Limited to the range of -60 to 60 A in mA
      *
-     * @note: `desiredOutput` is cast to an int16_t and limited to an int16_t's range! The
-     *      user should make sure their value is in range. The declaration takes an int32_t
-     *      in hopes to mitigate overflow.
      */
     void setDesiredOutput(int32_t desiredOutput) override;
 
@@ -205,7 +201,7 @@ private:
 
     tap::can::CanBus motorCanBus;
 
-    int16_t desiredOutput;
+    int32_t desiredOutput;
 
     int16_t shaftRPM;
 

@@ -22,9 +22,9 @@
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
+#include "aruwsrc/drivers.hpp"
 #include "modm/architecture/interface/assert.h"
 #include "modm/architecture/interface/can_message.hpp"
 
@@ -58,68 +58,38 @@ void TMotorTxHandler::addMotorToManager(Tmotor_AK809* motor)
 void TMotorTxHandler::encodeAndSendCanData()
 {
     // set up new can messages to be sent via CAN bus 1 and 2
-    modm::can::Message can1MessageLow(
-        CAN_DJI_LOW_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH,
+    modm::can::Message can1Message(
+        CAN_TMOTOR_LOW_IDENTIFIER,
+        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
         0,
-        false);
-    modm::can::Message can1MessageHigh(
-        CAN_DJI_HIGH_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH,
+        true);
+    modm::can::Message can2Message(
+        CAN_TMOTOR_LOW_IDENTIFIER,
+        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
         0,
-        false);
-    modm::can::Message can2MessageLow(
-        CAN_DJI_LOW_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH,
-        0,
-        false);
-    modm::can::Message can2MessageHigh(
-        CAN_DJI_HIGH_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH,
-        0,
-        false);
+        true);
+    bool can1ValidMotorMessage = false;
+    bool can2ValidMotorMessage = false;
 
-    bool can1ValidMotorMessageLow = false;
-    bool can1ValidMotorMessageHigh = false;
-    bool can2ValidMotorMessageLow = false;
-    bool can2ValidMotorMessageHigh = false;
+    serializeMotorStoreSendData(can1MotorStore, &can1Message, &can1ValidMotorMessage);
 
-    serializeMotorStoreSendData(
-        can1MotorStore,
-        &can1MessageLow,
-        &can1MessageHigh,
-        &can1ValidMotorMessageLow,
-        &can1ValidMotorMessageHigh);
-
-    serializeMotorStoreSendData(
-        can2MotorStore,
-        &can2MessageLow,
-        &can2MessageHigh,
-        &can2ValidMotorMessageLow,
-        &can2ValidMotorMessageHigh);
+    serializeMotorStoreSendData(can2MotorStore, &can2Message, &can2ValidMotorMessage);
 
     bool messageSuccess = true;
 
     if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
     {
-        if (can1ValidMotorMessageLow)
+        if (can1ValidMotorMessage)
         {
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageLow);
-        }
-        if (can1ValidMotorMessageHigh)
-        {
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageHigh);
+            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, can1Message);
         }
     }
     if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS2))
     {
-        if (can2ValidMotorMessageLow)
+        if (can2ValidMotorMessage)
         {
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageLow);
-        }
-        if (can2ValidMotorMessageHigh)
-        {
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageHigh);
+            debugmessage = can2Message;
+            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, can2Message);
         }
     }
 
@@ -131,27 +101,17 @@ void TMotorTxHandler::encodeAndSendCanData()
 
 void TMotorTxHandler::serializeMotorStoreSendData(
     Tmotor_AK809** canMotorStore,
-    modm::can::Message* messageLow,
-    modm::can::Message* messageHigh,
-    bool* validMotorMessageLow,
-    bool* validMotorMessageHigh)
+    modm::can::Message* message,
+    bool* validMotorMessage)
 {
     for (int i = 0; i < DJI_MOTORS_PER_CAN; i++)
     {
         const Tmotor_AK809* const motor = canMotorStore[i];
         if (motor != nullptr)
         {
-            if (TMOTOR_TO_NORMALIZED_ID(motor->getMotorIdentifier()) <=
-                TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR4))
-            {
-                motor->serializeCanSendData(messageLow);
-                *validMotorMessageLow = true;
-            }
-            else
-            {
-                motor->serializeCanSendData(messageHigh);
-                *validMotorMessageHigh = true;
-            }
+            message->setIdentifier((uint32_t)i |((uint32_t)0x01 << 8));  // sets the CAN ID as well as setting "CURRENT LOOP MODE"
+            motor->serializeCanSendData(message);
+            *validMotorMessage = true;
         }
     }
 }
@@ -182,12 +142,14 @@ void TMotorTxHandler::removeFromMotorManager(const Tmotor_AK809& motor, Tmotor_A
 Tmotor_AK809 const* TMotorTxHandler::getCan1Motor(TMotorId motorId)
 {
     uint32_t index = TMOTOR_TO_NORMALIZED_ID(motorId);
-    return index > TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR8) ? nullptr : can1MotorStore[index];
+    return index > TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR8) ? nullptr
+                                                                   : can1MotorStore[index];
 }
 
 Tmotor_AK809 const* TMotorTxHandler::getCan2Motor(TMotorId motorId)
 {
     uint32_t index = TMOTOR_TO_NORMALIZED_ID(motorId);
-    return index > TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR8) ? nullptr : can2MotorStore[index];
+    return index > TMOTOR_TO_NORMALIZED_ID(aruwsrc::motor::MOTOR8) ? nullptr
+                                                                   : can2MotorStore[index];
 }
 }  // namespace aruwsrc::motor

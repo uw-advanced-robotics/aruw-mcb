@@ -69,11 +69,9 @@ public:
     /** Number of motors on each CAN bus. */
     static constexpr int DJI_MOTORS_PER_CAN = 8;
     /** CAN message length of each motor control message. */
-    static constexpr int CAN_DJI_MESSAGE_SEND_LENGTH = 8;
-    /** CAN message identifier for "low" segment (low 4 CAN motor IDs) of control message. */
-    static constexpr uint32_t CAN_DJI_LOW_IDENTIFIER = 0X200;
-    /** CAN message identifier for "high" segment (high 4 CAN motor IDs) of control message. */
-    static constexpr uint32_t CAN_DJI_HIGH_IDENTIFIER = 0X1FF;
+    static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
+    /** CAN message identifier*/
+    static constexpr uint32_t CAN_TMOTOR_LOW_IDENTIFIER = 0X00;
 
     TMotorTxHandler(aruwsrc::Drivers* drivers) : drivers(drivers) {}
     mockable ~TMotorTxHandler() = default;
@@ -111,12 +109,13 @@ private:
 
     void serializeMotorStoreSendData(
         Tmotor_AK809** canMotorStore,
-        modm::can::Message* messageLow,
-        modm::can::Message* messageHigh,
-        bool* validMotorMessageLow,
-        bool* validMotorMessageHigh);
+        modm::can::Message* message,
+        bool* validMotorMessage);
 
     void removeFromMotorManager(const Tmotor_AK809& motor, Tmotor_AK809** motorStore);
+    
+    modm::can::Message debugmessage;
+
 };
 
 }  // namespace aruwsrc::motor

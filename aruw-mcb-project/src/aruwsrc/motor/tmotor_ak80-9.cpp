@@ -78,8 +78,7 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
 
 void Tmotor_AK809::setDesiredOutput(int32_t desiredOutput)
 {
-    int16_t desOutputNotInverted =
-        static_cast<int16_t>(tap::algorithms::limitVal<int32_t>(desiredOutput, SHRT_MIN, SHRT_MAX));
+    int32_t desOutputNotInverted = tap::algorithms::limitVal<int32_t>(desiredOutput, -60000, 60000);
     this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
 }
 
@@ -95,13 +94,10 @@ bool Tmotor_AK809::isMotorOnline() const
 
 void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
 {
-    int id = TMOTOR_TO_NORMALIZED_ID(this->getMotorIdentifier());  // number between 0 and 7
-    // this method assumes you have choosen the correct message
-    // to send the data in. Is blind to message type and is a private method
-    // that I use accordingly.
-    id %= 4;
-    txMessage->data[2 * id] = this->getOutputDesired() >> 8;
-    txMessage->data[2 * id + 1] = this->getOutputDesired() & 0xFF;
+    txMessage->data[0] = this->getOutputDesired() >> 24;
+    txMessage->data[1] = this->getOutputDesired() >> 16;
+    txMessage->data[2] = this->getOutputDesired() >> 8;
+    txMessage->data[3] = this->getOutputDesired();
 }
 
 // getter functions

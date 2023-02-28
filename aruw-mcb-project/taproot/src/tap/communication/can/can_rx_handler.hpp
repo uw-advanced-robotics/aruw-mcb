@@ -79,8 +79,8 @@ class CanRxListener;
 class CanRxHandler
 {
 public:
-    static constexpr uint16_t MIN_CAN_ID = 0x1E4;
-    static constexpr uint16_t NUM_CAN_IDS = 64;
+    static constexpr uint16_t MIN_CAN_ID = 0x000;
+    static constexpr uint16_t NUM_CAN_IDS = 0x224;
     static constexpr uint16_t MAX_CAN_ID = MIN_CAN_ID + NUM_CAN_IDS;
 
     CanRxHandler(Drivers* drivers);

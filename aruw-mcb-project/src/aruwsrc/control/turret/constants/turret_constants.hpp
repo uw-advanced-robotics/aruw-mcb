@@ -30,6 +30,9 @@
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
 #include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
+#elif defined(TARGET_TESTBED)
+#include "aruwsrc/robot/testbed/testbed_constants.hpp"
 #endif
+
 
 #endif  // TURRET_CONSTANTS_HPP_

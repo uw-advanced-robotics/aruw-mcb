@@ -85,15 +85,21 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+#if defined(TARGET_TESTBED)
+            PROFILE(drivers->profiler, drivers->tMotorTxHandler.encodeAndSendCanData, ());
+#endif
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
+#ifndef TARGET_TESTBED
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
         }
         modm::delay_us(10);
     }
@@ -112,10 +118,13 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
-    drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+#ifndef TARGET_TESTBED
     drivers->visionCoprocessor.initializeCV();
+
+    drivers->oledDisplay.initialize();
+#endif
     drivers->mpu6500TerminalSerialHandler.init();
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
     drivers->turretMCBCanCommBus1.init();
@@ -130,7 +139,9 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
+#ifndef TARGET_TESTBED
     drivers->visionCoprocessor.updateSerial();
+    drivers->oledDisplay.updateDisplay();F
+#endif
 }
