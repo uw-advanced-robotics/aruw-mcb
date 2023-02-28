@@ -71,7 +71,7 @@
         "SConstruct": "python",
         "SConscript": "python"
     },
-    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
         "aruw-mcb-project/taproot/src",
         "aruw-mcb-project/src",
@@ -87,11 +87,7 @@
     "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
     "[markdown]": {
         "editor.wordWrap": "off",
-        "editor.quickSuggestions": {
-            "comments": "off",
-            "strings": "off",
-            "other": "off"
-        },
+        "editor.quickSuggestions": false,
         "editor.rulers": [
             100
         ]
