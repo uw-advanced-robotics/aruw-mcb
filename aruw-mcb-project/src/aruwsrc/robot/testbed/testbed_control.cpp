@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -53,7 +53,6 @@ using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace tap::control;
 using namespace aruwsrc::control;
-using namespace tap::communication::serial;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -63,12 +62,9 @@ using namespace tap::communication::serial;
  */
 aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
 
-namespace testbed
+namespace testbed_control
 {
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
-{
-    return drivers()->turretMCBCanCommBus1;
-}
+
 
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::motor::Tmotor_AK809 legmotorLF(
@@ -85,36 +81,8 @@ aruwsrc::motor::Tmotor_AK809 legmotorLR(
     false,
     "LeftRear Leg");
 
-// aruwsrc::control::turret::TurretMotor yawMotor(&legmotorLF, YAW_MOTOR_CONFIG);
-// aruwsrc::control::turret::TurretMotor pitchMotor(&legmotorLR, PITCH_MOTOR_CONFIG);
 
-aruwsrc::control::turret::HeroTurretSubsystem turret(
-    drivers(),
-    &legmotorLF,
-    &legmotorLR,
-    aruwsrc::control::turret::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
 
-aruwsrc::control::turret::algorithms::
-    ChassisFramePitchTurretController chassisFramePitchTurretController(
-        turret.pitchMotor,
-        TURRET_PID_CONFIG);
-
-aruwsrc::control::turret::algorithms::
-    ChassisFrameYawTurretController chassisFrameYawTurretController(
-        turret.yawMotor,
-        TURRET_PID_CONFIG);
-
-/* define command mappings --------------------------------------------------*/
-aruwsrc::control::turret::user::TurretUserControlCommand turretUserCommand(
-    drivers(),
-    drivers()->controlOperatorInterface,
-    &turret,
-    &chassisFrameYawTurretController,
-    &chassisFramePitchTurretController,
-    aruwsrc::control::turret::USER_YAW_INPUT_SCALAR,
-    aruwsrc::control::turret::USER_PITCH_INPUT_SCALAR);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -122,35 +90,40 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerTestbedSubsystems(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&turret);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { turret.initialize(); }
+void initializeSubsystems()
+{
+}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(aruwsrc::Drivers *)
+void setDefaultTestbedCommands(aruwsrc::Drivers *)
 {
-    turret.setDefaultCommand(&turretUserCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(aruwsrc::Drivers *drivers) {}
+void startTestbedCommands(aruwsrc::Drivers *drivers)
+{
+}
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(aruwsrc::Drivers *drivers) {}
-}  // namespace testbed
+void registerTestbedIoMappings(aruwsrc::Drivers *drivers)
+{
+}
+}  // namespace testbed_control
 
 namespace aruwsrc::control
 {
 void initSubsystemCommands(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.setSafeDisconnectFunction(&testbed::remoteSafeDisconnectFunction);
-    testbed::initializeSubsystems();
-    testbed::registerTestbedSubsystems(drivers);
-    testbed::setDefaultStandardCommands(drivers);
-    testbed::startStandardCommands(drivers);
-    testbed::registerStandardIoMappings(drivers);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &testbed_control::remoteSafeDisconnectFunction);
+    testbed_control::initializeSubsystems();
+    testbed_control::registerTestbedSubsystems(drivers);
+    testbed_control::setDefaultTestbedCommands(drivers);
+    testbed_control::startTestbedCommands(drivers);
+    testbed_control::registerTestbedIoMappings(drivers);
 }
 }  // namespace aruwsrc::control
 
