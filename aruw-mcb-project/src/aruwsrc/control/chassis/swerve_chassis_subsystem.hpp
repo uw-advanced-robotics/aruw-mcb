@@ -93,6 +93,8 @@ public:
 
     void setZeroRPM() override;
 
+    Module* getModule(unsigned int i);
+
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
      */

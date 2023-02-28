@@ -81,6 +81,13 @@ void SwerveChassisSubsystem::setZeroRPM()
         modules[i].setZeroRPM();
 }
 
+Module* SwerveChassisSubsystem::getModule(unsigned int i)
+{
+    if(i >= NUM_MODULES)
+        return nullptr;
+    return &modules[i];
+}
+
 
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
