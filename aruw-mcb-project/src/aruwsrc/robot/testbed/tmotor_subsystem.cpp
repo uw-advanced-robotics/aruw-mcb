@@ -21,35 +21,30 @@
 
 #include "tmotor_subsystem.hpp"
 
+#include <cassert>
+
 namespace aruwsrc::testbed
 {
-    TMotorSubsystem::TMotorSubsystem(
-        tap::Drivers* drivers,
-        aruwsrc::motor::Tmotor_AK809& tmotor
-    ) : tap::control::Subsystem(drivers),
-        drivers(drivers),
-        tmotor(tmotor),
-        desiredOutput(0)
-    {
-        assert(drivers != nullptr);
-        assert(tmotor != nullptr);
-    }
-
-    void TMotorSubsystem::initialize()
-    {
-        desiredOutput = 0;
-        tmotor.setDesiredOutput(0);
-    }
-
-    void TMotorSubsystem::refresh()
-    {
-        tmotor.setDesiredOutput(desiredOutput);
-    }
-
-    void TMotorSubsystem::onHardwareTestStart()
-    {
-        tmotor.setDesiredOutput(0);
-    }
+TMotorSubsystem::TMotorSubsystem(tap::Drivers* drivers, aruwsrc::motor::Tmotor_AK809* tmotor)
+    : tap::control::Subsystem(drivers),
+      drivers(drivers),
+      tmotor(tmotor),
+      desiredOutput(0)
+{
+    assert(drivers != nullptr);
+    assert(tmotor != nullptr);
 }
+
+void TMotorSubsystem::initialize()
+{
+    desiredOutput = 0;
+    tmotor->initialize();
+    tmotor->setDesiredOutput(0);
+}
+
+void TMotorSubsystem::refresh() { tmotor->setDesiredOutput(desiredOutput); }
+
+void TMotorSubsystem::onHardwareTestStart() { tmotor->setDesiredOutput(0); }
+}  // namespace aruwsrc::testbed
 
 #endif  // TARGET_TESTBED

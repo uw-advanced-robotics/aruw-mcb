@@ -70,8 +70,6 @@ public:
     static constexpr int DJI_MOTORS_PER_CAN = 8;
     /** CAN message length of each motor control message. */
     static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
-    /** CAN message identifier*/
-    static constexpr uint32_t CAN_TMOTOR_LOW_IDENTIFIER = 0X00;
 
     TMotorTxHandler(aruwsrc::Drivers* drivers) : drivers(drivers) {}
     mockable ~TMotorTxHandler() = default;
@@ -108,7 +106,7 @@ private:
     void addMotorToManager(Tmotor_AK809** canMotorStore, Tmotor_AK809* const motor);
 
     void serializeMotorStoreSendData(
-        Tmotor_AK809** canMotorStore,
+        Tmotor_AK809* motor,
         modm::can::Message* message,
         bool* validMotorMessage);
 

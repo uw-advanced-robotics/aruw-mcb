@@ -46,14 +46,14 @@ namespace aruwsrc::motor
  */
 enum TMotorId : uint32_t
 {
-    MOTOR1 = 0X001,
-    MOTOR2 = 0x002,
-    MOTOR3 = 0x003,
-    MOTOR4 = 0x004,
-    MOTOR5 = 0x005,
-    MOTOR6 = 0x006,
-    MOTOR7 = 0x007,
-    MOTOR8 = 0x008,
+    MOTOR1 = 0X01,
+    MOTOR2 = 0x02,
+    MOTOR3 = 0x03,
+    MOTOR4 = 0x04,
+    MOTOR5 = 0x05,
+    MOTOR6 = 0x06,
+    MOTOR7 = 0x07,
+    MOTOR8 = 0x08,
 };
 
 /**
@@ -184,6 +184,8 @@ public:
     }
 
 private:
+
+    modm::can::Message debugMessage;
     // wait time before the motor is considered disconnected, in milliseconds
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
 

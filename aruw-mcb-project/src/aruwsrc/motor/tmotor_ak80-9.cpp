@@ -56,7 +56,8 @@ void Tmotor_AK809::initialize()
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
-    if (message.getIdentifier() != Tmotor_AK809::getMotorIdentifier())
+    debugMessage = message;
+    if ((message.getIdentifier() - 0x2900) != Tmotor_AK809::getMotorIdentifier())
     {
         return;
     }

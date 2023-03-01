@@ -93,6 +93,9 @@ public:
      */
     static inline uint16_t lookupTableIndexForCanId(uint16_t canId)
     {
+        if (canId > NUM_CAN_IDS) {
+            canId -= 0x2900;
+        }
         if (canId < MIN_CAN_ID)
         {
             return NUM_CAN_IDS;

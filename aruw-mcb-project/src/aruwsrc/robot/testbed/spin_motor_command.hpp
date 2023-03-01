@@ -32,8 +32,8 @@ class SpinMotorCommand : public tap::control::Command
 public:
     SpinMotorCommand(
         tap::Drivers* drivers,
-        TMotorSubsystem& tmotorSubsystem,
-        float speed
+        TMotorSubsystem* tmotorSubsystem,
+        int16_t speed
     );
 
     void initialize() override;
@@ -48,8 +48,8 @@ public:
 
 private:
     tap::Drivers* drivers;
-    TMotorSubsystem& tmotorSubsystem;
-    float speed;
+    TMotorSubsystem* tmotorSubsystem;
+    int16_t speed;
 };   // class SpinMotorCommand
 }   // namespace aruwsrc::testbed
 

@@ -22,35 +22,27 @@
 
 namespace aruwsrc::testbed
 {
-    SpinMotorCommand::SpinMotorCommand(
-        tap::Drivers* drivers,
-        TMotorSubsystem& tmotorSubsystem,
-        float speed
-    ) : drivers(drivers),
-        tmotorSubsystem(tmotorSubsystem),
-        speed(speed)
-    {
-        addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(tmotorSubsystem));
-    }
+SpinMotorCommand::SpinMotorCommand(
+    tap::Drivers* drivers,
+    TMotorSubsystem* tmotorSubsystem,
+    int16_t speed)
+    : drivers(drivers),
+      tmotorSubsystem(tmotorSubsystem),
+      speed(speed)
+{
+    addSubsystemRequirement(tmotorSubsystem);
+}
 
-    void SpinMotorCommand::initialize()
-    {
-        tmotorSubsystem.setDesiredOutput(speed);
-    }
+void SpinMotorCommand::initialize() { tmotorSubsystem->setDesiredOutput(speed); }
 
-    void SpinMotorCommand::execute()
-    {
-        return;
-    }
+void SpinMotorCommand::execute()
+{
+    tmotorSubsystem->setDesiredOutput(speed);
+    return;
+}
 
-    void SpinMotorCommand::end(bool)
-    {
-        tmotorSubsystem.setDesiredOutput(0);
-    }
+void SpinMotorCommand::end(bool) { tmotorSubsystem->setDesiredOutput(0); }
 
-    bool SpinMotorCommand::isFinished() const
-    {
-        return false;
-    }
-}   // namespace aruwsrc::testbed
+bool SpinMotorCommand::isFinished() const { return false; }
+}  // namespace aruwsrc::testbed
 #endif  // TARGET_TESTBED

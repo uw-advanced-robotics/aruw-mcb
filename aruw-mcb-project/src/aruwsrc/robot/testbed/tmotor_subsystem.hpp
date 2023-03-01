@@ -34,14 +34,14 @@ class TMotorSubsystem : public tap::control::Subsystem
 public:
     explicit TMotorSubsystem(
         tap::Drivers* drivers,
-        aruwsrc::motor::Tmotor_AK809& tmotor
+        aruwsrc::motor::Tmotor_AK809* tmotor
     );
 
     void initialize() override;
 
     void refresh() override;
 
-    const char* getName() override { return "Tmotor"; }
+    const char* getName() override { return tmotor->getName(); }
 
     void onHardwareTestStart() override;
 
@@ -49,7 +49,7 @@ public:
 
 private:
     tap::Drivers* drivers;
-    aruwsrc::motor::Tmotor_AK809& tmotor;
+    aruwsrc::motor::Tmotor_AK809* tmotor;
     int16_t desiredOutput;
 };
 }

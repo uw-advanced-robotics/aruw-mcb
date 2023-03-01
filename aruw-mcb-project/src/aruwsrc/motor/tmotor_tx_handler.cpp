@@ -57,62 +57,64 @@ void TMotorTxHandler::addMotorToManager(Tmotor_AK809* motor)
 
 void TMotorTxHandler::encodeAndSendCanData()
 {
-    // set up new can messages to be sent via CAN bus 1 and 2
-    modm::can::Message can1Message(
-        CAN_TMOTOR_LOW_IDENTIFIER,
-        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
-        0,
-        true);
-    modm::can::Message can2Message(
-        CAN_TMOTOR_LOW_IDENTIFIER,
-        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
-        0,
-        true);
-    bool can1ValidMotorMessage = false;
-    bool can2ValidMotorMessage = false;
-
-    serializeMotorStoreSendData(can1MotorStore, &can1Message, &can1ValidMotorMessage);
-
-    serializeMotorStoreSendData(can2MotorStore, &can2Message, &can2ValidMotorMessage);
-
-    bool messageSuccess = true;
-
-    if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
+    for (int i = 0; i < DJI_MOTORS_PER_CAN; i++)
     {
-        if (can1ValidMotorMessage)
+        // set up new can messages to be sent via CAN bus 1 and 2
+        modm::can::Message can1Message(
+            (uint32_t)(i + 1) |
+                ((uint32_t)0x01 << 8),  // the 01 in LSByte 2 sets motor to current mode
+            CAN_TMOTOR_MESSAGE_SEND_LENGTH,
+            0,
+            true);
+        can1Message.setRemoteTransmitRequest(false);
+        modm::can::Message can2Message(
+            (uint32_t)(i + 1) |
+                ((uint32_t)0x01 << 8),  // the 01 in LSByte 2 sets motor to current mode
+            CAN_TMOTOR_MESSAGE_SEND_LENGTH,
+            0,
+            true);
+        can2Message.setRemoteTransmitRequest(false);
+
+        bool can1ValidMotorMessage = false;
+        bool can2ValidMotorMessage = false;
+
+        serializeMotorStoreSendData(can1MotorStore[i], &can1Message, &can1ValidMotorMessage);
+        serializeMotorStoreSendData(can2MotorStore[i], &can2Message, &can2ValidMotorMessage);
+
+        bool messageSuccess = true;
+
+        if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1))
         {
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, can1Message);
+            if (can1ValidMotorMessage)
+            {
+                messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, can1Message);
+            }
         }
-    }
-    if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS2))
-    {
-        if (can2ValidMotorMessage)
+        if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS2))
         {
-            debugmessage = can2Message;
-            messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, can2Message);
+            if (can2ValidMotorMessage)
+            {
+                messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, can2Message);
+            }
         }
-    }
 
-    if (!messageSuccess)
-    {
-        RAISE_ERROR(drivers, "sendMessage failure");
+        if (!messageSuccess)
+        {
+            RAISE_ERROR(drivers, "sendMessage failure");
+        }
     }
 }
 
 void TMotorTxHandler::serializeMotorStoreSendData(
-    Tmotor_AK809** canMotorStore,
+    Tmotor_AK809* motor,
     modm::can::Message* message,
     bool* validMotorMessage)
 {
-    for (int i = 0; i < DJI_MOTORS_PER_CAN; i++)
+    if (motor != nullptr)
     {
-        const Tmotor_AK809* const motor = canMotorStore[i];
-        if (motor != nullptr)
-        {
-            message->setIdentifier((uint32_t)i |((uint32_t)0x01 << 8));  // sets the CAN ID as well as setting "CURRENT LOOP MODE"
-            motor->serializeCanSendData(message);
-            *validMotorMessage = true;
-        }
+        motor->serializeCanSendData(message);
+        *validMotorMessage = true;
+        this->debugmessage = *message;
     }
 }
 
