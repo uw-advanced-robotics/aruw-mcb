@@ -120,6 +120,11 @@ public:
     float mpsToRpm(float mps) const;
     float rpmToMps(float rpm) const;
 
+    //in radians
+    inline float getRotationSetpoint() {return rotationSetpoint;}
+    //in rpm
+    inline float getSpeedSetpoint() {return speedSetpointRPM;}
+
 // motors
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
@@ -143,7 +148,7 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float preScaledSpeedSetpoint{0}, rotationSetpointRadians{0}, speedSetpointRPM, rotationSetpoint;
+    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM, rotationSetpoint;
     
     //handles wrapping desired rotation and reversing module (in radians, will always be a multiple of PI)
     float rotationOffset{0};

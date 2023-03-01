@@ -108,18 +108,18 @@ float SwerveModule::calculate(float x, float y, float r)
         float newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
         
         //normal angle wrapping
-        if (abs(newRotationSetpointRadians - rotationSetpointRadians) > M_PI)
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
-            rotationOffset -= getSign(newRotationSetpointRadians - rotationSetpointRadians) * M_TWOPI;//TWOPI == 2*PI
+            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_TWOPI;//TWOPI == 2*PI
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
         
         //reverse module if it's a smaller azimuth rotation to do so
-        if(abs(newRotationSetpointRadians - rotationSetpointRadians) > M_PI_2)
+        if(abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
         {
-            rotationOffset -= getSign(newRotationSetpointRadians - rotationSetpointRadians) * M_PI;
+            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
         }
-        rotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
+        preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint = mpsToRpm(sqrtf(moveVectorX*moveVectorX + moveVectorY*moveVectorY));
 
@@ -132,7 +132,7 @@ float SwerveModule::calculate(float x, float y, float r)
 
 void SwerveModule::scaleAndSetDesiredState(float scaleCoeff)
 {
-    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, rotationSetpointRadians);
+    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, preScaledRotationSetpoint);
 }
 
 void SwerveModule::setDesiredState(float driveRpm, float radianTarget)

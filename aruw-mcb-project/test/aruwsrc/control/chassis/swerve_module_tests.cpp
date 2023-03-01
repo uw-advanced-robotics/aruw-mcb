@@ -87,3 +87,30 @@ TEST_F(SwerveModuleTest, getDriveVelocity)
     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
 }
+
+TEST_F(SwerveModuleTest, simpleDirectionChange)
+{
+    EXPECT_NEAR(0, module.getRotationSetpoint(), 1E-3);
+    module.calculate(1, 1, 0);
+    module.scaleAndSetDesiredState(1);
+    EXPECT_NEAR(M_PI_4, module.getRotationSetpoint(), 1E-3);
+    EXPECT_FALSE(module.getSpeedSetpoint() < 0);
+
+    module.calculate(0, 1, 0);
+    module.scaleAndSetDesiredState(1);
+    EXPECT_NEAR(M_PI_2, module.getRotationSetpoint(), 1E-3);
+    EXPECT_FALSE(module.getSpeedSetpoint() < 0);
+}
+
+TEST_F(SwerveModuleTest, reversingDirectionChange)
+{
+    module.calculate(1, 1, 0);
+    module.scaleAndSetDesiredState(1);
+    EXPECT_NEAR(M_PI_4, module.getRotationSetpoint(), 1E-3);
+    EXPECT_FALSE(module.getSpeedSetpoint() < 0);
+
+    module.calculate(0, -1, 0);
+    module.scaleAndSetDesiredState(1);
+    EXPECT_NEAR(M_PI_2, module.getRotationSetpoint(), 1E-3);
+    EXPECT_TRUE(module.getSpeedSetpoint() < 0);
+}
