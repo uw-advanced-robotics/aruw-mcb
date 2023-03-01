@@ -44,6 +44,8 @@
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/imu/wheel_imu_calibrate_command.hpp"
+#include "aruwsrc/control/imu/calibrate_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -355,6 +357,11 @@ ClientDisplayCommand clientDisplayCommand(
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
+aruwsrc::control::imu::CalibrateSubsystem calibrateSubsystem(drivers(), imuCalibrateCommand);
+aruwsrc::control::imu::WheelImuCalibrateCommand wheelImuCalibrateCommand(
+    calibrateSubsystem, 
+    *drivers(),
+    drivers()->controlOperatorInterface);
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
@@ -473,6 +480,7 @@ void registerStandardSubsystems(aruwsrc::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&calibrateSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -487,6 +495,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    calibrateSubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -496,6 +505,7 @@ void setDefaultStandardCommands(aruwsrc::Drivers *)
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     buzzer.setDefaultCommand(&lowBatteryCommand);
+    calibrateSubsystem.setDefaultCommand(&wheelImuCalibrateCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
