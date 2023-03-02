@@ -19,7 +19,7 @@
 
 #ifndef ENV_UNIT_TESTS
 
-#include "aruw-mcb-project/src/aruwsrc/robot/drivers_singleton.hpp"
+#include "drivers_singleton.hpp"
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
