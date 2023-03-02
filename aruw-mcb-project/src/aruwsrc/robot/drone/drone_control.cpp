@@ -21,7 +21,10 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 
-#include "drone_drivers_singleton.hpp"
+#include "aruwsrc/robot/drivers_singleton.hpp"
+#include "aruwsrc/robot/drone/drone_drivers.hpp"
+
+using namespace aruwsrc::drone;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -29,7 +32,7 @@
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::droneDriversFunc drivers = aruwsrc::DoNotUse_getDroneDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace drone_control
 {
@@ -44,21 +47,21 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(aruwsrc::DroneDrivers *) {}
+void registerDroneSubsystems(Drivers *) {}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(aruwsrc::DroneDrivers *) {}
+void setDefaultDroneCommands(Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(aruwsrc::DroneDrivers *) {}
+void startDroneCommands(Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(aruwsrc::DroneDrivers *) {}
+void registerDroneIoMappings(Drivers *) {}
 }  // namespace drone_control
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwsrc::DroneDrivers *drivers)
+void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &drone_control::remoteSafeDisconnectFunction);

@@ -17,14 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_DRIVERS_SINGLETON_HPP_
-#define STANDARD_DRIVERS_SINGLETON_HPP_
+#ifndef DRIVERS_SINGLETON_HPP_
+#define DRIVERS_SINGLETON_HPP_
 
 #ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/robot/standard/standard_drivers.hpp"
 
-namespace aruwsrc
+#if defined(ALL_STANDARDS)
+#include "aruwsrc/robot/standard/standard_drivers.hpp"
+namespace aruwsrc::standard
+#elif defined(ALL_SENTRIES)
+#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
+namespace aruwsrc::sentry
+#elif defined(TARGET_HERO_CYCLONE)
+#include "aruwsrc/robot/hero/hero_drivers.hpp"
+namespace aruwsrc::hero
+#elif defined(TARGET_DRONE)
+#include "aruwsrc/robot/drone/drone_drivers.hpp"
+namespace aruwsrc::drone
+#elif defined(TARGET_ENGINEER)
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+namespace aruwsrc::engineer
+#endif
 {
 /**
  * @return The singleton instance of the Drivers class. This is the only instance of the
@@ -33,10 +47,10 @@ namespace aruwsrc
  *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
  *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
-aruwsrc::StandardDrivers *DoNotUse_getStandardDrivers();
-using standardDriversFunc = aruwsrc::StandardDrivers *(*)();
+Drivers *DoNotUse_getDrivers();
+using driversFunc = Drivers*(*)();
 }  // namespace aruwsrc
 
 #endif
 
-#endif  // STANDARD_DRIVERS_SINGLETON_HPP_
+#endif  // DRIVERS_SINGLETON_HPP_

@@ -29,11 +29,12 @@
 #include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 #include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 
-#include "engineer_drivers_singleton.hpp"
+#include "aruwsrc/robot/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
-using namespace aruwsrc::engineer;
 using namespace tap::gpio;
 using tap::control::CommandMapper;
+using namespace aruwsrc::engineer;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -41,7 +42,7 @@ using tap::control::CommandMapper;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::engineerDriversFunc drivers = aruwsrc::DoNotUse_getEngineerDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace aruwsrc
 {
@@ -73,22 +74,22 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::EngineerDrivers *drivers)
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::EngineerDrivers *) {}
+void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::EngineerDrivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::EngineerDrivers *) {}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
 
-void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers)
+void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
     initializeSubsystems();

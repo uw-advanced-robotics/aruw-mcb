@@ -38,16 +38,16 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
-namespace aruwsrc
+namespace aruwsrc::standard
 {
-class StandardDrivers : public tap::Drivers
+class Drivers : public tap::Drivers
 {
-    friend class StandardDriversSingleton;
+    friend class DriversSingleton;
 
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    StandardDrivers()
+    Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),

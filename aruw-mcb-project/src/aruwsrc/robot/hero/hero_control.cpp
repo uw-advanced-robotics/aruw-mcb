@@ -69,7 +69,7 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-#include "aruwsrc/robot/hero/hero_drivers_singleton.hpp"
+#include "aruwsrc/robot/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::control::setpoint;
@@ -88,6 +88,7 @@ using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
+using namespace aruwsrc::hero;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -95,7 +96,7 @@ using tap::control::RemoteMapState;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::heroDriversFunc drivers = aruwsrc::DoNotUse_getHeroDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
@@ -486,7 +487,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(tap::Drivers *drivers)
+void registerHeroSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -510,14 +511,12 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(tap::Drivers *drivers)
+void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    ((aruwsrc::HeroDrivers *)drivers)
-        ->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    ((aruwsrc::HeroDrivers *)drivers)
-        ->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
@@ -527,7 +526,7 @@ void startHeroCommands(tap::Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(tap::Drivers *drivers)
+void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -552,7 +551,7 @@ void registerHeroIoMappings(tap::Drivers *drivers)
 
 namespace aruwsrc::control
 {
-void initSubsystemCommands(aruwsrc::HeroDrivers *drivers)
+void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &hero_control::remoteSafeDisconnectFunction);
