@@ -23,7 +23,7 @@
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/robot/drivers_singleton.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/robot/engineer/grabber_subsystem.hpp"

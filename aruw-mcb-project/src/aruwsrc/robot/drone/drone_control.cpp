@@ -20,7 +20,7 @@
 #if defined(TARGET_DRONE)
 
 #include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/robot/drivers_singleton.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 
 using namespace aruwsrc::drone;
