@@ -30,14 +30,14 @@
 
 namespace aruwsrc
 {
-class DartDrivers : public tap::Drivers
+class Drivers : public tap::Drivers
 {
-    friend class DartDriversSingleton;
+    friend class DriversSingleton;
 
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    DartDrivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers() {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 

@@ -23,26 +23,22 @@
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
-#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
+#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 
-namespace aruwsrc
-{
-namespace control
-{
 #if defined(ALL_STANDARDS)
-void initSubsystemCommands(aruwsrc::StandardDrivers *drivers);
+namespace aruwsrc::standard
+#elif defined(ALL_SENTRIES)
+namespace aruwsrc::sentry
 #elif defined(TARGET_HERO_CYCLONE)
-void initSubsystemCommands(aruwsrc::HeroDrivers *drivers);
-#elif defined(TARGET_ENGINEER)
-void initSubsystemCommands(aruwsrc::EngineerDrivers *drivers);
+namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
-void initSubsystemCommands(aruwsrc::DroneDrivers *drivers);
-#elif defined(TARGET_SENTRY_BEEHIVE)
-void initSubsystemCommands(aruwsrc::SentryDrivers *drivers);
+namespace aruwsrc::drone
+#elif defined(TARGET_ENGINEER)
+namespace aruwsrc::engineer
 #endif
-}  // namespace control
-
-}  // namespace aruwsrc
+{
+void initSubsystemCommands(Drivers *drivers);
+}  // namespace tbh whatever you want it to be
 
 #endif  // ROBOT_CONTROL_HPP_

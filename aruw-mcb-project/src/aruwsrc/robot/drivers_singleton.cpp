@@ -19,23 +19,36 @@
 
 #ifndef ENV_UNIT_TESTS
 
-#include "dart_drivers_singleton.hpp"
+#include "aruw-mcb-project/src/aruwsrc/robot/drivers_singleton.hpp"
 
-namespace aruwsrc
+#if defined(ALL_STANDARDS)
+namespace aruwsrc::standard
+#elif defined(ALL_SENTRIES)
+namespace aruwsrc::sentry
+#elif defined(TARGET_HERO_CYCLONE)
+namespace aruwsrc::hero
+#elif defined(TARGET_DRONE)
+namespace aruwsrc::drone
+#elif defined(TARGET_ENGINEER)
+namespace aruwsrc::engineer
+#endif
 {
 /**
  * Class that allows one to construct a Drivers instance because of friendship
  * with the Drivers class.
  */
-class DartDriversSingleton
+class DriversSingleton
 {
 public:
-    static aruwsrc::DartDrivers drivers;
+    static Drivers drivers;
 };  // class DriversSingleton
 
-aruwsrc::DartDrivers DartDriversSingleton::drivers;
+Drivers DriversSingleton::drivers;
 
-aruwsrc::DartDrivers *DoNotUse_getDartDrivers() { return &DartDriversSingleton::drivers; }
+Drivers *DoNotUse_getDrivers()
+{
+    return &DriversSingleton::drivers;
+}
 }  // namespace aruwsrc
 
 #endif

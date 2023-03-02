@@ -28,16 +28,16 @@
 
 #endif
 
-namespace aruwsrc
+namespace aruwsrc::drone
 {
-class DroneDrivers : public tap::Drivers
+class Drivers : public tap::Drivers
 {
-    friend class DroneDriversSingleton;
+    friend class DriversSingleton;
 
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    DroneDrivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers() {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
