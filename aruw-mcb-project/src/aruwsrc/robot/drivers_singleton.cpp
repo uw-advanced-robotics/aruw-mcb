@@ -45,10 +45,7 @@ public:
 
 Drivers DriversSingleton::drivers;
 
-Drivers *DoNotUse_getDrivers()
-{
-    return &DriversSingleton::drivers;
-}
+Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

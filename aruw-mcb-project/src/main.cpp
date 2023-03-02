@@ -136,10 +136,10 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
 
 #ifdef TARGET_HERO_CYCLONE
-    ((Drivers *) drivers)->visionCoprocessor.initializeCV();
-    ((Drivers *) drivers)->mpu6500TerminalSerialHandler.init();
-    ((Drivers *) drivers)->turretMCBCanCommBus1.init();
-    ((Drivers *) drivers)->oledDisplay.initialize();
+    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
+    ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
+    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+    ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 
 #if defined(ALL_STANDARDS)

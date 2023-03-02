@@ -22,7 +22,6 @@
 
 #ifndef ENV_UNIT_TESTS
 
-
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 namespace aruwsrc::standard
@@ -48,7 +47,7 @@ namespace aruwsrc::engineer
  *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
 Drivers *DoNotUse_getDrivers();
-using driversFunc = Drivers*(*)();
+using driversFunc = Drivers *(*)();
 }  // namespace aruwsrc
 
 #endif
