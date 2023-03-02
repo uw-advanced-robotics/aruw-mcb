@@ -46,6 +46,6 @@ public:
 
 #endif
 };  // class aruwsrc::DroneDrivers
-}  // namespace aruwsrc
+}  // namespace aruwsrc::drone
 
 #endif  // DRONE_DRIVERS_HPP_

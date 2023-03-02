@@ -75,6 +75,6 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 #endif
 };  // class aruwsrc::HeroDrivers
-}  // namespace aruwsrc
+}  // namespace aruwsrc::hero
 
 #endif  // HERO_DRIVERS_HPP_

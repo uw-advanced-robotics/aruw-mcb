@@ -46,6 +46,6 @@ public:
 
 #endif
 };  // class aruwsrc::EngineerDrivers
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer
 
 #endif  // ENGINEER_DRIVERS_HPP_

@@ -72,10 +72,9 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
-#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-
 #include "aruwsrc/robot/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
+#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
