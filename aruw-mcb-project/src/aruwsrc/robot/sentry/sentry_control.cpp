@@ -470,7 +470,7 @@ void registerSentryIoMappings(Drivers *drivers)
 }
 }  // namespace sentry_control
 
-namespace aruwsrc::control
+namespace aruwsrc::sentry
 {
 void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 {
