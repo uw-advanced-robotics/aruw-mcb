@@ -556,7 +556,7 @@ void registerStandardIoMappings(Drivers *drivers)
 }
 }  // namespace standard_control
 
-namespace aruwsrc::control
+namespace aruwsrc::standard
 {
 void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 {
