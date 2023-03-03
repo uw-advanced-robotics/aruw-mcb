@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 
 namespace aruwsrc::mock
 {
@@ -30,7 +30,7 @@ class SentryDriveSubsystemMock : public control::sentry::drive::SentryDriveSubsy
 {
 public:
     SentryDriveSubsystemMock(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::gpio::Digital::InputPin leftLimitSwitch,
         tap::gpio::Digital::InputPin rightLimitSwitch);
     virtual ~SentryDriveSubsystemMock();

@@ -29,7 +29,7 @@ namespace aruwsrc::mock
 class TurretMCBCanCommMock : public can::TurretMCBCanComm
 {
 public:
-    TurretMCBCanCommMock(aruwsrc::Drivers *drivers, tap::can::CanBus canBus);
+    TurretMCBCanCommMock(tap::Drivers *drivers, tap::can::CanBus canBus);
     ~TurretMCBCanCommMock();
 
     MOCK_METHOD(void, init, (), (override));

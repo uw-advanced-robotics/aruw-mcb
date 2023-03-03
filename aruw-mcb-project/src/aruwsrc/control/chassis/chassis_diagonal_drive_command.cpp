@@ -19,19 +19,21 @@
 
 #include "chassis_diagonal_drive_command.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::chassis
 {
 ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
-    : ChassisAutorotateCommand(drivers, chassis, yawMotor, chassisSymmetry)
+    : ChassisAutorotateCommand(drivers, operatorInterface, chassis, yawMotor, chassisSymmetry)
 {
     // subsystem requirement added by base class
     // ensures that we are 90 degree symmetrical. This only works for holonomic chasses.
@@ -46,7 +48,7 @@ float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
 
     if (const auto chassisVelocity = chassis->getActualVelocityChassisRelative();
         hypot(chassisVelocity[0][0], chassisVelocity[1][0]) > AUTOROTATION_DIAGONAL_SPEED &&
-        !drivers->controlOperatorInterface.isSlowMode())
+        !operatorInterface->isSlowMode())
     {
         angleFromCenterForChassisAutorotate =
             ContiguousFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getValue() + M_PI_4;

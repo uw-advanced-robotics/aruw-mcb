@@ -20,12 +20,12 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
@@ -47,12 +47,12 @@ protected:
         : frictionWheels(&drivers),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
-          ballistics(drivers, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
 
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

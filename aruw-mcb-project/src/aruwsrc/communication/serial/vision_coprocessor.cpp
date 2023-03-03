@@ -22,9 +22,9 @@
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
@@ -43,7 +43,7 @@ MODM_ISR(EXTI0)
 }
 #endif
 
-VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
+VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),

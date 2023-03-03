@@ -22,7 +22,7 @@
 namespace aruwsrc::control::agitator
 {
 MultiShotCvCommandMapping::MultiShotCvCommandMapping(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,

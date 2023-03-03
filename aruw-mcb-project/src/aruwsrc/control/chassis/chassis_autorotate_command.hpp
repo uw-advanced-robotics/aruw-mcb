@@ -21,13 +21,10 @@
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -64,7 +61,8 @@ public:
      * @param[in] chassisSymmetry The symmetry of the chassis.
      */
     ChassisAutorotateCommand(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
@@ -86,7 +84,8 @@ public:
     const char* getName() const override { return "chassis autorotate"; }
 
 protected:
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
 

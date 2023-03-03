@@ -44,7 +44,7 @@ namespace tap::control
 class Subsystem;
 }
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -73,6 +73,7 @@ public:
      * Construct a ClientDisplayCommand.
      *
      * @param[in] drivers Global drivers instance.
+     * @param[in] commandScheduler CommandScheduler instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
      * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
      * that may be nullptr if no hopper exists.
@@ -98,7 +99,9 @@ public:
      * movement state of the sentry.
      */
     ClientDisplayCommand(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        tap::control::CommandScheduler &commandScheduler,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -123,10 +126,10 @@ public:
     bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::Drivers &drivers;
-
+    tap::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-
     BooleanHudIndicators booleanHudIndicators;
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;

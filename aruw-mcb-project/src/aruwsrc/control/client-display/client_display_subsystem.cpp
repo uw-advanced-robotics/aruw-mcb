@@ -19,9 +19,9 @@
 
 #include "client_display_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::client_display
 {
-ClientDisplaySubsystem::ClientDisplaySubsystem(aruwsrc::Drivers* drivers) : Subsystem(drivers) {}
+ClientDisplaySubsystem::ClientDisplaySubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
 }  // namespace aruwsrc::control::client_display

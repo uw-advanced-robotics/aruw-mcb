@@ -32,7 +32,7 @@ namespace mock
 class ChassisSubsystemMock : public aruwsrc::chassis::Holonomic4MotorChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(aruwsrc::Drivers *drivers);
+    ChassisSubsystemMock(tap::Drivers *drivers);
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

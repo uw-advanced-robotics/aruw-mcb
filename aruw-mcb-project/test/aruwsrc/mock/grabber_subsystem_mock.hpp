@@ -22,13 +22,13 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/grabber_subsystem.hpp"
+#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
 
 namespace aruwsrc::mock
 {
 class GrabberSubsystemMock : public engineer::GrabberSubsystem
 {
-    GrabberSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
+    GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
     virtual ~GrabberSubsystemMock();
 
     MOCK_METHOD(void, setSqueezed, (bool), (override));

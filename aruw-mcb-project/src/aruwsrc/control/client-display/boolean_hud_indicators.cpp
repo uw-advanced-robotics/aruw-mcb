@@ -21,8 +21,7 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/control/command_scheduler.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::communication::referee;
@@ -43,7 +42,7 @@ static inline void updateGraphicColor(
 }
 
 BooleanHudIndicators::BooleanHudIndicators(
-    aruwsrc::Drivers &drivers,
+    tap::control::CommandScheduler &commandScheduler,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -51,7 +50,7 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : HudIndicator(refSerialTransmitter),
-      drivers(drivers),
+      commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
@@ -113,7 +112,7 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
 
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
-        drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand));
+        commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
     booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
         sentryResponseHandler.getSentryMoving());

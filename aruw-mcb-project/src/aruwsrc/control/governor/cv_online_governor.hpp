@@ -21,9 +21,9 @@
 #define CV_ONLINE_GOVERNOR_HPP_
 
 #include "tap/control/governor/command_governor_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -34,23 +34,26 @@ class CvOnlineGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     CvOnlineGovernor(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand)
         : drivers(drivers),
+          visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand)
     {
     }
 
     bool isReady() final
     {
-        return drivers.visionCoprocessor.isCvOnline() &&
+        return visionCoprocessor.isCvOnline() &&
                drivers.commandScheduler.isCommandScheduled(&turretCVCommand);
     }
 
     bool isFinished() final { return !isReady(); }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
 };
 }  // namespace aruwsrc::control::governor

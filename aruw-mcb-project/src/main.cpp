@@ -39,7 +39,7 @@
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/control/robot_control.hpp"
+#include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
@@ -51,12 +51,24 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(aruwsrc::Drivers *drivers);
+static void initializeIo(tap::Drivers *drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(aruwsrc::Drivers *drivers);
+static void updateIo(tap::Drivers *drivers);
+
+#if defined(ALL_STANDARDS)
+using namespace aruwsrc::standard;
+#elif defined(ALL_SENTRIES)
+using namespace aruwsrc::sentry;
+#elif defined(TARGET_HERO_CYCLONE)
+using namespace aruwsrc::hero;
+#elif defined(TARGET_DRONE)
+using namespace aruwsrc::drone;
+#elif defined(TARGET_ENGINEER)
+using namespace aruwsrc::engineer;
+#endif
 
 int main()
 {
@@ -69,11 +81,11 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    aruwsrc::Drivers *drivers = aruwsrc::DoNotUse_getDrivers();
+    Drivers *drivers = DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
-    aruwsrc::control::initSubsystemCommands(drivers);
+    initSubsystemCommands(drivers);
 
     while (1)
     {
@@ -86,21 +98,29 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
+
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
         }
         modm::delay_us(10);
     }
     return 0;
 }
 
-static void initializeIo(aruwsrc::Drivers *drivers)
+static void initializeIo(tap::Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -112,25 +132,34 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
-    drivers->oledDisplay.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    drivers->visionCoprocessor.initializeCV();
-    drivers->mpu6500TerminalSerialHandler.init();
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
-    drivers->turretMCBCanCommBus1.init();
-#endif
-#if defined(TARGET_SENTRY_BEEHIVE)
-    drivers->turretMCBCanCommBus2.init();
+
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
+    ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
+    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+    ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 }
 
-static void updateIo(aruwsrc::Drivers *drivers)
+static void updateIo(tap::Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
-    drivers->oledDisplay.updateDisplay();
     drivers->mpu6500.read();
-    drivers->visionCoprocessor.updateSerial();
+
+#ifdef ALL_STANDARDS
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#ifdef TARGET_HERO_CYCLONE
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#ifdef TARGET_SENTRY_BEEHIVE
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
 }
