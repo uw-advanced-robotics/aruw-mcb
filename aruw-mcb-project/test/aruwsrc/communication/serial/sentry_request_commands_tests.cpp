@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/sentry_request_subsystem_mock.hpp"
 
 using namespace testing;
@@ -30,7 +31,7 @@ class SentryRequestCommandsTest : public Test
 {
 protected:
     SentryRequestCommandsTest() : subsystem(&drivers) {}
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     aruwsrc::mock::SentryRequestSubsystemMock subsystem;
 };
 

@@ -19,7 +19,7 @@
 
 #include "sentry_response_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "sentry_request_message_types.hpp"
 

@@ -22,9 +22,9 @@
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;

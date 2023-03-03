@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::agitator;
@@ -65,7 +65,7 @@ protected:
     }
 
     tap::arch::clock::ClockStub clock;
-    Drivers drivers;
+    tap::Drivers drivers;
     AgitatorSubsystem agitator;
 
     int32_t encUnwrapped = 0;

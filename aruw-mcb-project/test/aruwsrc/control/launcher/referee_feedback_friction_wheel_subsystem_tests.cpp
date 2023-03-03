@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace aruwsrc;
 using namespace aruwsrc::control::launcher;
@@ -48,7 +48,7 @@ protected:
     }
 
     tap::arch::clock::ClockStub clock;
-    Drivers drivers;
+    tap::Drivers drivers;
     RefereeFeedbackFrictionWheelSubsystem<10> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

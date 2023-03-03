@@ -19,23 +19,33 @@
 
 #ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/drivers_singleton.hpp"
+#include "drivers_singleton.hpp"
 
-namespace aruwsrc
+#if defined(ALL_STANDARDS)
+namespace aruwsrc::standard
+#elif defined(ALL_SENTRIES)
+namespace aruwsrc::sentry
+#elif defined(TARGET_HERO_CYCLONE)
+namespace aruwsrc::hero
+#elif defined(TARGET_DRONE)
+namespace aruwsrc::drone
+#elif defined(TARGET_ENGINEER)
+namespace aruwsrc::engineer
+#endif
 {
 /**
- * Class that allows one to construct a Drivers instance because of frienship
+ * Class that allows one to construct a Drivers instance because of friendship
  * with the Drivers class.
  */
 class DriversSingleton
 {
 public:
-    static aruwsrc::Drivers drivers;
+    static Drivers drivers;
 };  // class DriversSingleton
 
-aruwsrc::Drivers DriversSingleton::drivers;
+Drivers DriversSingleton::drivers;
 
-aruwsrc::Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
+Drivers *DoNotUse_getDrivers() { return &DriversSingleton::drivers; }
 }  // namespace aruwsrc
 
 #endif

@@ -24,15 +24,16 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/extend_xaxis_command.hpp"
 #include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
 #include "aruwsrc/robot/engineer/squeeze_grabber_command.hpp"
 #include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 #include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 
-using namespace aruwsrc::engineer;
 using namespace tap::gpio;
 using tap::control::CommandMapper;
+using namespace aruwsrc::engineer;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -40,7 +41,7 @@ using tap::control::CommandMapper;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace aruwsrc
 {
@@ -72,33 +73,36 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::Drivers *drivers)
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&grabber);
     drivers->commandScheduler.registerSubsystem(&xAxis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::Drivers *) {}
+void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::Drivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::Drivers *) {}
-
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
-{
-    drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
-    initializeSubsystems();
-    registerEngineerSubsystems(drivers);
-    setDefaultEngineerCommands(drivers);
-    startEngineerCommands(drivers);
-    registerEngineerIoMappings(drivers);
-}
-
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
 }  // namespace control
 
 }  // namespace aruwsrc
+
+namespace aruwsrc::engineer
+{
+void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &aruwsrc::control::remoteSafeDisconnectFunction);
+    aruwsrc::control::initializeSubsystems();
+    aruwsrc::control::registerEngineerSubsystems(drivers);
+    aruwsrc::control::setDefaultEngineerCommands(drivers);
+    aruwsrc::control::startEngineerCommands(drivers);
+    aruwsrc::control::registerEngineerIoMappings(drivers);
+}
+}  // namespace aruwsrc::engineer
 
 #endif

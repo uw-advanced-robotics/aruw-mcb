@@ -23,9 +23,9 @@
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 #define LOW_BATTERY_THRESHOLD 23500
 

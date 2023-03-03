@@ -73,6 +73,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
@@ -87,6 +88,7 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
+using namespace aruwsrc::standard;
 using namespace tap::control;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
@@ -99,7 +101,7 @@ using namespace aruwsrc::control::agitator;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
@@ -176,25 +178,25 @@ aruwsrc::communication::serial::
     PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
 
 aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
@@ -352,7 +354,7 @@ aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*dri
 
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
-    *((tap::Drivers *)drivers()),
+    *drivers(),
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
@@ -478,7 +480,7 @@ CycleStateCommandMapping<
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(aruwsrc::Drivers *drivers)
+void registerStandardSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
@@ -506,7 +508,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(aruwsrc::Drivers *)
+void setDefaultStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -515,7 +517,7 @@ void setDefaultStandardCommands(aruwsrc::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(aruwsrc::Drivers *drivers)
+void startStandardCommands(Drivers *drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -530,7 +532,7 @@ void startStandardCommands(aruwsrc::Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(aruwsrc::Drivers *drivers)
+void registerStandardIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -554,9 +556,9 @@ void registerStandardIoMappings(aruwsrc::Drivers *drivers)
 }
 }  // namespace standard_control
 
-namespace aruwsrc::control
+namespace aruwsrc::standard
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &standard_control::remoteSafeDisconnectFunction);
@@ -566,7 +568,7 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
     standard_control::startStandardCommands(drivers);
     standard_control::registerStandardIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand()
