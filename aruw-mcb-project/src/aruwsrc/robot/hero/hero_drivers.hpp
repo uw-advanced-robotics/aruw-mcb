@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRIVERS_HPP_
-#define DRIVERS_HPP_
+#ifndef HERO_DRIVERS_HPP_
+#define HERO_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
@@ -38,7 +38,7 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
-namespace aruwsrc
+namespace aruwsrc::hero
 {
 class Drivers : public tap::Drivers
 {
@@ -74,7 +74,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 #endif
-};  // class aruwsrc::Drivers
-}  // namespace aruwsrc
+};  // class aruwsrc::HeroDrivers
+}  // namespace aruwsrc::hero
 
-#endif  // DRIVERS_HPP_
+#endif  // HERO_DRIVERS_HPP_

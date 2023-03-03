@@ -19,10 +19,11 @@
 
 #include "chassis_diagonal_drive_command.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::chassis
 {

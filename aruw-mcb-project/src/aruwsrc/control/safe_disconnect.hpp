@@ -21,8 +21,7 @@
 #define SAFE_DISCONNECT_HPP_
 
 #include "tap/control/command_scheduler.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 /**
  * Defines the condition for a robot to be "safely disconnected" to be
@@ -34,11 +33,11 @@ namespace aruwsrc::control
 class RemoteSafeDisconnectFunction : public tap::control::SafeDisconnectFunction
 {
 public:
-    RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers);
+    RemoteSafeDisconnectFunction(tap::Drivers *drivers);
     virtual bool operator()();
 
 private:
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 };
 }  // namespace aruwsrc::control
 
