@@ -88,7 +88,7 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
 
-void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
+void aruwsrc::engineer::initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
     initializeSubsystems();

@@ -568,7 +568,7 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
     standard_control::startStandardCommands(drivers);
     standard_control::registerStandardIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand()

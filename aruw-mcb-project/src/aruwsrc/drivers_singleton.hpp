@@ -22,6 +22,8 @@
 
 #ifndef ENV_UNIT_TESTS
 
+#include "aruwsrc/util_macros.hpp"
+
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 namespace aruwsrc::standard

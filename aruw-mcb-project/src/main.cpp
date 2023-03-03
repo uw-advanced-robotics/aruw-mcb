@@ -31,7 +31,7 @@
 #include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include "drivers_singleton.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -135,26 +135,11 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
 
-#ifdef TARGET_HERO_CYCLONE
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
     ((Drivers *)drivers)->oledDisplay.initialize();
-#endif
-
-#if defined(ALL_STANDARDS)
-    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
-    ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
-    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
-    ((Drivers *)drivers)->oledDisplay.initialize();
-#endif
-
-#if defined(TARGET_SENTRY_BEEHIVE)
-    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
-    ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
-    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
-    ((Drivers *)drivers)->oledDisplay.initialize();
-    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
 #endif
 }
 
