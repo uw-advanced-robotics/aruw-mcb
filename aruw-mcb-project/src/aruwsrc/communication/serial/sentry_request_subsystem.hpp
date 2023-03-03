@@ -35,7 +35,7 @@ namespace aruwsrc::communication::serial
 class SentryRequestSubsystem : public tap::control::Subsystem
 {
 public:
-    SentryRequestSubsystem(aruwsrc::Drivers *drivers);
+    SentryRequestSubsystem(tap::Drivers *drivers);
 
     void refresh() override;
 

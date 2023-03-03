@@ -23,7 +23,6 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -33,9 +32,10 @@ class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
 {
 public:
     BeybladeCommandMock(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         chassis::HolonomicChassisSubsystem *chassis,
-        aruwsrc::control::turret::TurretMotor *yawMotor);
+        aruwsrc::control::turret::TurretMotor *yawMotor,
+        aruwsrc::control::ControlOperatorInterface &operatorInterface);
 
     virtual ~BeybladeCommandMock();
 

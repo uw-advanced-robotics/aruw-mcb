@@ -23,9 +23,9 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
@@ -38,12 +38,14 @@ namespace aruwsrc
 namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
-    const aruwsrc::control::turret::TurretMotor* yawMotor)
+    const aruwsrc::control::turret::TurretMotor* yawMotor,
+    aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
       chassis(chassis),
-      yawMotor(yawMotor)
+      yawMotor(yawMotor),
+      operatorInterface(operatorInterface)
 {
     addSubsystemRequirement(chassis);
 }
@@ -71,7 +73,13 @@ void BeybladeCommand::execute()
         // Note: pass in 0 as rotation since we don't want to take into consideration
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
-        ChassisRelDrive::computeDesiredUserTranslation(drivers, chassis, 0, &x, &y);
+        ChassisRelDrive::computeDesiredUserTranslation(
+            &operatorInterface,
+            drivers,
+            chassis,
+            0,
+            &x,
+            &y);
         x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
@@ -109,7 +117,7 @@ void BeybladeCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(drivers, chassis);
+        ChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
     }
 }
 

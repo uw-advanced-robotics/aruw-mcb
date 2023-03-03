@@ -28,7 +28,6 @@
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace tap::algorithms;
 using namespace modm;
@@ -36,13 +35,13 @@ using namespace modm;
 namespace aruwsrc::algorithms
 {
 OttoBallisticsSolver::OttoBallisticsSolver(
-    const Drivers &drivers,
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
-    : drivers(drivers),
+    : visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
@@ -54,9 +53,9 @@ OttoBallisticsSolver::OttoBallisticsSolver(
 std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     computeTurretAimAngles()
 {
-    const auto &aimData = drivers.visionCoprocessor.getLastAimData(turretID);
+    const auto &aimData = visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
-    if (!drivers.visionCoprocessor.isCvOnline() || !aimData.hasTarget)
+    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;
@@ -103,15 +102,21 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
+
         ballistics::MeasuredKinematicState targetState = {
             .position =
-                {aimData.xPos - turretPosition.x,
-                 aimData.yPos - turretPosition.y,
-                 aimData.zPos - turretPosition.z},
-            .velocity = {aimData.xVel - chassisVel.x, aimData.yVel - chassisVel.y, aimData.zVel},
+                {aimData.pva.xPos - turretPosition.x,
+                 aimData.pva.yPos - turretPosition.y,
+                 aimData.pva.zPos - turretPosition.z},
+            .velocity =
+                {aimData.pva.xVel - chassisVel.x,
+                 aimData.pva.yVel - chassisVel.y,
+                 aimData.pva.zVel},
             .acceleration =
-                {aimData.xAcc, aimData.yAcc, aimData.zAcc},  // TODO consider using chassis
-                                                             // acceleration from IMU
+                {aimData.pva.xAcc,
+                 aimData.pva.yAcc,
+                 aimData.pva.zAcc},  // TODO consider using chassis
+                                     // acceleration from IMU
         };
 
         // time in microseconds to project the target position ahead by

@@ -21,15 +21,16 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,

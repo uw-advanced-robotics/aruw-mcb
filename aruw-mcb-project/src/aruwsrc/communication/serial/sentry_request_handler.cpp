@@ -19,15 +19,14 @@
 
 #include "sentry_request_handler.hpp"
 
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
-
-#include "aruwsrc/drivers.hpp"
 
 #include "sentry_request_message_types.hpp"
 
 namespace aruwsrc::communication::serial
 {
-SentryRequestHandler::SentryRequestHandler(aruwsrc::Drivers *drivers) : drivers(drivers) {}
+SentryRequestHandler::SentryRequestHandler(tap::Drivers *drivers) : drivers(drivers) {}
 
 void SentryRequestHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)

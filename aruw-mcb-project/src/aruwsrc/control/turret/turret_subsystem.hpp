@@ -39,11 +39,6 @@
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
-
 namespace aruwsrc::can
 {
 class TurretMCBCanComm;
@@ -71,12 +66,11 @@ public:
     /**
      * Constructs a TurretSubsystem.
      *
-     * @param[in] drivers Pointer to a drivers singleton object.
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
      */
     explicit TurretSubsystem(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
@@ -106,7 +100,6 @@ public:
 #endif
 
 protected:
-    Drivers* drivers;
     const aruwsrc::can::TurretMCBCanComm* turretMCB;
 };  // class TurretSubsystem
 

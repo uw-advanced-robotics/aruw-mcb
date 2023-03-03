@@ -19,13 +19,13 @@
 
 #include "low_battery_buzzer_command.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::communication
 {
 LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
-    aruwsrc::Drivers* drivers)
+    tap::Drivers* drivers)
     : buzzer(buzzer),
       drivers(drivers)
 {

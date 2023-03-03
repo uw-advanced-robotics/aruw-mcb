@@ -27,14 +27,10 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret
 {
@@ -86,11 +82,34 @@ public:
         HIGH = 3,
     };
 
+    enum Tags : uint8_t
+    {
+        TARGET_STATE = 0,
+        SHOT_TIMING = 1,
+        NUM_TAGS = 2,
+    };
+
+    enum messageWidths : uint8_t
+    {
+        FLAGS_BYTES = 1,
+        TIMESTAMP_BYTES = 4,
+        FIRERATE_BYTES = 1,
+        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
+        SHOT_TIMING_BYTES = 12,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
+        messageWidths::TARGET_DATA_BYTES,
+        messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
+
     /**
      * AutoAim data to receive from Jetson.
      */
-    struct TurretAimData
+
+    struct PositionData
     {
+        FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
+
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -103,17 +122,25 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool hasTarget;      ///< Whether or not the xavier has a target.
-        uint32_t timestamp;  ///< Timestamp in microseconds.
+        bool updated;  ///< whether or not this came from the most recent message
 
-        FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
+    } modm_packed;
 
-        bool recommendUseTimedShots;   ///< Validity of the targetHitTime
-        uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
-                                       ///< next shot should ideally hit
-        uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
-        uint32_t
-            targetIntervalDuration;  ///< Duration during which the plate is at the target point
+    struct TimingData
+    {
+        uint32_t duration;       ///< duration during which the plate is at the target point
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+                                 ///< next shot should ideally hit
+
+        bool updated;  ///< whether or not this came from the most recent message
+    } modm_packed;
+
+    struct TurretAimData
+    {
+        struct PositionData pva;
+        uint32_t timestamp;  ///< timestamp in microseconds
+        struct TimingData timing;
     } modm_packed;
 
     /**
@@ -148,7 +175,7 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-    VisionCoprocessor(aruwsrc::Drivers* drivers);
+    VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
 
@@ -193,7 +220,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget;
+            hasTarget |= lastAimData[i].pva.updated;
         }
         return hasTarget;
     }
@@ -203,7 +230,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -271,6 +298,8 @@ private:
     volatile uint32_t risingEdgeTime = 0;
 
     uint32_t prevRisingEdgeTime = 0;
+
+    uint8_t testMessageBytes[256];
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};

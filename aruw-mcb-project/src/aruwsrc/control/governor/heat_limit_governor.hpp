@@ -23,8 +23,7 @@
 #include <cassert>
 
 #include "tap/control/governor/command_governor_interface.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -36,7 +35,7 @@ class HeatLimitGovernor : public tap::control::governor::CommandGovernorInterfac
 {
 public:
     HeatLimitGovernor(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
         const uint16_t heatLimitBuffer)
         : drivers(drivers),
@@ -50,7 +49,7 @@ public:
     bool isFinished() final { return !enoughHeatToLaunchProjectile(); }
 
 private:
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
 
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
 

@@ -21,19 +21,19 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 namespace aruwsrc::display
 {
 CVMenu::CVMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::Drivers *drivers)
+    tap::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, CV_MENU_ID),
       drivers(drivers),
       verticalScroll(
           drivers,
           MODM_ARRAY_SIZE(CV_MENU_UPDATE_FNS),
-          std::min(DISPLAY_MAX_ENTRIES, static_cast<uint8_t>(MODM_ARRAY_SIZE(CV_MENU_UPDATE_FNS))))
+          std::min(DISPLAY_MAX_ENTRIES, static_cast<uint8_t>(MODM_ARRAY_SIZE(CV_MENU_UPDATE_FNS)))),
+      visionCoprocessor(visionCoprocessor)
 {
 }
 
@@ -79,15 +79,15 @@ bool CVMenu::hasChanged()
 
 void CVMenu::drawShutdownCV(modm::IOStream &stream) { stream << "Shutdown CV"; }
 
-void CVMenu::shutdownCV() { drivers->visionCoprocessor.sendShutdownMessage(); }
+void CVMenu::shutdownCV() { visionCoprocessor->sendShutdownMessage(); }
 
 void CVMenu::drawRebootCV(modm::IOStream &stream) { stream << "Reboot CV"; }
 
-void CVMenu::rebootCV() { drivers->visionCoprocessor.sendRebootMessage(); }
+void CVMenu::rebootCV() { visionCoprocessor->sendRebootMessage(); }
 
 void CVMenu::drawCVOnline(modm::IOStream &stream)
 {
-    stream << "CV Online: " << drivers->visionCoprocessor.isCvOnline();
+    stream << "CV Online: " << visionCoprocessor->isCvOnline();
 }
 
 }  // namespace aruwsrc::display
