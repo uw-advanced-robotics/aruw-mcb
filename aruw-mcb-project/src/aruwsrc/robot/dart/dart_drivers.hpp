@@ -28,7 +28,7 @@
 
 #endif
 
-namespace aruwsrc
+namespace aruwsrc::dart
 {
 class Drivers : public tap::Drivers
 {
