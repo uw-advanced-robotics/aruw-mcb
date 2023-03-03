@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,17 +17,35 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_request_subsystem.hpp"
+#ifndef DART_DRIVERS_HPP_
+#define DART_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::communication::serial
-{
-SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
-    : tap::control::Subsystem(drivers),
-      sentryRequestTransmitter(drivers)
-{
-}
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
-void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.send(); }
-}  // namespace aruwsrc::communication::serial
+#else
+
+#endif
+
+namespace aruwsrc
+{
+class Drivers : public tap::Drivers
+{
+    friend class DriversSingleton;
+
+#ifdef ENV_UNIT_TESTS
+public:
+#endif
+    Drivers() : tap::Drivers() {}
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+
+#else
+public:
+
+#endif
+};  // class aruwsrc::DartDrivers
+}  // namespace aruwsrc
+
+#endif  // DART_DRIVERS_HPP_

@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/communication/serial/sentry_request_transmitter.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;
@@ -39,7 +40,7 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     SentryRequestTransmitter transmitter;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

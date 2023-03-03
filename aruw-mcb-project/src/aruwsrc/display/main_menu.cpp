@@ -19,7 +19,7 @@
 
 #include "main_menu.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::display;
 

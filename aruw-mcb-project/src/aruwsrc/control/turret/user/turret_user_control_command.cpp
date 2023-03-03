@@ -19,8 +19,10 @@
 
 #include "turret_user_control_command.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::turret::user
 {

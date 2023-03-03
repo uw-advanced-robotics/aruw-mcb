@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -54,7 +54,7 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

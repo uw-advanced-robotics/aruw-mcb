@@ -20,7 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 
 using aruwsrc::engineer::TowSubsystem;
@@ -44,7 +45,7 @@ protected:
     {
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     TowSubsystem ts;
 };
 

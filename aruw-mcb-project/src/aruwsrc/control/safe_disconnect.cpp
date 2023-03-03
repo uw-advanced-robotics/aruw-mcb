@@ -20,12 +20,11 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 
 #include "tap/control/command_scheduler.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control
 {
-RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(aruwsrc::Drivers *drivers)
+RemoteSafeDisconnectFunction::RemoteSafeDisconnectFunction(tap::Drivers *drivers)
 {
     this->drivers = drivers;
 }
