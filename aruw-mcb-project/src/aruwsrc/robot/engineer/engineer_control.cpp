@@ -95,13 +95,14 @@ namespace aruwsrc::engineer
 {
 void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.setSafeDisconnectFunction(&aruwsrc::control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &aruwsrc::control::remoteSafeDisconnectFunction);
     aruwsrc::control::initializeSubsystems();
     aruwsrc::control::registerEngineerSubsystems(drivers);
     aruwsrc::control::setDefaultEngineerCommands(drivers);
     aruwsrc::control::startEngineerCommands(drivers);
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
-}  // namespace engineer
+}  // namespace aruwsrc::engineer
 
 #endif
