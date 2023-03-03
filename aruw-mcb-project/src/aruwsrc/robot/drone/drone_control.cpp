@@ -70,6 +70,6 @@ void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
     drone_control::startDroneCommands(drivers);
     drone_control::registerDroneIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::drone
 
 #endif

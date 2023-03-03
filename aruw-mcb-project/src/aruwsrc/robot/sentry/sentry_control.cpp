@@ -482,7 +482,7 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::startSentryCommands(drivers);
     sentry_control::registerSentryIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::sentry
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
