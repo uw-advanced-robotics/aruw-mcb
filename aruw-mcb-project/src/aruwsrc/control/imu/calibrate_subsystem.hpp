@@ -22,8 +22,8 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::imu
 {
