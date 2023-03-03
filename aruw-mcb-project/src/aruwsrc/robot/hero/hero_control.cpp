@@ -549,7 +549,7 @@ void registerHeroIoMappings(Drivers *drivers)
 }
 }  // namespace hero_control
 
-namespace aruwsrc::sentry
+namespace aruwsrc::hero
 {
 void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 {
