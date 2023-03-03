@@ -87,19 +87,21 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
-
-void aruwsrc::engineer::initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
-{
-    drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
-    initializeSubsystems();
-    registerEngineerSubsystems(drivers);
-    setDefaultEngineerCommands(drivers);
-    startEngineerCommands(drivers);
-    registerEngineerIoMappings(drivers);
-}
-
 }  // namespace control
 
 }  // namespace aruwsrc
+
+namespace aruwsrc::engineer
+{
+void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(&aruwsrc::control::remoteSafeDisconnectFunction);
+    aruwsrc::control::initializeSubsystems();
+    aruwsrc::control::registerEngineerSubsystems(drivers);
+    aruwsrc::control::setDefaultEngineerCommands(drivers);
+    aruwsrc::control::startEngineerCommands(drivers);
+    aruwsrc::control::registerEngineerIoMappings(drivers);
+}
+}  // namespace engineer
 
 #endif
