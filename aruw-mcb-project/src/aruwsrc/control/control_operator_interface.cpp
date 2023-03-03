@@ -231,10 +231,10 @@ float ControlOperatorInterface::getSentrySpeedInput()
            USER_STICK_SENTRY_DRIVE_SCALAR;
 }
 
- bool ControlOperatorInterface::getCalibrationWheelInput() 
- {
-    return (drivers->remote.getChannel(Remote::Channel::WHEEL) > 0.7); //or similar logic
- }
+bool ControlOperatorInterface::getCalibrationWheelInput()
+{
+    return (drivers->remote.getChannel(Remote::Channel::WHEEL) > 0.7);  // or similar logic
+}
 }  // namespace control
 
 }  // namespace aruwsrc

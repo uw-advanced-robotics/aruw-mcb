@@ -133,7 +133,7 @@ public:
 
     /**
      * @returns whether or not the wheel to calibrate the IMU is pressed.
-    */
+     */
     mockable bool getCalibrationWheelInput();
 
 private:
