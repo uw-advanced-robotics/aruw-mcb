@@ -561,7 +561,7 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
     hero_control::startHeroCommands(drivers);
     hero_control::registerHeroIoMappings(drivers);
 }
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
