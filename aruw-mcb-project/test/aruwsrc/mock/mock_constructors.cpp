@@ -20,20 +20,19 @@
 #include "agitator_subsystem_mock.hpp"
 #include "beyblade_command_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
-#include "swerve_chassis_subsystem_mock.hpp"
-#include "swerve_module_mock.hpp"
-#include "mecanum_chassis_subsystem_mock.hpp"
-#include "x_drive_chassis_subsystem_mock.hpp"
 #include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
 #include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
+#include "mecanum_chassis_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
 #include "sentry_drive_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
+#include "swerve_chassis_subsystem_mock.hpp"
+#include "swerve_module_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
@@ -42,6 +41,7 @@
 #include "turret_subsystem_mock.hpp"
 #include "vision_coprocessor_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
+#include "x_drive_chassis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
 // so in a source file allows for faster compilation than defining constructors
@@ -104,15 +104,13 @@ SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(tap::Drivers *drivers)
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
-SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers,
-        aruwsrc::chassis::SwerveModuleConfig& config)
+SwerveModuleMock::SwerveModuleMock(
+    tap::Drivers *drivers,
+    aruwsrc::chassis::SwerveModuleConfig &config)
     : SwerveModule(drivers, config)
 {
 }
-SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers)
-    : SwerveModule(drivers)
-{
-}
+SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers) : SwerveModule(drivers) {}
 SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)

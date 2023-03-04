@@ -34,8 +34,7 @@ class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
 public:
     SwerveModuleMock(tap::Drivers *drivers);
 
-    SwerveModuleMock(tap::Drivers *drivers,
-        aruwsrc::chassis::SwerveModuleConfig& config);
+    SwerveModuleMock(tap::Drivers *drivers, aruwsrc::chassis::SwerveModuleConfig &config);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());
@@ -49,9 +48,9 @@ public:
     MOCK_METHOD(float, getAzimuthError, (), (const));
     MOCK_METHOD(float, getDriveError, (), (const));
     MOCK_METHOD(bool, allMotorsOnline, (), (const));
-    //getModuleVelocity
+    // getModuleVelocity
     MOCK_METHOD(void, limitPower, (float), ());
-    
+
 };  // class SwerveModuleMock
 }  // namespace mock
 }  // namespace aruwsrc
