@@ -115,6 +115,7 @@ public:
 
     std::vector<float> getModuleVelocity();
 
+    //limits power
     void limitPower(float frac);
     
     float mpsToRpm(float mps) const;
