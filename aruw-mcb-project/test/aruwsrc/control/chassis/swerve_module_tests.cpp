@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/swerve_module.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -30,7 +30,6 @@ using modm::Vector3f;
 using tap::algorithms::getSign;
 using namespace aruwsrc::chassis;
 using namespace testing;
-
 
 class SwerveModuleTest : public Test
 {
@@ -53,7 +52,7 @@ TEST_F(SwerveModuleTest, allMotorsOnline)
     bool driveOnline, azimuthOnline;
     ON_CALL(module.driveMotor, isMotorOnline).WillByDefault(ReturnPointee(&driveOnline));
     ON_CALL(module.azimuthMotor, isMotorOnline).WillByDefault(ReturnPointee(&azimuthOnline));
-    
+
     for (int i = 0; i < 0x3; i++)
     {
         driveOnline = i & 1;
@@ -76,7 +75,7 @@ TEST_F(SwerveModuleTest, initialize)
     module.initialize();
 }
 
-TEST_F(SwerveModuleTest, getAngle)//change test value to smth more useful lol?
+TEST_F(SwerveModuleTest, getAngle)  // change test value to smth more useful lol?
 {
     ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);

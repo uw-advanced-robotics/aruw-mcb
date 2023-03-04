@@ -59,18 +59,20 @@ protected:
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_0_rotation)//holonomic
+TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_0_rotation)  // holonomic
 {
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(0), 1E-3);
 }
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_almost_0_rotation)//holonomic
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_almost_0_rotation)  // holonomic
 {
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(MIN_ROTATION_THRESHOLD), 1E-3);
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(-MIN_ROTATION_THRESHOLD), 1E-3);
 }
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)//holonomic
+TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
         powf(MIN_ROTATION_THRESHOLD / CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second, 2.0f),
@@ -78,7 +80,9 @@ TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_vel
         1E-3);
 }
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_gt_max_velocity)//holonomic
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_gt_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
         0,
@@ -89,7 +93,7 @@ TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_gt_max_
 
 // See the googletest cookbook for how MATCHER_P2 works
 // http://google.github.io/googletest/gmock_cook_book.html
-MATCHER_P2(//holonomic
+MATCHER_P2(  // holonomic
     InClosedRange,
     low,
     hi,
@@ -99,14 +103,14 @@ MATCHER_P2(//holonomic
     return low <= arg && arg <= hi;
 }
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_half_rotation)//holonomic
+TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_half_rotation)  // holonomic
 {
     EXPECT_THAT(
         chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 2),
         InClosedRange(0.0f, 1.0f));
 }
 
-TEST_F(HolonomicChassisSubsystemTest, chassisSpeedRotationPID_basic_validation)//holonomic
+TEST_F(HolonomicChassisSubsystemTest, chassisSpeedRotationPID_basic_validation)  // holonomic
 {
     EXPECT_NEAR(0, chassis.chassisSpeedRotationPID(0, 0), 1E-3);
     EXPECT_GT(chassis.chassisSpeedRotationPID(1000 * getSign(AUTOROTATION_PID_KP), 0), 0);

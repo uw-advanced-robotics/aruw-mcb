@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -61,7 +61,7 @@ protected:
 
 TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)
 {
-    EXPECT_EQ(2, chassis.NUM_MODULES);//has to be manually changed to reflect chassis constructor
+    EXPECT_EQ(2, chassis.NUM_MODULES);  // has to be manually changed to reflect chassis constructor
 }
 
 TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
@@ -88,7 +88,10 @@ TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)
     ON_CALL(chassis.modules[3], allMotorsOnline).WillByDefault(ReturnPointee(&online4));
 
     int cases = 1;
-    for(unsigned int i = 0; i < chassis.NUM_MODULES; i++) {cases *= 2;}
+    for (unsigned int i = 0; i < chassis.NUM_MODULES; i++)
+    {
+        cases *= 2;
+    }
     cases -= 1;
     for (int i = 0; i < cases; i++)
     {
@@ -122,7 +125,7 @@ TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
 
 TEST_F(SwerveChassisSubsystemTest, initialize)
 {
-    for(unsigned int i = 0; i < chassis.NUM_MODULES; i++)
+    for (unsigned int i = 0; i < chassis.NUM_MODULES; i++)
     {
         EXPECT_CALL(chassis.modules[i], initialize);
     }

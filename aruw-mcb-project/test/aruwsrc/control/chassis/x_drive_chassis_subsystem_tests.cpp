@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
-#include "tap/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -58,4 +58,3 @@ protected:
     XDriveChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
-
