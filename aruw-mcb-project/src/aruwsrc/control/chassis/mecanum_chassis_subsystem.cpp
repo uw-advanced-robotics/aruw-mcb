@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-
 #include "mecanum_chassis_subsystem.hpp"
 
 #include "tap/drivers.hpp"

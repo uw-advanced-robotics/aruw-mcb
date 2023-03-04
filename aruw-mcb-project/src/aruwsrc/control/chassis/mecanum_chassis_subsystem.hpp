@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef MECANUM_CHASSIS_SUBSYSTEM_HPP_
 #define MECANUM_CHASSIS_SUBSYSTEM_HPP_
 

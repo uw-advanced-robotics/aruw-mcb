@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
@@ -68,10 +67,7 @@ public:
 
     void refresh() override;
 
-    inline void setZeroRPM() override
-    {
-        desiredWheelRPM = desiredWheelRPM.zeroMatrix();
-    }
+    inline void setZeroRPM() override { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
     /**
      * Used to index into the desiredWheelRPM matrix and velocityPid array.
@@ -91,8 +87,6 @@ public:
      */
     modm::Matrix<float, 4, 1> desiredWheelRPM;
 
-    
-
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
      *      where vz is rotational velocity. This is the desired velocity calculated before any
@@ -106,8 +100,6 @@ protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
 private:
-    
-
     /**
      * When you input desired x, y, an r rpm, this function translates
      * and sets the RPM of individual chassis motors.

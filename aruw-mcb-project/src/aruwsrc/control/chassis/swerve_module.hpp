@@ -20,17 +20,15 @@
 #ifndef SWERVE_MODULE_HPP_
 #define SWERVE_MODULE_HPP_
 
-#include "tap/motor/m3508_constants.hpp"
-#include "tap/drivers.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/drivers.hpp"
+#include "tap/motor/m3508_constants.hpp"
 
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
-
-#include "constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/swerve_module_config.hpp"
-
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -49,7 +47,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 /**
  *
  * This class encapsultes a swerve module using two motors.
@@ -75,7 +72,7 @@ public:
      * @param y desired chassis y velocity in m/s
      * @param r desired chassis angular velocity in rad/s
      * @return pre-scaled module speed in rpm
-    */
+     */
     float calculate(float x, float y, float r);
 
     /**
@@ -115,21 +112,22 @@ public:
 
     std::vector<float> getModuleVelocity();
 
-    //limits power
+    // limits power
     void limitPower(float frac);
-    
+
     float mpsToRpm(float mps) const;
     float rpmToMps(float rpm) const;
 
-    //in radians
-    inline float getRotationSetpoint() {return rotationSetpoint;}
-    //in rpm
-    inline float getSpeedSetpoint() {return speedSetpointRPM;}
+    // in radians
+    inline float getRotationSetpoint() { return rotationSetpoint; }
+    // in rpm
+    inline float getSpeedSetpoint() { return speedSetpointRPM; }
 
 // motors
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
     testing::NiceMock<tap::mock::DjiMotorMock> azimuthMotor;
+
 private:
 #else
 private:
@@ -139,8 +137,11 @@ private:
 
     inline float wrapAngle(float angle, float denomination)
     {
-        return fmod(fmod(angle, denomination) + M_TWOPI, denomination);//replace M_TWOPI with denomination? doesn't matter for its one use case currently
-        //double fmod needed to ensure output is positive bc fmod can be negative
+        return fmod(
+            fmod(angle, denomination) + M_TWOPI,
+            denomination);  // replace M_TWOPI with denomination? doesn't matter for its one use
+                            // case currently
+        // double fmod needed to ensure output is positive bc fmod can be negative
     }
 
     const SwerveModuleConfig config;
@@ -149,9 +150,11 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM, rotationSetpoint;
-    
-    //handles wrapping desired rotation and reversing module (in radians, will always be a multiple of PI)
+    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM,
+        rotationSetpoint;
+
+    // handles wrapping desired rotation and reversing module (in radians, will always be a multiple
+    // of PI)
     float rotationOffset{0};
 
 };  // class SwerveModule

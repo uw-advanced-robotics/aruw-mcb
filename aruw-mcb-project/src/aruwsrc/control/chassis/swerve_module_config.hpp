@@ -20,30 +20,30 @@
 #define SWERVE_MODULE_CONFIG_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::chassis
 {
-
 struct SwerveModuleConfig
 {
     const float WHEEL_DIAMETER_M = 0.076f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
-    //in encoder clicks
+    // in encoder clicks
     const int64_t azimuthZeroOffset = 0;
 
     tap::motor::MotorId driveMotorId = tap::motor::MOTOR1;
     tap::motor::MotorId azimuthMotorId = tap::motor::MOTOR5;
 
-    //in meters, measured from center
+    // in meters, measured from center
     float positionWithinChassisX = 0.2f;
     float positionWithinChassisY = 0.2f;
 
     // Whether any motor is inverted
     const bool driveMotorInverted = false, azimuthMotorInverted = false;
     // Gear ratios for motors
-    const float driveMotorGearing = 23.0f/12.0f, azimuthMotorGearing = 1;
+    const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
     const float drivePidKp = 10.0f;
     const float drivePidKi = 0.0f;
@@ -65,5 +65,5 @@ struct SwerveModuleConfig
 
 static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;
 
-}  //namespace aruwsrc::chassis
+}  // namespace aruwsrc::chassis
 #endif  // SWERVE_MODULE_CONFIG_HPP_

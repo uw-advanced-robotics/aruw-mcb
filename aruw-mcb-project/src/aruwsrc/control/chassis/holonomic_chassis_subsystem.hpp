@@ -60,7 +60,7 @@ public:
         tap::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-    //virtual ~HolonomicChassisSubsystem();
+    // virtual ~HolonomicChassisSubsystem();
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -145,7 +145,7 @@ public:
 
     const char* getName() override { return "Chassis"; }
 
-    virtual bool allMotorsOnline() const override {return false;};
+    virtual bool allMotorsOnline() const override { return false; };
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
@@ -164,8 +164,7 @@ public:
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
      */
-    inline modm::Matrix<float, 4, 1> convertRawRPM(
-        const modm::Matrix<float, 4, 1>& mat) const
+    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
         static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;

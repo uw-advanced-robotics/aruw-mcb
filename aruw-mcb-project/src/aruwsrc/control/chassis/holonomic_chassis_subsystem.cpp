@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "holonomic_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
@@ -54,7 +53,7 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
 {
 }
 
-//HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
+// HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
 
 float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
@@ -76,8 +75,8 @@ float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError
     return wheelRotationSpeed;
 }
 
-float HolonomicChassisSubsystem::calculateRotationTranslationalGain(float
-chassisRotationDesiredWheelspeed)
+float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
+    float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain = 1.0f;

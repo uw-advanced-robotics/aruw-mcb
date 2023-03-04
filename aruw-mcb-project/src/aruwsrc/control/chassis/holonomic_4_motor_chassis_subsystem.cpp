@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"

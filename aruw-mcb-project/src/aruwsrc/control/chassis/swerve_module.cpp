@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "swerve_module.hpp"
 
 using namespace tap::algorithms;
@@ -26,9 +25,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-SwerveModule::SwerveModule(
-    tap::Drivers* drivers,
-    SwerveModuleConfig& config)
+SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
     : driveMotor(
           drivers,
           config.driveMotorId,
@@ -62,10 +59,7 @@ void SwerveModule::initialize()
     azimuthMotor.initialize();
 }
 
-void SwerveModule::setZeroRPM()
-{
-    speedSetpointRPM = 0;
-}
+void SwerveModule::setZeroRPM() { speedSetpointRPM = 0; }
 
 bool SwerveModule::allMotorsOnline() const
 {
@@ -74,31 +68,29 @@ bool SwerveModule::allMotorsOnline() const
 
 float SwerveModule::calculateTotalModuleError() const
 {
-    //probably a naive way of doing this but haven't thought of a better one yet
+    // probably a naive way of doing this but haven't thought of a better one yet
     //  (comparing power used for maintaining position vs velocity)
     return ANGULAR_ERROR_POWER_BIAS * getAzimuthError() + getDriveError();
 }
 
-
 float SwerveModule::getAzimuthError() const
 {
-    return 0;//azimuthPid.getLastError();  //**FIX THIS SMOOTHPID DOESNT HAVE GETLASTERROR IDK WHAT TO DO**
+    return 0;  // azimuthPid.getLastError();  //**FIX THIS SMOOTHPID DOESNT HAVE GETLASTERROR IDK
+               // WHAT TO DO**
 }
 
 //
-float SwerveModule::getDriveError() const
-{
-    return drivePid.getLastError();
-}
+float SwerveModule::getDriveError() const { return drivePid.getLastError(); }
 
 float SwerveModule::calculate(float x, float y, float r)
 {
     float moveVectorX = x + r * rotationVectorX;
     float moveVectorY = y + r * rotationVectorY;
 
-    if(compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
+    if (compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
-        //deadzone (temporarily?) set to ±0.1m/s to substitute for non-existant joystick input debounce/lowpass
+        // deadzone (temporarily?) set to ±0.1m/s to substitute for non-existant joystick input
+        // debounce/lowpass
         //  (module did unnecessary 360s when deadzone was ±0.01m/s)
         preScaledSpeedSetpoint = 0;
     }
@@ -106,33 +98,38 @@ float SwerveModule::calculate(float x, float y, float r)
     {
         float newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
         float newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
-        
-        //normal angle wrapping
+
+        // normal angle wrapping
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
-            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_TWOPI;//TWOPI == 2*PI
+            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) *
+                              M_TWOPI;  // TWOPI == 2*PI
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
-        
-        //reverse module if it's a smaller azimuth rotation to do so
-        if(abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+
+        // reverse module if it's a smaller azimuth rotation to do so
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
         {
-            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+            rotationOffset -=
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
         }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
-        preScaledSpeedSetpoint = mpsToRpm(sqrtf(moveVectorX*moveVectorX + moveVectorY*moveVectorY));
+        preScaledSpeedSetpoint =
+            mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
 
-        //if offset isn't an integer multiple of 2pi, it means module is currently reversed so speed must be negative
+        // if offset isn't an integer multiple of 2pi, it means module is currently reversed so
+        // speed must be negative
         //  compareFloatClose may or may not be necessary
-        if(compareFloatClose(wrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1)) preScaledSpeedSetpoint *= -1;
+        if (compareFloatClose(wrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1))
+            preScaledSpeedSetpoint *= -1;
     }
     return preScaledSpeedSetpoint;
 }
 
 void SwerveModule::scaleAndSetDesiredState(float scaleCoeff)
 {
-    setDesiredState(scaleCoeff*preScaledSpeedSetpoint, preScaledRotationSetpoint);
+    setDesiredState(scaleCoeff * preScaledSpeedSetpoint, preScaledRotationSetpoint);
 }
 
 void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
@@ -146,27 +143,20 @@ void SwerveModule::refresh()
     drivePid.update(speedSetpointRPM - getDriveRPM());
     driveMotor.setDesiredOutput(drivePid.getValue());
 
-    azimuthPid.runController(
-            rotationSetpoint - getAngle(),
-            getAngularVelocity(),
-            2.0f);
+    azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveModule::getDriveVelocity() const
-{
-    return rpmToMps(driveMotor.getShaftRPM());
-}
+float SwerveModule::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
 
-float SwerveModule::getDriveRPM() const
-{
-    return driveMotor.getShaftRPM();
-}
+float SwerveModule::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
 float SwerveModule::getAngle() const
 {
-    return modm::toRadian(azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped() 
-        - config.azimuthZeroOffset) * config.azimuthMotorGearing);//azimuthZeroOffset temporarily replaced w 0
+    return modm::toRadian(
+        azimuthMotor.encoderToDegrees(
+            azimuthMotor.getEncoderUnwrapped() - config.azimuthZeroOffset) *
+        config.azimuthMotorGearing);  // azimuthZeroOffset temporarily replaced w 0
 }
 
 float SwerveModule::getAngularVelocity() const
@@ -176,12 +166,14 @@ float SwerveModule::getAngularVelocity() const
 
 float SwerveModule::mpsToRpm(float mps) const
 {
-    return (mps / config.WHEEL_CIRCUMFRENCE_M) / CHASSIS_GEARBOX_RATIO * 60.0f / config.driveMotorGearing;
+    return (mps / config.WHEEL_CIRCUMFRENCE_M) / CHASSIS_GEARBOX_RATIO * 60.0f /
+           config.driveMotorGearing;
 }
 
 float SwerveModule::rpmToMps(float rpm) const
 {
-    return rpm * CHASSIS_GEARBOX_RATIO / 60.0f * config.driveMotorGearing * config.WHEEL_CIRCUMFRENCE_M;
+    return rpm * CHASSIS_GEARBOX_RATIO / 60.0f * config.driveMotorGearing *
+           config.WHEEL_CIRCUMFRENCE_M;
 }
 
 void SwerveModule::limitPower(float frac)

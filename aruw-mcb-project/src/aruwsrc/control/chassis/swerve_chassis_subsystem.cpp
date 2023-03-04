@@ -25,18 +25,18 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
     SwerveModuleConfig config1,
     SwerveModuleConfig config2,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
-    NUM_MODULES(2),
-    modules{Module(drivers, config1), 
-            Module(drivers, config2), 
-            Module(drivers, DEFAULT_SWERVE_CONFIG), 
-            Module(drivers, DEFAULT_SWERVE_CONFIG)}
+      NUM_MODULES(2),
+      modules{
+          Module(drivers, config1),
+          Module(drivers, config2),
+          Module(drivers, DEFAULT_SWERVE_CONFIG),
+          Module(drivers, DEFAULT_SWERVE_CONFIG)}
 {
 }
 
@@ -48,50 +48,44 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     SwerveModuleConfig config4,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
-    NUM_MODULES(4),
-    modules{Module(drivers, config1), 
-            Module(drivers, config2), 
-            Module(drivers, config3), 
-            Module(drivers, config4)}
+      NUM_MODULES(4),
+      modules{
+          Module(drivers, config1),
+          Module(drivers, config2),
+          Module(drivers, config3),
+          Module(drivers, config4)}
 {
 }
 
 void SwerveChassisSubsystem::initialize()
 {
-    for(unsigned int i = 0; i < NUM_MODULES; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].initialize();
     }
 }
 
-
 bool SwerveChassisSubsystem::allMotorsOnline() const
 {
-    
     bool online = true;
-    for (unsigned int i = 0; i < NUM_MODULES; i++)
-        online &= modules[i].allMotorsOnline();
+    for (unsigned int i = 0; i < NUM_MODULES; i++) online &= modules[i].allMotorsOnline();
     return online;
 }
 
-
 void SwerveChassisSubsystem::setZeroRPM()
 {
-    for (unsigned int i = 0; i < NUM_MODULES; i++)
-        modules[i].setZeroRPM();
+    for (unsigned int i = 0; i < NUM_MODULES; i++) modules[i].setZeroRPM();
 }
 
 Module* SwerveChassisSubsystem::getModule(unsigned int i)
 {
-    if(i >= NUM_MODULES)
-        return nullptr;
+    if (i >= NUM_MODULES) return nullptr;
     return &modules[i];
 }
 
-
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    //convert inputs from motor rpm to m/s
+    // convert inputs from motor rpm to m/s
     x = modules[0].rpmToMps(x);
     y = modules[0].rpmToMps(y);
     r = modules[0].rpmToMps(r) / WIDTH_BETWEEN_WHEELS_X * 2;
@@ -105,12 +99,11 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
-
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
     desiredRotation = modules[0].mpsToRpm(r) * WIDTH_BETWEEN_WHEELS_X / 2;
     float maxInitialSpeed = 0;
-    for(unsigned int i = 0; i < NUM_MODULES; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         desiredModuleSpeeds[i][0] = modules[i].calculate(x, y, r);
         maxInitialSpeed = std::max(maxInitialSpeed, desiredModuleSpeeds[i][0]);
@@ -118,21 +111,19 @@ void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, flo
 
     float scaleCoeff = std::min(maxWheelRPM / maxInitialSpeed, 1.0f);
 
-    for(unsigned int i = 0; i < NUM_MODULES; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].scaleAndSetDesiredState(scaleCoeff);
     }
 }
 
-
 void SwerveChassisSubsystem::refresh()
 {
-    for(unsigned int i = 0; i < NUM_MODULES; i++)
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i].refresh();
     }
 }
-
 
 void SwerveChassisSubsystem::limitChassisPower()
 {
@@ -164,20 +155,20 @@ void SwerveChassisSubsystem::limitChassisPower()
         // values for all motors is 1.
         /* float velocityErrorFrac = totalErrorZero
                                       ? (1.0f / NUM_MODULES)
-                                      : (abs(modules[i].calculateTotalModuleError()) / totalError); */
+                                      : (abs(modules[i].calculateTotalModuleError()) / totalError);
+         */
         // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
         // based on the current velocity error. In this way, if the velocity error is large, the
         // motor requires more current to be directed to it than other motors. Without this
         // compensation, a total of NUM_MOTORS * powerLimitFrac fractional limiting is divided
         // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
         // velocityErrorFrac for each motor.
-        
+
         /* float modifiedPowerLimitFrac =
             limitVal(NUM_MODULES * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f); */
         modules[i].limitPower(powerLimitFrac);
     }
 }
-
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
@@ -193,6 +184,6 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelat
     return getActualVelocityChassisRelative();
 }
 
-}
+}  // namespace chassis
 
-}
+}  // namespace aruwsrc

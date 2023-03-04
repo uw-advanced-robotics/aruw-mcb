@@ -20,6 +20,7 @@
 #ifndef SWERVE_CHASSIS_SUBSYSTEM_HPP_
 #define SWERVE_CHASSIS_SUBSYSTEM_HPP_
 
+#include <array>
 
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
@@ -28,18 +29,17 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
+#include "tap/drivers.hpp"
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
-#include "tap/drivers.hpp"
 
-#include "aruwsrc/util_macros.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
+#include "aruwsrc/util_macros.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
-#include <array>
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/swerve_module_mock.hpp"
@@ -47,8 +47,6 @@ using Module = testing::NiceMock<aruwsrc::mock::SwerveModuleMock>;
 #else
 using Module = aruwsrc::chassis::SwerveModule;
 #endif
-
-
 
 namespace aruwsrc
 {
@@ -59,7 +57,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
 public:
@@ -67,17 +64,15 @@ public:
         tap::Drivers* drivers,
         SwerveModuleConfig config1 = DEFAULT_SWERVE_CONFIG,
         SwerveModuleConfig config2 = DEFAULT_SWERVE_CONFIG,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    );
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     SwerveChassisSubsystem(
-        tap::Drivers* drivers, 
+        tap::Drivers* drivers,
         SwerveModuleConfig config1,
         SwerveModuleConfig config2,
         SwerveModuleConfig config3,
         SwerveModuleConfig config4,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN
-    );
+        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
 
@@ -110,20 +105,20 @@ public:
 
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    //only to satisfy chassis subsystem interface
+    // only to satisfy chassis subsystem interface
     inline int16_t getLeftFrontRpmActual() const override { return modules[LF].getDriveRPM(); }
     inline int16_t getLeftBackRpmActual() const override { return modules[LB].getDriveRPM(); }
     inline int16_t getRightFrontRpmActual() const override { return modules[RF].getDriveRPM(); }
     inline int16_t getRightBackRpmActual() const override { return modules[RB].getDriveRPM(); }
 
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     const unsigned int NUM_MODULES{4};
     std::array<Module, 4> modules;
+
 private:
 #else
 private:
-    const unsigned int NUM_MODULES {4};
+    const unsigned int NUM_MODULES{4};
     std::array<Module, 4> modules;
 #endif
 
