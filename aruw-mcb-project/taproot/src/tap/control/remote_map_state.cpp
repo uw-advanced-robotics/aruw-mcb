@@ -67,11 +67,18 @@ RemoteMapState::RemoteMapState(Remote::Switch swh, Remote::SwitchState switchSta
     }
 }
 
+RemoteMapState::RemoteMapState(Remote::Channel channel, float valueMin, float valueMax)
+{
+    initChannel(channel, valueMin, valueMax);
+}
+
 RemoteMapState::RemoteMapState(Remote::SwitchState leftss, Remote::SwitchState rightss)
 {
     initLSwitch(leftss);
     initRSwitch(rightss);
 }
+
+
 
 RemoteMapState::RemoteMapState(
     const std::list<Remote::Key> &keySet,
@@ -172,6 +179,16 @@ void RemoteMapState::initNegKeys(const std::list<Remote::Key> &negKeySet)
     initNegKeys(negKeys);
 }
 
+void RemoteMapState::initChannel(Remote::Channel channel, float minValue, float maxValue) {
+    if(minValue < -1 || maxValue > 1 || maxValue < minValue) {
+        return;
+    }
+    usingChannel = true;
+    this->channel = channel;
+    this->channelValueMin = minValue;
+    this->channelValueMax = maxValue;
+}
+
 void RemoteMapState::initLMouseButton() { lMouseButton = true; }
 
 void RemoteMapState::initRMouseButton() { rMouseButton = true; }
@@ -198,6 +215,7 @@ bool RemoteMapState::stateSubsetOf(const RemoteMapState &other) const
     {
         return false;
     }
+    //TODO: if (usingChannel && other.channel)
     return true;
 }
 

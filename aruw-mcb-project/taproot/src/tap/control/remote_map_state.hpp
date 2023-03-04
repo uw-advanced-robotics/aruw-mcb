@@ -103,6 +103,17 @@ public:
         tap::communication::serial::Remote::SwitchState switchState);
 
     /**
+     * Initializes a RemoteMapState with a single channel to the value of the given channel.
+     *
+     * @param[in] channel The channel to use in the map state.
+     * @param[in] switchState The value of the given channel.
+     */
+    RemoteMapState(
+        tap::communication::serial::Remote::Channel channel,
+        float channelValueMin,
+        float channelValueMax);
+
+    /**
      * Initializes a RemoteMapState with particular switch states for both remote
      * switches.
      *
@@ -158,6 +169,8 @@ public:
      * Initializes the right switch with the particular `Remote::SwitchState` provided.
      */
     void initRSwitch(tap::communication::serial::Remote::SwitchState ss);
+
+    void initChannel(tap::communication::serial::Remote::Channel channel, float minValue, float maxValue);
 
     /**
      * Initializes the keys to the bit mapped set of keys provided.
@@ -256,6 +269,11 @@ private:
 
     tap::communication::serial::Remote::SwitchState rSwitch =
         tap::communication::serial::Remote::SwitchState::UNKNOWN;
+
+    bool usingChannel = false; //TODO find better name
+    tap::communication::serial::Remote::Channel channel;
+    float channelValueMin;
+    float channelValueMax;
 
     uint16_t keys = 0;
 
