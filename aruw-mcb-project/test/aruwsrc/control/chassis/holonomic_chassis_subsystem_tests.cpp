@@ -103,7 +103,9 @@ MATCHER_P2(  // holonomic
     return low <= arg && arg <= hi;
 }
 
-TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_half_rotation)  // holonomic
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_half_rotation)  // holonomic
 {
     EXPECT_THAT(
         chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 2),
