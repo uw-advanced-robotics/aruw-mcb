@@ -17,38 +17,23 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_COMMAND_HPP_
-#define DART_COMMAND_HPP_
+#include "dart_command.hpp"
 
-#include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-
-#include "aruwsrc/robot/dart/dart_subsystem.hpp"
 
 namespace aruwsrc::dart
 {
-class DartCommand : public tap::control::Command
+DartCommand::DartCommand(
+    aruwsrc::dart::DartSubsystem& dartSubsystem,
+    tap::Drivers* drivers)
+    : dartSubsystem(dartSubsystem),
+      drivers(drivers)
 {
-public:
-    DartCommand(
-        aruwsrc::dart::DartSubsystem& dartSubsystem,
-        tap::Drivers* drivers);
+    addSubsystemRequirement(&dartSubsystem);
+}
 
-    void initialize() override {}
+void DartCommand::execute() { dartSubsystem.windUp(); }
 
-    void execute() override;
-
-    bool isFinished() const override { return true; }
-
-    void end(bool interrupt) override;
-
-    const char* getName() const override { return "Dart command"; }
-
-private:
-    aruwsrc::dart::DartSubsystem& dartSubsystem;
-    tap::Drivers* drivers;
-};
+void DartCommand::end(bool) { dartSubsystem.stop(); }
 
 }  // namespace aruwsrc::dart
-
-#endif
