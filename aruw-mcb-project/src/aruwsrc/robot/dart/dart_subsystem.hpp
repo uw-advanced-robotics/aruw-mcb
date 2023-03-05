@@ -22,8 +22,11 @@
 
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "limits.h"
 
-namespace aruwsrc::control::dart
+#define WINDUP_SPEED = SHRT_MAX / 2
+
+namespace aruwsrc::dart
 {
 class DartSubsystem : public tap::control::Subsystem
 {

@@ -21,7 +21,7 @@
 
 #include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::control::dart
+namespace aruwsrc::dart
 {
 
 DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
@@ -30,10 +30,8 @@ DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
 {
 }
 
-void DartSubsystem::windUp() {
-	
-}
+void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
 
-void DartSubsystem::stop() {}
+void DartSubsystem::stop() { motor->setDesiredOutput(0); }
 
 }  // namespace aruwsrc::control::dart
