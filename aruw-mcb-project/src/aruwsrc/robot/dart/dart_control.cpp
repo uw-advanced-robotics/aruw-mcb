@@ -25,12 +25,11 @@
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/dart/dart_drivers.hpp"
-
-#include "aruwsrc/robot/dart/dart_subsystem.hpp"
 #include "aruwsrc/robot/dart/dart_command.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
+#include "aruwsrc/robot/dart/dart_drivers.hpp"
+#include "aruwsrc/robot/dart/dart_subsystem.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -56,12 +55,15 @@ DartSubsystem dart(drivers(), &pullMotor);
 
 DartCommand dartCommand(dart, drivers());
 
+HoldRepeatCommandMapping rightSwitchDown(
+    drivers(),
+    {&dartCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+	true);
 
 /* only being used for the encoder motor */
 tap::motor::DjiMotor deadMotor1(drivers(), DEAD_MOTOR1, CAN_BUS_MOTORS, false, "Pitch Turret");
 tap::motor::DjiMotor deadMotor2(drivers(), DEAD_MOTOR2, CAN_BUS_MOTORS, false, "Pitch Turret");
-
-
 
 }  // namespace dart_control
 
