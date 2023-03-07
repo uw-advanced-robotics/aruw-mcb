@@ -335,6 +335,26 @@ before_script:
   variables:
     ROBOT: SENTRY_BEEHIVE
 
+# Dart Build
+
+"Dart: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: DART
+
+"Dart: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: DART
+
+"Dart: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: DART
+
 # Pages deploy
 
 "Generate Docs":
