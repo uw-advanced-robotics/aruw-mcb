@@ -64,8 +64,8 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* only being used for the encoder motor */
-tap::motor::DjiMotor deadMotor1(drivers(), DEAD_MOTOR1, CAN_BUS_MOTORS, false, "Pitch Turret");
-tap::motor::DjiMotor deadMotor2(drivers(), DEAD_MOTOR2, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DjiMotor deadMotor1(drivers(), DEAD_MOTOR1, CAN_BUS_MOTORS, false, "Pitch Turret Encoder Motor 1");
+tap::motor::DjiMotor deadMotor2(drivers(), DEAD_MOTOR2, CAN_BUS_MOTORS, false, "Pitch Turret Encoder Motor 2");
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
