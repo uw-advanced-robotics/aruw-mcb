@@ -5,8 +5,6 @@
 
 #include "tmotor_ak80-9.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-
 #include "aruwsrc/drivers.hpp"
 
 #ifdef PLATFORM_HOSTED

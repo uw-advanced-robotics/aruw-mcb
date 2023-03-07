@@ -30,6 +30,7 @@
 #include "tap/communication/can/can_rx_listener.hpp"
 
 #include "motor_interface.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace tap::motor
 {
@@ -107,6 +108,16 @@ public:
     int64_t getEncoderUnwrapped() const override;
 
     uint16_t getEncoderWrapped() const override;
+
+    /***
+     * @returns Angular position of motor, unwrapped, in radians.
+     */
+    float getPositionUnwrapped() const { return getEncoderUnwrapped() * ENC_RESOLUTION / M_TWOPI; };
+    
+    /***
+     * @returns Angular position of motor, wrapped to one rotation, in radians.
+     */
+    float getPositionWrapped() const { return getEncoderWrapped() * ENC_RESOLUTION / M_TWOPI; };
 
     DISALLOW_COPY_AND_ASSIGN(DjiMotor)
 

@@ -26,6 +26,7 @@
 
 #include <string>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 
@@ -34,7 +35,7 @@
 namespace aruwsrc
 {
 class Drivers;
-}   // namespace aruwsrc
+}  // namespace aruwsrc
 
 namespace aruwsrc::motor
 {
@@ -106,6 +107,16 @@ public:
 
     uint16_t getEncoderWrapped() const override;
 
+    /***
+     * @returns Angular position of motor, unwrapped, in radians.
+     */
+    float getPositionUnwrapped() const { return getEncoderUnwrapped() * ENC_RESOLUTION / M_TWOPI; };
+    
+    /***
+     * @returns Angular position of motor, wrapped to one rotation, in radians.
+     */
+    float getPositionWrapped() const { return getEncoderWrapped() * ENC_RESOLUTION / M_TWOPI; };
+
     DISALLOW_COPY_AND_ASSIGN(Tmotor_AK809)
 
     /**
@@ -118,7 +129,8 @@ public:
     void processMessage(const modm::can::Message& message) override;
 
     /**
-     * Set the desired output for the motor. The meaning is a current value between -60 and 60 A, in mA (AKA -60,000 to 60,000)
+     * Set the desired output for the motor. The meaning is a current value between -60 and 60 A, in
+     * mA (AKA -60,000 to 60,000)
      *
      * @param[in] desiredOutput the desired motor output. Limited to the range of -60 to 60 A in mA
      *
@@ -184,7 +196,6 @@ public:
     }
 
 private:
-
     modm::can::Message debugMessage;
     // wait time before the motor is considered disconnected, in milliseconds
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
