@@ -20,9 +20,10 @@
 #ifndef DART_SUBSYSTEM_HPP_
 #define DART_SUBSYSTEM_HPP_
 
+#include "limits.h"
+
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "limits.h"
 
 #define WINDUP_SPEED = SHRT_MAX / 2
 
@@ -37,13 +38,12 @@ public:
 
     void windUp();
 
-	void stop();
+    void stop();
 
-	private:
-	tap::motor::DjiMotor* motor;
-
+private:
+    tap::motor::DjiMotor* motor;
 };
 
-}  // namespace aruwsrc::control::dart
+}  // namespace aruwsrc::dart
 
 #endif  // DART_SUBSYSTEM_HPP_

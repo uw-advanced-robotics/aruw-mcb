@@ -75,6 +75,7 @@ before_script:
             aruwsrc/robot/sentry/sentry_control.cpp
             aruwsrc/robot/standard/standard_control.cpp
             aruwsrc/robot/drone/drone_control.cpp
+            aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             main.cpp
 

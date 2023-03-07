@@ -30,9 +30,7 @@ namespace aruwsrc::dart
 class DartCommand : public tap::control::Command
 {
 public:
-    DartCommand(
-        aruwsrc::dart::DartSubsystem& dartSubsystem,
-        tap::Drivers* drivers);
+    DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers);
 
     void initialize() override {}
 

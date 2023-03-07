@@ -23,9 +23,7 @@
 
 namespace aruwsrc::dart
 {
-DartCommand::DartCommand(
-    aruwsrc::dart::DartSubsystem& dartSubsystem,
-    tap::Drivers* drivers)
+DartCommand::DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers)
     : dartSubsystem(dartSubsystem),
       drivers(drivers)
 {

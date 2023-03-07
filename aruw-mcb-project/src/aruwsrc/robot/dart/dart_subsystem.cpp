@@ -23,7 +23,6 @@
 
 namespace aruwsrc::dart
 {
-
 DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
     : Subsystem(drivers),
       motor(motor)
@@ -34,4 +33,4 @@ void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
 
 void DartSubsystem::stop() { motor->setDesiredOutput(0); }
 
-}  // namespace aruwsrc::control::dart
+}  // namespace aruwsrc::dart

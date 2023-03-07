@@ -46,7 +46,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace dart_control
 {
-
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
@@ -64,8 +63,18 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* only being used for the encoder motor */
-tap::motor::DjiMotor deadMotor1(drivers(), DEAD_MOTOR1, CAN_BUS_MOTORS, false, "Pitch Turret Encoder Motor 1");
-tap::motor::DjiMotor deadMotor2(drivers(), DEAD_MOTOR2, CAN_BUS_MOTORS, false, "Pitch Turret Encoder Motor 2");
+tap::motor::DjiMotor deadMotor1(
+    drivers(),
+    DEAD_MOTOR1,
+    CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret Encoder Motor 1");
+tap::motor::DjiMotor deadMotor2(
+    drivers(),
+    DEAD_MOTOR2,
+    CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret Encoder Motor 2");
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -81,7 +90,7 @@ void registerDartSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
-void setDefaultDartCommands(Drivers* drivers)
+void setDefaultDartCommands(Drivers*)
 {
     dart.setDefaultCommand(&dartCommand);
     buzzer.setDefaultCommand(&lowBatteryCommand);

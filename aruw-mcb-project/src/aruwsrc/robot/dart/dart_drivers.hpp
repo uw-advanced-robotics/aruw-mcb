@@ -46,6 +46,6 @@ public:
 
 #endif
 };  // class aruwsrc::DartDrivers
-}  // namespace aruwsrc
+}  // namespace aruwsrc::dart
 
 #endif  // DART_DRIVERS_HPP_
