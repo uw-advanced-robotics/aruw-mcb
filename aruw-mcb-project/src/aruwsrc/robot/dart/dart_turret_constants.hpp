@@ -27,8 +27,9 @@
 
 namespace aruwsrc::control::turret
 {
-static constexpr uint8_t NUM_TURRETS = 1;
 
+//These are needed to not break vision coprocessor 🤷‍♂️, temp fix to issue
+static constexpr uint8_t NUM_TURRETS = 1;
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
