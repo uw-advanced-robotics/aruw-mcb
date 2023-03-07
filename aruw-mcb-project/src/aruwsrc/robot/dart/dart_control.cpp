@@ -20,7 +20,6 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -59,12 +58,57 @@ HoldRepeatCommandMapping rightSwitchDown(
     drivers(),
     {&dartCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-	true);
+    true);
+
+aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* only being used for the encoder motor */
 tap::motor::DjiMotor deadMotor1(drivers(), DEAD_MOTOR1, CAN_BUS_MOTORS, false, "Pitch Turret");
 tap::motor::DjiMotor deadMotor2(drivers(), DEAD_MOTOR2, CAN_BUS_MOTORS, false, "Pitch Turret");
 
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+void initializeSubsystems()
+{
+    dart.initialize();
+    buzzer.initialize();
+}
+
+void registerDartSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.registerSubsystem(&dart);
+    drivers->commandScheduler.registerSubsystem(&buzzer);
+}
+
+void setDefaultDartCommands(Drivers* drivers)
+{
+    dart.setDefaultCommand(&dartCommand);
+    buzzer.setDefaultCommand(&lowBatteryCommand);
+}
+
+void startDartCommands(Drivers* drivers)
+{
+    drivers->commandScheduler.addCommand(&dartCommand);
+    drivers->commandScheduler.addCommand(&lowBatteryCommand);
+}
+
+void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
+
 }  // namespace dart_control
+
+namespace aruwsrc::dart
+{
+void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &dart_control::remoteSafeDisconnectFunction);
+    dart_control::initializeSubsystems();
+    dart_control::registerDartSubsystems(drivers);
+    dart_control::setDefaultDartCommands(drivers);
+    dart_control::startDartCommands(drivers);
+    dart_control::registerDartIoMappings(drivers);
+}
+}  // namespace aruwsrc::dart
 
 #endif
