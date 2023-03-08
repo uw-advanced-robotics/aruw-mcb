@@ -17,21 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CONSTANTS_HPP_
-#define TURRET_CONSTANTS_HPP_
+#ifndef DART_SUBSYSTEM_HPP_
+#define DART_SUBSYSTEM_HPP_
 
-#include "aruwsrc/util_macros.hpp"
+#include "limits.h"
 
-#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_HERO_CYCLONE)
-#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#endif
+#include "tap/control/subsystem.hpp"
+#include "tap/motor/dji_motor.hpp"
 
-#endif  // TURRET_CONSTANTS_HPP_
+#define WINDUP_SPEED = SHRT_MAX / 2
+
+namespace aruwsrc::dart
+{
+class DartSubsystem : public tap::control::Subsystem
+{
+public:
+    DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor);
+
+    const char* getName() override { return "Dart"; }
+
+    void windUp();
+
+    void stop();
+
+private:
+    tap::motor::DjiMotor* motor;
+};
+
+}  // namespace aruwsrc::dart
+
+#endif  // DART_SUBSYSTEM_HPP_

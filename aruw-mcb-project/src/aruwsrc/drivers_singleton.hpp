@@ -39,6 +39,9 @@ namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 namespace aruwsrc::engineer
+#elif defined(TARGET_DART)
+#include "aruwsrc/robot/dart/dart_drivers.hpp"
+namespace aruwsrc::dart
 #endif
 {
 /**
