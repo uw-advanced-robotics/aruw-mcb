@@ -90,7 +90,7 @@ void registerDartSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
-void setDefaultDartCommands(Drivers *)
+void setDefaultDartCommands(Drivers*)
 {
     dart.setDefaultCommand(&dartCommand);
     buzzer.setDefaultCommand(&lowBatteryCommand);
