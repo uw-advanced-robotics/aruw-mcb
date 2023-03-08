@@ -28,6 +28,6 @@
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_DART
+#define TARGET_STANDARD_SPIDER
 
 #endif
