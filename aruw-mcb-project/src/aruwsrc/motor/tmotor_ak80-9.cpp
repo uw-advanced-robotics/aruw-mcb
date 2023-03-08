@@ -54,13 +54,18 @@ void Tmotor_AK809::initialize()
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
-    debugMessage = message;
     if ((message.getIdentifier() - 0x2900) != Tmotor_AK809::getMotorIdentifier())
     {
         return;
     }
-    uint16_t encoderActual =
-        static_cast<uint16_t>(message.data[0] << 8 | message.data[1]);        // encoder value
+    uint16_t positionActual =
+        static_cast<uint16_t>(message.data[0] << 8 | message.data[1]);  // position, mDeg
+    /***
+     * WARNING! the AK80-9 outputs position in the range [-32000, 32000]
+     * If the output shaft rotates more than this, then the output value will saturate! The motor
+     * continues to track it's position but you will not get the values over CAN. Try to not
+     * overrotate the motor.
+     */
     shaftRPM = static_cast<int16_t>(message.data[2] << 8 | message.data[3]);  // rpm
     shaftRPM = motorInverted ? -shaftRPM : shaftRPM;
     torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
@@ -69,10 +74,11 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
 
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
-
+    positionActual =
+        positionActual % 3600;  // Motor returns unwrapped position, to a point. don't double dip.
     // invert motor if necessary
-    encoderActual = motorInverted ? ENC_RESOLUTION - 1 - encoderActual : encoderActual;
-    updateEncoderValue(encoderActual);
+    positionActual = motorInverted ? ENC_RESOLUTION - 1 - positionActual : positionActual;
+    updateEncoderValue(positionActual);
 }
 
 void Tmotor_AK809::setDesiredOutput(int32_t desiredOutput)

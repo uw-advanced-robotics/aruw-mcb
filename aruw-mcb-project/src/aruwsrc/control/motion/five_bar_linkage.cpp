@@ -29,7 +29,6 @@
 namespace aruwsrc::control::motion
 {
 FiveBarLinkage::FiveBarLinkage(
-    tap::Drivers* drivers,
     tap::motor::MotorInterface* motor1,
     tap::motor::MotorInterface* motor2,
     FiveBarConfig fiveBarConfig,
@@ -38,12 +37,16 @@ FiveBarLinkage::FiveBarLinkage(
       motor2Pid(motorPidConfig),
       fiveBarConfig(fiveBarConfig)
 {
-    assert(drivers != nullptr);
     assert(motor1 != nullptr);
     assert(motor2 != nullptr);
 }
 
-void FiveBarLinkage::initialize() { desiredPosition = fiveBarConfig.defaultPosition; }
+void FiveBarLinkage::initialize()
+{
+    desiredPosition = fiveBarConfig.defaultPosition;
+    motor1->initialize();
+    motor2->initialize();
+}
 
 void FiveBarLinkage::refresh()
 {
@@ -56,13 +59,19 @@ void FiveBarLinkage::moveMotors()
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
-
+    motorsMoved = dt;
+    debug1 = motor1->getPositionUnwrapped();
+    debug2 = motor1Setpoint;
+    debug3 =
+        motor1Pid.runControllerDerivateError(motor1->getPositionUnwrapped() - motor1Setpoint, dt);
     float motor1Output =
         motor1Pid.runControllerDerivateError(motor1->getPositionUnwrapped() - motor1Setpoint, dt);
+    // motorsMoved = 2;
     motor1->setDesiredOutput(motor1Output);
     float motor2Output =
         motor2Pid.runControllerDerivateError(motor2->getPositionUnwrapped() - motor1Setpoint, dt);
     motor2->setDesiredOutput(motor2Output);
+    motorsMoved = 3;
 }
 
 void FiveBarLinkage::computeMotorAngles()
@@ -70,24 +79,24 @@ void FiveBarLinkage::computeMotorAngles()
     float xp = desiredPosition.getX() +
                fiveBarConfig.motor1toMotor2Length / 2;  // uncenter the computation point
     float c1Inv = tap::algorithms::fastInvSqrt(powf(xp, 2) + powf(desiredPosition.getY(), 2));
+    float c1Squared = powf(xp, 2) + powf(desiredPosition.getY(), 2);
     float c2Inv = tap::algorithms::fastInvSqrt(
         powf(xp, 2) + powf(desiredPosition.getY(), 2) -
         2 * xp * fiveBarConfig.motor1toMotor2Length + powf(fiveBarConfig.motor1toMotor2Length, 2));
+    float c2Squared = powf(xp, 2) + powf(desiredPosition.getY(), 2) -
+                      2 * xp * fiveBarConfig.motor1toMotor2Length +
+                      powf(fiveBarConfig.motor1toMotor2Length, 2);
 
-    this->motor1Setpoint = M_PI + acos(xp * c1Inv) +
-                           acos(
+    this->motor1Setpoint = M_PI + acosf(xp * c1Inv) +
+                           acosf(
                                ((powf(fiveBarConfig.joint1toTipLength, 2) -
-                                 powf(fiveBarConfig.motor1toJoint1Length, 2) - powf(xp, 2) +
-                                 powf(desiredPosition.getY(), 2)) *
+                                 powf(fiveBarConfig.motor1toJoint1Length, 2) - c1Squared) *
                                 c1Inv) /
                                (-2 * fiveBarConfig.motor1toJoint1Length));
-    this->motor2Setpoint = 2 * M_PI - acos((-xp + fiveBarConfig.motor1toMotor2Length) * c2Inv) -
-                           acos(
+    this->motor2Setpoint = 2 * M_PI - acosf((-xp + fiveBarConfig.motor1toMotor2Length) * c2Inv) -
+                           acosf(
                                ((powf(fiveBarConfig.joint2toTipLength, 2) -
-                                 powf(fiveBarConfig.motor2toJoint2Length, 2) -
-                                 (powf(xp, 2) + powf(desiredPosition.getY(), 2) -
-                                  2 * xp * fiveBarConfig.motor1toMotor2Length +
-                                  powf(fiveBarConfig.motor1toMotor2Length, 2))) *
+                                 powf(fiveBarConfig.motor2toJoint2Length, 2) - c2Squared) *
                                 c2Inv) /
                                (-2 * fiveBarConfig.motor2toJoint2Length));
 }

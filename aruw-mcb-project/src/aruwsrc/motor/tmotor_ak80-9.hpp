@@ -75,7 +75,7 @@ class Tmotor_AK809 : public tap::can::CanRxListener, public tap::motor::MotorInt
 {
 public:
     // 14-bit encoder
-    static constexpr uint16_t ENC_RESOLUTION = 16384;
+    static constexpr uint16_t ENC_RESOLUTION = 3600;
 
     /**
      * @param drivers a pointer to the drivers struct
@@ -102,20 +102,31 @@ public:
     mockable ~Tmotor_AK809();
 
     void initialize() override;
-
+    /***
+     * @returns Angular position of motor, unwrapped, in 0.1ths of a Degree
+     */
     int64_t getEncoderUnwrapped() const override;
 
+    /***
+     * @returns Angular position of motor, wrapped from 0 to 3599, in 0.1ths of a Degree
+     */
     uint16_t getEncoderWrapped() const override;
 
     /***
      * @returns Angular position of motor, unwrapped, in radians.
      */
-    float getPositionUnwrapped() const { return getEncoderUnwrapped() * ENC_RESOLUTION / M_TWOPI; };
-    
+    float getPositionUnwrapped() const
+    {
+        return ((float)getEncoderUnwrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
+    };
+
     /***
      * @returns Angular position of motor, wrapped to one rotation, in radians.
      */
-    float getPositionWrapped() const { return getEncoderWrapped() * ENC_RESOLUTION / M_TWOPI; };
+    float getPositionWrapped() const
+    {
+        return ((float)getEncoderWrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
+    };
 
     DISALLOW_COPY_AND_ASSIGN(Tmotor_AK809)
 
@@ -172,31 +183,7 @@ public:
 
     mockable const char* getName() const;
 
-    template <typename T>
-    static void assertEncoderType()
-    {
-        constexpr bool good_type =
-            std::is_same<typename std::decay<T>::type, std::int64_t>::value ||
-            std::is_same<typename std::decay<T>::type, std::uint16_t>::value;
-        static_assert(good_type, "x is not of the correct type");
-    }
-
-    template <typename T>
-    static T degreesToEncoder(float angle)
-    {
-        assertEncoderType<T>();
-        return static_cast<T>((ENC_RESOLUTION * angle) / 360);
-    }
-
-    template <typename T>
-    static float encoderToDegrees(T encoder)
-    {
-        assertEncoderType<T>();
-        return (360.0f * static_cast<float>(encoder)) / ENC_RESOLUTION;
-    }
-
 private:
-    modm::can::Message debugMessage;
     // wait time before the motor is considered disconnected, in milliseconds
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
 
@@ -230,10 +217,10 @@ private:
     bool motorInverted;
 
     /**
-     * The raw encoder value reported by the motor controller. It wraps around from
-     * {0..8191}, hence "Wrapped"
+     * The raw position value reported by the motor controller. It wraps around from
+     * {0..3599}, hence "Wrapped"
      */
-    uint16_t encoderWrapped;
+    float encoderWrapped;
 
     /**
      * Absolute unwrapped encoder position =

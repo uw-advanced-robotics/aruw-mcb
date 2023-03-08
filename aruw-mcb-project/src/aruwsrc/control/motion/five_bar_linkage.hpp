@@ -47,7 +47,6 @@ class FiveBarLinkage
 {
 public:
     FiveBarLinkage(
-        tap::Drivers* drivers,
         tap::motor::MotorInterface* motor1,
         tap::motor::MotorInterface* motor2,
         FiveBarConfig fiveBarConfig,
@@ -55,11 +54,19 @@ public:
 
     void initialize();
 
-    inline void setDesiredPosition(modm::Vector2f desiredPosition){
+    inline void setDesiredPosition(modm::Vector2f desiredPosition)
+    {
         this->desiredPosition = desiredPosition;
     };
 
+    inline void setDesiredPosition(float x, float y)
+    {
+        this->desiredPosition = modm::Vector2f(x, y);
+    };
+
     modm::Vector2f getDesiredPosition() { return desiredPosition; };
+
+    modm::Vector2f getDefaultPosition() { return fiveBarConfig.defaultPosition; };
 
     modm::Location2D<float> getCurrentPosition() { return currentPosition; };
 
@@ -90,8 +97,6 @@ private:
      */
     modm::Vector2f desiredPosition;
 
-    FiveBarConfig fiveBarConfig;
-
     tap::algorithms::SmoothPidConfig motorPidConfig;
 
     tap::motor::MotorInterface* motor1;
@@ -100,6 +105,8 @@ private:
     tap::algorithms::SmoothPid motor1Pid;
     tap::algorithms::SmoothPid motor2Pid;
 
+    FiveBarConfig fiveBarConfig;
+
     uint32_t prevTime = 0;
 
     float motor1Setpoint;
@@ -107,6 +114,16 @@ private:
 
     void moveMotors();
 
+    int motorsMoved = 0;
+
+    float debug1 = 0;
+    float debug2 = 0;
+    float debug3 = 0;
+
+    /***
+     * There's some magic numbers going on here
+     * do the math if you want to
+     */
     void computeMotorAngles();
 
 };  // class FiveBarLinkageSubsystem
