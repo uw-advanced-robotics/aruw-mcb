@@ -17,21 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CONSTANTS_HPP_
-#define TURRET_CONSTANTS_HPP_
+#ifndef DART_COMMAND_HPP_
+#define DART_COMMAND_HPP_
 
-#include "aruwsrc/util_macros.hpp"
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
-#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_HERO_CYCLONE)
-#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
+#include "aruwsrc/robot/dart/dart_subsystem.hpp"
+
+namespace aruwsrc::dart
+{
+class DartCommand : public tap::control::Command
+{
+public:
+    DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers);
+
+    void initialize() override {}
+
+    void execute() override;
+
+    bool isFinished() const override { return true; }
+
+    void end(bool interrupt) override;
+
+    const char* getName() const override { return "Dart command"; }
+
+private:
+    aruwsrc::dart::DartSubsystem& dartSubsystem;
+    tap::Drivers* drivers;
+};
+
+}  // namespace aruwsrc::dart
+
 #endif
-
-#endif  // TURRET_CONSTANTS_HPP_

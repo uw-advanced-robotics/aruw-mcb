@@ -75,6 +75,7 @@ before_script:
             aruwsrc/robot/sentry/sentry_control.cpp
             aruwsrc/robot/standard/standard_control.cpp
             aruwsrc/robot/drone/drone_control.cpp
+            aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             main.cpp
 
@@ -334,6 +335,26 @@ before_script:
     - .test_build
   variables:
     ROBOT: SENTRY_BEEHIVE
+
+# Dart Build
+
+"Dart: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: DART
+
+"Dart: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: DART
+
+"Dart: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: DART
 
 # Pages deploy
 

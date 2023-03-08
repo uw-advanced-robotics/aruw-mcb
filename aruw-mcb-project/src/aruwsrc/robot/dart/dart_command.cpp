@@ -17,21 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_CONSTANTS_HPP_
-#define TURRET_CONSTANTS_HPP_
+#include "dart_command.hpp"
 
-#include "aruwsrc/util_macros.hpp"
+#include "tap/drivers.hpp"
 
-#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_HERO_CYCLONE)
-#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#endif
+namespace aruwsrc::dart
+{
+DartCommand::DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers)
+    : dartSubsystem(dartSubsystem),
+      drivers(drivers)
+{
+    addSubsystemRequirement(&dartSubsystem);
+}
 
-#endif  // TURRET_CONSTANTS_HPP_
+void DartCommand::execute() { dartSubsystem.windUp(); }
+
+void DartCommand::end(bool) { dartSubsystem.stop(); }
+
+}  // namespace aruwsrc::dart
