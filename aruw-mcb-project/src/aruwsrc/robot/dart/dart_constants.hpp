@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see https://www.gnu.org/licenses/.
  */
-#ifndef DART_CONSTANTSHPP
-#define DART_CONSTANTSHPP
+#ifndef DART_CONSTANTS_HPP_
+#define DART_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
