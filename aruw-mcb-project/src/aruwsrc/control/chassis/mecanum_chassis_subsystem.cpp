@@ -35,10 +35,10 @@ namespace chassis
 {
 MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorId leftFrontMotorId,
-    tap::motor::MotorId leftBackMotorId,
-    tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
+    tap::motor::DjiMotor& leftFrontMotorId,
+    tap::motor::DjiMotor& leftBackMotorId,
+    tap::motor::DjiMotor& rightFrontMotorId,
+    tap::motor::DjiMotor& rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
     : Holonomic4MotorChassisSubsystem(
           drivers,

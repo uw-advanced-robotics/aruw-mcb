@@ -39,7 +39,11 @@ namespace tap::algorithms
 class Transformer
 {
 public:
-    Transformer() {}
+    /**
+     * Instantiate a new Transformer
+     */
+    Transformer() {};
+
     // Disable copy constructor and assignment
     Transformer(const Transformer& other) = delete;
     Transformer& operator=(const Transformer& other) = delete;

@@ -77,6 +77,7 @@
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -135,7 +136,17 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
+
+// ============ Motors for chassis subsystem + chassis ==================
+// aruwsrc::chassis::LEFT_FRONT_MOTOR_ID;
+
+tap::motor::DjiMotor leftFrontMotor(drivers(), aruwsrc::chassis::LEFT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left front drive motor");
+tap::motor::DjiMotor leftBackMotor(drivers(), aruwsrc::chassis::LEFT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left back drive motor");
+tap::motor::DjiMotor rightFrontMotor(drivers(), aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor");
+tap::motor::DjiMotor rightBackMotor(drivers(), aruwsrc::chassis::RIGHT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right back drive motor");
+
+aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
+// ============= end  modifications ===========================
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
@@ -376,13 +387,6 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 
-/* Standard transformer =====================================================*/
-aruwsrc::algorithms::StandardTransformer standardTransformer(
-  chassis,
-  drivers()->mpu6500,
-  getTurretMCBCanComm()
-);
-
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
@@ -539,6 +543,8 @@ void startStandardCommands(Drivers *drivers)
         &sentryResponseHandler);
 
     drivers->commandScheduler.addCommand(&lowBatteryCommand);
+
+    drivers->transformer.registerMotors(&rightFrontMotor, &leftFrontMotor, &rightBackMotor, &leftBackMotor);
 }
 
 /* register io mappings here ------------------------------------------------*/

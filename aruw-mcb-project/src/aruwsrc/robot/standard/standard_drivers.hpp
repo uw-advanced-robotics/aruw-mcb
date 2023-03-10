@@ -36,6 +36,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/algorithms/transforms/standard_transformer.hpp"
 #endif
 
 namespace aruwsrc::standard
@@ -54,7 +55,9 @@ public:
           oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          transformer(this->mpu6500, turretMCBCanCommBus1)
+          
     {
     }
 
@@ -73,6 +76,8 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    algorithms::StandardTransformer transformer;
+
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

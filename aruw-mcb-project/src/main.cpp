@@ -46,6 +46,22 @@
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
+
+// for looking at our odometry values
+#include "modm/math/geometry/vector3.hpp"
+
+static float chassisX = 0.0;
+static float chassisY = 0.0;
+static float chassisZ = 0.0;
+
+static float chassisRoll = 0.0;
+static float chassisPitch = 0.0;
+static float chassisYaw = 0.0;
+
+static float turretRoll = 0.0;
+static float turretPitch = 0.0;
+static float turretYaw = 0.0;
+
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
@@ -89,6 +105,23 @@ int main()
 
     while (1)
     {
+
+        modm::Vector3f& chassisWorldPosition = drivers->transformer.chassisWorldPosition;
+        modm::Vector3f& chassisWorldOrientation = drivers->transformer.chassisWorldOrientation;
+        modm::Vector3f& turretWorldOrientation = drivers->transformer.turretWorldOrientation;
+
+        chassisX = chassisWorldPosition.getX();
+        chassisY = chassisWorldPosition.getX();
+        chassisZ = chassisWorldPosition.getX();
+
+        chassisRoll = chassisWorldOrientation.getX();
+        chassisPitch = chassisWorldOrientation.getY();
+        chassisYaw = chassisWorldOrientation.getZ();
+
+        turretRoll = turretWorldOrientation.getX();
+        turretPitch = turretWorldOrientation.getY();
+        turretYaw = turretWorldOrientation.getZ();
+
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
@@ -113,6 +146,10 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+
+#if defined(ALL_STANDARDS)
+            PROFILE(drivers->profiler, drivers->transformer.update, ());
 #endif
         }
         modm::delay_us(10);

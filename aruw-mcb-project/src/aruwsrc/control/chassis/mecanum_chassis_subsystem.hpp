@@ -44,10 +44,10 @@ class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
 public:
     MecanumChassisSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
+        tap::motor::DjiMotor& leftFrontMotorId,
+        tap::motor::DjiMotor& leftBackMotorId,
+        tap::motor::DjiMotor& rightFrontMotorId,
+        tap::motor::DjiMotor& rightBackMotorId,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 };
 

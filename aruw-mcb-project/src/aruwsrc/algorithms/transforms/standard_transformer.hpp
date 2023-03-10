@@ -19,8 +19,6 @@
 
 #ifndef STANDARD_TRANSFORMER_HPP_
 #define STANDARD_TRANSFORMER_HPP_
-// NOTE: this implementation wraps kfodometry to try to mimic the behavior
-// 
 
 // libraries needed by transforms
 #include "tap/algorithms/transforms/transformer.hpp"
@@ -40,8 +38,7 @@
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-
-
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -59,13 +56,7 @@ namespace aruwsrc::algorithms
         */
         StandardTransformer
         (      
-        aruwsrc::chassis::MecanumChassisSubsystem &chassis,
-        // const tap::motor::DjiMotor& leftBackMotor,
-        // const tap::motor::DjiMotor& rightBackMotor,
-        // const tap::motor::DjiMotor& leftFrontMotor,
-        // const tap::motor::DjiMotor& rightFrontMotor,
-        tap::communication::sensors::imu::ImuInterface& chassisImu,
-        // tap::communication::sensors::imu::ImuInterface& turretImu
+        tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
         aruwsrc::can::TurretMCBCanComm& turretMCB
         );
 
@@ -75,6 +66,16 @@ namespace aruwsrc::algorithms
         */
         void update();
 
+        /**
+         * used to get const references to the instantiated motors
+         * must be called before the standard transformer can do anything.
+         * 
+        */
+        void registerMotors(const tap::motor::DjiMotor* rightFrontMotor, 
+                  const tap::motor::DjiMotor* leftFrontMotor, 
+                  const tap::motor::DjiMotor* rightBackMotor, 
+                  const tap::motor::DjiMotor* leftBackMotor);
+        
         enum ChassisVelIndex
         {
             X = 0,
@@ -90,7 +91,16 @@ namespace aruwsrc::algorithms
             NUM_MOTORS,
         };
 
-        modm::Matrix<float, 2, 4> wheelVelToChassisVelMat;
+        // x,y,z location of chassis in world frame
+        modm::Vector3f chassisWorldPosition;
+
+        // rotation of chassis about x, y, z axes in world frame
+        // (roll, pitch, yaw)
+        modm::Vector3f chassisWorldOrientation;
+
+        // rotation of chassis about x, y, z axes in world frame
+        // (roll, pitch, yaw)
+        modm::Vector3f turretWorldOrientation;
 
         /**
          * Get World to Chassis transform
@@ -169,15 +179,16 @@ namespace aruwsrc::algorithms
         Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
         // References to all devices necessary for tracking odometry
-        aruwsrc::chassis::MecanumChassisSubsystem& chassis;
-        // const tap::motor::DjiMotor& leftBackMotor;
-        // const tap::motor::DjiMotor& rightBackMotor;
-        // const tap::motor::DjiMotor& leftFrontMotor;
-        // const tap::motor::DjiMotor& rightFrontMotor;
+        // Motors are initially empty pointers
+        const tap::motor::DjiMotor* leftBackMotor = nullptr;
+        const tap::motor::DjiMotor* rightBackMotor = nullptr;
+        const tap::motor::DjiMotor* leftFrontMotor = nullptr;
+        const tap::motor::DjiMotor* rightFrontMotor = nullptr;
         tap::communication::sensors::imu::ImuInterface& chassisImu;
-        // tap::communication::sensors::imu::ImuInterface& turretImu;
         aruwsrc::can::TurretMCBCanComm& turretMCB;
 
+        // matrix for computing mecanum velocity
+        modm::Matrix<float, 2, 4> wheelVelToChassisVelMat;
 
         // kalman filter stuff for keeping track of chassis position
         enum class OdomState
@@ -277,16 +288,7 @@ namespace aruwsrc::algorithms
         // Kalman filter for keeping track of chassis (x, y, z)
         tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-        // x,y,z location of chassis in world frame
-        modm::Vector3f chassisWorldPosition;
 
-        // rotation of chassis about x, y, z axes in world frame
-        // (roll, pitch, yaw)
-        modm::Vector3f chassisWorldOrientation;
-
-        // rotation of chassis about x, y, z axes in world frame
-        // (roll, pitch, yaw)
-        modm::Vector3f turretWorldOrientation;
 
         void updateInternalOdomFromKF();
 

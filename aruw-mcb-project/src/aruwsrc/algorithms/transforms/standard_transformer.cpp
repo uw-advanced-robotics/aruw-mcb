@@ -25,27 +25,16 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
-// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
-// TODO: take in pitch motor, yaw motor
-
 namespace aruwsrc::algorithms {
 
     StandardTransformer::StandardTransformer
     (
-        aruwsrc::chassis::MecanumChassisSubsystem& chassis,
-        // const tap::motor::DjiMotor& leftBackMotor,
-        // const tap::motor::DjiMotor& rightBackMotor,
-        // const tap::motor::DjiMotor& leftFrontMotor,
-        // const tap::motor::DjiMotor& rightFrontMotor,
-        tap::communication::sensors::imu::ImuInterface& chassisImu,
-        // tap::communication::sensors::imu::ImuInterface& turretImu
+        tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
         aruwsrc::can::TurretMCBCanComm& turretMCB
     )
     :
@@ -68,19 +57,14 @@ namespace aruwsrc::algorithms {
     chassisToTurretIMUTransform(Transform<ChassisFrame,TurretIMUFrame>(0., 0., 401.44, 0., 0., 0.)),
     chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame> (105.68, 0., 121.72, 0., 0., 0.)),
 
-    chassis(chassis),
-    // leftBackMotor(leftBackMotor),
-    // rightBackMotor(rightBackMotor),
-    // leftFrontMotor(leftFrontMotor),
-    // rightFrontMotor(rightFrontMotor),
     chassisImu(chassisImu),
-    // turretImu(turretImu),
     turretMCB(turretMCB),
     kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
           chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
     {  
+        // Set up mecanum to 2d velocity matrix
         wheelVelToChassisVelMat[X][LF] = 1;
         wheelVelToChassisVelMat[X][RF] = -1;
         wheelVelToChassisVelMat[X][LB] = 1;
@@ -91,11 +75,24 @@ namespace aruwsrc::algorithms {
         wheelVelToChassisVelMat[Y][RB] = 1;
     }
 
+
     void StandardTransformer::update() {
         // update odometry so it can be used to update
         updateOdometry();
         // update transforms with odometry data
         updateTransforms();
+    }
+
+    void StandardTransformer::registerMotors(
+                const tap::motor::DjiMotor* rightFrontMotor, 
+                const tap::motor::DjiMotor* leftFrontMotor, 
+                const tap::motor::DjiMotor* rightBackMotor, 
+                const tap::motor::DjiMotor* leftBackMotor) 
+    {
+        this->rightFrontMotor = rightFrontMotor;
+        this->leftFrontMotor = leftFrontMotor;
+        this->rightBackMotor = rightBackMotor;
+        this->leftBackMotor = leftBackMotor;
     }
 
     const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform() {
@@ -207,6 +204,8 @@ namespace aruwsrc::algorithms {
       // a more sophisticated way for more accurate transforms
       // so all turret to something transforms don't work 
       // if chassis is rolling (maybe also pitching )
+
+      // fix: add/subtract rotations from chassis mcb
       turretWorldOrientation.setX(0);
       turretWorldOrientation.setY(turretMCB.getPitch());
       turretWorldOrientation.setZ(turretMCB.getYaw());
@@ -251,24 +250,26 @@ namespace aruwsrc::algorithms {
 
     modm::Matrix<float, 3, 1> StandardTransformer::getActualVelocityChassisRelative() {
         modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
+        modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>();
 
-        // wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
-        // wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
-        // wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
-        // wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
+        // if motors haven't been registered
+        if (leftBackMotor == nullptr) return chassisVelocity.zeroMatrix();
 
-        wheelVelocity[LF][0] = chassis.getLeftFrontRpmActual();
-        wheelVelocity[RF][0] = chassis.getRightFrontRpmActual();
-        wheelVelocity[LB][0] = chassis.getLeftBackRpmActual();
-        wheelVelocity[RB][0] = chassis.getRightBackRpmActual();
+        // if motors aren't online yet
+        if (!leftBackMotor->isMotorOnline() || !rightBackMotor->isMotorOnline()
+        || !leftFrontMotor->isMotorOnline() || !rightFrontMotor->isMotorOnline())
+            return chassisVelocity.zeroMatrix();
 
+        wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
+        wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
+        wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
+        wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
 
         modm::Matrix<float, 2, 1> planarXYVelocity = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
-        modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>();
 
         chassisVelocity[0][0] = planarXYVelocity[0][0];
         chassisVelocity[1][0] = planarXYVelocity[1][0];
-        chassisVelocity[1][0] = 0;
+        chassisVelocity[1][0] = 0; // z-component *should* always be 0 (unless chassis jumps upwards ??)
         return chassisVelocity;
     }
 

@@ -39,10 +39,10 @@ namespace chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorId leftFrontMotorId,
-    tap::motor::MotorId leftBackMotorId,
-    tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
+    tap::motor::DjiMotor& leftFrontMotorId,
+    tap::motor::DjiMotor& leftBackMotorId,
+    tap::motor::DjiMotor& rightFrontMotorId,
+    tap::motor::DjiMotor& rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       velocityPid{
@@ -70,10 +70,10 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
-      leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
-      rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
-      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
+      leftFrontMotor(leftFrontMotor),
+      leftBackMotor(leftBackMotor),
+      rightFrontMotor(rightFrontMotor),
+      rightBackMotor(rightBackMotor)
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
