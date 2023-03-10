@@ -111,8 +111,6 @@ private:
         bool* validMotorMessage);
 
     void removeFromMotorManager(const Tmotor_AK809& motor, Tmotor_AK809** motorStore);
-    
-    modm::can::Message debugmessage;
 
 };
 

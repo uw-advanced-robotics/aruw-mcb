@@ -114,7 +114,6 @@ void TMotorTxHandler::serializeMotorStoreSendData(
     {
         motor->serializeCanSendData(message);
         *validMotorMessage = true;
-        this->debugmessage = *message;
     }
 }
 

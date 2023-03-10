@@ -36,14 +36,13 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/motion/five_bar_motion_subsystem.hpp"
+#include "aruwsrc/control/motion/five_bar_move_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
-#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 #include "aruwsrc/robot/testbed/spin_motor_command.hpp"
 #include "aruwsrc/robot/testbed/testbed_constants.hpp"
 #include "aruwsrc/robot/testbed/tmotor_subsystem.hpp"
@@ -64,6 +63,8 @@ using namespace aruwsrc::control;
  *      Drivers class to all of these objects.
  */
 aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+using namespace aruwsrc::control;
+using namespace aruwsrc::chassis;
 
 namespace testbed_control
 {
@@ -83,15 +84,24 @@ aruwsrc::motor::Tmotor_AK809 legmotorLR(
     false,
     "LeftRear Leg");
 
-aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
-aruwsrc::testbed::TMotorSubsystem motorSubsystemLR(drivers(), &legmotorLR);
+// aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
+// aruwsrc::testbed::TMotorSubsystem motorSubsystemLR(drivers(), &legmotorLR);
 
-aruwsrc::testbed::SpinMotorCommand spinMotorLF(drivers(), &motorSubsystemLF, 500);
-aruwsrc::testbed::SpinMotorCommand spinMotorLR(drivers(), &motorSubsystemLR, -500);
+// aruwsrc::testbed::SpinMotorCommand spinMotorLF(drivers(), &motorSubsystemLF, 500);
+// aruwsrc::testbed::SpinMotorCommand spinMotorLR(drivers(), &motorSubsystemLR, -500);
+
+motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
+    drivers(),
+    &legmotorLF,
+    &legmotorLR,
+    FIVE_BAR_CONFIG,
+    LEG_MOTOR_PID_CONFIG);
+
+motion::FiveBarMoveCommand moveFiveBarLeft(drivers(), &fiveBarSubsystemLeft);
 
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&spinMotorLF, &spinMotorLR},
+    {},
     RemoteMapState(
         tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
         tap::communication::serial::Remote::SwitchState::UP));
@@ -102,15 +112,17 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerTestbedSubsystems(aruwsrc::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&motorSubsystemLF);
-    drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
+    // drivers->commandScheduler.registerSubsystem(&motorSubsystemLF);
+    // drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
+    drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemLeft);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    motorSubsystemLF.initialize();
-    motorSubsystemLR.initialize();
+    // motorSubsystemLF.initialize();
+    // motorSubsystemLR.initialize();
+    fiveBarSubsystemLeft.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
