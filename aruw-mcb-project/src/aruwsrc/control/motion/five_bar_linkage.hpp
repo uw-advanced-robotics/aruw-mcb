@@ -73,20 +73,24 @@ private:
      * X+ = from motor 2 to motor 1
      * Y+ = to the left of x+
      * orientation = angle of motor link (x+ side)
-     *      (M2)  y+ ^     (M1)
-     *          _____|______         x+ ->
-     *         /           \
-     *      ./              \.
-     *       \              /
+     *      (M2)  y+ ^  (M1)
+     *          ____|____         x+ ->
+     *         /         \
+     *        /           \
+     *       /             \
+     *      O               O
+     *       \             / (orientation)
      *        \           /
-     *          \       / (orientation)
+     *         \         /
+     *          \       /
+     *           \     /
      *            \   /
      *              O
      */
     modm::Location2D<float> currentPosition;
 
     /**
-     * Desired position. See sign convention above     *
+     * Desired position. See sign convention above.
      */
     modm::Vector2f desiredPosition;
 
