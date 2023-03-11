@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_COMMAND_HPP_
-#define DART_COMMAND_HPP_
+#ifndef LOAD_COMMAND_HPP_
+#define LOAD_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
@@ -27,10 +27,10 @@
 
 namespace aruwsrc::dart
 {
-class DartCommand : public tap::control::Command
+class LoadCommand : public tap::control::Command
 {
 public:
-    DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers);
+    LoadCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers);
 
     void initialize() override {}
 
@@ -40,7 +40,7 @@ public:
 
     void end(bool interrupt) override;
 
-    const char* getName() const override { return "Launch command"; }
+    const char* getName() const override { return "Load command"; }
 
 private:
     aruwsrc::dart::DartSubsystem& dartSubsystem;

@@ -26,6 +26,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_command.hpp"
+#include "aruwsrc/robot/dart/load_command.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_subsystem.hpp"
@@ -48,14 +49,15 @@ namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DjiMotor loadMotor(drivers(), LOAD_MOTOR_ID, CAN_BUS_MOTORS, false, "Loading Turret");
 
-DartSubsystem dart(drivers(), &pullMotor);
+DartSubsystem dart(drivers(), &pullMotor, &loadMotor, &loadMotor, &loadMotor);
 
-DartCommand dartCommand(dart, drivers());
+DartCommand launchCommand(dart, drivers());
 
 HoldRepeatCommandMapping rightSwitchDown(
     drivers(),
-    {&dartCommand},
+    {&launchCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
     true);
 
@@ -92,13 +94,13 @@ void registerDartSubsystems(Drivers* drivers)
 
 void setDefaultDartCommands(Drivers*)
 {
-    dart.setDefaultCommand(&dartCommand);
+    dart.setDefaultCommand(&launchCommand);
     buzzer.setDefaultCommand(&lowBatteryCommand);
 }
 
 void startDartCommands(Drivers* drivers)
 {
-    drivers->commandScheduler.addCommand(&dartCommand);
+    drivers->commandScheduler.addCommand(&launchCommand);
     drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 

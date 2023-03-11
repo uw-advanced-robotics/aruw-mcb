@@ -30,6 +30,8 @@ namespace aruwsrc::control::turret
 {
 static constexpr tap::motor::MotorId PULL_MOTOR_ID =
     tap::motor::MOTOR6;  // TODO: update correct motor
+static constexpr tap::motor::MotorId LOAD_MOTOR_ID =
+    tap::motor::MOTOR3;  // TODO: update correct motor
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;

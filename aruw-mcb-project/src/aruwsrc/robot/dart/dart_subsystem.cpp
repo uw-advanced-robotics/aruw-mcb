@@ -23,14 +23,25 @@
 
 namespace aruwsrc::dart
 {
-DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
+DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor1,
+                            tap::motor::DjiMotor* motor2, tap::motor::DjiMotor* motor3, tap::motor::DjiMotor* motor4)
     : Subsystem(drivers),
-      motor(motor)
+      motor1(motor1),
+      motor2(motor2),
+      motor3(motor3),
+      motor4(motor4),
 {
 }
 
-void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
+void DartSubsystem::windUp() { motor1->setDesiredOutput(WINDUP_SPEED); }
 
-void DartSubsystem::stop() { motor->setDesiredOutput(0); }
+void DartSubsystem::load() 
+{
+  motor2->setDesiredOutput(LOAD_OUTPUT);
+  motor3->setDesiredOutput(LOAD_OUTPUT);
+  motor4->setDesiredOutput(LOAD_OUTPUT);
+}
+
+void DartSubsystem::stop() { motor1->setDesiredOutput(0); }
 
 }  // namespace aruwsrc::dart

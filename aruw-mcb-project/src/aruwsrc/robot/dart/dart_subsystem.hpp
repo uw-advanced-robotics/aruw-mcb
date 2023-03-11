@@ -25,23 +25,30 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#define WINDUP_SPEED = SHRT_MAX / 2
+#define WINDUP_SPEED SHRT_MAX / 2
+#define LOAD_OUTPUT 40
 
 namespace aruwsrc::dart
 {
 class DartSubsystem : public tap::control::Subsystem
 {
 public:
-    DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor);
+    DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor1, 
+                  tap::motor::DjiMotor* motor2, tap::motor::DjiMotor* motor3, tap::motor::DjiMotor* motor4);
 
     const char* getName() override { return "Dart"; }
 
     void windUp();
 
+    void load();
+
     void stop();
 
 private:
-    tap::motor::DjiMotor* motor;
+    tap::motor::DjiMotor* motor1; // Pull Motor
+    tap::motor::DjiMotor* motor2; // Loading motors
+    tap::motor::DjiMotor* motor3;
+    tap::motor::DjiMotor* motor4;
 };
 
 }  // namespace aruwsrc::dart
