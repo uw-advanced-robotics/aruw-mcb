@@ -31,6 +31,7 @@
 #include "robot_turret_subsystem_mock.hpp"
 #include "sentry_drive_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
+#include "tmotor_tx_handler_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
@@ -39,7 +40,6 @@
 #include "turret_subsystem_mock.hpp"
 #include "vision_coprocessor_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
-
 // A file for listing all mock constructors and destructors since doing
 // so in a source file allows for faster compilation than defining constructors
 // in the headers
@@ -213,14 +213,18 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(
-            getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getValue());
-    });
+        .WillByDefault(
+            [&](const float setpoint, const float measurement) {
+                return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
+                    .difference(setpoint);
+            });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]() {
+                return getValidMinError(
+                    getChassisFrameSetpoint(),
+                    getChassisFrameMeasuredAngle().getValue());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}
@@ -287,5 +291,11 @@ CvOnTargetGovernorMock::CvOnTargetGovernorMock(
           mode)
 {
 }
+
+TMotorTxHandlerMock::TMotorTxHandlerMock(aruwsrc::Drivers *drivers)
+    : aruwsrc::mock::TMotorTxHandlerMock(drivers)
+{
+}
+TMotorTxHandlerMock::~TMotorTxHandlerMock() {}
 
 }  // namespace aruwsrc::mock

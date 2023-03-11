@@ -29,6 +29,7 @@
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
+#include "aruwsrc/mock/tmotor_tx_handler_mock.hpp"
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
@@ -67,6 +68,7 @@ public:
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
+    testing::NiceMock<mock::TMotorTxHandlerMock> tMotorTxHandler;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
