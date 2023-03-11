@@ -39,10 +39,10 @@ namespace chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DjiMotor& leftFrontMotorId,
-    tap::motor::DjiMotor& leftBackMotorId,
-    tap::motor::DjiMotor& rightFrontMotorId,
-    tap::motor::DjiMotor& rightBackMotorId,
+    tap::motor::DjiMotor& leftFrontMotor,
+    tap::motor::DjiMotor& leftBackMotor,
+    tap::motor::DjiMotor& rightFrontMotor,
+    tap::motor::DjiMotor& rightBackMotor,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       velocityPid{

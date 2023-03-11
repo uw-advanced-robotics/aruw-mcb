@@ -89,6 +89,9 @@ namespace aruwsrc::algorithms {
                 const tap::motor::DjiMotor* rightBackMotor, 
                 const tap::motor::DjiMotor* leftBackMotor) 
     {
+        //  /TODO change this
+        float initialVals[9] = {0,0,0,0,0,0,0,0,0};
+        this->kf.init(initialVals);       
         this->rightFrontMotor = rightFrontMotor;
         this->leftFrontMotor = leftFrontMotor;
         this->rightBackMotor = rightBackMotor;

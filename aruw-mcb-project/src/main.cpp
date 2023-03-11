@@ -43,6 +43,7 @@
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
@@ -50,17 +51,32 @@ static constexpr float MAHONY_KP = 0.1f;
 // for looking at our odometry values
 #include "modm/math/geometry/vector3.hpp"
 
-static float chassisX = 0.0;
-static float chassisY = 0.0;
-static float chassisZ = 0.0;
+float chassisXS = 5.0;
+float chassisYS = 5.0;
+float chassisZS = 5.0;
 
-static float chassisRoll = 0.0;
-static float chassisPitch = 0.0;
-static float chassisYaw = 0.0;
+float chassisRollS = 0.0;
+float chassisPitchS = 0.0;
+float chassisYawS = 0.0;
 
-static float turretRoll = 0.0;
-static float turretPitch = 0.0;
-static float turretYaw = 0.0;
+float turretRollS = 0.0;
+float turretPitchS = 0.0;
+float turretYawS = 0.0;
+
+
+float chassisXO = 0.0;
+float chassisYO = 0.0;
+
+
+// static float chassisZO = 0.0;
+
+// static float chassisRollO = 0.0;
+// static float chassisPitchO = 0.0;
+// static float chassisYawO = 0.0;
+
+// static float turretRollO = 0.0;
+// static float turretPitchO = 0.0;
+// static float turretYawO = 0.0;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
@@ -105,22 +121,31 @@ int main()
 
     while (1)
     {
-
         modm::Vector3f& chassisWorldPosition = drivers->transformer.chassisWorldPosition;
         modm::Vector3f& chassisWorldOrientation = drivers->transformer.chassisWorldOrientation;
         modm::Vector3f& turretWorldOrientation = drivers->transformer.turretWorldOrientation;
 
-        chassisX = chassisWorldPosition.getX();
-        chassisY = chassisWorldPosition.getX();
-        chassisZ = chassisWorldPosition.getX();
+        chassisXS = chassisWorldPosition.getX();
+        chassisYS = chassisWorldPosition.getY();
+        chassisZS = chassisWorldPosition.getZ();
 
-        chassisRoll = chassisWorldOrientation.getX();
-        chassisPitch = chassisWorldOrientation.getY();
-        chassisYaw = chassisWorldOrientation.getZ();
+        // chassisXS = 5.0f;
 
-        turretRoll = turretWorldOrientation.getX();
-        turretPitch = turretWorldOrientation.getY();
-        turretYaw = turretWorldOrientation.getZ();
+        chassisRollS = chassisWorldOrientation.getX();
+        chassisPitchS = chassisWorldOrientation.getY();
+        chassisYawS = chassisWorldOrientation.getZ();
+
+        turretRollS = turretWorldOrientation.getX();
+        turretPitchS = turretWorldOrientation.getY();
+        turretYawS = turretWorldOrientation.getZ();
+
+        // TODO: get odometry values
+        // in odometry subsystem we need to get public refernces to 
+        // stored odoemstry stuff
+        
+        modm::Location2D<float> odomLoc = drivers->removeThisOdom->getCurrentLocation2D();
+        chassisXO = odomLoc.getX();
+        chassisYO = odomLoc.getY();
 
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
