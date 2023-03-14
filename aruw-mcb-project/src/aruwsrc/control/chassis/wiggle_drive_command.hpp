@@ -45,7 +45,7 @@ public:
         tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::ControlOperatorInterface* operatorInterface);
+        aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
     void initialize() override;
 
@@ -95,7 +95,7 @@ private:
     tap::Drivers* drivers;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
-    aruwsrc::control::ControlOperatorInterface* operatorInterface;
+    aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
     tap::algorithms::Ramp rotationSpeedRamp;
 
