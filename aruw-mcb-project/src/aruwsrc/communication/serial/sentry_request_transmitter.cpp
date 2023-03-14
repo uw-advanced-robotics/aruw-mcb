@@ -19,13 +19,13 @@
 
 #include "sentry_request_transmitter.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
 {
-SentryRequestTransmitter::SentryRequestTransmitter(aruwsrc::Drivers *drivers)
+SentryRequestTransmitter::SentryRequestTransmitter(tap::Drivers *drivers)
     : drivers(drivers),
       refSerialTransmitter(drivers)
 {

@@ -21,10 +21,12 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -37,7 +39,13 @@ static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
 class ChassisImuDriveCommandTest : public Test
 {
 protected:
-    ChassisImuDriveCommandTest() : drivers(), chassis(&drivers), robotData{} {}
+    ChassisImuDriveCommandTest()
+        : drivers(),
+          chassis(&drivers),
+          controlOperatorInterface(&drivers),
+          robotData{}
+    {
+    }
 
     void SetUp() override
     {
@@ -56,13 +64,14 @@ protected:
 
     void setupUserInput(float userX, float userY, float userR)
     {
-        ON_CALL(drivers.controlOperatorInterface, getChassisXInput).WillByDefault(Return(userX));
-        ON_CALL(drivers.controlOperatorInterface, getChassisYInput).WillByDefault(Return(userY));
-        ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(userR));
+        ON_CALL(controlOperatorInterface, getChassisXInput).WillByDefault(Return(userX));
+        ON_CALL(controlOperatorInterface, getChassisYInput).WillByDefault(Return(userY));
+        ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(userR));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis;
+    NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     Mpu6500::ImuState imuState = Mpu6500::ImuState::IMU_CALIBRATED;
     float imuYaw = 0;
@@ -77,7 +86,7 @@ class ChassisImuDriveCommandNoTurretParameterizedTest
 public:
     ChassisImuDriveCommandNoTurretParameterizedTest()
         : ChassisImuDriveCommandTest(),
-          chassisImuDriveCommand(&drivers, &chassis, nullptr)
+          chassisImuDriveCommand(&drivers, &(controlOperatorInterface), &chassis, nullptr)
     {
     }
 
@@ -165,7 +174,7 @@ TEST_P(
     execute__imu_yaw_changes_nonzero_rotation_output)
 {
     // override getChassisRInput, ignore parameterized value
-    ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(0));
+    ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(0));
 
     EXPECT_CALL(chassis, setDesiredOutput(_, _, Ne(0)));
 
@@ -181,7 +190,7 @@ TEST_P(
     execute__if_imu_err_very_large_imu_setpoint_updated)
 {
     // override getChassisRInput, ignore parameterized value
-    ON_CALL(drivers.controlOperatorInterface, getChassisRInput).WillByDefault(Return(0));
+    ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(0));
 
     imuYaw = 0;
     chassisImuDriveCommand.initialize();
@@ -234,7 +243,11 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {
     NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);
-    ChassisImuDriveCommand chassisImuDriveCommand(&drivers, &chassis, &turret.yawMotor);
+    ChassisImuDriveCommand chassisImuDriveCommand(
+        &drivers,
+        &(controlOperatorInterface),
+        &chassis,
+        &turret.yawMotor);
 
     setupUserInput(MAX_SPEED, 0, 0);
 

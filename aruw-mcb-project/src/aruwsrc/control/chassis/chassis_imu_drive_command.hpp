@@ -21,14 +21,12 @@
 #define CHASSIS_IMU_DRIVE_COMMAND_HPP_
 
 #include "tap/algorithms/contiguous_float.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -75,7 +73,8 @@ public:
      * turret. If the robot does not have a turret, pass in `nullptr`.
      */
     ChassisImuDriveCommand(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor);
 
@@ -90,7 +89,8 @@ public:
     const char* getName() const override { return "chassis imu drive"; }
 
 private:
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     tap::algorithms::ContiguousFloat rotationSetpoint;

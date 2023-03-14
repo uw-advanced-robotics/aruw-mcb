@@ -24,6 +24,7 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
@@ -49,10 +50,12 @@ public:
     /**
      * @param[in] vs `ViewStack` that this menu is sitting on top of.
      * @param[in] drivers A pointer to the global drivers object.
+     * @param[in] visionCoprocessor A pointer to the global visionCoprocessor object.
      */
     CVMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+        tap::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor);
 
     void draw() override;
 
@@ -70,8 +73,9 @@ private:
 
     static constexpr int CV_MENU_ID = 8;
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler verticalScroll;
+    serial::VisionCoprocessor *visionCoprocessor;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 

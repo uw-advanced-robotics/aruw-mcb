@@ -19,10 +19,11 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
-using aruwsrc::Drivers;
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+
+using tap::Drivers;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
@@ -41,7 +42,7 @@ protected:
     }
 
     ClockStub clock;
-    Drivers drivers;
+    tap::Drivers drivers;
     FrictionWheelSubsystem frictionWheels;
 };
 

@@ -35,7 +35,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -85,7 +85,8 @@ public:
      * will never be selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
@@ -199,7 +200,9 @@ private:
         VISION_COPROCESSOR_OFFLINE,
     };
 
-    aruwsrc::Drivers &drivers;
+    tap::Drivers &drivers;
+
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
 
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
 

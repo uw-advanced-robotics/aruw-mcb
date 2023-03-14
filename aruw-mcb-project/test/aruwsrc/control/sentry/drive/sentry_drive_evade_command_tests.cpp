@@ -19,8 +19,9 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/control/sentry/drive/sentry_drive_evade_command.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/control/chassis/sentry/sentry_drive_evade_command.hpp"
 #include "aruwsrc/mock/sentry_drive_subsystem_mock.hpp"
 
 using namespace testing;
@@ -47,7 +48,7 @@ protected:
     }
 
 private:
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
 
 protected:
     NiceMock<aruwsrc::mock::SentryDriveSubsystemMock> sub;

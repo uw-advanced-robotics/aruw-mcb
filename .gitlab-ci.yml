@@ -71,11 +71,12 @@ before_script:
         -p ./aruw-mcb-project/src/
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
-            aruwsrc/control/engineer_control.cpp
-            aruwsrc/control/sentry_control.cpp
-            aruwsrc/control/standard_control.cpp
-            aruwsrc/control/drone_control.cpp
-            aruwsrc/control/hero_control.cpp
+            aruwsrc/robot/engineer/engineer_control.cpp
+            aruwsrc/robot/sentry/sentry_control.cpp
+            aruwsrc/robot/standard/standard_control.cpp
+            aruwsrc/robot/drone/drone_control.cpp
+            aruwsrc/robot/dart/dart_control.cpp
+            aruwsrc/robot/hero/hero_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
@@ -334,6 +335,26 @@ before_script:
     - .test_build
   variables:
     ROBOT: SENTRY_BEEHIVE
+
+# Dart Build
+
+"Dart: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: DART
+
+"Dart: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: DART
+
+"Dart: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: DART
 
 # Pages deploy
 

@@ -22,13 +22,10 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc
 {
@@ -45,9 +42,10 @@ class WiggleDriveCommand : public tap::control::Command
 {
 public:
     WiggleDriveCommand(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
-        const aruwsrc::control::turret::TurretMotor* yawMotor);
+        const aruwsrc::control::turret::TurretMotor* yawMotor,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface);
 
     void initialize() override;
 
@@ -94,9 +92,10 @@ private:
     static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
 
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
 
     tap::algorithms::Ramp rotationSpeedRamp;
 
