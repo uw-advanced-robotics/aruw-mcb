@@ -74,7 +74,7 @@ aruwsrc::motor::Tmotor_AK809 legmotorLF(
     drivers(),
     aruwsrc::motor::MOTOR1,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "LeftFront Leg");
 
 aruwsrc::motor::Tmotor_AK809 legmotorLR(
@@ -97,14 +97,26 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     FIVE_BAR_CONFIG,
     LEG_MOTOR_PID_CONFIG);
 
-motion::FiveBarMoveCommand moveFiveBarLeft(drivers(), &fiveBarSubsystemLeft);
+motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
+
+motion::FiveBarMoveCommand moveFiveBarLeftSquare(
+    drivers(),
+    &fiveBarSubsystemLeft,
+    motion::UP_AND_DOWN);
 
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {},
+    {&moveFiveBarLeftCircle},
     RemoteMapState(
         tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
         tap::communication::serial::Remote::SwitchState::UP));
+
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&moveFiveBarLeftSquare},
+    RemoteMapState(
+        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
+        tap::communication::serial::Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -135,6 +147,7 @@ void startTestbedCommands(aruwsrc::Drivers *drivers) {}
 void registerTestbedIoMappings(aruwsrc::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchDown);
 }
 }  // namespace testbed_control
 

@@ -28,7 +28,6 @@ Tmotor_AK809::Tmotor_AK809(
     tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
-    uint16_t encoderWrapped,
     int64_t encoderRevolutions)
     : CanRxListener(drivers, static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
       motorName(name),
@@ -40,7 +39,6 @@ Tmotor_AK809::Tmotor_AK809(
       temperature(0),
       torque(0),
       motorInverted(isInverted),
-      encoderWrapped(encoderWrapped),
       encoderRevolutions(encoderRevolutions)
 {
     motorDisconnectTimeout.stop();
@@ -54,12 +52,13 @@ void Tmotor_AK809::initialize()
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
-    if ((message.getIdentifier() - 0x2900) != Tmotor_AK809::getMotorIdentifier())
+    if ((message.getIdentifier() - 0x2900) !=
+        Tmotor_AK809::getMotorIdentifier())  // magic offset for return messages
     {
         return;
     }
-    uint16_t positionActual =
-        static_cast<uint16_t>(message.data[0] << 8 | message.data[1]);  // position, mDeg
+    encoderPosition =
+        static_cast<int16_t>(message.data[0] << 8 | message.data[1]);  // position, mDeg
     /***
      * WARNING! the AK80-9 outputs position in the range [-32000, 32000]
      * If the output shaft rotates more than this, then the output value will saturate! The motor
@@ -74,17 +73,13 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
 
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
-    positionActual =
-        positionActual % 3600;  // Motor returns unwrapped position, to a point. don't double dip.
     // invert motor if necessary
-    positionActual = motorInverted ? ENC_RESOLUTION - 1 - positionActual : positionActual;
-    updateEncoderValue(positionActual);
+    encoderPosition = motorInverted ? - encoderPosition : encoderPosition;
 }
 
 void Tmotor_AK809::setDesiredOutput(int32_t desiredOutput)
 {
-    int32_t desOutputNotInverted = tap::algorithms::limitVal<int32_t>(desiredOutput, -60000, 60000);
-    this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;
+    this->desiredOutput = tap::algorithms::limitVal<int32_t>(desiredOutput, -60000, 60000);
 }
 
 bool Tmotor_AK809::isMotorOnline() const
@@ -105,6 +100,17 @@ void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
     txMessage->data[3] = this->getOutputDesired();
 }
 
+bool Tmotor_AK809::sendPositionHomeMessage()
+{
+    modm::can::Message homingMessage(
+        (uint32_t)(motorIdentifier) |
+            ((uint32_t)0x05 << 8),  // the 05 in LSByte 2 sets motor to pos home mode
+        8,                          // data length is 8 as per the protocol
+        0,
+        true);
+    homingMessage.data[0] = 0x0;  // sets the temporary origin
+    return drivers->can.sendMessage(motorCanBus, homingMessage);
+}
 // getter functions
 int16_t Tmotor_AK809::getOutputDesired() const { return desiredOutput; }
 
@@ -124,25 +130,21 @@ const char* Tmotor_AK809::getName() const { return motorName; }
 
 int64_t Tmotor_AK809::getEncoderUnwrapped() const
 {
-    return static_cast<int64_t>(encoderWrapped) +
-           static_cast<int64_t>(ENC_RESOLUTION) * encoderRevolutions;
+    return static_cast<int64_t>(encoderPosition);
 }
 
-uint16_t Tmotor_AK809::getEncoderWrapped() const { return encoderWrapped; }
-
-void Tmotor_AK809::updateEncoderValue(uint16_t newEncWrapped)
+uint16_t Tmotor_AK809::getEncoderWrapped() const
 {
-    int16_t enc_dif = newEncWrapped - encoderWrapped;
-    if (enc_dif < -ENC_RESOLUTION / 2)
+    if (encoderPosition >= 0)
     {
-        encoderRevolutions++;
+        return encoderPosition % 3600;
     }
-    else if (enc_dif > ENC_RESOLUTION / 2)
+    else
     {
-        encoderRevolutions--;
+        return 3600 + encoderPosition % 3600;
     }
-    encoderWrapped = newEncWrapped;
 }
+
 }  // namespace motor
 
 }  // namespace aruwsrc

@@ -39,7 +39,7 @@ enum MOTION_FUNCTIONS
     CIRCLE,
     RETURN_TO_HOME,
 };
-static constexpr float MOTION_SIZE = .100;
+static constexpr float MOTION_SIZE = .150;
 /**
  * Testing motion system for FiveBar mechanism
  */
@@ -65,8 +65,9 @@ public:
         fiveBarLinkage.setDesiredPosition(desiredPosition);
     }
 
-    void setMotionFunction(aruwsrc::control::motion::MOTION_FUNCTIONS func) {
+    void setMotionFunction(const aruwsrc::control::motion::MOTION_FUNCTIONS func) {
         movementMode = func;
+        return;
     }
 
     void onHardwareTestStart() { fiveBarLinkage.initialize(); }
@@ -81,7 +82,7 @@ private:
 
     FiveBarLinkage fiveBarLinkage;
 
-    MOTION_FUNCTIONS movementMode = UP_AND_DOWN;
+    MOTION_FUNCTIONS movementMode = RETURN_TO_HOME;
 
     uint32_t prevZeroTime = 0;
 };

@@ -96,7 +96,6 @@ public:
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
-        uint16_t encoderWrapped = ENC_RESOLUTION / 2,
         int64_t encoderRevolutions = 0);
 
     mockable ~Tmotor_AK809();
@@ -117,7 +116,7 @@ public:
      */
     float getPositionUnwrapped() const
     {
-        return ((float)getEncoderUnwrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
+        return ((getEncoderUnwrapped()) / ((float)ENC_RESOLUTION)) * M_TWOPI;
     };
 
     /***
@@ -125,7 +124,7 @@ public:
      */
     float getPositionWrapped() const
     {
-        return ((float)getEncoderWrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
+        return (getEncoderWrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
     };
 
     DISALLOW_COPY_AND_ASSIGN(Tmotor_AK809)
@@ -160,6 +159,14 @@ public:
     mockable void serializeCanSendData(modm::can::Message* txMessage) const;
 
     /**
+     * @brief As per the protocol, send a specific data packet to 0 the motor's position when
+     * called.
+     *
+     * @return success of message send
+     */
+    bool sendPositionHomeMessage();
+
+    /**
      * @return the raw `desiredOutput` value which will be sent to the motor controller
      *      (specified via `setDesiredOutput()`)
      */
@@ -189,12 +196,6 @@ private:
 
     const char* motorName;
 
-    /**
-     * Updates the stored encoder value given a newly received encoder value
-     * special logic necessary for keeping track of unwrapped encoder value.
-     */
-    void updateEncoderValue(uint16_t newEncWrapped);
-
     aruwsrc::Drivers* drivers;
 
     uint32_t motorIdentifier;
@@ -217,11 +218,10 @@ private:
     bool motorInverted;
 
     /**
-     * The raw position value reported by the motor controller. It wraps around from
-     * {0..3599}, hence "Wrapped"
+     * The raw position value reported by the motor controller. [-32,000 to +32,000]
      */
-    float encoderWrapped;
-
+    int16_t encoderPosition;
+    
     /**
      * Absolute unwrapped encoder position =
      *      encoderRevolutions * ENCODER_RESOLUTION + encoderWrapped

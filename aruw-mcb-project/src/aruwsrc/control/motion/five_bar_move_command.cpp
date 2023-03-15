@@ -23,16 +23,22 @@ namespace aruwsrc::control::motion
 {
 FiveBarMoveCommand::FiveBarMoveCommand(
     tap::Drivers* drivers,
-    FiveBarMotionSubsystem* fiveBarSubsystem)
+    FiveBarMotionSubsystem* fiveBarSubsystem,
+    const MOTION_FUNCTIONS motion)
     : drivers(drivers),
-      fiveBarSubsystem(fiveBarSubsystem)
+      fiveBarSubsystem(fiveBarSubsystem),
+      motion(motion)
 {
     addSubsystemRequirement(fiveBarSubsystem);
 }
 
-void FiveBarMoveCommand::initialize() { fiveBarSubsystem->initialize(); }
+void FiveBarMoveCommand::initialize() {}
 
-void FiveBarMoveCommand::execute() { fiveBarSubsystem->refresh(); }
+void FiveBarMoveCommand::execute()
+{
+    fiveBarSubsystem->setMotionFunction(motion);
+    fiveBarSubsystem->refresh();
+}
 
 void FiveBarMoveCommand::end(bool)
 {

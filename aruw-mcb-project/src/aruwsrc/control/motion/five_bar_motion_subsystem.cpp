@@ -36,7 +36,7 @@ FiveBarMotionSubsystem::FiveBarMotionSubsystem(
 void FiveBarMotionSubsystem::initialize()
 {
     fiveBarLinkage.initialize();
-    setMotionFunction(aruwsrc::control::motion::RETURN_TO_HOME);
+    //setMotionFunction(aruwsrc::control::motion::RETURN_TO_HOME);
 }
 
 void FiveBarMotionSubsystem::refresh()

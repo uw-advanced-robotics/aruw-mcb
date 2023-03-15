@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef FIVE_BAR_MOVE_COMMAND_HPP_
 #define FIVE_BAR_MOVE_COMMAND_HPP_
 
@@ -30,7 +29,10 @@ namespace aruwsrc::control::motion
 class FiveBarMoveCommand : public tap::control::Command
 {
 public:
-    FiveBarMoveCommand(tap::Drivers* drivers, FiveBarMotionSubsystem* fiveBarSubsystem);
+    FiveBarMoveCommand(
+        tap::Drivers* drivers,
+        FiveBarMotionSubsystem* fiveBarSubsystem,
+        const MOTION_FUNCTIONS motion);
 
     void initialize() override;
 
@@ -45,9 +47,9 @@ public:
 private:
     tap::Drivers* drivers;
     FiveBarMotionSubsystem* fiveBarSubsystem;
+    MOTION_FUNCTIONS motion = RETURN_TO_HOME;
     int16_t speed;
 };  // class SpinMotorCommand
 }  // namespace aruwsrc::control::motion
 
 #endif  // FIVE_BAR_MOVE_COMMAND_HPP
-

@@ -146,14 +146,15 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const tap::algorithms::SmoothPidConfig LEG_MOTOR_PID_CONFIG{
-    .kp = 100,
-    .ki = 0,
-    .kd = 1,
-    .maxOutput = 60000,
+    .kp = 2000,
+    .ki = 3,
+    .kd = 3000,
+    .maxICumulative = 500,
+    .maxOutput = 5000,
 };
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
-    .defaultPosition = modm::Vector2f(0, -0.200),
+    .defaultPosition = modm::Vector2f(0, -0.150),
     .motor1toMotor2Length = .108,
     .motor1toJoint1Length = .150,
     .motor2toJoint2Length = .150,
