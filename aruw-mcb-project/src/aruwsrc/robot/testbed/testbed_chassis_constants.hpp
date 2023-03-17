@@ -147,7 +147,7 @@ static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const tap::algorithms::SmoothPidConfig LEG_MOTOR_PID_CONFIG{
     .kp = 2000,
-    .ki = 3,
+    .ki = 1,
     .kd = 3000,
     .maxICumulative = 500,
     .maxOutput = 5000,

@@ -46,6 +46,10 @@ FiveBarLinkage::FiveBarLinkage(
 void FiveBarLinkage::initialize()
 {
     desiredPosition = fiveBarConfig.defaultPosition;
+    computeMotorAngles();
+    motor1home = motor1Setpoint;  // Zeroes the motors, assuming you boot at default postion
+    motor2home = motor2Setpoint;
+
     motor1->initialize();
     motor1->setDesiredOutput(0);
     motor2->initialize();
@@ -64,15 +68,17 @@ void FiveBarLinkage::moveMotors()
     const uint32_t dt = curTime - prevTime;
     prevTime = curTime;
     motorsMoved = dt;
-    debug1 = motor1->getPositionUnwrapped();
-    debug2 = motor1Setpoint;
-    debug3 = motor1Setpoint - motor1->getPositionUnwrapped();
-    float motor1Output =
-        motor1Pid.runControllerDerivateError(motor1Setpoint - motor1->getPositionUnwrapped(), dt);
+    debug1 = motor2->getPositionUnwrapped();
+    debug2 = (motor2Setpoint - motor2home);
+    debug3 = (motor2Setpoint - motor2home) - motor2->getPositionUnwrapped();
+    float motor1Output = motor1Pid.runControllerDerivateError(
+        (motor1Setpoint - motor1home) - motor1->getPositionUnwrapped(),
+        dt);
 
     motor1->setDesiredOutput(motor1Output);
-    float motor2Output =
-        motor2Pid.runControllerDerivateError(motor2->getPositionUnwrapped() - motor1Setpoint, dt);
+    float motor2Output = motor2Pid.runControllerDerivateError(
+        (motor2Setpoint - motor2home) - motor2->getPositionUnwrapped(),
+        dt);
     motor2->setDesiredOutput(motor2Output);
 }
 

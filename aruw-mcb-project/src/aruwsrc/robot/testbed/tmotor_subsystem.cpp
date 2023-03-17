@@ -40,6 +40,7 @@ void TMotorSubsystem::initialize()
     desiredOutput = 0;
     tmotor->initialize();
     tmotor->setDesiredOutput(0);
+    tmotor->sendPositionHomeResetMessage();
 }
 
 void TMotorSubsystem::refresh() { tmotor->setDesiredOutput(desiredOutput); }

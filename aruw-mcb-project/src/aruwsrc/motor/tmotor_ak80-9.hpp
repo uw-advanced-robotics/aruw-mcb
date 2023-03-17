@@ -160,11 +160,19 @@ public:
 
     /**
      * @brief As per the protocol, send a specific data packet to 0 the motor's position when
-     * called.
+     * called. The 0 should retain after power cycle
      *
      * @return success of message send
      */
-    bool sendPositionHomeMessage();
+    bool sendPositionHomeResetMessage();
+
+    /**
+     * @brief As per the protocol, send a specific data packet to have the motor recall it's saved 0
+     * positon
+     *
+     * @return success of message send
+     */
+    bool sendPositionHomeGetMessage();
 
     /**
      * @return the raw `desiredOutput` value which will be sent to the motor controller
@@ -221,7 +229,7 @@ private:
      * The raw position value reported by the motor controller. [-32,000 to +32,000]
      */
     int16_t encoderPosition;
-    
+
     /**
      * Absolute unwrapped encoder position =
      *      encoderRevolutions * ENCODER_RESOLUTION + encoderWrapped

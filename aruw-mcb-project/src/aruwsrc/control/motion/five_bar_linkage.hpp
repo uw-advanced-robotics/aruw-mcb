@@ -109,6 +109,9 @@ private:
     tap::algorithms::SmoothPid motor1Pid;
     tap::algorithms::SmoothPid motor2Pid;
 
+    float motor1home;
+    float motor2home;
+
     FiveBarConfig fiveBarConfig;
 
     uint32_t prevTime = 0;

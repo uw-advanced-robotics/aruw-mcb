@@ -72,16 +72,16 @@ namespace testbed_control
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::motor::Tmotor_AK809 legmotorLF(
     drivers(),
-    aruwsrc::motor::MOTOR1,
+    aruwsrc::motor::MOTOR2,
     tap::can::CanBus::CAN_BUS2,
     true,
     "LeftFront Leg");
 
 aruwsrc::motor::Tmotor_AK809 legmotorLR(
     drivers(),
-    aruwsrc::motor::MOTOR2,
+    aruwsrc::motor::MOTOR1,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "LeftRear Leg");
 
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
@@ -97,7 +97,7 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     FIVE_BAR_CONFIG,
     LEG_MOTOR_PID_CONFIG);
 
-motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
+motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::SQUARE);
 
 motion::FiveBarMoveCommand moveFiveBarLeftSquare(
     drivers(),

@@ -36,7 +36,7 @@ FiveBarMotionSubsystem::FiveBarMotionSubsystem(
 void FiveBarMotionSubsystem::initialize()
 {
     fiveBarLinkage.initialize();
-    //setMotionFunction(aruwsrc::control::motion::RETURN_TO_HOME);
+    // setMotionFunction(aruwsrc::control::motion::RETURN_TO_HOME);
 }
 
 void FiveBarMotionSubsystem::refresh()
@@ -101,22 +101,22 @@ modm::Vector2f FiveBarMotionSubsystem::pathPlotSquare(uint32_t time)
     if (dt > 0 && dt <= 1000)
     {  // top right
         xDes = fiveBarLinkage.getDefaultPosition().getX() + MOTION_SIZE / 2;
-        yDes = fiveBarLinkage.getDefaultPosition().getY();
+        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE / 4;
     }
     else if (dt > 1000 && dt <= 2000)
     {  // bottom right
         xDes = fiveBarLinkage.getDefaultPosition().getX() + MOTION_SIZE / 2;
-        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE;
+        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE - MOTION_SIZE / 4;
     }
     else if (dt > 2000 && dt <= 3000)
     {  // bottom right
         xDes = fiveBarLinkage.getDefaultPosition().getX() - MOTION_SIZE / 2;
-        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE;
+        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE - MOTION_SIZE / 4;
     }
     else if (dt > 3000 && dt <= 4000)
     {  // bottom right
         xDes = fiveBarLinkage.getDefaultPosition().getX() - MOTION_SIZE / 2;
-        yDes = fiveBarLinkage.getDefaultPosition().getY();
+        yDes = fiveBarLinkage.getDefaultPosition().getY() - MOTION_SIZE / 4;
     }
     return modm::Vector2f(xDes, yDes);
 }

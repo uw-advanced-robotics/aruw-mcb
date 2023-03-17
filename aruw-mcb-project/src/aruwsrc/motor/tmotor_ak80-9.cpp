@@ -48,6 +48,7 @@ void Tmotor_AK809::initialize()
 {
     drivers->tMotorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
+    sendPositionHomeGetMessage();
 }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
@@ -74,12 +75,13 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
     // invert motor if necessary
-    encoderPosition = motorInverted ? - encoderPosition : encoderPosition;
+    encoderPosition = motorInverted ?  encoderPosition : -encoderPosition;
 }
 
 void Tmotor_AK809::setDesiredOutput(int32_t desiredOutput)
 {
-    this->desiredOutput = tap::algorithms::limitVal<int32_t>(desiredOutput, -60000, 60000);
+    int32_t invertedOutput = motorInverted ? -desiredOutput : desiredOutput;
+    this->desiredOutput = tap::algorithms::limitVal<int32_t>(invertedOutput, -60000, 60000);
 }
 
 bool Tmotor_AK809::isMotorOnline() const
@@ -100,7 +102,7 @@ void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
     txMessage->data[3] = this->getOutputDesired();
 }
 
-bool Tmotor_AK809::sendPositionHomeMessage()
+bool Tmotor_AK809::sendPositionHomeResetMessage()
 {
     modm::can::Message homingMessage(
         (uint32_t)(motorIdentifier) |
@@ -108,9 +110,22 @@ bool Tmotor_AK809::sendPositionHomeMessage()
         8,                          // data length is 8 as per the protocol
         0,
         true);
-    homingMessage.data[0] = 0x0;  // sets the temporary origin
+    homingMessage.data[0] = 0x1;  // sets the permanent origin
     return drivers->can.sendMessage(motorCanBus, homingMessage);
 }
+
+bool Tmotor_AK809::sendPositionHomeGetMessage()
+{
+    modm::can::Message homingMessage(
+        (uint32_t)(motorIdentifier) |
+            ((uint32_t)0x05 << 8),  // the 05 in LSByte 2 sets motor to pos home mode
+        8,                          // data length is 8 as per the protocol
+        0,
+        true);
+    homingMessage.data[0] = 0x2;  // gets the permanent origin
+    return drivers->can.sendMessage(motorCanBus, homingMessage);
+}
+
 // getter functions
 int16_t Tmotor_AK809::getOutputDesired() const { return desiredOutput; }
 
