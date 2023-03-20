@@ -17,35 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CAN_BUSS_HPP_
-#define CAN_BUS_HPP_
+#ifndef PHYSICAL_CAN_BUS_HPP_
+#define PHYSICAL_CAN_BUS_HPP_
+
+#include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/serial/uart.hpp"
+#include "tap/drivers.hpp"
+
+#include "can_bus.hpp" 
 
 namespace aruwsrc::can
 {
-	class CanBus {
+class PhysicalCanBus : public CanBus
+{
+public:
+    PhysicalCanBus(tap::Drivers* drivers);
 
-		/**
-		 * Constructor that passes in the CAN bus and whether or not if the port is virtual
-		 *
-		*/
+    void initialize() override;
 
-		/**
-		 * Send message (Take in a can message)
-		*/
+    bool isMessageAvailable(tap::can::CanBus canbus) override;
 
-		/**
-		 * Read messages (Output is a can message)
-		*/
+    bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
 
-		
+    bool isReadyToSend(tap::can::CanBus canbus) override;
 
+    bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
 
+private:
+    tap::Drivers* drivers;
+};
 
-
-
-	};
-
-} // namespace aruwsrc::communication::can
-
+}  // namespace aruwsrc::can
 
 #endif
