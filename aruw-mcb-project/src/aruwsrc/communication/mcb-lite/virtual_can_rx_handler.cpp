@@ -17,27 +17,37 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_CAN_RX_HANDLER_HPP_
-#define VIRTUAL_CAN_RX_HANDLER_HPP_
+#include "virtual_can_rx_handler.hpp"
 
-#include "tap/communication/can/can_rx_handler.hpp"
+#include "tap/communication/can/can.hpp"
+#include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
-
-#include "can_bus.hpp"
 
 namespace aruwsrc::can
 {
-class VirtualCANRxHandler : public tap::can::CanRxHandler
+
+VirtualCANRxHandler::VirtualCANRxHandler(tap::Drivers* drivers, CanBus canbus)
+    : CanRxHandler(drivers),
+      canbus(canbus)
 {
-public:
-    VirtualCANRxHandler(tap::Drivers* drivers, CanBus canbus);
+}
 
-    void pollCanData();
+void VirtualCANRxHandler::pollCanData()
+{
+    modm::can::Message rxMessage;
 
-private:
-    CanBus canbus;
-};
+    // handle incoming CAN 1 messages
+    if (canbus.getMessage(tap::can::CanBus::CAN_BUS1, &rxMessage))
+    {
+        CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan1);
+    }
+
+    // handle incoming CAN 2 messages
+    if (canbus.getMessage(tap::can::CanBus::CAN_BUS2, &rxMessage))
+    {
+       CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan2);
+    }
+}
 
 }  // namespace aruwsrc::can
-
-#endif
