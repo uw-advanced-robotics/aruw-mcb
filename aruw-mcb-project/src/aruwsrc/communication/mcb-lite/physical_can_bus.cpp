@@ -38,7 +38,7 @@ bool PhysicalCanBus::isMessageAvailable(tap::can::CanBus canbus)
 
 bool PhysicalCanBus::getMessage(tap::can::CanBus canbus, modm::can::Message* message)
 {
-    drivers->can.getMessage(canbus, message);
+    return drivers->can.getMessage(canbus, message);
 }
 
 bool PhysicalCanBus::isReadyToSend(tap::can::CanBus canbus) { drivers->can.isReadyToSend(canbus); }

@@ -17,31 +17,20 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_MCB_HANDLER_HPP_
-#define VIRTUAL_MCB_HANDLER_HPP_
+#ifndef VIRTUAL_CAN_RX_HANDLER_HPP_
+#define VIRTUAL_CAN_RX_HANDLER_HPP_
 
 #include "can_bus.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
 
-namespace aruwsrc::virtualMCB
+#include "tap/communication/can/can_rx_handler.hpp"
+
+namespace aruwsrc::can
 {
-class VirtualMCBHandler
+class VirtualCANRxHandler : public tap::can::CanRxHandler
 {
-public:
 
-
-
-/**
- * This boy needs to handle:
- * 
- * DJI motor tx handler
- * CAN rx handler
- * And then do all the extra things that MCb-Lite is supposed to do 💀
-*/
-
-private:
-
-VirtualDJIMotorTxHandler motorTxHandler;
+VirtualCANRxHandler()
 
 
 };
