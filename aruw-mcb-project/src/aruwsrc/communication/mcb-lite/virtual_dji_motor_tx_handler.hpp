@@ -17,38 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_CAN_BUS_HPP_
-#define VIRTUAL_CAN_BUS_HPP_
+#ifndef VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
+#define VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
 
-#include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
+#include "tap/motor/dji_motor_tx_handler.hpp"
 
-#include "can_bus.hpp" 
+#include "can_bus.hpp"
 
-namespace aruwsrc::can
+using namespace aruwsrc::can;
+
+namespace aruwsrc::virtualMCB
 {
-class VirtualCanBus : public CanBus
+class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
 {
 public:
+    VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus canbus);
 
-    VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
-
-    void initialize() override;
-
-    bool isMessageAvailable(tap::can::CanBus canbus) override;
-
-    bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
-
-    bool isReadyToSend(tap::can::CanBus canbus) override;
-
-    bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
+	void encodeAndSendCanData();
 
 private:
-    tap::communication::serial::Uart::UartPort port;
-    tap::Drivers* drivers;
+    CanBus canbus;
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

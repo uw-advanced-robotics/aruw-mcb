@@ -119,6 +119,14 @@ protected:
         bool* validMotorMessageLow,
         bool* validMotorMessageHigh);
 
+    DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};
+    DjiMotor* can2MotorStore[DJI_MOTORS_PER_CAN] = {0};
+    
+    Drivers* drivers;
+
+private:
+    void addMotorToManager(DjiMotor** canMotorStore, DjiMotor* const motor);
+
     void removeFromMotorManager(const DjiMotor& motor, DjiMotor** motorStore);
 };
 

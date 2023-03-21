@@ -29,6 +29,7 @@ namespace aruwsrc::can
 {
 class CanBus
 {
+public:
     virtual void initialize();
 
     virtual bool isMessageAvailable(tap::can::CanBus canbus);

@@ -17,36 +17,23 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_CAN_BUS_HPP_
-#define VIRTUAL_CAN_BUS_HPP_
+#ifndef VIRTUAL_MCB_HANDLER_HPP_
+#define VIRTUAL_MCB_HANDLER_HPP_
 
-#include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
-#include "tap/drivers.hpp"
-
-#include "can_bus.hpp" 
-
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
-class VirtualCanBus : public CanBus
+class VirtualMCBHandler
 {
 public:
 
-    VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+/**
+ * This boy needs to handle:
+ * 
+ * DJI motor tx handler
+ * CAN rx handler
+ * And then do all the extra things that MCb-Lite is supposed to do 💀
+*/
 
-    void initialize() override;
-
-    bool isMessageAvailable(tap::can::CanBus canbus) override;
-
-    bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
-
-    bool isReadyToSend(tap::can::CanBus canbus) override;
-
-    bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
-
-private:
-    tap::communication::serial::Uart::UartPort port;
-    tap::Drivers* drivers;
 };
 
 }  // namespace aruwsrc::can
