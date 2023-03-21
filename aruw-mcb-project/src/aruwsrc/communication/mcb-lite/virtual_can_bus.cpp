@@ -49,9 +49,10 @@ bool VirtualCanBus::getMessage(tap::can::CanBus canbus, modm::can::Message* mess
 {
     uint32_t* messageCast;
     // This is read at 32 for can message??
-    drivers->uart.read(port, reinterpret_cast<uint8_t*>(messageCast), sizeof(message));
+    uint32_t readSize = drivers->uart.read(port, reinterpret_cast<uint8_t*>(messageCast), sizeof(message));
     memcpy(&message, &messageCast, sizeof(message));
     // TODO: Figure out if this is correct
+
 }
 
 bool VirtualCanBus::isReadyToSend(tap::can::CanBus canbus)
