@@ -19,27 +19,19 @@ from SCons.Script import *
 
 from .parse_args import USAGE
 
-ROBOT_TYPE_FILE     = "robot-type/robot_type.hpp"
-VALID_ROBOT_TYPES   = [ "TARGET_STANDARD_WOODY",
-                        "TARGET_STANDARD_ELSA",
-                        "TARGET_STANDARD_SPIDER",
-                        "TARGET_DRONE",
-                        "TARGET_ENGINEER",
-                        "TARGET_SENTRY_BEEHIVE",
-                        "TARGET_HERO_CYCLONE",
-                        "TARGET_DART" ]
+VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
+                        "STANDARD_ELSA",
+                        "STANDARD_SPIDER",
+                        "DRONE",
+                        "ENGINEER",
+                        "SENTRY_BEEHIVE",
+                        "HERO_CYCLONE",
+                        "DART" ]
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")
     # Configure robot type and check against valid robot type
-    # If there is no optional argument, revert back to the macro in robot_type.hpp
-    if robot_type == None:
-        with open(ROBOT_TYPE_FILE, "r") as robot_type_file_reader:
-            for word in robot_type_file_reader.read().splitlines():
-                if "#define" in word and "TARGET_" in word:
-                    robot_type = word.split()[-1]
-                    break
     if robot_type not in VALID_ROBOT_TYPES:
         raise Exception(USAGE)
 
-    return robot_type
+    return "TARGET_" + robot_type
