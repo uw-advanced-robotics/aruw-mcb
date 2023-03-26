@@ -99,8 +99,8 @@ before_script:
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
-    - scons size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
+    - scons build robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS
+    - scons size robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../taproot-scripts/parse_metrics.py -i size.txt -o metrics.txt --identifier $ROBOT
     - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
@@ -121,7 +121,7 @@ before_script:
   needs: ["Sim Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-sim profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-sim profile=fast robot=$ROBOT -j${NUM_JOBS}
   cache:
     key: sim-binaries
     untracked: true
@@ -133,7 +133,7 @@ before_script:
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
   cache:
     key: test-binaries
@@ -222,7 +222,7 @@ before_script:
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=TARGET_STANDARD_ELSA -j${NUM_JOBS}
+    - scons run-tests-gcov profile=fast robot=STANDARD_ELSA -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
