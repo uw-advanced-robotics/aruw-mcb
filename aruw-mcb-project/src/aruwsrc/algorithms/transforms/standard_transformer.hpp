@@ -43,7 +43,7 @@
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
-namespace aruwsrc::algorithms
+namespace aruwsrc::algorithms::transforms
 
 {
     class StandardTransformer : public Transformer
