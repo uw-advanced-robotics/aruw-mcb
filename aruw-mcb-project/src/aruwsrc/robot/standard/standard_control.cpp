@@ -544,8 +544,8 @@ void startStandardCommands(Drivers *drivers)
 
     drivers->commandScheduler.addCommand(&lowBatteryCommand);
 
-    drivers->transformer.registerMotors(&rightFrontMotor, &leftFrontMotor, &rightBackMotor, &leftBackMotor);
-    // TODO: remove this when done omg so many changes!!!@!!!!!!0
+    drivers->transformer.init(&rightFrontMotor, &leftFrontMotor, &rightBackMotor, &leftBackMotor);
+    // TODO: remove this when done
     drivers->removeThisOdom = &odometrySubsystem;
 }
 

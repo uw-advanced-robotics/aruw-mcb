@@ -52,7 +52,6 @@ namespace aruwsrc::algorithms
         /**
          * A transform provider that provides transforms for the standard
          * robot. 
-         * @param chassisOdometry odometry used to update transforms
         */
         StandardTransformer
         (      
@@ -71,7 +70,7 @@ namespace aruwsrc::algorithms
          * must be called before the standard transformer can do anything.
          * 
         */
-        void registerMotors(const tap::motor::DjiMotor* rightFrontMotor, 
+        void init(const tap::motor::DjiMotor* rightFrontMotor, 
                   const tap::motor::DjiMotor* leftFrontMotor, 
                   const tap::motor::DjiMotor* rightBackMotor, 
                   const tap::motor::DjiMotor* leftBackMotor);
@@ -287,8 +286,6 @@ namespace aruwsrc::algorithms
 
         // Kalman filter for keeping track of chassis (x, y, z)
         tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
-
-
 
         void updateInternalOdomFromKF();
 

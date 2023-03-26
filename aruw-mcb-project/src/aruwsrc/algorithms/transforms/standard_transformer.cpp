@@ -83,15 +83,17 @@ namespace aruwsrc::algorithms {
         updateTransforms();
     }
 
-    void StandardTransformer::registerMotors(
+    void StandardTransformer::init(
                 const tap::motor::DjiMotor* rightFrontMotor, 
                 const tap::motor::DjiMotor* leftFrontMotor, 
                 const tap::motor::DjiMotor* rightBackMotor, 
                 const tap::motor::DjiMotor* leftBackMotor) 
     {
-        //  /TODO change this
-        float initialVals[9] = {0,0,0,0,0,0,0,0,0};
-        this->kf.init(initialVals);       
+        // initialize the kalman filter
+        float initialKFVals[9] = {0,0,0,0,0,0,0,0,0};
+        this->kf.init(initialKFVals);    
+
+
         this->rightFrontMotor = rightFrontMotor;
         this->leftFrontMotor = leftFrontMotor;
         this->rightBackMotor = rightBackMotor;
