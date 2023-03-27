@@ -89,16 +89,9 @@ void registerDartSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
-void setDefaultDartCommands(Drivers*)
-{
-    dart.setDefaultCommand(&dartCommand);
-}
+void setDefaultDartCommands(Drivers*) { dart.setDefaultCommand(&dartCommand); }
 
-void startDartCommands(Drivers* drivers)
-{
-    drivers->commandScheduler.addCommand(&dartCommand);
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
-}
+void startDartCommands(Drivers* drivers) { drivers->commandScheduler.addCommand(&dartCommand); }
 
 void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
 
