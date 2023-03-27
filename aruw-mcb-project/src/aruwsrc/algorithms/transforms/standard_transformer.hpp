@@ -35,7 +35,8 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 
-#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
@@ -73,21 +74,6 @@ namespace aruwsrc::algorithms::transforms
                   const tap::motor::DjiMotor* rightBackMotor, 
                   const tap::motor::DjiMotor* leftBackMotor);
         
-        enum ChassisVelIndex
-        {
-            X = 0,
-            Y,
-        };
-
-        enum WheelRPMIndex
-        {
-            LF = 0,
-            RF,
-            LB,
-            RB,
-            NUM_MOTORS,
-        };
-
         // x,y,z location of chassis in world frame
         modm::Vector3f chassisWorldPosition;
 
@@ -141,9 +127,7 @@ namespace aruwsrc::algorithms::transforms
         */
         const Transform<CameraFrame, TurretIMUFrame>& getCameraToTurretIMUTransform();
      private:
-        float turretIMUToChassisYawOffset   = -1.0f;
-        float turretIMUToChassisPitchOffset = -1.0f;
-        float turretIMUToChassisRollOffset  = -1.0f;
+
         /**
          * Updates the stored transforms for this cycle
         */
@@ -155,7 +139,12 @@ namespace aruwsrc::algorithms::transforms
         */
         void updateOdometry();
 
-        float PLACEHOLDER_VAL = 0.0f;
+        /**
+         * Updates the stored odometry values (not the same place as KF)
+         * probably delete this later
+        */
+        void updateInternalOdomFromKF();
+
 
         // Transforms that are dynamically updated
         Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
@@ -181,13 +170,67 @@ namespace aruwsrc::algorithms::transforms
         const tap::motor::DjiMotor* rightBackMotor = nullptr;
         const tap::motor::DjiMotor* leftFrontMotor = nullptr;
         const tap::motor::DjiMotor* rightFrontMotor = nullptr;
+
+        // IMUs for calculating orientation
         tap::communication::sensors::imu::ImuInterface& chassisImu;
         aruwsrc::can::TurretMCBCanComm& turretMCB;
 
-        // matrix for computing mecanum velocity
-        modm::Matrix<float, 2, 4> wheelVelToChassisVelMat;
+        // placeholder value used when constructing transforms before odometry data
+        // is available
+        // the use of this variable indicates the value in the transform is in an 
+        // uninitialized state
+        const float TRANSFORM_PLACEHOLDER_VAL = 0.0f;
 
-        // kalman filter stuff for keeping track of chassis position
+        // static values used in transforms (in cm?)
+        // TODO: determine the units of these
+        // TODO: probably have x,y,z for all, but too lazy rn
+        const float TURRETIMU_TO_CAMERA_Y_OFFSET = 94.04;
+        const float TURRETIMU_TO_GUN_Y_OFFSET = 11.94;
+        const float TURRETIMU_TO_GUN_Z_OFFSET = 41.97;
+
+        const float CHASSIS_TO_TURRET_Z_OFFSET = 401.44;
+        const float CHASSISIMU_TO_CHASSIS_X_OFFSET = 105.68;
+        const float CHASSISIMU_TO_CHASSIS_Z_OFFSET = 121.72;
+
+        // enums and matrix for calculating chassis velocity from raw motor RPM
+        // ripped from holonomic_chassis_subsystem, probably bad to have this repeated
+        // in the code
+        enum WheelRPMIndex
+        {
+            LF = 0,
+            RF = 1,
+            LB = 2,
+            RB = 3,
+            NUM_MOTORS,
+        };
+
+        enum ChassisVelIndex
+        {
+            X = 0,
+            Y = 1,
+            R = 2,
+        };
+        
+        modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
+
+        /**
+         * Compute the velocity of the chassis relative to itself
+         * Returns <vx, vy, vz>
+         * 
+        */
+        modm::Matrix<float, 3, 1> getActualVelocityChassisRelative();
+
+        /**
+         * Converts a vector of wheel rotations per minute to appropriately-geared
+         * radians per second
+        */
+        inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+        {
+            static constexpr float ratio = 2.0f * M_PI * chassis::CHASSIS_GEARBOX_RATIO / 60.0f;
+            return mat * ratio;
+        }
+
+        // Kalman Filter enums
         enum class OdomState
         {
             POS_X = 0,
@@ -213,8 +256,12 @@ namespace aruwsrc::algorithms::transforms
             NUM_INPUTS,
         };
 
-
-        static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
+        /**
+         * Rotates a chassis-relative vector <x,y,z> from the chassis frame 
+         * to the world frame
+         * Performs the rotation in-place on the input variable (for some reason ... )
+        */
+        void rotateChassisVectorToWorld(modm::Matrix<float, 3, 1>& chassisRelVector);
 
         static constexpr int STATES_SQUARED =
           static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
@@ -223,7 +270,12 @@ namespace aruwsrc::algorithms::transforms
         static constexpr int INPUTS_MULT_STATES =
           static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
             
+        // Kalman filter for keeping track of chassis (x, y, z)
+        tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+
         /// Assumed time difference between calls to `update`, in seconds
+        // TODO: is there a better way of doing this? one that lets us dynamically
+        // upate DT? or is 0.002 good enough?
         static constexpr float DT = 0.002f;
         
         // clang-format off
@@ -281,48 +333,6 @@ namespace aruwsrc::algorithms::transforms
           0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
         };
         // clang-format on
-
-        // Kalman filter for keeping track of chassis (x, y, z)
-        tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
-
-        void updateInternalOdomFromKF();
-
-        void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
-        static constexpr float MAX_ACCELERATION = 8.0f;
-
-        static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 1E0},
-            {MAX_ACCELERATION, 1E2},
-        };
-
-        static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
-
-        /// Chassis measured change in velocity since the last time `update` was called, in the chassis
-        /// frame
-        modm::Vector3f chassisMeasuredDeltaVelocity;
-
-        modm::interpolation::Linear<modm::Pair<float, float>>
-            chassisAccelerationToMeasurementCovarianceInterpolator;
-
-        /// Previous time `update` was called, in microseconds
-        uint32_t prevTime = 0;
-        modm::Matrix<float, 3, 1> prevChassisVelocity;
-
-        modm::Matrix<float, 3, 1> getActualVelocityChassisRelative();
-
-        inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
-        {
-            static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
-            return mat * ratio;
-        }
-
-        /**
-         * Transforms the chassis relative velocity of the form <vx, vy, vz> 
-         * into world relative frame, given some particular chassis
-         * Transforms the input matrix chassisRelativeVelocity. Units: m/s
-         */
-        void transformChassisVelocityToWorldRelative(modm::Matrix<float, 3, 1>& chassisRelativeVelocity);
     };
 }
 
