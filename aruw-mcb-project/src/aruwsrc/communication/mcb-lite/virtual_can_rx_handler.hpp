@@ -25,7 +25,7 @@
 
 #include "can_bus.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
 class VirtualCANRxHandler : public tap::can::CanRxHandler
 {

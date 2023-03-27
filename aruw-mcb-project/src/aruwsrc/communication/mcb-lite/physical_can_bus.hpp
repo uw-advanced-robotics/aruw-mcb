@@ -26,7 +26,7 @@
 
 #include "can_bus.hpp" 
 
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
 class PhysicalCanBus : public CanBus
 {

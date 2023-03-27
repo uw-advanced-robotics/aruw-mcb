@@ -8,7 +8,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * aruw-mcb is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,virtual_can_rx_listener
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,35 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "physical_can_bus.hpp"
+#include "virtual_can_rx_listener.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
+#include "virtual_can_rx_handler.hpp"
+
 namespace aruwsrc::virtualMCB
 {
 
-PhysicalCanBus::PhysicalCanBus(tap::Drivers* drivers) : drivers(drivers) {}
-
-void PhysicalCanBus::initialize() { drivers->can.initialize(); }
-
-bool PhysicalCanBus::isMessageAvailable(tap::can::CanBus canbus)
+VirtualCANRxListener::VirtualCANRxListener(
+    tap::Drivers* drivers,
+    uint32_t id,
+    tap::can::CanBus canbus,
+    VirtualMCBHandler* canHandler)
+    : CanRxListener(drivers, id, canbus),
+      canHandler(canHandler)
 {
-    return drivers->can.isMessageAvailable(canbus);
 }
 
-bool PhysicalCanBus::getMessage(tap::can::CanBus canbus, modm::can::Message* message)
+void VirtualCANRxListener::attachSelfToRxHandler()
 {
-    return drivers->can.getMessage(canbus, message);
+    canHandler->canRxHandler.attachReceiveHandler(this);
 }
 
-bool PhysicalCanBus::isReadyToSend(tap::can::CanBus canbus) { drivers->can.isReadyToSend(canbus); }
-
-bool PhysicalCanBus::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
-{
-    drivers->can.sendMessage(canbus, message);
-}
-
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB

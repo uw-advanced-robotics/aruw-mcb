@@ -24,7 +24,7 @@
 
 #include "virtual_can_bus.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
 
 VirtualCanBus::VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)

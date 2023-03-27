@@ -24,7 +24,7 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
 
 VirtualCANRxHandler::VirtualCANRxHandler(tap::Drivers* drivers, CanBus canbus)
