@@ -30,7 +30,15 @@ VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")
-    # Configure robot type and check against valid robot type
+
+    if robot_type not in VALID_ROBOT_TYPES:
+        prompt = "Please enter a valid robot type out of the following:\n"
+        for type in VALID_ROBOT_TYPES:
+            prompt += type + "\n"
+        prompt += "--> "
+        robot_type = input(prompt)
+    
+    # Check against valid robot type
     if robot_type not in VALID_ROBOT_TYPES:
         raise Exception(USAGE)
 
