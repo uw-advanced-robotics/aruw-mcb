@@ -73,6 +73,8 @@ namespace aruwsrc::algorithms::transforms {
         wheelVelToChassisVelMat[Y][RF] = -1;
         wheelVelToChassisVelMat[Y][LB] = 1;
         wheelVelToChassisVelMat[Y][RB] = 1;
+
+        // rotational velocity (double check this part)
         wheelVelToChassisVelMat[R][LF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
         wheelVelToChassisVelMat[R][RF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
         wheelVelToChassisVelMat[R][LB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
@@ -81,10 +83,9 @@ namespace aruwsrc::algorithms::transforms {
     }
 
     void StandardTransformer::update() {
-        // update odometry so it can be used to update
         updateOdometry();
-        // update transforms with odometry data
-        updateTransforms();
+        // testing odometry without rotation: don't update transforms
+        // updateTransforms();
     }
 
     void StandardTransformer::init(
@@ -105,14 +106,17 @@ namespace aruwsrc::algorithms::transforms {
     const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform() {
         worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
             (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+
         return worldToChassisTransform;
     }
 
     const Transform<WorldFrame, TurretIMUFrame>& StandardTransformer::getWorldToTurretIMUTransform() {
         worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
             (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+
         worldToTurretIMUTransform = compose<WorldFrame, ChassisFrame, TurretIMUFrame>
             (worldToChassisTransform, chassisToTurretIMUTransform);
+
         return worldToTurretIMUTransform;
     }
 
@@ -123,6 +127,7 @@ namespace aruwsrc::algorithms::transforms {
     const Transform<ChassisFrame, WorldFrame>& StandardTransformer::getChassisToWorldTransform() {
         worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>
             (worldToChassisIMUTransform, chassisIMUToChassisTransform);
+
         chassisToWorldTransform = worldToChassisTransform.getInverse();
         return chassisToWorldTransform;
     }
@@ -144,7 +149,7 @@ namespace aruwsrc::algorithms::transforms {
              -chassisWorldOrientation.getX(), -chassisWorldOrientation.getY(),-chassisWorldOrientation.getZ());
         
         TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>
-            (0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 
+            (0.                           , TURRETIMU_TO_CAMERA_Y_OFFSET ,                            0., 
              turretWorldOrientation.getX(), turretWorldOrientation.getY(), turretWorldOrientation.getZ());
 
         turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>
@@ -153,7 +158,6 @@ namespace aruwsrc::algorithms::transforms {
     }
 
     void StandardTransformer::updateOdometry() {
-    
         modm::Matrix<float, 3, 1> chassisVelocity = getActualVelocityChassisRelative();
         rotateChassisVectorToWorld(chassisVelocity);
 
@@ -198,15 +202,16 @@ namespace aruwsrc::algorithms::transforms {
     }
 
     modm::Matrix<float, 3, 1> StandardTransformer::getActualVelocityChassisRelative() {
-        modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
 
         // init hasn't been called
         if (leftBackMotor == nullptr) return modm::Matrix<float, 3, 1>().zeroMatrix();
 
         if (!leftBackMotor->isMotorOnline() || !rightBackMotor->isMotorOnline()
-        || !leftFrontMotor->isMotorOnline() || !rightFrontMotor->isMotorOnline())
+            || !leftFrontMotor->isMotorOnline() || !rightFrontMotor->isMotorOnline())
             return modm::Matrix<float, 3, 1>().zeroMatrix();
 
+        modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
+        
         wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
         wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
         wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
@@ -216,8 +221,6 @@ namespace aruwsrc::algorithms::transforms {
     }
 
       void StandardTransformer::rotateChassisVectorToWorld(modm::Matrix<float, 3, 1>& chassisRelVector) {
-        // use a transform :P
-
         // our chassisToWorldTransform is 1 cycle out of date, so in the future we 
         // may want to extrapolate values to construct the up-to-date transform
         // but for now I'm lazy...
