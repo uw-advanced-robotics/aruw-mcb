@@ -19,25 +19,23 @@
 
 #include "otto_chassis_world_yaw_observer.hpp"
 
-#include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
-    aruwsrc::Drivers* drivers,
-    const aruwsrc::control::turret::TurretMotor* turretMotor)
-    : drivers(drivers),
-      turretMotor(turretMotor)
+    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
+    : turretSubsystem(turretSubsystem)
 {
 }
 
 bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     /// @todo fix this in the future, should use some sort of interface
-#if defined(ALL_SENTINELS)
+#if defined(ALL_SENTRIES)
     *output = 0;
     return true;
 #else
@@ -45,7 +43,12 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     // meaningful for the vision system.
     /// @todo in the future we could have the odometry subsystem fall back to using
     /// just chassis IMU and turret when turret IMU is offline.
-    if (!drivers->turretMCBCanComm.isConnected() || !turretMotor->isOnline())
+
+    // the turret must have a turret IMU for this function to work
+    auto turretMCB = turretSubsystem.getTurretMCB();
+    assert(turretMCB != nullptr);
+
+    if (!turretMCB->isConnected() || !turretSubsystem.yawMotor.isOnline())
     {
         return false;
     }
@@ -55,10 +58,9 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
-        float turretWorldYawRadians =
-            modm::Angle::normalize(modm::toRadian(drivers->turretMCBCanComm.getYaw()));
+        float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
         // Normalized angle in range (-pi, pi)
-        float turretChassisYawRadians = turretMotor->getAngleFromCenter();
+        float turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
 
         *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
         return true;

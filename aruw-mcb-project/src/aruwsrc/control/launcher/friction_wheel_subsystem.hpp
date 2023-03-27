@@ -39,6 +39,11 @@ namespace aruwsrc
 class Drivers;
 }
 
+namespace aruwsrc::can
+{
+class TurretMCBCanComm;
+}
+
 namespace aruwsrc::control::launcher
 {
 /**
@@ -52,10 +57,11 @@ public:
      * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus);
+        tap::can::CanBus canBus,
+        aruwsrc::can::TurretMCBCanComm *turretMCB);
 
     void initialize() override;
 
@@ -71,6 +77,16 @@ public:
 
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
+    mockable float getDesiredFrictionWheelSpeed() const
+    {
+        return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed);
+    }
+
+    /**
+     * @return The average measured friction wheel speed of the launcher in RPM.
+     */
+    float getCurrentFrictionWheelSpeed() const;
+
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
@@ -85,7 +101,19 @@ public:
     const char *getName() override { return "Friction wheels"; }
 
 protected:
-    aruwsrc::Drivers *drivers;
+    /// The maximum launch speed that the user can request. The launch speed is limited between [0,
+    /// MAX_DESIRED_LAUNCH_SPEED].
+    static constexpr float MAX_DESIRED_LAUNCH_SPEED =
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
+            [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]
+                .first;
+
+    /// The maximum measured launch speed if the max desired launch speed is requested. This is a
+    /// large overestimate on purpose--it is useful for providing an upper bound on the possible
+    /// measured launch speed in case the measured launch speed is garbage.
+    static constexpr float MAX_MEASURED_LAUNCH_SPEED = MAX_DESIRED_LAUNCH_SPEED + 10.0f;
+
+    tap::Drivers *drivers;
 
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
@@ -97,8 +125,6 @@ private:
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
-
-    float predictedLaunchSpeed = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -114,6 +140,8 @@ private:
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
+
+    aruwsrc::can::TurretMCBCanComm *turretMCB;
 
     /**
      * @param[in] launchSpeed Some launch speed in m/s. The speed will be

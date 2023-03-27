@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,17 +21,14 @@
 #define CHASSIS_AUTOROTATE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 
 /**
  * A command that continuously attempts to rotate the chasis so that the turret is
@@ -64,8 +61,9 @@ public:
      * @param[in] chassisSymmetry The symmetry of the chassis.
      */
     ChassisAutorotateCommand(
-        aruwsrc::Drivers* drivers,
-        ChassisSubsystem* chassis,
+        tap::Drivers* drivers,
+        aruwsrc::control::ControlOperatorInterface* operatorInterface,
+        HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
 
@@ -85,9 +83,10 @@ public:
 
     const char* getName() const override { return "chassis autorotate"; }
 
-private:
-    aruwsrc::Drivers* drivers;
-    ChassisSubsystem* chassis;
+protected:
+    tap::Drivers* drivers;
+    aruwsrc::control::ControlOperatorInterface* operatorInterface;
+    HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
 
     /** Autorotation setpoint, smoothed using a low pass filter. */
@@ -109,6 +108,18 @@ private:
      * reason to autorotate until the turret is done turning around.
      */
     bool chassisAutorotating;
+
+    /**
+     * Computes the setpoint to autorotate the chassis towards
+     *
+     * @param turretAngleFromCenter the current angle of the turret relative to the chassis
+     * @param maxAngleFromCenter the maximum angle difference to either side before the autorotation
+     * setpoint swaps
+     * @return how much to rotate the chassis to get it aligned with the turret
+     */
+    virtual float computeAngleFromCenterForAutorotation(
+        float turretAngleFromCenter,
+        float maxAngleFromCenter);
 
     void updateAutorotateState();
 };  // class ChassisAutorotateCommand

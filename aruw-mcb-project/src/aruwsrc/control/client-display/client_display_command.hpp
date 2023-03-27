@@ -37,7 +37,6 @@
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
-#include "turret_angles_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
 namespace tap::control
@@ -45,7 +44,7 @@ namespace tap::control
 class Subsystem;
 }
 
-namespace aruwsrc
+namespace tap
 {
 class Drivers;
 }
@@ -74,6 +73,7 @@ public:
      * Construct a ClientDisplayCommand.
      *
      * @param[in] drivers Global drivers instance.
+     * @param[in] commandScheduler CommandScheduler instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
      * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
      * that may be nullptr if no hopper exists.
@@ -88,25 +88,32 @@ public:
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
      * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
      * HUD).
+     * @param[in] cvOnTargetManager @see MatrixHudIndicators
      * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
      * never be selected as the current chassis command.
      * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
+     * @param[in] sentryResponseHandler Global sentry response handler that contains the current
+     * movement state of the sentry.
      */
     ClientDisplayCommand(
-        aruwsrc::Drivers &drivers,
+        tap::Drivers &drivers,
+        tap::control::CommandScheduler &commandScheduler,
+        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+        const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
+        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
 
     const char *getName() const override { return "client display"; }
 
@@ -119,15 +126,14 @@ public:
     bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::Drivers &drivers;
-
+    tap::Drivers &drivers;
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-
     BooleanHudIndicators booleanHudIndicators;
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
-    TurretAnglesIndicator turretAnglesIndicator;
     VisionHudIndicators visionHudIndicators;
 
     bool run();

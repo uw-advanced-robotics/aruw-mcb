@@ -19,13 +19,15 @@
 
 #include "turret_user_world_relative_command.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 namespace aruwsrc::control::turret::user
 {
 TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
+    ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *chassisImuYawController,
     algorithms::TurretPitchControllerInterface *chassisImuPitchController,
@@ -37,6 +39,7 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     : tap::control::ComprisedCommand(drivers),
       turretWRChassisImuCommand(
           drivers,
+          controlOperatorInterface,
           turretSubsystem,
           chassisImuYawController,
           chassisImuPitchController,
@@ -45,6 +48,7 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
           turretID),
       turretWRTurretImuCommand(
           drivers,
+          controlOperatorInterface,
           turretSubsystem,
           turretImuYawController,
           turretImuPitchController,

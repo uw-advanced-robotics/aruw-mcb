@@ -19,9 +19,10 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 #include "turret_gravity_compensation.hpp"
 
@@ -30,7 +31,7 @@ using namespace tap::control::turret;
 namespace aruwsrc::control::turret::algorithms
 {
 ChassisFrameYawTurretController::ChassisFrameYawTurretController(
-    TurretMotor *yawMotor,
+    TurretMotor &yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(yawMotor),
       pid(pidConfig)
@@ -39,41 +40,46 @@ ChassisFrameYawTurretController::ChassisFrameYawTurretController(
 
 void ChassisFrameYawTurretController::initialize()
 {
-    if (turretMotor->getTurretController() != this)
+    if (turretMotor.getTurretController() != this)
     {
         pid.reset();
-        turretMotor->attachTurretController(this);
+        turretMotor.attachTurretController(this);
     }
 }
 
 void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret yaw gimbal
-    float positionControllerError = turretMotor->getValidChassisMeasurementError();
+    float positionControllerError = turretMotor.getValidChassisMeasurementError();
 
     float pidOutput =
-        pid.runController(positionControllerError, turretMotor->getChassisFrameVelocity(), dt);
+        pid.runController(positionControllerError, turretMotor.getChassisFrameVelocity(), dt);
 
-    turretMotor->setMotorOutput(pidOutput);
+    turretMotor.setMotorOutput(pidOutput);
 }
 
 void ChassisFrameYawTurretController::setSetpoint(float desiredSetpoint)
 {
-    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 }
 
 float ChassisFrameYawTurretController::getSetpoint() const
 {
-    return turretMotor->getChassisFrameSetpoint();
+    return turretMotor.getChassisFrameSetpoint();
 }
 
-bool ChassisFrameYawTurretController::isOnline() const { return turretMotor->isOnline(); }
+float ChassisFrameYawTurretController::getMeasurement() const
+{
+    return turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+}
+
+bool ChassisFrameYawTurretController::isOnline() const { return turretMotor.isOnline(); }
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
-    TurretMotor *pitchMotorp,
+    TurretMotor &pitchMotorp,
     const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretPitchControllerInterface(pitchMotorp),
       pid(pidConfig)
@@ -82,10 +88,10 @@ ChassisFramePitchTurretController::ChassisFramePitchTurretController(
 
 void ChassisFramePitchTurretController::initialize()
 {
-    if (turretMotor->getTurretController() != this)
+    if (turretMotor.getTurretController() != this)
     {
         pid.reset();
-        turretMotor->attachTurretController(this);
+        turretMotor.attachTurretController(this);
     }
 }
 
@@ -94,33 +100,38 @@ void ChassisFramePitchTurretController::runController(
     const float desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret pitch gimbal
-    float positionControllerError = turretMotor->getValidChassisMeasurementError();
+    float positionControllerError = turretMotor.getValidChassisMeasurementError();
 
     float pidOutput =
-        pid.runController(positionControllerError, turretMotor->getChassisFrameVelocity(), dt);
+        pid.runController(positionControllerError, turretMotor.getChassisFrameVelocity(), dt);
 
     pidOutput += computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
-        -turretMotor->getAngleFromCenter(),
+        -turretMotor.getAngleFromCenter(),
         GRAVITY_COMPENSATION_SCALAR);
 
-    turretMotor->setMotorOutput(pidOutput);
+    turretMotor.setMotorOutput(pidOutput);
 }
 
 void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
 {
-    turretMotor->setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 }
 
 float ChassisFramePitchTurretController::getSetpoint() const
 {
-    return turretMotor->getChassisFrameSetpoint();
+    return turretMotor.getChassisFrameSetpoint();
 }
 
-bool ChassisFramePitchTurretController::isOnline() const { return turretMotor->isOnline(); }
+float ChassisFramePitchTurretController::getMeasurement() const
+{
+    return turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+}
+
+bool ChassisFramePitchTurretController::isOnline() const { return turretMotor.isOnline(); }
 
 }  // namespace aruwsrc::control::turret::algorithms

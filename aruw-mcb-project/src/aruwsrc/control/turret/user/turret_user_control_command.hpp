@@ -28,7 +28,12 @@
 namespace aruwsrc
 {
 class Drivers;
+
+namespace control
+{
+class ControlOperatorInterface;
 }
+}  // namespace aruwsrc
 
 namespace aruwsrc::control::turret::user
 {
@@ -41,7 +46,7 @@ class TurretUserControlCommand : public tap::control::Command
 public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] turretSubsystem Pointer to the sentinel turret to control.
+     * @param[in] turretSubsystem Pointer to the sentry turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
      * @param[in] pitchController Pointer to a pitch controller that will be used to control the
@@ -51,7 +56,8 @@ public:
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
     TurretUserControlCommand(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
+        ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -72,7 +78,8 @@ public:
     void end(bool) override;
 
 private:
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
+    ControlOperatorInterface &controlOperatorInterface;
     TurretSubsystem *turretSubsystem;
 
     uint32_t prevTime = 0;

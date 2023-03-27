@@ -19,8 +19,9 @@
 
 #include "imu_calibrate_menu.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/drivers.hpp"
 
 /**
  * Default function if getImuCalibrateCommand not defined by the user.
@@ -31,7 +32,7 @@ namespace aruwsrc::display
 {
 ImuCalibrateMenu::ImuCalibrateMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::Drivers *drivers)
+    tap::Drivers *drivers)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, IMU_CALIBRATE_MENU_ID),
       drivers(drivers)
 {
@@ -60,19 +61,20 @@ void ImuCalibrateMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
     control::imu::ImuCalibrateCommand *imuCalibrateCommand = getImuCalibrateCommand();
 
-    if (imuCalibrateCommand == nullptr)
-    {
-        return;
-    }
-
     switch (button)
     {
         case modm::MenuButtons::LEFT:
-            drivers->commandScheduler.removeCommand(imuCalibrateCommand, true);
             this->remove();
+            if (imuCalibrateCommand != nullptr)
+            {
+                drivers->commandScheduler.removeCommand(imuCalibrateCommand, true);
+            }
             break;
         case modm::MenuButtons::OK:
-            drivers->commandScheduler.addCommand(imuCalibrateCommand);
+            if (imuCalibrateCommand != nullptr)
+            {
+                drivers->commandScheduler.addCommand(imuCalibrateCommand);
+            }
             break;
         case modm::MenuButtons::RIGHT:
         case modm::MenuButtons::DOWN:

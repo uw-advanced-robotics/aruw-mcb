@@ -21,9 +21,11 @@
 
 #include <cassert>
 
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
@@ -41,7 +43,7 @@ MODM_ISR(EXTI0)
 }
 #endif
 
-VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
+VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),
@@ -54,13 +56,21 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     assert(visionCoprocessorInstance == nullptr);
 #endif
     visionCoprocessorInstance = this;
+
+    // Initialize all aim state to be invalid/unknown
+    for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+    {
+        this->lastAimData[i].pva.updated = 0;
+        this->lastAimData[i].timestamp = 0;
+    }
 }
 
 VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
 
 void VisionCoprocessor::initializeCV()
 {
-#ifndef PLATFORM_HOSTED
+#define DISABLE_TIME_SYNC_INTERRUPT
+#if !defined(PLATFORM_HOSTED) && !defined(DISABLE_TIME_SYNC_INTERRUPT)
     // Set up the interrupt for the vision coprocessor sync handler
     VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
@@ -70,7 +80,7 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
     drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
 #else
@@ -96,11 +106,35 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != sizeof(lastAimData))
+    int currIndex = 0;
+    for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
-        return false;
+        uint8_t flags = message.data[currIndex];
+        lastAimData[j].pva.updated = 0;
+        lastAimData[j].timing.updated = 0;
+
+        currIndex += messageWidths::FLAGS_BYTES;
+        memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
+        currIndex += messageWidths::TIMESTAMP_BYTES;
+        for (int i = 0; i < NUM_TAGS; ++i)
+        {
+            if (flags & (1 << i))
+            {
+                switch (i)
+                {
+                    case 0:
+                        memcpy(&lastAimData[j].pva, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].pva.updated = 1;
+                        break;
+                    case 1:
+                        memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].timing.updated = 1;
+                        break;
+                }
+                currIndex += (int)LEN_FIELDS[i];
+            }
+        }
     }
-    memcpy(lastAimData, &message.data, sizeof(lastAimData));
     return true;
 }
 
@@ -149,14 +183,25 @@ void VisionCoprocessor::sendOdometryData()
 
     modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
 
+    float pitch = modm::toRadian(drivers->mpu6500.getPitch());
+    float roll = modm::toRadian(drivers->mpu6500.getRoll());
+    // transform the pitch/roll from the chassis frame to the world frame
+    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
+
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
+#if defined(ALL_SENTRIES)
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
     odometryData->chassisOdometry.yaw = 0;
+#else
+    odometryData->chassisOdometry.pitch = pitch;
+    odometryData->chassisOdometry.roll = roll;
+    odometryData->chassisOdometry.yaw = location.getOrientation();
+#endif
 
     // number of turrets
     odometryData->numTurrets = control::turret::NUM_TURRETS;
@@ -167,10 +212,8 @@ void VisionCoprocessor::sendOdometryData()
         assert(turretOrientationInterfaces[i] != nullptr);
         odometryData->turretOdometry[i].timestamp =
             turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        odometryData->turretOdometry[i].pitch =
-            modm::toDegree(turretOrientationInterfaces[i]->getWorldPitch());
-        odometryData->turretOdometry[i].yaw =
-            modm::toDegree(turretOrientationInterfaces[i]->getWorldYaw());
+        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
+        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
     }
 
     odometryMessage.setCRC16();

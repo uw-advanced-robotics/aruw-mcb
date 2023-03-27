@@ -22,16 +22,16 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#if defined(ALL_SOLDIERS) || defined(TARGET_ENGINEER)
-#include "soldier_turret_constants.hpp"
-#elif defined(TARGET_HERO)
-#include "hero_turret_constants.hpp"
+#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
+#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
+#elif defined(TARGET_HERO_CYCLONE)
+#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
-#include "drone_turret_constants.hpp"
-#elif defined(TARGET_SENTINEL_2021)
-#include "sentinel_2021_turret_constants.hpp"
-#elif defined(TARGET_SENTINEL_2022)
-#include "sentinel_2022_turret_constants.hpp"
+#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
+#elif defined(TARGET_SENTRY_BEEHIVE)
+#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
+#elif defined(TARGET_DART)
+#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_

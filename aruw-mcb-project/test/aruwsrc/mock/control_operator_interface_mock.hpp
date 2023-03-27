@@ -25,7 +25,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc
 {
@@ -34,7 +34,7 @@ namespace mock
 class ControlOperatorInterfaceMock : public aruwsrc::control::ControlOperatorInterface
 {
 public:
-    ControlOperatorInterfaceMock(aruwsrc::Drivers *drivers);
+    ControlOperatorInterfaceMock(tap::Drivers *drivers);
     virtual ~ControlOperatorInterfaceMock();
 
     MOCK_METHOD(float, getChassisXInput, (), (override));
@@ -42,7 +42,7 @@ public:
     MOCK_METHOD(float, getChassisRInput, (), (override));
     MOCK_METHOD(float, getTurretYawInput, (uint8_t), (override));
     MOCK_METHOD(float, getTurretPitchInput, (uint8_t), (override));
-    MOCK_METHOD(float, getSentinelSpeedInput, (), (override));
+    MOCK_METHOD(float, getSentrySpeedInput, (), (override));
 };  // class ControlOperatorInterfaceMock
 }  // namespace mock
 }  // namespace aruwsrc

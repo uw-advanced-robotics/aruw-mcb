@@ -19,7 +19,7 @@
 
 #include "turret_quick_turn_command.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::turret::user
 {
@@ -36,9 +36,17 @@ bool TurretQuickTurnCommand::isReady() { return turretSubsystem->yawMotor.isOnli
 
 void TurretQuickTurnCommand::initialize()
 {
-    float newSetpoint =
-        turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() + targetOffsetToTurn;
+    float newSetpoint = tap::algorithms::ContiguousFloat(
+                            turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() +
+                                targetOffsetToTurn,
+                            0,
+                            M_TWOPI)
+                            .getValue();
+
+    newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
+
     turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
+
     turretSubsystem->yawMotor.attachTurretController(nullptr);
 }
 }  // namespace aruwsrc::control::turret::user

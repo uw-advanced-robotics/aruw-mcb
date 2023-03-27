@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -46,7 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class ChassisSubsystemTest : public Test
 {
 protected:
-    ChassisSubsystemTest() : chassis(&drivers, ChassisSubsystem::ChassisType::MECANUM) {}
+    ChassisSubsystemTest() : chassis(&drivers) {}
 
     void SetUp() override
     {
@@ -54,8 +54,8 @@ protected:
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(testing::ReturnRef(robotData));
     }
 
-    aruwsrc::Drivers drivers;
-    ChassisSubsystem chassis;
+    tap::Drivers drivers;
+    MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
@@ -279,7 +279,7 @@ VelocityGetterParam velocityGetterValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     VelocityGetterTest,
     ValuesIn(velocityGetterValuesToTest));
 
@@ -289,8 +289,9 @@ class MaxWheelSpeedGetterTest : public TestWithParam<std::tuple<bool, int, float
 
 TEST_P(MaxWheelSpeedGetterTest, getMaxWheelSpeed)
 {
-    float maxWheelSpeed =
-        ChassisSubsystem::getMaxWheelSpeed(std::get<0>(GetParam()), std::get<1>(GetParam()));
+    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        std::get<0>(GetParam()),
+        std::get<1>(GetParam()));
 
     EXPECT_NEAR(std::get<2>(GetParam()), maxWheelSpeed, 1E-3);
 }
@@ -316,7 +317,7 @@ std::tuple<bool, int, float> maxWheelSpeedValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     MaxWheelSpeedGetterTest,
     ValuesIn(maxWheelSpeedValuesToTest));
 
@@ -399,6 +400,6 @@ ActualVelocityParam actualVelocityValuesToTest[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    ChassisSubsystem,
+    HolonomicChassisSubsystem,
     ActualVelocityTest,
     ValuesIn(actualVelocityValuesToTest));

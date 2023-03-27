@@ -27,8 +27,10 @@
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/standard_menu.hpp"
 
+#include "about_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
@@ -48,7 +50,10 @@ class MainMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IA
 public:
     MainMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
-        aruwsrc::Drivers *drivers);
+        tap::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor,
+        can::TurretMCBCanComm *turretMCBCanCommBus1,
+        can::TurretMCBCanComm *turretMCBCanCommBus2);
 
     virtual ~MainMenu() = default;
 
@@ -60,7 +65,7 @@ public:
 private:
     static constexpr int MAIN_MENU_ID = 2;
 
-    aruwsrc::Drivers *drivers;
+    tap::Drivers *drivers;
 
     ImuCalibrateMenu imuCalibrateMenu;
     CVMenu cvMenu;
@@ -70,7 +75,12 @@ private:
     tap::display::CommandSchedulerMenu commandSchedulerMenu;
     tap::display::RefSerialMenu refSerialMenu;
     tap::communication::sensors::imu::ImuMenu imuMenu;
-    TurretMCBMenu turretStatusMenu;
+    TurretMCBMenu turretStatusMenuBus1;
+    TurretMCBMenu turretStatusMenuBus2;
+    AboutMenu aboutMenu;
+    serial::VisionCoprocessor *visionCoprocessor;
+    can::TurretMCBCanComm *turretMCBCanCommBus1;
+    can::TurretMCBCanComm *turretMCBCanCommBus2;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -81,7 +91,9 @@ private:
     void addCommandSchedulerCallback();
     void addRefSerialMenuCallback();
     void addImuMenuCallback();
-    void addTurretMCBMenuCallback();
+    void addTurretMCBMenuBus1Callback();
+    void addTurretMCBMenuBus2Callback();
+    void addAboutMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

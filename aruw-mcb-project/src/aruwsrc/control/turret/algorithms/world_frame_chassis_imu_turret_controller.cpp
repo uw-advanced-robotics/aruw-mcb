@@ -19,7 +19,7 @@
 
 #include "world_frame_chassis_imu_turret_controller.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -87,49 +87,51 @@ static inline void updateYawWorldFrameSetpoint(
     const float desiredSetpoint,
     const float chassisFrameInitImuYawAngle,
     const float chassisFrameImuYawAngle,
-    tap::algorithms::ContiguousFloat *worldFrameYawSetpoint,
-    TurretMotor *yawMotor)
+    float &worldFrameYawSetpoint,
+    TurretMotor &yawMotor)
 {
-    worldFrameYawSetpoint->setValue(desiredSetpoint);
+    worldFrameYawSetpoint = desiredSetpoint;
 
     // project target angle in world relative to chassis relative to limit the value
-    yawMotor->setChassisFrameSetpoint(transformWorldFrameYawToChassisFrame(
+    yawMotor.setChassisFrameSetpoint(transformWorldFrameYawToChassisFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        worldFrameYawSetpoint->getValue()));
+        worldFrameYawSetpoint));
 
-    if (yawMotor->getConfig().limitMotorAngles)
+    if (yawMotor.getConfig().limitMotorAngles)
     {
         // project angle that is limited by the subsystem to world relative again to run the
         // controller. Otherwise use worldFrameYawSetpoint directly.
-        worldFrameYawSetpoint->setValue(transformChassisFrameYawToWorldFrame(
+        worldFrameYawSetpoint = transformChassisFrameYawToWorldFrame(
             chassisFrameInitImuYawAngle,
             chassisFrameImuYawAngle,
-            yawMotor->getChassisFrameSetpoint()));
+            yawMotor.getChassisFrameSetpoint());
     }
 }
 
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
-    aruwsrc::Drivers *drivers,
-    TurretMotor *yawMotor,
+    tap::Drivers &drivers,
+    TurretMotor &yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(yawMotor),
       drivers(drivers),
-      pid(pidConfig),
-      worldFrameSetpoint(0, 0, M_TWOPI)
+      pid(pidConfig)
 {
 }
 
 void WorldFrameYawChassisImuTurretController::initialize()
 {
-    if (turretMotor->getTurretController() != this)
+    if (turretMotor.getTurretController() != this)
     {
         pid.reset();
 
-        chassisFrameInitImuYawAngle = modm::toRadian(drivers->mpu6500.getYaw());
-        worldFrameSetpoint.setValue(turretMotor->getChassisFrameSetpoint());
+        revolutions = 0;
+        prevYaw = getMpu6500YawUnwrapped();
 
-        turretMotor->attachTurretController(this);
+        chassisFrameInitImuYawAngle = prevYaw;
+        worldFrameSetpoint = turretMotor.getChassisFrameSetpoint();
+
+        turretMotor.attachTurretController(this);
     }
 }
 
@@ -137,28 +139,31 @@ void WorldFrameYawChassisImuTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    const float chassisFrameImuYawAngle = modm::toRadian(drivers->mpu6500.getYaw());
+    updateRevolutionCounter();
+
+    const float chassisFrameImuYawAngle = getMpu6500YawUnwrapped();
 
     updateYawWorldFrameSetpoint(
         desiredSetpoint,
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        &worldFrameSetpoint,
+        worldFrameSetpoint,
         turretMotor);
 
-    float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
+    const float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        turretMotor->getChassisFrameMeasuredAngle().getValue());
+        turretMotor.getChassisFrameUnwrappedMeasuredAngle());
 
     // position controller based on imu and yaw gimbal angle
-    float positionControllerError = -worldFrameSetpoint.difference(worldFrameYawAngle);
-    float pidOutput = pid.runController(
+    const float positionControllerError =
+        turretMotor.getValidMinError(worldFrameSetpoint, worldFrameYawAngle);
+    const float pidOutput = pid.runController(
         positionControllerError,
-        turretMotor->getChassisFrameVelocity() + modm::toRadian(drivers->mpu6500.getGz()),
+        turretMotor.getChassisFrameVelocity() + modm::toRadian(drivers.mpu6500.getGz()),
         dt);
 
-    turretMotor->setMotorOutput(pidOutput);
+    turretMotor.setMotorOutput(pidOutput);
 }
 
 void WorldFrameYawChassisImuTurretController::setSetpoint(float desiredSetpoint)
@@ -167,18 +172,47 @@ void WorldFrameYawChassisImuTurretController::setSetpoint(float desiredSetpoint)
         desiredSetpoint,
         chassisFrameInitImuYawAngle,
         chassisFrameInitImuYawAngle,
-        &worldFrameSetpoint,
+        worldFrameSetpoint,
         turretMotor);
 }
 
-float WorldFrameYawChassisImuTurretController::getSetpoint() const
+float WorldFrameYawChassisImuTurretController::getSetpoint() const { return worldFrameSetpoint; }
+
+float WorldFrameYawChassisImuTurretController::getMeasurement() const
 {
-    return worldFrameSetpoint.getValue();
+    const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
+
+    return transformChassisFrameYawToWorldFrame(
+        chassisFrameInitImuYawAngle,
+        chassisFrameImuYawAngle,
+        turretMotor.getChassisFrameUnwrappedMeasuredAngle());
 }
 
 bool WorldFrameYawChassisImuTurretController::isOnline() const
 {
-    return turretMotor->isOnline() && drivers->mpu6500.isRunning();
+    return turretMotor.isOnline() && drivers.mpu6500.isRunning();
+}
+
+float WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFrame(
+    float controllerFrameAngle) const
+{
+    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+
+    return transformWorldFrameYawToChassisFrame(
+        chassisFrameInitImuYawAngle,
+        chassisFrameImuYawAngle,
+        controllerFrameAngle);
+}
+
+float WorldFrameYawChassisImuTurretController::convertChassisAngleToControllerFrame(
+    float chassisFrameAngle) const
+{
+    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+
+    return transformChassisFrameYawToWorldFrame(
+        chassisFrameInitImuYawAngle,
+        chassisFrameImuYawAngle,
+        chassisFrameAngle);
 }
 
 }  // namespace aruwsrc::control::turret::algorithms

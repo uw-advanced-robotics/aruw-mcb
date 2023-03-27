@@ -27,14 +27,10 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret
 {
@@ -66,22 +62,85 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
+#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
+    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
+     *  The IMU Faces to the left of the 'R' on the Type A MCB
+     *  0 Rotation corresponds with a 0 rotation of the chassis
+     */
+    // MCB has power inlet facing forward
+    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+#else
+    // MCB has power inlet facing backwards
+    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
+#endif
+
+    enum class FireRate : uint8_t
+    {
+        ZERO = 0,
+        LOW = 1,
+        MEDIUM = 2,
+        HIGH = 3,
+    };
+
+    enum Tags : uint8_t
+    {
+        TARGET_STATE = 0,
+        SHOT_TIMING = 1,
+        NUM_TAGS = 2,
+    };
+
+    enum messageWidths : uint8_t
+    {
+        FLAGS_BYTES = 1,
+        TIMESTAMP_BYTES = 4,
+        FIRERATE_BYTES = 1,
+        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
+        SHOT_TIMING_BYTES = 12,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
+        messageWidths::TARGET_DATA_BYTES,
+        messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
+
     /**
      * AutoAim data to receive from Jetson.
      */
+
+    struct PositionData
+    {
+        FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
+
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
+
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
+
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
+
+        bool updated;  ///< whether or not this came from the most recent message
+
+    } modm_packed;
+
+    struct TimingData
+    {
+        uint32_t duration;       ///< duration during which the plate is at the target point
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+                                 ///< next shot should ideally hit
+
+        bool updated;  ///< whether or not this came from the most recent message
+    } modm_packed;
+
     struct TurretAimData
     {
-        float xPos;          ///< x position of the target (in m).
-        float yPos;          ///< y position of the target (in m).
-        float zPos;          ///< z position of the target (in m).
-        float xVel;          ///< x velocity of the target (in m/s).
-        float yVel;          ///< y velocity of the target (in m/s).
-        float zVel;          ///< z velocity of the target (in m/s).
-        float xAcc;          ///< x acceleration of the target (in m/s^2).
-        float yAcc;          ///< y acceleration of the target (in m/s^2).
-        float zAcc;          ///< z acceleration of the target (in m/s^2).
-        bool hasTarget;      ///< Whether or not the xavier has a target.
-        uint32_t timestamp;  ///< Timestamp in microseconds.
+        struct PositionData pva;
+        uint32_t timestamp;  ///< timestamp in microseconds
+        struct TimingData timing;
     } modm_packed;
 
     /**
@@ -116,7 +175,7 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-    VisionCoprocessor(aruwsrc::Drivers* drivers);
+    VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
 
@@ -161,7 +220,17 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget;
+            hasTarget |= lastAimData[i].pva.updated;
+        }
+        return hasTarget;
+    }
+
+    mockable inline bool getSomeTurretUsingTimedShots() const
+    {
+        bool hasTarget = false;
+        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+        {
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -238,6 +307,8 @@ private:
     volatile uint32_t risingEdgeTime = 0;
 
     uint32_t prevRisingEdgeTime = 0;
+
+    uint8_t testMessageBytes[256];
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};

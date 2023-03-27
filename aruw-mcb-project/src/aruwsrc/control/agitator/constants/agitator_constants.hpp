@@ -20,14 +20,12 @@
 #ifndef AGITATOR_CONSTANTS_HPP_
 #define AGITATOR_CONSTANTS_HPP_
 
-#if defined(ALL_SOLDIERS)
-#include "soldier_agitator_constants.hpp"
-#elif defined(TARGET_SENTINEL_2021)
-#include "sentinel_2021_agitator_constants.hpp"
-#elif defined(TARGET_SENTINEL_2022)
-#include "sentinel_2022_agitator_constants.hpp"
-#elif defined(TARGET_HERO)
-#include "hero_agitator_constants.hpp"
+#if defined(ALL_STANDARDS)
+#include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
+#elif defined(TARGET_SENTRY_BEEHIVE)
+#include "aruwsrc/robot/sentry/sentry_beehive_agitator_constants.hpp"
+#elif defined(TARGET_HERO_CYCLONE)
+#include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_

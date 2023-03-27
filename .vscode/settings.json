@@ -74,7 +74,9 @@
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
         "aruw-mcb-project/taproot/src",
-        "aruw-mcb-project/src"
+        "aruw-mcb-project/src",
+        "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+        "aruw-mcb-project/taproot/modm/ext/cmsis/core"
     ],
     "C_Cpp.default.cppStandard": "c++20",
     "C_Cpp.default.cStandard": "c11",

@@ -19,7 +19,7 @@
 
 #include "main_menu.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 using namespace tap::display;
 
@@ -29,18 +29,26 @@ namespace display
 {
 MainMenu::MainMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
-    aruwsrc::Drivers* drivers)
+    tap::Drivers* drivers,
+    serial::VisionCoprocessor* visionCoprocessor,
+    can::TurretMCBCanComm* turretMCBCanCommBus1,
+    can::TurretMCBCanComm* turretMCBCanCommBus2)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
-      cvMenu(stack, drivers),
-      errorMenu(stack, drivers),
+      cvMenu(stack, drivers, visionCoprocessor),
+      errorMenu(stack),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers),
       commandSchedulerMenu(stack, drivers),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500),
-      turretStatusMenu(stack, drivers)
+      turretStatusMenuBus1(stack, *turretMCBCanCommBus1),
+      turretStatusMenuBus2(stack, *turretMCBCanCommBus2),
+      aboutMenu(stack),
+      visionCoprocessor(visionCoprocessor),
+      turretMCBCanCommBus1(turretMCBCanCommBus1),
+      turretMCBCanCommBus2(turretMCBCanCommBus2)
 {
 }
 
@@ -72,10 +80,15 @@ void MainMenu::initialize()
             this,
             &MainMenu::addImuMenuCallback));
     addEntry(
-        TurretMCBMenu::getMenuName(),
+        "Turret MCB Menu Bus 1",
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
-            &MainMenu::addTurretMCBMenuCallback));
+            &MainMenu::addTurretMCBMenuBus1Callback));
+    addEntry(
+        "Turret MCB Menu Bus 2",
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addTurretMCBMenuBus2Callback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -86,6 +99,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addHardwareTestMenuCallback));
+    addEntry(
+        AboutMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addAboutMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -98,14 +116,14 @@ void MainMenu::addImuCalibrateMenuCallback()
 
 void MainMenu::addCVMenuCallback()
 {
-    CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers);
+    CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers, visionCoprocessor);
     getViewStack()->push(cvm);
 }
 
 void MainMenu::addErrorMenuCallback()
 {
     // em actually points to errorMenu
-    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack(), drivers);
+    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack());
     getViewStack()->push(em);
 }
 
@@ -146,10 +164,24 @@ void MainMenu::addImuMenuCallback()
     getViewStack()->push(imc);
 }
 
-void MainMenu::addTurretMCBMenuCallback()
+void MainMenu::addTurretMCBMenuBus1Callback()
 {
-    TurretMCBMenu* tsm = new (&turretStatusMenu) TurretMCBMenu(getViewStack(), drivers);
+    TurretMCBMenu* tsm =
+        new (&turretStatusMenuBus1) TurretMCBMenu(getViewStack(), *turretMCBCanCommBus1);
     getViewStack()->push(tsm);
+}
+
+void MainMenu::addTurretMCBMenuBus2Callback()
+{
+    TurretMCBMenu* tsm =
+        new (&turretStatusMenuBus2) TurretMCBMenu(getViewStack(), *turretMCBCanCommBus2);
+    getViewStack()->push(tsm);
+}
+
+void MainMenu::addAboutMenuCallback()
+{
+    AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
+    getViewStack()->push(abtm);
 }
 }  // namespace display
 

@@ -35,6 +35,7 @@
     <module>taproot:core</module>
     <module>taproot:communication:sensors:buzzer</module>
     <module>taproot:communication:sensors:distance</module>
+    <module>taproot:communication:sensors:limit-switch</module>
     <module>taproot:communication:gpio:leds</module>
     <module>taproot:communication:gpio:digital</module>
     <module>taproot:communication:tcp-server</module>

@@ -19,11 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc;
@@ -40,14 +42,23 @@ class TurretUserControlCommandTest : public Test
 protected:
     TurretUserControlCommandTest()
         : turret(&drivers),
-          pitchController(&turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          yawController(&turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          turretCmd(&drivers, &turret, &yawController, &pitchController, 1, 1)
+          controlOperatorInterface(&drivers),
+          pitchController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          yawController(turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          turretCmd(
+              &drivers,
+              controlOperatorInterface,
+              &turret,
+              &yawController,
+              &pitchController,
+              1.0f,
+              1.0f)
     {
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<TurretSubsystemMock> turret;
+    NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     ChassisFramePitchTurretController pitchController;
     ChassisFrameYawTurretController yawController;
     TurretUserControlCommand turretCmd;
@@ -101,8 +112,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
     float yawSetpoint = M_PI_2;
     float pitchSetpoint = M_PI_2;
 
-    ON_CALL(drivers.controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
-    ON_CALL(drivers.controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
+    ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
+    ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
     ON_CALL(turret.pitchMotor, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&yawSetpoint));
     ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&pitchSetpoint));
     ON_CALL(turret.pitchMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(pitchActual));
@@ -133,8 +144,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
     float yawSetpoint = M_PI_2;
     tap::algorithms::ContiguousFloat yawActual(M_PI_2, 0, M_TWOPI);
     tap::algorithms::ContiguousFloat pitchActual(M_PI_2, 0, M_TWOPI);
-    ON_CALL(drivers.controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(1));
-    ON_CALL(drivers.controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
+    ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(1));
+    ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
     ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
         .WillByDefault(ReturnPointee(&pitchSetpoint));
     ON_CALL(turret.yawMotor, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&yawSetpoint));

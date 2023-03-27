@@ -21,18 +21,20 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSubsystem::FrictionWheelSubsystem(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
-    tap::can::CanBus canBus)
+    tap::can::CanBus canBus,
+    aruwsrc::can::TurretMCBCanComm *turretMCB)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
       launchSpeedLinearInterpolator(
@@ -52,7 +54,8 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           LAUNCHER_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
       leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
-      rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel")
+      rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
+      turretMCB(turretMCB)
 {
 }
 
@@ -65,9 +68,19 @@ void FrictionWheelSubsystem::initialize()
 
 void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
-    desiredLaunchSpeed = speed;
+    desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    drivers->turretMCBCanComm.setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+    if (turretMCB != nullptr)
+    {
+        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+    }
+}
+
+float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
+{
+    float leftWheelSpeed = leftWheel.getShaftRPM();
+    float rightWheelSpeed = rightWheel.getShaftRPM();
+    return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
 }
 
 void FrictionWheelSubsystem::refresh()

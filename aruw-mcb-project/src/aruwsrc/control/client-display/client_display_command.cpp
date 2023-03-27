@@ -20,9 +20,10 @@
 #include "client_display_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 #include "client_display_subsystem.hpp"
 #include "hud_indicator.hpp"
@@ -32,40 +33,49 @@ using namespace tap::control;
 namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers &drivers,
+    tap::control::CommandScheduler &commandScheduler,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
     const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    aruwsrc::agitator::AgitatorSubsystem &agitatorSubsystem,
+    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::agitator::MultiShotHandler *multiShotHandler,
+    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
     : Command(),
       drivers(drivers),
+      visionCoprocessor(visionCoprocessor),
+      commandScheduler(commandScheduler),
       refSerialTransmitter(&drivers),
       booleanHudIndicators(
-          drivers,
+          commandScheduler,
           refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
           agitatorSubsystem,
-          imuCalibrateCommand),
+          imuCalibrateCommand,
+          sentryResponseHandler),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
+          visionCoprocessor,
           refSerialTransmitter,
           hopperSubsystem,
           frictionWheelSubsystem,
+          robotTurretSubsystem,
           multiShotHandler,
+          cvOnTargetManager,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      turretAnglesIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
-      visionHudIndicators(drivers, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
 }
@@ -78,7 +88,6 @@ void ClientDisplayCommand::initialize()
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
-    turretAnglesIndicator.initialize();
     visionHudIndicators.initialize();
 }
 
@@ -94,7 +103,6 @@ bool ClientDisplayCommand::run()
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
-    PT_CALL(turretAnglesIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
     while (true)
@@ -103,7 +111,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
-        PT_CALL(turretAnglesIndicator.update());
         PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }

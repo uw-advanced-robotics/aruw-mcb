@@ -19,10 +19,10 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace testing;
@@ -43,34 +43,36 @@ protected:
 
     WorldFrameChassisImuTurretControllerTest()
         : turretMotor(&motor, TURRET_MOTOR_CONFIG),
-          turretController(&drivers, &turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          yawValue(0, 0, M_TWOPI),
-          setpoint(0)
+          turretController(drivers, turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          chassisFrameMeasured(0),
+          chassisFrameSetpoint(0)
     {
     }
 
     void SetUp() override
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
-        ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
-        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&setpoint));
+        ON_CALL(turretMotor, getChassisFrameUnwrappedMeasuredAngle)
+            .WillByDefault(ReturnPointee(&chassisFrameMeasured));
+        ON_CALL(turretMotor, getChassisFrameSetpoint)
+            .WillByDefault(ReturnPointee(&chassisFrameSetpoint));
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(TURRET_MOTOR_CONFIG));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     testing::NiceMock<tap::mock::MotorInterfaceMock> motor;
     testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;
     float mpu6500Yaw = 0;
-    ContiguousFloat yawValue;
-    float setpoint;
+    float chassisFrameMeasured;
+    float chassisFrameSetpoint;
 };
 
 TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_actual_identical_output_0)
 {
-    yawValue.setValue(M_PI_2);
+    chassisFrameMeasured = M_PI_2;
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
@@ -81,9 +83,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_gt_actual_output_positive)
 {
-    yawValue.setValue(modm::toRadian(80));
-    ON_CALL(turretMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(yawValue));
-    ON_CALL(drivers.mpu6500, getYaw).WillByDefault(Return(0));
+    chassisFrameMeasured = modm::toRadian(80);
 
     EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
@@ -94,7 +94,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_lt_actual_output_negative)
 {
-    yawValue.setValue(modm::toRadian(100));
+    chassisFrameMeasured = modm::toRadian(100);
 
     EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 
@@ -105,7 +105,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_chassis_frame_rotated_setpoint_actual_equal_0_output)
 {
-    yawValue.setValue(0);
+    chassisFrameMeasured = 0;
     mpu6500Yaw = 90;
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));

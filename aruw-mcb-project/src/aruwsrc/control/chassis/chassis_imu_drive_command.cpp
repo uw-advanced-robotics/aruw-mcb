@@ -20,22 +20,26 @@
 #include "chassis_imu_drive_command.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/drivers.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
-    aruwsrc::Drivers* drivers,
-    ChassisSubsystem* chassis,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
+    HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor)
     : tap::control::Command(),
       drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
       rotationSetpoint(0, 0, M_TWOPI)
@@ -78,8 +82,8 @@ void ChassisImuDriveCommand::execute()
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
             // to get to the same position that it was at previously.
-            float chassisRInput = drivers->controlOperatorInterface.getChassisRInput() *
-                                  USER_INPUT_TO_ANGLE_DELTA_SCALAR;
+            float chassisRInput =
+                operatorInterface->getChassisRInput() * USER_INPUT_TO_ANGLE_DELTA_SCALAR;
             if (abs(angleFromDesiredRotation) > MAX_ROTATION_ERR)
             {
                 // doesn't have to be in the if statement but this is more computationally intensive
@@ -117,13 +121,14 @@ void ChassisImuDriveCommand::execute()
     else
     {
         imuSetpointInitialized = false;
-        chassisRotationDesiredWheelspeed = drivers->controlOperatorInterface.getChassisRInput();
+        chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput();
     }
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;
 
     ChassisRelDrive::computeDesiredUserTranslation(
+        operatorInterface,
         drivers,
         chassis,
         chassisRotationDesiredWheelspeed,

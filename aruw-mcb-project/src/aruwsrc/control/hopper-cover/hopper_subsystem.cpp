@@ -21,14 +21,12 @@
 
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/drivers.hpp"
-
 namespace aruwsrc
 {
 namespace control
 {
 HopperSubsystem::HopperSubsystem(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float open,
     float close,

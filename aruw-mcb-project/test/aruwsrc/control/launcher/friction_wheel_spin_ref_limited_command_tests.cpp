@@ -19,12 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
-using aruwsrc::Drivers;
 using aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand;
+using tap::Drivers;
 using namespace testing;
 using namespace tap::communication::serial;
 
@@ -40,7 +41,7 @@ protected:
             .WillByDefault(ReturnPointee(&refSerialOnline));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
     RefSerialData::Rx::RobotData robotData{};
     bool refSerialOnline = false;
@@ -55,7 +56,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
         &frictionWheels,
         5,
         false,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(5));
@@ -70,7 +71,7 @@ TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_1_specifie
         &frictionWheels,
         5,
         false,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
@@ -86,7 +87,7 @@ TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_2_specifie
         &frictionWheels,
         5,
         false,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_2);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
     refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
@@ -102,7 +103,7 @@ TEST_EXECUTE(barrelSpeedLimit17ID2_used_when_ref_serial_online_barrel_42mm_speci
         &frictionWheels,
         5,
         false,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_42MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
     refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
@@ -118,7 +119,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         &frictionWheels,
         0,
         true,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
@@ -134,7 +135,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         &frictionWheels,
         0,
         true,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
@@ -150,7 +151,7 @@ TEST_EXECUTE(launch_speed_changes_when_ref_serial_online_and_barrel_speed_change
         &frictionWheels,
         0,
         false,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
@@ -178,7 +179,7 @@ TEST_F(FrictionWheelSpinRefLimitedCommandTest, isFinished__always_false)
         &frictionWheels,
         0,
         true,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     EXPECT_FALSE(frictionWheelSpinRefLimitedCommand.isFinished());
 }
@@ -190,7 +191,7 @@ TEST_F(FrictionWheelSpinRefLimitedCommandTest, end__sets_launch_speed_to_0)
         &frictionWheels,
         0,
         true,
-        FrictionWheelSpinRefLimitedCommand::Barrel::BARREL_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0)).Times(2);
 
