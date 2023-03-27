@@ -150,7 +150,7 @@ before_script:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_SPIDER compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     untracked: true
     key: mcb-binaries
@@ -164,7 +164,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=sim profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_SPIDER compile_lib_only=sim profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
@@ -176,7 +176,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_SPIDER compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
@@ -195,11 +195,27 @@ before_script:
   variables:
     ROBOT: STANDARD_SPIDER
 
+# Test build script is different from the others since we use this one to track test coverage for the repo
 "Standard (Spider): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_WOODY
+  stage: Tests
+  needs: []
+  only: *default_only
+  except: *default_except
+  script:
+    - cd aruw-mcb-project
+    - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - cd .. && gcovr -g --xml > cobertura.xml
+    - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
+    - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
+  coverage: '/\s+Total:\|(\d+.\d+\%).+\|.+\|.+/'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-standard-tests"
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
+    expire_in: 2 weeks
 
 # Standard (Elsa) build
 
@@ -216,25 +232,10 @@ before_script:
     ROBOT: STANDARD_ELSA
 
 "Standard (Elsa): Test Build":
-  stage: Tests
-  needs: []
-  only: *default_only
-  except: *default_except
-  script:
-    - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_ELSA -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
-    - cd .. && gcovr -g --xml > cobertura.xml
-    - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
-    - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
-  coverage: '/\s+Total:\|(\d+.\d+\%).+\|.+\|.+/'
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-standard-tests"
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
-    expire_in: 2 weeks
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_ELSA
 
 # Standard (Woody) Build
 
