@@ -25,8 +25,6 @@
 
 #include "../can_bus.hpp"
 
-using namespace aruwsrc::can;
-
 namespace aruwsrc::virtualMCB
 {
 class VirtualDJIMotor : public tap::motor::DjiMotor

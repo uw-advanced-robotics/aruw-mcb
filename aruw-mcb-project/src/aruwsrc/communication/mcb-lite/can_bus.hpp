@@ -25,7 +25,7 @@
 
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::virtualMCB
 {
 class CanBus
 {

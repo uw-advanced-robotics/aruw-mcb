@@ -22,6 +22,7 @@
 
 #include "can_bus.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
+#include "virtual_can_rx_handler.hpp"
 
 namespace aruwsrc::virtualMCB
 {
@@ -39,9 +40,10 @@ public:
  * And then do all the extra things that MCb-Lite is supposed to do 💀
 */
 
-private:
+public:
 
 VirtualDJIMotorTxHandler motorTxHandler;
+VirtualCANRxHandler canRxHandler;
 
 
 };
