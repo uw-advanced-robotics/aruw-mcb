@@ -161,7 +161,7 @@ namespace aruwsrc::algorithms::transforms {
         modm::Matrix<float, 3, 1> chassisVelocity = getActualVelocityChassisRelative();
         rotateChassisVectorToWorld(chassisVelocity);
 
-        float accData[3] = {chassisImu.getAx(), chassisImu.getAx(), chassisImu.getAx()};
+        float accData[3] = {chassisImu.getAx(), chassisImu.getAy(), chassisImu.getAz()};
         modm::Matrix<float, 3, 1> chassisAcceleration = modm::Matrix<float, 3, 1>(accData);
         rotateChassisVectorToWorld(chassisAcceleration);
 
@@ -211,7 +211,7 @@ namespace aruwsrc::algorithms::transforms {
             return modm::Matrix<float, 3, 1>().zeroMatrix();
 
         modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
-        
+
         wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
         wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
         wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
