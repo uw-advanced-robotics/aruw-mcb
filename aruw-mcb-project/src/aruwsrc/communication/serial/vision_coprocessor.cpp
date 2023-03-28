@@ -142,6 +142,9 @@ void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendRefereeRealtimeData();
+    sendRefereeCompetitionResult();
+    sendRefereeWarning();
     sendTimeSyncMessage();
 }
 
@@ -261,8 +264,8 @@ void VisionCoprocessor::sendRefereeRealtimeData()
         const auto& gameData = drivers->refSerial.getGameData();
         const auto& robotData = drivers->refSerial.getRobotData();
 
-        data->gameType = static_cast<uint8_t>(gameData.gameStage);
-        data->gameProgress = static_cast<uint8_t>(gameData.gameType);
+        data->gameType = static_cast<uint8_t>(gameData.gameType);
+        data->gameProgress = static_cast<uint8_t>(gameData.gameStage);
         data->stageRemainTime = gameData.stageTimeRemaining;
         data->unixTime = gameData.unixTime;
         data->powerSupplyStatus = robotData.robotPower.value;
@@ -297,7 +300,7 @@ void VisionCoprocessor::sendRefereeWarning()
 {
     const auto& refereeWarningData = drivers->refSerial.getRobotData().refereeWarningData;
 
-    // A new warning has been received
+    // Only send if a new warning has been received
     if (lastSentRefereeWarningTime != refereeWarningData.lastReceivedWarningRobotTime)
     {
         DJISerial::SerialMessage<2> message;
@@ -312,6 +315,9 @@ void VisionCoprocessor::sendRefereeWarning()
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&message),
             sizeof(message));
+
+        // New warning sent
+        lastSentRefereeWarningTime = refereeWarningData.lastReceivedWarningRobotTime;
     }
 }
 
