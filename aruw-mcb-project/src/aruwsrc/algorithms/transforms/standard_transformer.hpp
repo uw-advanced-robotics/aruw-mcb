@@ -195,8 +195,6 @@ namespace aruwsrc::algorithms::transforms
         const float CHASSISIMU_TO_CHASSIS_Z_OFFSET = 0.12172;
 
         // enums and matrix for calculating chassis velocity from raw motor RPM
-        // ripped from holonomic_chassis_subsystem, probably bad to have this repeated
-        // in the code
         enum WheelRPMIndex
         {
             LF = 0,
@@ -213,6 +211,10 @@ namespace aruwsrc::algorithms::transforms
             R = 2,
         };
         
+        // forward kinematic matrix for mecanum drive
+        // used to compute chassis <vx, vy, wz> from individual
+        // wheel velocities
+        // (wz = angular velocity around z axis)
         modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
         /**

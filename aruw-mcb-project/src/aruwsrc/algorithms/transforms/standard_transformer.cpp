@@ -75,7 +75,7 @@ namespace aruwsrc::algorithms::transforms {
         // have their velocity multiplied by -1
         // it makes sense that the reading would need to be multiplied
         // by -1 *somewhere*, but why here? couldn't that 
-        // have been handled in isInverted upon motor construction?
+        // have been handled in isInverted upon motor instantiation?
         wheelVelToChassisVelMat[X][LF] = 1;
         wheelVelToChassisVelMat[X][RF] = -1;
         wheelVelToChassisVelMat[X][LB] = 1;
