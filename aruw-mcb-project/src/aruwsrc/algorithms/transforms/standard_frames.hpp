@@ -25,20 +25,32 @@
 namespace aruwsrc::algorithms
 {
 
-class WorldFrame : public tap::algorithms::Frame { } ;
+class WorldFrame : public tap::algorithms::Frame
+{
+};
 
-class ChassisFrame : public tap::algorithms::Frame { } ;
+class ChassisFrame : public tap::algorithms::Frame
+{
+};
 
-class GunFrame : public tap::algorithms::Frame { } ;
+class GunFrame : public tap::algorithms::Frame
+{
+};
 
 // class TurretPivotFrame : public tap::algorithms::Frame { } ;
 
-class CameraFrame : public tap::algorithms::Frame { } ;
+class CameraFrame : public tap::algorithms::Frame
+{
+};
 
-class TurretIMUFrame : public tap::algorithms::Frame { } ;
+class TurretIMUFrame : public tap::algorithms::Frame
+{
+};
 
-class ChassisIMUFrame : public tap::algorithms::Frame { } ;
+class ChassisIMUFrame : public tap::algorithms::Frame
+{
+};
 
-}
+}  // namespace aruwsrc::algorithms
 
-#endif // TAPROOT_STANDARD_FRAMES_HPP_
+#endif  // TAPROOT_STANDARD_FRAMES_HPP_
