@@ -72,7 +72,7 @@ float chassisYO = 0.0;
 
 // static float chassisRollO = 0.0;
 // static float chassisPitchO = 0.0;
-// static float chassisYawO = 0.0;
+float chassisYawO = 0.0;
 
 // static float turretRollO = 0.0;
 // static float turretPitchO = 0.0;
@@ -140,12 +140,14 @@ int main()
         turretYawS = turretWorldOrientation.getZ();
 
         // TODO: get odometry values
-        // in odometry subsystem we need to get public refernces to 
+        // in odometry subsystem we need to get public references to 
         // stored odoemstry stuff
         
         modm::Location2D<float> odomLoc = drivers->removeThisOdom->getCurrentLocation2D();
         chassisXO = odomLoc.getX();
         chassisYO = odomLoc.getY();
+
+        chassisYawO = drivers->removeThisOdom->getYaw();
 
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));

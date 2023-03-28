@@ -280,7 +280,7 @@ private:
     };
 
     /**
-     * Rotates a chassis-relative vector <x,y,z> from the chassis frame
+     * Rotates a chassis-relative vector <a,b,c> from the chassis frame
      * to the world frame
      * Performs the rotation in-place on the input variable (for some reason ... )
      */

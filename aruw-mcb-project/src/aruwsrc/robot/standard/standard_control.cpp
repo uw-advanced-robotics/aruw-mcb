@@ -138,8 +138,6 @@ StandardTurretSubsystem turret(
 
 
 // ============ Motors for chassis subsystem + chassis ==================
-// aruwsrc::chassis::LEFT_FRONT_MOTOR_ID;
-
 tap::motor::DjiMotor leftFrontMotor(drivers(), aruwsrc::chassis::LEFT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left front drive motor");
 tap::motor::DjiMotor leftBackMotor(drivers(), aruwsrc::chassis::LEFT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left back drive motor");
 tap::motor::DjiMotor rightFrontMotor(drivers(), aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor");
@@ -545,7 +543,7 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&lowBatteryCommand);
 
     drivers->transformer.init(&rightFrontMotor, &leftFrontMotor, &rightBackMotor, &leftBackMotor);
-    // TODO: remove this when done
+    // TODO: remove this when done comparing transformer odometry to odometry s
     drivers->removeThisOdom = &odometrySubsystem;
 }
 
