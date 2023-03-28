@@ -175,22 +175,24 @@ namespace aruwsrc::algorithms::transforms
         tap::communication::sensors::imu::ImuInterface& chassisImu;
         aruwsrc::can::TurretMCBCanComm& turretMCB;
 
-        // placeholder value used when constructing transforms before odometry data
-        // is available
-        // the use of this variable indicates the value in the transform is in an 
-        // uninitialized state
+        /**
+         * placeholder value used when constructing transforms before odometry data
+         * is available
+         * the use of this variable indicates the value in the transform is in an
+         * uninitialized state
+        */
         const float TRANSFORM_PLACEHOLDER_VAL = 0.0f;
 
-        // static values used in transforms (in cm?)
-        // TODO: determine the units of these
-        // TODO: probably have x,y,z for all, but too lazy rn
-        const float TURRETIMU_TO_CAMERA_Y_OFFSET = 94.04;
-        const float TURRETIMU_TO_GUN_Y_OFFSET = 11.94;
-        const float TURRETIMU_TO_GUN_Z_OFFSET = 41.97;
+        // static values used in transforms (in cm? mm?)
+        // I think these are in meters now
+        const float TURRETIMU_TO_CAMERA_Y_OFFSET = 0.09404;
 
-        const float CHASSIS_TO_TURRET_Z_OFFSET = 401.44;
-        const float CHASSISIMU_TO_CHASSIS_X_OFFSET = 105.68;
-        const float CHASSISIMU_TO_CHASSIS_Z_OFFSET = 121.72;
+        const float TURRETIMU_TO_GUN_Y_OFFSET = 0.01194;
+        const float TURRETIMU_TO_GUN_Z_OFFSET = 0.04197;
+
+        const float CHASSIS_TO_TURRET_Z_OFFSET = 0.40144;
+        const float CHASSISIMU_TO_CHASSIS_X_OFFSET = 0.10568;
+        const float CHASSISIMU_TO_CHASSIS_Z_OFFSET = 0.12172;
 
         // enums and matrix for calculating chassis velocity from raw motor RPM
         // ripped from holonomic_chassis_subsystem, probably bad to have this repeated
@@ -215,10 +217,22 @@ namespace aruwsrc::algorithms::transforms
 
         /**
          * Compute the velocity of the chassis relative to itself
-         * Returns <vx, vy, vz>
-         * 
+         * Returns a 3x1 matrix <vx, vy, vz>
+         * If the motors are not online, the returned matrix
+         * has all entries set to zero
         */
-        modm::Matrix<float, 3, 1> getActualVelocityChassisRelative();
+        modm::Matrix<float, 3, 1> getVelocityChassisRelative();
+
+        /**
+         * Compute the acceleration of the chassis relative to itself
+         * Returns a 3x1 matrix <ax, ay, az>
+        */
+        modm::Matrix<float, 3, 1> getAccelerationChassisRelative();
+
+        /**
+         * Returns true if motors have been registered and are online
+        */
+        bool areMotorsOnline();
 
         /**
          * Converts a vector of wheel rotations per minute to appropriately-geared
@@ -229,6 +243,15 @@ namespace aruwsrc::algorithms::transforms
             static constexpr float ratio = 2.0f * M_PI * chassis::CHASSIS_GEARBOX_RATIO / 60.0f;
             return mat * ratio;
         }
+
+        /**
+         * Fills nextKFInput with measurements taken from the chassis about the current
+         * state of the robot.
+         * 
+         * Specifically, fills in the chassis' velocity and acceleration in the 
+         * perspective of the world frame
+        */
+        void fillKFInput(float nextKFInput[]);
 
         // Kalman Filter enums
         enum class OdomState
@@ -269,8 +292,8 @@ namespace aruwsrc::algorithms::transforms
           static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
         static constexpr int INPUTS_MULT_STATES =
           static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
-            
-        // Kalman filter for keeping track of chassis (x, y, z)
+
+
         tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
         /// Assumed time difference between calls to `update`, in seconds

@@ -42,7 +42,7 @@ public:
     /**
      * Instantiate a new Transformer
      */
-    Transformer();
+    Transformer(){};
 
     // Disable copy constructor and assignment
     Transformer(const Transformer& other) = delete;
