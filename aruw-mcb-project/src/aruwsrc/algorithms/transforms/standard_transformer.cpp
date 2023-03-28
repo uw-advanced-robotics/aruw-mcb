@@ -67,7 +67,15 @@ namespace aruwsrc::algorithms::transforms {
     {  
         // reference https://ecam-eurobot.github.io/Tutorials/mechanical/mecanum.html
         // reference disagrees with the forward kinematics.. (in terms of signedness)
+        // lol chat gpt also disagrees
         // Forward kinematic matrix for mecanum drive
+
+        // after some big brain simulation, this is the matrix that 
+        // is produced from the referenced matrix IF all right motors
+        // have their velocity multiplied by -1
+        // it makes sense that the reading would need to be multiplied
+        // by -1 *somewhere*, but why here? couldn't that 
+        // have been handled in isInverted upon motor construction?
         wheelVelToChassisVelMat[X][LF] = 1;
         wheelVelToChassisVelMat[X][RF] = -1;
         wheelVelToChassisVelMat[X][LB] = 1;
