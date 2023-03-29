@@ -17,27 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
-#define VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
+#ifndef VIRTUAL_CAN_RX_LISTENER_HPP_
+#define VIRTUAL_CAN_RX_LISTENER_HPP_
 
+#include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
-#include "tap/motor/dji_motor_tx_handler.hpp"
 
-#include "aruwsrc/communication/mcb-lite/can/can_bus.hpp"
+#include "aruwsrc/communication/mcb-lite/can/virtual_can_rx_handler.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
+class VirtualCANRxListener : public tap::can::CanRxListener
 {
 public:
-    VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus);
+    VirtualCANRxListener(tap::Drivers* drivers, uint32_t id, tap::can::CanBus canbus, VirtualCANRxHandler* canHandler);
 
-	void encodeAndSendCanData();
+    void attachSelfToRxHandler();
+
+    virtual void processMessage(const modm::can::Message& message) = 0;
 
 private:
-    CanBus* canbus;
+    VirtualCANRxHandler* canHandler;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::can
 
 #endif
