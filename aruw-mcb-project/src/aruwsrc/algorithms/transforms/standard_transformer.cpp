@@ -253,7 +253,10 @@ void StandardTransformer::updateOdometry()
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
 {
-    modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
+    // modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
+    // chassisVelocity = getVelocityChassisRelative(chassisVelocity);
+    getVelocityChassisRelative(chassisVelocity);
+
     rotateChassisVectorToWorld(chassisVelocity);
 
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
@@ -291,18 +294,30 @@ void StandardTransformer::updateInternalOdomFromKF()
     turretWorldOrientation.setZ(turretMCB.getYaw());
 }
 
-modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative()
+void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
+// modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& chassisVelocity)
 {
-    if (!areMotorsOnline()) return modm::Matrix<float, 3, 1>().zeroMatrix();
+    if (!areMotorsOnline()) cV = modm::Matrix<float, 3, 1>().zeroMatrix();
+    else {
+        wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
+        wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
+        wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
+        wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
+        cV = (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
+    }
 
-    modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
+    // modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
+    // modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
 
-    wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
-    wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
-    wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
-    wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
+    // wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
+    // wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
+    // wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
+    // wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
 
-    return (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
+    // chassisVelocityInGetVelFN = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+    // return chassisVelocityInGetVelFN;
+
+    // chassisVelocity = (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
 }
 
 bool StandardTransformer::areMotorsOnline()

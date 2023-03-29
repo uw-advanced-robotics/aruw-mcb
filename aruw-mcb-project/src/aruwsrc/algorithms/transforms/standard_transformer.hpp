@@ -98,6 +98,9 @@ public:
     float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
     float vel_x_in = 0.0f;
 
+    modm::Matrix<float, 3, 1> chassisVelocity; // from debug, remove
+    modm::Matrix<float, 4, 1> wheelVelocity;
+    modm::Matrix<float, 3, 1> chassisVelocityInGetVelFN; // from debug, remove
 
     /**
      * Get World to Chassis transform
@@ -236,7 +239,8 @@ private:
      * If the motors are not online, the returned matrix
      * has all entries set to zero
      */
-    modm::Matrix<float, 3, 1> getVelocityChassisRelative();
+    // modm::Matrix<float, 3, 1> getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
+    void getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
 
     /**
      * Compute the acceleration of the chassis relative to itself
