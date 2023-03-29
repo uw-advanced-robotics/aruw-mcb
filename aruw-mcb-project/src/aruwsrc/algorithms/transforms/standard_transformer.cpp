@@ -243,7 +243,7 @@ void StandardTransformer::updateTransforms()
 void StandardTransformer::updateOdometry()
 {
     // nasty to return an array in c++, so do this for now
-    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
+    // float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
     fillKFInput(nextKFInput);
 
     kf.performUpdate(nextKFInput);
@@ -259,9 +259,13 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
     rotateChassisVectorToWorld(chassisAcceleration);
 
+
     nextKFInput[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
     nextKFInput[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
     nextKFInput[int(OdomInput::VEL_Z)] = chassisVelocity[2][0];
+
+    // TODO: for testing only, remove
+    vel_x_in = nextKFInput[int(OdomInput::VEL_X)];
 
     nextKFInput[int(OdomInput::ACC_X)] = chassisAcceleration[0][0];
     nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
@@ -298,7 +302,7 @@ modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative()
     wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
     wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
 
-    return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+    return (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
 }
 
 bool StandardTransformer::areMotorsOnline()

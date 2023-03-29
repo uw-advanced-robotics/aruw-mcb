@@ -84,6 +84,21 @@ public:
     // (roll, pitch, yaw)
     modm::Vector3f turretWorldOrientation;
 
+    enum class OdomInput
+    {
+        VEL_X = 0,
+        ACC_X,
+        VEL_Y,
+        ACC_Y,
+        VEL_Z,
+        ACC_Z,
+        NUM_INPUTS,
+    };
+
+    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
+    float vel_x_in = 0.0f;
+
+
     /**
      * Get World to Chassis transform
      *
@@ -268,16 +283,7 @@ private:
         NUM_STATES,
     };
 
-    enum class OdomInput
-    {
-        VEL_X = 0,
-        ACC_X,
-        VEL_Y,
-        ACC_Y,
-        VEL_Z,
-        ACC_Z,
-        NUM_INPUTS,
-    };
+
 
     /**
      * Rotates a chassis-relative vector <a,b,c> from the chassis frame

@@ -67,6 +67,9 @@ float turretYawS = 0.0;
 float chassisXO = 0.0;
 float chassisYO = 0.0;
 
+float chassisXin = 0.f;
+float chassisYin = 0.f;
+
 
 // static float chassisZO = 0.0;
 
@@ -129,6 +132,9 @@ int main()
         chassisYS = chassisWorldPosition.getY();
         chassisZS = chassisWorldPosition.getZ();
 
+        chassisXin = drivers->transformer.vel_x_in;
+        chassisXin = drivers->transformer.nextKFInput[2];
+
         // chassisXS = 5.0f;
 
         chassisRollS = chassisWorldOrientation.getX();
@@ -146,7 +152,8 @@ int main()
         modm::Location2D<float> odomLoc = drivers->removeThisOdom->getCurrentLocation2D();
         chassisXO = odomLoc.getX();
         chassisYO = odomLoc.getY();
-
+ 
+ 
         chassisYawO = drivers->removeThisOdom->getYaw();
 
         // do this as fast as you can
