@@ -54,7 +54,8 @@ public:
         tap::motor::MotorInterface* motor1,
         tap::motor::MotorInterface* motor2,
         FiveBarConfig fiveBarConfig,
-        tap::algorithms::SmoothPidConfig motorPidConfig);
+        tap::algorithms::SmoothPidConfig motor1PidConfig,
+        tap::algorithms::SmoothPidConfig motor2PidConfig);
 
     void initialize() override;
 

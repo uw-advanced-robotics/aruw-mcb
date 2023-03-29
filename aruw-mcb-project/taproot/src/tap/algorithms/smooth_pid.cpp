@@ -53,7 +53,7 @@ float SmoothPid::runController(float error, float errorDerivative, float dt)
         -config.maxICumulative,
         config.maxICumulative);
     // d
-    currErrorD = -config.kd * derivativeKalman.filterData(errorDerivative);
+    currErrorD = config.kd * derivativeKalman.filterData(errorDerivative);
     if (fabs(error) < config.errorDerivativeFloor)
     {
         // the error is less than some amount, so round derivative output to 0

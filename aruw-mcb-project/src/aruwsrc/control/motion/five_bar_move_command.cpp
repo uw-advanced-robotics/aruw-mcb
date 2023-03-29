@@ -37,7 +37,6 @@ void FiveBarMoveCommand::initialize() {}
 void FiveBarMoveCommand::execute()
 {
     fiveBarSubsystem->setMotionFunction(motion);
-    fiveBarSubsystem->refresh();
 }
 
 void FiveBarMoveCommand::end(bool)

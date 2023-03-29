@@ -95,7 +95,8 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     &legmotorLF,
     &legmotorLR,
     FIVE_BAR_CONFIG,
-    LEG_MOTOR_PID_CONFIG);
+    LF_LEG_MOTOR_PID_CONFIG,
+    LR_LEG_MOTOR_PID_CONFIG);
 
 motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::SQUARE);
 

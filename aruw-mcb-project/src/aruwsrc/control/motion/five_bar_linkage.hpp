@@ -50,7 +50,8 @@ public:
         tap::motor::MotorInterface* motor1,
         tap::motor::MotorInterface* motor2,
         FiveBarConfig fiveBarConfig,
-        tap::algorithms::SmoothPidConfig motorPidConfig);
+        tap::algorithms::SmoothPidConfig motor1PidConfig,
+        tap::algorithms::SmoothPidConfig motor2PidConfig);
 
     void initialize();
 
@@ -101,7 +102,8 @@ private:
      */
     modm::Vector2f desiredPosition;
 
-    tap::algorithms::SmoothPidConfig motorPidConfig;
+    tap::algorithms::SmoothPidConfig motor1PidConfig;
+    tap::algorithms::SmoothPidConfig motor2PidConfig;
 
     tap::motor::MotorInterface* motor1;
     tap::motor::MotorInterface* motor2;
@@ -111,6 +113,9 @@ private:
 
     float motor1home;
     float motor2home;
+
+    float motor1RelativePosition;
+    float motor2RelativePosition;
 
     FiveBarConfig fiveBarConfig;
 
@@ -132,6 +137,11 @@ private:
      * do the math if you want to
      */
     void computeMotorAngles();
+
+    /**
+     * Forward Kinematic Solution. Updates currentPosition based on actual motor1 and motor2 angles.
+     */
+    void computePositionFromAngles();
 
 };  // class FiveBarLinkageSubsystem
 }  // namespace aruwsrc::control::motion
