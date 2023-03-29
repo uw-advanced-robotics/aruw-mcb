@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -25,7 +25,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/m3508_constants.hpp"
 
-#include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "swerve_module_config.hpp"
+#include "aruwsrc/algorithms/wheel.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -37,6 +38,7 @@
 #endif
 
 using Motor = tap::motor::DjiMotor;
+using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
@@ -49,7 +51,7 @@ namespace chassis
 {
 /**
  *
- * This class encapsultes a swerve module using two motors.
+ * This class encapsulates a swerve module using two motors.
  * Input is in meters per second and radians.
  *
  */
@@ -110,18 +112,25 @@ public:
     float getDriveError() const;
     bool allMotorsOnline() const;
 
-    std::vector<float> getModuleVelocity();
+    inline modm::Matrix<float, 2, 1> getModuleVelocity() const
+    {
+        float mag = getDriveVelocity();
+        float ang = getAngle();
+        modm::Matrix<float, 2, 1> velocity;
+        velocity[0][0] = mag * cos(ang);
+        velocity[1][0] = mag * sin(ang);
+        return velocity;
+    }
 
     // limits power
     void limitPower(float frac);
-
-    float mpsToRpm(float mps) const;
-    float rpmToMps(float rpm) const;
 
     // in radians
     inline float getRotationSetpoint() { return rotationSetpoint; }
     // in rpm
     inline float getSpeedSetpoint() { return speedSetpointRPM; }
+
+    const Wheel wheel;
 
 // motors
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)

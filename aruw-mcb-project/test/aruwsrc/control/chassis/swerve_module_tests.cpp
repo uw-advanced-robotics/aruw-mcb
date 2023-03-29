@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -113,3 +113,15 @@ TEST_F(SwerveModuleTest, reversingDirectionChange)
     EXPECT_NEAR(M_PI_2, module.getRotationSetpoint(), 1E-3);
     EXPECT_TRUE(module.getSpeedSetpoint() < 0);
 }
+
+// TEST_F(SwerveModuleTest, getModuleVelocity)
+// {
+//     ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(DEFAULT_SWERVE_CONFIG.azimuthMotorGearing));
+//     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(1));
+
+//     modm::Matrix<float, 2, 1> vel = module.getModuleVelocity();
+//     EXPECT_NEAR(1, vel[0][0], 1E-3);
+//     EXPECT_NEAR(0, vel[1][0], 1E-3);
+
+    
+// }

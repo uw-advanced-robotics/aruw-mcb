@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -86,9 +86,9 @@ Module* SwerveChassisSubsystem::getModule(unsigned int i)
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     // convert inputs from motor rpm to m/s
-    x = modules[0].rpmToMps(x);
-    y = modules[0].rpmToMps(y);
-    r = modules[0].rpmToMps(r) / WIDTH_BETWEEN_WHEELS_X * 2;
+    x = modules[0].wheel.rpmToMps(x);
+    y = modules[0].wheel.rpmToMps(y);
+    r = modules[0].wheel.rpmToMps(r) / WIDTH_BETWEEN_WHEELS_X * 2;
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
         x,
@@ -101,7 +101,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
-    desiredRotation = modules[0].mpsToRpm(r) * WIDTH_BETWEEN_WHEELS_X / 2;
+    desiredRotation = modules[0].wheel.mpsToRpm(r) * WIDTH_BETWEEN_WHEELS_X / 2;
     float maxInitialSpeed = 0;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -145,7 +145,7 @@ public:
 
     const char* getName() override { return "Chassis"; }
 
-    virtual bool allMotorsOnline() const override { return false; };
+    virtual bool allMotorsOnline() const override = 0;
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 

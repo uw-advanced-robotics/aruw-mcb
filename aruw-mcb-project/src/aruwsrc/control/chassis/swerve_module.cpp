@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -38,6 +38,7 @@ SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
           CAN_BUS_MOTORS,
           config.azimuthMotorInverted,
           "Azimuth motor"),
+      wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       config(config),
       drivePid(
           config.drivePidKp,
@@ -116,7 +117,7 @@ float SwerveModule::calculate(float x, float y, float r)
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
-            mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
+            wheel.mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
 
         // if offset isn't an integer multiple of 2pi, it means module is currently reversed so
         // speed must be negative
@@ -147,7 +148,7 @@ void SwerveModule::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveModule::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
+float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
 
 float SwerveModule::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
@@ -162,18 +163,6 @@ float SwerveModule::getAngle() const
 float SwerveModule::getAngularVelocity() const
 {
     return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * config.azimuthMotorGearing;
-}
-
-float SwerveModule::mpsToRpm(float mps) const
-{
-    return (mps / config.WHEEL_CIRCUMFRENCE_M) / CHASSIS_GEARBOX_RATIO * 60.0f /
-           config.driveMotorGearing;
-}
-
-float SwerveModule::rpmToMps(float rpm) const
-{
-    return rpm * CHASSIS_GEARBOX_RATIO / 60.0f * config.driveMotorGearing *
-           config.WHEEL_CIRCUMFRENCE_M;
 }
 
 void SwerveModule::limitPower(float frac)
