@@ -35,7 +35,8 @@ class IMUListener : public VirtualCANRxListener
         tap::Drivers* drivers,
         uint32_t id,
         tap::can::CanBus canbus,
-        VirtualCANRxHandler* canHandler);
+        VirtualCANRxHandler* canHandler)
+        : VirtualCANRxListener(drivers, id, canbus, canHandler){};
 
     inline void processMessage(const modm::can::Message& message) override {}
 };
