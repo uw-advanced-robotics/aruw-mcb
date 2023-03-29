@@ -30,12 +30,12 @@ namespace aruwsrc::virtualMCB
 class VirtualCANRxHandler : public tap::can::CanRxHandler
 {
 public:
-    VirtualCANRxHandler(tap::Drivers* drivers, CanBus canbus);
+    VirtualCANRxHandler(tap::Drivers* drivers, CanBus* canbus);
 
     void pollCanData();
 
 private:
-    CanBus canbus;
+    CanBus* canbus;
 };
 
 }  // namespace aruwsrc::can

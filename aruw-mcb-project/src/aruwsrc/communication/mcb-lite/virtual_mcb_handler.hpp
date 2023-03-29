@@ -20,33 +20,41 @@
 #ifndef VIRTUAL_MCB_HANDLER_HPP_
 #define VIRTUAL_MCB_HANDLER_HPP_
 
-#include "can_bus.hpp"
-#include "motor/virtual_dji_motor_tx_handler.hpp"
-#include "virtual_can_rx_handler.hpp"
+#include "tap/communication/serial/uart.hpp"
+#include "tap/drivers.hpp"
 
+#include "motor/virtual_dji_motor_tx_handler.hpp"
+
+#include "can/virtual_can_bus.hpp"
+#include "can/virtual_can_rx_handler.hpp"
 
 namespace aruwsrc::virtualMCB
 {
 class VirtualMCBHandler
 {
-
-
-/**
- * This boy needs to handle:
- * 
- * DJI motor tx handler
- * CAN rx handler
- * And then do all the extra things that MCb-Lite is supposed to do 💀
-*/
+    /**
+     * This boy needs to handle:
+     *
+     * DJI motor tx handler
+     * CAN rx handler
+     * And then do all the extra things that MCb-Lite is supposed to do 💀
+     */
 
 public:
+    VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
-VirtualDJIMotorTxHandler motorTxHandler;
-VirtualCANRxHandler canRxHandler;
+    void refresh();
 
+    VirtualCanBus* getCanbus();
+    VirtualCANRxHandler* getRxHandler();
+    VirtualDJIMotorTxHandler* getDjiMotorHandler();
 
+private:
+    VirtualCanBus* canbus;
+    VirtualDJIMotorTxHandler* motorTxHandler;
+    VirtualCANRxHandler* canRxHandler;
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

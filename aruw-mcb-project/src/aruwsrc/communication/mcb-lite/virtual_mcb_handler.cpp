@@ -17,27 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
-#define VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
+#include "virtual_mcb_handler.hpp"
 
 #include "tap/drivers.hpp"
-#include "tap/motor/dji_motor_tx_handler.hpp"
-
-#include "aruwsrc/communication/mcb-lite/can/can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
+
+VirtualMCBHandler::VirtualMCBHandler(
+    tap::Drivers* drivers,
+    tap::communication::serial::Uart::UartPort port)
+    : canbus(&VirtualCanBus(drivers, port)),
+      motorTxHandler(&VirtualDJIMotorTxHandler(drivers, canbus)),
+      canRxHandler(&VirtualCANRxHandler(drivers, canbus))
 {
-public:
-    VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus);
+}
 
-	void encodeAndSendCanData();
+void VirtualMCBHandler::refresh(){
+	canRxHandler->pollCanData();
+	motorTxHandler->encodeAndSendCanData();
+}
 
-private:
-    CanBus* canbus;
-};
+VirtualCanBus* VirtualMCBHandler::getCanbus() { return canbus; }
+VirtualCANRxHandler* VirtualMCBHandler::getRxHandler() { return canRxHandler; }
+VirtualDJIMotorTxHandler* VirtualMCBHandler::getDjiMotorHandler() { return motorTxHandler; }
 
 }  // namespace aruwsrc::virtualMCB
-
-#endif

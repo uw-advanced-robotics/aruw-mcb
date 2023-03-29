@@ -8,7 +8,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * aruw-mcb is distributed in the hope that it will be useful,
+ * aruw-mcb is distributed in the hope that it will be useful,virtual_can_rx_listener
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,27 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
-#define VIRTUAL_DJI_MOTOR_TX_HANDLER_HPP_
+#include "virtual_can_rx_listener.hpp"
 
+#include "tap/communication/can/can.hpp"
+#include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
-#include "tap/motor/dji_motor_tx_handler.hpp"
-
-#include "aruwsrc/communication/mcb-lite/can/can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
+
+VirtualCANRxListener::VirtualCANRxListener(
+    tap::Drivers* drivers,
+    uint32_t id,
+    tap::can::CanBus canbus,
+    VirtualCANRxHandler* canHandler)
+    : CanRxListener(drivers, id, canbus),
+      canHandler(canHandler)
 {
-public:
-    VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus);
+}
 
-	void encodeAndSendCanData();
-
-private:
-    CanBus* canbus;
-};
+void VirtualCANRxListener::attachSelfToRxHandler() { canHandler->attachReceiveHandler(this); }
 
 }  // namespace aruwsrc::virtualMCB
-
-#endif
