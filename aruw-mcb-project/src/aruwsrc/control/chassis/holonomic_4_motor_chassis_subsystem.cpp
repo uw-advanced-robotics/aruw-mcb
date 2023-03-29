@@ -39,10 +39,10 @@ namespace chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DjiMotor& leftFrontMotor,
-    tap::motor::DjiMotor& leftBackMotor,
-    tap::motor::DjiMotor& rightFrontMotor,
-    tap::motor::DjiMotor& rightBackMotor,
+    tap::motor::MotorId leftFrontMotorId,
+    tap::motor::MotorId leftBackMotorId,
+    tap::motor::MotorId rightFrontMotorId,
+    tap::motor::MotorId rightBackMotorId,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       velocityPid{
@@ -70,10 +70,10 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(leftFrontMotor),
-      leftBackMotor(leftBackMotor),
-      rightFrontMotor(rightFrontMotor),
-      rightBackMotor(rightBackMotor)
+        leftFrontMotor(drivers, aruwsrc::chassis::LEFT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left front drive motor"),
+        leftBackMotor(drivers, aruwsrc::chassis::LEFT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left back drive motor"),
+        rightFrontMotor(drivers, aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor"),
+        rightBackMotor(drivers, aruwsrc::chassis::RIGHT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right back drive motor")
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;

@@ -44,10 +44,10 @@ class XDriveChassisSubsystem : public Holonomic4MotorChassisSubsystem
 public:
     XDriveChassisSubsystem(
         tap::Drivers* drivers,
-        tap::motor::DjiMotor&,
-        tap::motor::DjiMotor&,
-        tap::motor::DjiMotor&,
-        tap::motor::DjiMotor&,
+        tap::motor::MotorId leftFrontMotorId,
+        tap::motor::MotorId leftBackMotorId,
+        tap::motor::MotorId rightFrontMotorId,
+        tap::motor::MotorId rightBackMotorId,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 };
 
