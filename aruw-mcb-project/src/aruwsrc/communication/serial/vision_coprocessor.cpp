@@ -245,7 +245,10 @@ void VisionCoprocessor::sendHealthMessage()
     {
         DJISerial::SerialMessage<sizeof(RefSerialData::Rx::RobotHpData::RobotHp) * 2> healthMessage;
         healthMessage.messageType = CV_MESSAGE_TYPES_HEALTH_DATA;
-        memcpy(&healthMessage.data, &drivers->refSerial.getRobotData().allRobotHp, sizeof(healthMessage.data));
+        memcpy(
+            &healthMessage.data,
+            &drivers->refSerial.getRobotData().allRobotHp,
+            sizeof(healthMessage.data));
         healthMessage.setCRC16();
         drivers->uart.write(
             VISION_COPROCESSOR_TX_UART_PORT,
