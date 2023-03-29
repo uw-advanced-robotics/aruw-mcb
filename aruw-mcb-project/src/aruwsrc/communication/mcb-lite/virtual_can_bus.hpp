@@ -24,14 +24,13 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "can_bus.hpp" 
+#include "can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
 class VirtualCanBus : public CanBus
 {
 public:
-
     VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     void initialize() override;
@@ -45,10 +44,10 @@ public:
     bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
 
 private:
-    tap::communication::serial::Uart::UartPort port;
     tap::Drivers* drivers;
+    tap::communication::serial::Uart::UartPort port;
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

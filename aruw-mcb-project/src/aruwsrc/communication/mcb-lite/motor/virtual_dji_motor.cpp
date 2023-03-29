@@ -8,7 +8,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * aruw-mcb is distributed in the hope that it will be useful,virtual_can_rx_listener
+ * aruw-mcb is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,31 +17,45 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "virtual_can_rx_listener.hpp"
+#include "virtual_dji_motor.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "virtual_can_rx_handler.hpp"
-
 namespace aruwsrc::virtualMCB
 {
 
-VirtualCANRxListener::VirtualCANRxListener(
+VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
-    uint32_t id,
-    tap::can::CanBus canbus,
-    VirtualMCBHandler* canHandler)
-    : CanRxListener(drivers, id, canbus),
-      canHandler(canHandler)
+    MotorId desMotorIdentifier,
+    tap::can::CanBus motorCanBus,
+    VirtualDJIMotorTxHandler* txMotorHandler,
+    VirtualCANRxHandler* rxHandler,
+    bool isInverted,
+    const char* name,
+    uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
+    int64_t encoderRevolutions = 0)
+    : DjiMotor(
+          drivers,
+          desMotorIdentifier,
+          motorCanBus,
+          isInverted,
+          name,
+          encoderWrapped,
+          encoderRevolutions),
+      txMotorHandler(txMotorHandler),
+      rxHandler(rxHandler)
 {
 }
 
-void VirtualCANRxListener::attachSelfToRxHandler()
+void VirtualDjiMotor::initialize()
 {
-    canHandler->canRxHandler.attachReceiveHandler(this);
+    txMotorHandler->addMotorToManager(this);
+    attachSelfToRxHandler();
 }
+
+void VirtualDjiMotor::attachSelfToRxHandler() { rxHandler->attachReceiveHandler(this); }
 
 }  // namespace aruwsrc::virtualMCB

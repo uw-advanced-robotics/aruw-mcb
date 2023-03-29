@@ -24,12 +24,35 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "../can_bus.hpp"
+#include "../virtual_can_rx_handler.hpp"
+
+#include "virtual_dji_motor_tx_handler.hpp"
+
+using namespace tap::motor;
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualDJIMotor : public tap::motor::DjiMotor
+class VirtualDjiMotor : public tap::motor::DjiMotor
 {
 public:
+    VirtualDjiMotor(
+        tap::Drivers* drivers,
+        MotorId desMotorIdentifier,
+        tap::can::CanBus motorCanBus,
+        VirtualDJIMotorTxHandler* txMotorHandler,
+        VirtualCANRxHandler* rxHandler,
+        bool isInverted,
+        const char* name,
+        uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
+        int64_t encoderRevolutions = 0);
+
+    void initialize() override;
+
+    void attachSelfToRxHandler();
+
+private:
+    VirtualDJIMotorTxHandler* txMotorHandler;
+    VirtualCANRxHandler* rxHandler;
 };
 
 }  // namespace aruwsrc::virtualMCB
