@@ -28,8 +28,6 @@ namespace aruwsrc::virtualMCB
 {
 class VirtualMCBHandler
 {
-public:
-
 
 
 /**
