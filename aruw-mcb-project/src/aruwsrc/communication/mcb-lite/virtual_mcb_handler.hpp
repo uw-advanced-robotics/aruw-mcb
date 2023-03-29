@@ -24,6 +24,7 @@
 #include "motor/virtual_dji_motor_tx_handler.hpp"
 #include "virtual_can_rx_handler.hpp"
 
+
 namespace aruwsrc::virtualMCB
 {
 class VirtualMCBHandler
