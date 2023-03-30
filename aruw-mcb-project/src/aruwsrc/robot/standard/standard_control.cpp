@@ -143,7 +143,8 @@ tap::motor::DjiMotor leftBackMotor(drivers(), aruwsrc::chassis::LEFT_BACK_MOTOR_
 tap::motor::DjiMotor rightFrontMotor(drivers(), aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor");
 tap::motor::DjiMotor rightBackMotor(drivers(), aruwsrc::chassis::RIGHT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right back drive motor");
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
+// aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
 // ============= end  modifications ===========================
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
