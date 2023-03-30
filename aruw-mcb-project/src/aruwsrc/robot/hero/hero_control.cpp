@@ -380,7 +380,6 @@ ClientDisplayCommand clientDisplayCommand(
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -521,8 +520,6 @@ void startHeroCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
