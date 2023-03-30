@@ -42,72 +42,72 @@ StandardTransformer::StandardTransformer(
     aruwsrc::can::TurretMCBCanComm& turretMCB)
     :  // TODO: store transforms in an array so we don't have to initialize them here (very ugly !!!
        // !! ! !) Transforms that are dynamically updated
-      worldToChassisIMUTransform(Transform<WorldFrame, ChassisIMUFrame>(
+      worldToChassisIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
       TurretIMUToCameraTransform(
-          Transform<TurretIMUFrame, CameraFrame>(0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 0., 0., 0.)),
-      turretIMUToGunTransform(Transform<TurretIMUFrame, GunFrame>(
+          0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 0., 0., 0.),
+      turretIMUToGunTransform(
           0.,
           TURRETIMU_TO_GUN_Y_OFFSET,
           TURRETIMU_TO_GUN_Z_OFFSET,
           0.,
           0.,
-          0.)),
+          0.),
 
       // Transforms that are compositions
-      worldToTurretIMUTransform(Transform<WorldFrame, TurretIMUFrame>(
+      worldToTurretIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      worldToChassisTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
 
       // Transforms that are inverses
-      chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(
+      chassisToWorldTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      turretIMUToChassisTransform(Transform<TurretIMUFrame, ChassisFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      turretIMUToChassisTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      cameraToTurretIMUTransform(Transform<CameraFrame, TurretIMUFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      cameraToTurretIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
 
       // Constant transforms
       chassisToTurretIMUTransform(
-          Transform<ChassisFrame, TurretIMUFrame>(0., 0., CHASSIS_TO_TURRET_Z_OFFSET, 0., 0., 0.)),
-      chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame>(
+          0., 0., CHASSIS_TO_TURRET_Z_OFFSET, 0., 0., 0.),
+      chassisIMUToChassisTransform(
           CHASSISIMU_TO_CHASSIS_X_OFFSET,
           0.,
           CHASSISIMU_TO_CHASSIS_Z_OFFSET,
           0.,
           0.,
-          0.)),
+          0.),
 
       chassisImu(chassisImu),
       turretMCB(turretMCB),

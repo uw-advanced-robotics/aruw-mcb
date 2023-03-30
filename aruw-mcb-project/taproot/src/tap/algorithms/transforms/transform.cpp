@@ -32,10 +32,9 @@ Transform<SOURCE, TARGET>::Transform(CMSISMat<3, 3>& rotation, CMSISMat<3, 1>& p
     this->rotation = std::move(rotation);
     this->position = std::move(position);
     arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
-
-
 };
 
+#pragma optimize("", off )
 template <typename SOURCE, typename TARGET>
 Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B, float C)
 {
@@ -55,8 +54,9 @@ Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B
 
     CMSISMat<3, 3> rot = CMSISMat<3, 3>(data);
     CMSISMat<3, 1> pos = CMSISMat<3, 1>({x, y, z});
-    Transform(rot, pos);
+    *this = Transform(rot, pos);
 };
+#pragma optimize("", on)
 
 template <typename SRC, typename TARG, typename NEWTARGET>
 Transform<SRC, NEWTARGET> compose(Transform<SRC, TARG>& source, Transform<TARG, NEWTARGET>& target)
