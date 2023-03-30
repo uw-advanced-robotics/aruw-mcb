@@ -143,8 +143,9 @@ public:
      * @returns Camera to Turret transform
      */
     const Transform<CameraFrame, TurretIMUFrame>& getCameraToTurretIMUTransform();
-
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     /**
      * Updates the stored transforms for this cycle
      */
@@ -197,7 +198,7 @@ private:
      * the use of this variable indicates the value in the transform is in an
      * uninitialized state
      */
-    const float TRANSFORM_PLACEHOLDER_VAL = 0.0f;
+    static constexpr float TRANSFORM_PLACEHOLDER_VAL = 0.0f;
 
     // static values used in transforms (in cm? mm?)
     // I think these are in meters now

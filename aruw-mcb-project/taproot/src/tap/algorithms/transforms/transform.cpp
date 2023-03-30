@@ -32,6 +32,8 @@ Transform<SOURCE, TARGET>::Transform(CMSISMat<3, 3>& rotation, CMSISMat<3, 1>& p
     this->rotation = std::move(rotation);
     this->position = std::move(position);
     arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
+
+
 };
 
 template <typename SOURCE, typename TARGET>
@@ -49,6 +51,8 @@ Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B
         -std::sin(B),
         std::cos(B) * std::sin(A),
         std::cos(B) * std::cos(A)};
+
+
     CMSISMat<3, 3> rot = CMSISMat<3, 3>(data);
     CMSISMat<3, 1> pos = CMSISMat<3, 1>({x, y, z});
     Transform(rot, pos);
@@ -73,6 +77,19 @@ Transform<TARGET, SOURCE> Transform<SOURCE, TARGET>::getInverse()
     {
         invPos.data[i] = -invPos.data[i];
     }
+    std :: cerr << "transform rotation in get inverse" << std::endl;
+    for (int i = 0; i < 9; i++) {
+        std::cerr << tRotation.data[i] << ", ";
+    }
+    std::cerr << std::endl;
+
+    std :: cerr << "transform trotation" << std::endl;
+    for (int i = 0; i < 9; i++) {
+        std::cerr << tRotation.data[i] << ", ";
+    }
+    std::cerr << std::endl;
+
+
     return Transform<TARGET, SOURCE>(tRotation, invPos);
 };
 

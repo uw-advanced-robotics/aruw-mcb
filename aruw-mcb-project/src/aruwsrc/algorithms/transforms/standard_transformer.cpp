@@ -139,6 +139,13 @@ StandardTransformer::StandardTransformer(
     wheelVelToChassisVelMat[R][LB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
     wheelVelToChassisVelMat[R][RB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
     wheelVelToChassisVelMat *= (chassis::WHEEL_RADIUS / 4);
+
+
+    std::cerr << "world to chassis rotation " << std::endl;
+    std::cerr << worldToChassisIMUTransform.rotation.data[0] << std::endl;
+    std::cerr << worldToChassisIMUTransform.rotation.data[1] << std::endl;
+    std::cerr << worldToChassisIMUTransform.rotation.data[2] << std::endl;
+
 }
 
 void StandardTransformer::update()
@@ -347,10 +354,27 @@ void StandardTransformer::rotateChassisVectorToWorld(modm::Matrix<float, 3, 1>& 
 
     float data[3] = {chassisRelVector[0][0], chassisRelVector[1][0], chassisRelVector[2][0]};
     CMSISMat<3, 1> cmsisChassisRelVector = CMSISMat<3, 1>(data);
+    
+    // std::cerr << "rotate cmsis input " << std::endl;
+    // std::cerr << cmsisChassisRelVector.data[0] << std::endl;
+    // std::cerr << cmsisChassisRelVector.data[1] << std::endl;
+    // std::cerr << cmsisChassisRelVector.data[2] << std::endl;
+
+    // std::cerr << "world to chassis rotation " << std::endl;
+    // std::cerr << worldToChassisIMUTransform.rotation.data[0] << std::endl;
+    // std::cerr << worldToChassisIMUTransform.rotation.data[1] << std::endl;
+    // std::cerr << worldToChassisIMUTransform.rotation.data[2] << std::endl;
+    // std::cerr << cmsisChassisRelVector.data[1] << std::endl;
+    // std::cerr << cmsisChassisRelVector.data[2] << std::endl;
 
     // Transform.applyToVector only rotates, doesn't translate
     CMSISMat<3, 1> cmsisWorldRelVector =
         worldToChassisIMUTransform.getInverse().applyToVector(cmsisChassisRelVector);
+
+    // std::cerr << "rotate cmsis output" << std::endl;
+    // std::cerr << cmsisWorldRelVector.data[0] << std::endl;
+    // std::cerr << cmsisWorldRelVector.data[1] << std::endl;
+    // std::cerr << cmsisWorldRelVector.data[2] << std::endl;
 
     // copy transformed positions back to original vector
     chassisRelVector[0][0] = cmsisWorldRelVector.data[0];

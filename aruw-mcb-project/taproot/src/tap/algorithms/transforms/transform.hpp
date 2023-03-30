@@ -136,7 +136,9 @@ public:
      */
     void updatePosition(CMSISMat<3, 1>& newPos);
 
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     /**
      * Rotation matrix.
      */
