@@ -26,10 +26,7 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
-    : wheel(
-          config.WHEEL_DIAMETER_M,
-          config.driveMotorGearing,
-          CHASSIS_GEARBOX_RATIO),
+    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       driveMotor(
           drivers,
           config.driveMotorId,
@@ -92,8 +89,8 @@ float SwerveModule::calculate(float x, float y, float r)
         // normal angle wrapping
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
-            rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) *
-                              M_TWOPI;
+            rotationOffset -=
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_TWOPI;
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
@@ -156,8 +153,12 @@ float SwerveModule::getAngularVelocity() const
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac * angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac * (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    driveMotor.setDesiredOutput(
+        driveMotor.getOutputDesired() * frac *
+        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+    azimuthMotor.setDesiredOutput(
+        azimuthMotor.getOutputDesired() * frac *
+        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
 }  // namespace chassis

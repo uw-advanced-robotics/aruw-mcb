@@ -145,7 +145,7 @@ void SwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    //TODO: override with stuff in transforms library
+    // TODO: override with stuff in transforms library
     modm::Matrix<float, 3, 1> randomOutput;
     randomOutput[0][0] = 0;
     randomOutput[1][0] = 0;
