@@ -35,8 +35,7 @@ VirtualCanBus<port>::VirtualCanBus(tap::Drivers* drivers) : drivers(drivers)
 template <tap::communication::serial::Uart::UartPort port>
 void VirtualCanBus<port>::initialize()
 {
-    drivers->uart.init<tap::communication::serial::Uart::Uart1, 1000000>();
-    drivers->uart.init<port, 1000000>();
+    drivers->uart.init<port, 1'000'000>();
 }
 
 template <tap::communication::serial::Uart::UartPort port>
@@ -44,6 +43,8 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
 {
     uint8_t canbusNum;
     drivers->uart.read(port, &canbusNum);
+    canbusNum -= CANBUS_ID_OFFSET;
+    
     if (canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS1) &&
         canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
     {
@@ -87,7 +88,7 @@ bool VirtualCanBus<port>::isReadyToSend(tap::can::CanBus canbus)
 template <tap::communication::serial::Uart::UartPort port>
 bool VirtualCanBus<port>::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
 {
-    drivers->uart.write(port, (uint8_t)canbus);
+    drivers->uart.write(port, (uint8_t)canbus + CANBUS_ID_OFFSET);
     return drivers->uart.write(
         port,
         reinterpret_cast<uint8_t*>(message),

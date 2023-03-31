@@ -21,9 +21,11 @@
 #define VIRTUAL_CAN_BUS_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/can/can_rx_handler.hpp"
 #include "tap/communication/serial/uart.hpp"
-#include "modm/container/queue.hpp"
 #include "tap/drivers.hpp"
+
+#include "modm/container/queue.hpp"
 
 #include "can_bus.hpp"
 
@@ -46,9 +48,12 @@ public:
 private:
     tap::Drivers* drivers;
 
-// Blame eli if this does bad hardware kilobytes things, actually just blame him in general
+    // Blame eli if this does bad hardware kilobytes things, actually just blame him in general
     modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;
     modm::BoundedQueue<modm::can::Message, 254> CAN2_queue;
+
+    // choosing this cuz in binary this would be 10000001
+    static constexpr uint16_t CANBUS_ID_OFFSET = 129;
 };
 
 }  // namespace aruwsrc::virtualMCB
