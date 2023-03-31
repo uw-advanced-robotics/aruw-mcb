@@ -28,27 +28,23 @@ namespace aruwsrc
 {
 namespace algorithms
 {
-
 Wheel::Wheel(float diameter, float gearRatio, float motorGearRatio)
     : circumference(diameter * M_PI),
-    gearRatio(gearRatio),
-    motorGearRatio(motorGearRatio)
+      gearRatio(gearRatio),
+      motorGearRatio(motorGearRatio)
 {
 }
 
 float Wheel::mpsToRpm(float mps) const
 {
-    return (mps / circumference) / motorGearRatio * 60.0f /
-        gearRatio;
+    return (mps / circumference) / motorGearRatio * 60.0f / gearRatio;
 }
 
 float Wheel::rpmToMps(float rpm) const
 {
-    return rpm * motorGearRatio / 60.0f * gearRatio *
-        circumference;
+    return rpm * motorGearRatio / 60.0f * gearRatio * circumference;
 }
 
-
-}  // namespace algoriths
+}  // namespace algorithms
 
 }  // namespace aruwsrc

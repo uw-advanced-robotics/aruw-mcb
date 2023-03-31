@@ -55,5 +55,4 @@ private:
 
 }  // namespace aruwsrc
 
-
 #endif  // WHEEL_HPP_
