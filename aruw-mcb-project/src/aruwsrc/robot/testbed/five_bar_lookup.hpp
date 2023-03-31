@@ -22,7 +22,8 @@
 
 namespace aruwsrc::chassis
 {
-
+// angle is in degrees
+// distances are in mm (to store as ints)
 static const float FIVE_BAR_T1_MIN = 385.0;
 static const float FIVE_BAR_T1_MAX = 265.0;
 static const float FIVE_BAR_T1_DELTA = -5.0;

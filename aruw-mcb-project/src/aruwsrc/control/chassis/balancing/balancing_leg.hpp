@@ -22,16 +22,16 @@
 
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/motor/tmotor_ak80-9.hpp"
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
+#include "aruwsrc/motor/tmotor_ak80-9.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
 /**
- * 
-*/
+ *
+ */
 class BalancingLeg
 {
 public:
@@ -39,39 +39,33 @@ public:
         tap::Drivers* drivers,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
         tap::motor::MotorInterface* wheelMotor,
-        const float wheelRadius
-    );
+        const float wheelRadius,
+        const tap::algorithms::SmoothPidConfig driveWheelPidConfig);
 
     /**
-     * 
-    */
-    inline void setDesiredHeight(float height)
-    {
-        zDesired = height;
-    };
+     *
+     */
+    inline void setDesiredHeight(float height) { zDesired = height; };
 
     /**
-     * 
-    */
-    inline void setDesiredTranslationSpeed(float speed)
-    {
-        vDesired = speed;
-    }
+     *
+     */
+    inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
 
     /**
-     * 
-    */
+     *
+     */
     inline float getCurrentHeight() { return zCurrent; };
 
     /**
-     * 
-    */
+     *
+     */
     inline float getCurrentTranslationSpeed() { return vCurrent; };
 
     /**
-     * 
-    */
-   void update();
+     *
+     */
+    void update();
 
 private:
     const float WHEEL_RADIUS;
@@ -79,16 +73,16 @@ private:
     aruwsrc::control::motion::FiveBarLinkage* fivebar;
     tap::motor::MotorInterface* driveWheel;
 
-    modm::Location2D<float> fblCurrentPosition;
-    modm::Vector2f fblDesiredPosition;
+    tap::algorithms::SmoothPid driveWheelPid;
 
-    float zDesired,     // m
-          vDesired,     // m/s
-          zCurrent,     // m
-          vCurrent,     // m/s
-          tl_Current;   // rad
+    float zDesired,          // m
+        vDesired,            // m/s
+        zCurrent,            // m
+        vCurrent,            // m/s
+        motorLinkAnglePrev,  // rad
+        tl_Current;          // rad
 };
-}   // namespace chassis
-}   // namespace aruwsrc
+}  // namespace chassis
+}  // namespace aruwsrc
 
 #endif  // BALANCING_LEG_HPP_

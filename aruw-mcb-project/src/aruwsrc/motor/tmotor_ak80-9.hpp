@@ -160,11 +160,12 @@ public:
 
     /**
      * @brief As per the protocol, send a specific data packet to 0 the motor's position when
-     * called. The 0 should retain after power cycle
+     * called. The 0 should retain after power cycle. The 0 here set the motor's returnned position
+     * to 1800.
      *
      * @return success of message send
      */
-    bool sendPositionHomeResetMessage();
+    bool sendPositionHomeResetMessage() const;
 
     /**
      * @brief As per the protocol, send a specific data packet to have the motor recall it's saved 0
@@ -172,7 +173,7 @@ public:
      *
      * @return success of message send
      */
-    bool sendPositionHomeGetMessage();
+    bool sendPositionHomeGetMessage() const;
 
     /**
      * @return the raw `desiredOutput` value which will be sent to the motor controller
@@ -240,6 +241,11 @@ private:
     int64_t encoderRevolutions;
 
     tap::arch::MilliTimeout motorDisconnectTimeout;
+    
+    /***
+     * the position of the AK80-9 should be 0'd on it's powerup via the home resetting message.
+    */
+    bool motorHomed;
 };
 
 }  // namespace aruwsrc::motor

@@ -48,7 +48,6 @@ void Tmotor_AK809::initialize()
 {
     drivers->tMotorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
-    sendPositionHomeGetMessage();
 }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
@@ -58,6 +57,9 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
     {
         return;
     }
+    /***
+     * WARNING! The Ak80-9 initializes it's encoder position to 1750 on boot.
+     */
     encoderPosition =
         static_cast<int16_t>(message.data[0] << 8 | message.data[1]);  // position, mDeg
     /***
@@ -74,8 +76,9 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
 
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
+
     // invert motor if necessary
-    encoderPosition = motorInverted ?  encoderPosition : -encoderPosition;
+    encoderPosition = motorInverted ? encoderPosition : -encoderPosition;
 }
 
 void Tmotor_AK809::setDesiredOutput(int32_t desiredOutput)
@@ -91,7 +94,15 @@ bool Tmotor_AK809::isMotorOnline() const
      * somehow got disconnected) and the timeout hasn't been stopped (initially, the timeout
      * is stopped)
      */
-    return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
+    if (!motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped())
+    {
+        return true;
+    }
+    else
+    {
+        sendPositionHomeGetMessage();
+        return false;
+    }
 }
 
 void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
@@ -102,7 +113,7 @@ void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
     txMessage->data[3] = this->getOutputDesired();
 }
 
-bool Tmotor_AK809::sendPositionHomeResetMessage()
+bool Tmotor_AK809::sendPositionHomeResetMessage() const
 {
     modm::can::Message homingMessage(
         (uint32_t)(motorIdentifier) |
@@ -114,7 +125,7 @@ bool Tmotor_AK809::sendPositionHomeResetMessage()
     return drivers->can.sendMessage(motorCanBus, homingMessage);
 }
 
-bool Tmotor_AK809::sendPositionHomeGetMessage()
+bool Tmotor_AK809::sendPositionHomeGetMessage() const
 {
     modm::can::Message homingMessage(
         (uint32_t)(motorIdentifier) |
@@ -143,10 +154,7 @@ tap::can::CanBus Tmotor_AK809::getCanBus() const { return motorCanBus; }
 
 const char* Tmotor_AK809::getName() const { return motorName; }
 
-int64_t Tmotor_AK809::getEncoderUnwrapped() const
-{
-    return static_cast<int64_t>(encoderPosition);
-}
+int64_t Tmotor_AK809::getEncoderUnwrapped() const { return static_cast<int64_t>(encoderPosition); }
 
 uint16_t Tmotor_AK809::getEncoderWrapped() const
 {

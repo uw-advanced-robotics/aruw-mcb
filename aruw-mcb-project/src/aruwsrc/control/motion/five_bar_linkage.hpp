@@ -113,6 +113,8 @@ private:
 
     float motor1home;
     float motor2home;
+    bool motor1homed = false;
+    bool motor2homed = false;
 
     float motor1RelativePosition;
     float motor2RelativePosition;

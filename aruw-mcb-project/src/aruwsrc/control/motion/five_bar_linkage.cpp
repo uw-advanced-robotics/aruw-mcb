@@ -61,6 +61,10 @@ void FiveBarLinkage::refresh()
 {
     motor1RelativePosition = motor1->getPositionUnwrapped() + motor1home;
     motor2RelativePosition = motor2->getPositionUnwrapped() + motor2home;
+
+    motor1->isMotorOnline();
+    motor2->isMotorOnline();
+
     computeMotorAngles();
     computePositionFromAngles();
     moveMotors();
@@ -78,6 +82,7 @@ void FiveBarLinkage::moveMotors()
         motor2Pid.runController(motor2Setpoint - motor2RelativePosition, motor2->getShaftRPM(), dt);
     debug1 = motor1Output;
     debug2 = motor2Output;
+
     motor1->setDesiredOutput(motor1Output);
     motor2->setDesiredOutput(motor2Output);
 }
@@ -122,7 +127,7 @@ void FiveBarLinkage::computePositionFromAngles()
                          &chassis::FIVE_BAR_T2_DELTA,
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
-                     1000;
+                     1000; //check units with LUT
     float currentY = tap::algorithms::interpolateLinear2D(
                          &chassis::FIVE_BAR_LUT_Y,
                          &chassis::FIVE_BAR_T1_MIN,
@@ -135,5 +140,12 @@ void FiveBarLinkage::computePositionFromAngles()
                          (motor2RelativePosition)*360 / M_TWOPI) /
                      1000;
     currentPosition.setPosition(modm::Vector2f(currentX, currentY));
+    // finds the angle of the joint1-tip link relative to the refernce 0 (+x ax) using trig
+    float psi = motor1RelativePosition -
+                atan2f(currentY, currentX + fiveBarConfig.motor1toMotor2Length / 2);
+    float phi = asinf(
+        sqrtf(powf(currentX + fiveBarConfig.motor1toMotor2Length / 2, 2) + powf(currentY, 2)) /
+        fiveBarConfig.joint1toTipLength * sin(psi));
+    currentPosition.setOrientation(motor1RelativePosition - phi);
 }
 }  // namespace aruwsrc::control::motion

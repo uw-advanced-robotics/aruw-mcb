@@ -18,38 +18,45 @@
  */
 
 #include "balancing_leg.hpp"
+
 #include <assert.h>
 
 namespace aruwsrc
 {
 namespace chassis
 {
-    BalancingLeg::BalancingLeg(
-        tap::Drivers* drivers,
-        aruwsrc::control::motion::FiveBarLinkage* fivebar,
-        tap::motor::MotorInterface* wheelMotor,
-        const float wheelRadius
-    ) : fivebar(fivebar),
-        driveWheel(wheelMotor),
-        WHEEL_RADIUS(wheelRadius)
-    {
-        assert(fivebar != nullptr);
-        assert(wheelMotor != nullptr);
-    }
-
-    void BalancingLeg::update()
-    {
-        // 1. Update Current Output Values
-        fblCurrentPosition = fivebar->getCurrentPosition();
-        zCurrent = -fblCurrentPosition.getY();
-        tl_Current = atan2(zCurrent, -fblCurrentPosition.getX());
-        vCurrent = WHEEL_RADIUS*driveWheel->getShaftRPM();
-
-        // 2. Apply Control Law
-
-
-        // 3. Send New Output Values
-        
-    }
+BalancingLeg::BalancingLeg(
+    tap::Drivers* drivers,
+    aruwsrc::control::motion::FiveBarLinkage* fivebar,
+    tap::motor::MotorInterface* wheelMotor,
+    const float wheelRadius,
+    const tap::algorithms::SmoothPidConfig driveWheelPidConfig)
+    : fivebar(fivebar),
+      driveWheel(wheelMotor),
+      WHEEL_RADIUS(wheelRadius),
+      driveWheelPid(driveWheelPidConfig)
+{
+    assert(fivebar != nullptr);
+    assert(wheelMotor != nullptr);
 }
+
+void BalancingLeg::update()
+{
+    // 1. Update Current State
+    zCurrent = fivebar->getCurrentPosition().getY();
+    tl_Current = atan2(zCurrent, -fivebar->getCurrentPosition().getX());
+    vCurrent = WHEEL_RADIUS * driveWheel->getShaftRPM() * M_TWOPI / 60;
+
+    // 2. Apply Control Law
+    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, -.2);
+    float desiredWheelSpeed = 0;
+    float desiredWheelAngle = 0;
+    desiredWheelAngle -= fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev; //subtract
+    motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
+    
+    // 3. Send New Output Values
+    fivebar->setDesiredPosition(desiredWheelLocation);
+    driveWheelPid.runControllerDerivateError();
 }
+}  // namespace chassis
+}  // namespace aruwsrc
