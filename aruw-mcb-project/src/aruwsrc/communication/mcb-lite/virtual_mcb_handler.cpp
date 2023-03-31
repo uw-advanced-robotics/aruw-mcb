@@ -24,22 +24,35 @@
 namespace aruwsrc::virtualMCB
 {
 
-VirtualMCBHandler::VirtualMCBHandler(
-    tap::Drivers* drivers,
-    tap::communication::serial::Uart::UartPort port)
-    : canbus(&VirtualCanBus(drivers, port)),
-      motorTxHandler(&VirtualDJIMotorTxHandler(drivers, canbus)),
-      canRxHandler(&VirtualCANRxHandler(drivers, canbus))
+template <tap::communication::serial::Uart::UartPort port>
+VirtualMCBHandler<port>::VirtualMCBHandler(tap::Drivers* drivers)
+    : canbus(VirtualCanBus<port>(drivers)),
+      motorTxHandler(VirtualDJIMotorTxHandler(drivers, &canbus)),
+      canRxHandler(VirtualCANRxHandler(drivers, &canbus))
 {
 }
 
-void VirtualMCBHandler::refresh(){
-	canRxHandler->pollCanData();
-	motorTxHandler->encodeAndSendCanData();
+template <tap::communication::serial::Uart::UartPort port>
+void VirtualMCBHandler<port>::refresh()
+{
+    canRxHandler.pollCanData();
+    motorTxHandler.encodeAndSendCanData();
 }
 
-VirtualCanBus* VirtualMCBHandler::getCanbus() { return canbus; }
-VirtualCANRxHandler* VirtualMCBHandler::getRxHandler() { return canRxHandler; }
-VirtualDJIMotorTxHandler* VirtualMCBHandler::getDjiMotorHandler() { return motorTxHandler; }
+template <tap::communication::serial::Uart::UartPort port>
+VirtualCanBus<port>& VirtualMCBHandler<port>::getCanbus()
+{
+    return &canbus;
+}
+template <tap::communication::serial::Uart::UartPort port>
+VirtualCANRxHandler& VirtualMCBHandler<port>::getRxHandler()
+{
+    return &canRxHandler;
+}
+template <tap::communication::serial::Uart::UartPort port>
+VirtualDJIMotorTxHandler& VirtualMCBHandler<port>::getDjiMotorHandler()
+{
+    return &motorTxHandler;
+}
 
 }  // namespace aruwsrc::virtualMCB

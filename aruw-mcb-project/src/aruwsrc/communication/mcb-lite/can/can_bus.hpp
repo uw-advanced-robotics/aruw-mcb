@@ -32,8 +32,6 @@ class CanBus
 public:
     virtual void initialize();
 
-    virtual bool isMessageAvailable(tap::can::CanBus canbus);
-
     virtual bool getMessage(tap::can::CanBus canbus, modm::can::Message *message);
 
     virtual bool isReadyToSend(tap::can::CanBus canbus);

@@ -23,6 +23,7 @@
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
 
+#include "listener_constants.hpp"
 #include "aruwsrc/communication/mcb-lite/can/virtual_can_rx_handler.hpp"
 
 namespace aruwsrc::virtualMCB

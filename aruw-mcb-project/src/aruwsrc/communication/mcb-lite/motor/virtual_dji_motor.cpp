@@ -35,8 +35,8 @@ VirtualDjiMotor::VirtualDjiMotor(
     VirtualCANRxHandler* rxHandler,
     bool isInverted,
     const char* name,
-    uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
-    int64_t encoderRevolutions = 0)
+    uint16_t encoderWrapped,
+    int64_t encoderRevolutions)
     : DjiMotor(
           drivers,
           desMotorIdentifier,

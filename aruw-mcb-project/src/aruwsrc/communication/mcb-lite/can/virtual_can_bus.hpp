@@ -22,20 +22,20 @@
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
+#include "modm/container/queue.hpp"
 #include "tap/drivers.hpp"
 
 #include "can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
+template <tap::communication::serial::Uart::UartPort port>
 class VirtualCanBus : public CanBus
 {
 public:
-    VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+    VirtualCanBus(tap::Drivers* drivers);
 
     void initialize() override;
-
-    bool isMessageAvailable(tap::can::CanBus canbus) override;
 
     bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
 
@@ -45,7 +45,10 @@ public:
 
 private:
     tap::Drivers* drivers;
-    tap::communication::serial::Uart::UartPort port;
+
+// Blame eli if this does bad hardware kilobytes things, actually just blame him in general
+    modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;
+    modm::BoundedQueue<modm::can::Message, 254> CAN2_queue;
 };
 
 }  // namespace aruwsrc::virtualMCB
