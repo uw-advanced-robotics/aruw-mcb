@@ -17,56 +17,80 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "virtual_can_bus.hpp"
+
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "virtual_can_bus.hpp"
-
 namespace aruwsrc::virtualMCB
 {
 
-VirtualCanBus::VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
-    : drivers(drivers),
-      port(port)
+template <tap::communication::serial::Uart::UartPort port>
+VirtualCanBus<port>::VirtualCanBus(tap::Drivers* drivers) : drivers(drivers)
 {
 }
 
-void VirtualCanBus::initialize()
+template <tap::communication::serial::Uart::UartPort port>
+void VirtualCanBus<port>::initialize()
 {
-    // drivers->uart.init<tap::communication::serial::Uart::Port::Uart3, 1000000>();
-    // drivers->uart.init<port, 1000000>();
+    drivers->uart.init<tap::communication::serial::Uart::Uart1, 1000000>();
+    drivers->uart.init<port, 1000000>();
 }
 
-bool VirtualCanBus::isMessageAvailable(tap::can::CanBus canbus)
+template <tap::communication::serial::Uart::UartPort port>
+bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message* message)
 {
-    // Uuuuuuuuh this doesn't really exist on the uart port?? Also TODO: Where is this used???
-    //  drivers->uart.i
+    uint8_t canbusNum;
+    drivers->uart.read(port, &canbusNum);
+    if (canbusNum != tap::can::CanBus::CAN_BUS1 || canbusNum != tap::can::CanBus::CAN_BUS2)
+    {
+        return false;
+    }
+
+    modm::can::Message msg;
+
+    bool passed =
+        drivers->uart.read(port, reinterpret_cast<uint8_t*>(msg), sizeof(modm::can::Message)) ==
+        sizeof(modm::can::Message);
+
+    if (!passed)
+    {
+        return passed;
+    }
+
+    if (canbusNum == tap::can::CanBus::CAN_BUS1)
+    {
+        CAN1_queue.push(msg);
+        msg = CAN1_queue.pop();
+        memcpy(msg, message, sizeof(modm::can::Message));
+    }
+
+    if (canbusNum == tap::can::CanBus::CAN_BUS2)
+    {
+        CAN2_queue.push(msg);
+        msg = CAN2_queue.pop();
+        memcpy(msg, message, sizeof(modm::can::Message));
+    }
+
+    return true;
 }
 
-bool VirtualCanBus::getMessage(tap::can::CanBus canbus, modm::can::Message* message)
-{
-    uint32_t* messageCast;
-    // This is read at 32 for can message??
-    uint32_t readSize = drivers->uart.read(port, reinterpret_cast<uint8_t*>(messageCast), sizeof(message));
-    memcpy(&message, &messageCast, readSize);
-    // TODO: Figure out if this is correct
-    return true; // ????
-
-}
-
-bool VirtualCanBus::isReadyToSend(tap::can::CanBus canbus)
+template <tap::communication::serial::Uart::UartPort port>
+bool VirtualCanBus<port>::isReadyToSend(tap::can::CanBus canbus)
 {
     return drivers->uart.isWriteFinished(port);
 }
 
-bool VirtualCanBus::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
+template <tap::communication::serial::Uart::UartPort port>
+bool VirtualCanBus<port>::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
 {
-    // Copy of what's done in the can send message
-    uint32_t* messageCast;
-    memcpy(&messageCast, &message, sizeof(message));
-    drivers->uart.write(port, reinterpret_cast<uint8_t*>(messageCast), sizeof(message));
+    drivers->uart.write(port, (uint8_t)canbus);
+    return drivers->uart.write(
+        port,
+        reinterpret_cast<uint8_t*>(message),
+        sizeof(modm::can::Message));
 }
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB

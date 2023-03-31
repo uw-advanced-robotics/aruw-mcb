@@ -23,13 +23,13 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "motor/virtual_dji_motor_tx_handler.hpp"
-
 #include "can/virtual_can_bus.hpp"
 #include "can/virtual_can_rx_handler.hpp"
+#include "motor/virtual_dji_motor_tx_handler.hpp"
 
 namespace aruwsrc::virtualMCB
 {
+template <tap::communication::serial::Uart::UartPort port>
 class VirtualMCBHandler
 {
     /**
@@ -41,18 +41,20 @@ class VirtualMCBHandler
      */
 
 public:
-    VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+    VirtualMCBHandler(tap::Drivers* drivers);
 
     void refresh();
 
-    VirtualCanBus* getCanbus();
-    VirtualCANRxHandler* getRxHandler();
-    VirtualDJIMotorTxHandler* getDjiMotorHandler();
+    VirtualCanBus<port>& getCanbus();
+    VirtualCANRxHandler& getRxHandler();
+    VirtualDJIMotorTxHandler& getDjiMotorHandler();
 
 private:
-    VirtualCanBus* canbus;
-    VirtualDJIMotorTxHandler* motorTxHandler;
-    VirtualCANRxHandler* canRxHandler;
+    VirtualCanBus<port> canbus;
+    VirtualDJIMotorTxHandler motorTxHandler;
+    VirtualCANRxHandler canRxHandler;
+
+    
 };
 
 }  // namespace aruwsrc::virtualMCB

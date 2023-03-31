@@ -17,29 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_LISTENER_HPP_
-#define IMU_LISTENER_HPP_
+#ifndef LISTENER_CONSTANTS_HPP_
+#define LISTENER_CONSTANTS_HPP_
 
-#include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/serial/uart.hpp"
-#include "tap/drivers.hpp"
-
-#include "virtual_can_rx_listener.hpp"
+#include <stdint.h>
 
 namespace aruwsrc::virtualMCB
 {
-class IMUListener : public VirtualCANRxListener
-{
-    // These values should be hardcoded equivalents
-    IMUListener(
-        tap::Drivers* drivers,
-        uint32_t id,
-        tap::can::CanBus canbus,
-        VirtualCANRxHandler* canHandler)
-        : VirtualCANRxListener(drivers, id, canbus, canHandler){};
 
-    inline void processMessage(const modm::can::Message& message) override {}
-};
+constexpr uint32_t IMU_POS_MESSAGE = 510UL;
+constexpr uint32_t IMU_VEL_MESSAGE = 510UL;
+
 
 }  // namespace aruwsrc::virtualMCB
 
