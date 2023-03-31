@@ -68,6 +68,8 @@ using namespace aruwsrc::hero;
 using namespace aruwsrc::drone;
 #elif defined(TARGET_ENGINEER)
 using namespace aruwsrc::engineer;
+#elif defined(TARGET_DART)
+using namespace aruwsrc::dart;
 #endif
 
 int main()
