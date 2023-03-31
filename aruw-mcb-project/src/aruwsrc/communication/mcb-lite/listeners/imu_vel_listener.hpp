@@ -46,14 +46,9 @@ public:
         Vy = message.data[0] << 8 & message.data[1];
         Vp = message.data[2] << 8 & message.data[3];
         Vr = message.data[4] << 8 & message.data[5];
-
-        uint8_t state = message.data[6] << 8 & message.data[7];
-        imuState = static_cast<tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState>(state);
     }
 
     uint16_t Vy, Vp, Vr;
-    tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState =
-        tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_NOT_CONNECTED;
 };
 
 }  // namespace aruwsrc::virtualMCB
