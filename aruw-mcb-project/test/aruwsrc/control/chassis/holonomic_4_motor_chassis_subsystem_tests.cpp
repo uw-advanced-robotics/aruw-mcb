@@ -59,17 +59,13 @@ protected:
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
-TEST_F(
-    Holonomic4MotorChassisSubsystemTest,
-    getDesiredRotation_returns_desired_rotation)
+TEST_F(Holonomic4MotorChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
 }
 
-TEST_F(
-    Holonomic4MotorChassisSubsystemTest,
-    setZeroRPM_doesnt_reset_desired_orientation)
+TEST_F(Holonomic4MotorChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_orientation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     chassis.setZeroRPM();
@@ -104,9 +100,7 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)
     EXPECT_TRUE(chassis.allMotorsOnline());
 }
 
-TEST_F(
-    Holonomic4MotorChassisSubsystemTest,
-    onHardwareTestStart_sets_desired_out_0)
+TEST_F(Holonomic4MotorChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
 {
     chassis.setDesiredOutput(1000, 1000, 1000);
     chassis.onHardwareTestStart();

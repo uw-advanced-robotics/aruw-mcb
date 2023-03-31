@@ -116,12 +116,12 @@ TEST_F(SwerveModuleTest, reversingDirectionChange)
 
 // TEST_F(SwerveModuleTest, getModuleVelocity)
 // {
-//     ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(DEFAULT_SWERVE_CONFIG.azimuthMotorGearing));
+//     ON_CALL(module.azimuthMotor,
+//     getEncoderUnwrapped).WillByDefault(Return(DEFAULT_SWERVE_CONFIG.azimuthMotorGearing));
 //     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(1));
 
 //     modm::Matrix<float, 2, 1> vel = module.getModuleVelocity();
 //     EXPECT_NEAR(1, vel[0][0], 1E-3);
 //     EXPECT_NEAR(0, vel[1][0], 1E-3);
 
-    
 // }
