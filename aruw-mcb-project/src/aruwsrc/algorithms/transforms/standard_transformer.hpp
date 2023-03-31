@@ -239,8 +239,8 @@ private:
      * If the motors are not online, the returned matrix
      * has all entries set to zero
      */
-    // modm::Matrix<float, 3, 1> getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
-    void getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
+    modm::Matrix<float, 3, 1> getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
+    // void getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
 
     /**
      * Compute the acceleration of the chassis relative to itself

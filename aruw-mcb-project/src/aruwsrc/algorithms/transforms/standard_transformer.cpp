@@ -25,14 +25,11 @@
 
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
 
-// #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-// #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
-// using namespace aruwsrc::chassis;
 
 namespace aruwsrc::algorithms::transforms
 {
@@ -42,73 +39,72 @@ StandardTransformer::StandardTransformer(
     aruwsrc::can::TurretMCBCanComm& turretMCB)
     :  // TODO: store transforms in an array so we don't have to initialize them here (very ugly !!!
        // !! ! !) Transforms that are dynamically updated
-      worldToChassisIMUTransform(Transform<WorldFrame, ChassisIMUFrame>(
+      worldToChassisIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
       TurretIMUToCameraTransform(
-          Transform<TurretIMUFrame, CameraFrame>(0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 0., 0., 0.)),
-      turretIMUToGunTransform(Transform<TurretIMUFrame, GunFrame>(
+          0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 0., 0., 0.),
+      turretIMUToGunTransform(
           0.,
           TURRETIMU_TO_GUN_Y_OFFSET,
           TURRETIMU_TO_GUN_Z_OFFSET,
           0.,
           0.,
-          0.)),
+          0.),
 
       // Transforms that are compositions
-      worldToTurretIMUTransform(Transform<WorldFrame, TurretIMUFrame>(
+      worldToTurretIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      worldToChassisTransform(Transform<WorldFrame, ChassisFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      worldToChassisTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
 
       // Transforms that are inverses
-      chassisToWorldTransform(Transform<ChassisFrame, WorldFrame>(
+      chassisToWorldTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      turretIMUToChassisTransform(Transform<TurretIMUFrame, ChassisFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      turretIMUToChassisTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
-      cameraToTurretIMUTransform(Transform<CameraFrame, TurretIMUFrame>(
+          TRANSFORM_PLACEHOLDER_VAL),
+      cameraToTurretIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL)),
+          TRANSFORM_PLACEHOLDER_VAL),
 
       // Constant transforms
       chassisToTurretIMUTransform(
-          Transform<ChassisFrame, TurretIMUFrame>(0., 0., CHASSIS_TO_TURRET_Z_OFFSET, 0., 0., 0.)),
-      chassisIMUToChassisTransform(Transform<ChassisIMUFrame, ChassisFrame>(
+        0., 0., CHASSIS_TO_TURRET_Z_OFFSET, 0., 0., 0.),
+      chassisIMUToChassisTransform(
           CHASSISIMU_TO_CHASSIS_X_OFFSET,
           0.,
           CHASSISIMU_TO_CHASSIS_Z_OFFSET,
           0.,
           0.,
-          0.)),
-
+          0.),
       chassisImu(chassisImu),
       turretMCB(turretMCB),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
@@ -294,30 +290,18 @@ void StandardTransformer::updateInternalOdomFromKF()
     turretWorldOrientation.setZ(turretMCB.getYaw());
 }
 
-void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
-// modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& chassisVelocity)
+// void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
+modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& chassisVelocity)
 {
-    if (!areMotorsOnline()) cV = modm::Matrix<float, 3, 1>().zeroMatrix();
-    else {
-        wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
-        wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
-        wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
-        wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
-        cV = (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
-    }
 
-    // modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
-    // modm::Matrix<float, WheelRPMIndex::NUM_MOTORS, 1> wheelVelocity;
-
-    // wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
-    // wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
-    // wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
-    // wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
-
-    // chassisVelocityInGetVelFN = wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
-    // return chassisVelocityInGetVelFN;
-
-    // chassisVelocity = (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
+    if (!areMotorsOnline()) 
+        return modm::Matrix<float, 3, 1>().zeroMatrix();
+    
+    wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
+    wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
+    wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
+    wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
+    return (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
 }
 
 bool StandardTransformer::areMotorsOnline()
