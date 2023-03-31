@@ -44,7 +44,7 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
     uint8_t canbusNum;
     drivers->uart.read(port, &canbusNum);
     canbusNum -= CANBUS_ID_OFFSET;
-    
+
     if (canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS1) &&
         canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
     {
@@ -53,13 +53,13 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
 
     modm::can::Message msg;
 
-    bool passed =
+    bool readCompleteMessage =
         drivers->uart.read(port, reinterpret_cast<uint8_t*>(msg), sizeof(modm::can::Message)) ==
         sizeof(modm::can::Message);
 
-    if (!passed)
+    if (!readCompleteMessage)
     {
-        return passed;
+        return readCompleteMessage;
     }
 
     if (canbusNum == reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS1))

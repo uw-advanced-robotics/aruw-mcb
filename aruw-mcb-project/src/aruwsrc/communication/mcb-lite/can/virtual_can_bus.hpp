@@ -52,7 +52,7 @@ private:
     modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;
     modm::BoundedQueue<modm::can::Message, 254> CAN2_queue;
 
-    // choosing this cuz in binary this would be 10000001
+    // choosing this cuz in binary this would be 10000001 so we don't read empty buffer as can bus 1
     static constexpr uint16_t CANBUS_ID_OFFSET = 129;
 };
 
