@@ -47,6 +47,7 @@ VirtualCanBus<port>& VirtualMCBHandler<port>::getCanbus()
 template <tap::communication::serial::Uart::UartPort port>
 VirtualCANRxHandler& VirtualMCBHandler<port>::getRxHandler()
 {
+  
     return &canRxHandler;
 }
 template <tap::communication::serial::Uart::UartPort port>
