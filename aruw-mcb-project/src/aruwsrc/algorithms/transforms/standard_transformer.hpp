@@ -287,8 +287,6 @@ private:
         NUM_STATES,
     };
 
-
-
     /**
      * Rotates a chassis-relative vector <a,b,c> from the chassis frame
      * to the world frame
