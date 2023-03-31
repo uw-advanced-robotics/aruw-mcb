@@ -110,15 +110,14 @@ public:
 
     inline modm::Matrix<float, 2, 1> getModuleVelocity() const
     {
-        float mag = getDriveVelocity();
-        float ang = getAngle();
         modm::Matrix<float, 2, 1> velocity;
-        velocity[0][0] = mag * cos(ang);
-        velocity[1][0] = mag * sin(ang);
+        velocity[0][0] = getDriveVelocity() * cos(getAngle());
+        velocity[1][0] = getDriveVelocity() * sin(getAngle());
         return velocity;
     }
 
-    // limits power to both motors equally
+    // uses the lookup table to determine how much power to give to each motor
+    // the lower the azimuth error, the less the azimuth power
     void limitPower(float frac);
 
     // in radians
