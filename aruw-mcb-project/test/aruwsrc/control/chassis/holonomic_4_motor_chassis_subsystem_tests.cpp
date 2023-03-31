@@ -61,7 +61,7 @@ protected:
 
 TEST_F(
     Holonomic4MotorChassisSubsystemTest,
-    getDesiredRotation_returns_desired_rotation)  // 4 motor, swerve
+    getDesiredRotation_returns_desired_rotation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
@@ -69,7 +69,7 @@ TEST_F(
 
 TEST_F(
     Holonomic4MotorChassisSubsystemTest,
-    setZeroRPM_doesnt_reset_desired_velocity)  // 4 motor, swerve??
+    setZeroRPM_doesnt_reset_desired_orientation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     chassis.setZeroRPM();
@@ -78,7 +78,7 @@ TEST_F(
     EXPECT_NEAR(0, desiredVelocity[2][0], 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)  // 4 motor, swerve
+TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)
 {
     bool lfOnline, lbOnline, rfOnline, rbOnline;
     ON_CALL(chassis.leftFrontMotor, isMotorOnline).WillByDefault(ReturnPointee(&lfOnline));
@@ -106,7 +106,7 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)  // 4 motor, swerve
 
 TEST_F(
     Holonomic4MotorChassisSubsystemTest,
-    onHardwareTestStart_sets_desired_out_0)  // swerve, 4 motor
+    onHardwareTestStart_sets_desired_out_0)
 {
     chassis.setDesiredOutput(1000, 1000, 1000);
     chassis.onHardwareTestStart();
@@ -118,31 +118,31 @@ TEST_F(
     EXPECT_NEAR(0, chassiSVelocity[2][0], 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftFrontRpmActual)  // 4 motor
+TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftFrontRpmActual)
 {
     ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_NEAR(1000, chassis.getLeftFrontRpmActual(), 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftBackRpmActual)  // 4 motor
+TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftBackRpmActual)
 {
     ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_NEAR(1000, chassis.getLeftBackRpmActual(), 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightFrontRpmActual)  // 4 motor
+TEST_F(Holonomic4MotorChassisSubsystemTest, getRightFrontRpmActual)
 {
     ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_NEAR(1000, chassis.getRightFrontRpmActual(), 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightBackRpmActual)  // 4 motor
+TEST_F(Holonomic4MotorChassisSubsystemTest, getRightBackRpmActual)
 {
     ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(1000));
     EXPECT_NEAR(1000, chassis.getRightBackRpmActual(), 1E-3);
 }
 
-TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)  // 4 motor, swerve(done)
+TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)
 {
     EXPECT_CALL(chassis.leftFrontMotor, initialize);
     EXPECT_CALL(chassis.leftBackMotor, initialize);

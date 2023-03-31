@@ -60,7 +60,6 @@ public:
         tap::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-    // virtual ~HolonomicChassisSubsystem();
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -144,8 +143,6 @@ public:
     virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
 
     const char* getName() override { return "Chassis"; }
-
-    virtual bool allMotorsOnline() const override = 0;
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 

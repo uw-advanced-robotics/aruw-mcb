@@ -26,7 +26,11 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
-    : driveMotor(
+    : wheel(
+          config.WHEEL_DIAMETER_M,
+          config.driveMotorGearing,
+          CHASSIS_GEARBOX_RATIO),
+      driveMotor(
           drivers,
           config.driveMotorId,
           CAN_BUS_MOTORS,
@@ -38,7 +42,6 @@ SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
           CAN_BUS_MOTORS,
           config.azimuthMotorInverted,
           "Azimuth motor"),
-      wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       config(config),
       drivePid(
           config.drivePidKp,
@@ -48,7 +51,10 @@ SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
           config.drivePidMaxOutput),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
-      rotationVectorY(config.positionWithinChassisX)
+      rotationVectorY(config.positionWithinChassisX),
+      angularBiasLUTInterpolator(
+          config.ANGULAR_POWER_FRAC_LUT,
+          MODM_ARRAY_SIZE(config.ANGULAR_POWER_FRAC_LUT))
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
@@ -67,22 +73,6 @@ bool SwerveModule::allMotorsOnline() const
     return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
-float SwerveModule::calculateTotalModuleError() const
-{
-    // probably a naive way of doing this but haven't thought of a better one yet
-    //  (comparing power used for maintaining position vs velocity)
-    return ANGULAR_ERROR_POWER_BIAS * getAzimuthError() + getDriveError();
-}
-
-float SwerveModule::getAzimuthError() const
-{
-    return 0;  // azimuthPid.getLastError();  //**FIX THIS SMOOTHPID DOESNT HAVE GETLASTERROR IDK
-               // WHAT TO DO**
-}
-
-//
-float SwerveModule::getDriveError() const { return drivePid.getLastError(); }
-
 float SwerveModule::calculate(float x, float y, float r)
 {
     float moveVectorX = x + r * rotationVectorX;
@@ -90,9 +80,8 @@ float SwerveModule::calculate(float x, float y, float r)
 
     if (compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
-        // deadzone (temporarily?) set to ±0.1m/s to substitute for non-existant joystick input
-        // debounce/lowpass
-        //  (module did unnecessary 360s when deadzone was ±0.01m/s)
+        // deadzone set to ±0.1m/s to substitute for non-existant joystick input
+        // debounce/lowpass (module does unnecessary 360s when deadzone is ±0.01m/s)
         preScaledSpeedSetpoint = 0;
     }
     else
@@ -104,7 +93,7 @@ float SwerveModule::calculate(float x, float y, float r)
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
             rotationOffset -= getSign(newRotationSetpointRadians - preScaledRotationSetpoint) *
-                              M_TWOPI;  // TWOPI == 2*PI
+                              M_TWOPI;
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
@@ -167,8 +156,8 @@ float SwerveModule::getAngularVelocity() const
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);
-    azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);
+    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac * angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+    azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac * (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
 }  // namespace chassis

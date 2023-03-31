@@ -46,7 +46,7 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class SwerveChassisSubsystemTest : public Test
 {
 protected:
-    SwerveChassisSubsystemTest() : chassis(&drivers) {}
+    SwerveChassisSubsystemTest() : chassis(&drivers, DEFAULT_SWERVE_CONFIG, DEFAULT_SWERVE_CONFIG, DEFAULT_SWERVE_CONFIG, DEFAULT_SWERVE_CONFIG) {}
 
     void SetUp() override
     {
@@ -61,7 +61,7 @@ protected:
 
 TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)
 {
-    EXPECT_EQ(2, chassis.NUM_MODULES);  // has to be manually changed to reflect chassis constructor
+    EXPECT_EQ(4, chassis.NUM_MODULES);  // has to be manually changed to reflect chassis constructor
 }
 
 TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
@@ -70,7 +70,7 @@ TEST_F(SwerveChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
     EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
 }
 
-TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)
+TEST_F(SwerveChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_orientation)
 {
     chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
     chassis.setZeroRPM();

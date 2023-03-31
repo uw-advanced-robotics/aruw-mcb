@@ -51,8 +51,7 @@ namespace chassis
 {
 /**
  *
- * This class encapsulates a swerve module using two motors.
- * Input is in meters per second and radians.
+ * This class encapsulates a swerve module with two motors.
  *
  */
 class SwerveModule
@@ -62,10 +61,11 @@ public:
         tap::Drivers* drivers,
         SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
-    const float ANGULAR_ERROR_POWER_BIAS = M_PI_2 / 4.5f;
-
-    void setDesiredState(float metersPerSecond, float radianOutput);
-
+    /**
+     * uses the internally stored values from calculate() to update 
+     * the desired module state, scaling the speed
+     * @param scaleCoeff the scale factor applied to the module speed
+    */
     void scaleAndSetDesiredState(float scaleCoeff);
 
     /**
@@ -104,12 +104,8 @@ public:
      */
     void refresh();
 
-    float calculateTotalModuleError() const;
-
     void setZeroRPM();
 
-    float getAzimuthError() const;
-    float getDriveError() const;
     bool allMotorsOnline() const;
 
     inline modm::Matrix<float, 2, 1> getModuleVelocity() const
@@ -122,7 +118,7 @@ public:
         return velocity;
     }
 
-    // limits power
+    // limits power to both motors equally
     void limitPower(float frac);
 
     // in radians
@@ -143,6 +139,13 @@ private:
     Motor driveMotor;
     Motor azimuthMotor;
 #endif
+
+    /**
+     * sets the module's desired rotation and wheel speed
+     * @param metersPerSecond desired module speed in mps
+     * @param radianOutput desired module rotation in radians
+    */
+    void setDesiredState(float metersPerSecond, float radianOutput);
 
     inline float wrapAngle(float angle, float denomination)
     {
@@ -165,6 +168,8 @@ private:
     // handles wrapping desired rotation and reversing module (in radians, will always be a multiple
     // of PI)
     float rotationOffset{0};
+
+    modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;
 
 };  // class SwerveModule
 

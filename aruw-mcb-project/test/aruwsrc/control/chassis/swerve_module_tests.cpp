@@ -75,7 +75,7 @@ TEST_F(SwerveModuleTest, initialize)
     module.initialize();
 }
 
-TEST_F(SwerveModuleTest, getAngle)  // change test value to smth more useful lol?
+TEST_F(SwerveModuleTest, getAngle)
 {
     ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);

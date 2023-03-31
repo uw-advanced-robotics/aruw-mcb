@@ -35,7 +35,6 @@
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
@@ -45,6 +44,7 @@
 #include "aruwsrc/mock/swerve_module_mock.hpp"
 using Module = testing::NiceMock<aruwsrc::mock::SwerveModuleMock>;
 #else
+#include "aruwsrc/control/chassis/swerve_module.hpp"
 using Module = aruwsrc::chassis::SwerveModule;
 #endif
 
@@ -82,7 +82,7 @@ public:
 
     void refresh() override;
 
-    inline int getNumChassisMotors() const override { return 8; }
+    inline int getNumChassisMotors() const override { return NUM_MODULES * 2; }
 
     bool allMotorsOnline() const override;
 

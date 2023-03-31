@@ -20,7 +20,7 @@
 #define SWERVE_MODULE_CONFIG_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-
+#include "modm/math/interpolation/linear.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::chassis
@@ -60,6 +60,11 @@ struct SwerveModuleConfig
         .maxOutput = 16'000.0f,
         .errDeadzone = 0.0f,
         .errorDerivativeFloor = 0.0f,
+    };
+
+    modm::Pair<float, float> ANGULAR_POWER_FRAC_LUT[2] = {
+        {0.0f, 0.2f},
+        {M_PI_2, 0.75f},
     };
 };
 
