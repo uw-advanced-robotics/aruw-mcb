@@ -25,11 +25,12 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/m3508_constants.hpp"
 
-#include "swerve_module_config.hpp"
 #include "aruwsrc/algorithms/wheel.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
+
+#include "swerve_module_config.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -62,10 +63,10 @@ public:
         SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
     /**
-     * uses the internally stored values from calculate() to update 
+     * uses the internally stored values from calculate() to update
      * the desired module state, scaling the speed
      * @param scaleCoeff the scale factor applied to the module speed
-    */
+     */
     void scaleAndSetDesiredState(float scaleCoeff);
 
     /**
@@ -143,7 +144,7 @@ private:
      * sets the module's desired rotation and wheel speed
      * @param metersPerSecond desired module speed in mps
      * @param radianOutput desired module rotation in radians
-    */
+     */
     void setDesiredState(float metersPerSecond, float radianOutput);
 
     inline float wrapAngle(float angle, float denomination)
@@ -162,11 +163,11 @@ private:
 
     const float rotationVectorX, rotationVectorY;
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM,
-        rotationSetpoint, newRawRotationSetpointRadians, newRotationSetpointRadians,
-        moveVectorX, moveVectorY;
+        rotationSetpoint, newRawRotationSetpointRadians, newRotationSetpointRadians, moveVectorX,
+        moveVectorY;
 
-    // handles unwrapping desired rotation and reversing module (in radians, will always be a multiple
-    // of PI)
+    // handles unwrapping desired rotation and reversing module (in radians, will always be a
+    // multiple of PI)
     float rotationOffset{0};
 
     modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;

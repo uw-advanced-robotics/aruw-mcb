@@ -20,8 +20,9 @@
 #define SWERVE_MODULE_CONFIG_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "modm/math/interpolation/linear.hpp"
+
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::chassis
 {

@@ -60,7 +60,6 @@ public:
         tap::Drivers* drivers,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
-
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
      */
