@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,8 +30,12 @@ namespace aruwsrc
 namespace chassis
 {
 /**
- *
- */
+ * Wrapper class for a mechanism that uses a five-bar linkage
+ * with links grounded on a robot chassis and a wheel motor
+ * attached to the end-effector to drive one side of a two-wheeled robot.
+ * 
+ * See @class BalancingChassisSubsystem for application of this mechanism.
+*/
 class BalancingLeg
 {
 public:
