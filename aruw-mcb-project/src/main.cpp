@@ -71,6 +71,9 @@ float chassisXin = 0.f;
 float chassisYin = 0.f;
 
 
+float chassiYawSUmedh = 0.0f;
+
+
 // static float chassisZO = 0.0;
 
 // static float chassisRollO = 0.0;
@@ -124,6 +127,9 @@ int main()
 
     while (1)
     {
+
+
+        chassiYawSUmedh = drivers->mpu6500.getYaw();
         modm::Vector3f& chassisWorldPosition = drivers->transformer.chassisWorldPosition;
         modm::Vector3f& chassisWorldOrientation = drivers->transformer.chassisWorldOrientation;
         modm::Vector3f& turretWorldOrientation = drivers->transformer.turretWorldOrientation;

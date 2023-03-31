@@ -249,15 +249,14 @@ void StandardTransformer::updateOdometry()
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
 {
-    // modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
+    modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
+    // getVelocityChassisRelative(chassisVelocity);
     // chassisVelocity = getVelocityChassisRelative(chassisVelocity);
-    getVelocityChassisRelative(chassisVelocity);
 
     rotateChassisVectorToWorld(chassisVelocity);
 
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
     rotateChassisVectorToWorld(chassisAcceleration);
-
 
     nextKFInput[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
     nextKFInput[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
@@ -291,12 +290,12 @@ void StandardTransformer::updateInternalOdomFromKF()
 }
 
 // void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
-modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& chassisVelocity)
+modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative()
 {
-
     if (!areMotorsOnline()) 
         return modm::Matrix<float, 3, 1>().zeroMatrix();
-    
+
+    modm::Matrix<float, 4, 1> wheelVelocity;
     wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
     wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
     wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
