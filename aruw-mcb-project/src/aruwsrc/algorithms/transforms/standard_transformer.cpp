@@ -141,7 +141,7 @@ void StandardTransformer::update()
 {
     updateOdometry();
     // testing odometry without rotation: don't update transforms
-    // updateTransforms();
+    updateTransforms();
 }
 
 void StandardTransformer::init(

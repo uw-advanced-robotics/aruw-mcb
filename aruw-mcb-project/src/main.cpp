@@ -51,39 +51,6 @@ static constexpr float MAHONY_KP = 0.1f;
 // for looking at our odometry values
 #include "modm/math/geometry/vector3.hpp"
 
-float chassisXS = 5.0;
-float chassisYS = 5.0;
-float chassisZS = 5.0;
-
-float chassisRollS = 0.0;
-float chassisPitchS = 0.0;
-float chassisYawS = 0.0;
-
-float turretRollS = 0.0;
-float turretPitchS = 0.0;
-float turretYawS = 0.0;
-
-
-float chassisXO = 0.0;
-float chassisYO = 0.0;
-
-float chassisXin = 0.f;
-float chassisYin = 0.f;
-
-
-float chassiYawSUmedh = 0.0f;
-
-
-// static float chassisZO = 0.0;
-
-// static float chassisRollO = 0.0;
-// static float chassisPitchO = 0.0;
-float chassisYawO = 0.0;
-
-// static float turretRollO = 0.0;
-// static float turretPitchO = 0.0;
-// static float turretYawO = 0.0;
-
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
