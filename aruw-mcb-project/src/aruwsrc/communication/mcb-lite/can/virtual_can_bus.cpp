@@ -44,7 +44,8 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
 {
     uint8_t canbusNum;
     drivers->uart.read(port, &canbusNum);
-    if (canbusNum != tap::can::CanBus::CAN_BUS1 || canbusNum != tap::can::CanBus::CAN_BUS2)
+    if (canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS1) &&
+        canbusNum != reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
     {
         return false;
     }
@@ -60,18 +61,18 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
         return passed;
     }
 
-    if (canbusNum == tap::can::CanBus::CAN_BUS1)
+    if (canbusNum == reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS1))
     {
         CAN1_queue.push(msg);
         msg = CAN1_queue.pop();
-        memcpy(msg, message, sizeof(modm::can::Message));
+        memcpy(&msg, message, sizeof(modm::can::Message));
     }
 
-    if (canbusNum == tap::can::CanBus::CAN_BUS2)
+    if (canbusNum == reinterpret_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
     {
         CAN2_queue.push(msg);
         msg = CAN2_queue.pop();
-        memcpy(msg, message, sizeof(modm::can::Message));
+        memcpy(&msg, message, sizeof(modm::can::Message));
     }
 
     return true;
