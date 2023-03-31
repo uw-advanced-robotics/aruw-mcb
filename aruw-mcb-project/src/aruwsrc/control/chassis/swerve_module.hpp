@@ -162,9 +162,10 @@ private:
 
     const float rotationVectorX, rotationVectorY;
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM,
-        rotationSetpoint;
+        rotationSetpoint, newRawRotationSetpointRadians, newRotationSetpointRadians,
+        moveVectorX, moveVectorY;
 
-    // handles wrapping desired rotation and reversing module (in radians, will always be a multiple
+    // handles unwrapping desired rotation and reversing module (in radians, will always be a multiple
     // of PI)
     float rotationOffset{0};
 

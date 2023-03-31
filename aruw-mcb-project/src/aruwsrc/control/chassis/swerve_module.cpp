@@ -75,8 +75,8 @@ bool SwerveModule::allMotorsOnline() const
 
 float SwerveModule::calculate(float x, float y, float r)
 {
-    float moveVectorX = x + r * rotationVectorX;
-    float moveVectorY = y + r * rotationVectorY;
+    moveVectorX = x + r * rotationVectorX;
+    moveVectorY = y + r * rotationVectorY;
 
     if (compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
@@ -86,8 +86,8 @@ float SwerveModule::calculate(float x, float y, float r)
     }
     else
     {
-        float newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
-        float newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
+        newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
+        newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
         // normal angle wrapping
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
