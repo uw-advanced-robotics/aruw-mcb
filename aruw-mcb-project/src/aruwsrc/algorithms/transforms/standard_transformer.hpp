@@ -84,16 +84,6 @@ public:
     // (roll, pitch, yaw)
     modm::Vector3f turretWorldOrientation;
 
-    enum class OdomInput
-    {
-        VEL_X = 0,
-        ACC_X,
-        VEL_Y,
-        ACC_Y,
-        VEL_Z,
-        ACC_Z,
-        NUM_INPUTS,
-    };
 
     float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
     float vel_x_in = 0.0f;
@@ -273,6 +263,19 @@ private:
     void fillKFInput(float nextKFInput[]);
 
     // Kalman Filter enums
+    enum class OdomInput
+    {
+        VEL_X = 0,
+        ACC_X,
+        VEL_Y,
+        ACC_Y,
+        VEL_Z,
+        ACC_Z,
+        YAW, // read from IMU?
+        YAW_VEL,
+        NUM_INPUTS,
+    };
+
     enum class OdomState
     {
         POS_X = 0,
@@ -284,6 +287,9 @@ private:
         POS_Z,
         VEL_Z,
         ACC_Z,
+        YAW,
+        YAW_VEL,
+        YAW_ACC,
         NUM_STATES,
     };
 
