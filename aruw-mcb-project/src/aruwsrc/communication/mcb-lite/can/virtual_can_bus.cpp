@@ -26,7 +26,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 template <tap::communication::serial::Uart::UartPort port>
 VirtualCanBus<port>::VirtualCanBus(tap::Drivers* drivers) : drivers(drivers)
 {

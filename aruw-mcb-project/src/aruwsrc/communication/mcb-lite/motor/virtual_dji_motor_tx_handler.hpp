@@ -32,7 +32,7 @@ class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
 public:
     VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus);
 
-	void encodeAndSendCanData();
+    void encodeAndSendCanData();
 
 private:
     CanBus* canbus;

@@ -38,6 +38,6 @@ private:
     CanBus* canbus;
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

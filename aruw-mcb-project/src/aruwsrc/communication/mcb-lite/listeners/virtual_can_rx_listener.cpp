@@ -26,7 +26,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 VirtualCANRxListener::VirtualCANRxListener(
     tap::Drivers* drivers,
     uint32_t id,
