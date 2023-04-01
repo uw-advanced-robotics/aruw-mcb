@@ -31,7 +31,7 @@
 // for odometry
 #include "tap/algorithms/kalman_filter.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 // #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 
@@ -48,7 +48,7 @@ public:
      * A transform provider that provides transforms for the standard
      * robot.
      */
-    StandardTransformer();
+    StandardTransformer(const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu);
 
     /**
      * Update each transform with most recent encoder and IMU odometry data. This method
@@ -62,7 +62,6 @@ public:
      *
      */
     void init(  const chassis::MecanumChassisSubsystem* chassisSubsystem,
-                const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
                 const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem);
 
     // x,y,z location of chassis in world frame
@@ -168,7 +167,7 @@ private:
     // References to all devices necessary for tracking odometry
     const chassis::MecanumChassisSubsystem* chassis  = nullptr;
     const control::turret::TurretSubsystem* turret = nullptr;
-    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
+    const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
 
     /**
      * placeholder value used when constructing transforms before odometry data

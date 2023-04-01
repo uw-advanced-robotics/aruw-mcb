@@ -70,10 +70,10 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(leftFrontMotor),
-      leftBackMotor(leftBackMotor),
-      rightFrontMotor(rightFrontMotor),
-      rightBackMotor(rightBackMotor)
+      leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
+      leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
+      rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
+      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;

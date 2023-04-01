@@ -25,8 +25,9 @@
 
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -35,9 +36,8 @@ namespace aruwsrc::algorithms::transforms
 {
 
 StandardTransformer::StandardTransformer(
-    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu)
-    :  // TODO: store transforms in an array so we don't have to initialize them here (very ugly !!!
-       // !! ! !) Transforms that are dynamically updated
+    const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
+    ) :  
       worldToChassisIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
@@ -105,7 +105,6 @@ StandardTransformer::StandardTransformer(
           0.,
           0.),
       chassisImu(chassisImu),
-      turretMCB(turretMCB),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
     // reference https://ecam-eurobot.github.io/Tutorials/mechanical/mecanum.html
@@ -139,19 +138,19 @@ StandardTransformer::StandardTransformer(
 void StandardTransformer::update()
 {
     updateOdometry();
-    // testing odometry without rotation: don't update transforms
-    updateTransforms();
+    // updateTransforms();
 }
 
 void StandardTransformer::init(
-    const tap::motor::DjiMotor* rightFrontMotor,
-    const tap::motor::DjiMotor* leftFrontMotor,
-    const tap::motor::DjiMotor* rightBackMotor,
-    const tap::motor::DjiMotor* leftBackMotor)
+    const chassis::MecanumChassisSubsystem* chassisSubsystem,
+    const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem
+    )
 {
     float initialKFVals[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
     this->kf.init(initialKFVals);
 
+    this->chassis = chassisSubsystem;
+    this->turret = turretSubsystem;
 }
 
 const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform()
