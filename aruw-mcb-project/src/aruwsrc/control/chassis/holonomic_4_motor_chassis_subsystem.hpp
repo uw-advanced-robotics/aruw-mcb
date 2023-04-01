@@ -44,10 +44,10 @@ class Holonomic4MotorChassisSubsystem : public HolonomicChassisSubsystem
 public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
-        tap::motor::DjiMotor& leftFrontMotorId,
-        tap::motor::DjiMotor& leftBackMotorId,
-        tap::motor::DjiMotor& rightFrontMotorId,
-        tap::motor::DjiMotor& rightBackMotorId,
+        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
+        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
+        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     inline bool allMotorsOnline() const override
@@ -101,10 +101,10 @@ public:
 private:
 #else
     // motors
-    tap::motor::DjiMotor& leftFrontMotor;
-    tap::motor::DjiMotor& leftBackMotor;
-    tap::motor::DjiMotor& rightFrontMotor;
-    tap::motor::DjiMotor& rightBackMotor;
+    tap::motor::DjiMotor leftFrontMotor;
+    tap::motor::DjiMotor leftBackMotor;
+    tap::motor::DjiMotor rightFrontMotor;
+    tap::motor::DjiMotor rightBackMotor;
 #endif
 };
 
