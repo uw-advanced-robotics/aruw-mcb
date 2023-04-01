@@ -256,7 +256,6 @@ void StandardTransformer::updateInternalOdomFromKF()
     turretWorldOrientation.setZ(turretMCB->getYaw());
 }
 
-
 modm::Matrix<float, 3, 1> StandardTransformer::getAccelerationChassisRelative()
 {
     // for this code to be running the imu has to be on (since the mcb is on)
