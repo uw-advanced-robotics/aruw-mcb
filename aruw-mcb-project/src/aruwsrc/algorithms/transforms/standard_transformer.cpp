@@ -27,7 +27,7 @@
 
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -36,7 +36,7 @@ namespace aruwsrc::algorithms::transforms
 {
 
 StandardTransformer::StandardTransformer(
-    const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
+    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
     ) :  
       worldToChassisIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
@@ -243,7 +243,7 @@ void StandardTransformer::updateOdometry()
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
 {
-    modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
+    modm::Matrix<float, 3, 1> chassisVelocity = chassis->getActualVelocityChassisRelative();
     rotateChassisVectorToWorld(chassisVelocity);
 
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
@@ -261,6 +261,7 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
 void StandardTransformer::updateInternalOdomFromKF()
 {
     const auto& state = kf.getStateVectorAsMatrix();
+    const aruwsrc::can::TurretMCBCanComm* turretMCB = turret->getTurretMCB();
 
     // update the store odometry for easy access internally
     chassisWorldPosition.setX(state[int(OdomState::POS_X)]);
@@ -273,32 +274,10 @@ void StandardTransformer::updateInternalOdomFromKF()
 
     // we cannot query turret roll (for now)
     turretWorldOrientation.setX(0);
-    turretWorldOrientation.setY(turretMCB.getPitch());
-    turretWorldOrientation.setZ(turretMCB.getYaw());
+    turretWorldOrientation.setY(turretMCB->getPitch());
+    turretWorldOrientation.setZ(turretMCB->getYaw());
 }
 
-// void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
-modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative()
-{
-    if (!areMotorsOnline()) 
-        return modm::Matrix<float, 3, 1>().zeroMatrix();
-
-    modm::Matrix<float, 4, 1> wheelVelocity;
-    wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
-    wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
-    wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
-    wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
-    return (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
-}
-
-bool StandardTransformer::areMotorsOnline()
-{
-    // motors aren't registered
-    if (leftBackMotor == nullptr) return false;
-
-    return leftBackMotor->isMotorOnline() && rightBackMotor->isMotorOnline() &&
-           leftFrontMotor->isMotorOnline() && rightFrontMotor->isMotorOnline();
-}
 
 modm::Matrix<float, 3, 1> StandardTransformer::getAccelerationChassisRelative()
 {

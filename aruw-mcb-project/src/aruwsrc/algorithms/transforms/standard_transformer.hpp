@@ -48,7 +48,7 @@ public:
      * A transform provider that provides transforms for the standard
      * robot.
      */
-    StandardTransformer(const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu);
+    StandardTransformer(tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu);
 
     /**
      * Update each transform with most recent encoder and IMU odometry data. This method
@@ -167,7 +167,7 @@ private:
     // References to all devices necessary for tracking odometry
     const chassis::MecanumChassisSubsystem* chassis  = nullptr;
     const control::turret::TurretSubsystem* turret = nullptr;
-    const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
+    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
 
     /**
      * placeholder value used when constructing transforms before odometry data
@@ -209,23 +209,10 @@ private:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
     /**
-     * Compute the velocity of the chassis relative to itself
-     * Returns a 3x1 matrix <vx, vy, vz>
-     * If the motors are not online, the returned matrix
-     * has all entries set to zero
-     */
-    modm::Matrix<float, 3, 1> getVelocityChassisRelative();
-
-    /**
      * Compute the acceleration of the chassis relative to itself
      * Returns a 3x1 matrix <ax, ay, az>
      */
     modm::Matrix<float, 3, 1> getAccelerationChassisRelative();
-
-    /**
-     * Returns true if motors have been registered and are online
-     */
-    bool areMotorsOnline();
 
     /**
      * Fills nextKFInput with measurements taken from the chassis about the current
@@ -270,59 +257,59 @@ private:
     static constexpr float DT = 0.002f;
 
     // clang-format off
-        static constexpr float KF_A[STATES_SQUARED] = {
-          1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0, 0,
-          0, 1 , DT           , 0, 0 , 0            , 0, 0, 0,
-          0, 0 , 1            , 0, 0 , 0            , 0, 0, 0,
-          0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0, 0,
-          0, 0 , 0            , 0, 1 , DT           , 0, 0, 0,
-          0, 0 , 0            , 0, 0 , 1            , 0, 0, 0,
-          0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-          0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT,
-          0, 0 , 0            , 0, 0 , 0            , 0, 0, 1,
-        };
+    static constexpr float KF_A[STATES_SQUARED] = {
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0, 0,
+        0, 1 , DT           , 0, 0 , 0            , 0, 0, 0,
+        0, 0 , 1            , 0, 0 , 0            , 0, 0, 0,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0, 0,
+        0, 0 , 0            , 0, 1 , DT           , 0, 0, 0,
+        0, 0 , 0            , 0, 0 , 1            , 0, 0, 0,
+        0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+        0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT,
+        0, 0 , 0            , 0, 0 , 0            , 0, 0, 1,
+    };
 
-        static constexpr float KF_C[INPUTS_MULT_STATES] = {
-          0, 1, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 1, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 1, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 1, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 1, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 1,
-        };
+    static constexpr float KF_C[INPUTS_MULT_STATES] = {
+        0, 1, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 1,
+    };
 
-        static constexpr float KF_Q[STATES_SQUARED] = {
-          1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-          0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-          0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
-          0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
-          0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
-          0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
-          0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
-          0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
-          0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
-        };
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
+    };
 
-        static constexpr float KF_R[INPUTS_SQUARED] = {
-          1.0, 0  , 0  , 0  , 0  , 0  ,
-          0  , 1.2, 0  , 0  , 0  , 0  ,
-          0  , 0  , 1.0, 0  , 0  , 0  ,
-          0  , 0  , 0  , 1.2, 0  , 0  ,
-          0  , 0  , 0  , 0  , 1.0, 0  ,
-          0  , 0  , 0  , 0  , 0  , 1.2,
-        };
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        1.0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1.0, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1.2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1.2,
+    };
 
-        static constexpr float KF_P0[STATES_SQUARED] = {
-          1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-          0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-          0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
-          0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
-          0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
-          0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
-          0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
-          0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
-          0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
-        };
+    static constexpr float KF_P0[STATES_SQUARED] = {
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+    };
     // clang-format on
 };
 }  // namespace aruwsrc::algorithms::transforms
