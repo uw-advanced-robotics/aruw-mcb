@@ -21,7 +21,6 @@
 #define STANDARD_TRANSFORMER_HPP_
 
 // libraries needed by transforms
-#include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/transforms/transformer.hpp"
 
@@ -30,14 +29,11 @@
 #include "modm/math/matrix.hpp"
 
 // for odometry
-#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
-#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
-#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/algorithms/kalman_filter.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+// #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -52,9 +48,7 @@ public:
      * A transform provider that provides transforms for the standard
      * robot.
      */
-    StandardTransformer(
-        tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
-        aruwsrc::can::TurretMCBCanComm& turretMCB);
+    StandardTransformer();
 
     /**
      * Update each transform with most recent encoder and IMU odometry data. This method
@@ -67,11 +61,8 @@ public:
      * must be called before the standard transformer can do anything.
      *
      */
-    void init(
-        const tap::motor::DjiMotor* rightFrontMotor,
-        const tap::motor::DjiMotor* leftFrontMotor,
-        const tap::motor::DjiMotor* rightBackMotor,
-        const tap::motor::DjiMotor* leftBackMotor);
+    void init(  const chassis::MecanumChassisSubsystem* chassisSubsystem,
+                const control::turret::StandardTurretSubsystem* turretSubsystem);
 
     // x,y,z location of chassis in world frame
     modm::Vector3f chassisWorldPosition;
@@ -94,13 +85,6 @@ public:
         ACC_Z,
         NUM_INPUTS,
     };
-
-    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
-    float vel_x_in = 0.0f;
-
-    // modm::Matrix<float, 3, 1> chassisVelocity; // from debug, remove
-    // modm::Matrix<float, 4, 1> wheelVelocity;
-    modm::Matrix<float, 3, 1> chassisVelocityInGetVelFN; // from debug, remove
 
     /**
      * Get World to Chassis transform
@@ -181,15 +165,8 @@ private:
     Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
     // References to all devices necessary for tracking odometry
-    // Motors are initially empty pointers
-    const tap::motor::DjiMotor* leftBackMotor = nullptr;
-    const tap::motor::DjiMotor* rightBackMotor = nullptr;
-    const tap::motor::DjiMotor* leftFrontMotor = nullptr;
-    const tap::motor::DjiMotor* rightFrontMotor = nullptr;
-
-    // IMUs for calculating orientation
-    tap::communication::sensors::imu::ImuInterface& chassisImu;
-    aruwsrc::can::TurretMCBCanComm& turretMCB;
+    const chassis::MecanumChassisSubsystem* chassis  = nullptr;
+    const control::turret::TurretSubsystem* turret = nullptr;
 
     /**
      * placeholder value used when constructing transforms before odometry data
@@ -198,9 +175,6 @@ private:
      * uninitialized state
      */
     const float TRANSFORM_PLACEHOLDER_VAL = 0.0f;
-
-    // static values used in transforms (in cm? mm?)
-    // I think these are in meters now
     const float TURRETIMU_TO_CAMERA_Y_OFFSET = 0.09404;
 
     const float TURRETIMU_TO_GUN_Y_OFFSET = 0.01194;
@@ -240,7 +214,6 @@ private:
      * has all entries set to zero
      */
     modm::Matrix<float, 3, 1> getVelocityChassisRelative();
-    // void getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV);
 
     /**
      * Compute the acceleration of the chassis relative to itself
@@ -252,16 +225,6 @@ private:
      * Returns true if motors have been registered and are online
      */
     bool areMotorsOnline();
-
-    /**
-     * Converts a vector of wheel rotations per minute to appropriately-geared
-     * radians per second
-     */
-    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
-    {
-        static constexpr float ratio = 2.0f * M_PI * chassis::CHASSIS_GEARBOX_RATIO / 60.0f;
-        return mat * ratio;
-    }
 
     /**
      * Fills nextKFInput with measurements taken from the chassis about the current
@@ -303,9 +266,6 @@ private:
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-    /// Assumed time difference between calls to `update`, in seconds
-    // TODO: is there a better way of doing this? one that lets us dynamically
-    // upate DT? or is 0.002 good enough?
     static constexpr float DT = 0.002f;
 
     // clang-format off

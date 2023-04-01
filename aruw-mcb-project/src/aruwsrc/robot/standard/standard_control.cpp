@@ -138,10 +138,10 @@ StandardTurretSubsystem turret(
 
 
 // ============ Motors for chassis subsystem + chassis ==================
-tap::motor::DjiMotor leftFrontMotor(drivers(), aruwsrc::chassis::LEFT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left front drive motor");
-tap::motor::DjiMotor leftBackMotor(drivers(), aruwsrc::chassis::LEFT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left back drive motor");
-tap::motor::DjiMotor rightFrontMotor(drivers(), aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor");
-tap::motor::DjiMotor rightBackMotor(drivers(), aruwsrc::chassis::RIGHT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right back drive motor");
+// tap::motor::DjiMotor leftFrontMotor(drivers(), aruwsrc::chassis::LEFT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left front drive motor");
+// tap::motor::DjiMotor leftBackMotor(drivers(), aruwsrc::chassis::LEFT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "left back drive motor");
+// tap::motor::DjiMotor rightFrontMotor(drivers(), aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right front drive motor");
+// tap::motor::DjiMotor rightBackMotor(drivers(), aruwsrc::chassis::RIGHT_BACK_MOTOR_ID, aruwsrc::chassis::CAN_BUS_MOTORS, false, "right back drive motor");
 
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
 // ============= end  modifications ===========================
