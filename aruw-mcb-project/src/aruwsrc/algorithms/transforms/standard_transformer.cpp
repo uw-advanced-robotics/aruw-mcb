@@ -120,7 +120,7 @@ void StandardTransformer::init(
     const chassis::MecanumChassisSubsystem* chassisSubsystem,
     const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem)
 {
-    float initialKFVals[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+    float initialKFVals[12] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
     this->kf.init(initialKFVals);
 
     this->chassis = chassisSubsystem;

@@ -51,7 +51,13 @@ Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B
         std::cos(B) * std::cos(A)};
     CMSISMat<3, 3> rot = CMSISMat<3, 3>(data);
     CMSISMat<3, 1> pos = CMSISMat<3, 1>({x, y, z});
-    return Transform(rot, pos);
+    *this = Transform(rot, pos);
+};
+
+template <typename SOURCE, typename TARGET>
+Transform<SOURCE, TARGET>::Transform()
+{
+    *this = Transform(0, 0, 0, 0, 0 ,0);
 };
 
 template <typename SRC, typename TARG, typename NEWTARGET>
