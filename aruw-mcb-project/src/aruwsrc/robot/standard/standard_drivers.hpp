@@ -58,9 +58,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          transformer(this->mpu6500, turretMCBCanCommBus1),
-          removeThisOdom(nullptr)
-          
+          transformer(this->mpu6500)
     {
     }
 
@@ -80,9 +78,6 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     algorithms::transforms::StandardTransformer transformer;
-    algorithms::odometry::OttoKFOdometry2DSubsystem* removeThisOdom; // a driver should NOT have a subsystem
-
-
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

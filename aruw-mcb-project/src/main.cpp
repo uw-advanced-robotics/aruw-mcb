@@ -95,40 +95,6 @@ int main()
     while (1)
     {
 
-
-        chassiYawSUmedh = drivers->mpu6500.getYaw();
-        modm::Vector3f& chassisWorldPosition = drivers->transformer.chassisWorldPosition;
-        modm::Vector3f& chassisWorldOrientation = drivers->transformer.chassisWorldOrientation;
-        modm::Vector3f& turretWorldOrientation = drivers->transformer.turretWorldOrientation;
-
-        chassisXS = chassisWorldPosition.getX();
-        chassisYS = chassisWorldPosition.getY();
-        chassisZS = chassisWorldPosition.getZ();
-
-        chassisXin = drivers->transformer.vel_x_in;
-        chassisXin = drivers->transformer.nextKFInput[2];
-
-        // chassisXS = 5.0f;
-
-        chassisRollS = chassisWorldOrientation.getX();
-        chassisPitchS = chassisWorldOrientation.getY();
-        chassisYawS = chassisWorldOrientation.getZ();
-
-        turretRollS = turretWorldOrientation.getX();
-        turretPitchS = turretWorldOrientation.getY();
-        turretYawS = turretWorldOrientation.getZ();
-
-        // TODO: get odometry values
-        // in odometry subsystem we need to get public references to 
-        // stored odoemstry stuff
-        
-        modm::Location2D<float> odomLoc = drivers->removeThisOdom->getCurrentLocation2D();
-        chassisXO = odomLoc.getX();
-        chassisYO = odomLoc.getY();
- 
- 
-        chassisYawO = drivers->removeThisOdom->getYaw();
-
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 

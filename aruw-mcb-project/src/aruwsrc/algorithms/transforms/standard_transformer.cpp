@@ -25,8 +25,9 @@
 
 #include "aruwsrc/algorithms/transforms/standard_frames.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -35,10 +36,8 @@ namespace aruwsrc::algorithms::transforms
 {
 
 StandardTransformer::StandardTransformer(
-    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
-    aruwsrc::can::TurretMCBCanComm& turretMCB)
-    :  // TODO: store transforms in an array so we don't have to initialize them here (very ugly !!!
-       // !! ! !) Transforms that are dynamically updated
+    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
+    ) :  
       worldToChassisIMUTransform(
           TRANSFORM_PLACEHOLDER_VAL,
           TRANSFORM_PLACEHOLDER_VAL,
@@ -106,57 +105,26 @@ StandardTransformer::StandardTransformer(
           0.,
           0.),
       chassisImu(chassisImu),
-      turretMCB(turretMCB),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
-    // reference https://ecam-eurobot.github.io/Tutorials/mechanical/mecanum.html
-    // reference disagrees with the forward kinematics.. (in terms of signedness)
-    // lol chat gpt also disagrees
-    // Forward kinematic matrix for mecanum drive
-
-    // after some big brain simulation, this is the matrix that
-    // is produced from the referenced matrix IF all right motors
-    // have their velocity multiplied by -1
-    // it makes sense that the reading would need to be multiplied
-    // by -1 *somewhere*, but why here? couldn't that
-    // have been handled in isInverted upon motor instantiation?
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-
-    // angular velocity (double check this part)
-    wheelVelToChassisVelMat[R][LF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat *= (chassis::WHEEL_RADIUS / 4);
+    
 }
 
 void StandardTransformer::update()
 {
     updateOdometry();
-    // testing odometry without rotation: don't update transforms
     updateTransforms();
 }
 
 void StandardTransformer::init(
-    const tap::motor::DjiMotor* rightFrontMotor,
-    const tap::motor::DjiMotor* leftFrontMotor,
-    const tap::motor::DjiMotor* rightBackMotor,
-    const tap::motor::DjiMotor* leftBackMotor)
+    const chassis::MecanumChassisSubsystem* chassisSubsystem,
+    const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem)
 {
     float initialKFVals[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
     this->kf.init(initialKFVals);
 
-    this->rightFrontMotor = rightFrontMotor;
-    this->leftFrontMotor = leftFrontMotor;
-    this->rightBackMotor = rightBackMotor;
-    this->leftBackMotor = leftBackMotor;
+    this->chassis = chassisSubsystem;
+    this->turret = turretSubsystem;
 }
 
 const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform()
@@ -238,21 +206,21 @@ void StandardTransformer::updateTransforms()
 
 void StandardTransformer::updateOdometry()
 {
-    // nasty to return an array in c++, so do this for now
-    // float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
+    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
     fillKFInput(nextKFInput);
-
     kf.performUpdate(nextKFInput);
-
     updateInternalOdomFromKF();
 }
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
 {
-    modm::Matrix<float, 3, 1> chassisVelocity = getVelocityChassisRelative();
-    // getVelocityChassisRelative(chassisVelocity);
-    // chassisVelocity = getVelocityChassisRelative(chassisVelocity);
-
+    // retrieves <vz, vy, yaw_velocity>
+    modm::Matrix<float, 3, 1> chassisPlanarVelocity = chassis->getActualVelocityChassisRelative();
+    float yawAngularVelocity = chassisPlanarVelocity[2][0];
+    
+    // relative to chassis, so velocity must be 0
+    float xyzVelocityData[3] = {chassisPlanarVelocity[0][0], chassisPlanarVelocity[1][0], 0.f};
+    modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>(xyzVelocityData);
     rotateChassisVectorToWorld(chassisVelocity);
 
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
@@ -262,17 +230,16 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     nextKFInput[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
     nextKFInput[int(OdomInput::VEL_Z)] = chassisVelocity[2][0];
 
-    // TODO: for testing only, remove
-    vel_x_in = nextKFInput[int(OdomInput::VEL_X)];
-
     nextKFInput[int(OdomInput::ACC_X)] = chassisAcceleration[0][0];
     nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
     nextKFInput[int(OdomInput::ACC_Z)] = chassisAcceleration[2][0];
+    // TODO: filter angular velocity
 }
 
 void StandardTransformer::updateInternalOdomFromKF()
 {
     const auto& state = kf.getStateVectorAsMatrix();
+    const aruwsrc::can::TurretMCBCanComm* turretMCB = turret->getTurretMCB();
 
     // update the store odometry for easy access internally
     chassisWorldPosition.setX(state[int(OdomState::POS_X)]);
@@ -285,31 +252,8 @@ void StandardTransformer::updateInternalOdomFromKF()
 
     // we cannot query turret roll (for now)
     turretWorldOrientation.setX(0);
-    turretWorldOrientation.setY(turretMCB.getPitch());
-    turretWorldOrientation.setZ(turretMCB.getYaw());
-}
-
-// void StandardTransformer::getVelocityChassisRelative(modm::Matrix<float, 3, 1>& cV)
-modm::Matrix<float, 3, 1> StandardTransformer::getVelocityChassisRelative()
-{
-    if (!areMotorsOnline()) 
-        return modm::Matrix<float, 3, 1>().zeroMatrix();
-
-    modm::Matrix<float, 4, 1> wheelVelocity;
-    wheelVelocity[LF][0] = leftFrontMotor->getShaftRPM();
-    wheelVelocity[RF][0] = rightFrontMotor->getShaftRPM();
-    wheelVelocity[LB][0] = leftBackMotor->getShaftRPM();
-    wheelVelocity[RB][0] = rightBackMotor->getShaftRPM();
-    return (wheelVelToChassisVelMat * convertRawRPM(wheelVelocity));
-}
-
-bool StandardTransformer::areMotorsOnline()
-{
-    // motors aren't registered
-    if (leftBackMotor == nullptr) return false;
-
-    return leftBackMotor->isMotorOnline() && rightBackMotor->isMotorOnline() &&
-           leftFrontMotor->isMotorOnline() && rightFrontMotor->isMotorOnline();
+    turretWorldOrientation.setY(turretMCB->getPitch());
+    turretWorldOrientation.setZ(turretMCB->getYaw());
 }
 
 modm::Matrix<float, 3, 1> StandardTransformer::getAccelerationChassisRelative()
