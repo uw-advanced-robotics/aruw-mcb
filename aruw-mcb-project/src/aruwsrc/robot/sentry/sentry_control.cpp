@@ -237,7 +237,7 @@ public:
     RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
-    SentryTurretSubsystem turretSubsystem;
+    SentryTurretMinorSubsystem turretSubsystem;
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
