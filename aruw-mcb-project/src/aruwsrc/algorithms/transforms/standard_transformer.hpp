@@ -143,6 +143,12 @@ private:
     Transform<ChassisFrame, TurretIMUFrame> chassisToTurretIMUTransform;
     Transform<ChassisIMUFrame, ChassisFrame> chassisIMUToChassisTransform;
 
+
+    /**
+     * Initializes all transforms with their default values
+    */
+    void initializeTransforms();
+
     // References to all devices necessary for tracking odometry
     const chassis::MecanumChassisSubsystem* chassis  = nullptr;
     const control::turret::TurretSubsystem* turret = nullptr;

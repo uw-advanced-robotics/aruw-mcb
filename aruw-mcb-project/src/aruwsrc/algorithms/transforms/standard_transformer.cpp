@@ -38,72 +38,6 @@ namespace aruwsrc::algorithms::transforms
 StandardTransformer::StandardTransformer(
     tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
     ) :  
-      worldToChassisIMUTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-      TurretIMUToCameraTransform(
-          0., TURRETIMU_TO_CAMERA_Y_OFFSET, 0., 0., 0., 0.),
-      turretIMUToGunTransform(
-          0.,
-          TURRETIMU_TO_GUN_Y_OFFSET,
-          TURRETIMU_TO_GUN_Z_OFFSET,
-          0.,
-          0.,
-          0.),
-
-      // Transforms that are compositions
-      worldToTurretIMUTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-      worldToChassisTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-
-      // Transforms that are inverses
-      chassisToWorldTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-      turretIMUToChassisTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-      cameraToTurretIMUTransform(
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL,
-          TRANSFORM_PLACEHOLDER_VAL),
-
-      // Constant transforms
-      chassisToTurretIMUTransform(
-        0., 0., CHASSIS_TO_TURRET_Z_OFFSET, 0., 0., 0.),
-      chassisIMUToChassisTransform(
-          CHASSISIMU_TO_CHASSIS_X_OFFSET,
-          0.,
-          CHASSISIMU_TO_CHASSIS_Z_OFFSET,
-          0.,
-          0.,
-          0.),
       chassisImu(chassisImu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
@@ -120,11 +54,13 @@ void StandardTransformer::init(
     const chassis::MecanumChassisSubsystem* chassisSubsystem,
     const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem)
 {
-    float initialKFVals[12] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
-    this->kf.init(initialKFVals);
-
     this->chassis = chassisSubsystem;
     this->turret = turretSubsystem;
+
+    float initialKFVals[int(OdomState::NUM_STATES)] = {};
+    this->kf.init(initialKFVals);
+
+    initializeTransforms();
 }
 
 const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform()
@@ -254,6 +190,24 @@ void StandardTransformer::updateInternalOdomFromKF()
     turretWorldOrientation.setX(0);
     turretWorldOrientation.setY(turretMCB->getPitch());
     turretWorldOrientation.setZ(turretMCB->getYaw());
+}
+
+void StandardTransformer::initializeTransforms() {
+    float turretIMUToCameraTransformPos[3] = {0.f, TURRETIMU_TO_CAMERA_Y_OFFSET, 0.f};
+    CMSISMat<3,1> cmsisTurretIMUToCameraDefaultPos(turretIMUToCameraTransformPos);
+    TurretIMUToCameraTransform.updatePosition(cmsisTurretIMUToCameraDefaultPos);
+
+    float turretIMUToGunDefaultPos[3] = {0.f, TURRETIMU_TO_GUN_Y_OFFSET, TURRETIMU_TO_GUN_Z_OFFSET};
+    CMSISMat<3,1> cmsisTurretIMUToGunDefaultPos(turretIMUToGunDefaultPos);
+    turretIMUToGunTransform.updatePosition(cmsisTurretIMUToGunDefaultPos);
+    
+    float chassisToTurretIMUTransformPos[3] = {0., 0., CHASSIS_TO_TURRET_Z_OFFSET};
+    CMSISMat<3,1> cmsisChassisToTurretIMUTransformPos(chassisToTurretIMUTransformPos);
+    chassisToTurretIMUTransform.updatePosition(cmsisChassisToTurretIMUTransformPos);
+
+    float chassisIMUToChassisTransformPos[3] = {CHASSISIMU_TO_CHASSIS_X_OFFSET, 0., CHASSISIMU_TO_CHASSIS_Z_OFFSET};
+    CMSISMat<3,1> cmsisChassisIMUToChassisTransformPos(chassisIMUToChassisTransformPos);
+    chassisIMUToChassisTransform.updatePosition(cmsisChassisIMUToChassisTransformPos);
 }
 
 modm::Matrix<float, 3, 1> StandardTransformer::getAccelerationChassisRelative()
