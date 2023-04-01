@@ -48,7 +48,7 @@ public:
 private:
     tap::Drivers* drivers;
 
-    // Blame eli if this does bad hardware kilobytes things, actually just blame him in general
+    // Blame eli if this does bad hardware kilobytes things
     modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;
     modm::BoundedQueue<modm::can::Message, 254> CAN2_queue;
 
