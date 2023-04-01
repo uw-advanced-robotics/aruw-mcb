@@ -39,6 +39,6 @@ public:
     virtual bool sendMessage(tap::can::CanBus canbus, const modm::can::Message &message);
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

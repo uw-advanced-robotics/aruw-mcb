@@ -32,15 +32,13 @@ namespace aruwsrc::virtualMCB
 template <tap::communication::serial::Uart::UartPort port>
 class VirtualMCBHandler
 {
-
     /**
      * Task list:
      * Send motor data (Output desired value) to lite board -> DJI motor TX handler
      * Get Motor data (Encoder + rpm + torque + temp) from lite board -> CanRxHandler
-     * 
+     *
      * Get imu data from lite board -> CanRxHandler
-    */
-
+     */
 
     /**
      * This boy needs to handle:
@@ -63,8 +61,6 @@ private:
     VirtualCanBus<port> canbus;
     VirtualDJIMotorTxHandler motorTxHandler;
     VirtualCANRxHandler canRxHandler;
-
-    
 };
 
 }  // namespace aruwsrc::virtualMCB

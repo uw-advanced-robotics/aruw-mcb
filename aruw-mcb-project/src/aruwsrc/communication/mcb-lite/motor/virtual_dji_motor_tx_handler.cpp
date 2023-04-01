@@ -17,17 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "virtual_dji_motor_tx_handler.hpp"
+
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "virtual_dji_motor_tx_handler.hpp"
-
 namespace aruwsrc::virtualMCB
 {
-
 VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus)
     : DjiMotorTxHandler(drivers),
       canbus(canbus)

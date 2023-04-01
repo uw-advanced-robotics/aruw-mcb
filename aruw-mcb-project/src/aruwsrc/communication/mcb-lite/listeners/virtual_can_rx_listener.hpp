@@ -23,15 +23,20 @@
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
 
-#include "listener_constants.hpp"
 #include "aruwsrc/communication/mcb-lite/can/virtual_can_rx_handler.hpp"
+
+#include "listener_constants.hpp"
 
 namespace aruwsrc::virtualMCB
 {
 class VirtualCANRxListener : public tap::can::CanRxListener
 {
 public:
-    VirtualCANRxListener(tap::Drivers* drivers, uint32_t id, tap::can::CanBus canbus, VirtualCANRxHandler* canHandler);
+    VirtualCANRxListener(
+        tap::Drivers* drivers,
+        uint32_t id,
+        tap::can::CanBus canbus,
+        VirtualCANRxHandler* canHandler);
 
     void attachSelfToRxHandler();
 
@@ -41,6 +46,6 @@ private:
     VirtualCANRxHandler* canHandler;
 };
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::virtualMCB
 
 #endif

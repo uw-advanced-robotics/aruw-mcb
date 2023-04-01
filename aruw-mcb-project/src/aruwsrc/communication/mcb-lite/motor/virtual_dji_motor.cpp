@@ -26,7 +26,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
