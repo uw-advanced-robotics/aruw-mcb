@@ -28,6 +28,7 @@
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
@@ -152,6 +153,7 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
 {
     // retrieves <vz, vy, yaw_velocity>
     modm::Matrix<float, 3, 1> chassisPlanarVelocity = chassis->getActualVelocityChassisRelative();
+    // radians per second
     float yawAngularVelocity = chassisPlanarVelocity[2][0];
     
     // relative to chassis, so velocity must be 0
@@ -169,7 +171,11 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     nextKFInput[int(OdomInput::ACC_X)] = chassisAcceleration[0][0];
     nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
     nextKFInput[int(OdomInput::ACC_Z)] = chassisAcceleration[2][0];
-    // TODO: filter angular velocity
+
+    nextKFInput[int(OdomInput::POS_YAW)] = modm::toRadian(chassisImu.getYaw());
+    // if chassis yaw was less than 320 degrees and chassis yaw is currently 0-30 degrees, then rotationCounter++
+    // Unwrapped yaw calculation is rotationCounter * 360 + chassisImu.getYaw();
+    nextKFInput[int(OdomInput::VEL_YAW)] = yawAngularVelocity;
 }
 
 void StandardTransformer::updateInternalOdomFromKF()
@@ -182,7 +188,8 @@ void StandardTransformer::updateInternalOdomFromKF()
     chassisWorldPosition.setY(state[int(OdomState::POS_Y)]);
     chassisWorldPosition.setZ(state[int(OdomState::POS_Z)]);
 
-    chassisWorldOrientation.setX(chassisImu.getRoll());
+    // chassisWorldOrientation.setX(chassisImu.getRoll());
+    chassisWorldOrientation.setX(state[int(OdomState::POS_YAW)]);
     chassisWorldOrientation.setY(chassisImu.getPitch());
     chassisWorldOrientation.setZ(chassisImu.getYaw());
 
