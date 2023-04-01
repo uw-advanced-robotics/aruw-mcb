@@ -107,44 +107,18 @@ StandardTransformer::StandardTransformer(
       chassisImu(chassisImu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
-    // reference https://ecam-eurobot.github.io/Tutorials/mechanical/mecanum.html
-    // reference disagrees with the forward kinematics.. (in terms of signedness)
-    // lol chat gpt also disagrees
-    // Forward kinematic matrix for mecanum drive
-
-    // after some big brain simulation, this is the matrix that
-    // is produced from the referenced matrix IF all right motors
-    // have their velocity multiplied by -1
-    // it makes sense that the reading would need to be multiplied
-    // by -1 *somewhere*, but why here? couldn't that
-    // have been handled in isInverted upon motor instantiation?
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-
-    // angular velocity (double check this part)
-    wheelVelToChassisVelMat[R][LF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / chassis::WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat *= (chassis::WHEEL_RADIUS / 4);
+    
 }
 
 void StandardTransformer::update()
 {
     updateOdometry();
-    // updateTransforms();
+    updateTransforms();
 }
 
 void StandardTransformer::init(
     const chassis::MecanumChassisSubsystem* chassisSubsystem,
-    const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem
-    )
+    const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem)
 {
     float initialKFVals[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
     this->kf.init(initialKFVals);
@@ -232,18 +206,21 @@ void StandardTransformer::updateTransforms()
 
 void StandardTransformer::updateOdometry()
 {
-    // nasty to return an array in c++, so do this for now
     float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
     fillKFInput(nextKFInput);
-
     kf.performUpdate(nextKFInput);
-
     updateInternalOdomFromKF();
 }
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
 {
-    modm::Matrix<float, 3, 1> chassisVelocity = chassis->getActualVelocityChassisRelative();
+    // retrieves <vz, vy, yaw_velocity>
+    modm::Matrix<float, 3, 1> chassisPlanarVelocity = chassis->getActualVelocityChassisRelative();
+    float yawAngularVelocity = chassisPlanarVelocity[2][0];
+    
+    // relative to chassis, so velocity must be 0
+    float xyzVelocityData[3] = {chassisPlanarVelocity[0][0], chassisPlanarVelocity[1][0], 0.f};
+    modm::Matrix<float, 3, 1> chassisVelocity = modm::Matrix<float, 3, 1>(xyzVelocityData);
     rotateChassisVectorToWorld(chassisVelocity);
 
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
@@ -256,6 +233,7 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     nextKFInput[int(OdomInput::ACC_X)] = chassisAcceleration[0][0];
     nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
     nextKFInput[int(OdomInput::ACC_Z)] = chassisAcceleration[2][0];
+    // TODO: filter angular velocity
 }
 
 void StandardTransformer::updateInternalOdomFromKF()

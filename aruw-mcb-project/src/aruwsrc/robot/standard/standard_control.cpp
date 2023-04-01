@@ -535,9 +535,7 @@ void startStandardCommands(Drivers *drivers)
 
     drivers->commandScheduler.addCommand(&lowBatteryCommand);
 
-    drivers->transformer.init(&rightFrontMotor, &leftFrontMotor, &rightBackMotor, &leftBackMotor);
-    // TODO: remove this when done comparing transformer odometry to odometry s
-    drivers->removeThisOdom = &odometrySubsystem;
+    drivers->transformer.init(&chassis, &turret);
 }
 
 /* register io mappings here ------------------------------------------------*/

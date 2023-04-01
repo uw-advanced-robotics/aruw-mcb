@@ -64,27 +64,6 @@ public:
     void init(  const chassis::MecanumChassisSubsystem* chassisSubsystem,
                 const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem);
 
-    // x,y,z location of chassis in world frame
-    modm::Vector3f chassisWorldPosition;
-
-    // rotation of chassis about x, y, z axes in world frame
-    // (roll, pitch, yaw)
-    modm::Vector3f chassisWorldOrientation;
-
-    // rotation of chassis about x, y, z axes in world frame
-    // (roll, pitch, yaw)
-    modm::Vector3f turretWorldOrientation;
-
-    enum class OdomInput
-    {
-        VEL_X = 0,
-        ACC_X,
-        VEL_Y,
-        ACC_Y,
-        VEL_Z,
-        ACC_Z,
-        NUM_INPUTS,
-    };
 
     /**
      * Get World to Chassis transform
@@ -202,12 +181,6 @@ private:
         R = 2,
     };
 
-    // forward kinematic matrix for mecanum drive
-    // used to compute chassis <vx, vy, wz> from individual
-    // wheel velocities
-    // (wz = angular velocity around z axis)
-    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
-
     /**
      * Compute the acceleration of the chassis relative to itself
      * Returns a 3x1 matrix <ax, ay, az>
@@ -223,7 +196,29 @@ private:
      */
     void fillKFInput(float nextKFInput[]);
 
+    // x,y,z location of chassis in world frame
+    modm::Vector3f chassisWorldPosition;
+
+    // rotation of chassis about x, y, z axes in world frame
+    // (roll, pitch, yaw)
+    modm::Vector3f chassisWorldOrientation;
+
+    // rotation of chassis about x, y, z axes in world frame
+    // (roll, pitch, yaw)
+    modm::Vector3f turretWorldOrientation;
+
     // Kalman Filter enums
+    enum class OdomInput
+    {
+        VEL_X = 0,
+        ACC_X,
+        VEL_Y,
+        ACC_Y,
+        VEL_Z,
+        ACC_Z,
+        NUM_INPUTS,
+    };
+
     enum class OdomState
     {
         POS_X = 0,
