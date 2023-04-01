@@ -27,10 +27,10 @@ namespace aruwsrc::control::turret
 /**
  * Turret subsystem for the Sentry.
  */
-class SentryTurretSubsystem final : public RobotTurretSubsystem
+class SentryTurretMinorSubsystem final : public RobotTurretSubsystem
 {
 public:
-    SentryTurretSubsystem(
+    SentryTurretMinorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
@@ -46,7 +46,7 @@ public:
 
 private:
     uint8_t turretID;
-};  // class SentryTurretSubsystem
+};  // class SentryTurretMinorSubsystem
 
 }  // namespace aruwsrc::control::turret
 
