@@ -35,8 +35,7 @@ namespace aruwsrc::algorithms::transforms
 {
 
 StandardTransformer::StandardTransformer(
-    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
-    aruwsrc::can::TurretMCBCanComm& turretMCB)
+    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu)
     :  // TODO: store transforms in an array so we don't have to initialize them here (very ugly !!!
        // !! ! !) Transforms that are dynamically updated
       worldToChassisIMUTransform(

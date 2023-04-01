@@ -62,7 +62,8 @@ public:
      *
      */
     void init(  const chassis::MecanumChassisSubsystem* chassisSubsystem,
-                const control::turret::StandardTurretSubsystem* turretSubsystem);
+                const tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu,
+                const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem);
 
     // x,y,z location of chassis in world frame
     modm::Vector3f chassisWorldPosition;
@@ -167,6 +168,7 @@ private:
     // References to all devices necessary for tracking odometry
     const chassis::MecanumChassisSubsystem* chassis  = nullptr;
     const control::turret::TurretSubsystem* turret = nullptr;
+    tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
 
     /**
      * placeholder value used when constructing transforms before odometry data
