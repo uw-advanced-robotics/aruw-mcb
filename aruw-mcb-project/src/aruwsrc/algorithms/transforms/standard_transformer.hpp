@@ -66,7 +66,21 @@ public:
 
 
     // store the default (non-zero) values in transforms
-    void initializeTransforms();
+    void initializeStaticTransforms();
+
+    // resets each transform to its starting state
+    void resetTransforms();
+
+    // resets just one transform to an identity transform
+    template <class SOURCE, class TARGET>
+        void setIdentityTransform(Transform<SOURCE, TARGET>& transform) {
+        // Initialize CMSISMat input to the transform
+        float emptyPositionData[3] = {0., 0., 0.};
+        CMSISMat<3, 1> cmsisPos(emptyPositionData);
+
+        transform.updatePosition(cmsisPos);
+        transform.updateRotation(0., 0., 0.);
+    }
 
     /**
      * Get World to Chassis transform
@@ -109,8 +123,9 @@ public:
      * @returns Camera to Turret transform
      */
     const Transform<CameraFrame, TurretIMUFrame>& getCameraToTurretIMUTransform();
-
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     /**
      * Updates the stored transforms for this cycle
      */

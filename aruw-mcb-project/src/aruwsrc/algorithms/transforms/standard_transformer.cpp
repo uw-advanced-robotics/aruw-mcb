@@ -61,7 +61,7 @@ void StandardTransformer::init(
     float initialKFVals[int(OdomState::NUM_STATES)] = {};
     this->kf.init(initialKFVals);
 
-    initializeTransforms();
+    resetTransforms();
 }
 
 const Transform<WorldFrame, ChassisFrame>& StandardTransformer::getWorldToChassisTransform()
@@ -199,7 +199,27 @@ void StandardTransformer::updateInternalOdomFromKF()
     turretWorldOrientation.setZ(turretMCB->getYaw());
 }
 
-void StandardTransformer::initializeTransforms() {
+void StandardTransformer::resetTransforms() {
+    // set all transforms to be identity
+    setIdentityTransform(worldToChassisIMUTransform);
+    setIdentityTransform(TurretIMUToCameraTransform);
+    setIdentityTransform(turretIMUToGunTransform);
+
+    setIdentityTransform(worldToTurretIMUTransform);
+    setIdentityTransform(worldToChassisTransform);
+
+    setIdentityTransform(chassisToWorldTransform);
+    setIdentityTransform(turretIMUToChassisTransform);
+    setIdentityTransform(cameraToTurretIMUTransform);
+
+    setIdentityTransform(chassisToTurretIMUTransform);
+    setIdentityTransform(chassisIMUToChassisTransform);
+
+    initializeStaticTransforms();
+}
+
+
+void StandardTransformer::initializeStaticTransforms() {
     float turretIMUToCameraTransformPos[3] = {0.f, TURRETIMU_TO_CAMERA_Y_OFFSET, 0.f};
     CMSISMat<3,1> cmsisTurretIMUToCameraDefaultPos(turretIMUToCameraTransformPos);
     TurretIMUToCameraTransform.updatePosition(cmsisTurretIMUToCameraDefaultPos);
