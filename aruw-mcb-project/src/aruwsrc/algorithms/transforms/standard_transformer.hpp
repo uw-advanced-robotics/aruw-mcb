@@ -32,7 +32,6 @@
 #include "tap/algorithms/kalman_filter.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-// #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 
 using namespace tap::algorithms;
@@ -145,7 +144,7 @@ private:
 
     // Transforms that are dynamically updated
     Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
-    Transform<TurretIMUFrame, CameraFrame> TurretIMUToCameraTransform;
+    Transform<TurretIMUFrame, CameraFrame> turretIMUToCameraTransform;
     Transform<TurretIMUFrame, GunFrame> turretIMUToGunTransform;
 
     // Transforms that are compositions
@@ -163,7 +162,7 @@ private:
 
     // References to all devices necessary for tracking odometry
     const chassis::MecanumChassisSubsystem* chassis  = nullptr;
-    const control::turret::TurretSubsystem* turret = nullptr;
+    const control::turret::StandardTurretSubsystem* turret = nullptr;
     tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu;
 
     /**

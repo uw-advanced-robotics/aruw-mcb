@@ -62,26 +62,38 @@ void StandardTransformer::updateOdometry()
 void StandardTransformer::updateTransforms()
 {
     // update all transforms that can't be derived from others
-    worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>(
+    float worldToChassisPosition[3] = {
         -chassisWorldPosition.getX(),
         -chassisWorldPosition.getY(),
-        -chassisWorldPosition.getZ(),
+        -chassisWorldPosition.getZ()};
+    CMSISMat<3,1> cmsisWorldToChassisPosition(worldToChassisPosition);
+    
+    worldToChassisIMUTransform.updatePosition(cmsisWorldToChassisPosition);
+    worldToChassisIMUTransform.updateRotation(
         -chassisWorldOrientation.getX(),
         -chassisWorldOrientation.getY(),
         -chassisWorldOrientation.getZ());
 
-    TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>(
+    float turretIMUTOCameraPosition[3] = {
         0.,
         TURRETIMU_TO_CAMERA_Y_OFFSET,
-        0.,
+        0.};
+    CMSISMat<3,1> cmsisTurretIMUToCameraPosition(turretIMUTOCameraPosition);
+    
+    turretIMUToCameraTransform.updatePosition(cmsisTurretIMUToCameraPosition);
+    turretIMUToCameraTransform.updateRotation(
         turretWorldOrientation.getX(),
         turretWorldOrientation.getY(),
         turretWorldOrientation.getZ());
 
-    turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>(
+    float turretIMUToGunPos[3] = {
         0.,
         TURRETIMU_TO_GUN_Y_OFFSET,
-        TURRETIMU_TO_GUN_Z_OFFSET,
+        TURRETIMU_TO_GUN_Z_OFFSET};
+    CMSISMat<3,1> cmsisTurretIMUToGunPos(turretIMUToGunPos);
+    
+    turretIMUToGunTransform.updatePosition(cmsisTurretIMUToGunPos);
+    turretIMUToGunTransform.updateRotation(
         turretWorldOrientation.getX(),
         turretWorldOrientation.getY(),
         turretWorldOrientation.getZ());
@@ -145,7 +157,7 @@ const Transform<TurretIMUFrame, ChassisFrame>& StandardTransformer::getTurretIMU
 
 const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTurretIMUTransform()
 {
-    cameraToTurretIMUTransform = TurretIMUToCameraTransform.getInverse();
+    cameraToTurretIMUTransform = turretIMUToCameraTransform.getInverse();
     return cameraToTurretIMUTransform;
 }
 
@@ -202,7 +214,7 @@ void StandardTransformer::updateInternalOdomFromKF()
 void StandardTransformer::resetTransforms() {
     // set all transforms to be identity
     setIdentityTransform(worldToChassisIMUTransform);
-    setIdentityTransform(TurretIMUToCameraTransform);
+    setIdentityTransform(turretIMUToCameraTransform);
     setIdentityTransform(turretIMUToGunTransform);
 
     setIdentityTransform(worldToTurretIMUTransform);
@@ -222,7 +234,7 @@ void StandardTransformer::resetTransforms() {
 void StandardTransformer::initializeStaticTransforms() {
     float turretIMUToCameraTransformPos[3] = {0.f, TURRETIMU_TO_CAMERA_Y_OFFSET, 0.f};
     CMSISMat<3,1> cmsisTurretIMUToCameraDefaultPos(turretIMUToCameraTransformPos);
-    TurretIMUToCameraTransform.updatePosition(cmsisTurretIMUToCameraDefaultPos);
+    turretIMUToCameraTransform.updatePosition(cmsisTurretIMUToCameraDefaultPos);
 
     float turretIMUToGunDefaultPos[3] = {0.f, TURRETIMU_TO_GUN_Y_OFFSET, TURRETIMU_TO_GUN_Z_OFFSET};
     CMSISMat<3,1> cmsisTurretIMUToGunDefaultPos(turretIMUToGunDefaultPos);
@@ -248,19 +260,12 @@ void StandardTransformer::rotateChassisVectorToWorld(modm::Matrix<float, 3, 1>& 
 {
     // our chassisToWorldTransform is 1 cycle out of date, so in the future we
     // may want to extrapolate values to construct the up-to-date transform
-    // but for now I'm lazy...
-
-    // need to get a CMSISMat from chassisRelVector since Transforms take
-    // CMSISMats :(
-
     float data[3] = {chassisRelVector[0][0], chassisRelVector[1][0], chassisRelVector[2][0]};
     CMSISMat<3, 1> cmsisChassisRelVector = CMSISMat<3, 1>(data);
 
-    // Transform.applyToVector only rotates, doesn't translate
     CMSISMat<3, 1> cmsisWorldRelVector =
         worldToChassisIMUTransform.getInverse().applyToVector(cmsisChassisRelVector);
 
-    // copy transformed positions back to original vector
     chassisRelVector[0][0] = cmsisWorldRelVector.data[0];
     chassisRelVector[1][0] = cmsisWorldRelVector.data[1];
     chassisRelVector[2][0] = cmsisWorldRelVector.data[2];
