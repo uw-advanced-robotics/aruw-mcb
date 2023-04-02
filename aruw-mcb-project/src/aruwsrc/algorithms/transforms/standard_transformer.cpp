@@ -51,6 +51,42 @@ void StandardTransformer::update()
     updateTransforms();
 }
 
+void StandardTransformer::updateOdometry()
+{
+    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
+    fillKFInput(nextKFInput);
+    kf.performUpdate(nextKFInput);
+    updateInternalOdomFromKF();
+}
+
+void StandardTransformer::updateTransforms()
+{
+    // update all transforms that can't be derived from others
+    worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>(
+        -chassisWorldPosition.getX(),
+        -chassisWorldPosition.getY(),
+        -chassisWorldPosition.getZ(),
+        -chassisWorldOrientation.getX(),
+        -chassisWorldOrientation.getY(),
+        -chassisWorldOrientation.getZ());
+
+    TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>(
+        0.,
+        TURRETIMU_TO_CAMERA_Y_OFFSET,
+        0.,
+        turretWorldOrientation.getX(),
+        turretWorldOrientation.getY(),
+        turretWorldOrientation.getZ());
+
+    turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>(
+        0.,
+        TURRETIMU_TO_GUN_Y_OFFSET,
+        TURRETIMU_TO_GUN_Z_OFFSET,
+        turretWorldOrientation.getX(),
+        turretWorldOrientation.getY(),
+        turretWorldOrientation.getZ());
+}
+
 void StandardTransformer::init(
     const chassis::MecanumChassisSubsystem* chassisSubsystem,
     const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem)
@@ -111,42 +147,6 @@ const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTu
 {
     cameraToTurretIMUTransform = TurretIMUToCameraTransform.getInverse();
     return cameraToTurretIMUTransform;
-}
-
-void StandardTransformer::updateTransforms()
-{
-    // update all transforms that can't be derived from others
-    worldToChassisIMUTransform = Transform<WorldFrame, ChassisIMUFrame>(
-        -chassisWorldPosition.getX(),
-        -chassisWorldPosition.getY(),
-        -chassisWorldPosition.getZ(),
-        -chassisWorldOrientation.getX(),
-        -chassisWorldOrientation.getY(),
-        -chassisWorldOrientation.getZ());
-
-    TurretIMUToCameraTransform = Transform<TurretIMUFrame, CameraFrame>(
-        0.,
-        TURRETIMU_TO_CAMERA_Y_OFFSET,
-        0.,
-        turretWorldOrientation.getX(),
-        turretWorldOrientation.getY(),
-        turretWorldOrientation.getZ());
-
-    turretIMUToGunTransform = Transform<TurretIMUFrame, GunFrame>(
-        0.,
-        TURRETIMU_TO_GUN_Y_OFFSET,
-        TURRETIMU_TO_GUN_Z_OFFSET,
-        turretWorldOrientation.getX(),
-        turretWorldOrientation.getY(),
-        turretWorldOrientation.getZ());
-}
-
-void StandardTransformer::updateOdometry()
-{
-    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
-    fillKFInput(nextKFInput);
-    kf.performUpdate(nextKFInput);
-    updateInternalOdomFromKF();
 }
 
 void StandardTransformer::fillKFInput(float nextKFInput[])
