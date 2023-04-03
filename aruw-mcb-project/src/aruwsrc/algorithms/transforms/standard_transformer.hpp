@@ -75,7 +75,7 @@ public:
     void resetTransforms();
 
     // resets the stored odometry
-    void resetOdometry();
+    // void resetOdometry();
 
     // resets just one transform to an identity transform
     template <class SOURCE, class TARGET>
