@@ -81,6 +81,7 @@ public:
         transform.updateRotation(0., 0., 0.);
     }
 
+
     /**
      * Get World to Chassis transform
      *
@@ -141,6 +142,15 @@ private:
      * probably delete this later
      */
     void updateInternalOdomFromKF();
+
+    // TODO: rethink which transforms we want to provide....
+    // moreover, some of the transforms we're holding aren't being updated
+
+    // should structure transforms in groups by:
+    //  <Chassis, something>
+    //  <Turret, something>
+    // the client can find a path of transfoms between any frames they want :)
+
 
     // Transforms that are dynamically updated
     Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
