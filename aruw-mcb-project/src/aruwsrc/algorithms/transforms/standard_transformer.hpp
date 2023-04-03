@@ -227,7 +227,17 @@ private:
      * Specifically, fills in the chassis' velocity and acceleration in the
      * perspective of the world frame
      */
-    void fillKFInput(float nextKFInput[]);
+    void fillPosKFInput(float nextKFInput[]);
+
+    /**
+     * TODO: Change this comment, I just copied and pasted
+     * Fills nextKFInput with measurements taken from the chassis about the current
+     * state of the robot.
+     *
+     * Specifically, fills in the chassis' velocity and acceleration in the
+     * perspective of the world frame
+     */
+    void fillRotKFInput(float nextKFInput[]);
 
     // x,y,z location of chassis in world frame
     modm::Vector3f chassisWorldPosition;
@@ -250,7 +260,7 @@ private:
     float getUnwrappedChassisIMUYaw();
     
     // Kalman Filter enums
-    enum class OdomInput
+    enum class PosOdomInput
     {
         VEL_X = 0,
         ACC_X,
@@ -258,12 +268,10 @@ private:
         ACC_Y,
         VEL_Z,
         ACC_Z,
-        POS_YAW,
-        VEL_YAW,
         NUM_INPUTS,
     };
 
-    enum class OdomState
+    enum class PosOdomState
     {
         POS_X = 0,
         VEL_X,
@@ -274,7 +282,19 @@ private:
         POS_Z,
         VEL_Z,
         ACC_Z,
-        POS_YAW,
+        NUM_STATES,
+    };
+
+    enum class RotOdomInput
+    {
+        POS_YAW = 0,
+        VEL_YAW,
+        NUM_INPUTS
+    };
+
+    enum class RotOdomState
+    {
+        POS_YAW = 0,
         VEL_YAW,
         ACC_YAW,
         NUM_STATES,
@@ -287,83 +307,117 @@ private:
      */
     void rotateChassisVectorToWorld(modm::Matrix<float, 3, 1>& chassisRelVector);
 
-    static constexpr int STATES_SQUARED =
-        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
-    static constexpr int INPUTS_SQUARED =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
-static constexpr int INPUTS_MULT_STATES =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+    // Positional matrix sizes
+    static constexpr int POS_STATES_SQUARED =
+        static_cast<int>(PosOdomState::NUM_STATES) * static_cast<int>(PosOdomState::NUM_STATES);
+    static constexpr int POS_INPUTS_SQUARED =
+        static_cast<int>(PosOdomInput::NUM_INPUTS) * static_cast<int>(PosOdomInput::NUM_INPUTS);
+    static constexpr int POS_INPUTS_MULT_STATES =
+        static_cast<int>(PosOdomInput::NUM_INPUTS) * static_cast<int>(PosOdomState::NUM_STATES);
 
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+    // Rotational matrix sizes
+    static constexpr int ROT_STATES_SQUARED =
+        static_cast<int>(RotOdomState::NUM_STATES) * static_cast<int>(RotOdomState::NUM_STATES);
+    static constexpr int ROT_INPUTS_SQUARED =
+        static_cast<int>(RotOdomInput::NUM_INPUTS) * static_cast<int>(RotOdomInput::NUM_INPUTS);
+    static constexpr int ROT_INPUTS_MULT_STATES =
+        static_cast<int>(RotOdomInput::NUM_INPUTS) * static_cast<int>(RotOdomState::NUM_STATES);
+
+    tap::algorithms::KalmanFilter<int(PosOdomState::NUM_STATES), int(PosOdomInput::NUM_INPUTS)> posKf;
+    tap::algorithms::KalmanFilter<int(RotOdomState::NUM_STATES), int(RotOdomInput::NUM_INPUTS)> rotKf;
 
     static constexpr float DT = 0.002f;
 
     // clang-format off
-    static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 1 , DT           , 0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 1            , 0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 1 , DT           , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 1            , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT           , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 1            , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT           ,
-        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 0            , 0, 0 , 1            ,
+
+    /*
+    * Positional Kalman Filter matrices
+    */
+    static constexpr float POS_KF_A[POS_STATES_SQUARED] = {
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 , 0            ,
+        0, 1 , DT           , 0, 0 , 0            , 0, 0 , 0            ,
+        0, 0 , 1            , 0, 0 , 0            , 0, 0 , 0            ,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
+        0, 0 , 0            , 0, 1 , DT           , 0, 0 , 0            ,
+        0, 0 , 0            , 0, 0 , 1            , 0, 0 , 0            ,
+        0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+        0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT           ,
+        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 1            ,
     };
 
-    static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    static constexpr float POS_KF_C[POS_INPUTS_MULT_STATES] = {
+        0, 1, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 1,
     };
 
-    static constexpr float KF_Q[STATES_SQUARED] = {
-        1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
+    static constexpr float POS_KF_Q[POS_STATES_SQUARED] = {
+        1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
     };
 
-    static constexpr float KF_R[INPUTS_SQUARED] = {
-        1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 1.2, 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 1.2, 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 1.2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 1.0, 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.2,
+    static constexpr float POS_KF_R[POS_INPUTS_SQUARED] = {
+        1.0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1.0, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1.2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1.2,
     };
 
-    static constexpr float KF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
-    };    
+    static constexpr float POS_KF_P0[POS_STATES_SQUARED] = {
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+    };
+
+    /*
+    * Rotational Kalman Filter matrices
+    */
+    static constexpr float ROT_KF_A[ROT_STATES_SQUARED] = {
+        1, DT, 0.5 * DT * DT,
+        0, 1 , DT           ,
+        0, 0 , 1            ,
+    };
+
+    static constexpr float ROT_KF_C[ROT_INPUTS_MULT_STATES] = {
+        0, 1, 0,
+        0, 0, 1,
+    };
+
+    static constexpr float ROT_KF_Q[ROT_STATES_SQUARED] = {
+        1E1, 0  , 0   ,
+        0  , 1E0, 0   ,
+        0  , 0  , 1E-1,
+    };
+
+    static constexpr float ROT_KF_R[ROT_INPUTS_SQUARED] = {
+        1.0, 0  ,
+        0  , 1.2,
+    };
+
+    static constexpr float ROT_KF_P0[ROT_STATES_SQUARED] = {
+        1E3, 0  , 0  ,
+        0  , 1E3, 0  ,
+        0  , 0  , 1E3,
+    };
+
     // clang-format on
 };
 }  // namespace aruwsrc::algorithms::transforms

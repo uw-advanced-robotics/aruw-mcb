@@ -40,7 +40,8 @@ StandardTransformer::StandardTransformer(
     tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu
     ) :  
       chassisImu(chassisImu),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
+      posKf(POS_KF_A, POS_KF_C, POS_KF_Q, POS_KF_R, POS_KF_P0),
+      rotKf(ROT_KF_A, ROT_KF_C, ROT_KF_Q, ROT_KF_R, ROT_KF_P0)
 {
     // assume chassis starts at 0 degrees (maybe call mpu.getYaw())
     prevUnwrappedIMUChassisYaw = 0.0;
@@ -54,9 +55,12 @@ void StandardTransformer::update()
 
 void StandardTransformer::updateOdometry()
 {
-    float nextKFInput[int(OdomInput::NUM_INPUTS)] = {};
-    fillKFInput(nextKFInput);
-    kf.performUpdate(nextKFInput);
+    float nextPosKFInput[int(PosOdomInput::NUM_INPUTS)] = {};
+    float nextRotKFInput[int(RotOdomInput::NUM_INPUTS)] = {};
+    fillPosKFInput(nextPosKFInput);
+    fillRotKFInput(nextRotKFInput);
+    posKf.performUpdate(nextPosKFInput);
+    rotKf.performUpdate(nextRotKFInput);
     updateInternalOdomFromKF();
 }
 
@@ -107,8 +111,10 @@ void StandardTransformer::init(
     this->chassis = chassisSubsystem;
     this->turret = turretSubsystem;
 
-    float initialKFVals[int(OdomState::NUM_STATES)] = {};
-    this->kf.init(initialKFVals);
+    float initialPosKFVals[int(PosOdomState::NUM_STATES)] = {};
+    float initialRotKFVals[int(RotOdomState::NUM_STATES)] = {};
+    this->posKf.init(initialPosKFVals);
+    this->rotKf.init(initialRotKFVals);
 
     resetTransforms();
 }
@@ -162,12 +168,10 @@ const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTu
     return cameraToTurretIMUTransform;
 }
 
-void StandardTransformer::fillKFInput(float nextKFInput[])
+void StandardTransformer::fillPosKFInput(float nextKFInput[])
 {
     // retrieves <vz, vy, yaw_velocity>
     modm::Matrix<float, 3, 1> chassisPlanarVelocity = chassis->getActualVelocityChassisRelative();
-    // radians per second
-    float yawAngularVelocity = chassisPlanarVelocity[2][0];
     
     // relative to chassis, so velocity must be 0
     float xyzVelocityData[3] = {chassisPlanarVelocity[0][0], chassisPlanarVelocity[1][0], 0.f};
@@ -177,35 +181,45 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     modm::Matrix<float, 3, 1> chassisAcceleration = getAccelerationChassisRelative();
     rotateChassisVectorToWorld(chassisAcceleration);
 
-    nextKFInput[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
-    nextKFInput[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
-    nextKFInput[int(OdomInput::VEL_Z)] = chassisVelocity[2][0];
+    nextKFInput[int(PosOdomInput::VEL_X)] = chassisVelocity[0][0];
+    nextKFInput[int(PosOdomInput::VEL_Y)] = chassisVelocity[1][0];
+    nextKFInput[int(PosOdomInput::VEL_Z)] = chassisVelocity[2][0];
 
-    nextKFInput[int(OdomInput::ACC_X)] = chassisAcceleration[0][0];
-    nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
-    nextKFInput[int(OdomInput::ACC_Z)] = chassisAcceleration[2][0];
+    nextKFInput[int(PosOdomInput::ACC_X)] = chassisAcceleration[0][0];
+    nextKFInput[int(PosOdomInput::ACC_Y)] = chassisAcceleration[1][0];
+    nextKFInput[int(PosOdomInput::ACC_Z)] = chassisAcceleration[2][0];
+}
 
-    float nextWrappedChassisYaw = getUnwrappedChassisIMUYaw();
-    nextKFInput[int(OdomInput::POS_YAW)] = modm::toRadian(nextWrappedChassisYaw);
-    nextKFInput[int(OdomInput::VEL_YAW)] = yawAngularVelocity;
+void StandardTransformer::fillRotKFInput(float nextKFInput[])
+{
+    // retrieves <vz, vy, yaw_velocity>
+    modm::Matrix<float, 3, 1> chassisPlanarVelocity = chassis->getActualVelocityChassisRelative();
     
-    prevUnwrappedIMUChassisYaw = nextWrappedChassisYaw;
+    // radians per second
+    float yawAngularVelocity = chassisPlanarVelocity[2][0];
+
+    float nextUnwrappedChassisYaw = getUnwrappedChassisIMUYaw();
+    nextKFInput[int(RotOdomInput::POS_YAW)] = modm::toRadian(nextUnwrappedChassisYaw);
+    nextKFInput[int(RotOdomInput::VEL_YAW)] = yawAngularVelocity;
+    
+    prevUnwrappedIMUChassisYaw = nextUnwrappedChassisYaw;
 }
 
 void StandardTransformer::updateInternalOdomFromKF()
 {
-    const auto& state = kf.getStateVectorAsMatrix();
+    const auto& posState = posKf.getStateVectorAsMatrix();
+    const auto& rotState = rotKf.getStateVectorAsMatrix();
     const aruwsrc::can::TurretMCBCanComm* turretMCB = turret->getTurretMCB();
 
     // update the store odometry for easy access internally
-    chassisWorldPosition.setX(state[int(OdomState::POS_X)]);
-    chassisWorldPosition.setY(state[int(OdomState::POS_Y)]);
-    chassisWorldPosition.setZ(state[int(OdomState::POS_Z)]);
+    chassisWorldPosition.setX(posState[int(PosOdomState::POS_X)]);
+    chassisWorldPosition.setY(posState[int(PosOdomState::POS_Y)]);
+    chassisWorldPosition.setZ(posState[int(PosOdomState::POS_Z)]);
 
     // chassisWorldOrientation.setX(chassisImu.getRoll());
-    chassisWorldOrientation.setX(state[int(OdomState::POS_YAW)]);
+    chassisWorldOrientation.setX(rotState[int(RotOdomState::POS_YAW)]);
     chassisWorldOrientation.setY(chassisImu.getPitch());
-    chassisWorldOrientation.setZ(chassisImu.getYaw());
+    chassisWorldOrientation.setZ(chassisImu.getRoll());
 
     // we cannot query turret roll (for now)
     turretWorldOrientation.setX(0);
