@@ -140,7 +140,6 @@ public:
      * @param newPos updated position vector.
      */
     void updatePosition(CMSISMat<3, 1>& newPos);
-
 private:
     /**
      * Rotation matrix.
