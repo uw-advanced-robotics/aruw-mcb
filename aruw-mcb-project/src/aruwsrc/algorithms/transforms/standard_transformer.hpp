@@ -43,6 +43,10 @@ namespace aruwsrc::algorithms::transforms
 class StandardTransformer : public Transformer
 {
 public:
+
+    // TODO: remove this
+    float prevUnwrappedIMUChassisYaw;
+
     /**
      * A transform provider that provides transforms for the standard
      * robot.
@@ -69,6 +73,9 @@ public:
 
     // resets each transform to its starting state
     void resetTransforms();
+
+    // resets the stored odometry
+    void resetOdometry();
 
     // resets just one transform to an identity transform
     template <class SOURCE, class TARGET>
@@ -150,7 +157,6 @@ private:
     //  <Chassis, something>
     //  <Turret, something>
     // the client can find a path of transfoms between any frames they want :)
-
 
     // Transforms that are dynamically updated
     Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
@@ -234,6 +240,15 @@ private:
     // (roll, pitch, yaw)
     modm::Vector3f turretWorldOrientation;
 
+    // the unwrapped yaw of the chassis IMU in degrees
+    // TODO: uncomment
+    // float prevUnwrappedIMUChassisYaw;
+    const float UPPER_WRAPPED_YAW_THRESHOLD = 300.f;
+    const float LOWER_WRAPPED_YAW_THRESHOLD = 60.f;
+    
+    // @return the unwrapped yaw read by the chassis IMU in degrees
+    float getUnwrappedChassisIMUYaw();
+    
     // Kalman Filter enums
     enum class OdomInput
     {

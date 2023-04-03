@@ -42,7 +42,8 @@ StandardTransformer::StandardTransformer(
       chassisImu(chassisImu),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
-    
+    // assume chassis starts at 0 degrees (maybe call mpu.getYaw())
+    prevUnwrappedIMUChassisYaw = 0.0;
 }
 
 void StandardTransformer::update()
@@ -184,10 +185,11 @@ void StandardTransformer::fillKFInput(float nextKFInput[])
     nextKFInput[int(OdomInput::ACC_Y)] = chassisAcceleration[1][0];
     nextKFInput[int(OdomInput::ACC_Z)] = chassisAcceleration[2][0];
 
-    nextKFInput[int(OdomInput::POS_YAW)] = modm::toRadian(chassisImu.getYaw());
-    // if chassis yaw was less than 320 degrees and chassis yaw is currently 0-30 degrees, then rotationCounter++
-    // Unwrapped yaw calculation is rotationCounter * 360 + chassisImu.getYaw();
+    float nextWrappedChassisYaw = getUnwrappedChassisIMUYaw();
+    nextKFInput[int(OdomInput::POS_YAW)] = modm::toRadian(nextWrappedChassisYaw);
     nextKFInput[int(OdomInput::VEL_YAW)] = yawAngularVelocity;
+    
+    prevUnwrappedIMUChassisYaw = nextWrappedChassisYaw;
 }
 
 void StandardTransformer::updateInternalOdomFromKF()
@@ -230,6 +232,25 @@ void StandardTransformer::resetTransforms() {
     initializeStaticTransforms();
 }
 
+float StandardTransformer::getUnwrappedChassisIMUYaw() {
+    // read from chassis IMU
+    float currWrappedYaw = chassisImu.getYaw();
+    float prevWrappedYaw = fmod(prevUnwrappedIMUChassisYaw, 360.0);
+
+    if (prevWrappedYaw >= UPPER_WRAPPED_YAW_THRESHOLD && currWrappedYaw <= LOWER_WRAPPED_YAW_THRESHOLD) {
+        // crossed threshold in positive direction
+        float prevToWrapPoint = 360 - prevWrappedYaw;
+        return prevUnwrappedIMUChassisYaw + prevToWrapPoint + currWrappedYaw;
+    } else if (prevWrappedYaw <= LOWER_WRAPPED_YAW_THRESHOLD && currWrappedYaw >= UPPER_WRAPPED_YAW_THRESHOLD) {
+        // crossed threshold in negative direction
+        float prevToWrapPoint = prevWrappedYaw;
+        float wrapPointToCurrent = 360.0 - currWrappedYaw;
+        return prevUnwrappedIMUChassisYaw - prevToWrapPoint - wrapPointToCurrent;
+    } else {
+        // we did not cross a boundary
+        return prevUnwrappedIMUChassisYaw - prevWrappedYaw + currWrappedYaw;
+    }
+}
 
 void StandardTransformer::initializeStaticTransforms() {
     float turretIMUToCameraTransformPos[3] = {0.f, TURRETIMU_TO_CAMERA_Y_OFFSET, 0.f};
