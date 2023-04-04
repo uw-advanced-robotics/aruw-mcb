@@ -30,6 +30,9 @@ namespace aruwsrc::virtualMCB
 class CanBus
 {
 public:
+
+    virtual ~CanBus() = default;
+
     virtual void initialize();
 
     virtual bool getMessage(tap::can::CanBus canbus, modm::can::Message *message);
