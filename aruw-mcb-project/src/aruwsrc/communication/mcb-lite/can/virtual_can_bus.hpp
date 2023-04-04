@@ -37,7 +37,7 @@ class VirtualCanBus : public CanBus
 public:
     VirtualCanBus(tap::Drivers* drivers);
 
-    ~VirtualCanBus() = default;
+    ~VirtualCanBus(){};
 
     void initialize() override;
 
