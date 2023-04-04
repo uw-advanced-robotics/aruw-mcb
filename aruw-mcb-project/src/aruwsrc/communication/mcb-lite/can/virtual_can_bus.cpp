@@ -51,13 +51,13 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
         return false;
     }
 
-    modm::can::Message msg;
+    modm::can::Message msg = new modm::can::Message();
+    uint8_t* holder = new uint8_t[sizeof(modm::can::Message)];
 
     // Read the message from the uart port
-    bool readCompleteMessage = drivers->uart.read(
-        port,
-        static_cast<uint8_t*>(&msg),
-        sizeof(modm::can::Message));
+    bool readCompleteMessage = drivers->uart.read(port, holder, sizeof(modm::can::Message)) == sizeof(modm::can::Message);
+    memcpy(&msg, holder, sizeof(modm::can::Message));
+
 
     if (!readCompleteMessage)
     {
@@ -91,9 +91,11 @@ template <tap::communication::serial::Uart::UartPort port>
 bool VirtualCanBus<port>::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
 {
     drivers->uart.write(port, (uint8_t)canbus + CANBUS_ID_OFFSET);
+    uint8_t* holder = new uint8_t[sizeof(modm::can::Message)];
+    memcpy(holder, &message, sizeof(modm::can::Message));
     return drivers->uart.write(
         port,
-        static_cast<uint8_t*>(message),
+        holder,
         sizeof(modm::can::Message));
 }
 
