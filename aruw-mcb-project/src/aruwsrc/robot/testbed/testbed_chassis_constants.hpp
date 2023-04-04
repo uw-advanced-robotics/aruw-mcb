@@ -26,6 +26,7 @@
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
+
 #include "five_bar_lookup.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -147,19 +148,35 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
-    .kp = 2000,
-    .ki = 1,
-    .kd = .001,
-    .maxICumulative = 1500,
+    .kp = 10000,
+    .ki = 3,
+    .kd = .05,
+    .maxICumulative = 2000,
     .maxOutput = 5000,
 };
 
 static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG{
-    .kp = 2000,
-    .ki = 1,
-    .kd = .001,
-    .maxICumulative = 1500,
-    .maxOutput = 5000,  
+    .kp = 10000,
+    .ki = 3,
+    .kd = .05,
+    .maxICumulative = 2000,
+    .maxOutput = 5000,
+};
+
+static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG{
+    .kp = 10000,
+    .ki = 3,
+    .kd = .05,
+    .maxICumulative = 2000,
+    .maxOutput = 5000,
+};
+
+static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG{
+    .kp = 10000,
+    .ki = 3,
+    .kd = .05,
+    .maxICumulative = 2000,
+    .maxOutput = 5000,
 };
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{

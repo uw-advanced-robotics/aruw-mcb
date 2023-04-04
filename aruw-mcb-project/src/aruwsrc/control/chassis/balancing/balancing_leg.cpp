@@ -56,7 +56,7 @@ void BalancingLeg::update()
     
     // 3. Send New Output Values
     fivebar->setDesiredPosition(desiredWheelLocation);
-    driveWheelPid.runControllerDerivateError();
+    // driveWheelPid.runControllerDerivateError();
 }
 }  // namespace chassis
 }  // namespace aruwsrc

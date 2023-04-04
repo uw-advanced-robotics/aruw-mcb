@@ -72,17 +72,31 @@ namespace testbed_control
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::motor::Tmotor_AK809 legmotorLF(
     drivers(),
-    aruwsrc::motor::MOTOR2,
+    aruwsrc::motor::MOTOR3,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     "LeftFront Leg");
 
 aruwsrc::motor::Tmotor_AK809 legmotorLR(
     drivers(),
+    aruwsrc::motor::MOTOR4,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    "LeftRear Leg");
+
+aruwsrc::motor::Tmotor_AK809 legmotorRF(
+    drivers(),
     aruwsrc::motor::MOTOR1,
     tap::can::CanBus::CAN_BUS2,
     true,
-    "LeftRear Leg");
+    "RightFront Leg");
+
+aruwsrc::motor::Tmotor_AK809 legmotorRR(
+    drivers(),
+    aruwsrc::motor::MOTOR2,
+    tap::can::CanBus::CAN_BUS2,
+    true,
+    "RightRear Leg");
 
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLR(drivers(), &legmotorLR);
@@ -98,23 +112,41 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     LF_LEG_MOTOR_PID_CONFIG,
     LR_LEG_MOTOR_PID_CONFIG);
 
-motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::SQUARE);
+motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
+    drivers(),
+    &legmotorRF,
+    &legmotorRR,
+    FIVE_BAR_CONFIG,
+    RF_LEG_MOTOR_PID_CONFIG,
+    RR_LEG_MOTOR_PID_CONFIG);
+
+motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
 
 motion::FiveBarMoveCommand moveFiveBarLeftSquare(
     drivers(),
     &fiveBarSubsystemLeft,
     motion::UP_AND_DOWN);
 
+motion::FiveBarMoveCommand moveFiveBarRightCircle(
+    drivers(),
+    &fiveBarSubsystemRight,
+    motion::CIRCLE);
+
+motion::FiveBarMoveCommand moveFiveBarRightSquare(
+    drivers(),
+    &fiveBarSubsystemRight,
+    motion::UP_AND_DOWN);
+
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&moveFiveBarLeftCircle},
+    {&moveFiveBarLeftCircle, &moveFiveBarRightCircle},
     RemoteMapState(
         tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
         tap::communication::serial::Remote::SwitchState::UP));
 
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&moveFiveBarLeftSquare},
+    {&moveFiveBarLeftSquare, &moveFiveBarRightSquare},
     RemoteMapState(
         tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
         tap::communication::serial::Remote::SwitchState::DOWN));
@@ -128,6 +160,7 @@ void registerTestbedSubsystems(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&motorSubsystemLF);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
     drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemLeft);
+    drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemRight);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -136,6 +169,7 @@ void initializeSubsystems()
     // motorSubsystemLF.initialize();
     // motorSubsystemLR.initialize();
     fiveBarSubsystemLeft.initialize();
+    fiveBarSubsystemRight.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
