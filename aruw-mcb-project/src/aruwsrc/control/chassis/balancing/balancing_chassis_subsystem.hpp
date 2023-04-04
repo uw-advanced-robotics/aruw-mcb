@@ -44,12 +44,17 @@ public:
 
     void setDesiredHeight(float z);
 
-    void setDesiredOutput(float x, float y, float r);
+    void setDesiredOutput(float x, float r);
 
     void limitChassisPower();
 
 private:
     BalancingLeg& leftLeg, rightLeg;
+    float desiredX,
+          desiredR,
+          desiredZ;
+
+    
 };
 }   // namespace aruwsrc::chassis
 

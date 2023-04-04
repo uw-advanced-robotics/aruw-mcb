@@ -34,12 +34,30 @@ namespace aruwsrc::chassis
 
     void BalancingChassisSubsystem::initialize()
     {
-        
+        desiredX = 0;
+        desiredR = 0;
+        desiredZ = 0;
     }
 
     void BalancingChassisSubsystem::refresh()
     {
+        // 1. Update yaw and roll values
+        
 
+        // 2. Apply scaling and/or control laws to yaw and roll values
+        float yawAdjustment = 0;
+        float rollAdjustment = 0;
+
+        // 3. Set each side's actuators to compensate appropriate for yaw and roll error
+        leftLeg.setDesiredHeight(desiredZ + rollAdjustment);
+        rightLeg.setDesiredHeight(desiredZ - rollAdjustment);
+
+        if (desiredX + yawAdjustment > MAX_WHEEL_SPEED)
+        {
+            desiredX = MAX_WHEEL_SPEED - yawAdjustment;
+        }
+        leftLeg.setDesiredTranslationSpeed(desiredX + yawAdjustment);
+        rightLeg.setDesiredTranslationSpeed(desiredX - yawAdjustment);
     }
 
     void BalancingChassisSubsystem::runHardwareTests()
