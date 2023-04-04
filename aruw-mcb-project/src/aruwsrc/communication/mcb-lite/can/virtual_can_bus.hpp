@@ -37,6 +37,8 @@ class VirtualCanBus : public CanBus
 public:
     VirtualCanBus(tap::Drivers* drivers);
 
+    ~VirtualCanBus() = default;
+
     void initialize() override;
 
     bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;

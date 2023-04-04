@@ -26,6 +26,7 @@
 
 namespace aruwsrc::virtualMCB
 {
+
 template <tap::communication::serial::Uart::UartPort port>
 VirtualCanBus<port>::VirtualCanBus(tap::Drivers* drivers) : drivers(drivers)
 {
@@ -52,9 +53,11 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
 
     modm::can::Message msg;
 
-    bool readCompleteMessage =
-        drivers->uart.read(port, static_cast<uint8_t*>(msg), sizeof(modm::can::Message)) ==
-        sizeof(modm::can::Message);
+    // Read the message from the uart port
+    bool readCompleteMessage = drivers->uart.read(
+        port,
+        static_cast<uint8_t*>(&msg),
+        sizeof(modm::can::Message));
 
     if (!readCompleteMessage)
     {
