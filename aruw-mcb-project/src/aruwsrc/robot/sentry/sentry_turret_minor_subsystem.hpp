@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_TURRET_SUBSYSTEM_HPP_
-#define SENTRY_TURRET_SUBSYSTEM_HPP_
+#ifndef SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
+#define SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
@@ -50,4 +50,4 @@ private:
 
 }  // namespace aruwsrc::control::turret
 
-#endif  // SENTRY_TURRET_SUBSYSTEM_HPP_
+#endif  // SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
