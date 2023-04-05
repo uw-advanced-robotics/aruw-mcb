@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_turret_subsystem.hpp"
+#include "sentry_turret_minor_subsystem.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
