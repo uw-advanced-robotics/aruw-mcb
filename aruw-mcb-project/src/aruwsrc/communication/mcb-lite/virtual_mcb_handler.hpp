@@ -53,11 +53,6 @@ public:
 
     void refresh();
 
-    VirtualCanBus<port>& getCanbus();
-    VirtualCANRxHandler& getRxHandler();
-    VirtualDJIMotorTxHandler& getDjiMotorHandler();
-
-private:
     VirtualCanBus<port> canbus;
     VirtualDJIMotorTxHandler motorTxHandler;
     VirtualCANRxHandler canRxHandler;
