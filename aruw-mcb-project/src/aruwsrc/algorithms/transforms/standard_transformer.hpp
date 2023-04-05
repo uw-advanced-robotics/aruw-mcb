@@ -44,14 +44,11 @@ class StandardTransformer : public Transformer
 {
 public:
 
-    // TODO: remove this
-    float prevUnwrappedIMUChassisYaw;
-
     /**
      * A transform provider that provides transforms for the standard
      * robot.
      */
-    StandardTransformer(tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu);
+    StandardTransformer(tap::communication::sensors::imu::mpu6500::Mpu6500& );
 
     /**
      * Update each transform with most recent encoder and IMU odometry data. This method
@@ -66,7 +63,6 @@ public:
      */
     void init(  const chassis::MecanumChassisSubsystem* chassisSubsystem,
                 const aruwsrc::control::turret::StandardTurretSubsystem* turretSubsystem);
-
 
     // store the default (non-zero) values in transforms
     void initializeStaticTransforms();
@@ -87,7 +83,6 @@ public:
         transform.updatePosition(cmsisPos);
         transform.updateRotation(0., 0., 0.);
     }
-
 
     /**
      * Get World to Chassis transform
@@ -287,8 +282,7 @@ private:
 
     enum class RotOdomInput
     {
-        POS_YAW = 0,
-        VEL_YAW,
+        VEL_YAW = 0,
         NUM_INPUTS
     };
 

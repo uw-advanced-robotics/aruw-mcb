@@ -42,10 +42,7 @@ StandardTransformer::StandardTransformer(
       chassisImu(chassisImu),
       posKf(POS_KF_A, POS_KF_C, POS_KF_Q, POS_KF_R, POS_KF_P0),
       rotKf(ROT_KF_A, ROT_KF_C, ROT_KF_Q, ROT_KF_R, ROT_KF_P0)
-{
-    // assume chassis starts at 0 degrees (maybe call mpu.getYaw())
-    prevUnwrappedIMUChassisYaw = 0.0;
-}
+{ }
 
 void StandardTransformer::update()
 {
@@ -197,12 +194,7 @@ void StandardTransformer::fillRotKFInput(float nextKFInput[])
     
     // radians per second
     float yawAngularVelocity = chassisPlanarVelocity[2][0];
-
-    float nextUnwrappedChassisYaw = getUnwrappedChassisIMUYaw();
-    nextKFInput[int(RotOdomInput::POS_YAW)] = modm::toRadian(nextUnwrappedChassisYaw);
     nextKFInput[int(RotOdomInput::VEL_YAW)] = yawAngularVelocity;
-    
-    prevUnwrappedIMUChassisYaw = nextUnwrappedChassisYaw;
 }
 
 void StandardTransformer::updateInternalOdomFromKF()
@@ -216,10 +208,9 @@ void StandardTransformer::updateInternalOdomFromKF()
     chassisWorldPosition.setY(posState[int(PosOdomState::POS_Y)]);
     chassisWorldPosition.setZ(posState[int(PosOdomState::POS_Z)]);
 
-    // chassisWorldOrientation.setX(chassisImu.getRoll());
     chassisWorldOrientation.setX(rotState[int(RotOdomState::POS_YAW)]);
-    chassisWorldOrientation.setY(chassisImu.getPitch());
-    chassisWorldOrientation.setZ(chassisImu.getRoll());
+    chassisWorldOrientation.setY(0);
+    chassisWorldOrientation.setZ(0);
 
     // we cannot query turret roll (for now)
     turretWorldOrientation.setX(0);
@@ -244,26 +235,6 @@ void StandardTransformer::resetTransforms() {
     setIdentityTransform(chassisIMUToChassisTransform);
 
     initializeStaticTransforms();
-}
-
-float StandardTransformer::getUnwrappedChassisIMUYaw() {
-    // read from chassis IMU
-    float currWrappedYaw = chassisImu.getYaw();
-    float prevWrappedYaw = fmod(prevUnwrappedIMUChassisYaw, 360.0);
-
-    if (prevWrappedYaw >= UPPER_WRAPPED_YAW_THRESHOLD && currWrappedYaw <= LOWER_WRAPPED_YAW_THRESHOLD) {
-        // crossed threshold in positive direction
-        float prevToWrapPoint = 360 - prevWrappedYaw;
-        return prevUnwrappedIMUChassisYaw + prevToWrapPoint + currWrappedYaw;
-    } else if (prevWrappedYaw <= LOWER_WRAPPED_YAW_THRESHOLD && currWrappedYaw >= UPPER_WRAPPED_YAW_THRESHOLD) {
-        // crossed threshold in negative direction
-        float prevToWrapPoint = prevWrappedYaw;
-        float wrapPointToCurrent = 360.0 - currWrappedYaw;
-        return prevUnwrappedIMUChassisYaw - prevToWrapPoint - wrapPointToCurrent;
-    } else {
-        // we did not cross a boundary
-        return prevUnwrappedIMUChassisYaw - prevWrappedYaw + currWrappedYaw;
-    }
 }
 
 void StandardTransformer::initializeStaticTransforms() {
