@@ -191,6 +191,22 @@ private:
         uint8_t seq;                   ///< Sequence number for synchronizing pitch/yaw messages
     };
 
+    /**
+     * Vision Odometry message, contains a position and orientation of the robot.
+     * The position is a vector x, y, z
+     * The orientation is a quaternion with a scalar w and a vector x, y, z
+    */
+    struct VisOdomMessageData
+    {
+        float x;
+        float y;
+        float z;
+        float qw;
+        float qx;
+        float qy;
+        float qz;
+    };
+
     const tap::can::CanBus canBus;
 
     tap::Drivers* drivers;
@@ -225,6 +241,8 @@ private:
     void handlePitchAngleGyroMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
+
+    void handleVisionOdometryMessage(const modm::can::Message& message);
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
 

@@ -156,6 +156,27 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     limitSwitchDepressed = message.data[0] & 0b1;
 }
 
+void TurretMCBCanComm::handleVisionOdometryMessage(const modm::can::Message& message)
+{
+    const VisOdomMessageData* odom = reinterpret_cast<const VisOdomMessageData*>(message.data);
+
+    // Convert quaternion to Euler angles for orientation
+    // This is just because the transformer works with Euler angles, maybe change that in the future?
+    float sinRoll = 2 * (odom->qw * odom->qx + odom->qy * odom->qz);
+    float cosRoll = 1 - 2 * (powf(odom->qy, 2) + powf(odom->qz, 2));
+    float roll = atan2(sinRoll, cosRoll);
+
+    float sinPitch = sqrt(1 + 2 * (odom->qw * odom->qy - odom->qx * odom->qz));
+    float cosPitch = sqrt(1 - 2 * (odom->qw * odom->qy - odom->qx * odom->qz));
+    float pitch = 2 * atan2(sinPitch, cosPitch) - M_PI_2;
+
+    float sinYaw = 2 * (odom->qw * odom->qz + odom->qx * odom->qy);
+    float cosYaw = 1 - 2 * (powf(odom->qy, 2) + powf(odom->qz, 2));
+    float yaw = atan2(sinYaw, cosYaw);
+
+    // TODO: Call a method in standard transformer to replace odometry
+}
+
 void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
 {
     modm::can::Message syncResponseMessage(SYNC_TX_CAN_ID, 4);
