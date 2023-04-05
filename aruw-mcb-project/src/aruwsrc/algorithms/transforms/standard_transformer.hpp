@@ -392,7 +392,6 @@ private:
 
     static constexpr float ROT_KF_C[ROT_INPUTS_MULT_STATES] = {
         0, 1, 0,
-        0, 0, 1,
     };
 
     static constexpr float ROT_KF_Q[ROT_STATES_SQUARED] = {
@@ -402,8 +401,7 @@ private:
     };
 
     static constexpr float ROT_KF_R[ROT_INPUTS_SQUARED] = {
-        1.0, 0  ,
-        0  , 1.2,
+        1.0,
     };
 
     static constexpr float ROT_KF_P0[ROT_STATES_SQUARED] = {
