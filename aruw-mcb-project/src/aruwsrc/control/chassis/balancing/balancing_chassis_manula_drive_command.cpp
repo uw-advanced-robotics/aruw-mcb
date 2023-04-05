@@ -24,36 +24,29 @@ namespace aruwsrc
 namespace chassis
 {
 
-    BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
-        // tap::Drivers* drivers,
-        BalancingChassisSubsystem* chassis,
-        control::ControlOperatorInterface& operatorInterface
-    ) : chassis(chassis),
-        operatorInterface(operatorInterface)
-    {
-        assert(chassis != nullptr);
-        addSubsystemRequirement(chassis);
-    }
-
-    void BalancingChassisManualDriveCommand::initialize()
-    {
-        chassis->setDesiredOutput(0, 0);
-    }
-
-    void BalancingChassisManualDriveCommand::execute()
-    {
-        chassis->setDesiredOutput(operatorInterface.getChassisXInput(), operatorInterface.getChassisRInput());
-        chassis->setDesiredHeight(operatorInterface.getChassisYInput());
-    }
-
-    void BalancingChassisManualDriveCommand::end(bool interrupted)
-    {
-        chassis->setDesiredOutput(0, 0);
-    }
-
-    bool isFinished()
-    {
-        return false;
-    }
+BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
+    // tap::Drivers* drivers,
+    BalancingChassisSubsystem* chassis,
+    control::ControlOperatorInterface& operatorInterface)
+    : chassis(chassis),
+      operatorInterface(operatorInterface)
+{
+    assert(chassis != nullptr);
+    addSubsystemRequirement(chassis);
 }
+
+void BalancingChassisManualDriveCommand::initialize() { chassis->setDesiredOutput(0, 0); }
+
+void BalancingChassisManualDriveCommand::execute()
+{
+    chassis->setDesiredOutput(
+        operatorInterface.getChassisXInput(),
+        operatorInterface.getChassisYInput());
+    // chassis->setDesiredHeight(operatorInterface.getChassisYInput());
 }
+
+void BalancingChassisManualDriveCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
+
+bool BalancingChassisManualDriveCommand::isFinished() const { return false; }
+}  // namespace chassis
+}  // namespace aruwsrc

@@ -96,8 +96,8 @@ int main()
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
-#ifndef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#ifndef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
@@ -120,10 +120,10 @@ static void initializeIo(aruwsrc::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+    drivers->oledDisplay.initialize();
 #ifndef TARGET_TESTBED
     drivers->visionCoprocessor.initializeCV();
 
-    drivers->oledDisplay.initialize();
 #endif
     drivers->mpu6500TerminalSerialHandler.init();
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
@@ -140,8 +140,8 @@ static void updateIo(aruwsrc::Drivers *drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
+    drivers->oledDisplay.updateDisplay();
 #ifndef TARGET_TESTBED
     drivers->visionCoprocessor.updateSerial();
-    drivers->oledDisplay.updateDisplay();F
 #endif
 }

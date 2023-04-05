@@ -147,6 +147,24 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
  */
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
+static const float MAX_WHEEL_SPEED = 5'000;
+
+static const float ROTATION_SCALAR = .001;
+
+static const tap::algorithms::SmoothPidConfig LEFT_WHEEL_MOTOR_PID_CONFIG{
+    .kp = 10,
+    .ki = 0,
+    .kd = .1,
+    .maxOutput = 1000,
+};
+
+static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
+    .kp = 10,
+    .ki = 0,
+    .kd = .1,
+    .maxOutput = 1000,
+};
+
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 10000,
     .ki = 3,

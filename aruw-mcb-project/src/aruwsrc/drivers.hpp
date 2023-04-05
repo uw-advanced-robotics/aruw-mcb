@@ -27,9 +27,9 @@
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/tmotor_tx_handler_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
-#include "aruwsrc/mock/tmotor_tx_handler_mock.hpp"
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
@@ -52,8 +52,8 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          //   visionCoprocessor(this),
-          //   oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
+          visionCoprocessor(this),
+          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
@@ -72,8 +72,8 @@ public:
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    // serial::VisionCoprocessor visionCoprocessor;
-    // display::OledDisplay oledDisplay;
+    serial::VisionCoprocessor visionCoprocessor;
+    display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;

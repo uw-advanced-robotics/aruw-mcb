@@ -79,6 +79,10 @@ class CanRxListener;
 class CanRxHandler
 {
 public:
+    int debug1 = 0;
+    int debug2;
+    int debug3;
+
     static constexpr uint16_t MIN_CAN_ID = 0x000;
     static constexpr uint16_t NUM_CAN_IDS = 0x224;
     static constexpr uint16_t MAX_CAN_ID = MIN_CAN_ID + NUM_CAN_IDS;
@@ -93,14 +97,19 @@ public:
      */
     static inline uint16_t lookupTableIndexForCanId(uint16_t canId)
     {
-        if (canId > NUM_CAN_IDS) {
+        if (canId > NUM_CAN_IDS)
+        {
             canId -= 0x2900;
         }
+
         if (canId < MIN_CAN_ID)
         {
             return NUM_CAN_IDS;
         }
-
+        if (canId >= 0x1E4)
+        {  // for DJI motors n shit
+            return canId - 0x1E4;
+        }
         return canId - MIN_CAN_ID;
     }
 

@@ -83,8 +83,8 @@ void FiveBarLinkage::moveMotors()
     debug1 = motor1Output;
     debug2 = motor2Output;
 
-    motor1->setDesiredOutput(motor1Output);
-    motor2->setDesiredOutput(motor2Output);
+    // motor1->setDesiredOutput(motor1Output);
+    // motor2->setDesiredOutput(motor2Output);
 }
 
 void FiveBarLinkage::computeMotorAngles()

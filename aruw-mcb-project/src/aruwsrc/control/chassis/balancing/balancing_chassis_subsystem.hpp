@@ -21,6 +21,9 @@
 #define BALANCING_CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
+
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+
 #include "balancing_leg.hpp"
 
 namespace aruwsrc::chassis
@@ -29,10 +32,7 @@ namespace aruwsrc::chassis
 class BalancingChassisSubsystem : public tap::control::Subsystem
 {
 public:
-    BalancingChassisSubsystem(
-        tap::Drivers* drivers,
-        BalancingLeg& leftLeg,
-        BalancingLeg& rightLeg);
+    BalancingChassisSubsystem(tap::Drivers* drivers, BalancingLeg& leftLeg, BalancingLeg& rightLeg);
 
     void initialize() override;
 
@@ -42,20 +42,20 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
-    void setDesiredHeight(float z);
+    void setDesiredHeight(float z) { desiredZ = z; };
 
-    void setDesiredOutput(float x, float r);
+    void setDesiredOutput(float x, float r)
+    {
+        desiredX = x;
+        desiredR = r;
+    };
 
     void limitChassisPower();
 
 private:
-    BalancingLeg& leftLeg, rightLeg;
-    float desiredX,
-          desiredR,
-          desiredZ;
-
-    
+    BalancingLeg &leftLeg, rightLeg;
+    float desiredX, desiredR, desiredZ;
 };
-}   // namespace aruwsrc::chassis
+}  // namespace aruwsrc::chassis
 
 #endif  // BALANCING_CHASSIS_SUBSYSTEM_HPP_

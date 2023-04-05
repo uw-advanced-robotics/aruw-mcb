@@ -35,8 +35,9 @@ void TMotorTxHandler::addMotorToManager(Tmotor_AK809** canMotorStore, Tmotor_AK8
     assert(motor != nullptr);
     uint32_t idIndex = TMOTOR_TO_NORMALIZED_ID(motor->getMotorIdentifier());
     bool motorOverloaded = canMotorStore[idIndex] != nullptr;
-    bool motorOutOfBounds = idIndex >= DJI_MOTORS_PER_CAN;
-    modm_assert(!motorOverloaded && !motorOutOfBounds, "TMotorTxHandler", "overloading");
+    bool motorOutOfBounds = idIndex >= TMOTOR_MOTORS_PER_CAN;
+    modm_assert(!motorOutOfBounds, "TMotorTxHandler", "motor OOB");
+    modm_assert(!motorOverloaded, "TMotorTxHandler", "overloaded");
     canMotorStore[idIndex] = motor;
 }
 
@@ -57,7 +58,7 @@ void TMotorTxHandler::addMotorToManager(Tmotor_AK809* motor)
 
 void TMotorTxHandler::encodeAndSendCanData()
 {
-    for (int i = 0; i < DJI_MOTORS_PER_CAN; i++)
+    for (int i = 0; i < TMOTOR_MOTORS_PER_CAN; i++)
     {
         // set up new can messages to be sent via CAN bus 1 and 2
         modm::can::Message can1Message(

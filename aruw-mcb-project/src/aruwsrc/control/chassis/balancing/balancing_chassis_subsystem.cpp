@@ -21,47 +21,52 @@
 
 namespace aruwsrc::chassis
 {
-    BalancingChassisSubsystem::BalancingChassisSubsystem(
-        tap::Drivers* drivers,
-        BalancingLeg& leftLeg,
-        BalancingLeg& rightLeg
-    ) : Subsystem(drivers),
-        leftLeg(leftLeg),
-        rightLeg(rightLeg)
-    {
+BalancingChassisSubsystem::BalancingChassisSubsystem(
+    tap::Drivers* drivers,
+    BalancingLeg& leftLeg,
+    BalancingLeg& rightLeg)
+    : Subsystem(drivers),
+      leftLeg(leftLeg),
+      rightLeg(rightLeg)
+{
+}
 
+void BalancingChassisSubsystem::initialize()
+{
+    desiredX = leftLeg.getDefaultPosition().getX();
+    desiredR = 0;
+    desiredZ = leftLeg.getDefaultPosition().getY();
+    leftLeg.initialize();
+    rightLeg.initialize();
+}
+
+void BalancingChassisSubsystem::refresh()
+{
+    // 1. Update yaw and roll values
+    float pitch = drivers->mpu6500.getPitch();
+    float roll = drivers->mpu6500.getRoll();
+
+    // 2. Apply scaling and/or control laws to yaw and roll values
+    float yawAdjustment = 0;
+    float rollAdjustment = 0;
+    float pitchAdjustment = 0;
+
+    // 3. Set each side's actuators to compensate appropriate for yaw and roll error
+    // leftLeg.setDesiredHeight(desiredZ + rollAdjustment);
+    // rightLeg.setDesiredHeight(desiredZ - rollAdjustment);
+
+    yawAdjustment = desiredR * ROTATION_SCALAR;
+
+    if (desiredX + yawAdjustment > MAX_WHEEL_SPEED)
+    {
+        desiredX = MAX_WHEEL_SPEED - yawAdjustment;
     }
 
-    void BalancingChassisSubsystem::initialize()
-    {
-        desiredX = 0;
-        desiredR = 0;
-        desiredZ = 0;
-    }
+    leftLeg.setDesiredTranslationSpeed(desiredX + yawAdjustment);
+    rightLeg.setDesiredTranslationSpeed(desiredX - yawAdjustment);
+    leftLeg.update();
+    rightLeg.update();
+}
 
-    void BalancingChassisSubsystem::refresh()
-    {
-        // 1. Update yaw and roll values
-        
-
-        // 2. Apply scaling and/or control laws to yaw and roll values
-        float yawAdjustment = 0;
-        float rollAdjustment = 0;
-
-        // 3. Set each side's actuators to compensate appropriate for yaw and roll error
-        leftLeg.setDesiredHeight(desiredZ + rollAdjustment);
-        rightLeg.setDesiredHeight(desiredZ - rollAdjustment);
-
-        if (desiredX + yawAdjustment > MAX_WHEEL_SPEED)
-        {
-            desiredX = MAX_WHEEL_SPEED - yawAdjustment;
-        }
-        leftLeg.setDesiredTranslationSpeed(desiredX + yawAdjustment);
-        rightLeg.setDesiredTranslationSpeed(desiredX - yawAdjustment);
-    }
-
-    void BalancingChassisSubsystem::runHardwareTests()
-    {
-
-    }
-}   // namespace aruwsrc::chassis
+void BalancingChassisSubsystem::runHardwareTests() {}
+}  // namespace aruwsrc::chassis

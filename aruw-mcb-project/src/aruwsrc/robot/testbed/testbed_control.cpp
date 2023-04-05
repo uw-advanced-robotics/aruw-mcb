@@ -34,8 +34,11 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_manual_drive_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/motion/five_bar_motion_subsystem.hpp"
 #include "aruwsrc/control/motion/five_bar_move_command.hpp"
@@ -98,11 +101,53 @@ aruwsrc::motor::Tmotor_AK809 legmotorRR(
     true,
     "RightRear Leg");
 
+tap::motor::DjiMotor leftWheel(
+    drivers(),
+    tap::motor::MOTOR5,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Left Wheel Motor");
+
+tap::motor::DjiMotor RightWheel(
+    drivers(),
+    tap::motor::MOTOR6,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Right Wheel Motor");
+
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLR(drivers(), &legmotorLR);
 
 // aruwsrc::testbed::SpinMotorCommand spinMotorLF(drivers(), &motorSubsystemLF, 500);
 // aruwsrc::testbed::SpinMotorCommand spinMotorLR(drivers(), &motorSubsystemLR, -500);
+
+motion::FiveBarLinkage fiveBarLeft(
+    &legmotorLF,
+    &legmotorLR,
+    FIVE_BAR_CONFIG,
+    LF_LEG_MOTOR_PID_CONFIG,
+    LR_LEG_MOTOR_PID_CONFIG);
+
+motion::FiveBarLinkage fiveBarRight(
+    &legmotorRF,
+    &legmotorRR,
+    FIVE_BAR_CONFIG,
+    RF_LEG_MOTOR_PID_CONFIG,
+    RR_LEG_MOTOR_PID_CONFIG);
+
+BalancingLeg legLeft(
+    drivers(),
+    &fiveBarLeft,
+    &leftWheel,
+    WHEEL_RADIUS,
+    LEFT_WHEEL_MOTOR_PID_CONFIG);
+
+BalancingLeg legRight(
+    drivers(),
+    &fiveBarRight,
+    &RightWheel,
+    WHEEL_RADIUS,
+    RIGHT_WHEEL_MOTOR_PID_CONFIG);
 
 motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     drivers(),
@@ -119,6 +164,17 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
     FIVE_BAR_CONFIG,
     RF_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG);
+
+aruwsrc::chassis::BalancingChassisSubsystem chassis(
+    drivers(),
+    legLeft,
+    legRight);
+
+BalancingChassisManualDriveCommand manualDriveCommand(
+    // drivers(),
+    &chassis,
+    drivers()->controlOperatorInterface
+);
 
 motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
 
@@ -161,6 +217,7 @@ void registerTestbedSubsystems(aruwsrc::Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
     drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemLeft);
     drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemRight);
+    drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -170,10 +227,13 @@ void initializeSubsystems()
     // motorSubsystemLR.initialize();
     fiveBarSubsystemLeft.initialize();
     fiveBarSubsystemRight.initialize();
+    chassis.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultTestbedCommands(aruwsrc::Drivers *) {}
+void setDefaultTestbedCommands(aruwsrc::Drivers *) {
+    chassis.setDefaultCommand(&manualDriveCommand);
+}
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startTestbedCommands(aruwsrc::Drivers *drivers) {}

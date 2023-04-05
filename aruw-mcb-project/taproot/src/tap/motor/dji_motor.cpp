@@ -69,12 +69,15 @@ void DjiMotor::initialize()
 {
     drivers->djiMotorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
+    debug = 3;
 }
 
 void DjiMotor::processMessage(const modm::can::Message& message)
 {
+    debug = 1;
     if (message.getIdentifier() != DjiMotor::getMotorIdentifier())
     {
+        debug = -1;
         return;
     }
     uint16_t encoderActual =

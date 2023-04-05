@@ -41,7 +41,7 @@ namespace aruwsrc::motor
  */
 #define TMOTOR_TO_NORMALIZED_ID(id)                                                    \
     static_cast<uint32_t>(                                                                \
-        (id < aruwsrc::motor::MOTOR1) ? (aruwsrc::motor::TMotorTxHandler::DJI_MOTORS_PER_CAN) \
+        (id < aruwsrc::motor::MOTOR1) ? (aruwsrc::motor::TMotorTxHandler::TMOTOR_MOTORS_PER_CAN) \
                                   : (id - aruwsrc::motor::MOTOR1))
 
 /**
@@ -67,7 +67,7 @@ class TMotorTxHandler
 {
 public:
     /** Number of motors on each CAN bus. */
-    static constexpr int DJI_MOTORS_PER_CAN = 8;
+    static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
     /** CAN message length of each motor control message. */
     static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
 
@@ -100,8 +100,8 @@ public:
 private:
     aruwsrc::Drivers* drivers;
 
-    Tmotor_AK809* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};
-    Tmotor_AK809* can2MotorStore[DJI_MOTORS_PER_CAN] = {0};
+    Tmotor_AK809* can1MotorStore[TMOTOR_MOTORS_PER_CAN] = {0};
+    Tmotor_AK809* can2MotorStore[TMOTOR_MOTORS_PER_CAN] = {0};
 
     void addMotorToManager(Tmotor_AK809** canMotorStore, Tmotor_AK809* const motor);
 

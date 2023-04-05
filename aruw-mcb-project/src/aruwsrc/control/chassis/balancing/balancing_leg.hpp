@@ -33,9 +33,9 @@ namespace chassis
  * Wrapper class for a mechanism that uses a five-bar linkage
  * with links grounded on a robot chassis and a wheel motor
  * attached to the end-effector to drive one side of a two-wheeled robot.
- * 
+ *
  * See @class BalancingChassisSubsystem for application of this mechanism.
-*/
+ */
 class BalancingLeg
 {
 public:
@@ -45,6 +45,8 @@ public:
         tap::motor::MotorInterface* wheelMotor,
         const float wheelRadius,
         const tap::algorithms::SmoothPidConfig driveWheelPidConfig);
+
+    void initialize();
 
     /**
      *
@@ -66,6 +68,8 @@ public:
      */
     inline float getCurrentTranslationSpeed() { return vCurrent; };
 
+    inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
+
     /**
      *
      */
@@ -78,6 +82,7 @@ private:
     tap::motor::MotorInterface* driveWheel;
 
     tap::algorithms::SmoothPid driveWheelPid;
+    uint32_t prevTime;
 
     float zDesired,          // m
         vDesired,            // m/s

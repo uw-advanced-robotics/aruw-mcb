@@ -226,6 +226,8 @@ private:
 
     int16_t torque;
 
+    int debug;
+
     /**
      * If `false` the positive rotation direction of the shaft is counter-clockwise when
      * looking at the shaft from the side opposite the motor. If `true` then the positive

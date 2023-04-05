@@ -40,9 +40,18 @@ BalancingLeg::BalancingLeg(
     assert(wheelMotor != nullptr);
 }
 
+void BalancingLeg::initialize()
+{
+    driveWheel->initialize();
+    fivebar->initialize();
+}
+
 void BalancingLeg::update()
 {
     // 1. Update Current State
+    uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+    int32_t dt = currentTime - prevTime;
+    prevTime = currentTime;
     zCurrent = fivebar->getCurrentPosition().getY();
     tl_Current = atan2(zCurrent, -fivebar->getCurrentPosition().getX());
     vCurrent = WHEEL_RADIUS * driveWheel->getShaftRPM() * M_TWOPI / 60;
@@ -51,12 +60,20 @@ void BalancingLeg::update()
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, -.2);
     float desiredWheelSpeed = 0;
     float desiredWheelAngle = 0;
-    desiredWheelAngle -= fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev; //subtract
+    desiredWheelSpeed += vDesired;
+    desiredWheelAngle -=
+        fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
-    
+
     // 3. Send New Output Values
     fivebar->setDesiredPosition(desiredWheelLocation);
-    // driveWheelPid.runControllerDerivateError();
+    // we do things in mks here
+    float driveWheelOutput = driveWheelPid.runControllerDerivateError(
+        driveWheel->getShaftRPM() * M_TWOPI / 360 - desiredWheelSpeed,
+        dt);
+
+    driveWheel->setDesiredOutput(driveWheelOutput);
+    fivebar->refresh();
 }
 }  // namespace chassis
 }  // namespace aruwsrc
