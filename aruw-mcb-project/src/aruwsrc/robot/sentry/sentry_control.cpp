@@ -62,7 +62,7 @@
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
