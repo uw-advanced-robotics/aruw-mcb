@@ -38,20 +38,4 @@ void VirtualMCBHandler<port>::refresh()
     motorTxHandler.encodeAndSendCanData();
 }
 
-template <tap::communication::serial::Uart::UartPort port>
-VirtualCanBus<port>& VirtualMCBHandler<port>::getCanbus()
-{
-    return &canbus;
-}
-template <tap::communication::serial::Uart::UartPort port>
-VirtualCANRxHandler& VirtualMCBHandler<port>::getRxHandler()
-{
-    return &canRxHandler;
-}
-template <tap::communication::serial::Uart::UartPort port>
-VirtualDJIMotorTxHandler& VirtualMCBHandler<port>::getDjiMotorHandler()
-{
-    return &motorTxHandler;
-}
-
 }  // namespace aruwsrc::virtualMCB
