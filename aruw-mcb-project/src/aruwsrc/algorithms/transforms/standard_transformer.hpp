@@ -48,7 +48,7 @@ public:
      * A transform provider that provides transforms for the standard
      * robot.
      */
-    StandardTransformer(tap::communication::sensors::imu::mpu6500::Mpu6500& );
+    StandardTransformer(tap::communication::sensors::imu::mpu6500::Mpu6500& chassisImu);
 
     /**
      * Update each transform with most recent encoder and IMU odometry data. This method
@@ -106,25 +106,20 @@ public:
     const Transform<ChassisFrame, TurretIMUFrame>& getChassisToTurretIMUTransform();
 
     /**
-     * Get Chassis to World transform
+     * Get turret IMU to camera transform
      *
-     * @returns Chassis to World transform
+     * @returns Turret to camera transform
      */
-    const Transform<ChassisFrame, WorldFrame>& getChassisToWorldTransform();
+    const Transform<TurretIMUFrame, CameraFrame>& getTurretIMUToCameraTransform();
 
     /**
-     * Get Turret to Chassis transform
+     * Get turret imu to gun transform
      *
-     * @returns Turret to Chassis transform
+     * @returns turret imu to gun transform
      */
-    const Transform<TurretIMUFrame, ChassisFrame>& getTurretIMUToChassisTransform();
+    const Transform<TurretIMUFrame, GunFrame>& getTurretIMUToGunTransform();
 
-    /**
-     * Get Camera to Turret transform
-     *
-     * @returns Camera to Turret transform
-     */
-    const Transform<CameraFrame, TurretIMUFrame>& getCameraToTurretIMUTransform();
+
 #ifndef ENV_UNIT_TESTS
 private:
 #endif
@@ -282,7 +277,8 @@ private:
 
     enum class RotOdomInput
     {
-        VEL_YAW = 0,
+        POS_YAW = 0,
+        VEL_YAW,
         NUM_INPUTS
     };
 
@@ -391,17 +387,19 @@ private:
     };
 
     static constexpr float ROT_KF_C[ROT_INPUTS_MULT_STATES] = {
+        1, 0, 0,
         0, 1, 0,
     };
 
     static constexpr float ROT_KF_Q[ROT_STATES_SQUARED] = {
-        1E1, 0  , 0   ,
-        0  , 1E0, 0   ,
+        1E0, 0  , 0   ,
+        0  , 1E1, 0   ,
         0  , 0  , 1E-1,
     };
 
     static constexpr float ROT_KF_R[ROT_INPUTS_SQUARED] = {
-        1.0,
+        1.0, 0. ,
+        0. , 1.0
     };
 
     static constexpr float ROT_KF_P0[ROT_STATES_SQUARED] = {
