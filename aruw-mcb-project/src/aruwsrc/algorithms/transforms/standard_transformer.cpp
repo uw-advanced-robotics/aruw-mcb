@@ -143,26 +143,20 @@ const Transform<ChassisFrame, TurretIMUFrame>& StandardTransformer::getChassisTo
     return chassisToTurretIMUTransform;
 }
 
-const Transform<ChassisFrame, WorldFrame>& StandardTransformer::getChassisToWorldTransform()
-{
-    worldToChassisTransform = compose<WorldFrame, ChassisIMUFrame, ChassisFrame>(
-        worldToChassisIMUTransform,
-        chassisIMUToChassisTransform);
 
-    chassisToWorldTransform = worldToChassisTransform.getInverse();
-    return chassisToWorldTransform;
+const Transform<ChassisIMUFrame, ChassisFrame>& StandardTransformer::getChassisIMUToChassisTransform() 
+{
+    return chassisIMUToChassisTransform;
 }
 
-const Transform<TurretIMUFrame, ChassisFrame>& StandardTransformer::getTurretIMUToChassisTransform()
+const Transform<TurretIMUFrame, CameraFrame>& StandardTransformer::getTurretIMUToCameraTransform()
 {
-    turretIMUToChassisTransform = chassisToTurretIMUTransform.getInverse();
-    return turretIMUToChassisTransform;
+    return turretIMUToCameraTransform;
 }
 
-const Transform<CameraFrame, TurretIMUFrame>& StandardTransformer::getCameraToTurretIMUTransform()
+const Transform<TurretIMUFrame, GunFrame>& StandardTransformer::getTurretIMUToGunTransform()
 {
-    cameraToTurretIMUTransform = turretIMUToCameraTransform.getInverse();
-    return cameraToTurretIMUTransform;
+    return turretIMUToGunTransform;
 }
 
 void StandardTransformer::fillPosKFInput(float nextKFInput[])
@@ -231,10 +225,6 @@ void StandardTransformer::resetTransforms() {
 
     setIdentityTransform(worldToTurretIMUTransform);
     setIdentityTransform(worldToChassisTransform);
-
-    setIdentityTransform(chassisToWorldTransform);
-    setIdentityTransform(turretIMUToChassisTransform);
-    setIdentityTransform(cameraToTurretIMUTransform);
 
     setIdentityTransform(chassisToTurretIMUTransform);
     setIdentityTransform(chassisIMUToChassisTransform);

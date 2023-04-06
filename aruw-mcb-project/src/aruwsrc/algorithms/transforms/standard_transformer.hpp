@@ -98,6 +98,14 @@ public:
      */
     const Transform<WorldFrame, TurretIMUFrame>& getWorldToTurretIMUTransform();
 
+
+    /**
+     * Get Chassis IMU to chassis transform
+     *
+     * @returns chassis IMU to chassis transform
+     */
+    const Transform<ChassisIMUFrame, ChassisFrame>& getChassisIMUToChassisTransform();
+
     /**
      * Get Chassis to Turret transform
      *
@@ -156,11 +164,6 @@ private:
     // Transforms that are compositions
     Transform<WorldFrame, TurretIMUFrame> worldToTurretIMUTransform;
     Transform<WorldFrame, ChassisFrame> worldToChassisTransform;
-
-    // Transforms that are inverses
-    Transform<ChassisFrame, WorldFrame> chassisToWorldTransform;
-    Transform<TurretIMUFrame, ChassisFrame> turretIMUToChassisTransform;
-    Transform<CameraFrame, TurretIMUFrame> cameraToTurretIMUTransform;
 
     // Constant transforms
     Transform<ChassisFrame, TurretIMUFrame> chassisToTurretIMUTransform;
