@@ -99,6 +99,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT:
+        {
+            decodeToAutoNavSetpointData(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -135,6 +140,12 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
             }
         }
     }
+    return true;  // bruh lol it never returns false
+}
+
+bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
+{
+    memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
     return true;
 }
 

@@ -281,6 +281,11 @@ cv::TurretCVCommand turretCVCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
+AutoNavCommand autoNavCommand(
+    drivers(),
+    chassis,
+    (drivers()->controlOperatorInterface));
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // base rotate/unjam commands
