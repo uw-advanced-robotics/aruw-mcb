@@ -143,7 +143,6 @@ const Transform<ChassisFrame, TurretIMUFrame>& StandardTransformer::getChassisTo
     return chassisToTurretIMUTransform;
 }
 
-
 const Transform<ChassisIMUFrame, ChassisFrame>& StandardTransformer::getChassisIMUToChassisTransform() 
 {
     return chassisIMUToChassisTransform;

@@ -75,7 +75,7 @@ public:
 
     // resets just one transform to an identity transform
     template <class SOURCE, class TARGET>
-        void setIdentityTransform(Transform<SOURCE, TARGET>& transform) {
+    void setIdentityTransform(Transform<SOURCE, TARGET>& transform) {
         // Initialize CMSISMat input to the transform
         float emptyPositionData[3] = {0., 0., 0.};
         CMSISMat<3, 1> cmsisPos(emptyPositionData);
@@ -148,14 +148,6 @@ private:
      */
     void updateInternalOdomFromKF();
 
-    // TODO: rethink which transforms we want to provide....
-    // moreover, some of the transforms we're holding aren't being updated
-
-    // should structure transforms in groups by:
-    //  <Chassis, something>
-    //  <Turret, something>
-    // the client can find a path of transfoms between any frames they want :)
-
     // Transforms that are dynamically updated
     Transform<WorldFrame, ChassisIMUFrame> worldToChassisIMUTransform;
     Transform<TurretIMUFrame, CameraFrame> turretIMUToCameraTransform;
@@ -223,12 +215,10 @@ private:
     void fillPosKFInput(float nextKFInput[]);
 
     /**
-     * TODO: Change this comment, I just copied and pasted
      * Fills nextKFInput with measurements taken from the chassis about the current
      * state of the robot.
      *
-     * Specifically, fills in the chassis' velocity and acceleration in the
-     * perspective of the world frame
+     * Specifically, fills in the chassis' yaw and angular velocity
      */
     void fillRotKFInput(float nextKFInput[]);
 
@@ -243,15 +233,6 @@ private:
     // (roll, pitch, yaw)
     modm::Vector3f turretWorldOrientation;
 
-    // the unwrapped yaw of the chassis IMU in degrees
-    // TODO: uncomment
-    // float prevUnwrappedIMUChassisYaw;
-    const float UPPER_WRAPPED_YAW_THRESHOLD = 300.f;
-    const float LOWER_WRAPPED_YAW_THRESHOLD = 60.f;
-    
-    // @return the unwrapped yaw read by the chassis IMU in degrees
-    float getUnwrappedChassisIMUYaw();
-    
     // Kalman Filter enums
     enum class PosOdomInput
     {
