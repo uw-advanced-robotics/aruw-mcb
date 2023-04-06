@@ -222,7 +222,7 @@ public:
         return lastAimData[turretID];
     }
     
-    mockable inline const SetpointData& getLastSetpointData() const
+    mockable inline const AutoNavSetpointData& getLastSetpointData() const
     {
         return lastSetpointData;
     }
@@ -317,7 +317,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData;
+    AutoNavSetpointData lastSetpointData{0.0f, 0.0f, 0};  // TODO: bad initialized timestamp
 
     // CV online variables.
     /// Timer for determining if serial is offline.

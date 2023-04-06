@@ -39,10 +39,12 @@ class HolonomicChassisSubsystem;
 class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
-    BeybladeCommand(
+    AutoNavBeybladeCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
+        const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+        const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
     void initialize() override;
@@ -60,11 +62,11 @@ private:
 
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
-
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
+    const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
 };  // class BeybladeCommand

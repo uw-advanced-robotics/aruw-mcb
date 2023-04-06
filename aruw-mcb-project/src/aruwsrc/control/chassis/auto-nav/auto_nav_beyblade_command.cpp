@@ -27,8 +27,8 @@
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-#include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -40,13 +40,19 @@ namespace chassis
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
-    aruwsrc::serial::VisionCoprocessor& VisionCoprocessor,
+    const aruwsrc::control::turret::TurretMotor& yawMotor,
+    const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
     aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
       chassis(chassis),
+      yawMotor(yawMotor),
+      visionCoprocessor(visionCoprocessor),
+      odometryInterface(odometryInterface),
       operatorInterface(operatorInterface)
 {
-    addSubsystemRequirement(chassis);
+    // TODO: sucks that we have to pull the address out of the reference bc everything else uses pointers
+    addSubsystemRequirement(&chassis);
 }
 
 // Resets ramp
@@ -57,25 +63,25 @@ void AutoNavBeybladeCommand::initialize()
 #else
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 #endif
-    rotateSpeedRamp.reset(chassis->getDesiredRotation());
+    rotateSpeedRamp.reset(chassis.getDesiredRotation());
 }
 
 void AutoNavBeybladeCommand::execute()
 {
-    if (yawMotor->isOnline())
+    if (yawMotor.isOnline())
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
         float currentY = odometryInterface.getCurrentLocation2D().getY();
         float chassisYawAngle = odometryInterface.getYaw();
 
-        AutoNavSetpointData& setpointData = drivers.visionCoprocessor.getLastSetpointData();
+        const aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData& setpointData = visionCoprocessor.getLastSetpointData();
         float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+            drivers.refSerial.getRefSerialReceivingData(),
+            drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
@@ -105,15 +111,15 @@ void AutoNavBeybladeCommand::execute()
 
         // set outputs
         // TODO: i THINK this is positional offset
-        chassis->setDesiredOutput(x, y, r);
+        chassis.setDesiredOutput(x, y, r);
     }
     else
     {
-        ChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
+        ChassisRelDrive::onExecute(&operatorInterface, &drivers, &chassis);
     }
 }
 
-void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
+void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }
 }  // namespace chassis
 
 }  // namespace aruwsrc

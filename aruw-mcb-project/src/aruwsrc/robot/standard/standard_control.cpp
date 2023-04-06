@@ -50,6 +50,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/auto-nav/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -281,10 +282,13 @@ cv::TurretCVCommand turretCVCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
-AutoNavCommand autoNavCommand(
-    drivers(),
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
     chassis,
-    (drivers()->controlOperatorInterface));
+    turret.yawMotor,
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    drivers()->controlOperatorInterface);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -394,9 +398,10 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
+// TODO: temporarily steal the beyblade command
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&autoNavBeybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
