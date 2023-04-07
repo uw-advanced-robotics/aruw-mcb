@@ -70,18 +70,26 @@ void AutoNavBeybladeCommand::execute()
 {
     if (yawMotor.isOnline())
     {
+        if(tap::arch::clock::getTimeMilliseconds() - testLastUpdated >= interval)
+        {
+            testLastUpdated = tap::arch::clock::getTimeMilliseconds();
+            clockedOffset += increment;
+        }
+
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
         float currentY = odometryInterface.getCurrentLocation2D().getY();
         float chassisYawAngle = odometryInterface.getYaw();
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
-        float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-        float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
+
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
+        positionOffset = setpointData.x + clockedOffset - currentX;
+        float x = positionOffset * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+        float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
@@ -104,7 +112,7 @@ void AutoNavBeybladeCommand::execute()
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
         rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RAMP);
 
-        float r = rotateSpeedRamp.getValue();
+        float r = 0;//rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
         tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);

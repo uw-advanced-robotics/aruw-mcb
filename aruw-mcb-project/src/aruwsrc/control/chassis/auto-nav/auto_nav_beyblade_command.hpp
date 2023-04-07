@@ -69,6 +69,10 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
+    uint32_t testLastUpdated{0}, interval{1000};
+    float clockedOffset{0}, increment{0.2}, positionOffset{0};
+
+
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis
