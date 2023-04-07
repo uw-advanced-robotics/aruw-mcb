@@ -189,7 +189,7 @@ void StandardTransformer::fillRotKFInput(float nextKFInput[])
     float yawAngularVelocity = chassisPlanarVelocity[2][0];
     nextKFInput[int(RotOdomInput::VEL_YAW)] = yawAngularVelocity;
 
-    // note: this will frick up the kalman filter when we cross 2pi => 0 or 0 =? 2pi
+    // note: this will frick up the kalman filter when we cross 2pi => 0 or 0 => 2pi
     nextKFInput[int(RotOdomInput::POS_YAW)] =  modm::toRadian(chassisImu.getYaw());
     // TODO: unwrap this later, for now observe what it looks like when it wraps
     // (how quickly it adjusts) 
