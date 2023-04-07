@@ -13,6 +13,6 @@ public:
     virtual void setLowerBound() = 0;
     virtual void setUpperBound() = 0;
 };
-}
+}  // namespace aruwsrc::control
 
 #endif
