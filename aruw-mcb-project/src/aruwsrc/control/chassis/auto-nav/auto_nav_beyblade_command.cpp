@@ -75,7 +75,7 @@ void AutoNavBeybladeCommand::execute()
         float currentY = odometryInterface.getCurrentLocation2D().getY();
         float chassisYawAngle = odometryInterface.getYaw();
 
-        const aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData& setpointData = visionCoprocessor.getLastSetpointData();
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
         float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 

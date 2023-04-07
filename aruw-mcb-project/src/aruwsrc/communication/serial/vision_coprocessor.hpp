@@ -222,7 +222,7 @@ public:
         return lastAimData[turretID];
     }
     
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
+    mockable inline AutoNavSetpointData getLastSetpointData() const
     {
         return lastSetpointData;
     }
