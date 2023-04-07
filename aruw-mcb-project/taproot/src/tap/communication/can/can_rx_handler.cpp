@@ -79,7 +79,6 @@ void CanRxHandler::pollCanData()
     {
         processReceivedCanData(rxMessage, messageHandlerStoreCan2);
     }
-    debug2 = rxMessage.getIdentifier();
 }
 
 void CanRxHandler::processReceivedCanData(
@@ -87,9 +86,6 @@ void CanRxHandler::processReceivedCanData(
     CanRxListener* const* messageHandlerStore)
 {
     uint16_t id = lookupTableIndexForCanId(rxMessage.getIdentifier());
-    debug1 = id;
-    debug2 = rxMessage.getIdentifier();
-    debug3 += 1;
 
     if (id >= NUM_CAN_IDS)
     {

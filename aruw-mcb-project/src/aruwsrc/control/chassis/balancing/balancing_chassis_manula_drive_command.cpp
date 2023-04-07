@@ -25,10 +25,11 @@ namespace chassis
 {
 
 BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
-    // tap::Drivers* drivers,
+    tap::Drivers* drivers,
     BalancingChassisSubsystem* chassis,
     control::ControlOperatorInterface& operatorInterface)
-    : chassis(chassis),
+    : drivers(drivers),
+      chassis(chassis),
       operatorInterface(operatorInterface)
 {
     assert(chassis != nullptr);
@@ -40,9 +41,9 @@ void BalancingChassisManualDriveCommand::initialize() { chassis->setDesiredOutpu
 void BalancingChassisManualDriveCommand::execute()
 {
     chassis->setDesiredOutput(
-        operatorInterface.getChassisXInput(),
-        operatorInterface.getChassisYInput());
-    // chassis->setDesiredHeight(operatorInterface.getChassisYInput());
+        operatorInterface.getChassisXInput()*TRANSLATION_REMOTE_SCALAR,
+        operatorInterface.getChassisYInput()*ROTATION_REMOTE_SCALAR);
+    chassis->setDesiredHeight(0.001*operatorInterface.getTurretPitchInput(0));
 }
 
 void BalancingChassisManualDriveCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }

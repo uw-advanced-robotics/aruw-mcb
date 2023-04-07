@@ -42,7 +42,11 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
-    void setDesiredHeight(float z) { desiredZ = z; };
+    void setDesiredHeight(float z)
+    {
+        desiredZ += z;
+        tap::algorithms::limitVal<float>(desiredZ, -.35, -.15);
+    };
 
     void setDesiredOutput(float x, float r)
     {
@@ -53,8 +57,39 @@ public:
     void limitChassisPower();
 
 private:
+    void computeState();
+
     BalancingLeg &leftLeg, rightLeg;
+    const tap::algorithms::SmoothPidConfig jankBalPidConfig{
+        .kp = 25,
+        .ki = .3,
+        .kd = 0,
+        .maxOutput = 200,
+    };
+    tap::algorithms::SmoothPid jankBalPid = tap::algorithms::SmoothPid(jankBalPidConfig);
+
+    const tap::algorithms::SmoothPidConfig jankBalVelPidConfig{
+        .kp = .1,
+        .ki = 0,
+        .kd = 0,
+        .maxOutput = 15 * M_TWOPI / 360,
+        .errDeadzone = 0,
+    };
+    tap::algorithms::SmoothPid jankBalVelPid = tap::algorithms::SmoothPid(jankBalVelPidConfig);
+
+    float pitchAdjustment = 0;
+    float pitchAdjustmentPrev = 0;
+    float velocityAdjustment = 0;
+    float velocityAdjustmentPrev = 0;
+    float targetPitch; 
+
+    float pitch;
+    float roll;
+    float yaw;
+
     float desiredX, desiredR, desiredZ;
+    float currentX, currentV, currentR, currentZ;
+    uint32_t prevTime;
 };
 }  // namespace aruwsrc::chassis
 

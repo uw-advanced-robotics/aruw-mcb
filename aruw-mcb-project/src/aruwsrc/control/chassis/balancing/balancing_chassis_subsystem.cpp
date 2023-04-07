@@ -42,30 +42,51 @@ void BalancingChassisSubsystem::initialize()
 
 void BalancingChassisSubsystem::refresh()
 {
+    const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+    const uint32_t dt = curTime - prevTime;
+    prevTime = curTime;
+
     // 1. Update yaw and roll values
-    float pitch = drivers->mpu6500.getPitch();
-    float roll = drivers->mpu6500.getRoll();
+    pitch = drivers->mpu6500.getRoll() * M_TWOPI / 360;
+    roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
+    computeState();
 
     // 2. Apply scaling and/or control laws to yaw and roll values
     float yawAdjustment = 0;
     float rollAdjustment = 0;
-    float pitchAdjustment = 0;
+
+    pitchAdjustment = jankBalVelPid.runControllerDerivateError(currentV, dt);
+    pitchAdjustmentPrev = tap::algorithms::lowPassFilter(pitchAdjustmentPrev, pitchAdjustment, .1);
+    pitchAdjustment = tap::algorithms::lowPassFilter(pitchAdjustmentPrev, pitchAdjustment, .1);
+    targetPitch = pitch - pitchAdjustment;
+    velocityAdjustment = -jankBalPid.runControllerDerivateError(-targetPitch, dt);  // units of m/s
 
     // 3. Set each side's actuators to compensate appropriate for yaw and roll error
-    // leftLeg.setDesiredHeight(desiredZ + rollAdjustment);
-    // rightLeg.setDesiredHeight(desiredZ - rollAdjustment);
+    leftLeg.setDesiredHeight(
+        tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
+    rightLeg.setDesiredHeight(
+        tap::algorithms::limitVal<float>(desiredZ - rollAdjustment, -.35, -.15));
 
-    yawAdjustment = desiredR * ROTATION_SCALAR;
+    yawAdjustment = desiredR * WIDTH_BETWEEN_WHEELS_Y / 2;  // m/s
 
-    if (desiredX + yawAdjustment > MAX_WHEEL_SPEED)
-    {
-        desiredX = MAX_WHEEL_SPEED - yawAdjustment;
-    }
-
-    leftLeg.setDesiredTranslationSpeed(desiredX + yawAdjustment);
-    rightLeg.setDesiredTranslationSpeed(desiredX - yawAdjustment);
+    // 4. run outputs
+    leftLeg.setDesiredTranslationSpeed(-yawAdjustment + velocityAdjustment + desiredX);  // m/s
+    rightLeg.setDesiredTranslationSpeed(yawAdjustment + velocityAdjustment + desiredX);
     leftLeg.update();
     rightLeg.update();
+}
+
+void BalancingChassisSubsystem::computeState()
+{
+    currentV = (rightLeg.getCurrentTranslationSpeed() + leftLeg.getCurrentTranslationSpeed()) / 2;
+
+    float rightRot =
+        2 * (rightLeg.getCurrentTranslationSpeed() - currentV) / WIDTH_BETWEEN_WHEELS_Y;
+    float leftRot = 2 * (leftLeg.getCurrentTranslationSpeed() + currentV) / WIDTH_BETWEEN_WHEELS_Y;
+    currentR = (rightRot + leftRot) / 2;
+    currentZ = rightLeg.getCurrentHeight() > leftLeg.getCurrentHeight()
+                   ? rightLeg.getCurrentHeight()
+                   : leftLeg.getCurrentHeight();
 }
 
 void BalancingChassisSubsystem::runHardwareTests() {}

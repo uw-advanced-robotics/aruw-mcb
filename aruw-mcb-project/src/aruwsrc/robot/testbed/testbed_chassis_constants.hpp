@@ -149,56 +149,61 @@ static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const float MAX_WHEEL_SPEED = 5'000;
 
-static const float ROTATION_SCALAR = .001;
+static constexpr float ROTATION_REMOTE_SCALAR = .005;
+static constexpr float TRANSLATION_REMOTE_SCALAR = .01;
 
 static const tap::algorithms::SmoothPidConfig LEFT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 10,
+    .kp = 1000,
     .ki = 0,
-    .kd = .1,
-    .maxOutput = 1000,
+    .kd = 0,
+    .maxOutput = 3000,
+    .errDeadzone = 0,
+    .errorDerivativeFloor = 1,
 };
 
 static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 10,
+    .kp = 1000,
     .ki = 0,
-    .kd = .1,
-    .maxOutput = 1000,
+    .kd = 0,
+    .maxOutput = 3000,
+    .errDeadzone = 0,
+    .errorDerivativeFloor = 1,
 };
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 10000,
-    .ki = 3,
-    .kd = .05,
-    .maxICumulative = 2000,
-    .maxOutput = 5000,
+    .ki = 5,
+    .kd = .1,
+    .maxICumulative = 5000,
+    .maxOutput = 10000,
 };
 
 static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG{
     .kp = 10000,
-    .ki = 3,
-    .kd = .05,
-    .maxICumulative = 2000,
-    .maxOutput = 5000,
+    .ki = 5,
+    .kd = .1,
+    .maxICumulative = 5000,
+    .maxOutput = 10000,
 };
 
 static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG{
     .kp = 10000,
-    .ki = 3,
-    .kd = .05,
-    .maxICumulative = 2000,
-    .maxOutput = 5000,
+    .ki = 5,
+    .kd = .1,
+    .maxICumulative = 5000,
+    .maxOutput = 10000,
 };
 
 static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG{
     .kp = 10000,
-    .ki = 3,
-    .kd = .05,
-    .maxICumulative = 2000,
-    .maxOutput = 5000,
+    .ki = 5,
+    .kd = .1,
+    .maxICumulative = 5000,
+    .maxOutput = 10000,
 };
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
-    .defaultPosition = modm::Vector2f(0, -0.150),
+    .defaultPosition = modm::Vector2f(0, -0.100),
     .motor1toMotor2Length = .108,
     .motor1toJoint1Length = .150,
     .motor2toJoint2Length = .150,

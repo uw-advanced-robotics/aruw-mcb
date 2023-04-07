@@ -128,6 +128,8 @@ private:
 
     void moveMotors();
 
+    bool withinEnvelope(modm::Vector2f point);
+
     int motorsMoved = 0;
 
     float debug1 = 0;

@@ -79,9 +79,6 @@ class CanRxListener;
 class CanRxHandler
 {
 public:
-    int debug1 = 0;
-    int debug2;
-    int debug3;
 
     static constexpr uint16_t MIN_CAN_ID = 0x000;
     static constexpr uint16_t NUM_CAN_IDS = 0x224;

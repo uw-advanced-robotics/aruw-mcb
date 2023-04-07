@@ -76,20 +76,43 @@ public:
     void update();
 
 private:
+    void computeState(uint32_t dt);
     const float WHEEL_RADIUS;
 
     aruwsrc::control::motion::FiveBarLinkage* fivebar;
     tap::motor::MotorInterface* driveWheel;
 
     tap::algorithms::SmoothPid driveWheelPid;
-    uint32_t prevTime;
+
+    tap::algorithms::SmoothPidConfig xPidConfig{
+        .kp = .001,
+        .ki = 0,
+        .kd = 0,
+        .maxOutput = .03,
+    };
+    tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
+ 
+    uint32_t prevTime = 0;
+    float wheelPosPrev = 0;
+    float tl_prev = 0;
 
     float zDesired,          // m
         vDesired,            // m/s
+        vDesiredPrev,
         zCurrent,            // m
         vCurrent,            // m/s
+        vCurrentPrev,
         motorLinkAnglePrev,  // rad
-        tl_Current;          // rad
+        tl,                  // rad
+        tl_dot,
+        tl_dotPrev;              // rad/s
+    float realWheelSpeed;
+    float aCurrentPrev;
+    float aCurrent;
+    float aDesired;
+    float aDesiredPrev;
+    float xoffset;
+    float xoffsetPrev;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

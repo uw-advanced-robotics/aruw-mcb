@@ -107,9 +107,6 @@ public:
 private:
     Drivers* drivers;
 
-    int debug1;
-    bool debug2;
-
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};
     DjiMotor* can2MotorStore[DJI_MOTORS_PER_CAN] = {0};
 

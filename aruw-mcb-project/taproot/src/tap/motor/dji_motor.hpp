@@ -26,11 +26,11 @@
 
 #include <string>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 
 #include "motor_interface.hpp"
-#include "tap/algorithms/math_user_utils.hpp"
 
 namespace tap::motor
 {
@@ -112,12 +112,18 @@ public:
     /***
      * @returns Angular position of motor, unwrapped, in radians.
      */
-    float getPositionUnwrapped() const { return getEncoderUnwrapped() * ENC_RESOLUTION / M_TWOPI; };
-    
+    float getPositionUnwrapped() const
+    {
+        return (float)getEncoderUnwrapped() / (float)ENC_RESOLUTION * M_TWOPI;
+    };
+
     /***
      * @returns Angular position of motor, wrapped to one rotation, in radians.
      */
-    float getPositionWrapped() const { return getEncoderWrapped() * ENC_RESOLUTION / M_TWOPI; };
+    float getPositionWrapped() const
+    {
+        return (float)getEncoderWrapped() / (float)ENC_RESOLUTION * M_TWOPI;
+    };
 
     DISALLOW_COPY_AND_ASSIGN(DjiMotor)
 

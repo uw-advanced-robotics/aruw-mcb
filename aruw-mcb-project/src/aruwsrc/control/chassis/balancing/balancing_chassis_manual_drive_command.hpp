@@ -22,8 +22,8 @@
 
 #include "tap/control/command.hpp"
 
-#include "balancing_chassis_subsystem.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "balancing_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -34,12 +34,12 @@ class BalancingChassisManualDriveCommand : public tap::control::Command
 {
 public:
     BalancingChassisManualDriveCommand(
-        // tap::Drivers* drivers,
+        tap::Drivers* drivers,
         BalancingChassisSubsystem* chassis,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
     const char* getName() const override { return "Balancing Chassis Manual Drive Command"; }
-    
+
     void initialize() override;
 
     void execute() override;
@@ -49,14 +49,14 @@ public:
     bool isFinished() const override;
 
 private:
+    tap::Drivers* drivers;
     BalancingChassisSubsystem* chassis;
     control::ControlOperatorInterface& operatorInterface;
 
 };  // class BalancingManualDriveCommand
 
-}   // namespace chassis
+}  // namespace chassis
 
-}   // namespace aruwsrc
-
+}  // namespace aruwsrc
 
 #endif  // BALANCING_CHASSIS_MANUAL_DRIVE_HPP_

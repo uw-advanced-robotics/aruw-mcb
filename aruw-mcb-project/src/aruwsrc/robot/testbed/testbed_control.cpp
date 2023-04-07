@@ -40,6 +40,7 @@
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/motion/five_bar_motion_subsystem.hpp"
 #include "aruwsrc/control/motion/five_bar_move_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -112,7 +113,7 @@ tap::motor::DjiMotor RightWheel(
     drivers(),
     tap::motor::MOTOR6,
     tap::can::CanBus::CAN_BUS1,
-    false,
+    true,
     "Right Wheel Motor");
 
 // aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
@@ -165,16 +166,12 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
     RF_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG);
 
-aruwsrc::chassis::BalancingChassisSubsystem chassis(
-    drivers(),
-    legLeft,
-    legRight);
+aruwsrc::chassis::BalancingChassisSubsystem chassis(drivers(), legLeft, legRight);
 
 BalancingChassisManualDriveCommand manualDriveCommand(
-    // drivers(),
+    drivers(),
     &chassis,
-    drivers()->controlOperatorInterface
-);
+    drivers()->controlOperatorInterface);
 
 motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
 
@@ -231,7 +228,8 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultTestbedCommands(aruwsrc::Drivers *) {
+void setDefaultTestbedCommands(aruwsrc::Drivers *)
+{
     chassis.setDefaultCommand(&manualDriveCommand);
 }
 

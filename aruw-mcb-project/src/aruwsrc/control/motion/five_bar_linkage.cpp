@@ -83,8 +83,8 @@ void FiveBarLinkage::moveMotors()
     debug1 = motor1Output;
     debug2 = motor2Output;
 
-    // motor1->setDesiredOutput(motor1Output);
-    // motor2->setDesiredOutput(motor2Output);
+    motor1->setDesiredOutput(motor1Output);
+    motor2->setDesiredOutput(motor2Output);
 }
 
 void FiveBarLinkage::computeMotorAngles()
@@ -115,6 +115,11 @@ void FiveBarLinkage::computeMotorAngles()
     return;
 }
 
+bool FiveBarLinkage::withinEnvelope(modm::Vector2f point)
+{
+    // TODO: this
+    return true;
+}
 void FiveBarLinkage::computePositionFromAngles()
 {
     float currentX = tap::algorithms::interpolateLinear2D(
@@ -127,7 +132,9 @@ void FiveBarLinkage::computePositionFromAngles()
                          &chassis::FIVE_BAR_T2_DELTA,
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
-                     1000; //check units with LUT
+                     1000;  // check units with LUT
+    currentX += fiveBarConfig.motor1toMotor2Length;
+    currentX = -currentX;
     float currentY = tap::algorithms::interpolateLinear2D(
                          &chassis::FIVE_BAR_LUT_Y,
                          &chassis::FIVE_BAR_T1_MIN,
