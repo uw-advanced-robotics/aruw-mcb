@@ -59,27 +59,38 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
     uint8_t readSize = drivers->uart.read(port, holder, sizeof(modm::can::Message));
     memcpy(&msg, holder, sizeof(modm::can::Message));
 
-    if (readSize != sizeof(modm::can::Message)
+    if (readSize != sizeof(modm::can::Message))
     {
         return false;
     }
 
+    // Push the message to the correct queue
     if (canbusNum == static_cast<uint8_t>(tap::can::CanBus::CAN_BUS1))
     {
         CAN1_queue.push(msg);
-        msg = CAN1_queue.pop();
-        memcpy(&msg, message, sizeof(modm::can::Message));
-    } else {
-        CAN2_queue.push(msg);
-        msg = CAN2_queue.pop();
-        memcpy(&msg, message, sizeof(modm::can::Message));
     }
+    else
+    {
+        CAN2_queue.push(msg);
+    }
+
+    // Check if the message is which canbus
+    if (canbus == tap::can::CanBus::CAN_BUS1)
+    {
+        msg = CAN1_queue.get();
+    }
+    else
+    {
+        msg = CAN2_queue.get();
+    }
+
+    memcpy(&msg, message, sizeof(modm::can::Message));
 
     return true;
 }
 
 template <tap::communication::serial::Uart::UartPort port>
-bool VirtualCanBus<port>::isReadyToSend(tap::can::CanBus canbus)
+bool VirtualCanBus<port>::isReadyToSend()
 {
     return drivers->uart.isWriteFinished(port);
 }
