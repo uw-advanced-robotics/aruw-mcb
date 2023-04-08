@@ -371,7 +371,6 @@ ClientDisplayCommand clientDisplayCommand(
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -513,7 +512,6 @@ void setDefaultStandardCommands(Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    buzzer.setDefaultCommand(&lowBatteryCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -527,8 +525,6 @@ void startStandardCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
