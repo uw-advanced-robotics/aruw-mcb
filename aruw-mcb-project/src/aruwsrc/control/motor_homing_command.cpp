@@ -56,13 +56,13 @@ void MotorHomingCommand::execute()
             if (subsystem.isStalled())
             {
                 subsystem.setUpperBound();
+                subsystem.setMotorOutput(0);
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;
         }
         case (HomingState::HOMING_COMPLETE):
         {
-            subsystem.setMotorOutput(0);
             break;
         }
     }
