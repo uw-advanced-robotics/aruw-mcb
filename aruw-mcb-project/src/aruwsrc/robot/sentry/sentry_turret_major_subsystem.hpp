@@ -43,7 +43,7 @@ private:
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
     uint8_t turretID;
-    
+
 };  // class SentryTurretMajorSubsystem
 
 }  // namespace aruwsrc::control::turret
