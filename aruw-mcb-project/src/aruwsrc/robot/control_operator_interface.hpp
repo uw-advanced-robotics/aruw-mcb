@@ -161,4 +161,5 @@ private:
 
 }  // namespace aruwsrc
 
+
 #endif  // CONTROL_OPERATOR_INTERFACE_HPP_

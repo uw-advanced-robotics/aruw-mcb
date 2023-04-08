@@ -17,10 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef CONTROL_OPERATOR_INTERFACE_HPP_
+#define CONTROL_OPERATOR_INTERFACE_HPP_
+
+
 #include "tap/drivers.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/architecture/clock.hpp"
-
+#include "tap/algorithms/linear_interpolation_predictor.hpp"
+#include "src/aruwsrc/robot/sentry/sentry_knuckles_turret_constants.hpp"
 
 namespace aruwsrc::control::sentry
 {
@@ -29,7 +34,7 @@ class SentryControlOperatorInterface
 {
 public:
     SentryControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
-    
+
     /**
      * @return The value used for chassis movement forward and backward, between
      * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
@@ -73,7 +78,20 @@ public:
      */
     mockable float getTurretMinor2PitchVelocity();
 
+    /**
+    * @return whether or not the control switch is set to drive mode.
+    */
+    bool isDriveMode();
 
+    /**
+     * @return whether or not the control switch is set to turret control mode.
+    */
+    bool isTurretControlMode();
+
+    /**
+     * @return whether or not the control switch is set to auto drive mode.
+    */
+    bool isAutoDriveMode();
 
     /**
     * Updates the control operator's state ??
@@ -90,16 +108,40 @@ public:
 private:
     tap::Drivers *drivers;
 
+    uint32_t prevUpdateCounterChassisXInput = 0;
+    uint32_t prevUpdateCounterChassisYInput = 0;
+    uint32_t prevUpdateCounterTurretMajorYawInput = 0;
+    uint32_t prevUpdateCounterTurretMinor1YawInput = 0;
+    uint32_t prevUpdateCounterTurretMinor2YawInput = 0;
+    uint32_t prevUpdateCounterTurretMinor1PitchInput = 0;
+    uint32_t prevUpdateCounterTurretMinor2PitchInput = 0;
+
+    tap::algorithms::LinearInterpolationPredictor chassisXInput;
+    tap::algorithms::LinearInterpolationPredictor chassisYInput;
+    tap::algorithms::LinearInterpolationPredictor turretMajorYawInput;
+    tap::algorithms::LinearInterpolationPredictor turretMinor1YawInput;
+    tap::algorithms::LinearInterpolationPredictor turretMinor2YawInput;
+    tap::algorithms::LinearInterpolationPredictor turretMinor1PitchInput;
+    tap::algorithms::LinearInterpolationPredictor turretMinor2PitchInput;
+
     tap::algorithms::Ramp chassisXInputRamp;
     tap::algorithms::Ramp chassisYInputRamp;
-    tap::algorithms::Ramp chassisYawInputRamp;
+    tap::algorithms::Ramp turretMajorYawRamp;
+    tap::algorithms::Ramp turretMinor1YawRamp;
+    tap::algorithms::Ramp turretMinor2YawRamp;
+    tap::algorithms::Ramp turretMinor1PitchRamp;
+    tap::algorithms::Ramp turretMinor2PitchRamp;
 
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
-    uint32_t prevChassisYawInputCalledTime = 0;
-
-    uint32_t getDT(uint32_t prevTimeCalled);
-
+    uint32_t prevTurretMajorYawInputCalledTime = 0;
+    uint32_t prevTurretMinor1YawInputCalledTime = 0;
+    uint32_t prevTurretMinor2YawInputCalledTime = 0;
+    uint32_t prevTurretMinor1PitchInputCalledTime = 0;
+    uint32_t prevTurretMinor2PitchInputCalledTime = 0;
 };
 
 } // namespace aruwsrc::control::sentry
+
+
+#endif // CONTROL_OPERATOR_INTERFACE_HPP_
