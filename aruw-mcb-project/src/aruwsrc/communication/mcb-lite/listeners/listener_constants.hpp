@@ -25,7 +25,7 @@
 namespace aruwsrc::virtualMCB
 {
 constexpr uint32_t IMU_POS_MESSAGE = 510UL;
-constexpr uint32_t IMU_VEL_MESSAGE = 510UL;
+constexpr uint32_t IMU_VEL_MESSAGE = 509UL;
 
 }  // namespace aruwsrc::virtualMCB
 
