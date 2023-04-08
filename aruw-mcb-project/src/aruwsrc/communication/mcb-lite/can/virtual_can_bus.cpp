@@ -41,27 +41,27 @@ void VirtualCanBus<port>::initialize()
 template <tap::communication::serial::Uart::UartPort port>
 bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message* message)
 {
+    // Get which canbus the message is from
     uint8_t canbusNum;
     drivers->uart.read(port, &canbusNum);
     canbusNum -= CANBUS_ID_OFFSET;
 
+    // Check if the canbus number is valid
     if (canbusNum != static_cast<uint8_t>(tap::can::CanBus::CAN_BUS1) &&
         canbusNum != static_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
     {
         return false;
     }
 
-    modm::can::Message msg = new modm::can::Message();
+    // Read the message
+    modm::can::Message msg;
     uint8_t* holder = new uint8_t[sizeof(modm::can::Message)];
-
-    // Read the message from the uart port
-    bool readCompleteMessage = drivers->uart.read(port, holder, sizeof(modm::can::Message)) == sizeof(modm::can::Message);
+    uint8_t readSize = drivers->uart.read(port, holder, sizeof(modm::can::Message));
     memcpy(&msg, holder, sizeof(modm::can::Message));
 
-
-    if (!readCompleteMessage)
+    if (readSize != sizeof(modm::can::Message)
     {
-        return readCompleteMessage;
+        return false;
     }
 
     if (canbusNum == static_cast<uint8_t>(tap::can::CanBus::CAN_BUS1))
@@ -69,10 +69,7 @@ bool VirtualCanBus<port>::getMessage(tap::can::CanBus canbus, modm::can::Message
         CAN1_queue.push(msg);
         msg = CAN1_queue.pop();
         memcpy(&msg, message, sizeof(modm::can::Message));
-    }
-
-    if (canbusNum == static_cast<uint8_t>(tap::can::CanBus::CAN_BUS2))
-    {
+    } else {
         CAN2_queue.push(msg);
         msg = CAN2_queue.pop();
         memcpy(&msg, message, sizeof(modm::can::Message));
@@ -91,11 +88,11 @@ template <tap::communication::serial::Uart::UartPort port>
 bool VirtualCanBus<port>::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
 {
     drivers->uart.write(port, (uint8_t)canbus + CANBUS_ID_OFFSET);
-    uint8_t* holder = new uint8_t[sizeof(modm::can::Message)];
+    uint16_t* holder = new uint16_t[sizeof(modm::can::Message)];
     memcpy(holder, &message, sizeof(modm::can::Message));
     return drivers->uart.write(
         port,
-        holder,
+        reinterpret_cast<uint8_t*>(holder),
         sizeof(modm::can::Message));
 }
 
