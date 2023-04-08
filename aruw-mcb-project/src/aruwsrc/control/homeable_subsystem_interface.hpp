@@ -30,6 +30,7 @@ namespace aruwsrc::control
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
+    HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
     /**
      * Sets the desired output of the motor of this homeable subsystem's axis.
      *
