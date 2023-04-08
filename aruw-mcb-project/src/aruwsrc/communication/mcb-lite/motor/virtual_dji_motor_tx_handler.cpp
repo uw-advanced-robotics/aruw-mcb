@@ -78,7 +78,7 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
 
     bool messageSuccess = true;
 
-    if (canbus->isReadyToSend(tap::can::CanBus::CAN_BUS1))
+    if (canbus->isReadyToSend())
     {
         if (can1ValidMotorMessageLow)
         {
@@ -89,7 +89,7 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
             messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageHigh);
         }
     }
-    if (canbus->isReadyToSend(tap::can::CanBus::CAN_BUS2))
+    if (canbus->isReadyToSend())
     {
         if (can2ValidMotorMessageLow)
         {

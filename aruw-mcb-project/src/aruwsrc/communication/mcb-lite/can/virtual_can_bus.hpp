@@ -43,7 +43,7 @@ public:
 
     bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
 
-    bool isReadyToSend(tap::can::CanBus canbus) override;
+    bool isReadyToSend() override;
 
     bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
 

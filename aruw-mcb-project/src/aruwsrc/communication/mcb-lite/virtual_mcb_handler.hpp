@@ -32,23 +32,7 @@ namespace aruwsrc::virtualMCB
 template <tap::communication::serial::Uart::UartPort port>
 class VirtualMCBHandler
 {
-    /**
-     * Task list:
-     * Send motor data (Output desired value) to lite board -> DJI motor TX handler
-     * Get Motor data (Encoder + rpm + torque + temp) from lite board -> CanRxHandler
-     *
-     * Get imu data from lite board -> CanRxHandler
-     */
-
-    /**
-     * This boy needs to handle:
-     *
-     * CanBus
-     * DJI motor tx handler
-     * CAN rx handler
-     */
-
-public:
+ public:
     VirtualMCBHandler(tap::Drivers* drivers);
 
     void refresh();
@@ -57,6 +41,15 @@ public:
     VirtualDJIMotorTxHandler motorTxHandler;
     VirtualCANRxHandler canRxHandler;
 };
+
+// This is essentially a forward declaration but needed for template class to build,
+// https://stackoverflow.com/a/37189280
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart1>;
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart2>;
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart3>;
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart6>;
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart7>;
+template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart8>;
 
 }  // namespace aruwsrc::virtualMCB
 

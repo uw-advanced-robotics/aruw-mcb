@@ -33,13 +33,13 @@ public:
 
     virtual ~CanBus() = default;
 
-    virtual void initialize();
+    virtual void initialize() = 0;
 
-    virtual bool getMessage(tap::can::CanBus canbus, modm::can::Message *message);
+    virtual bool getMessage(tap::can::CanBus canbus, modm::can::Message *message) = 0;
 
-    virtual bool isReadyToSend(tap::can::CanBus canbus);
+    virtual bool isReadyToSend() = 0;
 
-    virtual bool sendMessage(tap::can::CanBus canbus, const modm::can::Message &message);
+    virtual bool sendMessage(tap::can::CanBus canbus, const modm::can::Message &message) = 0;
 };
 
 }  // namespace aruwsrc::virtualMCB

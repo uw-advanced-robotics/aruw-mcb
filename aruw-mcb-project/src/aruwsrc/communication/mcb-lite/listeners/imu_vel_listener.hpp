@@ -43,12 +43,12 @@ public:
             return;
         }
 
-        Vy = message.data[0] << 8 & message.data[1];
-        Vp = message.data[2] << 8 & message.data[3];
-        Vr = message.data[4] << 8 & message.data[5];
+        pitchVel = message.data[0] << 8 & message.data[1];
+        yawVel = message.data[2] << 8 & message.data[3];
+        rollVel = message.data[4] << 8 & message.data[5];
     }
 
-    uint16_t Vy, Vp, Vr;
+    uint16_t pitchVel, yawVel, rollVel;
 };
 
 }  // namespace aruwsrc::virtualMCB
