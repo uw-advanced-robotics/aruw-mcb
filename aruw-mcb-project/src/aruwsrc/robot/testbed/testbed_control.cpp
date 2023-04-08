@@ -49,6 +49,7 @@
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 #include "aruwsrc/robot/testbed/spin_motor_command.hpp"
 #include "aruwsrc/robot/testbed/testbed_constants.hpp"
+#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 #include "aruwsrc/robot/testbed/tmotor_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
@@ -59,6 +60,8 @@ using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace tap::control;
 using namespace aruwsrc::control;
+using namespace aruwsrc::chassis;
+using namespace aruwsrc::testbed;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -66,9 +69,7 @@ using namespace aruwsrc::control;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
-using namespace aruwsrc::control;
-using namespace aruwsrc::chassis;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
@@ -208,7 +209,7 @@ HoldCommandMapping rightSwitchDown(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerTestbedSubsystems(aruwsrc::Drivers *drivers)
+void registerTestbedSubsystems(Drivers *drivers)
 {
     // drivers->commandScheduler.registerSubsystem(&motorSubsystemLF);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
@@ -228,25 +229,25 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultTestbedCommands(aruwsrc::Drivers *)
+void setDefaultTestbedCommands(Drivers *)
 {
     chassis.setDefaultCommand(&manualDriveCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startTestbedCommands(aruwsrc::Drivers *drivers) {}
+void startTestbedCommands(Drivers *drivers) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerTestbedIoMappings(aruwsrc::Drivers *drivers)
+void registerTestbedIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&rightSwitchDown);
 }
 }  // namespace testbed_control
 
-namespace aruwsrc::control
+namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &testbed_control::remoteSafeDisconnectFunction);
@@ -256,6 +257,6 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
     testbed_control::startTestbedCommands(drivers);
     testbed_control::registerTestbedIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::testbed
 
 #endif  // TARGET_TESTBED

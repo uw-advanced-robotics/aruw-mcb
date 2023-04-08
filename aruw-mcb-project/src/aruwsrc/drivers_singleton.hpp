@@ -22,9 +22,30 @@
 
 #ifndef ENV_UNIT_TESTS
 
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/util_macros.hpp"
 
-namespace aruwsrc
+#if defined(ALL_STANDARDS)
+#include "aruwsrc/robot/standard/standard_drivers.hpp"
+namespace aruwsrc::standard
+#elif defined(ALL_SENTRIES)
+#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
+namespace aruwsrc::sentry
+#elif defined(TARGET_HERO_CYCLONE)
+#include "aruwsrc/robot/hero/hero_drivers.hpp"
+namespace aruwsrc::hero
+#elif defined(TARGET_DRONE)
+#include "aruwsrc/robot/drone/drone_drivers.hpp"
+namespace aruwsrc::drone
+#elif defined(TARGET_ENGINEER)
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+namespace aruwsrc::engineer
+#elif defined(TARGET_DART)
+#include "aruwsrc/robot/dart/dart_drivers.hpp"
+namespace aruwsrc::dart
+#elif defined(TARGET_TESTBED)
+#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
+namespace aruwsrc::testbed
+#endif
 {
 /**
  * @return The singleton instance of the Drivers class. This is the only instance of the
@@ -33,8 +54,8 @@ namespace aruwsrc
  *      should be calling this function from -- `main.cpp` and `*_control.cpp`, either to
  *      run I/O stuff and to add a Drivers pointer to an instance of a Subsystem or Command.
  */
-aruwsrc::Drivers *DoNotUse_getDrivers();
-using driversFunc = aruwsrc::Drivers *(*)();
+Drivers *DoNotUse_getDrivers();
+using driversFunc = Drivers *(*)();
 }  // namespace aruwsrc
 
 #endif

@@ -19,12 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/friction_wheel_subsystem_mock.hpp"
 
-using aruwsrc::Drivers;
 using aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand;
+using tap::Drivers;
 using namespace testing;
 using namespace tap::communication::serial;
 
@@ -40,7 +41,7 @@ protected:
             .WillByDefault(ReturnPointee(&refSerialOnline));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
     RefSerialData::Rx::RobotData robotData{};
     bool refSerialOnline = false;

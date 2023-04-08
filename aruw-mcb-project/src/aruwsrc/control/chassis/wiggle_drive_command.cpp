@@ -24,8 +24,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
@@ -41,7 +40,7 @@ WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface* operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -93,7 +92,7 @@ void WiggleDriveCommand::execute()
         float x = 0.0f;
         float y = 0.0f;
         ChassisRelDrive::computeDesiredUserTranslation(
-            operatorInterface,
+            &operatorInterface,
             drivers,
             chassis,
             r,
@@ -109,7 +108,7 @@ void WiggleDriveCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+        ChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
     }
 }
 

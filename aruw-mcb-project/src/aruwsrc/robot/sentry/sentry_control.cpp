@@ -80,6 +80,7 @@ using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
+using namespace aruwsrc::sentry;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -87,7 +88,7 @@ using namespace tap::communication::serial;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
@@ -118,7 +119,7 @@ public:
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
     };
 
-    SentryTurret(aruwsrc::Drivers &drivers, const Config &config)
+    SentryTurret(Drivers &drivers, const Config &config)
         : agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
           frictionWheels(
               &drivers,
@@ -175,7 +176,7 @@ public:
               worldFrameYawTurretImuPosPid,
               worldFrameYawTurretImuVelPid),
           turretManual(
-              (tap::Drivers *)&drivers,
+              &drivers,
               drivers.controlOperatorInterface,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
@@ -350,7 +351,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     nullptr);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
@@ -411,7 +411,7 @@ void initializeSubsystems()
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(aruwsrc::Drivers *drivers)
+void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryDrive);
     drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
@@ -429,7 +429,7 @@ void registerSentrySubsystems(aruwsrc::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(aruwsrc::Drivers *)
+void setDefaultSentryCommands(Drivers *)
 {
     sentryDrive.setDefaultCommand(&sentryAutoDrive);
     turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
@@ -443,7 +443,7 @@ void setDefaultSentryCommands(aruwsrc::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(aruwsrc::Drivers *drivers)
+void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
@@ -455,12 +455,10 @@ void startSentryCommands(aruwsrc::Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings(aruwsrc::Drivers *drivers)
+void registerSentryIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -469,9 +467,9 @@ void registerSentryIoMappings(aruwsrc::Drivers *drivers)
 }
 }  // namespace sentry_control
 
-namespace aruwsrc::control
+namespace aruwsrc::sentry
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &sentry_control::remoteSafeDisconnectFunction);
@@ -481,7 +479,7 @@ void initSubsystemCommands(aruwsrc::Drivers *drivers)
     sentry_control::startSentryCommands(drivers);
     sentry_control::registerSentryIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::sentry
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }

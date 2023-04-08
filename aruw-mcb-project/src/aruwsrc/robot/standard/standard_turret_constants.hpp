@@ -113,9 +113,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 35.0f,
+    .kp = 40.0f,
     .ki = 0.0f,
-    .kd = 0.8f,
+    .kd = 0.3f,
     .maxICumulative = 0.0f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,

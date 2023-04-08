@@ -88,6 +88,7 @@ using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
+using namespace aruwsrc::hero;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -95,7 +96,7 @@ using tap::control::RemoteMapState;
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-aruwsrc::driversFunc drivers = aruwsrc::DoNotUse_getDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
@@ -178,38 +179,35 @@ aruwsrc::communication::serial::
     PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
 
-ChassisDriveCommand chassisDriveCommand(
-    ((tap::Drivers *)drivers()),
-    &drivers()->controlOperatorInterface,
-    &chassis);
+ChassisDriveCommand chassisDriveCommand(drivers(), &drivers()->controlOperatorInterface, &chassis);
 
 ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
     ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &frictionWheels,
     10.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
-    ((tap::Drivers *)drivers()),
+    drivers(),
     &frictionWheels,
     0.0f,
     true,
@@ -346,7 +344,7 @@ HeatLimitGovernor heatLimitGovernor(
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
     constants::HEAT_LIMIT_BUFFER);
 CvOnTargetGovernor cvOnTargetGovernor(
-    ((tap::Drivers *)(drivers())),
+    drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
@@ -365,7 +363,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
-    *((tap::Drivers *)drivers()),
+    *drivers(),
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
@@ -382,7 +380,6 @@ ClientDisplayCommand clientDisplayCommand(
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -489,7 +486,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(aruwsrc::Drivers *drivers)
+void registerHeroSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -503,7 +500,7 @@ void registerHeroSubsystems(aruwsrc::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands(aruwsrc::Drivers *)
+void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
@@ -513,7 +510,7 @@ void setDefaultHeroCommands(aruwsrc::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(aruwsrc::Drivers *drivers)
+void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -523,12 +520,10 @@ void startHeroCommands(aruwsrc::Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(aruwsrc::Drivers *drivers)
+void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -551,19 +546,19 @@ void registerHeroIoMappings(aruwsrc::Drivers *drivers)
 }
 }  // namespace hero_control
 
-namespace aruwsrc::control
+namespace aruwsrc::hero
 {
-void initSubsystemCommands(aruwsrc::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &hero_control::remoteSafeDisconnectFunction);
     hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);
-    hero_control::setDefaultHeroCommands(drivers);
+    hero_control::setDefaultHeroCommands();
     hero_control::startHeroCommands(drivers);
     hero_control::registerHeroIoMappings(drivers);
 }
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }

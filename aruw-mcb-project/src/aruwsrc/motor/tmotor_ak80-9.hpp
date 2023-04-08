@@ -29,21 +29,17 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
+#include "tap/drivers.hpp"
 
-#include "../taproot/src/tap/motor/motor_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}  // namespace aruwsrc
+#include "tap/motor/motor_interface.hpp"
 
 namespace aruwsrc::motor
 {
+
 /**
- * CAN IDs for the feedback messages sent by AK80-9 motor controller. Motor `i` in the set
- * {1, 2,...,8} sends feedback data with in a CAN message with ID 0x200 + `i`.
- * for declaring a new motor, must be one of these motor
- * identifiers
+ * CAN IDs for the command messages sent by AK80-9 motor controller. Motor `i` in the set
+ * {1, 2,...,8} sends feedback data with in a CAN message with ID 0x2900 + `i`.
+ * for declaring a new motor, must be one of these motor identifiers.
  */
 enum TMotorId : uint32_t
 {
@@ -56,6 +52,11 @@ enum TMotorId : uint32_t
     MOTOR7 = 0x07,
     MOTOR8 = 0x08,
 };
+
+/** Number of motors on each CAN bus. */
+static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
+/** CAN message length of each motor control message. */
+static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
 
 /**
  * A class designed to interface with tmotor brand motors and motor controllers over CAN.
@@ -79,6 +80,7 @@ public:
 
     /**
      * @param drivers a pointer to the drivers struct
+     * @param tMotorTxHandler a pointer to the drivers member tMotorTxHandler
      * @param desMotorIdentifier the ID of this motor controller
      * @param motorCanBus the CAN bus the motor is on
      * @param isInverted if `false` the positive rotation direction of the shaft is
@@ -91,7 +93,7 @@ public:
      *      See comment for DjiMotor::encoderRevolutions for more details.
      */
     Tmotor_AK809(
-        aruwsrc::Drivers* drivers,
+        tap::Drivers* drivers,
         aruwsrc::motor::TMotorId desMotorIdentifier,
         tap::can::CanBus motorCanBus,
         bool isInverted,
@@ -154,9 +156,12 @@ public:
     bool isMotorOnline() const override;
 
     /**
-     * Serializes send data and deposits it in a message to be sent.
+     * @brief creates, packs, and sends the CAN message to the motor with ID.
+     * 
+     * @return true if message is sent successfully
+     * @return false otherwise
      */
-    mockable void serializeCanSendData(modm::can::Message* txMessage) const;
+    bool sendCanMessage() const;
 
     /**
      * @brief As per the protocol, send a specific data packet to 0 the motor's position when
@@ -205,7 +210,7 @@ private:
 
     const char* motorName;
 
-    aruwsrc::Drivers* drivers;
+    tap::Drivers* drivers;
 
     uint32_t motorIdentifier;
 
@@ -241,10 +246,10 @@ private:
     int64_t encoderRevolutions;
 
     tap::arch::MilliTimeout motorDisconnectTimeout;
-    
+
     /***
      * the position of the AK80-9 should be 0'd on it's powerup via the home resetting message.
-    */
+     */
     bool motorHomed;
 };
 

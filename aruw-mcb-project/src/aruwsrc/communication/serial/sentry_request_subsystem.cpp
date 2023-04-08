@@ -19,7 +19,7 @@
 
 #include "sentry_request_subsystem.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::communication::serial
 {

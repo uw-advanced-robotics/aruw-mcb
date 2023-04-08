@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRIVERS_HPP_
-#define DRIVERS_HPP_
+#ifndef STANDARD_DRIVERS_HPP_
+#define STANDARD_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
@@ -27,7 +27,6 @@
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
-#include "aruwsrc/mock/tmotor_tx_handler_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
@@ -36,11 +35,10 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/motor/tmotor_tx_handler.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
-namespace aruwsrc
+namespace aruwsrc::standard
 {
 class Drivers : public tap::Drivers
 {
@@ -56,8 +54,7 @@ public:
           oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          tMotorTxHandler(this)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500)
     {
     }
 
@@ -68,7 +65,6 @@ public:
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
-    testing::NiceMock<mock::TMotorTxHandlerMock> tMotorTxHandler;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
@@ -77,9 +73,8 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    motor::TMotorTxHandler tMotorTxHandler;
 #endif
-};  // class aruwsrc::Drivers
-}  // namespace aruwsrc
+};  // class aruwsrc::StandardDrivers
+}  // namespace aruwsrc::standard
 
-#endif  // DRIVERS_HPP_
+#endif  // STANDARD_DRIVERS_HPP_

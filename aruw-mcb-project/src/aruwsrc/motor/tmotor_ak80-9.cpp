@@ -5,7 +5,7 @@
 
 #include "tmotor_ak80-9.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include <iostream>
@@ -20,10 +20,11 @@ namespace aruwsrc
 {
 namespace motor
 {
-Tmotor_AK809::~Tmotor_AK809() { drivers->tMotorTxHandler.removeFromMotorManager(*this); }
+
+Tmotor_AK809::~Tmotor_AK809() {}
 
 Tmotor_AK809::Tmotor_AK809(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     aruwsrc::motor::TMotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
     bool isInverted,
@@ -44,11 +45,7 @@ Tmotor_AK809::Tmotor_AK809(
     motorDisconnectTimeout.stop();
 }
 
-void Tmotor_AK809::initialize()
-{
-    drivers->tMotorTxHandler.addMotorToManager(this);
-    attachSelfToRxHandler();
-}
+void Tmotor_AK809::initialize() { attachSelfToRxHandler(); }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
@@ -105,12 +102,34 @@ bool Tmotor_AK809::isMotorOnline() const
     }
 }
 
-void Tmotor_AK809::serializeCanSendData(modm::can::Message* txMessage) const
+bool Tmotor_AK809::sendCanMessage() const
 {
-    txMessage->data[0] = this->getOutputDesired() >> 24;
-    txMessage->data[1] = this->getOutputDesired() >> 16;
-    txMessage->data[2] = this->getOutputDesired() >> 8;
-    txMessage->data[3] = this->getOutputDesired();
+    modm::can::Message message(
+        (uint32_t)(motorIdentifier + 1) |
+            ((uint32_t)0x01 << 8),  // the 01 in LSByte 2 sets motor to current mode
+        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
+        0,
+        true);
+    message.setRemoteTransmitRequest(false);
+
+    message.data[0] = desiredOutput >> 24;
+    message.data[1] = desiredOutput >> 16;
+    message.data[2] = desiredOutput >> 8;
+    message.data[3] = desiredOutput;
+
+    bool messageSuccess = true;
+
+    if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS1) &&
+        motorCanBus == tap::can::CanBus::CAN_BUS1)
+    {
+        messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, message);
+    }
+    if (drivers->can.isReadyToSend(tap::can::CanBus::CAN_BUS2) &&
+        motorCanBus == tap::can::CanBus::CAN_BUS2)
+    {
+        messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, message);
+    }
+    return messageSuccess;
 }
 
 bool Tmotor_AK809::sendPositionHomeResetMessage() const
