@@ -27,9 +27,9 @@ SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* yawMotor,
     const TurretMotorConfig& yawMotorConfig,
-    const aruwsrc::can::TurretMCBCanComm* turretMCB,
     uint8_t turretID)
-    : yawMotor(yawMotor, yawMotorConfig),
+    : Subsystem(drivers),
+      yawMotor(yawMotor, yawMotorConfig),
       turretID(turretID)
 {
 }

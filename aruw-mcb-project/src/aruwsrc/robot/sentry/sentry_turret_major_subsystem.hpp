@@ -34,16 +34,16 @@ public:
         tap::Drivers* drivers,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
     float getWorldYaw() const;
     uint32_t getLastMeasurementTimeMicros() const;
     modm::Vector3f getTurretOffset() const;
 
 private:
-    uint8_t turretID;
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
+    uint8_t turretID;
+    
 };  // class SentryTurretMajorSubsystem
 
 }  // namespace aruwsrc::control::turret
