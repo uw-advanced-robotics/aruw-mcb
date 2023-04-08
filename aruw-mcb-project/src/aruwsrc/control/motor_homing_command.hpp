@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef MOTOR_HOMING_COMMAND_HPP_
+#define MOTOR_HOMING_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
@@ -61,3 +63,4 @@ private:
     HomingState homingState;
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control
+#endif

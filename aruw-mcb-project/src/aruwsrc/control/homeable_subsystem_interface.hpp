@@ -24,12 +24,32 @@
 
 namespace aruwsrc::control
 {
+/**
+ * Abstract subsystem for a system that is homeable on an axis.
+ */
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
+    /**
+     * Sets the desired output of the motor of this homeable subsystem's axis.
+     *
+     * @param[in] desiredOutput The desired output of the motor to be set.
+     */
     virtual void setMotorOutput(int32_t desiredOutput) = 0;
+
+    /**
+     * Detects whether the subsystem's motor is stalled, indicating that it has reached a hard stop.
+     */
     virtual bool isStalled() const = 0;
+
+    /**
+     * Sets the lower bound of this homeable subsystem's home for the motor at its current position.
+     */
     virtual void setLowerBound() = 0;
+
+    /**
+     * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
+     */
     virtual void setUpperBound() = 0;
 };
 }  // namespace aruwsrc::control
