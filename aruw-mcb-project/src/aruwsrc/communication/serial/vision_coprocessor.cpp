@@ -276,3 +276,15 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
         sizeof(selectNewTargetMessage));
 }
+
+void VisionCoprocessor::sendMotionStrategyMessage(Strategy strategy)
+{
+    DJISerial::SerialMessage<1> motionStrategyMessage;
+    motionStrategyMessage.messageType = CV_MESSAGE_TYPE_MOTION_STRATEGY;
+    motionStrategyMessage.data[0] = strategy;
+    motionStrategyMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&motionStrategyMessage),
+        sizeof(motionStrategyMessage));
+}

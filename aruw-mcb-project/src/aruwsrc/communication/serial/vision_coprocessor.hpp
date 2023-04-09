@@ -89,6 +89,14 @@ public:
         NUM_TAGS = 2,
     };
 
+    enum Strategy : uint8_t
+    {
+        None = 0,
+        GoToFriendlyBase = 1,
+        GoToEnemyBase = 2,
+        GoToSupplierZone = 3,
+    };
+
     enum messageWidths : uint8_t
     {
         FLAGS_BYTES = 1,
@@ -263,6 +271,8 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    mockable void sendMotionStrategyMessage(Strategy strategy);
+
     static inline void handleTimeSyncRequest()
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
@@ -277,6 +287,7 @@ private:
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
+        CV_MESSAGE_TYPE_MOTION_STRATEGY = 13,
     };
 
     enum RxMessageTypes

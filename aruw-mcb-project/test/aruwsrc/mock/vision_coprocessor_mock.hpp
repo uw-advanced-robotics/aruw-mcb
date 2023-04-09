@@ -46,6 +46,7 @@ public:
         (override));
     MOCK_METHOD(void, sendShutdownMessage, (), (override));
     MOCK_METHOD(void, sendRebootMessage, (), (override));
+    MOCK_METHOD(void, sendMotionStrategyMessage, (Strategy strategy), (override));
     MOCK_METHOD(void, sendSelectNewTargetMessage, (), (override));
     MOCK_METHOD(bool, getSomeTurretHasTarget, (), (const override));
     MOCK_METHOD(bool, getSomeTurretUsingTimedShots, (), (const override));
