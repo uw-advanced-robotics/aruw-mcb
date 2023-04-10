@@ -29,7 +29,6 @@
 
 namespace aruwsrc::control::motion
 {
-
 struct FiveBarConfig
 {
     modm::Vector2f defaultPosition;

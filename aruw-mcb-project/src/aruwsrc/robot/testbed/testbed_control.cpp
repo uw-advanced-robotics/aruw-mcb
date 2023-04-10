@@ -73,7 +73,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::motor::Tmotor_AK809 legmotorLF(
     drivers(),
@@ -229,10 +228,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultTestbedCommands(Drivers *)
-{
-    chassis.setDefaultCommand(&manualDriveCommand);
-}
+void setDefaultTestbedCommands(Drivers *) { chassis.setDefaultCommand(&manualDriveCommand); }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startTestbedCommands(Drivers *drivers) {}

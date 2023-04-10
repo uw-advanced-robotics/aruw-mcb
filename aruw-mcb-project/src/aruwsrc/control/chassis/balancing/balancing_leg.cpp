@@ -67,12 +67,12 @@ void BalancingLeg::update()
     desiredWheelAngle -=
         fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
-    
+
     xoffset = xPid.runControllerDerivateError(aDesired - aCurrent, dt);
 
-    // xoffset = tap::algorithms::limitVal<float>(0.0005 * aDesired / (9.81 * WHEEL_RADIUS), -.03, .03);
-    // xoffsetPrev = tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05);
-    // xoffset = tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05);
+    // xoffset = tap::algorithms::limitVal<float>(0.0005 * aDesired / (9.81 * WHEEL_RADIUS), -.03,
+    // .03); xoffsetPrev = tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05); xoffset =
+    // tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05);
     // desiredWheelLocation.setX(xoffset);
 
     float driveWheelOutput =

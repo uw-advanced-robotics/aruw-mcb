@@ -91,21 +91,21 @@ private:
         .maxOutput = .03,
     };
     tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
- 
+
     uint32_t prevTime = 0;
     float wheelPosPrev = 0;
     float tl_prev = 0;
 
-    float zDesired,          // m
-        vDesired,            // m/s
+    float zDesired,  // m
+        vDesired,    // m/s
         vDesiredPrev,
-        zCurrent,            // m
-        vCurrent,            // m/s
+        zCurrent,  // m
+        vCurrent,  // m/s
         vCurrentPrev,
         motorLinkAnglePrev,  // rad
         tl,                  // rad
         tl_dot,
-        tl_dotPrev;              // rad/s
+        tl_dotPrev;  // rad/s
     float realWheelSpeed;
     float aCurrentPrev;
     float aCurrent;

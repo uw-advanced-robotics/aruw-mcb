@@ -23,6 +23,7 @@
 #define SPIN_MOTOR_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+
 #include "tmotor_subsystem.hpp"
 
 namespace aruwsrc::testbed
@@ -30,11 +31,7 @@ namespace aruwsrc::testbed
 class SpinMotorCommand : public tap::control::Command
 {
 public:
-    SpinMotorCommand(
-        tap::Drivers* drivers,
-        TMotorSubsystem* tmotorSubsystem,
-        int16_t speed
-    );
+    SpinMotorCommand(tap::Drivers* drivers, TMotorSubsystem* tmotorSubsystem, int16_t speed);
 
     void initialize() override;
 
@@ -50,8 +47,8 @@ private:
     tap::Drivers* drivers;
     TMotorSubsystem* tmotorSubsystem;
     int16_t speed;
-};   // class SpinMotorCommand
-}   // namespace aruwsrc::testbed
+};  // class SpinMotorCommand
+}  // namespace aruwsrc::testbed
 
 #endif  // SPIN_MOTOR_COMMAND_HPP_
 

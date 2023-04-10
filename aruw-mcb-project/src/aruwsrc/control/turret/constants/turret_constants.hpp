@@ -36,5 +36,4 @@
 #include "aruwsrc/robot/dart/dart_turret_constants.hpp"
 #endif
 
-
 #endif  // TURRET_CONSTANTS_HPP_

@@ -23,13 +23,13 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/robot/control_operator_interface.hpp"
+
 #include "balancing_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
-
 class BalancingChassisManualDriveCommand : public tap::control::Command
 {
 public:

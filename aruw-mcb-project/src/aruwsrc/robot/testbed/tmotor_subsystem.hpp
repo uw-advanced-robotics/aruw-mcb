@@ -32,10 +32,7 @@ namespace aruwsrc::testbed
 class TMotorSubsystem : public tap::control::Subsystem
 {
 public:
-    explicit TMotorSubsystem(
-        tap::Drivers* drivers,
-        aruwsrc::motor::Tmotor_AK809* tmotor
-    );
+    explicit TMotorSubsystem(tap::Drivers* drivers, aruwsrc::motor::Tmotor_AK809* tmotor);
 
     void initialize() override;
 
@@ -52,7 +49,7 @@ private:
     aruwsrc::motor::Tmotor_AK809* tmotor;
     int16_t desiredOutput;
 };
-}
+}  // namespace aruwsrc::testbed
 
 #endif  // TMOTOR_SUBSYSTEM_HPP_
 

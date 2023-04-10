@@ -28,7 +28,6 @@
 
 namespace aruwsrc::chassis
 {
-
 class BalancingChassisSubsystem : public tap::control::Subsystem
 {
 public:
@@ -81,7 +80,7 @@ private:
     float pitchAdjustmentPrev = 0;
     float velocityAdjustment = 0;
     float velocityAdjustmentPrev = 0;
-    float targetPitch; 
+    float targetPitch;
 
     float pitch;
     float roll;

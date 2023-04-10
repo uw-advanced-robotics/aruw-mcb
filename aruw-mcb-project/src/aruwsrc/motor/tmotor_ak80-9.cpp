@@ -20,7 +20,6 @@ namespace aruwsrc
 {
 namespace motor
 {
-
 Tmotor_AK809::~Tmotor_AK809() {}
 
 Tmotor_AK809::Tmotor_AK809(

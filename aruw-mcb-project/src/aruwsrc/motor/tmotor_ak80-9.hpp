@@ -30,12 +30,10 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
-
 #include "tap/motor/motor_interface.hpp"
 
 namespace aruwsrc::motor
 {
-
 /**
  * CAN IDs for the command messages sent by AK80-9 motor controller. Motor `i` in the set
  * {1, 2,...,8} sends feedback data with in a CAN message with ID 0x2900 + `i`.
@@ -157,7 +155,7 @@ public:
 
     /**
      * @brief creates, packs, and sends the CAN message to the motor with ID.
-     * 
+     *
      * @return true if message is sent successfully
      * @return false otherwise
      */

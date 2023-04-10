@@ -27,7 +27,6 @@
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
-#include "aruwsrc/mock/tmotor_tx_handler_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else

@@ -66,7 +66,8 @@ public:
         fiveBarLinkage.setDesiredPosition(desiredPosition);
     }
 
-    void setMotionFunction(const aruwsrc::control::motion::MOTION_FUNCTIONS func) {
+    void setMotionFunction(const aruwsrc::control::motion::MOTION_FUNCTIONS func)
+    {
         movementMode = func;
         return;
     }
@@ -76,7 +77,6 @@ public:
     const char* getName() override { return "FiveBar"; }
 
 private:
-
     modm::Vector2f pathPlotSquare(uint32_t time);
     modm::Vector2f pathPlotUpDown(uint32_t time);
     modm::Vector2f pathPlotCircle(uint32_t time);

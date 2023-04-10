@@ -23,7 +23,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
     tap::Drivers* drivers,
     BalancingChassisSubsystem* chassis,
@@ -41,9 +40,9 @@ void BalancingChassisManualDriveCommand::initialize() { chassis->setDesiredOutpu
 void BalancingChassisManualDriveCommand::execute()
 {
     chassis->setDesiredOutput(
-        operatorInterface.getChassisXInput()*TRANSLATION_REMOTE_SCALAR,
-        operatorInterface.getChassisYInput()*ROTATION_REMOTE_SCALAR);
-    chassis->setDesiredHeight(0.001*operatorInterface.getTurretPitchInput(0));
+        operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
+        operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
+    chassis->setDesiredHeight(0.001 * operatorInterface.getTurretPitchInput(0));
 }
 
 void BalancingChassisManualDriveCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
