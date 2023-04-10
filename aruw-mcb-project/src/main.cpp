@@ -67,14 +67,16 @@ using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
 #elif defined(TARGET_ENGINEER)
-using namespace aruwsrc::engineer;
+    using namespace aruwsrc::engineer;
+
+
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
 #endif
 
 int main()
 {
-#ifdef PLATFORM_HOSTED
+            #ifdef PLATFORM_HOSTED
     std::cout << "Simulation starting..." << std::endl;
 #endif
 
