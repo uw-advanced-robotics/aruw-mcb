@@ -31,7 +31,7 @@ FiveBarMotionSubsystem::FiveBarMotionSubsystem(
     tap::algorithms::SmoothPidConfig motor2PidConfig)
     : tap::control::Subsystem(drivers),
       fiveBarLinkage(
-          FiveBarLinkage(motor1, motor2, fiveBarConfig, motor1PidConfig, motor2PidConfig))
+          FiveBarLinkage(motor1, motor2, fiveBarConfig))
 {
 }
 

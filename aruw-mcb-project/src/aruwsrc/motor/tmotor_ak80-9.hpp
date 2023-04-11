@@ -55,6 +55,7 @@ enum TMotorId : uint32_t
 static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
 /** CAN message length of each motor control message. */
 static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
+static constexpr float AK809_TORQUE_CONSTANT = 0.105f * 9;  // Nm/A
 
 /**
  * A class designed to interface with tmotor brand motors and motor controllers over CAN.
@@ -159,7 +160,7 @@ public:
      * @return true if message is sent successfully
      * @return false otherwise
      */
-    bool sendCanMessage() const;
+    bool sendCanMessage();
 
     /**
      * @brief As per the protocol, send a specific data packet to 0 the motor's position when
@@ -249,6 +250,9 @@ private:
      * the position of the AK80-9 should be 0'd on it's powerup via the home resetting message.
      */
     bool motorHomed;
+
+    int debug1 = 0;
+    int debug2 = 0;
 };
 
 }  // namespace aruwsrc::motor

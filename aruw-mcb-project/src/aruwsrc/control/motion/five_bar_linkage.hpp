@@ -48,9 +48,7 @@ public:
     FiveBarLinkage(
         tap::motor::MotorInterface* motor1,
         tap::motor::MotorInterface* motor2,
-        FiveBarConfig fiveBarConfig,
-        tap::algorithms::SmoothPidConfig motor1PidConfig,
-        tap::algorithms::SmoothPidConfig motor2PidConfig);
+        FiveBarConfig fiveBarConfig);
 
     void initialize();
 
@@ -70,9 +68,21 @@ public:
 
     modm::Location2D<float> getCurrentPosition() { return currentPosition; };
 
+    float getMotor1Error() {return motor1Setpoint - motor1RelativePosition;};
+    float getMotor2Error() {return motor2Setpoint - motor2RelativePosition;};
+
+    float getMotor1RelativePosition() {return motor1RelativePosition;};
+    float getMotor2RelativePosition() {return motor2RelativePosition;};
+
     FiveBarConfig getFiveBarConfig() { return fiveBarConfig; };
 
+    tap::motor::MotorInterface* getMotor1() {return motor1;};
+
+    tap::motor::MotorInterface* getMotor2() {return motor2;};
+
     void refresh();
+
+    void moveMotors(float motor1output, float motor2output);
 
 private:
     /**
@@ -101,14 +111,8 @@ private:
      */
     modm::Vector2f desiredPosition;
 
-    tap::algorithms::SmoothPidConfig motor1PidConfig;
-    tap::algorithms::SmoothPidConfig motor2PidConfig;
-
     tap::motor::MotorInterface* motor1;
     tap::motor::MotorInterface* motor2;
-
-    tap::algorithms::SmoothPid motor1Pid;
-    tap::algorithms::SmoothPid motor2Pid;
 
     float motor1home;
     float motor2home;
@@ -124,8 +128,6 @@ private:
 
     float motor1Setpoint;
     float motor2Setpoint;
-
-    void moveMotors();
 
     bool withinEnvelope(modm::Vector2f point);
 

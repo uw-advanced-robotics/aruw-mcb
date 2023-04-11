@@ -101,10 +101,11 @@ bool Tmotor_AK809::isMotorOnline() const
     }
 }
 
-bool Tmotor_AK809::sendCanMessage() const
+bool Tmotor_AK809::sendCanMessage()
 {
+    debug1 += 1;
     modm::can::Message message(
-        (uint32_t)(motorIdentifier + 1) |
+        (uint32_t)(motorIdentifier) |
             ((uint32_t)0x01 << 8),  // the 01 in LSByte 2 sets motor to current mode
         CAN_TMOTOR_MESSAGE_SEND_LENGTH,
         0,
@@ -127,6 +128,7 @@ bool Tmotor_AK809::sendCanMessage() const
         motorCanBus == tap::can::CanBus::CAN_BUS2)
     {
         messageSuccess &= drivers->can.sendMessage(tap::can::CanBus::CAN_BUS2, message);
+        debug2 += 1;
     }
     return messageSuccess;
 }

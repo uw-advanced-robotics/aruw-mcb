@@ -55,12 +55,6 @@ void BalancingChassisSubsystem::refresh()
     float yawAdjustment = 0;
     float rollAdjustment = 0;
 
-    pitchAdjustment = jankBalVelPid.runControllerDerivateError(currentV, dt);
-    pitchAdjustmentPrev = tap::algorithms::lowPassFilter(pitchAdjustmentPrev, pitchAdjustment, .1);
-    pitchAdjustment = tap::algorithms::lowPassFilter(pitchAdjustmentPrev, pitchAdjustment, .1);
-    targetPitch = pitch - pitchAdjustment;
-    velocityAdjustment = -jankBalPid.runControllerDerivateError(-targetPitch, dt);  // units of m/s
-
     // 3. Set each side's actuators to compensate appropriate for yaw and roll error
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
@@ -70,10 +64,20 @@ void BalancingChassisSubsystem::refresh()
     yawAdjustment = desiredR * WIDTH_BETWEEN_WHEELS_Y / 2;  // m/s
 
     // 4. run outputs
-    leftLeg.setDesiredTranslationSpeed(-yawAdjustment + velocityAdjustment + desiredX);  // m/s
-    rightLeg.setDesiredTranslationSpeed(yawAdjustment + velocityAdjustment + desiredX);
+    leftLeg.setDesiredTranslationSpeed(-yawAdjustment + desiredX);  // m/s
+    rightLeg.setDesiredTranslationSpeed(yawAdjustment + desiredX);
+    
+    leftLeg.setChassisAngle(pitch);
+    rightLeg.setChassisAngle(pitch);
+
+
     leftLeg.update();
     rightLeg.update();
+    // do this here for safety. Only called once per subsystem
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())->sendCanMessage();
 }
 
 void BalancingChassisSubsystem::computeState()

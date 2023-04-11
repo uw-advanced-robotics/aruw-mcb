@@ -125,20 +125,18 @@ tap::motor::DjiMotor RightWheel(
 motion::FiveBarLinkage fiveBarLeft(
     &legmotorLF,
     &legmotorLR,
-    FIVE_BAR_CONFIG,
-    LF_LEG_MOTOR_PID_CONFIG,
-    LR_LEG_MOTOR_PID_CONFIG);
+    FIVE_BAR_CONFIG);
 
 motion::FiveBarLinkage fiveBarRight(
     &legmotorRF,
     &legmotorRR,
-    FIVE_BAR_CONFIG,
-    RF_LEG_MOTOR_PID_CONFIG,
-    RR_LEG_MOTOR_PID_CONFIG);
+    FIVE_BAR_CONFIG);
 
 BalancingLeg legLeft(
     drivers(),
     &fiveBarLeft,
+    LF_LEG_MOTOR_PID_CONFIG,
+    LR_LEG_MOTOR_PID_CONFIG,
     &leftWheel,
     WHEEL_RADIUS,
     LEFT_WHEEL_MOTOR_PID_CONFIG);
@@ -146,6 +144,8 @@ BalancingLeg legLeft(
 BalancingLeg legRight(
     drivers(),
     &fiveBarRight,
+    RF_LEG_MOTOR_PID_CONFIG,
+    RR_LEG_MOTOR_PID_CONFIG,
     &RightWheel,
     WHEEL_RADIUS,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);

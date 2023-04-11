@@ -42,6 +42,8 @@ public:
     BalancingLeg(
         tap::Drivers* drivers,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
+        const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
+        const tap::algorithms::SmoothPidConfig fivebarMotor2PidConfig,
         tap::motor::MotorInterface* wheelMotor,
         const float wheelRadius,
         const tap::algorithms::SmoothPidConfig driveWheelPidConfig);
@@ -52,6 +54,8 @@ public:
      *
      */
     inline void setDesiredHeight(float height) { zDesired = height; };
+
+    inline void setChassisAngle(float angle) { chassisAngle = angle; };
 
     /**
      *
@@ -68,6 +72,8 @@ public:
      */
     inline float getCurrentTranslationSpeed() { return vCurrent; };
 
+    inline aruwsrc::control::motion::FiveBarLinkage* getFiveBar() { return fivebar; };
+
     inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
 
     /**
@@ -77,9 +83,16 @@ public:
 
 private:
     void computeState(uint32_t dt);
+
+    void fiveBarController(uint32_t dt);
+
     const float WHEEL_RADIUS;
 
     aruwsrc::control::motion::FiveBarLinkage* fivebar;
+
+    tap::algorithms::SmoothPid fiveBarMotor1Pid;
+    tap::algorithms::SmoothPid fiveBarMotor2Pid;
+
     tap::motor::MotorInterface* driveWheel;
 
     tap::algorithms::SmoothPid driveWheelPid;
@@ -95,13 +108,16 @@ private:
     uint32_t prevTime = 0;
     float wheelPosPrev = 0;
     float tl_prev = 0;
+    float debug = 0;
 
     float zDesired,  // m
         vDesired,    // m/s
-        vDesiredPrev,
-        zCurrent,  // m
-        vCurrent,  // m/s
+        zCurrent,    // m
+        vCurrent,    // m/s
         vCurrentPrev,
+        chassisAngle,  // rad
+        chassisAnglePrev,
+        chassisAngledot,     // rad/s
         motorLinkAnglePrev,  // rad
         tl,                  // rad
         tl_dot,
@@ -113,6 +129,9 @@ private:
     float aDesiredPrev;
     float xoffset;
     float xoffsetPrev;
+
+    float debug1;
+    float debug2;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

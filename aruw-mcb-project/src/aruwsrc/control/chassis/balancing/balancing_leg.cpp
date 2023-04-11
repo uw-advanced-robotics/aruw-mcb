@@ -30,10 +30,14 @@ namespace chassis
 BalancingLeg::BalancingLeg(
     tap::Drivers* drivers,
     aruwsrc::control::motion::FiveBarLinkage* fivebar,
+    const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
+    const tap::algorithms::SmoothPidConfig fivebarMotor2PidConfig,
     tap::motor::MotorInterface* wheelMotor,
     const float wheelRadius,
     const tap::algorithms::SmoothPidConfig driveWheelPidConfig)
     : fivebar(fivebar),
+      fiveBarMotor1Pid(fivebarMotor1PidConfig),
+      fiveBarMotor2Pid(fivebarMotor2PidConfig),
       driveWheel(wheelMotor),
       WHEEL_RADIUS(wheelRadius),
       driveWheelPid(driveWheelPidConfig)
@@ -59,30 +63,66 @@ void BalancingLeg::update()
     computeState(dt);
 
     // 2. Apply Control Law
-    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, zDesired);
-    float desiredWheelSpeed = 0;
+    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.2);
+    float desiredWheelSpeed = vDesired;
     float desiredWheelAngle = 0;
     // desiredWheelSpeed += 1 / WHEEL_RADIUS * (vDesired - zCurrent * tl_dot);
-    desiredWheelSpeed += vDesired / WHEEL_RADIUS;
     desiredWheelAngle -=
         fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
-    xoffset = xPid.runControllerDerivateError(aDesired - aCurrent, dt);
+    //    u = -kx LQR control law
 
-    // xoffset = tap::algorithms::limitVal<float>(0.0005 * aDesired / (9.81 * WHEEL_RADIUS), -.03,
-    // .03); xoffsetPrev = tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05); xoffset =
-    // tap::algorithms::lowPassFilter(xoffsetPrev, xoffset, .05);
-    // desiredWheelLocation.setX(xoffset);
+    float desiredx = -(LQR_K11 * chassisAngle + LQR_K12 * chassisAngledot);
+    desiredx = tap::algorithms::limitVal(0.01f * desiredx, -.15f, .15f);
+    desiredWheelLocation.setX(desiredx);
 
-    float driveWheelOutput =
-        driveWheelPid.runControllerDerivateError(desiredWheelSpeed - realWheelSpeed, dt);
+    debug = desiredx;
+
+    desiredWheelSpeed -= (LQR_K32 * chassisAngledot + LQR_K33 * realWheelSpeed);
+    float driveWheelSpeedError =
+        desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed -
+        chassisAngledot * (fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
+                           fivebar->getCurrentPosition().getY() * cos(chassisAngle));
+
+    float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
     driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
     // 3. Send New Output Values
     driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
+    fiveBarController(dt);
+}
+
+void BalancingLeg::fiveBarController(uint32_t dt)
+{
+    float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
+    float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
+                   cos(fivebar->getMotor1RelativePosition()) *
+                   ((fivebar->getCurrentPosition().getX() + (L / 2)) / L) *
+                   (MASS_CHASSIS * 9.81 / 2);
+    float gravT2 = fivebar->getFiveBarConfig().motor2toJoint2Length *
+                   cos(M_PI - fivebar->getMotor2RelativePosition()) *
+                   (-(fivebar->getCurrentPosition().getX() - (L / 2)) / L) *
+                   (MASS_CHASSIS * 9.81 / 2);
+
+    float motor1error = fivebar->getMotor1Error();
+    float motor2error = fivebar->getMotor2Error();
+
+    float motor1output = fiveBarMotor1Pid.runController(
+        motor1error,
+        fivebar->getMotor1()->getShaftRPM() * M_TWOPI / 60,
+        dt);
+    float motor2output = fiveBarMotor2Pid.runController(
+        motor2error,
+        fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
+        dt);
+
+    motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;  // motor direction so -
+    motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+
+    fivebar->moveMotors(motor1output, motor2output);
 }
 
 void BalancingLeg::computeState(uint32_t dt)
@@ -105,9 +145,10 @@ void BalancingLeg::computeState(uint32_t dt)
     aCurrentPrev = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
     aCurrent = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
 
-    aDesired = (vDesired - vDesiredPrev) * 1000 / dt;
-    aDesiredPrev = tap::algorithms::lowPassFilter(aDesiredPrev, aDesired, .1);
-    aDesired = tap::algorithms::lowPassFilter(aDesiredPrev, aDesired, .1);
+    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1000 / dt;
+
+    chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .5);
+    // chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .1);
 }
 }  // namespace chassis
 }  // namespace aruwsrc

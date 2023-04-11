@@ -31,13 +31,9 @@ namespace aruwsrc::control::motion
 FiveBarLinkage::FiveBarLinkage(
     tap::motor::MotorInterface* motor1,
     tap::motor::MotorInterface* motor2,
-    FiveBarConfig fiveBarConfig,
-    tap::algorithms::SmoothPidConfig motor1PidConfig,
-    tap::algorithms::SmoothPidConfig motor2PidConfig)
+    FiveBarConfig fiveBarConfig)
     : motor1(motor1),
       motor2(motor2),
-      motor1Pid(motor1PidConfig),
-      motor2Pid(motor2PidConfig),
       fiveBarConfig(fiveBarConfig)
 {
     assert(motor1 != nullptr);
@@ -67,24 +63,12 @@ void FiveBarLinkage::refresh()
 
     computeMotorAngles();
     computePositionFromAngles();
-    moveMotors();
 }
 
-void FiveBarLinkage::moveMotors()
+void FiveBarLinkage::moveMotors(float motor1output, float motor2output)
 {
-    const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
-    motorsMoved = dt;
-    float motor1Output =
-        motor1Pid.runController(motor1Setpoint - motor1RelativePosition, motor1->getShaftRPM(), dt);
-    float motor2Output =
-        motor2Pid.runController(motor2Setpoint - motor2RelativePosition, motor2->getShaftRPM(), dt);
-    debug1 = motor1Output;
-    debug2 = motor2Output;
-
-    motor1->setDesiredOutput(motor1Output);
-    motor2->setDesiredOutput(motor2Output);
+    motor1->setDesiredOutput(motor1output);
+    motor2->setDesiredOutput(motor2output);
 }
 
 void FiveBarLinkage::computeMotorAngles()

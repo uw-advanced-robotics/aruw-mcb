@@ -152,64 +152,84 @@ static const float MAX_WHEEL_SPEED = 5'000;
 static constexpr float ROTATION_REMOTE_SCALAR = .005;
 static constexpr float TRANSLATION_REMOTE_SCALAR = .01;
 
+static constexpr float MASS_CHASSIS = 8.0f;  // kg
+
 static const tap::algorithms::SmoothPidConfig LEFT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 1000,
+    .kp = 400,
     .ki = 0,
-    .kd = 0,
+    .kd = 1000,
     .maxOutput = 3000,
     .errDeadzone = 0,
     .errorDerivativeFloor = 1,
 };
 
 static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 1000,
+    .kp = 400,
     .ki = 0,
-    .kd = 0,
-    .maxOutput = 3000,
+    .kd = 1000,
+    .maxOutput = 5000,
     .errDeadzone = 0,
     .errorDerivativeFloor = 1,
 };
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
-    .kp = 10000,
-    .ki = 5,
+    .kp = 4000,
+    .ki = 2,
     .kd = .1,
     .maxICumulative = 5000,
-    .maxOutput = 10000,
+    .maxOutput = 5000,
 };
+static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
+static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
+static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
 
-static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG{
-    .kp = 10000,
-    .ki = 5,
-    .kd = .1,
-    .maxICumulative = 5000,
-    .maxOutput = 10000,
-};
+// static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
+//     .kp = 10000,
+//     .ki = 5,
+//     .kd = .1,
+//     .maxICumulative = 5000,
+//     .maxOutput = 10000,
+// };
 
-static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG{
-    .kp = 10000,
-    .ki = 5,
-    .kd = .1,
-    .maxICumulative = 5000,
-    .maxOutput = 10000,
-};
+// static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG{
+//     .kp = 10000,
+//     .ki = 5,
+//     .kd = .1,
+//     .maxICumulative = 5000,
+//     .maxOutput = 10000,
+// };
 
-static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG{
-    .kp = 10000,
-    .ki = 5,
-    .kd = .1,
-    .maxICumulative = 5000,
-    .maxOutput = 10000,
-};
+// static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG{
+//     .kp = 10000,
+//     .ki = 5,
+//     .kd = .1,
+//     .maxICumulative = 5000,
+//     .maxOutput = 10000,
+// };
+
+// static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG{
+//     .kp = 10000,
+//     .ki = 5,
+//     .kd = .1,
+//     .maxICumulative = 5000,
+//     .maxOutput = 10000,
+// };
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
-    .defaultPosition = modm::Vector2f(0, -0.100),
-    .motor1toMotor2Length = .108,
-    .motor1toJoint1Length = .150,
-    .motor2toJoint2Length = .150,
-    .joint1toTipLength = .250,
-    .joint2toTipLength = .250,
+    .defaultPosition = modm::Vector2f(0.0f, -0.100f),
+    .motor1toMotor2Length = .108f,
+    .motor1toJoint1Length = .150f,
+    .motor2toJoint2Length = .150f,
+    .joint1toTipLength = .250f,
+    .joint2toTipLength = .250f,
 };
+
+static constexpr float LQR_K11 = 0.362370327152307f;
+static constexpr float LQR_K12 = 0.0701796468779454f;
+static constexpr float LQR_K32 = -0.135435773460834f;
+static constexpr float LQR_K33 = 0.160033863437814f;
+
+// other Ks are 0.
 
 }  // namespace aruwsrc::chassis
 
