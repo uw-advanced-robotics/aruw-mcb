@@ -51,13 +51,35 @@ public:
     IMUPosListener listener;
 };
 
-TEST_F(IMUPosListenerTest, test_zero_message_hamburger)
+TEST_F(IMUPosListenerTest, test_empty_position_message)
 {
-    modm::can::Message message(IMU_POS_MESSAGE, 8);
+    modm::can::Message msg(IMU_POS_MESSAGE, 8);
+    memset(msg.data, 0, 8);
 
-    listener.processMessage(message);
+    listener.processMessage(msg);
 
     EXPECT_EQ(listener.pitch, 0);
-    EXPECT_EQ(listener.yaw, 0x0203);
-    EXPECT_EQ(listener.roll, 0x0405);
+    EXPECT_EQ(listener.yaw, 0);
+    EXPECT_EQ(listener.roll, 0);
+}
+
+TEST_F(IMUPosListenerTest, test_position_message)
+{
+    modm::can::Message msg(IMU_POS_MESSAGE, 8);
+    memset(msg.data, 0, 8);
+
+    msg.data[0] = 0b100011;
+    msg.data[1] = 0b101000;
+    msg.data[2] = 0b1000110;
+    msg.data[3] = 0b1010000;
+    msg.data[4] = 0b1101001;
+    msg.data[5] = 0b1111000;
+
+    listener.processMessage(msg);
+    std::cout << listener.pitch << std::endl;
+    std::cout << listener.yaw << std::endl;
+    std::cout << listener.roll << std::endl;
+    EXPECT_EQ(listener.pitch, 90);
+    EXPECT_EQ(listener.yaw, 180);
+    EXPECT_EQ(listener.roll, 270);
 }

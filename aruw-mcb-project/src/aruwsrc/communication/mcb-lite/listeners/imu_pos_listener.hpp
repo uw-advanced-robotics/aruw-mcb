@@ -43,18 +43,26 @@ public:
             return;
         }
 
-        yaw = message.data[0] << 8 & message.data[1];
-        pitch = message.data[2] << 8 & message.data[3];
-        roll = message.data[4] << 8 & message.data[5];
+        pitch = getFloatFromMessage(message, 0);
+        yaw = getFloatFromMessage(message, 2);
+        roll = getFloatFromMessage(message, 4);
 
-        uint8_t state = message.data[6] << 8 & message.data[7];
+        uint8_t state = message.data[6] << 8 | message.data[7];
+
         imuState = static_cast<tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState>(state);
     }
 
-    uint16_t yaw, pitch, roll;
+    float yaw, pitch, roll;
     tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState =
         tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_NOT_CONNECTED;
-};
+
+private:
+    static float getFloatFromMessage(const modm::can::Message& message, uint8_t startIndex)
+    {
+        uint16_t data = message.data[startIndex] << 8 | message.data[startIndex + 1];
+        return (float) data / 100.0f;
+    };
+};  // class IMUPosListener
 
 }  // namespace aruwsrc::virtualMCB
 
