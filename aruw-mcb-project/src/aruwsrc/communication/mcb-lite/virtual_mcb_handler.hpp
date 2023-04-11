@@ -32,7 +32,7 @@ namespace aruwsrc::virtualMCB
 template <tap::communication::serial::Uart::UartPort port>
 class VirtualMCBHandler
 {
- public:
+public:
     VirtualMCBHandler(tap::Drivers* drivers);
 
     void refresh();

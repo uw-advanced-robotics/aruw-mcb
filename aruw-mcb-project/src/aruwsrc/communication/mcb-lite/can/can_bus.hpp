@@ -30,7 +30,6 @@ namespace aruwsrc::virtualMCB
 class CanBus
 {
 public:
-
     virtual ~CanBus() = default;
 
     virtual void initialize() = 0;
