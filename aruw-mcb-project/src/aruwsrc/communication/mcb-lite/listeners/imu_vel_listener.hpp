@@ -43,12 +43,20 @@ public:
             return;
         }
 
-        pitchVel = message.data[0] << 8 & message.data[1];
-        yawVel = message.data[2] << 8 & message.data[3];
-        rollVel = message.data[4] << 8 & message.data[5];
+        pitchVel = getFloatFromMessage(message, 0);
+        yawVel = getFloatFromMessage(message, 2);
+        rollVel = getFloatFromMessage(message, 4);
+
     }
 
-    uint16_t pitchVel, yawVel, rollVel;
+    float pitchVel, yawVel, rollVel;
+
+private:
+    static float getFloatFromMessage(const modm::can::Message& message, uint8_t startIndex)
+    {
+        uint16_t data = message.data[startIndex] << 8 | message.data[startIndex + 1];
+        return (float)data / 10.0f;
+    };
 };
 
 }  // namespace aruwsrc::virtualMCB
