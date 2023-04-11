@@ -46,7 +46,6 @@ public:
         pitchVel = getFloatFromMessage(message, 0);
         yawVel = getFloatFromMessage(message, 2);
         rollVel = getFloatFromMessage(message, 4);
-
     }
 
     float pitchVel, yawVel, rollVel;

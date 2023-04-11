@@ -58,7 +58,8 @@ private:
     static constexpr uint16_t CANBUS_ID_OFFSET = 129;
 };
 
-// This is essentially a forward declaration but needed for template class to build, https://stackoverflow.com/a/37189280
+// This is essentially a forward declaration but needed for template class to build,
+// https://stackoverflow.com/a/37189280
 template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart1>;
 template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart2>;
 template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart3>;

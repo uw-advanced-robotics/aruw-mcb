@@ -60,7 +60,7 @@ private:
     static float getFloatFromMessage(const modm::can::Message& message, uint8_t startIndex)
     {
         uint16_t data = message.data[startIndex] << 8 | message.data[startIndex + 1];
-        return (float) data / 100.0f;
+        return (float)data / 100.0f;
     };
 };  // class IMUPosListener
 
