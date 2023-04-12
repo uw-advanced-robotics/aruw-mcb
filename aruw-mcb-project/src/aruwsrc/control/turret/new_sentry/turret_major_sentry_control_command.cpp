@@ -33,7 +33,7 @@ TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
     float userYawInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
-      turretSubsystem(turretSubsystem),
+      turretMajorSubsystem(turretMajorSubsystem),
       yawController(yawController),
       userYawInputScalar(userYawInputScalar)
 {

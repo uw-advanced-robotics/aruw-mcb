@@ -48,7 +48,7 @@ class TurretMajorSentryControlCommand : public tap::control::Command
 public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] turretSubsystem Pointer to the sentry turret to control.
+     * @param[in] turretMajorSubsystem Pointer to the sentry turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
      * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
@@ -76,7 +76,7 @@ public:
 private:
     tap::Drivers *drivers;
     SentryControlOperatorInterface &controlOperatorInterface;
-    SentryTurretMajorSubsystem *turretSubsystem;
+    SentryTurretMajorSubsystem *turretMajorSubsystem;
 
     uint32_t prevTime = 0;
 
