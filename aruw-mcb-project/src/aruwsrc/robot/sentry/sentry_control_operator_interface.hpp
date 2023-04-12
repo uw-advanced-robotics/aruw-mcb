@@ -25,7 +25,7 @@
 #include "tap/algorithms/ramp.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
-#include "src/aruwsrc/robot/sentry/sentry_knuckles_turret_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 namespace aruwsrc::control::sentry
 {
@@ -33,13 +33,31 @@ namespace aruwsrc::control::sentry
 class SentryControlOperatorInterface
 {
 public:
-    SentryControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
+    float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
+    float DEFAULT_CHASSIS_Y_VELOCITY = 0.f;
+    float DEFAULT_TURRET_MAJOR_VELOCITY = 0.f;
 
     /**
-     * @return The value used for chassis movement forward and backward, between
-     * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
-     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
-     * and remote joystick information.
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 10'000.0f; // TODO: change these values
+    static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_Y = 10'000.0f; // TODO: change the values?
+    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_R = 10'000.0f; // TODO: change the values?
+    static constexpr float MAX_DECELERATION_R = 20'000.0f;
+    static constexpr float MAX_TURRET_MAJOR_YAW_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET1_MINOR_YAW_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET2_MINOR_YAW_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET1_MINOR_PITCH_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10; // TODO: refine this
+
+    SentryControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
+
+    // Drive mode functions
+
+    /**
+     * @return The value used for chassis movement forward and backward
      */
     mockable float getChassisXVelocity();
 
@@ -53,6 +71,8 @@ public:
      */
     mockable float getChassisYawVelocity();
     
+
+    // Turret control mode functions
     /**
      * @return the value used for turret major yaw velocity in radians / second
      */
@@ -78,6 +98,9 @@ public:
      */
     mockable float getTurretMinor2PitchVelocity();
 
+
+    // TODO: add autodrive commands
+
     /**
     * @return whether or not the control switch is set to drive mode.
     */
@@ -93,23 +116,13 @@ public:
     */
     bool isAutoDriveMode();
 
-    /**
-    * Updates the control operator's state ??
-    */
-    mockable float update();
-
-    enum class ControllerMode {
-        AUTO=0,
-        SHOOTING,
-        DRIVING,
-        NUM_MODES
-    };
-
 private:
     tap::Drivers *drivers;
 
     uint32_t prevUpdateCounterChassisXInput = 0;
     uint32_t prevUpdateCounterChassisYInput = 0;
+    uint32_t prevUpdateCounterChassisYawInput = 0;
+    
     uint32_t prevUpdateCounterTurretMajorYawInput = 0;
     uint32_t prevUpdateCounterTurretMinor1YawInput = 0;
     uint32_t prevUpdateCounterTurretMinor2YawInput = 0;
@@ -118,6 +131,7 @@ private:
 
     tap::algorithms::LinearInterpolationPredictor chassisXInput;
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
+    tap::algorithms::LinearInterpolationPredictor chassisYawInput;
     tap::algorithms::LinearInterpolationPredictor turretMajorYawInput;
     tap::algorithms::LinearInterpolationPredictor turretMinor1YawInput;
     tap::algorithms::LinearInterpolationPredictor turretMinor2YawInput;
@@ -126,6 +140,7 @@ private:
 
     tap::algorithms::Ramp chassisXInputRamp;
     tap::algorithms::Ramp chassisYInputRamp;
+    tap::algorithms::Ramp chassisYawInputRamp;
     tap::algorithms::Ramp turretMajorYawRamp;
     tap::algorithms::Ramp turretMinor1YawRamp;
     tap::algorithms::Ramp turretMinor2YawRamp;
@@ -134,6 +149,7 @@ private:
 
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
+    uint32_t prevChassisYawnputCalledTime = 0;
     uint32_t prevTurretMajorYawInputCalledTime = 0;
     uint32_t prevTurretMinor1YawInputCalledTime = 0;
     uint32_t prevTurretMinor2YawInputCalledTime = 0;

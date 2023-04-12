@@ -26,6 +26,7 @@ VALID_ROBOT_TYPES   = [ "TARGET_STANDARD_WOODY",
                         "TARGET_DRONE",
                         "TARGET_ENGINEER",
                         "TARGET_SENTRY_BEEHIVE",
+                        "TARGET_SENTRY_KNUCKLES",
                         "TARGET_HERO_CYCLONE",
                         "TARGET_DART" ]
 
