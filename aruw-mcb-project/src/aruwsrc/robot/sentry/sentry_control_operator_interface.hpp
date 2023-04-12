@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_OPERATOR_INTERFACE_HPP_
-#define CONTROL_OPERATOR_INTERFACE_HPP_
+#ifndef SENTRY_CONTROL_OPERATOR_INTERFACE_HPP_
+#define SENTRY_CONTROL_OPERATOR_INTERFACE_HPP_
 
 
 #include "tap/drivers.hpp"
@@ -160,4 +160,4 @@ private:
 } // namespace aruwsrc::control::sentry
 
 
-#endif // CONTROL_OPERATOR_INTERFACE_HPP_
+#endif // SENTRY_CONTROL_OPERATOR_INTERFACE_HPP__
