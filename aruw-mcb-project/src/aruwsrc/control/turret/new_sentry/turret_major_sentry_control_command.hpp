@@ -20,6 +20,13 @@
 #ifndef TURRET_MAJOR_SENTRY_CONTROL_COMMAND_HPP_
 #define TURRET_MAJOR_SENTRY_CONTROL_COMMAND_HPP_
 
+#include "tap/control/command.hpp"
+
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+
+using namespace aruwsrc::control::sentry;
+
 namespace aruwsrc
 {
 class Drivers;
@@ -36,8 +43,47 @@ namespace aruwsrc::control::turret::sentry
  * Command that takes user input from the 'SentryControlOperatorInterface' to control
  * axis of some turret using some passed in yaw and pitch controller upon constr
 */
-class TurretSentryControlCommand : public tap::control::Command
-// TODO: Finish
-}
+class TurretMajorSentryControlCommand : public tap::control::Command
+{
+public:
+    /**
+     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] turretSubsystem Pointer to the sentry turret to control.
+     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * axis of the turret.
+     * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
+     * by. Basically mouse sensitivity.
+     */
+    TurretMajorSentryControlCommand(
+        tap::Drivers *drivers,
+        SentryControlOperatorInterface &controlOperatorInterface,
+        SentryTurretMajorSubsystem *turretMajorSubsystem,
+        algorithms::TurretYawControllerInterface *yawController,
+        float userYawInputScalar);
+
+    bool isReady() override;
+
+    const char *getName() const override { return "User turret control"; }
+
+    void initialize() override;
+
+    void execute() override;
+
+    bool isFinished() const override;
+
+    void end(bool) override;
+
+private:
+    tap::Drivers *drivers;
+    SentryControlOperatorInterface &controlOperatorInterface;
+    SentryTurretMajorSubsystem *turretSubsystem;
+
+    uint32_t prevTime = 0;
+
+    algorithms::TurretYawControllerInterface *yawController;
+
+    const float userYawInputScalar;
+};
+}  // namespace aruwsrc::control::turret::sentry
 
 #endif
