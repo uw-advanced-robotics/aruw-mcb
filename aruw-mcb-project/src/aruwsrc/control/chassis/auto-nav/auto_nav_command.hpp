@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTO_NAV_BEYBLADE_COMMAND_HPP_
-#define AUTO_NAV_BEYBLADE_COMMAND_HPP_
+#ifndef AUTO_NAV_COMMAND_HPP_
+#define AUTO_NAV_COMMAND_HPP_
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
@@ -36,10 +36,10 @@ class HolonomicChassisSubsystem;
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
-class AutoNavBeybladeCommand : public tap::control::Command
+class AutoNavCommand : public tap::control::Command
 {
 public:
-    AutoNavBeybladeCommand(
+    AutoNavCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
@@ -58,18 +58,14 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
-    float rotationDirection;
-
-    tap::algorithms::Ramp rotateSpeedRamp;
-
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
-};  // class AutoNavBeybladeCommand
+};  // class AutoNavCommand
 
 }  // namespace aruwsrc::chassis
 
-#endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_
+#endif  // AUTO_NAV_COMMAND_HPP_

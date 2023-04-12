@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "auto_nav_beyblade_command.hpp"
+#include "auto_nav_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
@@ -37,7 +37,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-AutoNavBeybladeCommand::AutoNavBeybladeCommand(
+AutoNavCommand::AutoNavCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretMotor& yawMotor,
@@ -56,17 +56,11 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
 }
 
 // Resets ramp
-void AutoNavBeybladeCommand::initialize()
+void AutoNavCommand::initialize()
 {
-#ifdef ENV_UNIT_TESTS
-    rotationDirection = 1;
-#else
-    rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
-#endif
-    rotateSpeedRamp.reset(chassis.getDesiredRotation());
 }
 
-void AutoNavBeybladeCommand::execute()
+void AutoNavCommand::execute()
 {
     if (yawMotor.isOnline())
     {
@@ -83,36 +77,12 @@ void AutoNavBeybladeCommand::execute()
         float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 
-
-        // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
-        // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
-        const float translationalSpeedThreshold =
-            BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
-            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
-
-        float rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
-
-        // reduce the beyblade rotation when translating to allow for better translational speed
-        // (otherwise it is likely that you will barely move unless
-        // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-        if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
-        {
-            rampTarget *= BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
-        }
-
-        rotateSpeedRamp.setTarget(rampTarget);
-        // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-        rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RAMP);
-
-        float r = 0;//rotateSpeedRamp.getValue();
-
         // Rotate X and Y depending on turret angle
         tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
         // set outputs
         // TODO: i THINK this is positional offset
-        chassis.setDesiredOutput(x, y, r);
+        chassis.setDesiredOutput(x, y, 0);
     }
     else
     {
@@ -120,7 +90,7 @@ void AutoNavBeybladeCommand::execute()
     }
 }
 
-void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }
+void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }
 }  // namespace chassis
 
 }  // namespace aruwsrc
