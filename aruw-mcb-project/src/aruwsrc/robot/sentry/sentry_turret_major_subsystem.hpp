@@ -26,6 +26,12 @@ namespace aruwsrc::control::turret
 {
 /**
  * Turret major subsystem for the Sentry.
+ *
+ * Stores software necessary for interacting with a gimbal that control the
+ * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
+ *
+ * All angles computed using a right hand coordinate system. In other words, yaw is a value from
+ * 0-M_TWOPI rotated counterclockwise when looking at the turret from above.
  */
 class SentryTurretMajorSubsystem final : public tap::control::Subsystem
 {
@@ -35,8 +41,21 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& yawMotorConfig,
         uint8_t turretID);
+
+    /**
+     * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
+     * turret counterclockwise when looking at the turret from above.
+     */
     float getWorldYaw() const;
-    uint32_t getLastMeasurementTimeMicros() const;
+    /**
+     * @return Timestamp of when the turret subsystem returns the angle
+     * measurements.
+     */
+    uint32_t getLastMeasurementTimeMicroseconds() const;
+    /**
+     *  @return Distance between the turret and the chassis origin in the chassis frame. units of
+     * meters
+     */
     modm::Vector3f getTurretOffset() const;
 
 private:
