@@ -172,7 +172,6 @@ public:
     {
         float x;
         float y;
-        uint32_t timestamp;  ///< Jetson timestamp!  TODO: uhhhh timesync
     } modm_packed;
 
     struct OdometryData
