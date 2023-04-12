@@ -52,11 +52,6 @@ public:
      * measurements.
      */
     uint32_t getLastMeasurementTimeMicroseconds() const;
-    /**
-     *  @return Distance between the turret and the chassis origin in the chassis frame. units of
-     * meters
-     */
-    modm::Vector3f getTurretOffset() const;
 
 private:
     /// Associated with and contains logic for controlling the turret's yaw motor

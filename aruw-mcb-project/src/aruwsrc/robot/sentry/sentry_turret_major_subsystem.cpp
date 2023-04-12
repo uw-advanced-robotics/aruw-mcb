@@ -44,20 +44,4 @@ uint32_t SentryTurretMajorSubsystem::getLastMeasurementTimeMicroseconds() const
     return tap::arch::clock::getTimeMicroseconds();
 }
 
-modm::Vector3f SentryTurretMajorSubsystem::getTurretOffset() const
-{
-#ifdef TARGET_SENTRY_BEEHIVE
-    if (turretID == 1)
-    {
-        return modm::Vector3f(0, 0, 0);
-    }
-    else
-    {
-        return control::turret::OFFSET_TURRET_0_TO_TURRET_1;
-    }
-#else
-    return modm::Vector3f(0, 0, 0);
-#endif
-}
-
 }  // namespace aruwsrc::control::turret
