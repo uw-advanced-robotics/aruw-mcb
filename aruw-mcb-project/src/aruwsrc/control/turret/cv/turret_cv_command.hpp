@@ -24,6 +24,8 @@
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 #include "turret_cv_command_interface.hpp"
 
@@ -49,7 +51,7 @@ class LaunchSpeedPredictorInterface;
 
 namespace aruwsrc::chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 }
 
 namespace aruwsrc::control::turret::cv
@@ -58,7 +60,7 @@ namespace aruwsrc::control::turret::cv
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turret accordingly using a position PID controller.
  *
- * This command, unlike the `SentinelTurretCVCommand`, is not responsible for firing projectiles
+ * This command, unlike the `SentryTurretCVCommand`, is not responsible for firing projectiles
  * when the auto aim system determines it should fire. Nor does this class scan the turret back and
  * forth.
  *
@@ -72,7 +74,8 @@ public:
     /**
      * Constructs a TurretCVCommand
      *
-     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] visionCoprocessor Pointer to a global visionCoprocessor object.
+     * @param[in] controlOperatorInterface Pointer to a global controlOperatorInterface object.
      * @param[in] turretSubsystem Pointer to the turret to control.
      * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
      * axis of the turret.
@@ -88,7 +91,8 @@ public:
      * for more information.
      */
     TurretCVCommand(
-        aruwsrc::Drivers *drivers,
+        serial::VisionCoprocessor *visionCoprocessor,
+        control::ControlOperatorInterface *controlOperatorInterface,
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
@@ -119,7 +123,8 @@ public:
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
-    aruwsrc::Drivers *drivers;
+    serial::VisionCoprocessor *visionCoprocessor;
+    control::ControlOperatorInterface *controlOperatorInterface;
 
     uint8_t turretID;
 

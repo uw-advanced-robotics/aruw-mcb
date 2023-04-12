@@ -27,7 +27,7 @@ VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES               = ["true", "false"]
 VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
 
-USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROBOT_TYPE>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
+USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
     \"<target>\" is one of:\n\
         - \"build\": build all code for the hardware platform.\n\
         - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
@@ -36,9 +36,9 @@ USAGE = "Usage: scons <target> [profile=<debug|release|fast>] [robot=TARGET_<ROB
         - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
         - \"build-sim\": build all code for the simulated environment, for the current host platform.\n\
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
-    \"TARGET_<ROBOT_TYPE>\" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.\n\
+    \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - SOLDIER_2021, SOLDIER_2022, SOLDIERMK4_2022, DRONE, ENGINEER, SENTINEL_2021, SENTINEL_2022, HERO\n\
+            - STANDARD_WOODY, STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_CYCLONE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 

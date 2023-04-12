@@ -22,7 +22,7 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/engineer/tow_subsystem.hpp"
+#include "aruwsrc/robot/engineer/tow_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -32,7 +32,7 @@ class TowSubsystemMock : public aruwsrc::engineer::TowSubsystem
 {
 public:
     TowSubsystemMock(
-        aruwsrc::Drivers *drivers,
+        tap::Drivers *drivers,
         tap::gpio::Digital::OutputPin leftTowPin,
         tap::gpio::Digital::OutputPin rightTowPin,
         tap::gpio::Digital::InputPin leftTowLimitSwitchPin,

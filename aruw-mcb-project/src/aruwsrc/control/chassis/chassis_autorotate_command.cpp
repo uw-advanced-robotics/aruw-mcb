@@ -21,12 +21,12 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
@@ -34,11 +34,13 @@ using namespace aruwsrc::control::turret;
 namespace aruwsrc::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
-    aruwsrc::Drivers* drivers,
-    ChassisSubsystem* chassis,
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
+    HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
       chassisSymmetry(chassisSymmetry),
@@ -131,7 +133,7 @@ void ChassisAutorotateCommand::execute()
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
@@ -141,12 +143,12 @@ void ChassisAutorotateCommand::execute()
             maxWheelSpeed * chassis->calculateRotationTranslationalGain(desiredRotationAverage);
 
         float chassisXDesiredWheelspeed = limitVal(
-            drivers->controlOperatorInterface.getChassisXInput(),
+            operatorInterface->getChassisXInput(),
             -rotationLimitedMaxTranslationalSpeed,
             rotationLimitedMaxTranslationalSpeed);
 
         float chassisYDesiredWheelspeed = limitVal(
-            drivers->controlOperatorInterface.getChassisYInput(),
+            operatorInterface->getChassisYInput(),
             -rotationLimitedMaxTranslationalSpeed,
             rotationLimitedMaxTranslationalSpeed);
 
@@ -160,7 +162,7 @@ void ChassisAutorotateCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(drivers, chassis);
+        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
     }
 }
 

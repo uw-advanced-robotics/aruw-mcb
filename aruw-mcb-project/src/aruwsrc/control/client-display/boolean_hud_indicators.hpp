@@ -23,7 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/communication/serial/sentinel_response_handler.hpp"
+#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -31,11 +31,6 @@
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::client_display
 {
@@ -48,7 +43,7 @@ public:
     /**
      * Construct a BooleanHudIndicators object.
      *
-     * @param[in] drivers Global drivers instance.
+     * @param[in] commandScheduler  CommandScheduler instance.
      * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
      * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
@@ -56,17 +51,17 @@ public:
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
-     * @param[in] sentinelResponseHandler Global sentinel response handler that contains the current
-     * movement state of the sentinel.
+     * @param[in] sentryResponseHandler Global sentry response handler that contains the current
+     * movement state of the sentry.
      */
     BooleanHudIndicators(
-        aruwsrc::Drivers &drivers,
+        tap::control::CommandScheduler &commandScheduler,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -115,8 +110,8 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates whether or not the sentinel is moving. */
-        SENTINEL_DRIVE_STATUS,
+        /** Indicates whether or not the sentry is moving. */
+        SENTRY_DRIVE_STATUS,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -143,7 +138,7 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
         };
 
-    aruwsrc::Drivers &drivers;
+    tap::control::CommandScheduler &commandScheduler;
 
     /**
      * Hopper subsystem that provides information about whether or not the cover is open or closed.
@@ -168,10 +163,10 @@ private:
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
 
     /**
-     * SentinelResponseHandler that provides information about whether or not the sentinel is
+     * SentryResponseHandler that provides information about whether or not the sentry is
      * moving.
      */
-    const aruwsrc::communication::serial::SentinelResponseHandler &sentinelResponseHandler;
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,

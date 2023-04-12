@@ -31,7 +31,10 @@ namespace mock
 class ChassisDriveCommandMock : public chassis::ChassisDriveCommand
 {
 public:
-    ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::ChassisSubsystem *cs);
+    ChassisDriveCommandMock(
+        tap::Drivers *d,
+        aruwsrc::control::ControlOperatorInterface *operatorInterface,
+        chassis::HolonomicChassisSubsystem *cs);
     virtual ~ChassisDriveCommandMock();
 
     MOCK_METHOD(void, initialize, (), (override));

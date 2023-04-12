@@ -26,7 +26,7 @@
 
 namespace aruwsrc::chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 }
 
 namespace aruwsrc::control::turret
@@ -34,9 +34,9 @@ namespace aruwsrc::control::turret
 class RobotTurretSubsystem;
 }
 
-namespace aruwsrc
+namespace aruwsrc::serial
 {
-class Drivers;
+class VisionCoprocessor;
 }
 
 namespace aruwsrc::control::launcher
@@ -116,7 +116,7 @@ public:
      * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
-        const aruwsrc::Drivers &drivers,
+        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -136,7 +136,7 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const Drivers &drivers;
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;

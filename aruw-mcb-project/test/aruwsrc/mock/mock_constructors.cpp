@@ -29,13 +29,15 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "sentinel_drive_subsystem_mock.hpp"
-#include "sentinel_request_subsystem_mock.hpp"
+#include "sentry_drive_subsystem_mock.hpp"
+#include "sentry_request_subsystem_mock.hpp"
 #include "tow_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
+#include "turret_motor_mock.hpp"
 #include "turret_subsystem_mock.hpp"
+#include "vision_coprocessor_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
@@ -44,7 +46,7 @@
 namespace aruwsrc::mock
 {
 AgitatorSubsystemMock::AgitatorSubsystemMock(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     const tap::algorithms::SmoothPidConfig &pidConfig,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,
@@ -69,27 +71,31 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
 BeybladeCommandMock::BeybladeCommandMock(
-    aruwsrc::Drivers *drivers,
-    chassis::ChassisSubsystem *chassis,
-    aruwsrc::control::turret::TurretMotor *yawMotor)
-    : BeybladeCommand(drivers, chassis, yawMotor)
+    tap::Drivers *drivers,
+    chassis::HolonomicChassisSubsystem *chassis,
+    aruwsrc::control::turret::TurretMotor *yawMotor,
+    aruwsrc::control::ControlOperatorInterface &operatorInterface)
+    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
-ChassisDriveCommandMock::ChassisDriveCommandMock(aruwsrc::Drivers *d, chassis::ChassisSubsystem *cs)
-    : chassis::ChassisDriveCommand(d, cs)
+ChassisDriveCommandMock::ChassisDriveCommandMock(
+    tap::Drivers *d,
+    aruwsrc::control::ControlOperatorInterface *operatorInterface,
+    chassis::HolonomicChassisSubsystem *cs)
+    : chassis::ChassisDriveCommand(d, operatorInterface, cs)
 {
 }
 ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-ChassisSubsystemMock::ChassisSubsystemMock(aruwsrc::Drivers *drivers)
-    : ChassisSubsystem(drivers, chassis::ChassisSubsystem::ChassisType::MECANUM)
+ChassisSubsystemMock::ChassisSubsystemMock(tap::Drivers *drivers)
+    : Holonomic4MotorChassisSubsystem(drivers)
 {
 }
 ChassisSubsystemMock::~ChassisSubsystemMock() {}
 
-FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers)
+FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
     : FrictionWheelSubsystem(
           drivers,
           tap::motor::MOTOR1,
@@ -101,7 +107,7 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(aruwsrc::Drivers *drivers
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
-    aruwsrc::Drivers *drivers)
+    tap::Drivers *drivers)
     : RefereeFeedbackFrictionWheelSubsystem<10>(
           drivers,
           tap::motor::MOTOR1,
@@ -113,25 +119,30 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(
-    aruwsrc::Drivers *drivers,
-    tap::gpio::Digital::OutputPin pin)
+GrabberSubsystemMock::GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::GrabberSubsystem(drivers, pin)
 {
 }
 GrabberSubsystemMock::~GrabberSubsystemMock() {}
 
-OledDisplayMock::OledDisplayMock(aruwsrc::Drivers *drivers) : display::OledDisplay(drivers) {}
+OledDisplayMock::OledDisplayMock(
+    tap::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor *vc,
+    can::TurretMCBCanComm *turretMCBCanCommBus1,
+    can::TurretMCBCanComm *turretMCBCanCommBus2)
+    : display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
+{
+}
 OledDisplayMock::~OledDisplayMock() {}
 
-TurretMCBCanCommMock::TurretMCBCanCommMock(aruwsrc::Drivers *drivers, tap::can::CanBus canBus)
+TurretMCBCanCommMock::TurretMCBCanCommMock(tap::Drivers *drivers, tap::can::CanBus canBus)
     : can::TurretMCBCanComm(drivers, canBus)
 {
 }
 TurretMCBCanCommMock::~TurretMCBCanCommMock() {}
 
 HopperSubsystemMock::HopperSubsystemMock(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float open,
     float close,
@@ -141,23 +152,23 @@ HopperSubsystemMock::HopperSubsystemMock(
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
-SentinelDriveSubsystemMock::SentinelDriveSubsystemMock(
-    aruwsrc::Drivers *drivers,
+SentryDriveSubsystemMock::SentryDriveSubsystemMock(
+    tap::Drivers *drivers,
     tap::gpio::Digital::InputPin leftLimitSwitch,
     tap::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentinel::drive::SentinelDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
+    : control::sentry::drive::SentryDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
 {
 }
-SentinelDriveSubsystemMock::~SentinelDriveSubsystemMock() {}
+SentryDriveSubsystemMock::~SentryDriveSubsystemMock() {}
 
-SentinelRequestSubsystemMock::SentinelRequestSubsystemMock(aruwsrc::Drivers *drivers)
-    : SentinelRequestSubsystem(drivers)
+SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
+    : SentryRequestSubsystem(drivers)
 {
 }
-SentinelRequestSubsystemMock::~SentinelRequestSubsystemMock() {}
+SentryRequestSubsystemMock::~SentryRequestSubsystemMock() {}
 
 TowSubsystemMock::TowSubsystemMock(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     tap::gpio::Digital::OutputPin leftTowPin,
     tap::gpio::Digital::OutputPin rightTowPin,
     tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
@@ -172,25 +183,25 @@ TowSubsystemMock::TowSubsystemMock(
 }
 TowSubsystemMock::~TowSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(aruwsrc::Drivers *drivers)
+TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
     : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
-RobotTurretSubsystemMock::RobotTurretSubsystemMock(aruwsrc::Drivers *drivers)
+RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
     : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
 {
 }
 RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
 
-XAxisSubsystemMock::XAxisSubsystemMock(aruwsrc::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
+XAxisSubsystemMock::XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
     : engineer::XAxisSubsystem(drivers, pin)
 {
 }
 XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
-VisionCoprocessorMock::VisionCoprocessorMock(aruwsrc::Drivers *drivers)
+VisionCoprocessorMock::VisionCoprocessorMock(tap::Drivers *drivers)
     : serial::VisionCoprocessor(drivers)
 {
 }
@@ -215,7 +226,8 @@ TurretMotorMock::TurretMotorMock(
 TurretMotorMock::~TurretMotorMock() {}
 
 TurretCVCommandMock::TurretCVCommandMock(
-    aruwsrc::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    control::ControlOperatorInterface *controlOperatorInterface,
     aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
@@ -224,7 +236,8 @@ TurretCVCommandMock::TurretCVCommandMock(
     const float userYawInputScalar,
     uint8_t turretID)
     : aruwsrc::control::turret::cv::TurretCVCommand(
-          drivers,
+          visionCoprocessor,
+          controlOperatorInterface,
           turretSubsystem,
           yawController,
           pitchController,
@@ -237,14 +250,14 @@ TurretCVCommandMock::TurretCVCommandMock(
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
-    const aruwsrc::Drivers &drivers,
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
-          drivers,
+          visionCoprocessor,
           odometryInterface,
           turretSubsystem,
           frictionWheels,
@@ -261,11 +274,17 @@ TurretControllerInterfaceMock::TurretControllerInterfaceMock(
 TurretControllerInterfaceMock::~TurretControllerInterfaceMock() {}
 
 CvOnTargetGovernorMock::CvOnTargetGovernorMock(
-    aruwsrc::Drivers &drivers,
+    tap::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
     aruwsrc::control::governor::AutoAimLaunchTimer &launchTimer,
     aruwsrc::control::governor::CvOnTargetGovernorMode mode)
-    : aruwsrc::control::governor::CvOnTargetGovernor(drivers, turretCVCommand, launchTimer, mode)
+    : aruwsrc::control::governor::CvOnTargetGovernor(
+          drivers,
+          visionCoprocessor,
+          turretCVCommand,
+          launchTimer,
+          mode)
 {
 }
 

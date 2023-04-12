@@ -20,12 +20,14 @@
 #include <gtest/gtest.h>
 
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::algorithms;
@@ -101,16 +103,17 @@ class OttoBallisticsSolverTest : public Test
 {
 protected:
     OttoBallisticsSolverTest()
-        : turret(&drivers),
-          solver(drivers, odometry, turret, launcher, 15, 0)
+        : vc(&drivers),
+          turret(&drivers),
+          solver(vc, odometry, turret, launcher, 15, 0)
     {
     }
 
     void SetUp() override
     {
-        ON_CALL(drivers.visionCoprocessor, isCvOnline).WillByDefault(ReturnPointee(&cvOnline));
+        ON_CALL(vc, isCvOnline).WillByDefault(ReturnPointee(&cvOnline));
 
-        ON_CALL(drivers.visionCoprocessor, getLastAimData).WillByDefault(ReturnRef(aimData));
+        ON_CALL(vc, getLastAimData).WillByDefault(ReturnRef(aimData));
 
         ON_CALL(odometry, getLastComputedOdometryTime)
             .WillByDefault(ReturnPointee(&lastComputedOdomTime));
@@ -120,7 +123,9 @@ protected:
         ON_CALL(launcher, getPredictedLaunchSpeed).WillByDefault(ReturnPointee(&launchSpeed));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
+
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
@@ -151,14 +156,14 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
 {
     solution = solver.computeTurretAimAngles();
 
-    aimData.hasTarget = false;
+    aimData.pva.updated = false;
 
     EXPECT_FALSE(solution.has_value());
 }
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 {
-    aimData.xPos = 2;
+    aimData.pva.xPos = 2;
 
     solution = solver.computeTurretAimAngles();
 
@@ -168,8 +173,8 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 {
-    aimData.hasTarget = true;
-    aimData.xPos = 2;
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
 
     lastComputedOdomTime = 100;
 
@@ -181,8 +186,8 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 {
-    aimData.hasTarget = true;
-    aimData.xPos = 2;
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
     aimData.timestamp = 100;
 
     clock.time = 100;
@@ -195,8 +200,8 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 
 TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
-    aimData.hasTarget = true;
-    aimData.xPos = 2;
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
     chassisLoc.setPosition(-2, 0);
 
     aimData.timestamp = 100;
@@ -213,8 +218,8 @@ TEST_F(
     OttoBallisticsSolverTest,
     comiputeTurretAimAngles_solution_found_no_new_time_solution_not_resolved)
 {
-    aimData.hasTarget = true;
-    aimData.xPos = 2;
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
     aimData.timestamp = 100;
 
     clock.time = 100;
@@ -234,8 +239,8 @@ TEST_F(
 
 TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid_solution)
 {
-    aimData.hasTarget = true;
-    aimData.xPos = 100;
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 100;
     aimData.timestamp = 100;
 
     clock.time = 100;

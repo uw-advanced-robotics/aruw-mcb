@@ -1,20 +1,17 @@
 /**
  * @file robot_type.hpp
  *
- * @brief Header for intellisense and default robot selection
+ * @brief Header for intellisense
  *
- * This file serves two main purposes:
- *  1. To provide a default build target if one isn't provided when building.
- *     This functionality is handled by the build script searching this file.
- *  2. To help syntax highlighting. We setup the VSCode configuration to
- *     "include" this file for intellisense
+ * This file exists solely to help syntax highlighting. We setup the VSCode configuration to
+ * "include" this file for intellisense.
  *
  * `aruw-mcb` builds take a target option. This specifies which robot to build
- * for as different robots will have different subsystems and constants etc., and
- * this file helps with the above mentioned purposes.
+ * for as different robots will have different subsystems and constants, so this file
+ * allows the developer to view syntax highlighting for the robot they are developing
+ * for to catch mistakes without having to rebuild the code every time.
  *
- * So as to not mess with the build system this file should **NOT** be included
- * normally.
+ * This file should **NOT** be included normally, as otherwise it will mess with the build system.
  */
 
 #ifndef ROBOT_TYPE_HPP_
@@ -22,12 +19,12 @@
 
 // Check that target isn't already defined. This would be caused by including the file
 // when building (assuming define has been passed in through command line)
-#if defined(TARGET_SOLDIER_2022) || defined(TARGET_SOLDIER_2021) || defined(TARGET_DRONE) ||      \
-    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2021) || defined(TARGET_SENTINEL_2022) || \
-    defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
+#if defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_WOODY) || defined(TARGET_DRONE) ||      \
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_BEEHIVE) || \
+    defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER) || defined(TARGET_DART)
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_SOLDIERMK4_2022
+#define TARGET_STANDARD_SPIDER
 
 #endif

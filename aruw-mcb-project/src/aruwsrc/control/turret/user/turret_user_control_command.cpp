@@ -19,13 +19,16 @@
 
 #include "turret_user_control_command.hpp"
 
+#include "tap/drivers.hpp"
+
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
+    ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
@@ -33,6 +36,7 @@ TurretUserControlCommand::TurretUserControlCommand(
     float userPitchInputScalar,
     uint8_t turretID)
     : drivers(drivers),
+      controlOperatorInterface(controlOperatorInterface),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
@@ -60,12 +64,12 @@ void TurretUserControlCommand::execute()
 
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
+        userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
         yawController->getSetpoint() +
-        userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+        userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);
 }
 

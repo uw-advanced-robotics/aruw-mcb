@@ -26,7 +26,6 @@
 #include "../robot_turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "aruwsrc/drivers.hpp"
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
@@ -35,7 +34,8 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
-    aruwsrc::Drivers *drivers,
+    serial::VisionCoprocessor *visionCoprocessor,
+    control::ControlOperatorInterface *controlOperatorInterface,
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
@@ -43,7 +43,8 @@ TurretCVCommand::TurretCVCommand(
     const float userYawInputScalar,
     const float userPitchInputScalar,
     uint8_t turretID)
-    : drivers(drivers),
+    : visionCoprocessor(visionCoprocessor),
+      controlOperatorInterface(controlOperatorInterface),
       turretID(turretID),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
@@ -65,7 +66,7 @@ void TurretCVCommand::initialize()
     pitchController->initialize();
     yawController->initialize();
     prevTime = getTimeMilliseconds();
-    drivers->visionCoprocessor.sendSelectNewTargetMessage();
+    visionCoprocessor->sendSelectNewTargetMessage();
 }
 
 void TurretCVCommand::execute()
@@ -102,10 +103,9 @@ void TurretCVCommand::execute()
     {
         // no valid ballistics solution, let user control turret
         pitchSetpoint +=
-            userPitchInputScalar * drivers->controlOperatorInterface.getTurretPitchInput(turretID);
+            userPitchInputScalar * controlOperatorInterface->getTurretPitchInput(turretID);
 
-        yawSetpoint +=
-            userYawInputScalar * drivers->controlOperatorInterface.getTurretYawInput(turretID);
+        yawSetpoint += userYawInputScalar * controlOperatorInterface->getTurretYawInput(turretID);
 
         withinAimingTolerance = false;
     }

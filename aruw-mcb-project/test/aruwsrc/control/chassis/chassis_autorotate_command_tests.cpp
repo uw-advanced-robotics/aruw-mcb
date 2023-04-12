@@ -19,10 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/mock/chassis_subsystem_mock.hpp"
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::mock;
@@ -38,6 +41,7 @@ protected:
         : drivers(),
           chassis(&drivers),
           turret(&drivers),
+          controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
     {
     }
@@ -50,9 +54,10 @@ protected:
         ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(turretConfig));
     }
 
-    aruwsrc::Drivers drivers;
+    tap::Drivers drivers;
     NiceMock<ChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
+    NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
     TurretMotorConfig turretConfig;
 };
@@ -64,15 +69,15 @@ class TurretOfflineTest : public ChassisAutorotateCommandTest,
 
 TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
-    ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
+    ON_CALL(controlOperatorInterface, getChassisXInput)
         .WillByDefault(Return(std::get<0>(GetParam())));
-    ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
+    ON_CALL(controlOperatorInterface, getChassisYInput)
         .WillByDefault(Return(std::get<1>(GetParam())));
-    ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
+    ON_CALL(controlOperatorInterface, getChassisRInput)
         .WillByDefault(Return(std::get<2>(GetParam())));
 
     EXPECT_CALL(
@@ -87,13 +92,13 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 
 TEST_F(ChassisAutorotateCommandTest, constructor_only_adds_chassis_sub_req)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
     EXPECT_EQ(1U << chassis.getGlobalIdentifier(), cac.getRequirementsBitwise());
 }
 
 TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_CALL(chassis, setZeroRPM).Times(2);
 
@@ -103,7 +108,7 @@ TEST_F(ChassisAutorotateCommandTest, end_sets_chassis_out_0)
 
 TEST_F(ChassisAutorotateCommandTest, isFinished_returns_false)
 {
-    ChassisAutorotateCommand cac(&drivers, &chassis, &turret.yawMotor);
+    ChassisAutorotateCommand cac(&drivers, &(controlOperatorInterface), &chassis, &turret.yawMotor);
 
     EXPECT_FALSE(cac.isFinished());
 }
@@ -140,7 +145,11 @@ public:
                                  -M_PI,
                                  M_PI)
                                  .getValue()),
-          cac(&drivers, &chassis, &turret.yawMotor, GetParam().chassisSymmetry),
+          cac(&drivers,
+              &(controlOperatorInterface),
+              &chassis,
+              &turret.yawMotor,
+              GetParam().chassisSymmetry),
           turretAngleActual(GetParam().yawAngle, 0, M_TWOPI)
     {
     }
@@ -151,12 +160,9 @@ public:
 
         ON_CALL(drivers.mpu6500, getGz).WillByDefault(Return(0));
 
-        ON_CALL(drivers.controlOperatorInterface, getChassisXInput)
-            .WillByDefault(Return(GetParam().x));
-        ON_CALL(drivers.controlOperatorInterface, getChassisYInput)
-            .WillByDefault(Return(GetParam().y));
-        ON_CALL(drivers.controlOperatorInterface, getChassisRInput)
-            .WillByDefault(Return(GetParam().r));
+        ON_CALL(controlOperatorInterface, getChassisXInput).WillByDefault(Return(GetParam().x));
+        ON_CALL(controlOperatorInterface, getChassisYInput).WillByDefault(Return(GetParam().y));
+        ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(GetParam().r));
 
         turretConfig.limitMotorAngles = GetParam().yawLimited;
 
@@ -169,7 +175,7 @@ public:
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
         ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.ChassisSubsystem::chassisSpeedRotationPID(angle, d);
+            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
         });
     }
 

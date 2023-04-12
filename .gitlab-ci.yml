@@ -71,12 +71,12 @@ before_script:
         -p ./aruw-mcb-project/src/
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
-            aruwsrc/control/engineer_control.cpp
-            aruwsrc/control/sentinel_2021_control.cpp
-            aruwsrc/control/sentinel_2022_control.cpp
-            aruwsrc/control/soldier_control.cpp
-            aruwsrc/control/drone_control.cpp
-            aruwsrc/control/hero_control.cpp
+            aruwsrc/robot/engineer/engineer_control.cpp
+            aruwsrc/robot/sentry/sentry_control.cpp
+            aruwsrc/robot/standard/standard_control.cpp
+            aruwsrc/robot/drone/drone_control.cpp
+            aruwsrc/robot/dart/dart_control.cpp
+            aruwsrc/robot/hero/hero_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
@@ -86,7 +86,7 @@ before_script:
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
-    - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot
+    - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot "release develop"
   only: *verification_only
   except: *verification_except
 
@@ -99,8 +99,8 @@ before_script:
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS
-    - scons size robot=TARGET_$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
+    - scons build robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS
+    - scons size robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../taproot-scripts/parse_metrics.py -i size.txt -o metrics.txt --identifier $ROBOT
     - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
@@ -121,7 +121,7 @@ before_script:
   needs: ["Sim Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-sim profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-sim profile=fast robot=$ROBOT -j${NUM_JOBS}
   cache:
     key: sim-binaries
     untracked: true
@@ -133,7 +133,7 @@ before_script:
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-tests profile=fast robot=TARGET_$ROBOT -j${NUM_JOBS}
+    - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
   cache:
     key: test-binaries
@@ -150,7 +150,7 @@ before_script:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_SPIDER compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     untracked: true
     key: mcb-binaries
@@ -164,7 +164,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=sim profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_SPIDER compile_lib_only=sim profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
@@ -176,85 +176,86 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_SPIDER compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     paths:
       - $BUILD_PATH
 
-# Soldier MK4 2022 build
+# Standard (Spider) build
 
-"Soldier MK4 2022: MCB Build":
+"Standard (Spider): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SOLDIERMK4_2022
+    ROBOT: STANDARD_SPIDER
 
-"Soldier MK4 2022: Sim Build":
+"Standard (Spider): Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SOLDIERMK4_2022
+    ROBOT: STANDARD_SPIDER
 
-"Soldier MK4 2022: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: SOLDIER_2021
-
-# Soldier 2022 build
-
-"Soldier 2022: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: SOLDIER_2022
-
-"Soldier 2022: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: SOLDIER_2022
-
-"Soldier 2022: Test Build":
+# Test build script is different from the others since we use this one to track test coverage for the repo
+"Standard (Spider): Test Build":
   stage: Tests
   needs: []
   only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=TARGET_SOLDIER_2022 -j${NUM_JOBS}
+    - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
     - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
   coverage: '/\s+Total:\|(\d+.\d+\%).+\|.+\|.+/'
   artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-soldier-tests"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-standard-tests"
     reports:
       coverage_report:
         coverage_format: cobertura
         path: cobertura.xml
     expire_in: 2 weeks
 
-# Soldier 2021 Build
+# Standard (Elsa) build
 
-"Soldier 2021: MCB Build":
+"Standard (Elsa): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_ELSA
 
-"Soldier 2021: Sim Build":
+"Standard (Elsa): Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_ELSA
 
-"Soldier 2021: Test Build":
+"Standard (Elsa): Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SOLDIER_2021
+    ROBOT: STANDARD_ELSA
+
+# Standard (Woody) Build
+
+"Standard (Woody): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_WOODY
+
+"Standard (Woody): Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: STANDARD_WOODY
+
+"Standard (Woody): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_WOODY
 
 # Drone build
 
@@ -302,59 +303,59 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
 "Hero: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO
+    ROBOT: HERO_CYCLONE
 
-# Sentinel 2021 build
+# Sentry (Beehive) build
 
-"Sentinel 2021: MCB Build":
+"Sentry: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTINEL_2021
+    ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2021: Sim Build":
+"Sentry: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SENTINEL_2021
+    ROBOT: SENTRY_BEEHIVE
 
-"Sentinel 2021: Test Build":
+"Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTINEL_2021
+    ROBOT: SENTRY_BEEHIVE
 
-# Sentinel 2022 build
+# Dart Build
 
-"Sentinel 2022: MCB Build":
+"Dart: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTINEL_2022
+    ROBOT: DART
 
-"Sentinel 2022: Sim Build":
+"Dart: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SENTINEL_2022
+    ROBOT: DART
 
-"Sentinel 2022: Test Build":
+"Dart: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTINEL_2022
+    ROBOT: DART
 
 # Pages deploy
 

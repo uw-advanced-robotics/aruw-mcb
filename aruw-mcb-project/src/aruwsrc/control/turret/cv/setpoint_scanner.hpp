@@ -29,7 +29,7 @@ namespace aruwsrc::control::turret::cv
 /**
  * A simple class that bounces a setpoint back and forth between two bounds.
  *
- * Intended to be used for the Sentinel turret scanning logic.
+ * Intended to be used for the Sentry turret scanning logic.
  *
  * Takes the current setpoint from the user (to account for potential setpoint changes
  * when this class isn't the only thing controlling the setpoint). Should only be used

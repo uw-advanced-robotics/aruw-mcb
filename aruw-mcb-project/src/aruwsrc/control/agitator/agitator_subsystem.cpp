@@ -23,9 +23,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
-
-#include "aruwsrc/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -42,7 +41,7 @@ namespace aruwsrc
 namespace agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
-    aruwsrc::Drivers* drivers,
+    tap::Drivers* drivers,
     const tap::algorithms::SmoothPidConfig& pidParams,
     float agitatorGearRatio,
     tap::motor::MotorId agitatorMotorId,

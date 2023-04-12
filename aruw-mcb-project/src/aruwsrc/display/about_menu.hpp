@@ -42,22 +42,20 @@ namespace aruwsrc::display
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-#if defined(TARGET_SOLDIER_2021)
-    static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2021";
-#elif defined(TARGET_SOLDIER_2022)
-    static constexpr char ROBOT_NAME[] = "TARGET_SOLDIER_2022";
+#if defined(TARGET_STANDARD_WOODY)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_WOODY";
+#elif defined(TARGET_STANDARD_ELSA)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ELSA";
 #elif defined(TARGET_DRONE)
     static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
     static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTINEL)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL";
-#elif defined(TARGET_SENTINEL_2021)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2021";
-#elif defined(TARGET_SENTINEL_2022)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTINEL_2022";
-#elif defined(TARGET_HERO)
-    static constexpr char ROBOT_NAME[] = "TARGET_HERO";
+#elif defined(TARGET_SENTRY)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY";
+#elif defined(TARGET_SENTRY_BEEHIVE)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_BEEHIVE";
+#elif defined(TARGET_HERO_CYCLONE)
+    static constexpr char ROBOT_NAME[] = "TARGET_HERO_CYCLONE";
 #else
     static constexpr char ROBOT_NAME[] = "UNKNOWN";
 #endif
@@ -65,9 +63,7 @@ public:
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
     static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
 
-    AboutMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::Drivers *drivers);
+    AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
     void draw() override;
 
     void update() override;
@@ -83,7 +79,6 @@ public:
 private:
     static constexpr int TURRET_MCB_MENU_ID = 7;
 
-    aruwsrc::Drivers *drivers;
     bool drawn = false;
 };
 }  // namespace aruwsrc::display

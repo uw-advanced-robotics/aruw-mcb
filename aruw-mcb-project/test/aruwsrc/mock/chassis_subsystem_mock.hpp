@@ -22,22 +22,23 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-class ChassisSubsystemMock : public aruwsrc::chassis::ChassisSubsystem
+class ChassisSubsystemMock : public aruwsrc::chassis::Holonomic4MotorChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(aruwsrc::Drivers *drivers);
+    ChassisSubsystemMock(tap::Drivers *drivers);
     virtual ~ChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
-    MOCK_METHOD(void, setZeroRPM, (), (override));
-    MOCK_METHOD(float, chassisSpeedRotationPID, (float, float), (override));
+    MOCK_METHOD(void, setZeroRPM, ());
+    MOCK_METHOD(float, chassisSpeedRotationPID, (float, float));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(float, calculateRotationTranslationalGain, (float), ());
     MOCK_METHOD(int16_t, getLeftFrontRpmActual, (), (const override));

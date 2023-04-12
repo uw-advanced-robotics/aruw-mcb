@@ -27,14 +27,10 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
 
 namespace aruwsrc::control::turret
 {
@@ -66,7 +62,7 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO) || defined(TARGET_SOLDIERMK4_2022)
+#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -86,11 +82,34 @@ public:
         HIGH = 3,
     };
 
+    enum Tags : uint8_t
+    {
+        TARGET_STATE = 0,
+        SHOT_TIMING = 1,
+        NUM_TAGS = 2,
+    };
+
+    enum messageWidths : uint8_t
+    {
+        FLAGS_BYTES = 1,
+        TIMESTAMP_BYTES = 4,
+        FIRERATE_BYTES = 1,
+        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
+        SHOT_TIMING_BYTES = 12,
+    };
+
+    static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
+        messageWidths::TARGET_DATA_BYTES,
+        messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
+
     /**
      * AutoAim data to receive from Jetson.
      */
-    struct TurretAimData
+
+    struct PositionData
     {
+        FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
+
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
         float zPos;  ///< z position of the target (in m).
@@ -103,17 +122,25 @@ public:
         float yAcc;  ///< y acceleration of the target (in m/s^2).
         float zAcc;  ///< z acceleration of the target (in m/s^2).
 
-        bool hasTarget;      ///< Whether or not the xavier has a target.
-        uint32_t timestamp;  ///< Timestamp in microseconds.
+        bool updated;  ///< whether or not this came from the most recent message
 
-        FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
+    } modm_packed;
 
-        bool recommendUseTimedShots;   ///< Validity of the targetHitTime
-        uint32_t targetHitTimeOffset;  ///< Estimated microseconds beyond "timestamp" at which our
-                                       ///< next shot should ideally hit
-        uint32_t targetPulseInterval;  ///< Time between plate centers transiting the target point
-        uint32_t
-            targetIntervalDuration;  ///< Duration during which the plate is at the target point
+    struct TimingData
+    {
+        uint32_t duration;       ///< duration during which the plate is at the target point
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+                                 ///< next shot should ideally hit
+
+        bool updated;  ///< whether or not this came from the most recent message
+    } modm_packed;
+
+    struct TurretAimData
+    {
+        struct PositionData pva;
+        uint32_t timestamp;  ///< timestamp in microseconds
+        struct TimingData timing;
     } modm_packed;
 
     /**
@@ -148,7 +175,7 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-    VisionCoprocessor(aruwsrc::Drivers* drivers);
+    VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
 
@@ -193,7 +220,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget;
+            hasTarget |= lastAimData[i].pva.updated;
         }
         return hasTarget;
     }
@@ -203,7 +230,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].hasTarget && lastAimData[i].recommendUseTimedShots;
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -245,6 +272,9 @@ private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_REFEREE_REALTIME_DATA = 3,
+        CV_MESSAGE_TYPE_REFEREE_COMPETITION_RESULT = 4,
+        CV_MESSAGE_TYPE_REFEREE_WARNING = 5,
         CV_MESSAGE_TYPE_ROBOT_ID = 6,
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
@@ -266,11 +296,19 @@ private:
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
+    /// Time in ms between sending referee real time message.
+    static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 5'000;
+
+    /// Time in ms between sending competition result status (as reported by the ref system).
+    static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
 
     uint32_t prevRisingEdgeTime = 0;
+
+    uint8_t testMessageBytes[256];
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
@@ -288,6 +326,12 @@ private:
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
+    tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
+
+    tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    uint32_t lastSentRefereeWarningTime = 0;
+
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -304,6 +348,9 @@ public:
 #endif
 
     void sendOdometryData();
+    void sendRefereeRealtimeData();
+    void sendRefereeCompetitionResult();
+    void sendRefereeWarning();
     void sendRobotTypeData();
     void sendTimeSyncMessage();
 };

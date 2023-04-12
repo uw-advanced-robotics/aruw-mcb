@@ -21,18 +21,21 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
-
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "chassis_subsystem.hpp"
+#include "holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
-ChassisDriveCommand::ChassisDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsystem* chassis)
+ChassisDriveCommand::ChassisDriveCommand(
+    tap::Drivers* drivers,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface,
+    HolonomicChassisSubsystem* chassis)
     : drivers(drivers),
+      operatorInterface(operatorInterface),
       chassis(chassis)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -40,7 +43,10 @@ ChassisDriveCommand::ChassisDriveCommand(aruwsrc::Drivers* drivers, ChassisSubsy
 
 void ChassisDriveCommand::initialize() {}
 
-void ChassisDriveCommand::execute() { ChassisRelDrive::onExecute(drivers, chassis); }
+void ChassisDriveCommand::execute()
+{
+    ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+}
 
 void ChassisDriveCommand::end(bool) { chassis->setZeroRPM(); }
 

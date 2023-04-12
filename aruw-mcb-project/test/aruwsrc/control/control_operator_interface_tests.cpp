@@ -29,12 +29,11 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/control_operator_interface.hpp"
-#include "aruwsrc/drivers.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
-using aruwsrc::Drivers;
 using aruwsrc::control::ControlOperatorInterface;
 using namespace tap::communication::serial;
 using namespace testing;
@@ -53,7 +52,7 @@ protected:
         ON_CALL(drivers.remote, getUpdateCounter).WillByDefault(ReturnPointee(&updateCounter));
     }
 
-    Drivers drivers;
+    tap::Drivers drivers;
     ClockStub clock;
     ControlOperatorInterface operatorInterface;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
@@ -253,28 +252,29 @@ INSTANTIATE_TEST_SUITE_P(
         std::tuple<float, int16_t, float>(0, INT16_MAX - 1, -1),
         std::tuple<float, int16_t, float>(1, INT16_MIN + 1, 0)));
 
-class SentinelChassisTest : public ControlOperatorInterfaceTest,
-                            public WithParamInterface<std::tuple<float, float>>
+class SentryChassisTest : public ControlOperatorInterfaceTest,
+                          public WithParamInterface<std::tuple<float, float>>
 {
 };
 
-TEST_P(SentinelChassisTest, getSentinelSpeedInput_retuns_user_input)
+TEST_P(SentryChassisTest, getSentrySpeedInput_retuns_user_input)
 {
-    ON_CALL(drivers.remote, getWheel).WillByDefault(Return(std::get<0>(GetParam())));
+    ON_CALL(drivers.remote, getChannel(Remote::Channel::WHEEL))
+        .WillByDefault(Return(std::get<0>(GetParam())));
 
-    EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentinelSpeedInput(), 1E-3);
+    EXPECT_NEAR(std::get<1>(GetParam()), operatorInterface.getSentrySpeedInput(), 1E-3);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     ControlOperatorInterface,
-    SentinelChassisTest,
+    SentryChassisTest,
     Values(
         std::tuple<float, float>(0, 0),
-        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
-        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+        std::tuple<float, float>(-660, ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
+        std::tuple<float, float>(660, -ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
         std::tuple<float, float>(
             330,
-            -0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR),
+            -0.5 * ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR),
         std::tuple<float, float>(
             -330,
-            0.5 * ControlOperatorInterface::USER_STICK_SENTINEL_DRIVE_SCALAR)));
+            0.5 * ControlOperatorInterface::USER_STICK_SENTRY_DRIVE_SCALAR)));

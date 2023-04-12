@@ -22,19 +22,16 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
-
-namespace aruwsrc
-{
-class Drivers;
-}
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
-class ChassisSubsystem;
+class HolonomicChassisSubsystem;
 
 /**
  * A command that automatically rotates the chassis back and forth, following
@@ -45,9 +42,10 @@ class WiggleDriveCommand : public tap::control::Command
 {
 public:
     WiggleDriveCommand(
-        aruwsrc::Drivers* drivers,
-        ChassisSubsystem* chassis,
-        const aruwsrc::control::turret::TurretMotor* yawMotor);
+        tap::Drivers* drivers,
+        HolonomicChassisSubsystem* chassis,
+        const aruwsrc::control::turret::TurretMotor* yawMotor,
+        aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
     void initialize() override;
 
@@ -77,26 +75,27 @@ private:
     /**
      * Use these wiggle parameters if power consumption limit is <= 45 W
      */
-    static constexpr WiggleParams WIGGLE_PARAMS_45W_CUTOFF = {1700, modm::toRadian(5), 5};
+    static constexpr WiggleParams WIGGLE_PARAMS_45W_CUTOFF = {2500, modm::toRadian(5), 25};
     /**
      * Use these wiggle parameters if power consumption limit is within (45, 60] W
      */
-    static constexpr WiggleParams WIGGLE_PARAMS_60W_CUTOFF = {2300, modm::toRadian(5), 10};
+    static constexpr WiggleParams WIGGLE_PARAMS_60W_CUTOFF = {3500, modm::toRadian(15), 45};
     /**
      * Use these wiggle parameters if power consumption limit is within (60, 80] W
      */
-    static constexpr WiggleParams WIGGLE_PARAMS_80W_CUTOFF = {2500, modm::toRadian(5), 12};
+    static constexpr WiggleParams WIGGLE_PARAMS_80W_CUTOFF = {5000, modm::toRadian(30), 65};
     /**
      * Use these wiggle parameters if power consumption limit is greater than 80 W
      */
-    static constexpr WiggleParams WIGGLE_PARAMS_MAX_CUTOFF = {3000, modm::toRadian(5), 15};
+    static constexpr WiggleParams WIGGLE_PARAMS_MAX_CUTOFF = {7000, modm::toRadian(75), 80};
 
     static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
 
-    aruwsrc::Drivers* drivers;
-    ChassisSubsystem* chassis;
+    tap::Drivers* drivers;
+    HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
+    aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
     tap::algorithms::Ramp rotationSpeedRamp;
 

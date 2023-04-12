@@ -19,12 +19,14 @@
 
 #include "friction_wheel_spin_ref_limited_command.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "tap/drivers.hpp"
+
+#include "modm/architecture/interface/assert.hpp"
 
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
-    aruwsrc::Drivers *drivers,
+    tap::Drivers *drivers,
     FrictionWheelSubsystem *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,

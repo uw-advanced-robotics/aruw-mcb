@@ -22,9 +22,9 @@
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/drivers.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
@@ -43,7 +43,7 @@ MODM_ISR(EXTI0)
 }
 #endif
 
-VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
+VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),
@@ -60,7 +60,7 @@ VisionCoprocessor::VisionCoprocessor(aruwsrc::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].hasTarget = 0;
+        this->lastAimData[i].pva.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -80,7 +80,7 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-#if defined(TARGET_HERO)
+#if defined(TARGET_HERO_CYCLONE)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
     drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
 #else
@@ -106,11 +106,35 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
-    if (message.header.dataLength != sizeof(lastAimData))
+    int currIndex = 0;
+    for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
-        return false;
+        uint8_t flags = message.data[currIndex];
+        lastAimData[j].pva.updated = 0;
+        lastAimData[j].timing.updated = 0;
+
+        currIndex += messageWidths::FLAGS_BYTES;
+        memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
+        currIndex += messageWidths::TIMESTAMP_BYTES;
+        for (int i = 0; i < NUM_TAGS; ++i)
+        {
+            if (flags & (1 << i))
+            {
+                switch (i)
+                {
+                    case 0:
+                        memcpy(&lastAimData[j].pva, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].pva.updated = 1;
+                        break;
+                    case 1:
+                        memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
+                        lastAimData[j].timing.updated = 1;
+                        break;
+                }
+                currIndex += (int)LEN_FIELDS[i];
+            }
+        }
     }
-    memcpy(lastAimData, &message.data, sizeof(lastAimData));
     return true;
 }
 
@@ -118,6 +142,9 @@ void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendRefereeRealtimeData();
+    sendRefereeCompetitionResult();
+    sendRefereeWarning();
     sendTimeSyncMessage();
 }
 
@@ -169,7 +196,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-#if defined(ALL_SENTINELS)
+#if defined(ALL_SENTRIES)
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
     odometryData->chassisOdometry.yaw = 0;
@@ -212,6 +239,85 @@ void VisionCoprocessor::sendRobotTypeData()
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
+    }
+}
+
+void VisionCoprocessor::sendRefereeRealtimeData()
+{
+    if (sendRefRealTimeDataTimeout.execute())
+    {
+        struct RefereeRealtimeData
+        {
+            uint8_t gameType : 4;
+            uint8_t gameProgress : 4;
+            uint16_t stageRemainTime;
+            uint64_t unixTime;
+            uint8_t powerSupplyStatus;
+        } modm_packed;
+
+        DJISerial::SerialMessage<sizeof(RefereeRealtimeData)> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_REALTIME_DATA;
+
+        RefereeRealtimeData* data = reinterpret_cast<RefereeRealtimeData*>(message.data);
+
+        const auto& gameData = drivers->refSerial.getGameData();
+        const auto& robotData = drivers->refSerial.getRobotData();
+
+        data->gameType = static_cast<uint8_t>(gameData.gameType);
+        data->gameProgress = static_cast<uint8_t>(gameData.gameStage);
+        data->stageRemainTime = gameData.stageTimeRemaining;
+        data->unixTime = gameData.unixTime;
+        data->powerSupplyStatus = robotData.robotPower.value;
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+    }
+}
+
+void VisionCoprocessor::sendRefereeCompetitionResult()
+{
+    if (sendCompetitionResultTimeout.execute())
+    {
+        DJISerial::SerialMessage<1> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_COMPETITION_RESULT;
+
+        message.data[0] = static_cast<uint8_t>(drivers->refSerial.getGameData().gameWinner);
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+    }
+}
+
+void VisionCoprocessor::sendRefereeWarning()
+{
+    const auto& refereeWarningData = drivers->refSerial.getRobotData().refereeWarningData;
+
+    // Only send if a new warning has been received
+    if (lastSentRefereeWarningTime != refereeWarningData.lastReceivedWarningRobotTime)
+    {
+        DJISerial::SerialMessage<2> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_WARNING;
+
+        message.data[0] = refereeWarningData.level;
+        message.data[1] = static_cast<uint8_t>(refereeWarningData.foulRobotID);
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+
+        // New warning sent
+        lastSentRefereeWarningTime = refereeWarningData.lastReceivedWarningRobotTime;
     }
 }
 
