@@ -55,26 +55,12 @@ public:
 
     void limitChassisPower();
 
+    tap::algorithms::SmoothPid rotationPid;
+
 private:
     void computeState();
 
     BalancingLeg &leftLeg, rightLeg;
-    const tap::algorithms::SmoothPidConfig jankBalPidConfig{
-        .kp = 25,
-        .ki = .3,
-        .kd = 0,
-        .maxOutput = 200,
-    };
-    tap::algorithms::SmoothPid jankBalPid = tap::algorithms::SmoothPid(jankBalPidConfig);
-
-    const tap::algorithms::SmoothPidConfig jankBalVelPidConfig{
-        .kp = .1,
-        .ki = 0,
-        .kd = 0,
-        .maxOutput = 15 * M_TWOPI / 360,
-        .errDeadzone = 0,
-    };
-    tap::algorithms::SmoothPid jankBalVelPid = tap::algorithms::SmoothPid(jankBalVelPidConfig);
 
     float pitchAdjustment = 0;
     float pitchAdjustmentPrev = 0;

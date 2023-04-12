@@ -108,7 +108,8 @@ private:
     uint32_t prevTime = 0;
     float wheelPosPrev = 0;
     float tl_prev = 0;
-    float debug = 0;
+    float xdes = 0;
+    float iwdes = 0;
 
     float zDesired,  // m
         vDesired,    // m/s

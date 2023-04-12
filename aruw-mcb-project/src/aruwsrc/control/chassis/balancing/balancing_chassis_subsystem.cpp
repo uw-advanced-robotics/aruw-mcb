@@ -27,7 +27,8 @@ BalancingChassisSubsystem::BalancingChassisSubsystem(
     BalancingLeg& rightLeg)
     : Subsystem(drivers),
       leftLeg(leftLeg),
-      rightLeg(rightLeg)
+      rightLeg(rightLeg),
+      rotationPid(AUTOROTATION_PID)
 {
 }
 
@@ -75,8 +76,8 @@ void BalancingChassisSubsystem::refresh()
     rightLeg.update();
     // do this here for safety. Only called once per subsystem
     static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())->sendCanMessage();
     static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())->sendCanMessage();
     static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())->sendCanMessage();
 }
 

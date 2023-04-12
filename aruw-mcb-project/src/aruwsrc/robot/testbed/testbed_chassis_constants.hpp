@@ -88,6 +88,14 @@ static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+
+static const tap::algorithms::SmoothPidConfig AUTOROTATION_PID {
+    .kp = AUTOROTATION_PID_KP,
+    .ki = 0,
+    .kd = AUTOROTATION_PID_KD,
+    .maxOutput = AUTOROTATION_PID_MAX_OUTPUT,
+};
+
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -173,10 +181,10 @@ static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
 };
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
-    .kp = 4000,
-    .ki = 2,
-    .kd = .1,
-    .maxICumulative = 5000,
+    .kp = 4500,
+    .ki = 3,
+    .kd = 6,
+    .maxICumulative = 3000,
     .maxOutput = 5000,
 };
 static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
@@ -224,10 +232,12 @@ static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
     .joint2toTipLength = .250f,
 };
 
-static constexpr float LQR_K11 = 0.362370327152307f;
-static constexpr float LQR_K12 = 0.0701796468779454f;
-static constexpr float LQR_K32 = -0.135435773460834f;
-static constexpr float LQR_K33 = 0.160033863437814f;
+static constexpr float LQR_K11 = 0.345042268056633;
+static constexpr float LQR_K12 = 0.101992377224230f;
+static constexpr float LQR_K13 = 0.0695263958858381f;
+static constexpr float LQR_K31 = -26.6851196423879f;
+static constexpr float LQR_K32 = -5.94397865116958f;
+static constexpr float LQR_K33 = 14.2007324723501f;
 
 // other Ks are 0.
 

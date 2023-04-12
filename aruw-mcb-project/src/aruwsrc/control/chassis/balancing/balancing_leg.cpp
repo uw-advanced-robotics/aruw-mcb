@@ -63,7 +63,7 @@ void BalancingLeg::update()
     computeState(dt);
 
     // 2. Apply Control Law
-    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.2);
+    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.125);
     float desiredWheelSpeed = vDesired;
     float desiredWheelAngle = 0;
     // desiredWheelSpeed += 1 / WHEEL_RADIUS * (vDesired - zCurrent * tl_dot);
@@ -73,23 +73,29 @@ void BalancingLeg::update()
 
     //    u = -kx LQR control law
 
-    float desiredx = -(LQR_K11 * chassisAngle + LQR_K12 * chassisAngledot);
-    desiredx = tap::algorithms::limitVal(0.01f * desiredx, -.15f, .15f);
+    float desiredx =
+        -(LQR_K11 * chassisAngle + LQR_K12 * chassisAngledot + LQR_K13 * realWheelSpeed);
+    desiredx = tap::algorithms::limitVal(0.01f * desiredx, -.5f, .5f);
     desiredWheelLocation.setX(desiredx);
 
-    debug = desiredx;
+    xdes = desiredx;
 
-    desiredWheelSpeed -= (LQR_K32 * chassisAngledot + LQR_K33 * realWheelSpeed);
+    // desiredWheelSpeed -=
+
     float driveWheelSpeedError =
         desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed -
         chassisAngledot * (fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
                            fivebar->getCurrentPosition().getY() * cos(chassisAngle));
-
-    float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
-    driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
+    iwdes = -(LQR_K31 * chassisAngle + LQR_K32 * chassisAngledot + LQR_K33 * realWheelSpeed);
+    // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
+    iwdes = tap::algorithms::limitVal(
+        (16000.0f / 20.0f) * iwdes * 0.01f,
+        -5000.0f,
+        5000.0f);
+    // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
     // 3. Send New Output Values
-    driveWheel->setDesiredOutput(driveWheelOutput);
+    driveWheel->setDesiredOutput(iwdes);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
     fiveBarController(dt);
@@ -119,7 +125,8 @@ void BalancingLeg::fiveBarController(uint32_t dt)
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
         dt);
 
-    motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;  // motor direction so -
+    motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+    // motor direction so minus
     motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
 
     fivebar->moveMotors(motor1output, motor2output);

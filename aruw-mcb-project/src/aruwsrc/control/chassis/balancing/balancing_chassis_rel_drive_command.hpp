@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BALANCING_CHASSIS_MANUAL_DRIVE_COMMAND_HPP_
-#define BALANCING_CHASSIS_MANUAL_DRIVE_COMMAND_HPP_
+#ifndef BALANCING_CHASSIS_REL_DRIVE_COMMAND_HPP_
+#define BALANCING_CHASSIS_REL_DRIVE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -30,15 +30,15 @@ namespace aruwsrc
 {
 namespace chassis
 {
-class BalancingChassisManualDriveCommand : public tap::control::Command
+class BalancingChassisRelativeDriveCommand : public tap::control::Command
 {
 public:
-    BalancingChassisManualDriveCommand(
+    BalancingChassisRelativeDriveCommand(
         tap::Drivers* drivers,
         BalancingChassisSubsystem* chassis,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
-    const char* getName() const override { return "Balancing Chassis Manual Drive Command"; }
+    const char* getName() const override { return "Balancing Chassis Relative Drive Command"; }
 
     void initialize() override;
 
@@ -53,10 +53,10 @@ private:
     BalancingChassisSubsystem* chassis;
     control::ControlOperatorInterface& operatorInterface;
 
-};  // class BalancingManualDriveCommand
+};  // class BalancingChassisRelativeDriveCommand
 
 }  // namespace chassis
 
 }  // namespace aruwsrc
 
-#endif  // BALANCING_CHASSIS_MANUAL_DRIVE_HPP_
+#endif  // BALANCING_CHASSIS_REL_DRIVE_COMMAND_HPP_

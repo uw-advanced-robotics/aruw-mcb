@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "balancing_chassis_manual_drive_command.hpp"
+#include "balancing_chassis_rel_drive_command.hpp"
 
 namespace aruwsrc
 {
 namespace chassis
 {
-BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
+BalancingChassisRelativeDriveCommand::BalancingChassisRelativeDriveCommand(
     tap::Drivers* drivers,
     BalancingChassisSubsystem* chassis,
     control::ControlOperatorInterface& operatorInterface)
@@ -35,9 +35,9 @@ BalancingChassisManualDriveCommand::BalancingChassisManualDriveCommand(
     addSubsystemRequirement(chassis);
 }
 
-void BalancingChassisManualDriveCommand::initialize() { chassis->setDesiredOutput(0, 0); }
+void BalancingChassisRelativeDriveCommand::initialize() { chassis->setDesiredOutput(0, 0); }
 
-void BalancingChassisManualDriveCommand::execute()
+void BalancingChassisRelativeDriveCommand::execute()
 {
     chassis->setDesiredOutput(
         operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
@@ -45,8 +45,8 @@ void BalancingChassisManualDriveCommand::execute()
     chassis->setDesiredHeight(0.001 * operatorInterface.getTurretPitchInput(0));
 }
 
-void BalancingChassisManualDriveCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
+void BalancingChassisRelativeDriveCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
 
-bool BalancingChassisManualDriveCommand::isFinished() const { return false; }
+bool BalancingChassisRelativeDriveCommand::isFinished() const { return false; }
 }  // namespace chassis
 }  // namespace aruwsrc

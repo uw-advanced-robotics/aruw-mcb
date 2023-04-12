@@ -51,9 +51,7 @@ public:
      */
     FiveBarMotionSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface* motor1,
-        tap::motor::MotorInterface* motor2,
-        FiveBarConfig fiveBarConfig,
+        FiveBarLinkage* fivebar,
         tap::algorithms::SmoothPidConfig motor1PidConfig,
         tap::algorithms::SmoothPidConfig motor2PidConfig);
 
@@ -63,7 +61,7 @@ public:
 
     void updateDesiredPosition(modm::Vector2f desiredPosition)
     {
-        fiveBarLinkage.setDesiredPosition(desiredPosition);
+        fiveBarLinkage->setDesiredPosition(desiredPosition);
     }
 
     void setMotionFunction(const aruwsrc::control::motion::MOTION_FUNCTIONS func)
@@ -72,20 +70,28 @@ public:
         return;
     }
 
-    void onHardwareTestStart() { fiveBarLinkage.initialize(); }
+    void onHardwareTestStart() { fiveBarLinkage->initialize(); }
+
+    void resetZeroTime() { prevZeroTime = tap::arch::clock::getTimeMilliseconds(); }
 
     const char* getName() override { return "FiveBar"; }
 
 private:
+    void fiveBarController(uint32_t dt);
+
     modm::Vector2f pathPlotSquare(uint32_t time);
     modm::Vector2f pathPlotUpDown(uint32_t time);
     modm::Vector2f pathPlotCircle(uint32_t time);
 
-    FiveBarLinkage fiveBarLinkage;
+    tap::algorithms::SmoothPid motor1Pid;
+    tap::algorithms::SmoothPid motor2Pid;
+
+    FiveBarLinkage* fiveBarLinkage;
 
     MOTION_FUNCTIONS movementMode = RETURN_TO_HOME;
 
     uint32_t prevZeroTime = 0;
+    uint32_t prevTime = 0;
 };
 
 }  // namespace aruwsrc::control::motion

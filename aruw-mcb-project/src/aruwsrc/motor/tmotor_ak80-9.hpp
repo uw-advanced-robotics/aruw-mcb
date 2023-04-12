@@ -55,7 +55,7 @@ enum TMotorId : uint32_t
 static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
 /** CAN message length of each motor control message. */
 static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
-static constexpr float AK809_TORQUE_CONSTANT = 0.105f * 9;  // Nm/A
+static constexpr float AK809_TORQUE_CONSTANT = 0.105f * 9;  // Nm/A, 9:1 gear ratio
 
 /**
  * A class designed to interface with tmotor brand motors and motor controllers over CAN.

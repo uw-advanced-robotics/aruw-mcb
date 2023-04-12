@@ -37,7 +37,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/control/chassis/balancing/balancing_chassis_manual_drive_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -122,15 +122,9 @@ tap::motor::DjiMotor RightWheel(
 // aruwsrc::testbed::SpinMotorCommand spinMotorLF(drivers(), &motorSubsystemLF, 500);
 // aruwsrc::testbed::SpinMotorCommand spinMotorLR(drivers(), &motorSubsystemLR, -500);
 
-motion::FiveBarLinkage fiveBarLeft(
-    &legmotorLF,
-    &legmotorLR,
-    FIVE_BAR_CONFIG);
+motion::FiveBarLinkage fiveBarLeft(&legmotorLF, &legmotorLR, FIVE_BAR_CONFIG);
 
-motion::FiveBarLinkage fiveBarRight(
-    &legmotorRF,
-    &legmotorRR,
-    FIVE_BAR_CONFIG);
+motion::FiveBarLinkage fiveBarRight(&legmotorRF, &legmotorRR, FIVE_BAR_CONFIG);
 
 BalancingLeg legLeft(
     drivers(),
@@ -152,23 +146,19 @@ BalancingLeg legRight(
 
 motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
     drivers(),
-    &legmotorLF,
-    &legmotorLR,
-    FIVE_BAR_CONFIG,
+    &fiveBarLeft,
     LF_LEG_MOTOR_PID_CONFIG,
     LR_LEG_MOTOR_PID_CONFIG);
 
 motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
     drivers(),
-    &legmotorRF,
-    &legmotorRR,
-    FIVE_BAR_CONFIG,
+    &fiveBarRight,
     RF_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG);
 
 aruwsrc::chassis::BalancingChassisSubsystem chassis(drivers(), legLeft, legRight);
 
-BalancingChassisManualDriveCommand manualDriveCommand(
+BalancingChassisRelativeDriveCommand manualDriveCommand(
     drivers(),
     &chassis,
     drivers()->controlOperatorInterface);
