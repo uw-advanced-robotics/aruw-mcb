@@ -47,7 +47,7 @@ public:
         tap::can::CanRxListener* const canRxListener,
         tap::can::CanRxListener** messageHandlerStore);
 
-    void processReceivedCanData(
+    void processTheReceivedCanData(
         const modm::can::Message& rxMessage,
         tap::can::CanRxListener* const* messageHandlerStore);
 

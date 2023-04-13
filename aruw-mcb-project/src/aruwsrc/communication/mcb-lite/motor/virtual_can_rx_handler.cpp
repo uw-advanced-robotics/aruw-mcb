@@ -38,11 +38,11 @@ void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message me
 {
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
-        processReceivedCanData(message, messageHandlersCan1);
+        processTheReceivedCanData(message, messageHandlersCan1);
     }
     else
     {
-        processReceivedCanData(message, messageHandlersCan2);
+        processTheReceivedCanData(message, messageHandlersCan2);
     }
 }
 
@@ -70,7 +70,7 @@ void VirtualCanRxHandler::attachReceiveHandler(
     messageHandlerStore[id] = canRxListener;
 }
 
-void VirtualCanRxHandler::processReceivedCanData(
+void VirtualCanRxHandler::processTheReceivedCanData(
     const modm::can::Message& rxMessage,
     tap::can::CanRxListener* const* messageHandlerStore)
 {
