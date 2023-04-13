@@ -23,7 +23,9 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualMCBHandler::VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
+VirtualMCBHandler::VirtualMCBHandler(
+    tap::Drivers* drivers,
+    tap::communication::serial::Uart::UartPort port)
     : canbus(VirtualCanBus(drivers, port)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers, &canbus)),
       canRxHandler(VirtualCANRxHandler(drivers, &canbus))

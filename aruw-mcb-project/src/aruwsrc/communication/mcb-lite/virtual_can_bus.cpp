@@ -34,6 +34,10 @@ VirtualCanBus::VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::
 {
 }
 
+IMUMessage& VirtualCanBus::getIMUMessage() { return currentIMUData; }
+
+CurrentSensorMessage& VirtualCanBus::getCurrentSensorMessage() { return currentCurrentSensorData; }
+
 void VirtualCanBus::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     switch (completeMessage.messageType)
@@ -78,12 +82,14 @@ void VirtualCanBus::processCanMessage(
 void VirtualCanBus::processIMUMessage(const ReceivedSerialMessage& completeMessage)
 {
     // Read the message
-    memcpy(&currentIMUData, completeMessage.data, sizeof(modm::can::Message));
+    memcpy(&currentIMUData, completeMessage.data, sizeof(IMUMessage));
 }
 
-IMUMessage& VirtualCanBus::getIMUMessage() { return currentIMUData; }
-
-CurrentSensorMessage& VirtualCanBus::getCurrentSensorMessage() { return currentCurrentSensorData; }
+void VirtualCanBus::processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage)
+{
+    // Read the message
+    memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(CurrentSensorMessage));
+}
 
 bool VirtualCanBus::getCanMessage(tap::can::CanBus canbus, modm::can::Message* message)
 {

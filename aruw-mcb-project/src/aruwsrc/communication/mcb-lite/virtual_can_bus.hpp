@@ -37,7 +37,7 @@ enum MessageTypes : uint8_t
     CANBUS2_MESSAGE = 1,
     IMU_MESSAGE = 2,
     GPIO_MESSAGE = 3
-} ;
+};
 
 struct IMUMessage
 {
@@ -71,6 +71,8 @@ private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
 
     void processIMUMessage(const ReceivedSerialMessage& completeMessage);
+
+    void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
     tap::communication::serial::Uart::UartPort port;
 
