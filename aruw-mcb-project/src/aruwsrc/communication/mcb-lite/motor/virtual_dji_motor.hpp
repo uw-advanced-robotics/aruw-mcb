@@ -25,7 +25,6 @@
 
 #include "../virtual_mcb_handler.hpp"
 
-
 using namespace tap::motor;
 
 namespace aruwsrc::virtualMCB

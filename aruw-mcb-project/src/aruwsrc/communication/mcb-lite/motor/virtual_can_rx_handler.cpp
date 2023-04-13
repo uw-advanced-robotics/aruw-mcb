@@ -33,9 +33,10 @@ void VirtualCanRxHandler::pollCanData(tap::can::CanBus canbus, modm::can::Messag
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
         CanRxHandler::processReceivedCanData(message, messageHandlerStoreCan1);
-    } else {
+    }
+    else
+    {
         CanRxHandler::processReceivedCanData(message, messageHandlerStoreCan2);
-
     }
 }
 
