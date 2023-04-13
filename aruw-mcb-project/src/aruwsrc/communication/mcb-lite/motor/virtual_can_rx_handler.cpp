@@ -29,6 +29,7 @@ namespace aruwsrc::virtualMCB
 {
 VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers)
     : CanRxHandler(drivers),
+      drivers(drivers),
       messageHandlersCan1(),
       messageHandlersCan2()
 {

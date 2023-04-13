@@ -26,6 +26,7 @@
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
+#include "modm/architecture/interface/assert.h"
 
 #include "modm/architecture/interface/can_message.hpp"
 
@@ -52,8 +53,9 @@ public:
         tap::can::CanRxListener* const* messageHandlerStore);
 
 protected:
-    tap::can::CanRxListener* messageHandlersCan1[NUM_CAN_IDS];
+    tap::Drivers* drivers;
 
+    tap::can::CanRxListener* messageHandlersCan1[NUM_CAN_IDS];
     tap::can::CanRxListener* messageHandlersCan2[NUM_CAN_IDS];
 };
 
