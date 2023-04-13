@@ -24,10 +24,9 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
-
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::chassis
 {

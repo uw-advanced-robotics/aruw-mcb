@@ -25,10 +25,9 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -51,14 +50,12 @@ AutoNavCommand::AutoNavCommand(
       odometryInterface(odometryInterface),
       operatorInterface(operatorInterface)
 {
-    // TODO: sucks that we have to pull the address out of the reference bc everything else uses pointers
+    // TODO: sucks that we have to pull the address out of the reference bc everything else uses
+    // pointers
     addSubsystemRequirement(&chassis);
 }
 
-// Resets ramp
-void AutoNavCommand::initialize()
-{
-}
+void AutoNavCommand::initialize() {}
 
 void AutoNavCommand::execute()
 {
@@ -73,7 +70,8 @@ void AutoNavCommand::execute()
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
+            visionCoprocessor.getLastSetpointData();
         float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 

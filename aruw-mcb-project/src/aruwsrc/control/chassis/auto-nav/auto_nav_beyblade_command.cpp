@@ -25,10 +25,9 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -51,7 +50,8 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
       odometryInterface(odometryInterface),
       operatorInterface(operatorInterface)
 {
-    // TODO: sucks that we have to pull the address out of the reference bc everything else uses pointers
+    // TODO: sucks that we have to pull the address out of the reference bc everything else uses
+    // pointers
     addSubsystemRequirement(&chassis);
 }
 
@@ -79,7 +79,8 @@ void AutoNavBeybladeCommand::execute()
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
+            visionCoprocessor.getLastSetpointData();
         float x = (setpointData.x - currentX) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         float y = (setpointData.y - currentY) * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 
@@ -105,7 +106,7 @@ void AutoNavBeybladeCommand::execute()
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
         rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RAMP);
 
-        float r = 0;//rotateSpeedRamp.getValue();
+        float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
         tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
