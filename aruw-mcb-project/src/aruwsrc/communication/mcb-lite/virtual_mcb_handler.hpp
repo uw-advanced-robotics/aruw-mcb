@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_CAN_BUS_HPP_
-#define VIRTUAL_CAN_BUS_HPP_
+#ifndef VIRTUAL_MCB_HANDLER_HPP_
+#define VIRTUAL_MCB_HANDLER_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"

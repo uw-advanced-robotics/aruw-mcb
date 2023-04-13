@@ -30,11 +30,12 @@ VirtualMCBHandler::VirtualMCBHandler(
     tap::Drivers* drivers,
     tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
+      canRxHandler(VirtualCanRxHandler(drivers)),
+      motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
       port(port),
       currentIMUData(),
-      currentCurrentSensorData(),
-      canRxHandler(VirtualCanRxHandler(drivers)),
-      motorTxHandler(VirtualDJIMotorTxHandler(drivers))
+      currentCurrentSensorData()
+
 {
 }
 
