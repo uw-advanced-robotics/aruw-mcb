@@ -20,9 +20,12 @@
 #ifndef VIRTUAL_CAN_RX_HANDLER_HPP_
 #define VIRTUAL_CAN_RX_HANDLER_HPP_
 
+#include <cstdint>
+
 #include "tap/communication/can/can_rx_handler.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
+#include "tap/util_macros.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
 
