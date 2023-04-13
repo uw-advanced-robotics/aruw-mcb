@@ -23,19 +23,14 @@
 #include "tap/communication/can/can_rx_handler.hpp"
 #include "tap/drivers.hpp"
 
-#include "../virtual_can_bus.hpp"
-
 namespace aruwsrc::virtualMCB
 {
-class VirtualCANRxHandler : public tap::can::CanRxHandler
+class VirtualCanRxHandler : public tap::can::CanRxHandler
 {
 public:
-    VirtualCANRxHandler(tap::Drivers* drivers, VirtualCanBus* canbus);
+    VirtualCanRxHandler(tap::Drivers* drivers);
 
-    void pollCanData();
-
-private:
-    VirtualCanBus* canbus;
+    void pollCanData(tap::can::CanBus canbus, modm::can::Message message);
 };
 
 }  // namespace aruwsrc::virtualMCB

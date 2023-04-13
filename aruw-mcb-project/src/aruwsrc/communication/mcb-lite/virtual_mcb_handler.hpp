@@ -17,29 +17,74 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_MCB_HANDLER_HPP_
-#define VIRTUAL_MCB_HANDLER_HPP_
+#ifndef VIRTUAL_CAN_BUS_HPP_
+#define VIRTUAL_CAN_BUS_HPP_
 
+#include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
+#include "modm/container/queue.hpp"
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
 
-#include "virtual_can_bus.hpp"
-
 namespace aruwsrc::virtualMCB
 {
-class VirtualMCBHandler
+enum MessageTypes : uint8_t
+{
+    CANBUS1_MESSAGE = 0,
+    CANBUS2_MESSAGE = 1,
+    IMU_MESSAGE = 2,
+    GPIO_MESSAGE = 3
+};
+
+struct IMUMessage
+{
+    float pitch, roll, yaw;
+    float pitchRate, rollRate, yawRate;
+    float xAccel, yAccel, zAccel;
+    tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState;
+} modm_packed;
+
+struct CurrentSensorMessage
+{
+    float current;
+} modm_packed;
+
+class VirtualMCBHandler : public tap::communication::serial::DJISerial
 {
 public:
     VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     void refresh();
 
-    VirtualCanBus canbus;
+    bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
+
+    IMUMessage& getIMUMessage();
+
+    CurrentSensorMessage& getCurrentSensorMessage();
+
+    void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
+
+    VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
-    VirtualCANRxHandler canRxHandler;
+
+private:
+    void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
+
+    void processIMUMessage(const ReceivedSerialMessage& completeMessage);
+
+    void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
+
+    void updateMotorTx();
+
+    tap::communication::serial::Uart::UartPort port;
+
+    IMUMessage currentIMUData;
+
+    CurrentSensorMessage currentCurrentSensorData;
 };
 
 }  // namespace aruwsrc::virtualMCB

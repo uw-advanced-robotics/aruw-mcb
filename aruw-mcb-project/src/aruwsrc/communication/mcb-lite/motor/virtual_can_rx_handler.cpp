@@ -26,26 +26,16 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualCANRxHandler::VirtualCANRxHandler(tap::Drivers* drivers, VirtualCanBus* canbus)
-    : CanRxHandler(drivers),
-      canbus(canbus)
+VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers) : CanRxHandler(drivers) {}
+
+void VirtualCanRxHandler::pollCanData(tap::can::CanBus canbus, modm::can::Message message)
 {
-}
-
-void VirtualCANRxHandler::pollCanData()
-{
-    modm::can::Message rxMessage;
-
-    // handle incoming CAN 1 messages
-    if (canbus->getCanMessage(tap::can::CanBus::CAN_BUS1, &rxMessage))
+    if (canbus == tap::can::CanBus::CAN_BUS1)
     {
-        CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan1);
-    }
+        CanRxHandler::processReceivedCanData(message, messageHandlerStoreCan1);
+    } else {
+        CanRxHandler::processReceivedCanData(message, messageHandlerStoreCan2);
 
-    // handle incoming CAN 2 messages
-    if (canbus->getCanMessage(tap::can::CanBus::CAN_BUS2, &rxMessage))
-    {
-        CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan2);
     }
 }
 

@@ -27,9 +27,12 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers, VirtualCanBus* canbus)
+VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers)
     : DjiMotorTxHandler(drivers),
-      canbus(canbus)
+      can1MessageLowSend(),
+      can1MessageHighSend(),
+      can2MessageLowSend(),
+      can2MessageHighSend()
 {
 }
 
@@ -76,28 +79,29 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
         &can2ValidMotorMessageLow,
         &can2ValidMotorMessageHigh);
 
-    bool messageSuccess = true;
-
     if (can1ValidMotorMessageLow)
     {
-        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageLow);
+        memcpy(can1MessageLowSend->data, &can1MessageLow, sizeof(modm::can::Message));
+        can1MessageLowSend->messageType = 0;
+        can1MessageLowSend->setCRC16();
     }
     if (can1ValidMotorMessageHigh)
     {
-        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageHigh);
+        memcpy(can1MessageHighSend->data, &can1MessageHigh, sizeof(modm::can::Message));
+        can1MessageHighSend->messageType = 0;
+        can1MessageHighSend->setCRC16();
     }
     if (can2ValidMotorMessageLow)
     {
-        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageLow);
+        memcpy(can2MessageLowSend->data, &can2MessageLow, sizeof(modm::can::Message));
+        can2MessageLowSend->messageType = 1;
+        can2MessageLowSend->setCRC16();
     }
     if (can2ValidMotorMessageHigh)
     {
-        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageHigh);
-    }
-
-    if (!messageSuccess)
-    {
-        RAISE_ERROR(drivers, "sendMessage failure");
+        memcpy(can2MessageHighSend->data, &can2MessageHigh, sizeof(modm::can::Message));
+        can2MessageHighSend->messageType = 1;
+        can2MessageHighSend->setCRC16();
     }
 }
 

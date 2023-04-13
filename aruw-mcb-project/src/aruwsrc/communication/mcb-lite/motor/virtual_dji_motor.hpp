@@ -23,8 +23,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "virtual_can_rx_handler.hpp"
-#include "virtual_dji_motor_tx_handler.hpp"
+#include "../virtual_mcb_handler.hpp"
+
 
 using namespace tap::motor;
 
@@ -37,8 +37,7 @@ public:
         tap::Drivers* drivers,
         MotorId desMotorIdentifier,
         tap::can::CanBus motorCanBus,
-        VirtualDJIMotorTxHandler* txMotorHandler,
-        VirtualCANRxHandler* rxHandler,
+        VirtualMCBHandler* motorHandler,
         bool isInverted,
         const char* name,
         uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
@@ -49,8 +48,7 @@ public:
     void attachSelfToRxHandler();
 
 private:
-    VirtualDJIMotorTxHandler* txMotorHandler;
-    VirtualCANRxHandler* rxHandler;
+    VirtualMCBHandler* motorHandler;
 };
 
 }  // namespace aruwsrc::virtualMCB

@@ -30,8 +30,7 @@ VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
-    VirtualDJIMotorTxHandler* txMotorHandler,
-    VirtualCANRxHandler* rxHandler,
+    VirtualMCBHandler* motorHandler,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
@@ -44,17 +43,19 @@ VirtualDjiMotor::VirtualDjiMotor(
           name,
           encoderWrapped,
           encoderRevolutions),
-      txMotorHandler(txMotorHandler),
-      rxHandler(rxHandler)
+      motorHandler(motorHandler)
 {
 }
 
 void VirtualDjiMotor::initialize()
 {
-    txMotorHandler->addMotorToManager(this);
+    motorHandler->motorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
 }
 
-void VirtualDjiMotor::attachSelfToRxHandler() { rxHandler->attachReceiveHandler(this); }
+void VirtualDjiMotor::attachSelfToRxHandler()
+{
+    motorHandler->canRxHandler.attachReceiveHandler(this);
+}
 
 }  // namespace aruwsrc::virtualMCB
