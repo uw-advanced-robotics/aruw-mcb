@@ -27,7 +27,7 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus)
+VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers, VirtualCanBus* canbus)
     : DjiMotorTxHandler(drivers),
       canbus(canbus)
 {
@@ -78,27 +78,21 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
 
     bool messageSuccess = true;
 
-    if (canbus->isReadyToSend())
+    if (can1ValidMotorMessageLow)
     {
-        if (can1ValidMotorMessageLow)
-        {
-            messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageLow);
-        }
-        if (can1ValidMotorMessageHigh)
-        {
-            messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageHigh);
-        }
+        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageLow);
     }
-    if (canbus->isReadyToSend())
+    if (can1ValidMotorMessageHigh)
     {
-        if (can2ValidMotorMessageLow)
-        {
-            messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageLow);
-        }
-        if (can2ValidMotorMessageHigh)
-        {
-            messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageHigh);
-        }
+        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS1, can1MessageHigh);
+    }
+    if (can2ValidMotorMessageLow)
+    {
+        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageLow);
+    }
+    if (can2ValidMotorMessageHigh)
+    {
+        messageSuccess &= canbus->sendMessage(tap::can::CanBus::CAN_BUS2, can2MessageHigh);
     }
 
     if (!messageSuccess)

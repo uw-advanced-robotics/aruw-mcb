@@ -22,33 +22,69 @@
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/can/can_rx_handler.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
 #include "modm/container/queue.hpp"
 
-#include "can_bus.hpp"
-
 namespace aruwsrc::virtualMCB
 {
-template <tap::communication::serial::Uart::UartPort port>
-class VirtualCanBus : public CanBus
+enum MessageRecieveTypes : uint8_t
+{
+    CANBUS1_MESSAGE = 0,
+    CANBUS2_MESSAGE = 1,
+    IMU_MESSAGE = 2,
+    GPIO_MESSAGE = 3
+} modm_packed;
+
+enum MessageSendTypes : u_int16_t
+{
+    CAN_BUS1 = 129,
+    CAN_BUS2 = 130
+} modm_packed;
+
+struct IMUMessage
+{
+    float pitch, roll, yaw;
+    float pitchRate, rollRate, yawRate;
+    float xAccel, yAccel, zAccel;
+    tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState;
+} modm_packed;
+
+struct CurrentSensorMessage
+{
+    float current;
+} modm_packed;
+
+class VirtualCanBus : public tap::communication::serial::DJISerial
 {
 public:
-    VirtualCanBus(tap::Drivers* drivers);
+    VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     ~VirtualCanBus(){};
 
-    void initialize() override;
+    bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
 
-    bool getMessage(tap::can::CanBus canbus, modm::can::Message* message) override;
+    bool getIMUMessage();
 
-    bool isReadyToSend() override;
+    bool getGPIOMessage();
 
-    bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message) override;
+    bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message);
+
+    void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
 
 private:
+    void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
+
+    void processIMUMessage(const ReceivedSerialMessage& completeMessage);
+
+    IMUMessage currentIMUData;
+
     tap::Drivers* drivers;
+
+    tap::communication::serial::Uart::UartPort thePort;
 
     // Blame eli if this does bad hardware kilobytes things
     modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;
@@ -57,15 +93,6 @@ private:
     // choosing this cuz in binary this would be 10000001 so we don't read empty buffer as can bus 1
     static constexpr uint16_t CANBUS_ID_OFFSET = 129;
 };
-
-// This is essentially a forward declaration but needed for template class to build,
-// https://stackoverflow.com/a/37189280
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart1>;
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart2>;
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart3>;
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart6>;
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart7>;
-template class VirtualCanBus<tap::communication::serial::Uart::UartPort::Uart8>;
 
 }  // namespace aruwsrc::virtualMCB
 

@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "virtual_can_rx_listener.hpp"
+#include "virtual_can_rx_handler.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
@@ -26,16 +26,27 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualCANRxListener::VirtualCANRxListener(
-    tap::Drivers* drivers,
-    uint32_t id,
-    tap::can::CanBus canbus,
-    VirtualCANRxHandler* canHandler)
-    : CanRxListener(drivers, id, canbus),
-      canHandler(canHandler)
+VirtualCANRxHandler::VirtualCANRxHandler(tap::Drivers* drivers, VirtualCanBus* canbus)
+    : CanRxHandler(drivers),
+      canbus(canbus)
 {
 }
 
-void VirtualCANRxListener::attachSelfToRxHandler() { canHandler->attachReceiveHandler(this); }
+void VirtualCANRxHandler::pollCanData()
+{
+    modm::can::Message rxMessage;
+
+    // handle incoming CAN 1 messages
+    if (canbus->getCanMessage(tap::can::CanBus::CAN_BUS1, &rxMessage))
+    {
+        CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan1);
+    }
+
+    // handle incoming CAN 2 messages
+    if (canbus->getCanMessage(tap::can::CanBus::CAN_BUS2, &rxMessage))
+    {
+        CanRxHandler::processReceivedCanData(rxMessage, messageHandlerStoreCan2);
+    }
+}
 
 }  // namespace aruwsrc::virtualMCB

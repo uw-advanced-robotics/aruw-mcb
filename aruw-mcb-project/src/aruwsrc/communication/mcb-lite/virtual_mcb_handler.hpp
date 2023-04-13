@@ -23,33 +23,23 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "can/virtual_can_bus.hpp"
-#include "can/virtual_can_rx_handler.hpp"
+#include "virtual_can_bus.hpp"
+#include "virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-template <tap::communication::serial::Uart::UartPort port>
 class VirtualMCBHandler
 {
 public:
-    VirtualMCBHandler(tap::Drivers* drivers);
+    VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     void refresh();
 
-    VirtualCanBus<port> canbus;
+    VirtualCanBus canbus;
     VirtualDJIMotorTxHandler motorTxHandler;
     VirtualCANRxHandler canRxHandler;
 };
-
-// This is essentially a forward declaration but needed for template class to build,
-// https://stackoverflow.com/a/37189280
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart1>;
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart2>;
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart3>;
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart6>;
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart7>;
-template class VirtualMCBHandler<tap::communication::serial::Uart::UartPort::Uart8>;
 
 }  // namespace aruwsrc::virtualMCB
 

@@ -17,28 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CAN_BUS_HPP_
-#define CAN_BUS_HPP_
+#ifndef VIRTUAL_CAN_RX_HANDLER_HPP_
+#define VIRTUAL_CAN_RX_HANDLER_HPP_
 
-#include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
+#include "tap/communication/can/can_rx_handler.hpp"
+#include "tap/drivers.hpp"
 
-#include "modm/architecture/interface/can_message.hpp"
+#include "virtual_can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class CanBus
+class VirtualCANRxHandler : public tap::can::CanRxHandler
 {
 public:
-    virtual ~CanBus() = default;
+    VirtualCANRxHandler(tap::Drivers* drivers, VirtualCanBus* canbus);
 
-    virtual void initialize() = 0;
+    void pollCanData();
 
-    virtual bool getMessage(tap::can::CanBus canbus, modm::can::Message *message) = 0;
-
-    virtual bool isReadyToSend() = 0;
-
-    virtual bool sendMessage(tap::can::CanBus canbus, const modm::can::Message &message) = 0;
+private:
+    VirtualCanBus* canbus;
 };
 
 }  // namespace aruwsrc::virtualMCB

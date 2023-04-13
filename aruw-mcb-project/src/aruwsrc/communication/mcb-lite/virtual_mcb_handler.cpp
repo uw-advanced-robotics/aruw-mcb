@@ -23,17 +23,16 @@
 
 namespace aruwsrc::virtualMCB
 {
-template <tap::communication::serial::Uart::UartPort port>
-VirtualMCBHandler<port>::VirtualMCBHandler(tap::Drivers* drivers)
-    : canbus(VirtualCanBus<port>(drivers)),
+VirtualMCBHandler::VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
+    : canbus(VirtualCanBus(drivers, port)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers, &canbus)),
       canRxHandler(VirtualCANRxHandler(drivers, &canbus))
 {
 }
 
-template <tap::communication::serial::Uart::UartPort port>
-void VirtualMCBHandler<port>::refresh()
+void VirtualMCBHandler::refresh()
 {
+    canbus.updateSerial();
     canRxHandler.pollCanData();
     motorTxHandler.encodeAndSendCanData();
 }

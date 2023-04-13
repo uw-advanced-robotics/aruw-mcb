@@ -23,19 +23,19 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor_tx_handler.hpp"
 
-#include "aruwsrc/communication/mcb-lite/can/can_bus.hpp"
+#include "../virtual_can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
 class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
 {
 public:
-    VirtualDJIMotorTxHandler(tap::Drivers* drivers, CanBus* canbus);
+    VirtualDJIMotorTxHandler(tap::Drivers* drivers, VirtualCanBus* canbus);
 
     void encodeAndSendCanData();
 
 private:
-    CanBus* canbus;
+    VirtualCanBus* canbus;
 };
 
 }  // namespace aruwsrc::virtualMCB
