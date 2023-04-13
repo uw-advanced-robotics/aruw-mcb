@@ -28,7 +28,7 @@ namespace aruwsrc::virtualMCB
 {
 VirtualCanBus::VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
-      thePort(port),
+      port(port),
       currentIMUData(),
       currentCurrentSensorData()
 {
@@ -39,16 +39,16 @@ void VirtualCanBus::messageReceiveCallback(const ReceivedSerialMessage& complete
     switch (completeMessage.messageType)
     {
         {
-            case MessageRecieveTypes::CANBUS1_MESSAGE:
+            case MessageTypes::CANBUS1_MESSAGE:
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS1);
                 break;
-            case MessageRecieveTypes::CANBUS2_MESSAGE:
+            case MessageTypes::CANBUS2_MESSAGE:
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
-            case MessageRecieveTypes::IMU_MESSAGE:
+            case MessageTypes::IMU_MESSAGE:
                 processIMUMessage(completeMessage);
                 break;
-            case MessageRecieveTypes::GPIO_MESSAGE:
+            case MessageTypes::GPIO_MESSAGE:
                 break;
             default:
                 break;
@@ -114,17 +114,13 @@ bool VirtualCanBus::getCanMessage(tap::can::CanBus canbus, modm::can::Message* m
 bool VirtualCanBus::sendMessage(tap::can::CanBus canbus, const modm::can::Message& message)
 {
     DJISerial::SerialMessage<sizeof(modm::can::Message)> sendMessage;
-    sendMessage.messageType = canbus == tap::can::CanBus::CAN_BUS1
-                                  ? MessageRecieveTypes::CANBUS1_MESSAGE
-                                  : MessageRecieveTypes::CANBUS2_MESSAGE;
+    sendMessage.messageType = canbus == tap::can::CanBus::CAN_BUS1 ? MessageTypes::CANBUS1_MESSAGE
+                                                                   : MessageTypes::CANBUS2_MESSAGE;
     memcpy(sendMessage.data, &message, sizeof(modm::can::Message));
 
     sendMessage.setCRC16();
 
-    return drivers->uart.write(
-        thePort,
-        reinterpret_cast<uint8_t*>(&sendMessage),
-        sizeof(sendMessage));
+    return drivers->uart.write(port, reinterpret_cast<uint8_t*>(&sendMessage), sizeof(sendMessage));
 }
 
 }  // namespace aruwsrc::virtualMCB

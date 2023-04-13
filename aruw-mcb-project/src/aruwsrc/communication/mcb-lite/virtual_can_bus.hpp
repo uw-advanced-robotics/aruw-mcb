@@ -31,18 +31,12 @@
 
 namespace aruwsrc::virtualMCB
 {
-enum MessageRecieveTypes : uint8_t
+enum MessageTypes : uint8_t
 {
     CANBUS1_MESSAGE = 0,
     CANBUS2_MESSAGE = 1,
     IMU_MESSAGE = 2,
     GPIO_MESSAGE = 3
-} ;
-
-enum MessageSendTypes : u_int16_t
-{
-    CAN_BUS1 = 129,
-    CAN_BUS2 = 130
 } ;
 
 struct IMUMessage
@@ -63,8 +57,6 @@ class VirtualCanBus : public tap::communication::serial::DJISerial
 public:
     VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
-    ~VirtualCanBus(){};
-
     bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
 
     IMUMessage& getIMUMessage();
@@ -80,9 +72,7 @@ private:
 
     void processIMUMessage(const ReceivedSerialMessage& completeMessage);
 
-    tap::Drivers* drivers;
-
-    tap::communication::serial::Uart::UartPort thePort;
+    tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
 

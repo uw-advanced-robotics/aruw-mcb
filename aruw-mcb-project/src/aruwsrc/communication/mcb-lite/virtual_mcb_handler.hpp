@@ -23,9 +23,10 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-#include "virtual_can_bus.hpp"
-#include "virtual_can_rx_handler.hpp"
+#include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
+
+#include "virtual_can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {

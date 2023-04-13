@@ -23,7 +23,7 @@
 #include "tap/communication/can/can_rx_handler.hpp"
 #include "tap/drivers.hpp"
 
-#include "virtual_can_bus.hpp"
+#include "../virtual_can_bus.hpp"
 
 namespace aruwsrc::virtualMCB
 {
