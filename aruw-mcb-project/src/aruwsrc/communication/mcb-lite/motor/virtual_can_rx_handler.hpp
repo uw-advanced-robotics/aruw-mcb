@@ -27,6 +27,9 @@
 
 namespace aruwsrc::virtualMCB
 {
+/**
+ * This class is used to pass CAN messages from the virtual MCB to listeners (motors)
+ */
 class VirtualCanRxHandler : public tap::can::CanRxHandler
 {
 public:

@@ -28,6 +28,9 @@
 
 namespace aruwsrc::virtualMCB
 {
+/**
+ * This class is used to send motor data to motors on virtual MCBs
+ */
 class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
 {
 public:

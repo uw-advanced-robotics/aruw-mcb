@@ -55,6 +55,11 @@ struct CurrentSensorMessage
 
 class VirtualMCBHandler : public tap::communication::serial::DJISerial
 {
+    /**
+     * This class is used to communicate with the the virtual MCB using the UART port.
+     * This class handles the sending and receiving of motor data, as well as receiving
+     * IMU and current sensor data. Call refresh() to update the data.
+     */
 public:
     VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 

@@ -41,7 +41,7 @@ VirtualMCBHandler::VirtualMCBHandler(
 
 void VirtualMCBHandler::refresh()
 {
-    DJISerial::updateSerial();
+    updateSerial();
     updateMotorTx();
 }
 

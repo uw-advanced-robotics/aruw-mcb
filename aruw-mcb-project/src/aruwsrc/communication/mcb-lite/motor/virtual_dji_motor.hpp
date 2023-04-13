@@ -29,6 +29,9 @@ using namespace tap::motor;
 
 namespace aruwsrc::virtualMCB
 {
+/**
+ * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
+ */
 class VirtualDjiMotor : public tap::motor::DjiMotor
 {
 public:
