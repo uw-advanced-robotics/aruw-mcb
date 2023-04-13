@@ -22,6 +22,7 @@
 
 #include "tap/communication/can/can_rx_handler.hpp"
 #include "tap/drivers.hpp"
+
 #include "modm/architecture/interface/can_message.hpp"
 
 namespace aruwsrc::virtualMCB
