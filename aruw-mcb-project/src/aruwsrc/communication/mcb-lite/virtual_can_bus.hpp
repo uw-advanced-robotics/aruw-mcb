@@ -37,13 +37,13 @@ enum MessageRecieveTypes : uint8_t
     CANBUS2_MESSAGE = 1,
     IMU_MESSAGE = 2,
     GPIO_MESSAGE = 3
-} modm_packed;
+} ;
 
 enum MessageSendTypes : u_int16_t
 {
     CAN_BUS1 = 129,
     CAN_BUS2 = 130
-} modm_packed;
+} ;
 
 struct IMUMessage
 {
@@ -67,9 +67,9 @@ public:
 
     bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
 
-    bool getIMUMessage();
+    IMUMessage& getIMUMessage();
 
-    bool getGPIOMessage();
+    CurrentSensorMessage& getCurrentSensorMessage();
 
     bool sendMessage(tap::can::CanBus canbus, const modm::can::Message& message);
 
@@ -80,11 +80,13 @@ private:
 
     void processIMUMessage(const ReceivedSerialMessage& completeMessage);
 
-    IMUMessage currentIMUData;
-
     tap::Drivers* drivers;
 
     tap::communication::serial::Uart::UartPort thePort;
+
+    IMUMessage currentIMUData;
+
+    CurrentSensorMessage currentCurrentSensorData;
 
     // Blame eli if this does bad hardware kilobytes things
     modm::BoundedQueue<modm::can::Message, 254> CAN1_queue;

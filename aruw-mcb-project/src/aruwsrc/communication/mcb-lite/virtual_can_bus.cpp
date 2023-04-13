@@ -28,7 +28,9 @@ namespace aruwsrc::virtualMCB
 {
 VirtualCanBus::VirtualCanBus(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
-      thePort(port)
+      thePort(port),
+      currentIMUData(),
+      currentCurrentSensorData()
 {
 }
 
@@ -78,6 +80,10 @@ void VirtualCanBus::processIMUMessage(const ReceivedSerialMessage& completeMessa
     // Read the message
     memcpy(&currentIMUData, completeMessage.data, sizeof(modm::can::Message));
 }
+
+IMUMessage& VirtualCanBus::getIMUMessage() { return currentIMUData; }
+
+CurrentSensorMessage& VirtualCanBus::getCurrentSensorMessage() { return currentCurrentSensorData; }
 
 bool VirtualCanBus::getCanMessage(tap::can::CanBus canbus, modm::can::Message* message)
 {
