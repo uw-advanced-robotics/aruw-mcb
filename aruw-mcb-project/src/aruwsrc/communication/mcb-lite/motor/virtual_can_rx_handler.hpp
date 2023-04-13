@@ -26,8 +26,8 @@
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
-#include "modm/architecture/interface/assert.h"
 
+#include "modm/architecture/interface/assert.h"
 #include "modm/architecture/interface/can_message.hpp"
 
 namespace aruwsrc::virtualMCB
