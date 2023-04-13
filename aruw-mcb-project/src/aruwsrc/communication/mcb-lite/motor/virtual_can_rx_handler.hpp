@@ -21,6 +21,7 @@
 #define VIRTUAL_CAN_RX_HANDLER_HPP_
 
 #include "tap/communication/can/can_rx_handler.hpp"
+#include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
@@ -36,6 +37,21 @@ public:
     VirtualCanRxHandler(tap::Drivers* drivers);
 
     void refresh(tap::can::CanBus canbus, modm::can::Message message);
+
+    void attachReceiveHandler(tap::can::CanRxListener* const listener);
+
+    void attachReceiveHandler(
+        tap::can::CanRxListener* const canRxListener,
+        tap::can::CanRxListener** messageHandlerStore);
+
+    void processReceivedCanData(
+        const modm::can::Message& rxMessage,
+        tap::can::CanRxListener* const* messageHandlerStore);
+
+protected:
+    tap::can::CanRxListener* messageHandlersCan1[NUM_CAN_IDS];
+
+    tap::can::CanRxListener* messageHandlersCan2[NUM_CAN_IDS];
 };
 
 }  // namespace aruwsrc::virtualMCB

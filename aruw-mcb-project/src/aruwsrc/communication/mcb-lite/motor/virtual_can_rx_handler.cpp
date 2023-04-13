@@ -23,20 +23,68 @@
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers) : CanRxHandler(drivers) {}
+VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers)
+    : CanRxHandler(drivers),
+      messageHandlersCan1(),
+      messageHandlersCan2()
+{
+}
 
 void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message message)
 {
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
-        processReceivedCanData(message, messageHandlerStoreCan1);
+        processReceivedCanData(message, messageHandlersCan1);
     }
     else
     {
-        processReceivedCanData(message, messageHandlerStoreCan2);
+        processReceivedCanData(message, messageHandlersCan2);
+    }
+}
+
+void VirtualCanRxHandler::attachReceiveHandler(tap::can::CanRxListener* const listener)
+{
+    if (listener->canBus == tap::can::CanBus::CAN_BUS1)
+    {
+        attachReceiveHandler(listener, messageHandlersCan1);
+    }
+    else
+    {
+        attachReceiveHandler(listener, messageHandlersCan2);
+    }
+}
+
+void VirtualCanRxHandler::attachReceiveHandler(
+    tap::can::CanRxListener* const canRxListener,
+    tap::can::CanRxListener** messageHandlerStore)
+{
+    uint16_t id = lookupTableIndexForCanId(canRxListener->canIdentifier);
+
+    modm_assert(id < NUM_CAN_IDS, "CAN", "RX listener id out of bounds", 1);
+    modm_assert(messageHandlerStore[id] == nullptr, "CAN", "overloading", 1);
+
+    messageHandlerStore[id] = canRxListener;
+}
+
+void VirtualCanRxHandler::processReceivedCanData(
+    const modm::can::Message& rxMessage,
+    tap::can::CanRxListener* const* messageHandlerStore)
+{
+    uint16_t id = lookupTableIndexForCanId(rxMessage.getIdentifier());
+
+    if (id >= NUM_CAN_IDS)
+    {
+        RAISE_ERROR(drivers, "Invalid can id received");
+        return;
+    }
+
+    if (messageHandlerStore[id] != nullptr)
+    {
+        messageHandlerStore[id]->processMessage(rxMessage);
     }
 }
 
