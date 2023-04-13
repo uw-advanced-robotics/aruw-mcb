@@ -104,7 +104,7 @@ public:
 
     mockable DjiMotor const* getCan2Motor(MotorId motorId);
 
-protected:
+private:
     Drivers* drivers;
 
     DjiMotor* can1MotorStore[DJI_MOTORS_PER_CAN] = {0};
