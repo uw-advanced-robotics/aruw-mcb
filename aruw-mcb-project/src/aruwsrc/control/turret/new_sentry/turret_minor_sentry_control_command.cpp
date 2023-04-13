@@ -65,8 +65,10 @@ void TurretMinorSentryControlCommand::execute()
     {
         case 0:
             pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
+            break;
         case 1:
             pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
+            break;
         default:
             pitchInput = 0;
     }
@@ -77,8 +79,10 @@ void TurretMinorSentryControlCommand::execute()
     {
         case 0:
             yawInput = controlOperatorInterface.getTurretMinor1YawVelocity();
+            break;
         case 1:
             yawInput = controlOperatorInterface.getTurretMinor2YawVelocity();
+            break;
         default:
             yawInput = 0;
     }

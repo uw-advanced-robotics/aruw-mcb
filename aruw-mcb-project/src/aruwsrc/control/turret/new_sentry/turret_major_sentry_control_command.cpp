@@ -37,7 +37,7 @@ TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
       yawController(yawController),
       userYawInputScalar(userYawInputScalar)
 {
-    addSubsystemRequirement(turretSubsystem);
+    addSubsystemRequirement(turretMajorSubsystem);
 }
 
 bool TurretMajorSentryControlCommand::isReady() { return !isFinished(); }
@@ -67,7 +67,7 @@ bool TurretMajorSentryControlCommand::isFinished() const
 
 void TurretMajorSentryControlCommand::end(bool)
 {
-    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretMajorSubsystem->yawMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::sentry
