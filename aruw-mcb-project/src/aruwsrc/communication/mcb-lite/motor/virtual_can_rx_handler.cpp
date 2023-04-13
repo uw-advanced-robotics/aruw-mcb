@@ -29,9 +29,6 @@ namespace aruwsrc::virtualMCB
 {
 VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers)
     : CanRxHandler(drivers),
-      drivers(drivers),
-      messageHandlersCan1(),
-      messageHandlersCan2()
 {
 }
 
@@ -39,53 +36,11 @@ void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message me
 {
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
-        processTheReceivedCanData(message, messageHandlersCan1);
+        processReceivedCanData(message, messageHandlerStoreCan1);
     }
     else
     {
-        processTheReceivedCanData(message, messageHandlersCan2);
-    }
-}
-
-void VirtualCanRxHandler::attachReceiveHandler(tap::can::CanRxListener* const listener)
-{
-    if (listener->canBus == tap::can::CanBus::CAN_BUS1)
-    {
-        attachReceiveHandler(listener, messageHandlersCan1);
-    }
-    else
-    {
-        attachReceiveHandler(listener, messageHandlersCan2);
-    }
-}
-
-void VirtualCanRxHandler::attachReceiveHandler(
-    tap::can::CanRxListener* const canRxListener,
-    tap::can::CanRxListener** messageHandlerStore)
-{
-    uint16_t id = lookupTableIndexForCanId(canRxListener->canIdentifier);
-
-    modm_assert(id < NUM_CAN_IDS, "CAN", "RX listener id out of bounds", 1);
-    modm_assert(messageHandlerStore[id] == nullptr, "CAN", "overloading", 1);
-
-    messageHandlerStore[id] = canRxListener;
-}
-
-void VirtualCanRxHandler::processTheReceivedCanData(
-    const modm::can::Message& rxMessage,
-    tap::can::CanRxListener* const* messageHandlerStore)
-{
-    uint16_t id = lookupTableIndexForCanId(rxMessage.getIdentifier());
-
-    if (id >= NUM_CAN_IDS)
-    {
-        RAISE_ERROR(drivers, "Invalid can id received");
-        return;
-    }
-
-    if (messageHandlerStore[id] != nullptr)
-    {
-        messageHandlerStore[id]->processMessage(rxMessage);
+        processReceivedCanData(message, messageHandlerStoreCan2);
     }
 }
 
