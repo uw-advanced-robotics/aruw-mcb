@@ -19,9 +19,8 @@
 
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/control/chassis/new_sentry/sentry_chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-
 
 using namespace aruwsrc::control::sentry;
 
@@ -29,6 +28,7 @@ namespace aruwsrc
 {
 namespace aruwsrc::control::sentry
 {
+
 SentryManualDriveCommand::SentryManualDriveCommand(
     tap::Drivers* drivers,
     SentryControlOperatorInterface* operatorInterface,
@@ -44,7 +44,7 @@ void SentryManualDriveCommand::initialize() {}
 
 void SentryManualDriveCommand::execute()
 {
-    chassis::ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+    SentryChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
 }
 
 void SentryManualDriveCommand::end(bool) { chassis->setZeroRPM(); }

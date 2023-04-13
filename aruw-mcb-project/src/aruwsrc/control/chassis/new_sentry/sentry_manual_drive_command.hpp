@@ -5,17 +5,17 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 using namespace aruwsrc::control::sentry;
+
 namespace aruwsrc
 {
 namespace aruwsrc::control::sentry
 {
 
 /**
- * A command that applies classic chassis-relative mecanum drive.
+ * A command that controls chassis-relative mecanum drive.
  */
 class SentryManualDriveCommand : public tap::control::Command
 {
@@ -44,13 +44,10 @@ private:
     tap::Drivers* drivers;
     SentryControlOperatorInterface* operatorInterface;
     chassis::HolonomicChassisSubsystem* chassis;
-};  // class ChassisDriveCommand
+};  // class SentryManualDriveCommand
 
-}  // namespace chassis
+}  // namespace aruwsrc::control::sentry
 
 }  // namespace aruwsrc
 
-
-
-
-#endif SENTRY_MANUAL_DRIVE_COMMAND_HPP_
+#endif // SENTRY_MANUAL_DRIVE_COMMAND_HPP_
