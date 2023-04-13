@@ -101,7 +101,7 @@ void VirtualMCBHandler::processCanMessage(
 {
     modm::can::Message msg;
     memcpy(&msg, completeMessage.data, sizeof(modm::can::Message));
-    canRxHandler.pollCanData(canbus, msg);
+    canRxHandler.refresh(canbus, msg);
 }
 
 void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeMessage)

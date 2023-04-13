@@ -22,6 +22,8 @@
 
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor_tx_handler.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+#include "modm/architecture/interface/can_message.hpp"
 
 namespace aruwsrc::virtualMCB
 {

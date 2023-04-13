@@ -28,7 +28,7 @@ namespace aruwsrc::virtualMCB
 {
 VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers) : CanRxHandler(drivers) {}
 
-void VirtualCanRxHandler::pollCanData(tap::can::CanBus canbus, modm::can::Message message)
+void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message message)
 {
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
