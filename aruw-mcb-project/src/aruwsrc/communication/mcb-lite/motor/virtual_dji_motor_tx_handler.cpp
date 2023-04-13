@@ -65,14 +65,14 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
     bool can2ValidMotorMessageLow = false;
     bool can2ValidMotorMessageHigh = false;
 
-    DjiMotorTxHandler::serializeMotorStoreSendData(
+    serializeMotorStoreSendData(
         can1MotorStore,
         &can1MessageLow,
         &can1MessageHigh,
         &can1ValidMotorMessageLow,
         &can1ValidMotorMessageHigh);
 
-    DjiMotorTxHandler::serializeMotorStoreSendData(
+    serializeMotorStoreSendData(
         can2MotorStore,
         &can2MessageLow,
         &can2MessageHigh,
