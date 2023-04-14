@@ -47,8 +47,8 @@ struct SwerveModuleConfig
     testing::NiceMock<tap::mock::DjiMotorMock>* driveMotor;
     testing::NiceMock<tap::mock::DjiMotorMock>* azimuthMotor;
 #else
-    tap::motor::DjiMotor* driveMotor;
-    tap::motor::DjiMotor* azimuthMotor;
+    tap::motor::DjiMotor* driveMotor = nullptr;
+    tap::motor::DjiMotor* azimuthMotor = nullptr;
 #endif
 
     // in meters, measured from center
