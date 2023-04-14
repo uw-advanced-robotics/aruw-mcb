@@ -34,36 +34,50 @@ VirtualMCBHandler::VirtualMCBHandler(
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
       port(port),
       currentIMUData(),
-      currentCurrentSensorData()
+      currentCurrentSensorData(),
+      calibrateIMUMessage()
 
 {
 }
 
-void VirtualMCBHandler::refresh()
+void VirtualMCBHandler::sendData()
 {
-    updateSerial();
-    updateMotorTx();
+    if (drivers->uart.isWriteFinished(port))
+    {
+        motorTxHandler.encodeAndSendCanData();
+        drivers->uart.write(
+            port,
+            reinterpret_cast<uint8_t*>(&(motorTxHandler.can1MessageLowSend)),
+            sizeof(motorTxHandler.can1MessageLowSend));
+        drivers->uart.write(
+            port,
+            reinterpret_cast<uint8_t*>(&(motorTxHandler.can1MessageHighSend)),
+            sizeof(motorTxHandler.can1MessageHighSend));
+        drivers->uart.write(
+            port,
+            reinterpret_cast<uint8_t*>(&(motorTxHandler.can2MessageLowSend)),
+            sizeof(motorTxHandler.can2MessageLowSend));
+        drivers->uart.write(
+            port,
+            reinterpret_cast<uint8_t*>(&(motorTxHandler.can2MessageHighSend)),
+            sizeof(motorTxHandler.can2MessageHighSend));
+
+        if (sendIMUCalibrationMessage)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(calibrateIMUMessage)),
+                sizeof(calibrateIMUMessage));
+            sendIMUCalibrationMessage = false;
+        }
+    }
 }
 
-void VirtualMCBHandler::updateMotorTx()
+void VirtualMCBHandler::calibrateIMU()
 {
-    motorTxHandler.encodeAndSendCanData();
-    drivers->uart.write(
-        port,
-        reinterpret_cast<uint8_t*>(motorTxHandler.can1MessageLowSend),
-        sizeof(motorTxHandler.can1MessageLowSend));
-    drivers->uart.write(
-        port,
-        reinterpret_cast<uint8_t*>(motorTxHandler.can1MessageHighSend),
-        sizeof(motorTxHandler.can1MessageHighSend));
-    drivers->uart.write(
-        port,
-        reinterpret_cast<uint8_t*>(motorTxHandler.can2MessageLowSend),
-        sizeof(motorTxHandler.can2MessageLowSend));
-    drivers->uart.write(
-        port,
-        reinterpret_cast<uint8_t*>(motorTxHandler.can2MessageHighSend),
-        sizeof(motorTxHandler.can2MessageHighSend));
+    calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU;
+    calibrateIMUMessage.setCRC16();
+    sendIMUCalibrationMessage = true;
 }
 
 IMUMessage& VirtualMCBHandler::getIMUMessage() { return currentIMUData; }
@@ -88,6 +102,7 @@ void VirtualMCBHandler::messageReceiveCallback(const ReceivedSerialMessage& comp
                 processIMUMessage(completeMessage);
                 break;
             case MessageTypes::GPIO_MESSAGE:
+                processCurrentSensorMessage(completeMessage);
                 break;
             default:
                 break;
