@@ -22,6 +22,9 @@
 
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -48,9 +51,6 @@ public:
 
 private:
     uint8_t turretID;
-    algorithms::ChassisFramePitchTurretController pitchController;
-    algorithms::ChassisFrameYawTurretController yawController;
-
 };  // class SentryTurretMinorSubsystem
 
 }  // namespace aruwsrc::control::turret

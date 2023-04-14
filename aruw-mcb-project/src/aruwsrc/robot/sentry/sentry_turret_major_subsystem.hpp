@@ -52,7 +52,6 @@ public:
      */
     uint32_t getLastMeasurementTimeMicroseconds() const;
 
-private:
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
 

@@ -18,12 +18,6 @@
  */
 
 #if defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
-
-
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
@@ -37,6 +31,8 @@
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
@@ -45,9 +41,16 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/cv_online_governor.hpp"
@@ -67,7 +70,8 @@
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -87,8 +91,8 @@ using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 using namespace aruwsrc::sentry;
 
-
-namespace sentry_control {
+namespace sentry_control
+{
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -98,180 +102,12 @@ namespace sentry_control {
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor1(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 1");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor2(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 2");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor3(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 3");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor4(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 4");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor5(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 5");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor6(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 6");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor7(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 7");
-
-aruwsrc::virtualMCB::VirtualDjiMotor motor8(
-    drivers(),
-    MOTOR1,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "swerve virtual motor 8");
-
-
-
-
-chassis::SwerveChassisSubsystem swassis(
-
-);
-
-
-tap::motor::DjiMotor turretMajorYawMotor(
-    drivers(),
-    YAW_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
-    "Major Yaw Turret");
-
-SentryTurretMajorSubsystem turretMajor(
-    drivers(),
-    &turretMajorYawMotor,
-    majorYawConfig);
-
-
-tap::motor::DjiMotor turretMinor1PitchMotor(
-    drivers(),
-    PITCH_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
-    "Minor Pitch Turret"
-);
-
-tap::motor::DjiMotor turretMinor1YawMotor(
-    drivers(),
-    YAW_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
-    "Minor Yaw Turret"
-);
-
-SentryTurretMinorSubsystem turretMinor1(
-    drivers(),
-    &turretMinor1PitchMotor,
-    &turretMinor1YawMotor,
-    MINOR_PITCH_MOTOR_CONFIG,
-    MINOR_YAW_MOTOR_CONFIG
-);
-
-tap::motor::DjiMotor turretMinor2PitchMotor(
-    drivers(),
-    PITCH_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
-    "Minor Pitch Turret"
-);
-
-tap::motor::DjiMotor turretMinor2YawMotor(
-    drivers(),
-    YAW_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
-    "Minor Yaw Turret"
-);
-
-SentryTurretMinorSubsystem turretMinor2(
-    drivers(),
-    &turretMinorPitchMotor,
-    &turretMinorYawMotor,
-    config.
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::B;
-static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
-
 aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
 // forward declare before sentry turret to be used in turret CV command
 extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
 
-class SentryTurret
+class SentryMinorTurret
 {
 public:
     struct Config
@@ -290,7 +126,7 @@ public:
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
     };
 
-    SentryTurret(Drivers &drivers, const Config &config)
+    SentryMinorTurret(Drivers &drivers, const Config &config)
         : agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
           frictionWheels(
               &drivers,
@@ -359,7 +195,7 @@ public:
               &drivers.visionCoprocessor,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
-            &chassisFramePitchTurretController,
+              &chassisFramePitchTurretController,
               &ballisticsSolver,
               config.turretID),
           turretUturnCommand(&turretSubsystem, M_PI),
@@ -408,7 +244,7 @@ public:
     RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
-    SentryTurretSubsystem turretSubsystem;
+    SentryTurretMinorSubsystem turretSubsystem;
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
@@ -452,7 +288,84 @@ public:
     GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
 };
 
-SentryTurret turretZero(
+aruwsrc::virtualMCB::VirtualDjiMotor motor1(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 1");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor2(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 2");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor3(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 3");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor4(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 4");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor5(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 5");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor6(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 6");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor7(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 7");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor8(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 8");
+
+tap::motor::DjiMotor turretMajorYawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Major Yaw Turret");
+
+/* define subsystems --------------------------------------------------------*/
+
+aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(drivers());
+
+SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYawConfig);
+
+SentryMinorTurret turretZero(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG,
@@ -469,7 +382,7 @@ SentryTurret turretZero(
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
-SentryTurret turretOne(
+SentryMinorTurret turretOne(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG,
@@ -486,21 +399,7 @@ SentryTurret turretOne(
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
     });
 
-/* define subsystems --------------------------------------------------------*/
-SentryDriveSubsystem sentryDrive(drivers(), LEFT_LIMIT_SWITCH, RIGHT_LIMIT_SWITCH);
-
-SentryOttoKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    sentryDrive,
-    turretOne.turretSubsystem);
-
 /* define commands ----------------------------------------------------------*/
-// Two identical drive commands since you can't map an identical command to two different mappings
-SentryDriveManualCommand sentryDriveManual1(&(drivers()->controlOperatorInterface), &sentryDrive);
-SentryDriveManualCommand sentryDriveManual2(&(drivers()->controlOperatorInterface), &sentryDrive);
-
-SentryAutoDriveComprisedCommand sentryAutoDrive(drivers(), &sentryDrive);
-
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -519,9 +418,30 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
             false,
         },
     },
-    nullptr);
+    &sentryDrive);
 
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &sentryDrive);
+
+aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &sentryDrive,
+    &turretMajor.yawMotor,
+    aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+
+aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
+    drivers(),
+    &sentryDrive,
+    &turretMajor.yawMotor,
+    (drivers()->controlOperatorInterface));
+aruwsrc::chassis::BeybladeCommand beybladeCommand(
+    drivers(),
+    &sentryDrive,
+    &turretMajor.yawMotor,
+    (drivers()->controlOperatorInterface));
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
@@ -531,17 +451,13 @@ void targetNewQuadrantMessageHandler()
     turretOne.turretCVCommand.changeScanningQuadrant();
 }
 
-void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
+// void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
 
 void pauseProjectileLaunchMessageHandler()
 {
     turretZero.pauseCommandGovernor.initiatePause();
     turretOne.pauseCommandGovernor.initiatePause();
 }
-
-aruwsrc::communication::serial::SentryResponseSubsystem sentryResponseSubsystem(
-    *drivers(),
-    sentryAutoDrive);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -575,8 +491,6 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
-    sentryResponseSubsystem.initialize();
-    buzzer.initialize();
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -592,17 +506,15 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
-    drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    sentryDrive.setDefaultCommand(&sentryAutoDrive);
+    sentryDrive.setDefaultCommand(&chassisAutorotateCommand);
     turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
     turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
     turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
@@ -622,7 +534,6 @@ void startSentryCommands(Drivers *drivers)
         pauseProjectileLaunchMessageHandler);
     sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
