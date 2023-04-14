@@ -21,6 +21,7 @@
 #define SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -38,6 +39,7 @@ public:
         const TurretMotorConfig& yawMotorConfig,
         const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
+
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;

@@ -27,6 +27,8 @@
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
 
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
+
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
@@ -34,6 +36,31 @@
 
 namespace aruwsrc::control::turret
 {
+
+chassis::SwerveModuleConfig frontMotorConfig = {
+    .positionWithinChassisX = 0.205;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static constexpr uint8_t NUM_TURRETS = 2;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;

@@ -86,8 +86,6 @@ using namespace tap::communication::serial;
 using namespace aruwsrc::sentry;
 
 
-
-
 namespace sentry_control {
 
 /*
@@ -131,7 +129,6 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 4");
 
-
 aruwsrc::virtualMCB::VirtualDjiMotor motor(
     drivers(),
     MOTOR1,
@@ -139,7 +136,6 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     &(drivers()->mcbLite),
     false,
     "swerve virtual motor 5");
-
 
 aruwsrc::virtualMCB::VirtualDjiMotor motor(
     drivers(),
@@ -149,7 +145,6 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 6");
 
-
 aruwsrc::virtualMCB::VirtualDjiMotor motor(
     drivers(),
     MOTOR1,
@@ -158,6 +153,13 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 7");
 
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 8");
 
 
 
@@ -165,8 +167,9 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
 
 
 
-
-
+chassis::SwerveChassisSubsystem swassis(
+    
+);
 
 
 
@@ -307,7 +310,7 @@ public:
               &drivers.visionCoprocessor,
               &turretSubsystem,
               &worldFrameYawTurretImuController,
-              &chassisFramePitchTurretController,
+            &chassisFramePitchTurretController,
               &ballisticsSolver,
               config.turretID),
           turretUturnCommand(&turretSubsystem, M_PI),
