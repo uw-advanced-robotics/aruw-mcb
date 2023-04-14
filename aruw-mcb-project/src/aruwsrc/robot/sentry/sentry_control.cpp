@@ -50,6 +50,7 @@
 #include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -106,69 +107,85 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor1(
+aruwsrc::virtualMCB::VirtualDjiMotor frontLeftDriveMotor(
     drivers(),
     MOTOR1,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 1");
+    "Front Left Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor2(
+aruwsrc::virtualMCB::VirtualDjiMotor frontLeftAzimuthMotor(
     drivers(),
-    MOTOR1,
+    MOTOR2,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 2");
+    "Front Left Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor3(
+aruwsrc::virtualMCB::VirtualDjiMotor frontRightDriveMotor(
     drivers(),
-    MOTOR1,
+    MOTOR3,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 3");
+    "Front Right Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor4(
+aruwsrc::virtualMCB::VirtualDjiMotor frontRightAzimuthMotor(
     drivers(),
-    MOTOR1,
+    MOTOR4,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 4");
+    "Front Right Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor5(
+aruwsrc::virtualMCB::VirtualDjiMotor backLeftDriveMotor(
     drivers(),
-    MOTOR1,
+    MOTOR5,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 5");
+    "Back Left Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor6(
+aruwsrc::virtualMCB::VirtualDjiMotor backLeftAzimuthMotor(
     drivers(),
-    MOTOR1,
+    MOTOR6,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 6");
+    "Back Left Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor7(
+aruwsrc::virtualMCB::VirtualDjiMotor backRightDriveMotor(
     drivers(),
-    MOTOR1,
+    MOTOR7,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 7");
+    "Back Right Swerve Drive Motor");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor8(
+aruwsrc::virtualMCB::VirtualDjiMotor backRightAzimuthMotor(
     drivers(),
-    MOTOR1,
+    MOTOR8,
     CAN_BUS1,
     &(drivers()->mcbLite),
     false,
-    "swerve virtual motor 8");
+    "Back Right Swerve Drive Motor");
+
+aruwsrc::chassis::SwerveModuleConfig frontLeftModuleConfig = {
+    .driveMotor = &frontLeftDriveMotor,
+    .azimuthMotor = &frontLeftAzimuthMotor};
+
+aruwsrc::chassis::SwerveModuleConfig frontRightModuleConfig = {
+    .driveMotor = &frontRightDriveMotor,
+    .azimuthMotor = &frontRightAzimuthMotor};
+
+aruwsrc::chassis::SwerveModuleConfig backLeftModuleConfig = {
+    .driveMotor = &backLeftDriveMotor,
+    .azimuthMotor = &backLeftAzimuthMotor};
+
+aruwsrc::chassis::SwerveModuleConfig backRightModuleConfig = {
+    .driveMotor = &backRightDriveMotor,
+    .azimuthMotor = &backRightAzimuthMotor};
 
 tap::motor::DjiMotor turretMajorYawMotor(
     drivers(),
@@ -179,7 +196,12 @@ tap::motor::DjiMotor turretMajorYawMotor(
 
 /* define subsystems --------------------------------------------------------*/
 
-aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(drivers());
+aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
+    drivers(),
+    frontLeftModuleConfig,
+    frontRightModuleConfig,
+    backLeftModuleConfig,
+    backRightModuleConfig);
 
 SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYawConfig);
 
