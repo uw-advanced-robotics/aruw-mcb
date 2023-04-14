@@ -73,6 +73,8 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
+#include "sentry_turret_minor_govenor.hpp"
+
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
@@ -103,190 +105,6 @@ namespace sentry_control
 driversFunc drivers = DoNotUse_getDrivers;
 
 aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
-
-// forward declare before sentry turret to be used in turret CV command
-extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
-
-class SentryMinorTurret
-{
-public:
-    struct Config
-    {
-        aruwsrc::agitator::VelocityAgitatorSubsystemConfig agitatorConfig;
-        TurretMotorConfig pitchMotorConfig;
-        TurretMotorConfig yawMotorConfig;
-        tap::can::CanBus turretCanBus;
-        bool pitchMotorInverted;
-        uint8_t turretID;
-        RefSerialData::Rx::MechanismID turretBarrelMechanismId;
-        tap::algorithms::SmoothPidConfig pitchPidConfig;
-        tap::algorithms::SmoothPidConfig yawPidConfig;
-        tap::algorithms::SmoothPidConfig yawPosPidConfig;
-        tap::algorithms::SmoothPidConfig yawVelPidConfig;
-        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
-    };
-
-    SentryMinorTurret(Drivers &drivers, const Config &config)
-        : agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
-          frictionWheels(
-              &drivers,
-              LEFT_MOTOR_ID,
-              RIGHT_MOTOR_ID,
-              config.turretCanBus,
-              &config.turretMCBCanComm,
-              config.turretBarrelMechanismId),
-          pitchMotor(
-              &drivers,
-              aruwsrc::control::turret::PITCH_MOTOR_ID,
-              config.turretCanBus,
-              config.pitchMotorInverted,
-              "Pitch Turret"),
-          yawMotor(
-              &drivers,
-              aruwsrc::control::turret::YAW_MOTOR_ID,
-              config.turretCanBus,
-              true,
-              "Yaw Turret"),
-          turretSubsystem(
-              &drivers,
-              &pitchMotor,
-              &yawMotor,
-              config.pitchMotorConfig,
-              config.yawMotorConfig,
-              &config.turretMCBCanComm,
-              config.turretID),
-          ballisticsSolver(
-              drivers.visionCoprocessor,
-              odometrySubsystem,
-              turretSubsystem,
-              frictionWheels,
-              29.5f,  // defaultLaunchSpeed
-              config.turretID),
-          autoAimLaunchTimer(
-              aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-              &drivers.visionCoprocessor,
-              &ballisticsSolver),
-          spinFrictionWheels(
-              &drivers,
-              &frictionWheels,
-              30.0f,
-              true,
-              config.turretBarrelMechanismId),
-          stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-          chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
-          chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
-          worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
-          worldFrameYawTurretImuVelPid(config.yawVelPidConfig),
-          worldFrameYawTurretImuController(
-              config.turretMCBCanComm,
-              turretSubsystem.yawMotor,
-              worldFrameYawTurretImuPosPid,
-              worldFrameYawTurretImuVelPid),
-          turretManual(
-              &drivers,
-              drivers.controlOperatorInterface,
-              &turretSubsystem,
-              &worldFrameYawTurretImuController,
-              &chassisFramePitchTurretController,
-              USER_YAW_INPUT_SCALAR,
-              USER_PITCH_INPUT_SCALAR,
-              config.turretID),
-          turretCVCommand(
-              &drivers.visionCoprocessor,
-              &turretSubsystem,
-              &worldFrameYawTurretImuController,
-              &chassisFramePitchTurretController,
-              &ballisticsSolver,
-              config.turretID),
-          turretUturnCommand(&turretSubsystem, M_PI),
-          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
-          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
-          rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
-          frictionWheelsOnGovernor(frictionWheels),
-          heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-          cvOnTargetGovernor(
-              &drivers,
-              drivers.visionCoprocessor,
-              turretCVCommand,
-              autoAimLaunchTimer,
-              CvOnTargetGovernorMode::ON_TARGET_AND_GATED),
-          cvOnlineGovernor(drivers, drivers.visionCoprocessor, turretCVCommand),
-          autoAimFireRateManager(
-              drivers,
-              drivers.visionCoprocessor,
-              drivers.commandScheduler,
-              turretCVCommand,
-              config.turretID),
-          fireRateLimitGovernor(autoAimFireRateManager),
-          pauseCommandGovernor(
-              aruwsrc::control::agitator::constants::AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME),
-          rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline(
-              {&agitator},
-              rotateAndUnjamAgitator,
-              {&heatLimitGovernor,
-               &frictionWheelsOnGovernor,
-               &cvOnTargetGovernor,
-               &cvOnlineGovernor,
-               &fireRateLimitGovernor,
-               &pauseCommandGovernor}),
-          rotateAndUnjamAgitatorWithHeatAndCvLimiting(
-              {&agitator},
-              rotateAndUnjamAgitator,
-              {&heatLimitGovernor,
-               &frictionWheelsOnGovernor,
-               &cvOnTargetGovernor,
-               &fireRateLimitGovernor})
-    {
-    }
-
-    // subsystems
-    VelocityAgitatorSubsystem agitator;
-    RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
-    DjiMotor pitchMotor;
-    DjiMotor yawMotor;
-    SentryTurretMinorSubsystem turretSubsystem;
-
-    OttoBallisticsSolver ballisticsSolver;
-    AutoAimLaunchTimer autoAimLaunchTimer;
-
-    // friction wheel commands
-    FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
-    FrictionWheelSpinRefLimitedCommand stopFrictionWheels;
-
-    // turret controllers
-    algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController;
-    algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController;
-
-    tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
-    tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
-    algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
-
-    // turret commands
-    // limits fire rate
-    user::TurretUserControlCommand turretManual;
-
-    cv::SentryTurretCVCommand turretCVCommand;
-
-    user::TurretQuickTurnCommand turretUturnCommand;
-
-    // base agitator commands
-    MoveIntegralCommand rotateAgitator;
-    UnjamIntegralCommand unjamAgitator;
-    MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator;
-
-    // agitator related governors
-    FrictionWheelsOnGovernor frictionWheelsOnGovernor;
-    HeatLimitGovernor heatLimitGovernor;
-    CvOnTargetGovernor cvOnTargetGovernor;
-    CvOnlineGovernor cvOnlineGovernor;
-    AutoAimFireRateReselectionManager autoAimFireRateManager;
-    FireRateLimitGovernor fireRateLimitGovernor;
-    PauseCommandGovernor pauseCommandGovernor;
-
-    // agitator governor limited commands
-    GovernorLimitedCommand<6> rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline;
-    GovernorLimitedCommand<4> rotateAndUnjamAgitatorWithHeatAndCvLimiting;
-};
 
 aruwsrc::virtualMCB::VirtualDjiMotor motor1(
     drivers(),
@@ -365,7 +183,7 @@ aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(drivers());
 
 SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYawConfig);
 
-SentryMinorTurret turretZero(
+SentryMinorTurretGovenor turretZero(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG,
@@ -382,7 +200,7 @@ SentryMinorTurret turretZero(
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
-SentryMinorTurret turretOne(
+SentryMinorTurretGovenor turretOne(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG,
