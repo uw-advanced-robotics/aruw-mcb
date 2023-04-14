@@ -43,10 +43,10 @@ static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0
                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
 
-class ChassisSubsystemTest : public Test
+class HolonomicChassisSubsystemTest : public Test
 {
 protected:
-    ChassisSubsystemTest() : chassis(&drivers) {}
+    HolonomicChassisSubsystemTest() : chassis(&drivers) {}
 
     void SetUp() override
     {
@@ -59,105 +59,20 @@ protected:
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
-TEST_F(ChassisSubsystemTest, getDesiredRotation_returns_desired_rotation)
-{
-    chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
-    EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, setZeroRPM_doesnt_reset_desired_velocity)
-{
-    chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
-    chassis.setZeroRPM();
-    EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
-    modm::Matrix<float, 3, 1> desiredVelocity = chassis.getDesiredVelocityChassisRelative();
-    EXPECT_NEAR(0, desiredVelocity[2][0], 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, allMotorsOnline)
-{
-    bool lfOnline, lbOnline, rfOnline, rbOnline;
-    ON_CALL(chassis.leftFrontMotor, isMotorOnline).WillByDefault(ReturnPointee(&lfOnline));
-    ON_CALL(chassis.leftBackMotor, isMotorOnline).WillByDefault(ReturnPointee(&lbOnline));
-    ON_CALL(chassis.rightFrontMotor, isMotorOnline).WillByDefault(ReturnPointee(&rfOnline));
-    ON_CALL(chassis.rightBackMotor, isMotorOnline).WillByDefault(ReturnPointee(&rbOnline));
-
-    for (int i = 0; i < 0xf; i++)
-    {
-        lfOnline = i & 1;
-        lbOnline = (i >> 1) & 1;
-        rfOnline = (i >> 2) & 1;
-        rbOnline = (i >> 3) & 1;
-
-        EXPECT_FALSE(chassis.allMotorsOnline());
-    }
-
-    lfOnline = true;
-    lbOnline = true;
-    rfOnline = true;
-    rbOnline = true;
-
-    EXPECT_TRUE(chassis.allMotorsOnline());
-}
-
-TEST_F(ChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
-{
-    chassis.setDesiredOutput(1000, 1000, 1000);
-    chassis.onHardwareTestStart();
-
-    Matrix<float, 3, 1> chassiSVelocity = chassis.getDesiredVelocityChassisRelative();
-
-    EXPECT_NEAR(0, chassiSVelocity[0][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[1][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[2][0], 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, getLeftFrontRpmActual)
-{
-    ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftFrontRpmActual(), 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, getLeftBackRpmActual)
-{
-    ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftBackRpmActual(), 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, getRightFrontRpmActual)
-{
-    ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightFrontRpmActual(), 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, getRightBackRpmActual)
-{
-    ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightBackRpmActual(), 1E-3);
-}
-
-TEST_F(ChassisSubsystemTest, initialize)
-{
-    EXPECT_CALL(chassis.leftFrontMotor, initialize);
-    EXPECT_CALL(chassis.leftBackMotor, initialize);
-    EXPECT_CALL(chassis.rightFrontMotor, initialize);
-    EXPECT_CALL(chassis.rightBackMotor, initialize);
-
-    chassis.initialize();
-}
-
-TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_0_rotation)
+TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_0_rotation)  // holonomic
 {
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(0), 1E-3);
 }
 
-TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_almost_0_rotation)
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_almost_0_rotation)  // holonomic
 {
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(MIN_ROTATION_THRESHOLD), 1E-3);
     EXPECT_NEAR(1, chassis.calculateRotationTranslationalGain(-MIN_ROTATION_THRESHOLD), 1E-3);
 }
 
-TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)
+TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
         powf(MIN_ROTATION_THRESHOLD / CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second, 2.0f),
@@ -165,7 +80,9 @@ TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)
         1E-3);
 }
 
-TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_gt_max_velocity)
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_gt_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
         0,
@@ -176,7 +93,7 @@ TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_gt_max_velocity)
 
 // See the googletest cookbook for how MATCHER_P2 works
 // http://google.github.io/googletest/gmock_cook_book.html
-MATCHER_P2(
+MATCHER_P2(  // holonomic
     InClosedRange,
     low,
     hi,
@@ -186,14 +103,16 @@ MATCHER_P2(
     return low <= arg && arg <= hi;
 }
 
-TEST_F(ChassisSubsystemTest, calculateRotationTranslationalGain_half_rotation)
+TEST_F(
+    HolonomicChassisSubsystemTest,
+    calculateRotationTranslationalGain_half_rotation)  // holonomic
 {
     EXPECT_THAT(
         chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 2),
         InClosedRange(0.0f, 1.0f));
 }
 
-TEST_F(ChassisSubsystemTest, chassisSpeedRotationPID_basic_validation)
+TEST_F(HolonomicChassisSubsystemTest, chassisSpeedRotationPID_basic_validation)  // holonomic
 {
     EXPECT_NEAR(0, chassis.chassisSpeedRotationPID(0, 0), 1E-3);
     EXPECT_GT(chassis.chassisSpeedRotationPID(1000 * getSign(AUTOROTATION_PID_KP), 0), 0);
@@ -212,7 +131,7 @@ struct VelocityGetterParam
     float worldRelHeading;
 };
 
-class VelocityGetterTest : public ChassisSubsystemTest,
+class VelocityGetterTest : public HolonomicChassisSubsystemTest,
                            public WithParamInterface<VelocityGetterParam>
 {
 };
@@ -327,13 +246,13 @@ struct ActualVelocityParam
     float expectedX, expectedY, expectedR;
 };
 
-class ActualVelocityTest : public ChassisSubsystemTest,
+class ActualVelocityTest : public HolonomicChassisSubsystemTest,
                            public WithParamInterface<ActualVelocityParam>
 {
 public:
     void SetUp() override
     {
-        ChassisSubsystemTest::SetUp();
+        HolonomicChassisSubsystemTest::SetUp();
 
         ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(GetParam().lfRPM));
         ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(GetParam().lbRPM));
