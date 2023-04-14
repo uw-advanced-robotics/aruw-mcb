@@ -27,11 +27,10 @@ namespace aruwsrc::control::turret
 /**
  * Turret superstructure subsystem for the Sentry.
  */
-class SentrySuperstructureSubsystem final : public tap::control::Subsystem
+class SentrySuperstructureSubsystem
 {
 public:
-    SentrySuperstructureSubsystem(
-        
-    )
-}
-}
+    SentrySuperstructureSubsystem();
+};
+}  // namespace aruwsrc::control::turret
+#endif

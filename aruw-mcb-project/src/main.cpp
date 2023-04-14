@@ -101,10 +101,6 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
-#ifdef ALL_STANDARDS
-            PROFILE(drivers->profiler, ((Drivers *)drivers)->virtualMCBHandler.sendData, ());
-#endif
-
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
@@ -121,11 +117,9 @@ int main()
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
 #endif
-
         }
         modm::delay_us(10);
     }
@@ -146,12 +140,8 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-    #if defined(TARGET_SENTRY_BEEHIVE)
-        ((Drivers *) drivers)->mcbLite.initialize();
-    #endif
-
-#ifdef ALL_STANDARDS
-    ((Drivers *)drivers)->virtualMCBHandler.initialize();
+#if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->mcbLite.initialize();
 #endif
 
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
@@ -168,16 +158,14 @@ static void updateIo(tap::Drivers *drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-    #if defined(TARGET_SENTRY_BEEHIVE)
-    ((Drivers *) drivers)->mcbLite.updateSerial();
-    #endif
 
-
+#if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->mcbLite.updateSerial();
+#endif
 
 #ifdef ALL_STANDARDS
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
-    ((Drivers *)drivers)->virtualMCBHandler.updateSerial();
 #endif
 #ifdef TARGET_HERO_CYCLONE
     ((Drivers *)drivers)->oledDisplay.updateDisplay();

@@ -48,6 +48,8 @@ public:
 
 private:
     uint8_t turretID;
+    algorithms::ChassisFramePitchTurretController pitchController;
+    algorithms::ChassisFrameYawTurretController yawController;
 
 };  // class SentryTurretMinorSubsystem
 
