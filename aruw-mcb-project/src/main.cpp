@@ -120,6 +120,12 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
+
+
+#if defined(TARGET_SENTRY_BEEHIVE)
+            PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
+#endif
+
         }
         modm::delay_us(10);
     }
@@ -141,7 +147,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
     #if defined(TARGET_SENTRY_BEEHIVE)
-    ((Drivers *) drivers)->mcbLite.initialize()
+        ((Drivers *) drivers)->mcbLite.initialize();
     #endif
 
 #ifdef ALL_STANDARDS
@@ -163,7 +169,7 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
     #if defined(TARGET_SENTRY_BEEHIVE)
-    ((Drivers *) drivers)->mcbLite.initialize()
+    ((Drivers *) drivers)->mcbLite.updateSerial();
     #endif
 
 

@@ -19,6 +19,7 @@
 
 #if defined(TARGET_SENTRY_BEEHIVE)
 #include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 
 
 #include "tap/control/command_mapper.hpp"
@@ -87,62 +88,7 @@ using namespace aruwsrc::sentry;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+namespace sentry_control {
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -152,8 +98,119 @@ using namespace aruwsrc::sentry;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace sentry_control
-{
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 1");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 2");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 3");
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 4");
+
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 5");
+
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 6");
+
+
+aruwsrc::virtualMCB::VirtualDjiMotor motor(
+    drivers(),
+    MOTOR1,
+    CAN_BUS1,
+    &(drivers()->mcbLite),
+    false,
+    "swerve virtual motor 7");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::B;
 static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 

@@ -25,7 +25,7 @@
 namespace aruwsrc::control::turret
 {
 /**
- * Turret subsystem for the Sentry.
+ * Turret minor subsystem for the Sentry.
  */
 class SentryTurretMinorSubsystem final : public RobotTurretSubsystem
 {
