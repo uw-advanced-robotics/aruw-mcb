@@ -18,6 +18,8 @@
  */
 
 #if defined(TARGET_SENTRY_BEEHIVE)
+#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -62,7 +64,7 @@
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -81,6 +83,66 @@ using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 using namespace aruwsrc::sentry;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -237,7 +299,7 @@ public:
     RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
-    SentryTurretMinorSubsystem turretSubsystem;
+    SentryTurretSubsystem turretSubsystem;
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;

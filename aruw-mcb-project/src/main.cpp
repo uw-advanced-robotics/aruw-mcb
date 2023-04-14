@@ -136,6 +136,9 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+    #if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *) drivers)->mcbLite.initialize()
+    #endif
 
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
@@ -151,6 +154,11 @@ static void updateIo(tap::Drivers *drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
+    #if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *) drivers)->mcbLite.initialize()
+    #endif
+
+
 
 #ifdef ALL_STANDARDS
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
