@@ -34,11 +34,12 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
+using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
 #else
 #include "tap/motor/dji_motor.hpp"
+using Motor = tap::motor::DjiMotor;
 #endif
 
-using Motor = tap::motor::DjiMotor;
 using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
@@ -128,16 +129,14 @@ public:
 
     const Wheel wheel;
 
-// motors
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::DjiMotorMock> driveMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> azimuthMotor;
-
+    testing::NiceMock<tap::mock::DjiMotorMock>* driveMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock>* azimuthMotor;
 private:
 #else
 private:
-    Motor driveMotor;
-    Motor azimuthMotor;
+    tap::motor::DjiMotor* driveMotor;
+    tap::motor::DjiMotor* azimuthMotor;
 #endif
 
     /**
