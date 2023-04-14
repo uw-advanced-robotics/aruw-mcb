@@ -19,6 +19,7 @@ from SCons.Script import *
 
 from .parse_args import USAGE
 
+#this is a comment
 VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
                         "STANDARD_ELSA",
                         "STANDARD_SPIDER",
