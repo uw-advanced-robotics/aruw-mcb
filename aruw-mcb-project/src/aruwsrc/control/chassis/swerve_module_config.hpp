@@ -24,6 +24,12 @@
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "tap/mock/dji_motor_mock.hpp"
+#else
+#include "tap/motor/dji_motor.hpp"
+#endif
+
 namespace aruwsrc::chassis
 {
 struct SwerveModuleConfig
@@ -36,6 +42,14 @@ struct SwerveModuleConfig
 
     tap::motor::MotorId driveMotorId = tap::motor::MOTOR1;
     tap::motor::MotorId azimuthMotorId = tap::motor::MOTOR5;
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<tap::mock::DjiMotorMock>* driveMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock>* azimuthMotor;
+#else
+    tap::motor::DjiMotor* driveMotor;
+    tap::motor::DjiMotor* azimuthMotor;
+#endif
 
     // in meters, measured from center
     float positionWithinChassisX = 0.2f;

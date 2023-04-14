@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -31,10 +32,15 @@ using tap::algorithms::getSign;
 using namespace aruwsrc::chassis;
 using namespace testing;
 
+
 class SwerveModuleTest : public Test
 {
 protected:
-    SwerveModuleTest() : module(&drivers) {}
+    SwerveModuleTest()
+    : driveMock(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "drive mock"),
+    azimuthMock(&drivers, tap::motor::MOTOR5, CAN_BUS_MOTORS, false, "azimuth mock"),
+    module(&drivers, TEST_SWERVE_CONFIG)
+    {}
 
     void SetUp() override
     {
@@ -43,47 +49,54 @@ protected:
     }
 
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> driveMock;
+    NiceMock<tap::mock::DjiMotorMock> azimuthMock;
     SwerveModule module;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+
+    SwerveModuleConfig TEST_SWERVE_CONFIG = {
+        &driveMock,
+        &azimuthMock
+    };
 };
 
 TEST_F(SwerveModuleTest, allMotorsOnline)
 {
     bool driveOnline, azimuthOnline;
-    ON_CALL(module.driveMotor, isMotorOnline).WillByDefault(ReturnPointee(&driveOnline));
-    ON_CALL(module.azimuthMotor, isMotorOnline).WillByDefault(ReturnPointee(&azimuthOnline));
+    ON_CALL(module->driveMotor, isMotorOnline).WillByDefault(ReturnPointee(&driveOnline));
+    ON_CALL(module->azimuthMotor, isMotorOnline).WillByDefault(ReturnPointee(&azimuthOnline));
 
     for (int i = 0; i < 0x3; i++)
     {
         driveOnline = i & 1;
         azimuthOnline = (i >> 1) & 1;
 
-        EXPECT_FALSE(module.allMotorsOnline());
+        EXPECT_FALSE(module->allMotorsOnline());
     }
 
     driveOnline = true;
     azimuthOnline = true;
 
-    EXPECT_TRUE(module.allMotorsOnline());
+    EXPECT_TRUE(module->allMotorsOnline());
 }
 
 TEST_F(SwerveModuleTest, initialize)
 {
-    EXPECT_CALL(module.driveMotor, initialize);
-    EXPECT_CALL(module.azimuthMotor, initialize);
+    EXPECT_CALL(module->driveMotor, initialize);
+    EXPECT_CALL(module->azimuthMotor, initialize);
 
     module.initialize();
 }
 
 TEST_F(SwerveModuleTest, getAngle)
 {
-    ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
+    ON_CALL(module->azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);
 }
 
 TEST_F(SwerveModuleTest, getDriveVelocity)
 {
-    ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(0));
+    ON_CALL(module->driveMotor, getShaftRPM).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
 }
 
