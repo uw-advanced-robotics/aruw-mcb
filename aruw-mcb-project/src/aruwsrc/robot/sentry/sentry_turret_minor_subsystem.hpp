@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_TURRET_SUBSYSTEM_HPP_
-#define SENTRY_TURRET_SUBSYSTEM_HPP_
+#ifndef SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
+#define SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
@@ -27,10 +27,10 @@ namespace aruwsrc::control::turret
 /**
  * Turret subsystem for the Sentry.
  */
-class SentryTurretSubsystem final : public RobotTurretSubsystem
+class SentryTurretMinorSubsystem final : public RobotTurretSubsystem
 {
 public:
-    SentryTurretSubsystem(
+    SentryTurretMinorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
@@ -46,8 +46,8 @@ public:
 
 private:
     uint8_t turretID;
-};  // class SentryTurretSubsystem
+};  // class SentryTurretMinorSubsystem
 
 }  // namespace aruwsrc::control::turret
 
-#endif  // SENTRY_TURRET_SUBSYSTEM_HPP_
+#endif  // SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
