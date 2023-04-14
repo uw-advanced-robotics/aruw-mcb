@@ -20,8 +20,8 @@
 #ifndef SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 #define SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -48,6 +48,7 @@ public:
 
 private:
     uint8_t turretID;
+
 };  // class SentryTurretMinorSubsystem
 
 }  // namespace aruwsrc::control::turret

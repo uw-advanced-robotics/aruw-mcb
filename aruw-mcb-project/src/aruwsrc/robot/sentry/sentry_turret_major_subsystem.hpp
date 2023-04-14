@@ -39,8 +39,7 @@ public:
     SentryTurretMajorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* yawMotor,
-        const TurretMotorConfig& yawMotorConfig,
-        uint8_t turretID);
+        const TurretMotorConfig& yawMotorConfig);
 
     /**
      * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
@@ -56,7 +55,6 @@ public:
 private:
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
-    uint8_t turretID;
 
 };  // class SentryTurretMajorSubsystem
 

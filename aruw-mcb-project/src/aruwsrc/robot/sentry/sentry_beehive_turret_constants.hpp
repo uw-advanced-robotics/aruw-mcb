@@ -38,8 +38,49 @@ namespace aruwsrc::control::turret
 {
 
 chassis::SwerveModuleConfig frontMotorConfig = {
-    .positionWithinChassisX = 0.205;
-}
+    .positionWithinChassisX = 0.205,
+    .positionWithinChassisY = 0,
+};
+
+chassis::SwerveModuleConfig backMotorConfig = {
+    .positionWithinChassisX = -0.205,
+    .positionWithinChassisY = 0.0,
+};
+
+chassis::SwerveModuleConfig leftMotorConfig = {
+    .positionWithinChassisX = 0.0,
+    .positionWithinChassisY = -0.205,
+};
+
+chassis::SwerveModuleConfig rightMotorConfig = {
+    .positionWithinChassisX = 0.205,
+    .positionWithinChassisY = 0.0,
+};
+
+static constexpr TurretMotorConfig majorYawConfig = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 1363,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = false,
+};
+
+
+static constexpr TurretMotorConfig MINOR_YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
+};
+
+static constexpr TurretMotorConfig MINOR_PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 0,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = true,
+};
 
 
 

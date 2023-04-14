@@ -26,11 +26,9 @@ namespace aruwsrc::control::turret
 SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* yawMotor,
-    const TurretMotorConfig& yawMotorConfig,
-    uint8_t turretID)
+    const TurretMotorConfig& yawMotorConfig)
     : Subsystem(drivers),
-      yawMotor(yawMotor, yawMotorConfig),
-      turretID(turretID)
+      yawMotor(yawMotor, yawMotorConfig)
 {
 }
 

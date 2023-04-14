@@ -20,6 +20,8 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 #include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 
 #include "tap/control/command_mapper.hpp"
@@ -97,7 +99,7 @@ namespace sentry_control {
 driversFunc drivers = DoNotUse_getDrivers;
 
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor1(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -105,7 +107,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 1");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor2(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -113,7 +115,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 2");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor3(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -121,7 +123,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 3");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor4(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -129,7 +131,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 4");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor5(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -137,7 +139,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 5");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor6(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -145,7 +147,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 6");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor7(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -153,7 +155,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
     false,
     "swerve virtual motor 7");
 
-aruwsrc::virtualMCB::VirtualDjiMotor motor(
+aruwsrc::virtualMCB::VirtualDjiMotor motor8(
     drivers(),
     MOTOR1,
     CAN_BUS1,
@@ -164,23 +166,70 @@ aruwsrc::virtualMCB::VirtualDjiMotor motor(
 
 
 
-
-
-
 chassis::SwerveChassisSubsystem swassis(
-    
+
 );
 
 
+tap::motor::DjiMotor turretMajorYawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Major Yaw Turret");
+
+SentryTurretMajorSubsystem turretMajor(
+    drivers(),
+    &turretMajorYawMotor,
+    majorYawConfig);
 
 
+tap::motor::DjiMotor turretMinor1PitchMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Minor Pitch Turret"
+);
 
+tap::motor::DjiMotor turretMinor1YawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Minor Yaw Turret"
+);
 
+SentryTurretMinorSubsystem turretMinor1(
+    drivers(),
+    &turretMinor1PitchMotor,
+    &turretMinor1YawMotor,
+    MINOR_PITCH_MOTOR_CONFIG,
+    MINOR_YAW_MOTOR_CONFIG
+);
 
+tap::motor::DjiMotor turretMinor2PitchMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Minor Pitch Turret"
+);
 
+tap::motor::DjiMotor turretMinor2YawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Minor Yaw Turret"
+);
 
-
-
+SentryTurretMinorSubsystem turretMinor2(
+    drivers(),
+    &turretMinorPitchMotor,
+    &turretMinorYawMotor,
+    config.
+);
 
 
 
