@@ -37,7 +37,8 @@ enum MessageTypes : uint8_t
     CANBUS1_MESSAGE = 0,
     CANBUS2_MESSAGE = 1,
     IMU_MESSAGE = 2,
-    GPIO_MESSAGE = 3
+    GPIO_MESSAGE = 3,
+    CALIBRATE_IMU = 4
 };
 
 struct IMUMessage
@@ -63,8 +64,6 @@ class VirtualMCBHandler : public tap::communication::serial::DJISerial
 public:
     VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
-    void refresh();
-
     bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
 
     IMUMessage& getIMUMessage();
@@ -72,6 +71,10 @@ public:
     CurrentSensorMessage& getCurrentSensorMessage();
 
     void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
+
+    void sendData();
+
+    void calibrateIMU();
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
@@ -83,13 +86,14 @@ private:
 
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
-    void updateMotorTx();
-
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
 
     CurrentSensorMessage currentCurrentSensorData;
+
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<0> calibrateIMUMessage;
+    bool sendIMUCalibrationMessage = false;
 };
 
 }  // namespace aruwsrc::virtualMCB

@@ -81,27 +81,27 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
 
     if (can1ValidMotorMessageLow)
     {
-        memcpy(can1MessageLowSend->data, &can1MessageLow, sizeof(modm::can::Message));
-        can1MessageLowSend->messageType = 0;
-        can1MessageLowSend->setCRC16();
+        memcpy(can1MessageLowSend.data, &can1MessageLow, sizeof(modm::can::Message));
+        can1MessageLowSend.messageType = 0;
+        can1MessageLowSend.setCRC16();
     }
     if (can1ValidMotorMessageHigh)
     {
-        memcpy(can1MessageHighSend->data, &can1MessageHigh, sizeof(modm::can::Message));
-        can1MessageHighSend->messageType = 0;
-        can1MessageHighSend->setCRC16();
+        memcpy(can1MessageHighSend.data, &can1MessageHigh, sizeof(modm::can::Message));
+        can1MessageHighSend.messageType = 0;
+        can1MessageHighSend.setCRC16();
     }
     if (can2ValidMotorMessageLow)
     {
-        memcpy(can2MessageLowSend->data, &can2MessageLow, sizeof(modm::can::Message));
-        can2MessageLowSend->messageType = 1;
-        can2MessageLowSend->setCRC16();
+        memcpy(can2MessageLowSend.data, &can2MessageLow, sizeof(modm::can::Message));
+        can2MessageLowSend.messageType = 1;
+        can2MessageLowSend.setCRC16();
     }
     if (can2ValidMotorMessageHigh)
     {
-        memcpy(can2MessageHighSend->data, &can2MessageHigh, sizeof(modm::can::Message));
-        can2MessageHighSend->messageType = 1;
-        can2MessageHighSend->setCRC16();
+        memcpy(can2MessageHighSend.data, &can2MessageHigh, sizeof(modm::can::Message));
+        can2MessageHighSend.messageType = 1;
+        can2MessageHighSend.setCRC16();
     }
 }
 
