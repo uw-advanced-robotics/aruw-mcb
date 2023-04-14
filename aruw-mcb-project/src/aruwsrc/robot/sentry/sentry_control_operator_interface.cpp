@@ -18,9 +18,11 @@
  */
 
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-#include "tap/architecture/clock.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/clock.hpp"
+
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::serial;
@@ -29,23 +31,22 @@ namespace aruwsrc
 {
 namespace control::sentry
 {
-
- bool SentryControlOperatorInterface::isAutoDriveMode() 
- {
+bool SentryControlOperatorInterface::isAutoDriveMode()
+{
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
- }
+}
 
-bool SentryControlOperatorInterface::isTurretControlMode() 
- {
+bool SentryControlOperatorInterface::isTurretControlMode()
+{
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID;
- }
+}
 
-bool SentryControlOperatorInterface::isDriveMode() 
- {
+bool SentryControlOperatorInterface::isDriveMode()
+{
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN;
- }
+}
 
- /**
+/**
  * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
  * increment based on the passed in acceleration values. Ramp stores values in some units.
  * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
@@ -72,9 +73,9 @@ static inline void applyAccelerationToRamp(
 }
 
 float SentryControlOperatorInterface::getChassisXVelocity()
-{      
+{
     if (!isDriveMode()) return DEFAULT_CHASSIS_X_VELOCITY;
-    
+
     // Set dt and previous time
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -91,10 +92,10 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
-    float finalX = maxChassisSpeed *
-                   limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+    float finalX =
+        maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
-    chassisXInputRamp.setTarget(finalX); 
+    chassisXInputRamp.setTarget(finalX);
 
     applyAccelerationToRamp(
         chassisXInputRamp,
@@ -116,7 +117,9 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     if (prevUpdateCounterChassisYInput != updateCounter)
     {
-        chassisXInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
+        chassisXInput.update(
+            drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+            currTime);
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
@@ -124,10 +127,10 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
-    float finalY = maxChassisSpeed *
-                   limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+    float finalY =
+        maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
-    chassisYInputRamp.setTarget(finalY); 
+    chassisYInputRamp.setTarget(finalY);
 
     applyAccelerationToRamp(
         chassisYInputRamp,
@@ -137,9 +140,10 @@ float SentryControlOperatorInterface::getChassisYVelocity()
     return chassisYInputRamp.getValue();
 }
 
-float SentryControlOperatorInterface::getChassisYawVelocity() {
+float SentryControlOperatorInterface::getChassisYawVelocity()
+{
     if (!isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
-    
+
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevChassisYawnputCalledTime;
@@ -152,11 +156,11 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
             currTime);
         prevUpdateCounterChassisYawInput = updateCounter;
     }
-    
+
     const float maxChassisYawSpeed = MAX_TURRET_MAJOR_YAW_SPEED;
 
-    float finalR = maxChassisYawSpeed *
-                   limitVal(chassisYawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+    float finalR =
+        maxChassisYawSpeed * limitVal(chassisYawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
     chassisYawInputRamp.setTarget(finalR);
 
@@ -166,13 +170,13 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
         MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
-    return chassisYawInputRamp.getValue(); 
+    return chassisYawInputRamp.getValue();
 }
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 {
     if (!isTurretControlMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
-    
+
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTurretMajorYawInputCalledTime;
@@ -180,12 +184,10 @@ float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 
     if (prevUpdateCounterTurretMajorYawInput != updateCounter)
     {
-        turretMajorYawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::WHEEL),
-            currTime);
+        turretMajorYawInput.update(-drivers->remote.getChannel(Remote::Channel::WHEEL), currTime);
         prevUpdateCounterTurretMajorYawInput = updateCounter;
     }
-    
+
     const float maxTurretMajorYawSpeed = MAX_TURRET_MAJOR_YAW_SPEED;
 
     float finalR = maxTurretMajorYawSpeed *
@@ -205,7 +207,7 @@ float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
-    
+
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTurretMinor1YawInputCalledTime;
@@ -218,11 +220,11 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
             currTime);
         prevUpdateCounterTurretMinor1YawInput = updateCounter;
     }
-    
+
     const float maxTurretMinor1YawSpeed = MAX_TURRET1_MINOR_YAW_SPEED;
 
     float finalYaw = maxTurretMinor1YawSpeed *
-                   limitVal(turretMinor1YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+                     limitVal(turretMinor1YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
     turretMinor1YawRamp.setTarget(finalYaw);
 
@@ -238,7 +240,7 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
-    
+
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTurretMinor1PitchInputCalledTime;
@@ -251,11 +253,11 @@ float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
             currTime);
         prevUpdateCounterTurretMinor1PitchInput = updateCounter;
     }
-    
+
     const float maxTurretMinor1PitchSpeed = MAX_TURRET1_MINOR_PITCH_SPEED;
 
     float finalPitch = maxTurretMinor1PitchSpeed *
-                   limitVal(turretMinor1PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+                       limitVal(turretMinor1PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
     turretMinor1PitchRamp.setTarget(finalPitch);
 
@@ -271,7 +273,7 @@ float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
-    
+
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevTurretMinor2YawInputCalledTime;
@@ -284,11 +286,11 @@ float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
             currTime);
         prevUpdateCounterTurretMinor2YawInput = updateCounter;
     }
-    
+
     const float maxTurretMinor2YawSpeed = MAX_TURRET2_MINOR_YAW_SPEED;
 
     float finalYaw = maxTurretMinor2YawSpeed *
-                   limitVal(turretMinor2YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+                     limitVal(turretMinor2YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
     turretMinor2YawRamp.setTarget(finalYaw);
 
@@ -303,7 +305,7 @@ float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
 
 float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
 {
-    if (!isTurretControlMode()) return 0.f; 
+    if (!isTurretControlMode()) return 0.f;
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -317,11 +319,11 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
             currTime);
         prevUpdateCounterTurretMinor2PitchInput = updateCounter;
     }
-    
+
     const float maxTurretMinor2PitchSpeed = MAX_TURRET2_MINOR_PITCH_SPEED;
 
     float finalPitch = maxTurretMinor2PitchSpeed *
-                   limitVal(turretMinor2PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+                       limitVal(turretMinor2PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
     turretMinor1PitchRamp.setTarget(finalPitch);
 
@@ -334,6 +336,5 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
     return turretMinor1PitchRamp.getValue();
 }
 
-
-} // namespace aruwsrc::control::sentry
-} // namespace aruwsrc
+}  // namespace control::sentry
+}  // namespace aruwsrc
