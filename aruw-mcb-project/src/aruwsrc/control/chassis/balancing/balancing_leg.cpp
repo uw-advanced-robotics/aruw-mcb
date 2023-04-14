@@ -71,31 +71,24 @@ void BalancingLeg::update()
         fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
-    //    u = -kx LQR control law
+    xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
 
-    float desiredx =
-        -(LQR_K11 * chassisAngle + LQR_K12 * chassisAngledot + LQR_K13 * realWheelSpeed);
-    desiredx = tap::algorithms::limitVal(0.01f * desiredx, -.5f, .5f);
-    desiredWheelLocation.setX(desiredx);
+    float desiredx = cos(chassisAngle) * xoffset + sin(chassisAngle) * zDesired;
+    float desiredz = -sin(chassisAngle) * xoffset + cos(chassisAngle) * zDesired;
 
-    xdes = desiredx;
+    desiredWheelLocation.setX(tap::algorithms::limitVal(desiredx, -.1f, .1f));
+    desiredWheelLocation.setY(tap::algorithms::limitVal(desiredz, -.35f, -.15f));
 
-    // desiredWheelSpeed -=
+    desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-(tl + chassisAngle), dt);
 
-    float driveWheelSpeedError =
-        desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed -
-        chassisAngledot * (fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
-                           fivebar->getCurrentPosition().getY() * cos(chassisAngle));
-    iwdes = -(LQR_K31 * chassisAngle + LQR_K32 * chassisAngledot + LQR_K33 * realWheelSpeed);
-    // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
-    iwdes = tap::algorithms::limitVal(
-        (16000.0f / 20.0f) * iwdes * 0.01f,
-        -5000.0f,
-        5000.0f);
-    // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
+    float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
+
+    float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
+
+    driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
     // 3. Send New Output Values
-    driveWheel->setDesiredOutput(iwdes);
+    driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
     fiveBarController(dt);
@@ -134,7 +127,8 @@ void BalancingLeg::fiveBarController(uint32_t dt)
 
 void BalancingLeg::computeState(uint32_t dt)
 {
-    zCurrent = fivebar->getCurrentPosition().getY();
+    zCurrent = fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
+               fivebar->getCurrentPosition().getY() * cos(chassisAngle);
     tl = atan2(-fivebar->getCurrentPosition().getX(), -zCurrent);
     tl_dot = 1000 * (tl - tl_prev) / dt;  // ms to s
     tl_prev = tl;

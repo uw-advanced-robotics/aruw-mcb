@@ -34,6 +34,8 @@ namespace chassis
 /** When the turret yaw setpoint and measured value is < M_PI - this value, autorotation will be
  * paused until the difference is within this value again. */
 static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = modm::toRadian(1.0f);
+
+static constexpr uint32_t LAZY_ROTATION_TIMEOUT_MS = 500;
 /**
  * Various modes for autorotation. Strict means autorotation is executed immediately. Lazy means a
  * timeout runs between when desired rotation ends and autorotation begins. Keep chassis angle only
@@ -69,8 +71,6 @@ public:
 
     bool isFinished() const override;
 
-    void updateAutorotateState();
-
     void setShooterState(AutorotationMode mode)
     {
         if (mode < NUM_AUTOROTATION_STATES)
@@ -80,18 +80,26 @@ public:
     }
 
 private:
-    void plotPath();
+    float plotPath(float turretAngleFromCenter);
+    void updateAutorotateState();
+    float getAutorotationSetpoint(float turretAngleFromCenter);
+    void runRotationController(float chassisRotationSetpoint, float dt);
 
     tap::Drivers* drivers;
     BalancingChassisSubsystem* chassis;
     control::ControlOperatorInterface& operatorInterface;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
 
+    tap::arch::MilliTimeout lazyTimeout = tap::arch::MilliTimeout(LAZY_ROTATION_TIMEOUT_MS);
+
     uint32_t prevTime = 0;
 
-    modm::Vector2f desiredTurretRelativeTranslation;
-
     AutorotationMode autorotationMode = STRICT_PLATE_FORWARD;
+
+    modm::Vector2f motionDesiredTurretRelative;
+
+    const float maxAngleFromCenter = M_PI_2;
+    // 180 degree symmetry guaranteed for balacing standards as of 2023
 
     /** Autorotation setpoint, smoothed using a low pass filter. */
     float desiredRotationAverage = 0;
@@ -104,6 +112,12 @@ private:
      * reason to autorotate until the turret is done turning around.
      */
     bool chassisAutorotating;
+
+    /**
+     * `true` if the chassis's rotation is being used for motion planning. Rotation of the chassis
+     * for motion planning superceeds rotation of the chassis for autorotation.
+     */
+    bool chassisMotionPlanning;
 
     /**
      * Computes the setpoint to autorotate the chassis towards

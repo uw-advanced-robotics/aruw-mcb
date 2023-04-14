@@ -97,42 +97,67 @@ private:
 
     tap::algorithms::SmoothPid driveWheelPid;
 
+    /**
+     * PID which relates desired x velocity to x positional offset of the wheel which drives x
+     * acceleration through the plant. PID loop is essentially used to smoothly move x.
+     * output units are m
+     *
+     */
     tap::algorithms::SmoothPidConfig xPidConfig{
-        .kp = .001,
-        .ki = 0,
+        .kp = .0001,
+        .ki = 0.001,
         .kd = 0,
+        .maxICumulative = .1,
         .maxOutput = .03,
     };
     tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
 
+    tap::algorithms::SmoothPidConfig thetaLPidConfig{
+        .kp = 100,
+        .ki = 0,
+        .kd = 0,
+        .maxOutput = 10,
+    };
+
+    tap::algorithms::SmoothPid thetaLPid = tap::algorithms::SmoothPid(thetaLPidConfig);
+
     uint32_t prevTime = 0;
-    float wheelPosPrev = 0;
-    float tl_prev = 0;
+
+    // debugging variables for when I'm too much of a bitch to turn the robot on
     float xdes = 0;
     float iwdes = 0;
-
-    float zDesired,  // m
-        vDesired,    // m/s
-        zCurrent,    // m
-        vCurrent,    // m/s
-        vCurrentPrev,
-        chassisAngle,  // rad
-        chassisAnglePrev,
-        chassisAngledot,     // rad/s
-        motorLinkAnglePrev,  // rad
-        tl,                  // rad
-        tl_dot,
-        tl_dotPrev;  // rad/s
-    float realWheelSpeed;
-    float aCurrentPrev;
-    float aCurrent;
-    float aDesired;
-    float aDesiredPrev;
-    float xoffset;
-    float xoffsetPrev;
-
     float debug1;
     float debug2;
+
+    float zDesired,  // m, world-frame height
+        zCurrent;    // m
+
+    float vDesired;      // m/s, world-frame leg speed in x-direction
+    float vCurrent;      // m/s
+    float vCurrentPrev;  // m/s
+
+    float chassisAngle,     // rad, with positive = pitch down
+        chassisAnglePrev;   // rad
+    float chassisAngledot;  // rad/s, see chassisAngle
+
+    float motorLinkAnglePrev;  // rad, angle of the link that the wheel motor is attached to for
+                               // offsetting
+
+    float tl,        // rad, angle of the metaphyiscal pendulum
+        tl_prev,     // rad
+        tl_dot,      // rad/s
+        tl_dotPrev;  // rad/s
+
+    float realWheelSpeed;    // rad/s, rotation of wheel, +rotation = forward motion
+    float wheelPosPrev = 0;  // rad, just used to compute the wheel's speed
+
+    float aCurrent,    // m/s/s, rate of change of vCurrent
+        aCurrentPrev,  // m/s/s
+        aDesired,      // m/s/s
+        aDesiredPrev;  // m/s/s
+
+    float xoffset,  // m, x-offset used to drive linear acceleration
+        xoffsetPrev;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

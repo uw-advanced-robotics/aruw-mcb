@@ -48,7 +48,11 @@ void BalancingChassisAutorotateCommand::initialize()
 void BalancingChassisAutorotateCommand::updateAutorotateState()
 {
     float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
-
+    if (!tap::algorithms::compareFloatClose(motionDesiredTurretRelative.getLength(), 0, 1))
+    {
+        chassisMotionPlanning = true;
+        return;
+    }
     if (chassisAutorotating && !yawMotor->getConfig().limitMotorAngles &&
         turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
@@ -60,7 +64,21 @@ void BalancingChassisAutorotateCommand::updateAutorotateState()
         turretYawActualSetpointDiff < TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION)
     {
         // Once the turret setpoint/target have reached each other, start turning again
-        chassisAutorotating = true;
+
+        // see mode descriptions for why this makes sense
+        if (autorotationMode == KEEP_CHASSIS_ANGLE)
+        {
+            chassisAutorotating = false;
+        }
+        else if (
+            autorotationMode == STRICT_PLATE_FORWARD || autorotationMode == STRICT_SIDE_FORWARD)
+        {
+            chassisAutorotating = true;
+        }
+        else if (!lazyTimeout.isExpired())
+        {
+            chassisAutorotating = true;
+        }
     }
 }
 
@@ -69,60 +87,97 @@ void BalancingChassisAutorotateCommand::execute()
     uint32_t time = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = time - prevTime;
     prevTime = time;
+
+    // get user input
+    motionDesiredTurretRelative =
+        modm::Vector2f(operatorInterface.getChassisXInput(), operatorInterface.getChassisYInput());
+
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
     if (yawMotor->isOnline())
     {
-        updateAutorotateState();
-
         float turretAngleFromCenter = yawMotor->getAngleFromCenter();
+        updateAutorotateState();  // initiate or not autorotation
+        float chassisRotationSetpoint = 0;
 
-        if (chassisAutorotating)
+        if (chassisMotionPlanning)
         {
-            float maxAngleFromCenter = M_PI;
-
-            if (!yawMotor->getConfig().limitMotorAngles)
-            {
-                maxAngleFromCenter = M_PI_2;
-            }
-            float angleFromCenterForChassisAutorotate = tap::algorithms::ContiguousFloat(
-                                                            turretAngleFromCenter,
-                                                            -maxAngleFromCenter,
-                                                            maxAngleFromCenter)
-                                                            .getValue();
-            // PD controller to find desired rotational component of the chassis control
-            float desiredRotation = chassis->rotationPid.runController(
-                angleFromCenterForChassisAutorotate,
-                yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()),
-                dt);
-
-            // find an alpha value to be used for the low pass filter, some value >
-            // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
-            // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low
-            // pass filter alpha is small and more averaging will be applied to the desired
-            // autorotation
-            float autorotateSmoothingAlpha = std::max(
-                1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
-                AUTOROTATION_MIN_SMOOTHING_ALPHA);
-
-            // low pass filter the desiredRotation to avoid radical changes in the desired
-            // rotation when far away from where we are centering the chassis around
-            desiredRotationAverage = tap::algorithms::lowPassFilter(
-                desiredRotationAverage,
-                desiredRotation,
-                autorotateSmoothingAlpha);
+            chassisRotationSetpoint = plotPath(turretAngleFromCenter);
         }
-        float chassisXoutput = 0;
-        float chassisRoutput = 0;
+        else if (chassisAutorotating)
+        {
+            chassisRotationSetpoint = getAutorotationSetpoint(turretAngleFromCenter);
+        }
+        runRotationController(chassisRotationSetpoint, dt);
+
+        // we are now turning the robot towards the desired direction. Apply motion to chassis
+        // accordingly.
+        float chassisXoutput = motionDesiredTurretRelative.getLength() *
+                               cos(chassisRotationSetpoint - turretAngleFromCenter);
+        float chassisRoutput = desiredRotationAverage;
 
         chassis->setDesiredOutput(chassisXoutput, chassisRoutput);
     }
     else
     {
+        // fall back to chassis drive if no turret
+        chassis->setDesiredOutput(
+            operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
+            operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
+        chassis->setDesiredHeight(0.001 * operatorInterface.getTurretPitchInput(0));
     }
 }
 
-void plotPath() {}
+float BalancingChassisAutorotateCommand::getAutorotationSetpoint(float turretAngleFromCenter)
+{
+    return tap::algorithms::ContiguousFloat(
+               turretAngleFromCenter,
+               -maxAngleFromCenter,
+               maxAngleFromCenter)
+        .getValue();
+}
+
+void BalancingChassisAutorotateCommand::runRotationController(
+    float chassisRotationSetpoint,
+    float dt)
+{
+    // PD controller to find desired rotational component of the chassis control
+    float desiredRotation = chassis->rotationPid.runController(
+        chassisRotationSetpoint,
+        yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()),
+        dt);
+
+    // find an alpha value to be used for the low pass filter, some value >
+    // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
+    // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low
+    // pass filter alpha is small and more averaging will be applied to the desired
+    // autorotation
+    float autorotateSmoothingAlpha = std::max(
+        1.0f - abs(chassisRotationSetpoint) / maxAngleFromCenter,
+        AUTOROTATION_MIN_SMOOTHING_ALPHA);
+
+    // low pass filter the desiredRotation to avoid radical changes in the desired
+    // rotation when far away from where we are centering the chassis around
+    desiredRotationAverage = tap::algorithms::lowPassFilter(
+        desiredRotationAverage,
+        desiredRotation,
+        autorotateSmoothingAlpha);
+}
+
+float BalancingChassisAutorotateCommand::plotPath(float turretAngleFromCenter)
+{
+    tap::algorithms::rotateVector(
+        &motionDesiredTurretRelative.x,
+        &motionDesiredTurretRelative.y,
+        turretAngleFromCenter);
+    // ContiguousFloat makes us find the nearest 180 solution to this, instead of overrotating the
+    // robot.
+    return tap::algorithms::ContiguousFloat(
+               atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX()),
+               -maxAngleFromCenter,
+               maxAngleFromCenter)
+        .getValue();
+}
 
 void BalancingChassisAutorotateCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
 
