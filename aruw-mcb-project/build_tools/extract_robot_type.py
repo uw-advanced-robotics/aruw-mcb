@@ -20,14 +20,14 @@ from SCons.Script import *
 from .parse_args import USAGE
 
 ROBOT_TYPE_FILE     = "robot-type/robot_type.hpp"
-VALID_ROBOT_TYPES   = [ "TARGET_STANDARD_WOODY",
-                        "TARGET_STANDARD_ELSA",
-                        "TARGET_STANDARD_SPIDER",
-                        "TARGET_DRONE",
-                        "TARGET_ENGINEER",
-                        "TARGET_SENTRY_BEEHIVE",
-                        "TARGET_HERO_CYCLONE",
-                        "TARGET_TESTBED" ]
+VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
+                        "STANDARD_ELSA",
+                        "STANDARD_SPIDER",
+                        "DRONE",
+                        "ENGINEER",
+                        "SENTRY_BEEHIVE",
+                        "HERO_CYCLONE",
+                        "TESTBED" ]
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")
