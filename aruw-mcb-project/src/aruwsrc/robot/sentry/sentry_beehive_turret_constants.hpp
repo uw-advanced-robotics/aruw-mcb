@@ -27,7 +27,6 @@
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
 
-#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -37,25 +36,8 @@
 namespace aruwsrc::control::turret
 {
 
-chassis::SwerveModuleConfig frontMotorConfig = {
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0,
-};
 
-chassis::SwerveModuleConfig backMotorConfig = {
-    .positionWithinChassisX = -0.205,
-    .positionWithinChassisY = 0.0,
-};
-
-chassis::SwerveModuleConfig leftMotorConfig = {
-    .positionWithinChassisX = 0.0,
-    .positionWithinChassisY = -0.205,
-};
-
-chassis::SwerveModuleConfig rightMotorConfig = {
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0.0,
-};
+// new 
 
 static constexpr TurretMotorConfig majorYawConfig = {
     .startAngle = M_PI_2,
@@ -64,7 +46,6 @@ static constexpr TurretMotorConfig majorYawConfig = {
     .maxAngle = M_PI,
     .limitMotorAngles = false,
 };
-
 
 static constexpr TurretMotorConfig MINOR_YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
@@ -96,9 +77,7 @@ static constexpr TurretMotorConfig MINOR_PITCH_MOTOR_CONFIG = {
 
 
 
-
-
-
+// old 
 
 
 
@@ -106,6 +85,7 @@ static constexpr uint8_t NUM_TURRETS = 2;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+
 
 namespace turret0
 {

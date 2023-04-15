@@ -36,7 +36,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::sentry
@@ -69,7 +69,7 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    control::ControlOperatorInterface controlOperatorInterface;
+    control::sentry::SentryControlOperatorInterface controlOperatorInterface;
     serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
