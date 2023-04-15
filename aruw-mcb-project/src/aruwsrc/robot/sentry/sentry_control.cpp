@@ -59,7 +59,7 @@
 // #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 // #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 // #include "aruwsrc/control/governor/pause_command_governor.hpp"
-// #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 // #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 // #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 // #include "aruwsrc/control/safe_disconnect.hpp"
@@ -201,8 +201,8 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
 
 tap::motor::DoubleDjiMotor turretMajorYawMotor(
     drivers(),
-    MotorId::MOTOR7,
-    MotorId::MOTOR7,
+    MOTOR7,
+    MOTOR7,
     turretMajor::CAN_BUS_MOTOR_1,
     turretMajor::CAN_BUS_MOTOR_2,
     false,
@@ -213,15 +213,7 @@ tap::motor::DoubleDjiMotor turretMajorYawMotor(
 
 tap::motor::DjiMotor turretMinor0YawMotor(
     drivers(),
-    MotorId::MOTOR6,
-    turretMinor0::CAN_BUS_MOTORS,
-    false,
-    "Minor 0 Yaw Turret"
-);
-
-tap::motor::DjiMotor turretMinor0YawMotor(
-    drivers(),
-    MotorId::MOTOR6,
+    MOTOR6,
     turretMinor0::CAN_BUS_MOTORS,
     false,
     "Minor 0 Yaw Turret"
@@ -229,7 +221,7 @@ tap::motor::DjiMotor turretMinor0YawMotor(
 
 tap::motor::DjiMotor turretMinor0PitchMotor(
     drivers(),
-    MotorId::MOTOR5,
+    MOTOR5,
     turretMinor0::CAN_BUS_MOTORS,
     false,
     "Minor 0 Pitch Turret"
@@ -237,7 +229,7 @@ tap::motor::DjiMotor turretMinor0PitchMotor(
 
 tap::motor::DjiMotor turretMinor1YawMotor(
     drivers(),
-    MotorId::MOTOR6,
+    MOTOR6,
     turretMinor1::CAN_BUS_MOTORS,
     false,
     "Minor 1 Yaw Turret"
@@ -245,7 +237,7 @@ tap::motor::DjiMotor turretMinor1YawMotor(
 
 tap::motor::DjiMotor turretMinor1PitchMotor(
     drivers(),
-    MotorId::MOTOR5,
+    MOTOR5,
     turretMinor1::CAN_BUS_MOTORS,
     false,
     "Minor 1 Pitch Turret"

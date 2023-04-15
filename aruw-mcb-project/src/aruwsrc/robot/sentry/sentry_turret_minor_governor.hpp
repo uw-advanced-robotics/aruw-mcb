@@ -101,10 +101,11 @@ public:
     struct Config
     {
         aruwsrc::agitator::VelocityAgitatorSubsystemConfig agitatorConfig;
+        DjiMotor* pitchMotor;
+        DjiMotor* yawMotor;
         TurretMotorConfig pitchMotorConfig;
         TurretMotorConfig yawMotorConfig;
         tap::can::CanBus turretCanBus;
-        bool pitchMotorInverted;
         uint8_t turretID;
         RefSerialData::Rx::MechanismID turretBarrelMechanismId;
         tap::algorithms::SmoothPidConfig pitchPidConfig;
@@ -123,18 +124,8 @@ public:
               config.turretCanBus,
               &config.turretMCBCanComm,
               config.turretBarrelMechanismId),
-          pitchMotor(
-              &drivers,
-              aruwsrc::control::turret::PITCH_MOTOR_ID,
-              config.turretCanBus,
-              config.pitchMotorInverted,
-              "Pitch Turret"),
-          yawMotor(
-              &drivers,
-              aruwsrc::control::turret::YAW_MOTOR_ID,
-              config.turretCanBus,
-              true,
-              "Yaw Turret"),
+          pitchMotor(config.pitchMotor),
+          yawMotor(config.yawMotor),
           turretSubsystem(
               &drivers,
               &pitchMotor,
@@ -230,8 +221,8 @@ public:
     // subsystems
     VelocityAgitatorSubsystem agitator;
     RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
-    DjiMotor pitchMotor;
-    DjiMotor yawMotor;
+    DjiMotor* pitchMotor;
+    DjiMotor* yawMotor;
     SentryTurretMinorSubsystem turretSubsystem;
 
     OttoBallisticsSolver ballisticsSolver;
