@@ -171,7 +171,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 {
-    if (!isTurretControlMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
+    if (!isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
     
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -181,7 +181,7 @@ float SentryControlOperatorInterface::getTurretMajorYawVelocity()
     if (prevUpdateCounterTurretMajorYawInput != updateCounter)
     {
         turretMajorYawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::WHEEL),
+            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterTurretMajorYawInput = updateCounter;
     }
