@@ -41,6 +41,8 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& yawMotorConfig);
 
+    void initialize();
+
     /**
      * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
      * turret counterclockwise when looking at the turret from above.

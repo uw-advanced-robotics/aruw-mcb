@@ -32,6 +32,11 @@ SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
 {
 }
 
+void SentryTurretMajorSubsystem::initialize()
+{
+    yawMotor.initialize();
+}
+
 float SentryTurretMajorSubsystem::getWorldYaw() const
 {
     return yawMotor.getChassisFrameMeasuredAngle().getValue();

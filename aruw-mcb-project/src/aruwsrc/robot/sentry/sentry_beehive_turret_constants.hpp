@@ -39,28 +39,13 @@ namespace aruwsrc::control::turret
 
 // new 
 
-static constexpr TurretMotorConfig MAJOR_YAW_MOTOR_CONFIG = {
+// TODO: change this name
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 1363,
+    .startEncoderValue = 6162,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
-};
-
-static constexpr TurretMotorConfig MINOR_YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 0,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = true,
-};
-
-static constexpr TurretMotorConfig MINOR_PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 0,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = true,
 };
 
 namespace turretMajor
@@ -80,17 +65,17 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 6086,
-    .minAngle = -M_PI - M_PI_2,
+    .startEncoderValue = 6842,
+    .minAngle = modm::toRadian(-210),
     .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 0,
+    .startEncoderValue = 3335,
     .minAngle = modm::toRadian(-15),
-    .maxAngle = modm::toRadian(60),
+    .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
 
@@ -102,17 +87,17 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1525,
-    .minAngle = -M_PI_2,
-    .maxAngle = M_PI + modm::toRadian(30),
+    .startEncoderValue = 1345,
+    .minAngle = modm::toRadian(-30),
+    .maxAngle = modm::toRadian(210),
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1365,
+    .startEncoderValue = 2035,
     .minAngle = modm::toRadian(-15),
-    .maxAngle = modm::toRadian(60),
+    .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
 
@@ -151,7 +136,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 3'000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    // .maxOutput = 30'000.0f,
+    .maxOutput = 0.f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -167,7 +153,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 3'000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    // .maxOutput = 30'000.0f,
+    .maxOutput = 0.f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -180,7 +167,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .ki = 50.0f,
     .kd = 2'500.0f,
     .maxICumulative = 3'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 0.f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
@@ -196,7 +183,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 3'000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 0.0f,
+    // .maxOutput = 30'000.0f
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -209,7 +197,8 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .ki = 50.0f,
     .kd = 2'500.0f,
     .maxICumulative = 3'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 0.f,
+    // .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
@@ -228,7 +217,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = 0.0f,
+    // .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -242,7 +232,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 286.5f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 0.0f,
+    // .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -259,7 +250,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = 0.0f,
+    // .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -273,7 +265,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 286.5f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+    // .maxOutput = 30'000.0f,
+    .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
