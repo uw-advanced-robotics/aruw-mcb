@@ -258,10 +258,12 @@ SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYaw
 SentryMinorTurretGovernor turretZero(
     *drivers(),
     {
-        .agitatorConfig = aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG,
-        .pitchMotorConfig = aruwsrc::control::turret::turret0::PITCH_MOTOR_CONFIG,
-        .yawMotorConfig = aruwsrc::control::turret::turret0::YAW_MOTOR_CONFIG,
-        .turretCanBus = aruwsrc::control::turret::turret0::CAN_BUS_MOTORS,
+        .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor0::AGITATOR_CONFIG,
+        .pitchMotor = turretMinor0PitchMotor,
+        .yawMotor = turretMinor0YawMotor,
+        .pitchMotorConfig = aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG,
+        .yawMotorConfig = aruwsrc::control::turret::turretMinor0::YAW_MOTOR_CONFIG,
+        .turretCanBus = aruwsrc::control::turret::turretMinor0::CAN_BUS_MOTORS,
         .pitchMotorInverted = false,
         .turretID = 0,
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
@@ -276,6 +278,8 @@ SentryMinorTurretGovernor turretOne(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG,
+        .pitchMotor = turretMinor1PitchMotor,
+        .yawMotor = turretMinor1YawMotor,
         .pitchMotorConfig = aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
         .yawMotorConfig = aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG,
         .turretCanBus = aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
