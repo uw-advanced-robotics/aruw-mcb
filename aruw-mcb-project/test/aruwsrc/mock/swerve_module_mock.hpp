@@ -34,7 +34,11 @@ class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
 public:
     SwerveModuleMock(tap::Drivers *drivers);
 
-    SwerveModuleMock(tap::Drivers *drivers, aruwsrc::chassis::SwerveModuleConfig &config);
+    SwerveModuleMock(
+        tap::Drivers *drivers, 
+        testing::NiceMock<tap::mock::DjiMotorMock> aziMotor,
+        testing::NiceMock<tap::mock::DjiMotorMock> driMotor,
+        aruwsrc::chassis::SwerveModuleConfig &config);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());

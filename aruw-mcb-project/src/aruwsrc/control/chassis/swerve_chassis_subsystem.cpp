@@ -31,6 +31,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
+    float forwardMatrixArray[24],
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       NUM_MODULES(4),
@@ -38,7 +39,8 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
           moduleLeftFront,
           moduleRightFront,
           moduleLeftBack,
-          moduleRightBack}
+          moduleRightBack},
+      forwardMatrix(forwardMatrixArray)
 {
 }
 
@@ -130,18 +132,26 @@ void SwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    // TODO: calculate forward matrix and store in constants file
-    modm::Matrix<float, 3, 1> randomOutput;
-    randomOutput[0][0] = 0;
-    randomOutput[1][0] = 0;
-    randomOutput[2][0] = 0;
-    return randomOutput;
+    modm::Matrix<float, 8, 1> actualModuleVectors;
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+    {
+        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
+        actualModuleVectors[2*i][0] = moduleVel[0][0];
+        actualModuleVectors[2*i+1][0] = moduleVel[1][0];
+    }
+    return forwardMatrix*actualModuleVectors;
 }
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
-    return getActualVelocityChassisRelative();
-    // TODO: oh god bruh think about it later
+    modm::Matrix<float, 8, 1> desiredModuleVectors;
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+    {
+        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
+        desiredModuleVectors[2*i][0] = moduleVel[0][0];
+        desiredModuleVectors[2*i+1][0] = moduleVel[1][0];
+    }
+    return forwardMatrix*desiredModuleVectors;
 }
 
 }  // namespace chassis

@@ -124,7 +124,6 @@ public:
         return velocity;
     }
 
-    // UNFINISHED DONT USE YET ITS THE SAME AS ACTUAL
     inline modm::Matrix<float, 2, 1> getDesiredModuleVelocity() const
     {
         modm::Matrix<float, 2, 1> velocity;

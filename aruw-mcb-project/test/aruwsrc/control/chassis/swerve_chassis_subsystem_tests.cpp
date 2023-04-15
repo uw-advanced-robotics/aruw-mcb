@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/mock/swerve_module_mock.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
@@ -47,12 +48,16 @@ class SwerveChassisSubsystemTest : public Test
 {
 protected:
     SwerveChassisSubsystemTest()
-        : chassis(
+        : moduleLF(&drivers),
+        moduleRF(&drivers),
+        moduleLB(&drivers),
+        moduleRB(&drivers),
+        chassis(
               &drivers,
-              DEFAULT_SWERVE_CONFIG,
-              DEFAULT_SWERVE_CONFIG,
-              DEFAULT_SWERVE_CONFIG,
-              DEFAULT_SWERVE_CONFIG)
+              &moduleLF,
+              moduleRF,
+              moduleLB,
+              moduleRB)
     {
     }
 
@@ -63,8 +68,14 @@ protected:
     }
 
     tap::Drivers drivers;
+    NiceMock<aruwsrc::mock::SwerveModuleMock> moduleLF;
+    NiceMock<aruwsrc::mock::SwerveModuleMock> moduleRF;
+    NiceMock<aruwsrc::mock::SwerveModuleMock> moduleLB;
+    NiceMock<aruwsrc::mock::SwerveModuleMock> moduleRB;
     SwerveChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
+
+    
 };
 
 TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)

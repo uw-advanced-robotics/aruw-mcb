@@ -66,6 +66,7 @@ public:
         Module* moduleRightFront,
         Module* moduleLeftBack,
         Module* moduleRightBack,
+        float forwardMatrixArray[24],
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
@@ -119,6 +120,8 @@ private:
      * Stores the desired wheel rpm of each of the modules in a matrix, indexed by ModuleIndex
      */
     modm::Matrix<float, 4, 1> desiredModuleSpeeds;
+
+    const modm::Matrix<float, 3, 8> forwardMatrix;
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it

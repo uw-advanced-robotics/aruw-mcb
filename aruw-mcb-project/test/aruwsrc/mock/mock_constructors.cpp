@@ -106,8 +106,10 @@ SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
 SwerveModuleMock::SwerveModuleMock(
     tap::Drivers *drivers,
+    testing::NiceMock<tap::mock::DjiMotorMock> aziMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> driMotor,
     aruwsrc::chassis::SwerveModuleConfig &config)
-    : SwerveModule(drivers, config)
+    : SwerveModule(drivers, aziMotor, driMotor, config)
 {
 }
 SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers) : SwerveModule(drivers) {}
