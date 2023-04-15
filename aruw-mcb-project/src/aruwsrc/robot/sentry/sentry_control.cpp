@@ -80,6 +80,7 @@
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_major_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
+#include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -347,13 +348,28 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor0Co
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1ControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
-    &turretZero.turretSubsystem,
-    &turretZero.chassisFrameYawTurretController,
-    &turretZero.chassisFramePitchTurretController,
+    &turretOne.turretSubsystem,
+    &turretOne.chassisFrameYawTurretController,
+    &turretOne.chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR,
     1);
 
+// aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
+//     drivers(),
+//     &turretZero.turretSubsystem,
+//     &turretZero.chassisFrameYawTurretController,
+//     &turretZero.chassisFramePitchTurretController,
+// );
+
+
+// aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor1ControlCommand(
+//     drivers(),
+//     &turretOne.turretSubsystem,
+//     &turretOne.chassisFrameYawTurretController,
+//     &turretOne.chassisFramePitchTurretController,
+//     USER_YAW_INPUT_SCALAR,
+// );
 // aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,

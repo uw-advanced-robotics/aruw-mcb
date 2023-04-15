@@ -30,11 +30,6 @@ using namespace aruwsrc::control::sentry;
 namespace aruwsrc
 {
 class Drivers;
-
-namespace control
-{
-class ControlOperatorInterface;
-}
 }  // namespace aruwsrc
 
 namespace aruwsrc::control::turret::sentry
