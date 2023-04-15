@@ -214,7 +214,7 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
     if (prevUpdateCounterTurretMinor1YawInput != updateCounter)
     {
         turretMinor1YawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
             currTime);
         prevUpdateCounterTurretMinor1YawInput = updateCounter;
     }
