@@ -131,18 +131,6 @@ static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
 
-namespace turret0
-{
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-
-}  // namespace turret0
-
-namespace turret1
-{
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-
-}  // namespace turret1
-
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
@@ -156,7 +144,7 @@ static constexpr float PITCH_YAW_OFFSET = 0.045f;
 
 namespace chassis_rel
 {
-namespace turret0
+namespace turretMinor0
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 70'000.0f,
@@ -183,9 +171,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace turret0
+}  // namespace turretMinor0
 
-namespace turret1
+namespace turretMinor1
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 70'000.0f,
@@ -212,12 +200,12 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace turret1
+}  // namespace turretMinor1
 }  // namespace chassis_rel
 
 namespace world_rel_turret_imu
 {
-namespace turret0
+namespace turretMinor0
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 18.0f,
@@ -246,9 +234,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-}  // namespace turret0
+}  // namespace turretMinor0
 
-namespace turret1
+namespace turretMinor1
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 18.0f,
@@ -277,7 +265,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-}  // namespace turret1
+}  // namespace turretMinor1
 }  // namespace world_rel_turret_imu
 }  // namespace  aruwsrc::control::turret
 

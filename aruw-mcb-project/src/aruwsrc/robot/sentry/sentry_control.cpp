@@ -37,7 +37,7 @@
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-// #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 // #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 // #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 // #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -74,9 +74,10 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
-#include "sentry_turret_minor_govenor.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_governor.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_chassis_constants.hpp"
+#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -239,7 +240,7 @@ tap::motor::DjiMotor turretMinor1PitchMotor(
     drivers(),
     MOTOR5,
     turretMinor1::CAN_BUS_MOTORS,
-    false,
+    true,
     "Minor 1 Pitch Turret"
 );
 
@@ -259,37 +260,35 @@ SentryMinorTurretGovernor turretZero(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor0::AGITATOR_CONFIG,
-        .pitchMotor = turretMinor0PitchMotor,
-        .yawMotor = turretMinor0YawMotor,
+        .pitchMotor = &turretMinor0PitchMotor,
+        .yawMotor = &turretMinor0YawMotor,
         .pitchMotorConfig = aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG,
         .yawMotorConfig = aruwsrc::control::turret::turretMinor0::YAW_MOTOR_CONFIG,
         .turretCanBus = aruwsrc::control::turret::turretMinor0::CAN_BUS_MOTORS,
-        .pitchMotorInverted = false,
         .turretID = 0,
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-        .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret0::PITCH_PID_CONFIG,
-        .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret0::YAW_PID_CONFIG,
-        .yawPosPidConfig = world_rel_turret_imu::turret0::YAW_POS_PID_CONFIG,
-        .yawVelPidConfig = world_rel_turret_imu::turret0::YAW_VEL_PID_CONFIG,
+        .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor0::PITCH_PID_CONFIG,
+        .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor0::YAW_PID_CONFIG,
+        .yawPosPidConfig = world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG,
+        .yawVelPidConfig = world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
 SentryMinorTurretGovernor turretOne(
     *drivers(),
     {
-        .agitatorConfig = aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG,
-        .pitchMotor = turretMinor1PitchMotor,
-        .yawMotor = turretMinor1YawMotor,
-        .pitchMotorConfig = aruwsrc::control::turret::turret1::PITCH_MOTOR_CONFIG,
-        .yawMotorConfig = aruwsrc::control::turret::turret1::YAW_MOTOR_CONFIG,
-        .turretCanBus = aruwsrc::control::turret::turret1::CAN_BUS_MOTORS,
-        .pitchMotorInverted = true,
+        .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor1::AGITATOR_CONFIG,
+        .pitchMotor = &turretMinor1PitchMotor,
+        .yawMotor = &turretMinor1YawMotor,
+        .pitchMotorConfig = aruwsrc::control::turret::turretMinor1::PITCH_MOTOR_CONFIG,
+        .yawMotorConfig = aruwsrc::control::turret::turretMinor1::YAW_MOTOR_CONFIG,
+        .turretCanBus = aruwsrc::control::turret::turretMinor1::CAN_BUS_MOTORS,
         .turretID = 1,
         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-        .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turret1::PITCH_PID_CONFIG,
-        .yawPidConfig = aruwsrc::control::turret::chassis_rel::turret1::YAW_PID_CONFIG,
-        .yawPosPidConfig = world_rel_turret_imu::turret1::YAW_POS_PID_CONFIG,
-        .yawVelPidConfig = world_rel_turret_imu::turret1::YAW_VEL_PID_CONFIG,
+        .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::PITCH_PID_CONFIG,
+        .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::YAW_PID_CONFIG,
+        .yawPosPidConfig = world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG,
+        .yawVelPidConfig = world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
     });
 
@@ -314,7 +313,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     },
     &sentryDrive);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &sentryDrive);

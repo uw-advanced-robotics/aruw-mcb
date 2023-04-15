@@ -44,12 +44,12 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-namespace turret0
+namespace turretMinor0
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
      * The jamming constants. Agitator is considered jammed if difference between setpoint
@@ -66,11 +66,11 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 }
 
-namespace turret1
+namespace turretMinor1
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
+    .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**

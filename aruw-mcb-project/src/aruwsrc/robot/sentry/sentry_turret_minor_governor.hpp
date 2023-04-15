@@ -66,7 +66,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
+#include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
@@ -128,8 +128,8 @@ public:
           yawMotor(config.yawMotor),
           turretSubsystem(
               &drivers,
-              &pitchMotor,
-              &yawMotor,
+              pitchMotor,
+              yawMotor,
               config.pitchMotorConfig,
               config.yawMotorConfig,
               &config.turretMCBCanComm,
@@ -168,8 +168,7 @@ public:
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
               USER_YAW_INPUT_SCALAR,
-              USER_PITCH_INPUT_SCALAR,
-              config.turretID),
+              USER_PITCH_INPUT_SCALAR),
           turretCVCommand(
               &drivers.visionCoprocessor,
               &turretSubsystem,
@@ -242,7 +241,7 @@ public:
 
     // turret commands
     // limits fire rate
-    user::TurretUserControlCommand turretManual;
+    aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretManual;
 
     cv::SentryTurretCVCommand turretCVCommand;
 

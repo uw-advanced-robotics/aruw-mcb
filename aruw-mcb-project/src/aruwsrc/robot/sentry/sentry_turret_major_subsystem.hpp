@@ -52,16 +52,11 @@ public:
      */
     uint32_t getLastMeasurementTimeMicroseconds() const;
 
-<<<<<<< HEAD
-    /// Associated with and contains logic for controlling the turret's yaw motor
-    TurretMotor yawMotor;
-=======
     TurretMotor yawMotor;
 
 private:
     /// Associated with and contains logic for controlling the turret's yaw motor
     uint8_t turretID;
->>>>>>> origin/JoshuaT/#618/TurretManualControlCommand
 
 };  // class SentryTurretMajorSubsystem
 

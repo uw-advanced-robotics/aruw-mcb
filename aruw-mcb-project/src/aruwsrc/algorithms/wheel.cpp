@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-<<<<<<< HEAD:aruw-mcb-project/src/aruwsrc/algorithms/wheel.cpp
 #include "wheel.hpp"
 
 namespace aruwsrc
@@ -49,42 +48,3 @@ float Wheel::rpmToMps(float rpm) const
 }  // namespace algorithms
 
 }  // namespace aruwsrc
-=======
-#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-#include "aruwsrc/control/chassis/new_sentry/sentry_chassis_rel_drive.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-
-using namespace aruwsrc::control::sentry;
-
-namespace aruwsrc
-{
-namespace aruwsrc::control::sentry
-{
-
-SentryManualDriveCommand::SentryManualDriveCommand(
-    tap::Drivers* drivers,
-    SentryControlOperatorInterface* operatorInterface,
-    chassis::HolonomicChassisSubsystem* chassis)
-    : drivers(drivers),
-      operatorInterface(operatorInterface),
-      chassis(chassis)
-{
-    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
-}
-
-void SentryManualDriveCommand::initialize() {}
-
-void SentryManualDriveCommand::execute()
-{
-    SentryChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
-}
-
-void SentryManualDriveCommand::end(bool) { chassis->setZeroRPM(); }
-
-bool SentryManualDriveCommand::isFinished() const { return false; }
-
-}  // namespace chassis
-
-}  // namespace aruwsrc
->>>>>>> origin/JoshuaT/#618/TurretManualControlCommand:aruw-mcb-project/src/aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.cpp
