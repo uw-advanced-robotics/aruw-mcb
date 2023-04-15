@@ -46,6 +46,8 @@
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
+float yawvelinput = 0.f;
+
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
@@ -91,6 +93,7 @@ int main()
 
     while (1)
     {
+        yawvelinput = drivers->controlOperatorInterface.getTurretMajorYawVelocity();
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
