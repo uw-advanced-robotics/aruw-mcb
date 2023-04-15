@@ -55,48 +55,48 @@ protected:
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 
     SwerveModuleConfig TEST_SWERVE_CONFIG = {
-        &driveMock,
-        &azimuthMock
+        .driveMotor = &driveMock,
+        .azimuthMotor = &azimuthMock
     };
 };
 
 TEST_F(SwerveModuleTest, allMotorsOnline)
 {
     bool driveOnline, azimuthOnline;
-    ON_CALL(module->driveMotor, isMotorOnline).WillByDefault(ReturnPointee(&driveOnline));
-    ON_CALL(module->azimuthMotor, isMotorOnline).WillByDefault(ReturnPointee(&azimuthOnline));
+    ON_CALL(*module.driveMotor, isMotorOnline).WillByDefault(ReturnPointee(&driveOnline));
+    ON_CALL(*module.azimuthMotor, isMotorOnline).WillByDefault(ReturnPointee(&azimuthOnline));
 
     for (int i = 0; i < 0x3; i++)
     {
         driveOnline = i & 1;
         azimuthOnline = (i >> 1) & 1;
 
-        EXPECT_FALSE(module->allMotorsOnline());
+        EXPECT_FALSE(module.allMotorsOnline());
     }
 
     driveOnline = true;
     azimuthOnline = true;
 
-    EXPECT_TRUE(module->allMotorsOnline());
+    EXPECT_TRUE(module.allMotorsOnline());
 }
 
 TEST_F(SwerveModuleTest, initialize)
 {
-    EXPECT_CALL(module->driveMotor, initialize);
-    EXPECT_CALL(module->azimuthMotor, initialize);
+    EXPECT_CALL(*module.driveMotor, initialize);
+    EXPECT_CALL(*module.azimuthMotor, initialize);
 
     module.initialize();
 }
 
 TEST_F(SwerveModuleTest, getAngle)
 {
-    ON_CALL(module->azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
+    ON_CALL(*module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);
 }
 
 TEST_F(SwerveModuleTest, getDriveVelocity)
 {
-    ON_CALL(module->driveMotor, getShaftRPM).WillByDefault(Return(0));
+    ON_CALL(*module.driveMotor, getShaftRPM).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
 }
 
@@ -127,13 +127,13 @@ TEST_F(SwerveModuleTest, reversingDirectionChange)
     EXPECT_TRUE(module.getSpeedSetpoint() < 0);
 }
 
-// TEST_F(SwerveModuleTest, getModuleVelocity)
+// TEST_F(SwerveModuleTest, getActualModuleVelocity)
 // {
 //     ON_CALL(module.azimuthMotor,
 //     getEncoderUnwrapped).WillByDefault(Return(DEFAULT_SWERVE_CONFIG.azimuthMotorGearing));
 //     ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(1));
 
-//     modm::Matrix<float, 2, 1> vel = module.getModuleVelocity();
+//     modm::Matrix<float, 2, 1> vel = module.getActualModuleVelocity();
 //     EXPECT_NEAR(1, vel[0][0], 1E-3);
 //     EXPECT_NEAR(0, vel[1][0], 1E-3);
 

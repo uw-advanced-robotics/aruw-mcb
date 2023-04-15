@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(void, initialize, (), ());
     MOCK_METHOD(void, refresh, (), ());
     MOCK_METHOD(bool, allMotorsOnline, (), (const));
-    // getModuleVelocity
+    // getActualModuleVelocity
     MOCK_METHOD(void, limitPower, (float), ());
 
 };  // class SwerveModuleMock

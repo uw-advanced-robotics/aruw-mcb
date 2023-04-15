@@ -25,7 +25,15 @@ namespace aruwsrc
 {
 namespace chassis
 {
-SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
+SwerveModule::SwerveModule(
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor,
+#else
+    tap::motor::DjiMotor& driveMotor,
+    tap::motor::DjiMotor& azimuthMotor,
+#endif
+    SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
     //   driveMotor(
     //       drivers,
@@ -39,8 +47,8 @@ SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
     //       CAN_BUS_MOTORS,
     //       config.azimuthMotorInverted,
     //       "Azimuth motor"),
-      driveMotor(config.driveMotor),
-      azimuthMotor(config.azimuthMotor),
+      driveMotor(driveMotor),
+      azimuthMotor(azimuthMotor),
       config(config),
       drivePid(
           config.drivePidKp,
@@ -61,15 +69,15 @@ SwerveModule::SwerveModule(tap::Drivers* drivers, SwerveModuleConfig& config)
 
 void SwerveModule::initialize()
 {
-    driveMotor->initialize();
-    azimuthMotor->initialize();
+    driveMotor.initialize();
+    azimuthMotor.initialize();
 }
 
 void SwerveModule::setZeroRPM() { speedSetpointRPM = 0; }
 
 bool SwerveModule::allMotorsOnline() const
 {
-    return driveMotor->isMotorOnline() && azimuthMotor->isMotorOnline();
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
 float SwerveModule::calculate(float x, float y, float r)
@@ -130,36 +138,36 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 void SwerveModule::refresh()
 {
     drivePid.update(speedSetpointRPM - getDriveRPM());
-    driveMotor->setDesiredOutput(drivePid.getValue());
+    driveMotor.setDesiredOutput(drivePid.getValue());
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor->setDesiredOutput(azimuthPid.getOutput());
+    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor->getShaftRPM()); }
+float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
 
-float SwerveModule::getDriveRPM() const { return driveMotor->getShaftRPM(); }
+float SwerveModule::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
 float SwerveModule::getAngle() const
 {
     return modm::toRadian(
-        azimuthMotor->encoderToDegrees(
-            azimuthMotor->getEncoderUnwrapped() - config.azimuthZeroOffset) *
+        azimuthMotor.encoderToDegrees(
+            azimuthMotor.getEncoderUnwrapped() - config.azimuthZeroOffset) *
         config.azimuthMotorGearing);
 }
 
 float SwerveModule::getAngularVelocity() const
 {
-    return 6.0f * static_cast<float>(azimuthMotor->getShaftRPM()) * config.azimuthMotorGearing;
+    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * config.azimuthMotorGearing;
 }
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor->setDesiredOutput(
-        driveMotor->getOutputDesired() * frac *
+    driveMotor.setDesiredOutput(
+        driveMotor.getOutputDesired() * frac *
         angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor->setDesiredOutput(
-        azimuthMotor->getOutputDesired() * frac *
+    azimuthMotor.setDesiredOutput(
+        azimuthMotor.getOutputDesired() * frac *
         (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
