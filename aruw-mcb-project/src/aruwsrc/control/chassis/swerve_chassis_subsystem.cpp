@@ -31,7 +31,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
-    float forwardMatrixArray[24],
+    const float forwardMatrixArray[24],
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       NUM_MODULES(4),
@@ -88,7 +88,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
-    desiredRotation = modules[LF]->wheel.mpsToRpm(r) * WIDTH_BETWEEN_WHEELS_X / 2;
+    desiredRotation = modules[LF]->wheel.mpsToRpm(r) * 0.205f;
     float maxInitialSpeed = 0;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
