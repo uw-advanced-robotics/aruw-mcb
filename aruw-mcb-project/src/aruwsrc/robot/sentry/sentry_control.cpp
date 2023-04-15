@@ -254,7 +254,8 @@ aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
-    &rightBackSwerveModule);
+    &rightBackSwerveModule,
+    aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
 
 SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, YAW_MOTOR_CONFIG);
 
