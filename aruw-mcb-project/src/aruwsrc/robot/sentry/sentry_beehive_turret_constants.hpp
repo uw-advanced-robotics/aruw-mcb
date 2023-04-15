@@ -112,8 +112,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 static constexpr uint8_t NUM_TURRETS = 2;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.02f;
+
+static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
 
 
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
@@ -134,7 +136,7 @@ namespace turretMajor
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 70'000.0f,
     .ki = 0.0f,
-    .kd = 3'000.0f,
+    .kd = 10'000.0f,
     .maxICumulative = 0.0f,
     // .maxOutput = 30'000.0f,
     .maxOutput = 10000.f,

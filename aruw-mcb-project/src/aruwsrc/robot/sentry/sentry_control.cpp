@@ -333,7 +333,7 @@ aruwsrc::control::turret::sentry::TurretMajorSentryControlCommand turretMajorCon
     drivers()->controlOperatorInterface,
     &turretMajor,
     &turretMajorYawController,
-    aruwsrc::control::turret::USER_YAW_INPUT_SCALAR
+    aruwsrc::control::turret::MAJOR_USER_YAW_INPUT_SCALAR
 );
 
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor0ControlCommand(
@@ -342,8 +342,8 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor0Co
     &turretZero.turretSubsystem,
     &turretZero.chassisFrameYawTurretController,
     &turretZero.chassisFramePitchTurretController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
+    MINOR_USER_YAW_INPUT_SCALAR,
+    MINOR_USER_PITCH_INPUT_SCALAR,
     0);
 
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1ControlCommand(
@@ -352,8 +352,8 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1Co
     &turretOne.turretSubsystem,
     &turretOne.chassisFrameYawTurretController,
     &turretOne.chassisFramePitchTurretController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR,
+    MINOR_USER_YAW_INPUT_SCALAR,
+    MINOR_USER_PITCH_INPUT_SCALAR,
     1);
 
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
