@@ -27,10 +27,10 @@ namespace chassis
 {
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
-    SwerveModule* moduleFront,
-    SwerveModule* moduleLeft,
-    SwerveModule* moduleBack,
-    SwerveModule* moduleRight,
+    Module* moduleFront,
+    Module* moduleLeft,
+    Module* moduleBack,
+    Module* moduleRight,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       NUM_MODULES(4),
@@ -70,9 +70,9 @@ Module* SwerveChassisSubsystem::getModule(unsigned int i)
 
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    x = modules[F]->wheel.rpmToMps(x);  // convert input from motor rpm to m/s
-    y = modules[F]->wheel.rpmToMps(y);  // convert input from motor rpm to m/s
-    r = modules[F]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
+    x = modules[LF]->wheel.rpmToMps(x);  // convert input from motor rpm to m/s
+    y = modules[LF]->wheel.rpmToMps(y);  // convert input from motor rpm to m/s
+    r = modules[LF]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
     //TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
