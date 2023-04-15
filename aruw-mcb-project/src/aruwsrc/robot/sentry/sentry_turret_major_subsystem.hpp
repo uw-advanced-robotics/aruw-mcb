@@ -41,6 +41,8 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& yawMotorConfig);
 
+    void refresh();
+
     void initialize();
 
     /**

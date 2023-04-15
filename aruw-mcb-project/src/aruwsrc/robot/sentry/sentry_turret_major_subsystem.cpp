@@ -32,6 +32,10 @@ SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
 {
 }
 
+void SentryTurretMajorSubsystem::refresh(){
+    yawMotor.updateMotorAngle();
+}
+
 void SentryTurretMajorSubsystem::initialize()
 {
     yawMotor.initialize();
