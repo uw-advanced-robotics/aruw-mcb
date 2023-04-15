@@ -1,34 +1,30 @@
-
-
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
-
-namespace aruwsrc::chassis
+namespace aruwsrc::sentry::chassis
 {
 
-// Distance from center of rotation to 
+// Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
-
-static constexpr 
 
 // todo: hopefullly these can live as constants here soon :)
-SwerveModuleConfig frontMotorConfig = {
+aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
     .positionWithinChassisX = 0.205,
     .positionWithinChassisY = 0,
 };
 
-SwerveModuleConfig backMotorConfig = {
+aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     .positionWithinChassisX = -0.205,
     .positionWithinChassisY = 0.0,
 };
 
-SwerveModuleConfig leftMotorConfig = {
+aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     .positionWithinChassisX = 0.0,
     .positionWithinChassisY = -0.205,
 };
 
-SwerveModuleConfig rightMotorConfig = {
+aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
     .positionWithinChassisX = 0.205,
     .positionWithinChassisY = 0.0,
 };

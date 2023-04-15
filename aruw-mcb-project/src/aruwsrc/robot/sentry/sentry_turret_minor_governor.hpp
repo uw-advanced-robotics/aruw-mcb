@@ -95,7 +95,7 @@ namespace sentry_control
 	
 extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
 
-class SentryMinorTurretGovenor
+class SentryMinorTurretGovernor
 {
 public:
     struct Config
@@ -114,7 +114,7 @@ public:
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
     };
 
-    SentryMinorTurretGovenor(Drivers &drivers, const Config &config)
+    SentryMinorTurretGovernor(Drivers &drivers, const Config &config)
         : agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
           frictionWheels(
               &drivers,

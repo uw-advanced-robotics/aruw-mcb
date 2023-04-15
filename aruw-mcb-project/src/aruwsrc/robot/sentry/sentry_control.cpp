@@ -33,8 +33,8 @@
 // #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
-// #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-// #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
+#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
+#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 // #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -112,142 +112,155 @@ aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(driver
 
 /* define swerve motors --------------------------------------------------------*/
 
-VirtualDjiMotor frontDriveMotor(
+VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR1,
-    CAN_BUS1,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
     false,
-    "Front Swerve Drive Motor");
+    "Left Front Swerve Drive Motor");
 
-VirtualDjiMotor frontAzimuthMotor(
-    drivers(),
-    MOTOR2,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "Front Swerve Azimuth Motor");
-
-VirtualDjiMotor leftDriveMotor(
-    drivers(),
-    MOTOR3,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "Left Swerve Drive Motor");
-
-VirtualDjiMotor leftAzimuthMotor(
-    drivers(),
-    MOTOR4,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "Left Swerve Azimuth Motor");
-
-VirtualDjiMotor backDriveMotor(
+VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
     MOTOR5,
-    CAN_BUS1,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
     false,
-    "Back Swerve Drive Motor");
+    "Left Front Swerve Azimuth Motor");
 
-VirtualDjiMotor backAzimuthMotor(
+VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
-    MOTOR6,
-    CAN_BUS1,
+    MOTOR4,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
     false,
-    "Back Swerve Azimuth Motor");
+    "Right Front Swerve Drive Motor");
 
-VirtualDjiMotor rightDriveMotor(
-    drivers(),
-    MOTOR7,
-    CAN_BUS1,
-    &(drivers()->mcbLite),
-    false,
-    "Right Swerve Drive Motor");
-
-VirtualDjiMotor rightAzimuthMotor(
+VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR8,
-    CAN_BUS1,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
     false,
-    "Right Swerve Azimuth Motor");
+    "Right Front Swerve Azimuth Motor");
 
-aruwsrc::chassis::SwerveModuleConfig frontSwerveModuleConfig = {
-    .driveMotor = &frontLeftDriveMotor,
-    .azimuthMotor = &frontLeftAzimuthMotor,
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0.0,
-    };
+VirtualDjiMotor leftBackDriveMotor(
+    drivers(),
+    MOTOR2,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    &(drivers()->mcbLite),
+    false,
+    "Left Back Swerve Drive Motor");
 
-aruwsrc::chassis::SwerveModuleConfig leftSwerveModuleConfig = {
-    .driveMotor = &frontRightDriveMotor,
-    .azimuthMotor = &frontRightAzimuthMotor,
-    .positionWithinChassisX = 0.0,
-    .positionWithinChassisY = -0.205,
-    };
+VirtualDjiMotor leftBackAzimuthMotor(
+    drivers(),
+    MOTOR6,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    &(drivers()->mcbLite),
+    false,
+    "Left Back Swerve Azimuth Motor");
 
-aruwsrc::chassis::SwerveModuleConfig backSwerveModuleConfig = {
-    .driveMotor = &backLeftDriveMotor,
-    .azimuthMotor = &backLeftAzimuthMotor,
-    .positionWithinChassisX = -0.205,
-    .positionWithinChassisY = 0.0,
-    };
+VirtualDjiMotor rightBackDriveMotor(
+    drivers(),
+    MOTOR3,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    &(drivers()->mcbLite),
+    false,
+    "Right Back Swerve Drive Motor");
 
-aruwsrc::chassis::SwerveModuleConfig rightSwerveModuleConfig = {
-    .driveMotor = &backRightDriveMotor,
-    .azimuthMotor = &backRightAzimuthMotor,
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0.0,
-    };
+VirtualDjiMotor rightBackAzimuthMotor(
+    drivers(),
+    MOTOR7,
+    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    &(drivers()->mcbLite),
+    false,
+    "Right Back Swerve Azimuth Motor");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
-aruwsrc::chassis::SwerveModule frontSwerveModule(
-    drivers(),
-    frontSwerveModuleConfig
-);
+aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
+    leftFrontDriveMotor,
+    leftFrontAzimuthMotor,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig);
 
-aruwsrc::chassis::SwerveModule leftSwerveModule(
-    drivers(),
-    leftSwerveModuleConfig
-);
+aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
+    rightFrontDriveMotor,
+    rightFrontAzimuthMotor,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig);
 
-aruwsrc::chassis::SwerveModule backSwerveModule(
-    drivers(),
-    backSwerveModuleConfig
-);
+aruwsrc::chassis::SwerveModule leftBackSwerveModule(
+    leftBackDriveMotor,
+    leftBackAzimuthMotor,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig);
 
-aruwsrc::chassis::SwerveModule rightSwerveModule(
-    drivers(),
-    rightSwerveModuleConfig
-);
-
+aruwsrc::chassis::SwerveModule rightBackSwerveModule(
+    rightBackDriveMotor,
+    rightBackAzimuthMotor,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig);
 
 /* define turret motors --------------------------------------------------------*/
 
-tap::motor::DjiMotor turretMajorYawMotor(
+tap::motor::DoubleDjiMotor turretMajorYawMotor(
     drivers(),
-    YAW_MOTOR_ID,
-    turretMajor::CAN_BUS_MOTORS,
+    MotorId::MOTOR7,
+    MotorId::MOTOR7,
+    turretMajor::CAN_BUS_MOTOR_1,
+    turretMajor::CAN_BUS_MOTOR_2,
     false,
-    "Major Yaw Turret 1");
+    false,
+    "Major Yaw Turret 1",
+    "Major Yaw Turret 2"
+);
+
+tap::motor::DjiMotor turretMinor0YawMotor(
+    drivers(),
+    MotorId::MOTOR6,
+    turretMinor0::CAN_BUS_MOTORS,
+    false,
+    "Minor 0 Yaw Turret"
+);
+
+tap::motor::DjiMotor turretMinor0YawMotor(
+    drivers(),
+    MotorId::MOTOR6,
+    turretMinor0::CAN_BUS_MOTORS,
+    false,
+    "Minor 0 Yaw Turret"
+);
+
+tap::motor::DjiMotor turretMinor0PitchMotor(
+    drivers(),
+    MotorId::MOTOR5,
+    turretMinor0::CAN_BUS_MOTORS,
+    false,
+    "Minor 0 Pitch Turret"
+);
+
+tap::motor::DjiMotor turretMinor1YawMotor(
+    drivers(),
+    MotorId::MOTOR6,
+    turretMinor1::CAN_BUS_MOTORS,
+    false,
+    "Minor 1 Yaw Turret"
+);
+
+tap::motor::DjiMotor turretMinor1PitchMotor(
+    drivers(),
+    MotorId::MOTOR5,
+    turretMinor1::CAN_BUS_MOTORS,
+    false,
+    "Minor 1 Pitch Turret"
+);
 
 /* define subsystems --------------------------------------------------------*/
 
 // note: swerve drive will take swerve modules soon 
 aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
     drivers(),
-    frontSwerveModuleConfig,
-    leftSwerveModuleConfig,
-    backSwerveModuleConfig,
-    rigthSwerveModuleConfig);
+    
 
 SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYawConfig);
 
-SentryMinorTurretGovenor turretZero(
+SentryMinorTurretGovernor turretZero(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret0::AGITATOR_CONFIG,
@@ -264,7 +277,7 @@ SentryMinorTurretGovenor turretZero(
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
     });
 
-SentryMinorTurretGovenor turretOne(
+SentryMinorTurretGovernor turretOne(
     *drivers(),
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turret1::AGITATOR_CONFIG,

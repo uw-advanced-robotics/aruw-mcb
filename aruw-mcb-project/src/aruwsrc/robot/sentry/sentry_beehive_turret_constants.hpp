@@ -67,7 +67,7 @@ namespace turretMajor
 {
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-static constexptr tap::CanBus 
+// static constexptr tap::can::CanBus 
 
 
 }
