@@ -206,132 +206,29 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
     
-    uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTurretMinor1YawInputCalledTime;
-    prevTurretMinor1YawInputCalledTime = currTime;
-
-    if (prevUpdateCounterTurretMinor1YawInput != updateCounter)
-    {
-        turretMinor1YawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
-            currTime);
-        prevUpdateCounterTurretMinor1YawInput = updateCounter;
-    }
-    
-    const float maxTurretMinor1YawSpeed = MAX_TURRET1_MINOR_YAW_SPEED;
-
-    float finalYaw = maxTurretMinor1YawSpeed *
-                   limitVal(turretMinor1YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
-
-    turretMinor1YawRamp.setTarget(finalYaw);
-
-    applyAccelerationToRamp(
-        turretMinor1YawRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
-
-    return turretMinor1YawRamp.getValue();
+    return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
     
-    uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTurretMinor1PitchInputCalledTime;
-    prevTurretMinor1PitchInputCalledTime = currTime;
-
-    if (prevUpdateCounterTurretMinor1PitchInput != updateCounter)
-    {
-        turretMinor1YawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
-            currTime);
-        prevUpdateCounterTurretMinor1PitchInput = updateCounter;
-    }
-    
-    const float maxTurretMinor1PitchSpeed = MAX_TURRET1_MINOR_PITCH_SPEED;
-
-    float finalPitch = maxTurretMinor1PitchSpeed *
-                   limitVal(turretMinor1PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
-
-    turretMinor1PitchRamp.setTarget(finalPitch);
-
-    applyAccelerationToRamp(
-        turretMinor1PitchRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
-
-    return turretMinor1PitchRamp.getValue();
+    return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
     
-    uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTurretMinor2YawInputCalledTime;
-    prevTurretMinor2YawInputCalledTime = currTime;
-
-    if (prevUpdateCounterTurretMinor2YawInput != updateCounter)
-    {
-        turretMinor2YawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
-            currTime);
-        prevUpdateCounterTurretMinor2YawInput = updateCounter;
-    }
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
     
-    const float maxTurretMinor2YawSpeed = MAX_TURRET2_MINOR_YAW_SPEED;
-
-    float finalYaw = maxTurretMinor2YawSpeed *
-                   limitVal(turretMinor2YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
-
-    turretMinor2YawRamp.setTarget(finalYaw);
-
-    applyAccelerationToRamp(
-        turretMinor2YawRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
-
-    return turretMinor2YawRamp.getValue();
 }
 
 float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
 {
-    if (!isTurretControlMode()) return 0.f; 
+    if (!isTurretControlMode()) return 0.f;
 
-    uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTurretMinor2PitchInputCalledTime;
-    prevTurretMinor2PitchInputCalledTime = currTime;
-
-    if (prevUpdateCounterTurretMinor2PitchInput != updateCounter)
-    {
-        turretMinor2PitchInput.update(
-            -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL),
-            currTime);
-        prevUpdateCounterTurretMinor2PitchInput = updateCounter;
-    }
-    
-    const float maxTurretMinor2PitchSpeed = MAX_TURRET2_MINOR_PITCH_SPEED;
-
-    float finalPitch = maxTurretMinor2PitchSpeed *
-                   limitVal(turretMinor2PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
-
-    turretMinor1PitchRamp.setTarget(finalPitch);
-
-    applyAccelerationToRamp(
-        turretMinor1PitchRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
-
-    return turretMinor1PitchRamp.getValue();
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
 

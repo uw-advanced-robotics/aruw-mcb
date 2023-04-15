@@ -169,8 +169,8 @@ public:
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
-              USER_YAW_INPUT_SCALAR,
-              USER_PITCH_INPUT_SCALAR),
+              MINOR_USER_YAW_INPUT_SCALAR,
+              MINOR_USER_PITCH_INPUT_SCALAR),
         //   turretCVCommand(
             //   &drivers.visionCoprocessor,
             //   &turretSubsystem,
