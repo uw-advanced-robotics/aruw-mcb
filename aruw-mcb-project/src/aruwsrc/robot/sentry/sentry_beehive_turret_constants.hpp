@@ -135,11 +135,11 @@ namespace turretMajor
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 70'000.0f,
-    .ki = 0.0f,
-    .kd = 10'000.0f,
+    .ki = 2.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 25'000.0f,
-    // .maxOutput = 10000.f,
+// .maxOutput = 5000.f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
