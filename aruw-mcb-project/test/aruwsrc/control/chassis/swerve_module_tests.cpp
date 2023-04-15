@@ -49,12 +49,11 @@ protected:
     }
 
     tap::Drivers drivers;
+    SwerveModuleConfig TEST_SWERVE_CONFIG;
     NiceMock<tap::mock::DjiMotorMock> driveMock;
     NiceMock<tap::mock::DjiMotorMock> azimuthMock;
     SwerveModule module;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
-
-    SwerveModuleConfig TEST_SWERVE_CONFIG;
 };
 
 TEST_F(SwerveModuleTest, allMotorsOnline)
