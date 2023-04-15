@@ -137,37 +137,37 @@ float SentryControlOperatorInterface::getChassisYVelocity()
     return chassisYInputRamp.getValue();
 }
 
-float SentryControlOperatorInterface::getChassisYawVelocity() {
-    if (!isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
+// float SentryControlOperatorInterface::getChassisYawVelocity() {
+//     if (!isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
     
-    uint32_t updateCounter = drivers->remote.getUpdateCounter();
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYawnputCalledTime;
-    prevChassisYawnputCalledTime = currTime;
+//     uint32_t updateCounter = drivers->remote.getUpdateCounter();
+//     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+//     uint32_t dt = currTime - prevChassisYawnputCalledTime;
+//     prevChassisYawnputCalledTime = currTime;
 
-    if (prevUpdateCounterChassisYawInput != updateCounter)
-    {
-        chassisYawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
-            currTime);
-        prevUpdateCounterChassisYawInput = updateCounter;
-    }
+//     if (prevUpdateCounterChassisYawInput != updateCounter)
+//     {
+//         chassisYawInput.update(
+//             -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+//             currTime);
+//         prevUpdateCounterChassisYawInput = updateCounter;
+//     }
     
-    const float maxChassisYawSpeed = MAX_TURRET_MAJOR_YAW_SPEED;
+//     const float maxChassisYawSpeed = MAX_TURRET_MAJOR_YAW_SPEED;
 
-    float finalR = maxChassisYawSpeed *
-                   limitVal(chassisYawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+//     float finalR = maxChassisYawSpeed *
+//                    limitVal(chassisYawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
-    chassisYawInputRamp.setTarget(finalR);
+//     chassisYawInputRamp.setTarget(finalR);
 
-    applyAccelerationToRamp(
-        chassisYawInputRamp,
-        MAX_ACCELERATION_R,
-        MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
+//     applyAccelerationToRamp(
+//         chassisYawInputRamp,
+//         MAX_ACCELERATION_R,
+//         MAX_DECELERATION_R,
+//         static_cast<float>(dt) / 1E3);
 
-    return chassisYawInputRamp.getValue(); 
-}
+//     return chassisYawInputRamp.getValue(); 
+// }
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 {

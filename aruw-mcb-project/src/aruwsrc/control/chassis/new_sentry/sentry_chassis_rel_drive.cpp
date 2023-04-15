@@ -67,7 +67,8 @@ void SentryChassisRelDrive::onExecute(
     tap::Drivers *drivers,
     chassis::HolonomicChassisSubsystem *chassis)
 {
-    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisYawVelocity();
+    // float chassisRotationDesiredWheelspeed = operatorInterface->getChassisYawVelocity();
+    float chassisRotationDesiredWheelspeed = 0.0f;
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;

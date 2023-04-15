@@ -39,7 +39,7 @@ namespace aruwsrc::control::turret
 
 // new 
 
-static constexpr TurretMotorConfig majorYawConfig = {
+static constexpr TurretMotorConfig MAJOR_YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 1363,
     .minAngle = 0,
@@ -144,6 +144,22 @@ static constexpr float PITCH_YAW_OFFSET = 0.045f;
 
 namespace chassis_rel
 {
+namespace turretMajor
+{
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 70'000.0f,
+    .ki = 0.0f,
+    .kd = 3'000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 40.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+}  // namespace turretMinor0
+
 namespace turretMinor0
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
