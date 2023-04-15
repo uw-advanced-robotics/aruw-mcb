@@ -27,18 +27,18 @@ namespace chassis
 {
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
-    Module* moduleFront,
-    Module* moduleLeft,
-    Module* moduleBack,
-    Module* moduleRight,
+    Module* moduleLeftFront,
+    Module* moduleRightFront,
+    Module* moduleLeftBack,
+    Module* moduleRightBack,
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       NUM_MODULES(4),
       modules{
-          moduleFront,
-          moduleLeft,
-          moduleBack,
-          moduleRight}
+          moduleLeftFront,
+          moduleRightFront,
+          moduleLeftBack,
+          moduleRightBack}
 {
 }
 
