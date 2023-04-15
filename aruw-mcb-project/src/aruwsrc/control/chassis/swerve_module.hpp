@@ -60,7 +60,13 @@ class SwerveModule
 {
 public:
     SwerveModule(
-        tap::Drivers* drivers,
+    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+        testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor,
+        testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor,
+    #else
+        tap::motor::DjiMotor& driveMotor,
+        tap::motor::DjiMotor& azimuthMotor,
+    #endif
         SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
     /**
@@ -110,11 +116,20 @@ public:
 
     bool allMotorsOnline() const;
 
-    inline modm::Matrix<float, 2, 1> getModuleVelocity() const
+    inline modm::Matrix<float, 2, 1> getActualModuleVelocity() const
     {
         modm::Matrix<float, 2, 1> velocity;
         velocity[0][0] = getDriveVelocity() * cos(getAngle());
         velocity[1][0] = getDriveVelocity() * sin(getAngle());
+        return velocity;
+    }
+
+    // UNFINISHED DONT USE YET ITS THE SAME AS ACTUAL
+    inline modm::Matrix<float, 2, 1> getDesiredModuleVelocity() const
+    {
+        modm::Matrix<float, 2, 1> velocity;
+        velocity[0][0] = wheel.rpmToMps(speedSetpointRPM) * cos(rotationSetpoint);
+        velocity[1][0] = wheel.rpmToMps(speedSetpointRPM) * sin(rotationSetpoint);
         return velocity;
     }
 
@@ -130,13 +145,13 @@ public:
     const Wheel wheel;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::DjiMotorMock>* driveMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock>* azimuthMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor;
+    testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor;
 private:
 #else
 private:
-    tap::motor::DjiMotor* driveMotor;
-    tap::motor::DjiMotor* azimuthMotor;
+    tap::motor::DjiMotor& driveMotor;
+    tap::motor::DjiMotor& azimuthMotor;
 #endif
 
     /**
@@ -161,9 +176,9 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, speedSetpointRPM,
-        rotationSetpoint, newRawRotationSetpointRadians, newRotationSetpointRadians, moveVectorX,
-        moveVectorY;
+    float rotationSetpoint, speedSetpointRPM;  //pid setpoint, in radians and rpm respectively
+    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians, 
+        newRotationSetpointRadians, moveVectorX, moveVectorY;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)

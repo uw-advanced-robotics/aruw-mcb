@@ -62,16 +62,10 @@ class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 public:
     SwerveChassisSubsystem(
         tap::Drivers* drivers,
-        SwerveModuleConfig config1 = DEFAULT_SWERVE_CONFIG,
-        SwerveModuleConfig config2 = DEFAULT_SWERVE_CONFIG,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
-
-    SwerveChassisSubsystem(
-        tap::Drivers* drivers,
-        SwerveModuleConfig config1,
-        SwerveModuleConfig config2,
-        SwerveModuleConfig config3,
-        SwerveModuleConfig config4,
+        SwerveModule* moduleFront,
+        SwerveModule* moduleLeft,
+        SwerveModule* moduleBack,
+        SwerveModule* moduleRight,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
@@ -96,8 +90,8 @@ public:
     enum ModuleIndex
     {
         LF = 0,
-        LB = 1,
-        RF = 2,
+        RF = 1,
+        LB = 2,
         RB = 3,
     };
 
@@ -106,20 +100,19 @@ public:
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     // only to satisfy chassis subsystem interface
-    inline int16_t getLeftFrontRpmActual() const override { return modules[LF].getDriveRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return modules[LB].getDriveRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return modules[RF].getDriveRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return modules[RB].getDriveRPM(); }
+    inline int16_t getLeftFrontRpmActual() const override { return modules[LF]->getDriveRPM(); }
+    inline int16_t getLeftBackRpmActual() const override { return modules[LB]->getDriveRPM(); }
+    inline int16_t getRightFrontRpmActual() const override { return modules[RF]->getDriveRPM(); }
+    inline int16_t getRightBackRpmActual() const override { return modules[RB]->getDriveRPM(); }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     const unsigned int NUM_MODULES{4};
-    std::array<Module, 4> modules;
-
+    std::array<Module*, 4> modules;
 private:
 #else
 private:
     const unsigned int NUM_MODULES{4};
-    std::array<Module, 4> modules;
+    std::array<Module*, 4> modules;
 #endif
 
     /**

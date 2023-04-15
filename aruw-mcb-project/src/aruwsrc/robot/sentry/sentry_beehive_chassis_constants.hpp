@@ -3,25 +3,32 @@
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::chassis
 {
 
-chassis::SwerveModuleConfig frontMotorConfig = {
+// Distance from center of rotation to 
+static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
+
+
+static constexpr 
+
+// todo: hopefullly these can live as constants here soon :)
+SwerveModuleConfig frontMotorConfig = {
     .positionWithinChassisX = 0.205,
     .positionWithinChassisY = 0,
 };
 
-chassis::SwerveModuleConfig backMotorConfig = {
+SwerveModuleConfig backMotorConfig = {
     .positionWithinChassisX = -0.205,
     .positionWithinChassisY = 0.0,
 };
 
-chassis::SwerveModuleConfig leftMotorConfig = {
+SwerveModuleConfig leftMotorConfig = {
     .positionWithinChassisX = 0.0,
     .positionWithinChassisY = -0.205,
 };
 
-chassis::SwerveModuleConfig rightMotorConfig = {
+SwerveModuleConfig rightMotorConfig = {
     .positionWithinChassisX = 0.205,
     .positionWithinChassisY = 0.0,
 };

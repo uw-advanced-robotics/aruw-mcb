@@ -63,16 +63,28 @@ static constexpr TurretMotorConfig MINOR_PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
+namespace turretMajor
+{
+
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexptr tap::CanBus 
 
 
+}
+
+namespace turretMinor0
+{
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 
+}
+
+namespace turretMinor1
+{
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 
-
-
-
-
+}
 
 
 
