@@ -49,7 +49,7 @@
 // #include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
 // #include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
 // #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
-// #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 // #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 // #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 // #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
@@ -256,7 +256,10 @@ tap::motor::DjiMotor turretMinor1PitchMotor(
 // note: swerve drive will take swerve modules soon 
 aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
     drivers(),
-    
+    &leftFrontSwerveModule,
+    &rightFrontSwerveModule,
+    &leftBackSwerveModule,
+    &rightBackSwerveModule);
 
 SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, majorYawConfig);
 
