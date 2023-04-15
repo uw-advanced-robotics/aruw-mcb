@@ -97,6 +97,11 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+// Send the data as soon as possible
+#if defined(TARGET_SENTRY_BEEHIVE)
+        PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
+#endif
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
@@ -118,10 +123,6 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
-#if defined(TARGET_SENTRY_BEEHIVE)
-            PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
 #endif
         }
         modm::delay_us(10);

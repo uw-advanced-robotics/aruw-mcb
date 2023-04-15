@@ -76,6 +76,10 @@ public:
 
     void calibrateIMU();
 
+    void initialize();
+
+    constexpr static int UART_BAUDRATE = 1'000'000;
+
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
 
