@@ -24,6 +24,8 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
+using namespace tap::communication::serial;
+
 namespace aruwsrc::virtualMCB
 {
 VirtualMCBHandler::VirtualMCBHandler(
@@ -38,6 +40,33 @@ VirtualMCBHandler::VirtualMCBHandler(
       calibrateIMUMessage()
 
 {
+}
+
+void VirtualMCBHandler::initialize()
+{
+    switch (this->port)
+    {
+        case Uart::UartPort::Uart1:
+            drivers->uart.init<Uart::UartPort::Uart1, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart2:
+            drivers->uart.init<Uart::UartPort::Uart2, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart3:
+            drivers->uart.init<Uart::UartPort::Uart3, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart6:
+            drivers->uart.init<Uart::UartPort::Uart6, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart7:
+            drivers->uart.init<Uart::UartPort::Uart7, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart8:
+            drivers->uart.init<Uart::UartPort::Uart8, UART_BAUDRATE>();
+            break;
+        default:
+            break;
+    }
 }
 
 void VirtualMCBHandler::sendData()
