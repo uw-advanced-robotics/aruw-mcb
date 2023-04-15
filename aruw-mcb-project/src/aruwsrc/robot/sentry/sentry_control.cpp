@@ -311,14 +311,7 @@ HoldRepeatCommandMapping rightSwitchUp(
      &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&sentryDriveManual1, &turretZero.turretManual, &turretOne.turretManual},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&sentryDriveManual2},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -384,8 +377,8 @@ void registerSentryIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchMid);
+    // drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchMid);
 }
 }  // namespace sentry_control
 
