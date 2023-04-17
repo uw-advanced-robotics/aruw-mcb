@@ -87,10 +87,8 @@ public:
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
-
-    IMUMessage currentIMUData;
-
-    CurrentSensorMessage currentCurrentSensorData;
+    VirtualCurrentSensor currentSensor;
+    VirtualIMUInterface imu;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
@@ -99,14 +97,22 @@ private:
 
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
+    IMUMessage currentIMUData;
+
+    CurrentSensorMessage currentCurrentSensorData;
+
     tap::communication::serial::Uart::UartPort port;
 
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<0> calibrateIMUMessage;
     bool sendIMUCalibrationMessage = false;
+
+    friend class VirtualCurrentSensor;
+    friend class VirtualIMUInterface;
 };
 
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
+    public:
     VirtualCurrentSensor(VirtualMCBHandler* handler) : handler(handler) {}
     void update() override {}
     float getCurrentMa() const override { return handler->currentCurrentSensorData.current; }
@@ -115,6 +121,7 @@ class VirtualCurrentSensor : public tap::communication::sensors::current::Curren
 
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
+    public:
     VirtualIMUInterface(VirtualMCBHandler* handler) : handler(handler) {}
 
     float getPitch() override { return handler->currentIMUData.pitch; }
@@ -128,7 +135,7 @@ class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterfac
     float getAz() override { return handler->currentIMUData.Az; }
     float getTemp() override { return handler->currentIMUData.temperature; }
     Mpu6500::ImuState getImuState() { return handler->currentIMUData.imuState; }
-
+    virtual inline const char* getName() const { return "I'm a little chunky monkey"; }
     aruwsrc::virtualMCB::VirtualMCBHandler* handler;
 };
 
