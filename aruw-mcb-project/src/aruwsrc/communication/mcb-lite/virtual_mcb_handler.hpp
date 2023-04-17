@@ -21,6 +21,8 @@
 #define VIRTUAL_MCB_HANDLER_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
@@ -29,6 +31,8 @@
 #include "modm/container/queue.hpp"
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
+
+using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::virtualMCB
 {
@@ -44,9 +48,9 @@ enum MessageTypes : uint8_t
 struct IMUMessage
 {
     float pitch, roll, yaw;
-    float pitchRate, rollRate, yawRate;
-    float xAccel, yAccel, zAccel;
-    tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState;
+    float Gx, Gy, Gz;
+    float Ax, Ay, Az;
+    Mpu6500::ImuState imuState;
     float temperature;
 } modm_packed;
 
@@ -84,6 +88,10 @@ public:
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
 
+    IMUMessage currentIMUData;
+
+    CurrentSensorMessage currentCurrentSensorData;
+
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
 
@@ -93,12 +101,35 @@ private:
 
     tap::communication::serial::Uart::UartPort port;
 
-    IMUMessage currentIMUData;
-
-    CurrentSensorMessage currentCurrentSensorData;
-
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<0> calibrateIMUMessage;
     bool sendIMUCalibrationMessage = false;
+};
+
+class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
+{
+    VirtualCurrentSensor(VirtualMCBHandler* handler) : handler(handler) {}
+    void update() override {}
+    float getCurrentMa() const override { return handler->currentCurrentSensorData.current; }
+    aruwsrc::virtualMCB::VirtualMCBHandler* handler;
+};
+
+class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
+{
+    VirtualIMUInterface(VirtualMCBHandler* handler) : handler(handler) {}
+
+    float getPitch() override { return handler->currentIMUData.pitch; }
+    float getRoll() override { return handler->currentIMUData.roll; }
+    float getYaw() override { return handler->currentIMUData.yaw; }
+    float getGx() override { return handler->currentIMUData.Gx; }
+    float getGy() override { return handler->currentIMUData.Gy; }
+    float getGz() override { return handler->currentIMUData.Gz; }
+    float getAx() override { return handler->currentIMUData.Ax; }
+    float getAy() override { return handler->currentIMUData.Ay; }
+    float getAz() override { return handler->currentIMUData.Az; }
+    float getTemp() override { return handler->currentIMUData.temperature; }
+    Mpu6500::ImuState getImuState() { return handler->currentIMUData.imuState; }
+
+    aruwsrc::virtualMCB::VirtualMCBHandler* handler;
 };
 
 }  // namespace aruwsrc::virtualMCB
