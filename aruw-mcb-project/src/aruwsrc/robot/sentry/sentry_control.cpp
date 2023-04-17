@@ -441,7 +441,7 @@ HoldCommandMapping leftSwitchMid(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    // sentryDrive.initialize();
+    sentryDrive.initialize();
     // turretZero.agitator.initialize();
     // turretZero.frictionWheels.initialize();
     turretZero.turretSubsystem.initialize();
