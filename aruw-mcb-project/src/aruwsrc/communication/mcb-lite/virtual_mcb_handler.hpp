@@ -59,13 +59,13 @@ struct CurrentSensorMessage
     float current;
 } modm_packed;
 
+/**
+ * This class is used to communicate with the the virtual MCB using the UART port.
+ * This class handles the sending and receiving of motor data, as well as receiving
+ * IMU and current sensor data. Call refresh() to update the data.
+ */
 class VirtualMCBHandler : public tap::communication::serial::DJISerial
 {
-    /**
-     * This class is used to communicate with the the virtual MCB using the UART port.
-     * This class handles the sending and receiving of motor data, as well as receiving
-     * IMU and current sensor data. Call refresh() to update the data.
-     */
 public:
     VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
@@ -112,7 +112,7 @@ private:
 
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
-    public:
+public:
     VirtualCurrentSensor(VirtualMCBHandler* handler) : handler(handler) {}
     void update() override {}
     float getCurrentMa() const override { return handler->currentCurrentSensorData.current; }
@@ -121,7 +121,7 @@ class VirtualCurrentSensor : public tap::communication::sensors::current::Curren
 
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
-    public:
+public:
     VirtualIMUInterface(VirtualMCBHandler* handler) : handler(handler) {}
 
     float getPitch() override { return handler->currentIMUData.pitch; }
