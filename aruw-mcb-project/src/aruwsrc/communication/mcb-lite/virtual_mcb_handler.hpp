@@ -135,7 +135,7 @@ public:
     float getAz() override { return handler->currentIMUData.Az; }
     float getTemp() override { return handler->currentIMUData.temperature; }
     Mpu6500::ImuState getImuState() { return handler->currentIMUData.imuState; }
-    virtual inline const char* getName() const { return "I'm a little chunky monkey"; }
+    virtual inline const char* getName() const { return "Virtual IMU"; }
     aruwsrc::virtualMCB::VirtualMCBHandler* handler;
 };
 
