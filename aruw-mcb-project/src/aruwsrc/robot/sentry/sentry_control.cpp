@@ -452,6 +452,15 @@ void initializeSubsystems()
     turretMajor.initialize();
     // odometrySubsystem.initialize();
     // turret
+ 
+    leftFrontDriveMotor.setDesiredOutput(500);
+    leftFrontAzimuthMotor.setDesiredOutput(500);
+    rightFrontDriveMotor.setDesiredOutput(500);
+    rightFrontAzimuthMotor.setDesiredOutput(500);
+    leftBackDriveMotor.setDesiredOutput(500);
+    leftBackAzimuthMotor.setDesiredOutput(500);
+    rightBackDriveMotor.setDesiredOutput(500);
+    rightBackAzimuthMotor.setDesiredOutput(500);
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -487,6 +496,8 @@ void setDefaultSentryCommands(Drivers *)
     //     &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     // turretOne.agitator.setDefaultCommand(
     //     &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
+
+    
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
