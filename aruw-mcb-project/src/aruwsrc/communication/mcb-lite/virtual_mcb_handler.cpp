@@ -130,7 +130,7 @@ void VirtualMCBHandler::messageReceiveCallback(const ReceivedSerialMessage& comp
             case MessageTypes::IMU_MESSAGE:
                 processIMUMessage(completeMessage);
                 break;
-            case MessageTypes::GPIO_MESSAGE:
+            case MessageTypes::CURRENT_SENSOR_MESSAGE:
                 processCurrentSensorMessage(completeMessage);
                 break;
             default:

@@ -37,7 +37,7 @@ enum MessageTypes : uint8_t
     CANBUS1_MESSAGE = 0,
     CANBUS2_MESSAGE = 1,
     IMU_MESSAGE = 2,
-    GPIO_MESSAGE = 3,
+    CURRENT_SENSOR_MESSAGE = 3,
     CALIBRATE_IMU = 4
 };
 
@@ -47,6 +47,7 @@ struct IMUMessage
     float pitchRate, rollRate, yawRate;
     float xAccel, yAccel, zAccel;
     tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState imuState;
+    float temperature;
 } modm_packed;
 
 struct CurrentSensorMessage
