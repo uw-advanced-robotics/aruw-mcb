@@ -34,12 +34,12 @@ VirtualMCBHandler::VirtualMCBHandler(
     : DJISerial(drivers, port),
       canRxHandler(VirtualCanRxHandler(drivers)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
+      currentSensor(),
+      imu(),
       port(port),
-      currentIMUData(),
-      currentCurrentSensorData(),
       calibrateIMUMessage(),
-      currentSensor(this),
-      imu(this)
+      currentIMUData(),
+      currentCurrentSensorData()
 {
 }
 
@@ -110,13 +110,6 @@ void VirtualMCBHandler::calibrateIMU()
     sendIMUCalibrationMessage = true;
 }
 
-IMUMessage& VirtualMCBHandler::getIMUMessage() { return currentIMUData; }
-
-CurrentSensorMessage& VirtualMCBHandler::getCurrentSensorMessage()
-{
-    return currentCurrentSensorData;
-}
-
 void VirtualMCBHandler::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     switch (completeMessage.messageType)
@@ -151,12 +144,24 @@ void VirtualMCBHandler::processCanMessage(
 
 void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeMessage)
 {
-    memcpy(&currentIMUData, completeMessage.data, sizeof(IMUMessage));
+    memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
+    imu.pitch = currentIMUData.pitch;
+    imu.roll = currentIMUData.roll;
+    imu.yaw = currentIMUData.yaw;
+    imu.Gx = currentIMUData.Gx;
+    imu.Gy = currentIMUData.Gy;
+    imu.Gz = currentIMUData.Gz;
+    imu.Ax = currentIMUData.Ax;
+    imu.Ay = currentIMUData.Ay;
+    imu.Az = currentIMUData.Az;
+    imu.imuState = currentIMUData.imuState;
+    imu.temperature = currentIMUData.temperature;
 }
 
 void VirtualMCBHandler::processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage)
 {
-    memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(CurrentSensorMessage));
+    memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(currentCurrentSensorData));
+    currentSensor.current = currentCurrentSensorData.current;
 }
 
 }  // namespace aruwsrc::virtualMCB

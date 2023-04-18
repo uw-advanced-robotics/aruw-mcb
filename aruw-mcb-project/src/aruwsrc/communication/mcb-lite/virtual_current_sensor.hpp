@@ -16,29 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VIRTUAL_CURRENT_SENSOR_HPP_
+#define VIRTUAL_CURRENT_SENSOR_HPP_
 
-#ifndef VIRTUAL_CAN_RX_HANDLER_HPP_
-#define VIRTUAL_CAN_RX_HANDLER_HPP_
-
-#include "tap/communication/can/can_rx_handler.hpp"
-#include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/drivers.hpp"
-#include "tap/util_macros.hpp"
-
-#include "modm/architecture/interface/assert.h"
-#include "modm/architecture/interface/can_message.hpp"
+#include "tap/communication/sensors/current/current_sensor_interface.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-/**
- * This class is used to pass CAN messages from the virtual MCB to listeners (motors)
- */
-class VirtualCanRxHandler : public tap::can::CanRxHandler
+
+class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
 public:
-    VirtualCanRxHandler(tap::Drivers* drivers);
+    VirtualCurrentSensor() {}
+    void update() override {}
+    float getCurrentMa() const override { return current; }
 
-    void refresh(tap::can::CanBus canbus, modm::can::Message message);
+    float current;
 };
 
 }  // namespace aruwsrc::virtualMCB
