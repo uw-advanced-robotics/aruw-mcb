@@ -453,14 +453,14 @@ void initializeSubsystems()
     // odometrySubsystem.initialize();
     // turret
  
-    leftFrontDriveMotor.setDesiredOutput(500);
-    leftFrontAzimuthMotor.setDesiredOutput(500);
-    rightFrontDriveMotor.setDesiredOutput(500);
-    rightFrontAzimuthMotor.setDesiredOutput(500);
-    leftBackDriveMotor.setDesiredOutput(500);
-    leftBackAzimuthMotor.setDesiredOutput(500);
-    rightBackDriveMotor.setDesiredOutput(500);
-    rightBackAzimuthMotor.setDesiredOutput(500);
+    // leftFrontDriveMotor.setDesiredOutput(500);
+    // leftFrontAzimuthMotor.setDesiredOutput(500);
+    // rightFrontDriveMotor.setDesiredOutput(500);
+    // rightFrontAzimuthMotor.setDesiredOutput(500);
+    // leftBackDriveMotor.setDesiredOutput(500);
+    // leftBackAzimuthMotor.setDesiredOutput(500);
+    // rightBackDriveMotor.setDesiredOutput(500);
+    // rightBackAzimuthMotor.setDesiredOutput(500);
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
