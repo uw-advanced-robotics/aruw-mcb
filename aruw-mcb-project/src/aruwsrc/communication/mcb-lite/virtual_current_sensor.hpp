@@ -23,14 +23,16 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
+    friend class VirtualMCBHandler;
+
 public:
     VirtualCurrentSensor() {}
     void update() override {}
     float getCurrentMa() const override { return current; }
 
+private:
     float current;
 };
 

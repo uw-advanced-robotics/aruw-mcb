@@ -25,8 +25,12 @@
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
+namespace aruwsrc::virtualMCB
+{
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
+    friend class VirtualMCBHandler;
+
 public:
     VirtualIMUInterface() {}
 
@@ -43,11 +47,14 @@ public:
     Mpu6500::ImuState getImuState() { return imuState; }
     virtual inline const char* getName() const { return "Virtual IMU"; }
 
+private:
     float pitch, roll, yaw;
     float Gx, Gy, Gz;
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
 };
+
+}  // namespace aruwsrc::virtualMCB
 
 #endif
