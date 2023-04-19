@@ -31,7 +31,7 @@ void MotorHomingCommand::execute()
     {
         case (HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND):
         {
-            subsystem.setMotorOutput(-HOMING_MOTOR_OUTPUT);
+            subsystem.moveTowardLowerBound();
             homingState = HomingState::MOVING_TOWARD_LOWER_BOUND;
             break;
         }
@@ -40,14 +40,14 @@ void MotorHomingCommand::execute()
             if (subsystem.isStalled())
             {
                 subsystem.setLowerBound();
-                subsystem.setMotorOutput(0);
+                subsystem.stop();
                 homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
             }
             break;
         }
         case (HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND):
         {
-            subsystem.setMotorOutput(HOMING_MOTOR_OUTPUT);
+            subsystem.moveTowardUpperBound();
             homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
             break;
         }
@@ -56,7 +56,7 @@ void MotorHomingCommand::execute()
             if (subsystem.isStalled())
             {
                 subsystem.setUpperBound();
-                subsystem.setMotorOutput(0);
+                subsystem.stop();
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;
@@ -68,7 +68,7 @@ void MotorHomingCommand::execute()
     }
 }
 
-void MotorHomingCommand::end(bool) { subsystem.setMotorOutput(0); }
+void MotorHomingCommand::end(bool) { subsystem.stop(); }
 
 bool MotorHomingCommand::isFinished() const
 {

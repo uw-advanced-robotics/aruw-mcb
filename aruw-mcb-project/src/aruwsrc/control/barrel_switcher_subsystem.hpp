@@ -27,17 +27,52 @@
 
 namespace aruwsrc::control
 {
+
+static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
+
+
+static constexpr int32_t USING_RIGHT_BARREL_POSITION = 25; //find actual value after hardware testing
+static constexpr int32_t USING_LEFT_BARREL_POSITION = 75; //find actual value after hardware testing
+
+//find actual values after testing
+static constexpr float POSITION_PID_KP = 1.0f;
+static constexpr float POSITION_PID_KI = 1.0f;
+static constexpr float POSITION_PID_KD = 1.0f;
+static constexpr int32_t POSITION_PID_MAX_ERROR_SUM = 1;
+static constexpr int32_t POSITION_PID_MAX_OUTPUT = 1;
+
+enum class FiringPosition
+    {
+        USING_LEFT_BARREL,
+        USING_RIGHT_BARREL,
+        SWITCHING_BETWEEN_BARRELS
+    };
+
 class BarrelSwitcherSubsystem : public aruwsrc::control::HomeableSubsystemInterface
 {
 public:
-    BarrelSwitcherSubsystem(tap::Drivers* drivers, tap::motor::MotorId motorid);
+    BarrelSwitcherSubsystem(
+        tap::Drivers* drivers, 
+        tap::motor::MotorId motorid, aruwsrc::control::HomingConfig config
+    );
+    
     void initialize() override;
-    void setMotorOutput(int32_t desiredOutput) override;
+    void refresh() override;
     bool isStalled() const override;
     void setLowerBound() override;
     void setUpperBound() override;
+    void moveTowardUpperBound() override;
+    void moveTowardLowerBound() override; 
+    void stop() override;
     
 private:
+    void setMotorOutput(int32_t desiredOutput);
+    void updateMotorEncoderPid(
+        modm::Pid<int32_t>* pid,
+        tap::motor::DjiMotor* const motor,
+        int32_t desiredEncoderPosition
+    );
+
     /**
      * The motor that switches the turret's barrels
     */
@@ -48,6 +83,26 @@ private:
      * note: the lower bound is 0
     */
     int32_t motorUpperBound;
+
+    /**
+     * stores the thresholds for shaftRPM and torque; used to indicate motor stall
+    */
+    aruwsrc::control::HomingConfig config;
+
+    bool lowerBoundSet;
+    bool upperBoundSet;
+
+    /**
+     * Stores the motor's position along the axis 
+    */
+    int32_t motorPosition;
+
+    /**
+     * Stores the state of this barrel switcher's firing position; which barrel is in use
+    */
+    FiringPosition firingPosition;
+
+    modm::Pid<int32_t>* encoderPid;
 };
 } //namespace aruwsrc::control
 #endif

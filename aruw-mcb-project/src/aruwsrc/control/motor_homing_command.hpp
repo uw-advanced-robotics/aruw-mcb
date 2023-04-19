@@ -40,7 +40,6 @@ namespace aruwsrc::control
 class MotorHomingCommand : public tap::control::Command
 {
 public:
-    static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
 
     /**
      * Specifies the state that the homing command is in.

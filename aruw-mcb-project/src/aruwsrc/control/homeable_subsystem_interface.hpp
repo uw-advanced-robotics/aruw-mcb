@@ -24,6 +24,12 @@
 
 namespace aruwsrc::control
 {
+
+struct HomingConfig {
+    int16_t minRPM;
+    int16_t maxTorque;
+};
+
 /**
  * Abstract subsystem for a system that is homeable on an axis.
  */
@@ -31,12 +37,21 @@ class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
     HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+
     /**
-     * Sets the desired output of the motor of this homeable subsystem's axis.
-     *
-     * @param[in] desiredOutput The desired output of the motor to be set.
-     */
-    virtual void setMotorOutput(int32_t desiredOutput) = 0;
+     * Moves the motor on the homeeable axis towards its upper mechanical limit.
+    */
+    virtual void moveTowardUpperBound() = 0;
+
+    /**
+     * Moves the motor on the homeable axis towards its lower mechanical limit.
+    */
+    virtual void moveTowardLowerBound() = 0;
+
+    /**
+     * Stops the motor on the homeable axis.
+    */
+    virtual void stop() = 0;
 
     /**
      * Detects whether the subsystem's motor is stalled, indicating that it has reached a hard stop.
