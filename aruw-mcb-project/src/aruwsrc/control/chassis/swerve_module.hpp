@@ -141,6 +141,7 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     Motor& driveMotor;
     Motor& azimuthMotor;
+
 private:
 #else
 private:

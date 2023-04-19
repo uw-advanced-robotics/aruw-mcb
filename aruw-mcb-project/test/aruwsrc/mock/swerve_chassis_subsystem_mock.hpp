@@ -32,7 +32,7 @@ class SwerveChassisSubsystemMock : public aruwsrc::chassis::SwerveChassisSubsyst
 {
 public:
     SwerveChassisSubsystemMock(
-        tap::Drivers *drivers, 
+        tap::Drivers* drivers, 
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,
