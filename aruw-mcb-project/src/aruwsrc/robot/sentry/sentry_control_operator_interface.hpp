@@ -20,11 +20,11 @@
 #ifndef SENTRY_CONTROL_OPERATOR_INTERFACE_HPP_
 #define SENTRY_CONTROL_OPERATOR_INTERFACE_HPP_
 
-#include "tap/algorithms/linear_interpolation_predictor.hpp"
+
+#include "tap/drivers.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/architecture/clock.hpp"
-#include "tap/drivers.hpp"
-
+#include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 namespace aruwsrc::control::sentry
@@ -47,9 +47,9 @@ public:
 
     static constexpr float MAX_ACCELERATION_X = 10'000.0f; // TODO: change these values
     static constexpr float MAX_DECELERATION_X = 20'000.0f;
-    static constexpr float MAX_ACCELERATION_Y = 10'000.0f;  // TODO: change the values?
+    static constexpr float MAX_ACCELERATION_Y = 10'000.0f; // TODO: change the values?
     static constexpr float MAX_DECELERATION_Y = 20'000.0f;
-    static constexpr float MAX_ACCELERATION_R = 10'000.0f;  // TODO: change the values?
+    static constexpr float MAX_ACCELERATION_R = 10'000.0f; // TODO: change the values?
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
 
     // max rotational speeds of the turrets in RAD / S
@@ -60,7 +60,6 @@ public:
     SentryControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
 
     // Drive mode functions
-
     /**
      * @return The value used for chassis movement forward and backward
      */
@@ -70,11 +69,6 @@ public:
      * @return The value used for chassis lateral movement
      */
     mockable float getChassisYVelocity();
-
-    /**
-     * @return The value used for chassis rotational velocity,
-     */
-    mockable float getChassisYawVelocity();
 
     // Turret control mode functions
     /**
@@ -91,7 +85,7 @@ public:
      * @return the value used for turret minor 1 pitch velocity in radians / second
      */
     mockable float getTurretMinor1PitchVelocity();
-
+    
     /**
      * @return the value used for turret minor 2 yaw velocity in radians / second
      */
@@ -102,21 +96,22 @@ public:
      */
     mockable float getTurretMinor2PitchVelocity();
 
+
     // TODO: add autodrive commands
 
     /**
-     * @return whether or not the control switch is set to drive mode.
-     */
+    * @return whether or not the control switch is set to drive mode.
+    */
     bool isDriveMode();
 
     /**
      * @return whether or not the control switch is set to turret control mode.
-     */
+    */
     bool isTurretControlMode();
 
     /**
      * @return whether or not the control switch is set to auto drive mode.
-     */
+    */
     bool isAutoDriveMode();
 
 private:
@@ -125,7 +120,7 @@ private:
     uint32_t prevUpdateCounterChassisXInput = 0;
     uint32_t prevUpdateCounterChassisYInput = 0;
     uint32_t prevUpdateCounterChassisYawInput = 0;
-
+    
     uint32_t prevUpdateCounterTurretMajorYawInput = 0;
     uint32_t prevUpdateCounterTurretMinor1YawInput = 0;
     uint32_t prevUpdateCounterTurretMinor2YawInput = 0;
