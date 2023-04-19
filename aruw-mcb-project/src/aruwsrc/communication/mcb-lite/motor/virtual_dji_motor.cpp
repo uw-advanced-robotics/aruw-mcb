@@ -49,12 +49,14 @@ VirtualDjiMotor::VirtualDjiMotor(
 
 void VirtualDjiMotor::initialize()
 {
+    initialized = true;
     motorHandler->motorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
 }
 
 void VirtualDjiMotor::attachSelfToRxHandler()
 {
+    isAttachedToRxHandler = true;
     motorHandler->canRxHandler.attachReceiveHandler(this);
 }
 

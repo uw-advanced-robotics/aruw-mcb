@@ -33,10 +33,12 @@ void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message me
 {
     if (canbus == tap::can::CanBus::CAN_BUS1)
     {
+        can1Data++;
         processReceivedCanData(message, messageHandlerStoreCan1);
     }
     else
     {
+        can2Data++;
         processReceivedCanData(message, messageHandlerStoreCan2);
     }
 }

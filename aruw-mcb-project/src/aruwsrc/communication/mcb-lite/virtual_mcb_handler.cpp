@@ -39,7 +39,8 @@ VirtualMCBHandler::VirtualMCBHandler(
       port(port),
       calibrateIMUMessage(),
       currentIMUData(),
-      currentCurrentSensorData()
+      currentCurrentSensorData(),
+      currentCanData()
 {
 }
 
@@ -137,9 +138,8 @@ void VirtualMCBHandler::processCanMessage(
     const ReceivedSerialMessage& completeMessage,
     tap::can::CanBus canbus)
 {
-    modm::can::Message msg;
-    memcpy(&msg, completeMessage.data, sizeof(modm::can::Message));
-    canRxHandler.refresh(canbus, msg);
+    memcpy(&currentCanData, completeMessage.data, sizeof(modm::can::Message));
+    canRxHandler.refresh(canbus, currentCanData);
 }
 
 void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeMessage)

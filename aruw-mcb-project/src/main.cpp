@@ -74,6 +74,10 @@ using namespace aruwsrc::engineer;
 using namespace aruwsrc::dart;
 #endif
 
+bool gotHere = false;
+bool gotHalfWay = false;
+bool gotPastHere = false;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -88,8 +92,11 @@ int main()
     Drivers *drivers = DoNotUse_getDrivers();
 
     Board::initialize();
+    gotHere = true;
     initializeIo(drivers);
+    gotHalfWay = true;
     initSubsystemCommands(drivers);
+    gotPastHere = true;
 
     while (1)
     {
@@ -144,6 +151,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
+    
 #if defined(TARGET_SENTRY_BEEHIVE)
     // Set up the UART port
     ((Drivers *)drivers)->mcbLite.initialize();

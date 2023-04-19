@@ -135,7 +135,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR4,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
     false,
     "Right Front Swerve Drive Motor");
@@ -425,17 +425,17 @@ void pauseProjectileLaunchMessageHandler()
 
 
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&chassisDriveCommand, &turretMajorControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+// HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&chassisDriveCommand, &turretMajorControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+// HoldCommandMapping leftSwitchMid(
+//     drivers(),
+//     {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 
-
+bool isInitialized = false;
 
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -461,6 +461,9 @@ void initializeSubsystems()
     // leftBackAzimuthMotor.setDesiredOutput(500);
     // rightBackDriveMotor.setDesiredOutput(500);
     // rightBackAzimuthMotor.setDesiredOutput(500);
+
+    // rightFrontDriveMotor.initialize();
+    isInitialized = true;
 }
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -468,7 +471,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&sentryDrive);
+    drivers->commandScheduler.registerSubsystem(&sentryDrive);
     // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
     // drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretZero.turretSubsystem);
@@ -487,7 +490,7 @@ void setDefaultSentryCommands(Drivers *)
 {
     // sentryDrive.setDefaultCommand(&chassisAutorotateCommand);
     // TEMP: Setting default command to manual drive
-    // sentryDrive.setDefaultCommand(&chassisDriveCommand);
+    sentryDrive.setDefaultCommand(&chassisDriveCommand);
     // turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
     // turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
     // turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
@@ -519,8 +522,8 @@ void registerSentryIoMappings(Drivers *drivers)
 {
     // drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchMid);
+    // drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchMid);
 }
 }  // namespace sentry_control
 

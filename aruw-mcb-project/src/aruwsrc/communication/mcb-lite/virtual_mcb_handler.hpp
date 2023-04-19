@@ -100,6 +100,7 @@ private:
 
     IMUMessage currentIMUData;
     CurrentSensorMessage currentCurrentSensorData;
+    modm::can::Message currentCanData;
 };
 }  // namespace aruwsrc::virtualMCB
 

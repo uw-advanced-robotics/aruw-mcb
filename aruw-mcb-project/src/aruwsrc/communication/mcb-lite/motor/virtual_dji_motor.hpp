@@ -51,6 +51,8 @@ public:
 
 private:
     VirtualMCBHandler* motorHandler;
+    bool isAttachedToRxHandler = false;
+    bool initialized = false;
 };
 
 }  // namespace aruwsrc::virtualMCB

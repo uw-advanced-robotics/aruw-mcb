@@ -39,6 +39,9 @@ public:
     VirtualCanRxHandler(tap::Drivers* drivers);
 
     void refresh(tap::can::CanBus canbus, modm::can::Message message);
+
+    uint32_t can1Data = 0;
+    uint32_t can2Data = 0;
 };
 
 }  // namespace aruwsrc::virtualMCB
