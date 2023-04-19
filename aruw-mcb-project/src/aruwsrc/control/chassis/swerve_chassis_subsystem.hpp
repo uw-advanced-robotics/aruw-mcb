@@ -109,6 +109,7 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     const unsigned int NUM_MODULES{4};
     std::array<Module*, 4> modules;
+
 private:
 #else
 private:

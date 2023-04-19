@@ -60,13 +60,8 @@ class SwerveModule
 {
 public:
     SwerveModule(
-    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-        testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor,
-        testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor,
-    #else
-        tap::motor::DjiMotor& driveMotor,
-        tap::motor::DjiMotor& azimuthMotor,
-    #endif
+        Motor& driveMotor,
+        Motor& azimuthMotor,
         SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
 
     /**
@@ -144,13 +139,13 @@ public:
     const Wheel wheel;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor;
+    Motor& driveMotor;
+    Motor& azimuthMotor;
 private:
 #else
 private:
-    tap::motor::DjiMotor& driveMotor;
-    tap::motor::DjiMotor& azimuthMotor;
+    Motor& driveMotor;
+    Motor& azimuthMotor;
 #endif
 
     /**
@@ -175,8 +170,8 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float rotationSetpoint, speedSetpointRPM;  //pid setpoint, in radians and rpm respectively
-    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians, 
+    float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
+    float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians, moveVectorX, moveVectorY;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a

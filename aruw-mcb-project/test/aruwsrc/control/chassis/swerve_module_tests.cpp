@@ -32,15 +32,15 @@ using tap::algorithms::getSign;
 using namespace aruwsrc::chassis;
 using namespace testing;
 
-
 class SwerveModuleTest : public Test
 {
 protected:
     SwerveModuleTest()
-    : driveMock(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "drive mock"),
-    azimuthMock(&drivers, tap::motor::MOTOR5, CAN_BUS_MOTORS, false, "azimuth mock"),
-    module(driveMock, azimuthMock, TEST_SWERVE_CONFIG)
-    {}
+        : driveMock(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "drive mock"),
+          azimuthMock(&drivers, tap::motor::MOTOR5, CAN_BUS_MOTORS, false, "azimuth mock"),
+          module(driveMock, azimuthMock, TEST_SWERVE_CONFIG)
+    {
+    }
 
     void SetUp() override
     {

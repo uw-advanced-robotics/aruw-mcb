@@ -35,18 +35,6 @@ SwerveModule::SwerveModule(
 #endif
     SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
-    //   driveMotor(
-    //       drivers,
-    //       config.driveMotorId,
-    //       CAN_BUS_MOTORS,
-    //       config.driveMotorInverted,
-    //       "Drive motor"),
-    //   azimuthMotor(
-    //       drivers,
-    //       config.azimuthMotorId,
-    //       CAN_BUS_MOTORS,
-    //       config.azimuthMotorInverted,
-    //       "Azimuth motor"),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),

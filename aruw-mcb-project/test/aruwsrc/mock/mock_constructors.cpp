@@ -98,20 +98,24 @@ MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(tap::Drivers *drivers)
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
-SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(tap::Drivers *drivers)
-    : SwerveChassisSubsystem(drivers, nullptr, nullptr, nullptr, nullptr, SWERVE_FORWARD_MATRIX)
+SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
+    tap::Drivers *drivers,
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,
+    testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rb)
+    : SwerveChassisSubsystem(drivers, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
 {
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
 SwerveModuleMock::SwerveModuleMock(
-    testing::NiceMock<tap::mock::DjiMotorMock>& driMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock>& aziMotor,
-    aruwsrc::chassis::SwerveModuleConfig& config)
+    testing::NiceMock<tap::mock::DjiMotorMock> &driMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &aziMotor,
+    aruwsrc::chassis::SwerveModuleConfig &config)
     : SwerveModule(aziMotor, driMotor, config)
 {
 }
-//SwerveModuleMock::SwerveModuleMock(tap::Drivers *drivers) : SwerveModule(drivers) {}
 SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
