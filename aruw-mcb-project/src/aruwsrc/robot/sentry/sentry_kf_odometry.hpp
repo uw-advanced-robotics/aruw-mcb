@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -94,6 +94,83 @@ public:
         ACC_YAW,
         NUM_STATES
     };
+
+    static constexpr int STATES_SQUARED =
+        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
+    static constexpr int INPUTS_SQUARED =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
+    static constexpr int INPUTS_MULT_STATES =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+
+    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+
+
+    static constexpr float DT = 0.002f;
+    
+    // clang-format off
+
+    /**
+    * Positional Kalman Filter matrices
+    */
+    static constexpr float KF_A[STATES_SQUARED] = {
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 , 0            ,
+        0, 1 , DT           , 0, 0 , 0            , 0, 0 , 0            ,
+        0, 0 , 1            , 0, 0 , 0            , 0, 0 , 0            ,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
+        0, 0 , 0            , 0, 1 , DT           , 0, 0 , 0            ,
+        0, 0 , 0            , 0, 0 , 1            , 0, 0 , 0            ,
+        0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+        0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT           ,
+        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 1            ,
+    };
+
+    static constexpr float KF_C[INPUTS_MULT_STATES] = {
+        0, 1, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 1,
+    };
+
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
+        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
+    };
+
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        1.0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1.0, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1.2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1.2,
+    };
+
+    static constexpr float KF_P0[STATES_SQUARED] = {
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+    };
+
+private:
+    const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis;
+    const aruwsrc::control::turret::TurretSubsystem& turret;
+    tap::Drivers& drivers;
+
 };
 } // namespace namespace aruwsrc::algorithms::odometry
 
