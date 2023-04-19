@@ -28,7 +28,8 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -59,17 +60,30 @@ public:
      */
     SentryKFOdometry(
         tap::Drivers& drivers,
-        const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
-        const aruwsrc::control::turret::TurretSubsystem& turret);
+        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight);
 
-    virtual modm::Location2D<float>  getCurrentLocation2D() const override;
+    virtual void update() const;
+
+    virtual modm::Location2D<float> getCurrentLocation2D() const override;
 
     virtual modm::Vector2f getCurrentVelocity2D() const override;
 
     virtual uint32_t getLastComputedOdometryTime() const override;
 
     virtual float getYaw() const override;
-    
+
+
+private:
+
+    tap::Drivers& drivers;
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor; 
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft;
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight;
+
     // Kalman Filter enums
     // Chassis Inputs
     enum class OdomInput {
@@ -165,12 +179,6 @@ public:
         0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
         0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
     };
-
-private:
-    const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis;
-    const aruwsrc::control::turret::TurretSubsystem& turret;
-    tap::Drivers& drivers;
-
 };
 } // namespace namespace aruwsrc::algorithms::odometry
 

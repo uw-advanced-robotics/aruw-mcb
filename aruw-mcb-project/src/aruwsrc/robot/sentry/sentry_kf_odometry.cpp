@@ -18,16 +18,29 @@
  */
 
 #include "aruwsrc/robot/sentry/sentry_kf_odometry.hpp"
-
-
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
 
 SentryKFOdometry(
     tap::Drivers& drivers,
-    const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
-    const aruwsrc::control::turret::TurretSubsystem& turret)
-    : drivers(drivers),  turret(turret), chassis(chassis) { }
-)
+    const aruwsrc::control::sentry::drive::HolonomicChassisSubsystem& chassis,
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight)
+    : drivers(drivers), turretMajor(turretMajor), turretMinorLeft(turretMinorLeft), turretMinorRight(turretMinorRight),
+    kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
+    { }
+
+
+SentryKFOdometry::update() {
+    // Get chassis positional values
+    chassis.get
+}
+
+SentryKFOdometry::getCurrentVelocity
+
+
 } // namespace aruwsrc::algorithms::odometry
