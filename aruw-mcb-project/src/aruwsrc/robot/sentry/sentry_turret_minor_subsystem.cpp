@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_turret_subsystem.hpp"
+#include "sentry_turret_minor_subsystem.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 namespace aruwsrc::control::turret
 {
-SentryTurretSubsystem::SentryTurretSubsystem(
+SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* pitchMotor,
     tap::motor::MotorInterface* yawMotor,
@@ -42,22 +42,22 @@ SentryTurretSubsystem::SentryTurretSubsystem(
 {
 }
 
-float SentryTurretSubsystem::getWorldYaw() const
+float SentryTurretMinorSubsystem::getWorldYaw() const
 {
     return yawMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
-float SentryTurretSubsystem::getWorldPitch() const
+float SentryTurretMinorSubsystem::getWorldPitch() const
 {
     return pitchMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
-uint32_t SentryTurretSubsystem::getLastMeasurementTimeMicros() const
+uint32_t SentryTurretMinorSubsystem::getLastMeasurementTimeMicros() const
 {
     return tap::arch::clock::getTimeMicroseconds();
 }
 
-modm::Vector3f SentryTurretSubsystem::getTurretOffset() const
+modm::Vector3f SentryTurretMinorSubsystem::getTurretOffset() const
 {
 #ifdef TARGET_SENTRY_BEEHIVE
     if (turretID == 1)
@@ -73,7 +73,7 @@ modm::Vector3f SentryTurretSubsystem::getTurretOffset() const
 #endif
 }
 
-float SentryTurretSubsystem::getPitchOffset() const
+float SentryTurretMinorSubsystem::getPitchOffset() const
 {
 #ifdef TARGET_SENTRY_BEEHIVE
     return control::turret::PITCH_YAW_OFFSET;

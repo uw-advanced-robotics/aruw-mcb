@@ -40,7 +40,7 @@ WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface* operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -92,7 +92,7 @@ void WiggleDriveCommand::execute()
         float x = 0.0f;
         float y = 0.0f;
         ChassisRelDrive::computeDesiredUserTranslation(
-            operatorInterface,
+            &operatorInterface,
             drivers,
             chassis,
             r,
@@ -108,7 +108,7 @@ void WiggleDriveCommand::execute()
     }
     else
     {
-        ChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+        ChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
     }
 }
 

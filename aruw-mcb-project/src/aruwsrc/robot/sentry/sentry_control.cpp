@@ -62,7 +62,7 @@
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -237,7 +237,7 @@ public:
     RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
     DjiMotor pitchMotor;
     DjiMotor yawMotor;
-    SentryTurretSubsystem turretSubsystem;
+    SentryTurretMinorSubsystem turretSubsystem;
 
     OttoBallisticsSolver ballisticsSolver;
     AutoAimLaunchTimer autoAimLaunchTimer;
@@ -351,7 +351,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     nullptr);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
@@ -456,8 +455,6 @@ void startSentryCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
