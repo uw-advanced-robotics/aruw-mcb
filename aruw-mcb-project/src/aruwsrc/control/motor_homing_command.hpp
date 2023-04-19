@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef MOTOR_HOMING_COMMAND_HPP_
+#define MOTOR_HOMING_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
@@ -24,19 +26,34 @@
 
 namespace aruwsrc::control
 {
+/**
+ * A command whose job is to locate and set the upper and lower bounds of the motor in a homeable
+ * subsystem. When this command is scheduled, it performs the following actions:
+ * 1. Command the motor to move toward its lower bound.
+ * 2. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * bound to its position at this point.
+ * 3. Command the motor to move in the opposite direction.
+ * 4. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * bound to its position at this point.
+ * 5. At this point, the motor homing is complete. End the command.
+ */
 class MotorHomingCommand : public tap::control::Command
 {
 public:
-
+    /**
+     * Specifies the state that the homing command is in.
+     */
     enum class HomingState
     {
+        /** While in this state, the motor is commanded to move toward the lower bound. */
         INITIATE_MOVE_TOWARD_LOWER_BOUND,
+        /** While in this state, the motor is commanded to move toward the upper bound. */
         INITIATE_MOVE_TOWARD_UPPER_BOUND,
+        /** While in this state, the motor homing is completed. */
         HOMING_COMPLETE
     };
 
-    MotorHomingCommand(
-        aruwsrc::control::HomeableSubsystemInterface& subsystem)
+    MotorHomingCommand(aruwsrc::control::HomeableSubsystemInterface& subsystem)
         : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
@@ -55,3 +72,4 @@ private:
     HomingState homingState;
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control
+#endif

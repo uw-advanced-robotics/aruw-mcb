@@ -33,10 +33,32 @@ namespace aruwsrc::control
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
+    HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+    /**
+     * Sets the velocity of the motor of this homeable subsystem's axis.
+     *
+     * @param[in] velocity The desired velocity of the motor to be set.
+     */
     virtual void setMotorVelocity(int32_t velocity) = 0;
+
+    /**
+     * @return the velocity at which the motor moves toward its bounds.
+     */
     virtual int32_t getHomingMotorOutput() = 0;
+
+    /**
+     * Detects whether the subsystem's motor is stalled, indicating that it has reached a hard stop.
+     */
     virtual bool isStalled() const = 0;
+
+    /**
+     * Sets the lower bound of this homeable subsystem's home for the motor at its current position.
+     */
     virtual void setLowerBound() = 0;
+
+    /**
+     * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
+     */
     virtual void setUpperBound() = 0;
 };
 }  // namespace aruwsrc::control
