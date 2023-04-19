@@ -27,22 +27,17 @@ namespace aruwsrc::control
 class MotorHomingCommand : public tap::control::Command
 {
 public:
-    static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
 
     enum class HomingState
     {
         INITIATE_MOVE_TOWARD_LOWER_BOUND,
-        MOVING_TOWARD_LOWER_BOUND,
         INITIATE_MOVE_TOWARD_UPPER_BOUND,
-        MOVING_TOWARD_UPPER_BOUND,
         HOMING_COMPLETE
     };
 
     MotorHomingCommand(
-        aruwsrc::control::HomeableSubsystemInterface& subsystem,
-        tap::Drivers& drivers)
-        : subsystem(subsystem),
-          drivers(drivers)
+        aruwsrc::control::HomeableSubsystemInterface& subsystem)
+        : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
     };
@@ -57,7 +52,6 @@ public:
 
 private:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
-    tap::Drivers& drivers;
     HomingState homingState;
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control

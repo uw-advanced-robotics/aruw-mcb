@@ -24,10 +24,17 @@
 
 namespace aruwsrc::control
 {
+/**
+ * Interface for finding the bounds of a homeable subsystem.
+ *
+ * The lower bound is the furthest the motor can physically move in one direction along its axis of
+ * movement and the upper bound is the furthest it can move in the opposite direction.
+ */
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    virtual void setMotorOutput(int32_t desiredOutput) = 0;
+    virtual void setMotorVelocity(int32_t velocity) = 0;
+    virtual int32_t getHomingMotorOutput() = 0;
     virtual bool isStalled() const = 0;
     virtual void setLowerBound() = 0;
     virtual void setUpperBound() = 0;
