@@ -47,12 +47,20 @@ bool SentryControlOperatorInterface::isDriveMode()
 }
 
 /**
+<<<<<<< HEAD
  * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
  * increment based on the passed in acceleration values. Ramp stores values in some units.
  * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
  * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
  * @param[in] dt Change in time since this function was last called, in units of some time.
  */
+=======
+ * @param[out] ramp in units/time to apply acceleration to.
+ * @param[in] maxAcceleration to apply to the ramp in units/time^2.
+ * @param[in] maxDeceleration to apply to the ramp, in units/time^2.
+ * @param[in] dt since last call of this function.
+*/
+>>>>>>> 66fcba06 (mr stuff)
 static inline void applyAccelerationToRamp(
     tap::algorithms::Ramp &ramp,
     float maxAcceleration,
@@ -220,8 +228,13 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
             currTime);
         prevUpdateCounterTurretMinor1YawInput = updateCounter;
     }
+<<<<<<< HEAD
 
     const float maxTurretMinor1YawSpeed = MAX_TURRET1_MINOR_YAW_SPEED;
+=======
+    
+    const float maxTurretMinor1YawSpeed = MAX_TURRET_MINOR_YAW_SPEED;
+>>>>>>> 66fcba06 (mr stuff)
 
     float finalYaw = maxTurretMinor1YawSpeed *
                      limitVal(turretMinor1YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -253,8 +266,13 @@ float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
             currTime);
         prevUpdateCounterTurretMinor1PitchInput = updateCounter;
     }
+<<<<<<< HEAD
 
     const float maxTurretMinor1PitchSpeed = MAX_TURRET1_MINOR_PITCH_SPEED;
+=======
+    
+    const float maxTurretMinor1PitchSpeed = MAX_TURRET_MINOR_PITCH_SPEED;
+>>>>>>> 66fcba06 (mr stuff)
 
     float finalPitch = maxTurretMinor1PitchSpeed *
                        limitVal(turretMinor1PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -286,8 +304,13 @@ float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
             currTime);
         prevUpdateCounterTurretMinor2YawInput = updateCounter;
     }
+<<<<<<< HEAD
 
     const float maxTurretMinor2YawSpeed = MAX_TURRET2_MINOR_YAW_SPEED;
+=======
+    
+    const float maxTurretMinor2YawSpeed = MAX_TURRET_MINOR_YAW_SPEED;
+>>>>>>> 66fcba06 (mr stuff)
 
     float finalYaw = maxTurretMinor2YawSpeed *
                      limitVal(turretMinor2YawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -319,8 +342,13 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
             currTime);
         prevUpdateCounterTurretMinor2PitchInput = updateCounter;
     }
+<<<<<<< HEAD
 
     const float maxTurretMinor2PitchSpeed = MAX_TURRET2_MINOR_PITCH_SPEED;
+=======
+    
+    const float maxTurretMinor2PitchSpeed = MAX_TURRET_MINOR_PITCH_SPEED;
+>>>>>>> 66fcba06 (mr stuff)
 
     float finalPitch = maxTurretMinor2PitchSpeed *
                        limitVal(turretMinor2PitchInput.getInterpolatedValue(currTime), -1.0f, 1.0f);

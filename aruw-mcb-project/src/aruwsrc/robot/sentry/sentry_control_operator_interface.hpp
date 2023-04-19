@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,27 +29,33 @@
 
 namespace aruwsrc::control::sentry
 {
+
+/**
+ * A class for interpreting inputs from the remote. Since the 
+ * sentry uses 3 remote modes, functions not supported by 
+ * the current remote mode return sensible default values.
+ * This class should be used inside of Commands to read the
+ * remote operator's desired inputs.
+*/
+
 class SentryControlOperatorInterface
 {
 public:
-    float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
-    float DEFAULT_CHASSIS_Y_VELOCITY = 0.f;
-    float DEFAULT_TURRET_MAJOR_VELOCITY = 0.f;
+    static constexpr float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
+    static constexpr float DEFAULT_CHASSIS_Y_VELOCITY = 0.f;
+    static constexpr float DEFAULT_TURRET_MAJOR_VELOCITY = 0.f;
 
-    /**
-     * Max acceleration in rpm/s^2 of the chassis in the x direction
-     */
-    static constexpr float MAX_ACCELERATION_X = 10'000.0f;  // TODO: change these values
+    static constexpr float MAX_ACCELERATION_X = 10'000.0f; // TODO: change these values
     static constexpr float MAX_DECELERATION_X = 20'000.0f;
     static constexpr float MAX_ACCELERATION_Y = 10'000.0f;  // TODO: change the values?
     static constexpr float MAX_DECELERATION_Y = 20'000.0f;
     static constexpr float MAX_ACCELERATION_R = 10'000.0f;  // TODO: change the values?
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
-    static constexpr float MAX_TURRET_MAJOR_YAW_SPEED = 10;     // TODO: refine this
-    static constexpr float MAX_TURRET1_MINOR_YAW_SPEED = 10;    // TODO: refine this
-    static constexpr float MAX_TURRET2_MINOR_YAW_SPEED = 10;    // TODO: refine this
-    static constexpr float MAX_TURRET1_MINOR_PITCH_SPEED = 10;  // TODO: refine this
-    static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10;  // TODO: refine this
+
+    // max rotational speeds of the turrets in RAD / S
+    static constexpr float MAX_TURRET_MAJOR_YAW_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET_MINOR_YAW_SPEED = 10; // TODO: refine this
+    static constexpr float MAX_TURRET_MINOR_PITCH_SPEED = 10; // TODO: refine this
 
     SentryControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
 
@@ -154,6 +160,6 @@ private:
     uint32_t prevTurretMinor2PitchInputCalledTime = 0;
 };
 
-}  // namespace aruwsrc::control::sentry
+} // namespace aruwsrc::control::sentry
 
-#endif  // SENTRY_CONTROL_OPERATOR_INTERFACE_HPP__
+#endif // SENTRY_CONTROL_OPERATOR_INTERFACE_HPP__
