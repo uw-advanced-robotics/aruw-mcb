@@ -40,7 +40,6 @@ namespace aruwsrc::control
 class MotorHomingCommand : public tap::control::Command
 {
 public:
-
     /**
      * Specifies the state that the homing command is in.
      */
@@ -48,23 +47,14 @@ public:
     {
         /** While in this state, the motor is commanded to move toward the lower bound. */
         INITIATE_MOVE_TOWARD_LOWER_BOUND,
-        /** While in this state, the command waits for the motor to stall. It then sets the lower
-        bound of the subsystem to the subsystem's current position. */
-        MOVING_TOWARD_LOWER_BOUND,
         /** While in this state, the motor is commanded to move toward the upper bound. */
         INITIATE_MOVE_TOWARD_UPPER_BOUND,
-        /** While in this state, the command waits for the motor to stall. It then sets the upper
-        bound of the subsystem to the subsystem's current position. */
-        MOVING_TOWARD_UPPER_BOUND,
-        /** While in this state, the command is finished. */
+        /** While in this state, the motor homing is completed. */
         HOMING_COMPLETE
     };
 
-    MotorHomingCommand(
-        aruwsrc::control::HomeableSubsystemInterface& subsystem,
-        tap::Drivers& drivers)
-        : subsystem(subsystem),
-          drivers(drivers)
+    MotorHomingCommand(aruwsrc::control::HomeableSubsystemInterface& subsystem)
+        : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
     };
@@ -79,7 +69,6 @@ public:
 
 private:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
-    tap::Drivers& drivers;
     HomingState homingState;
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control

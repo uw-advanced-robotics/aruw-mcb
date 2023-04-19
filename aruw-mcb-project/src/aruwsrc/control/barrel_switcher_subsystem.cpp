@@ -44,29 +44,30 @@ void BarrelSwitcherSubsystem::initialize() {
 
 void BarrelSwitcherSubsystem::refresh() {
     switch (firingPosition) {
-        case (FiringPosition::USING_LEFT_BARREL) {
-            updateMotorEncoderPid()
+        case FiringPosition::USING_LEFT_BARREL:
+            // updateMotorEncoderPid();
             break;
-        }
-        case (FiringPosition::USING_RIGHT_BARREL) {
+        case FiringPosition::USING_RIGHT_BARREL:
 
             break;
-        }
-        case (FiringPosition::SWITCHING_BARRELS) {
+        case FiringPosition::SWITCHING_BETWEEN_BARRELS:
 
             break;
-        }
     }
 }
 
-void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput) {
+void BarrelSwitcherSubsystem::setMotorVelocity(int32_t velocity) {
     if(lowerBoundSet && upperBoundSet && 
-        ((motor.getEncoderUnwrapped() < 0 && desiredOutput < 0) ||
-        (motor.getEncoderUnwrapped() > motorUpperBound && desiredOutput > 0)))
+        ((motor.getEncoderUnwrapped() < 0 && velocity < 0) ||
+        (motor.getEncoderUnwrapped() > motorUpperBound && velocity > 0)))
     {
-        desiredOutput = 0;
+        velocity = 0;
     }
-    motor.setDesiredOutput(desiredOutput);
+    motor.setDesiredOutput(velocity); //replace with better logic
+}
+
+int32_t BarrelSwitcherSubsystem::getHomingMotorOutput() {
+    return SHRT_MAX / 2;
 }
 
 bool BarrelSwitcherSubsystem::isStalled() const {
@@ -83,20 +84,20 @@ void BarrelSwitcherSubsystem::setUpperBound() {
     upperBoundSet = true;
 }
 
-void BarrelSwitcherSubsystem::moveTowardUpperBound() {
-    this->setMotorOutput(HOMING_MOTOR_OUTPUT);
-}
+// void BarrelSwitcherSubsystem::moveTowardUpperBound() {
+//     this->setMotorOutput(HOMING_MOTOR_OUTPUT);
+// }
 
-void BarrelSwitcherSubsystem::moveTowardLowerBound() {
-    this->setMotorOutput(-HOMING_MOTOR_OUTPUT);
-}
+// void BarrelSwitcherSubsystem::moveTowardLowerBound() {
+//     this->setMotorOutput(-HOMING_MOTOR_OUTPUT);
+// }
 
-void BarrelSwitcherSubsystem::stop() {
-    this->setMotorOutput(0);
-}
+// void BarrelSwitcherSubsystem::stop() {
+//     this->setMotorOutput(0);
+// }
 
 void BarrelSwitcherSubsystem::updateMotorEncoderPid(modm::Pid<int32_t>* pid, tap::motor::DjiMotor* const motor, int32_t desiredEncoderPosition) {
     pid->update(desiredEncoderPosition - motor->getEncoderUnwrapped());
-    setMotorOutput(pid->getValue());
+    setMotorVelocity(pid->getValue());
 }
 };

@@ -19,11 +19,16 @@
 
 #include "motor_homing_command.hpp"
 
-#include "tap/drivers.hpp"
-
 namespace aruwsrc::control
 {
-void MotorHomingCommand::initialize() { homingState = HomingState::MOVING_TOWARD_LOWER_BOUND; }
+/**
+ * A command that homes a homeable subystem by finding and setting its upper and lower bound.
+ */
+void MotorHomingCommand::initialize()
+{
+    subsystem.setMotorVelocity(-subsystem.getHomingMotorOutput());
+    homingState = HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND;
+}
 
 void MotorHomingCommand::execute()
 {
@@ -31,32 +36,20 @@ void MotorHomingCommand::execute()
     {
         case (HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND):
         {
-            subsystem.moveTowardLowerBound();
-            homingState = HomingState::MOVING_TOWARD_LOWER_BOUND;
-            break;
-        }
-        case (HomingState::MOVING_TOWARD_LOWER_BOUND):
-        {
             if (subsystem.isStalled())
             {
                 subsystem.setLowerBound();
-                subsystem.stop();
-                homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
+                subsystem.setMotorVelocity(subsystem.getHomingMotorOutput());
+                homingState = HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND;
             }
             break;
         }
         case (HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND):
         {
-            subsystem.moveTowardUpperBound();
-            homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
-            break;
-        }
-        case (HomingState::MOVING_TOWARD_UPPER_BOUND):
-        {
             if (subsystem.isStalled())
             {
                 subsystem.setUpperBound();
-                subsystem.stop();
+                subsystem.setMotorVelocity(0);
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;
@@ -68,7 +61,7 @@ void MotorHomingCommand::execute()
     }
 }
 
-void MotorHomingCommand::end(bool) { subsystem.stop(); }
+void MotorHomingCommand::end(bool) { subsystem.setMotorVelocity(0); }
 
 bool MotorHomingCommand::isFinished() const
 {

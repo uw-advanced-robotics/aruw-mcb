@@ -28,7 +28,7 @@
 namespace aruwsrc::control
 {
 
-static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
+// static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
 
 
 static constexpr int32_t USING_RIGHT_BARREL_POSITION = 25; //find actual value after hardware testing
@@ -58,6 +58,7 @@ public:
     
     void initialize() override;
     void refresh() override;
+    int32_t getHomingMotorOutput() override;
     bool isStalled() const override;
     void setLowerBound() override;
     void setUpperBound() override;
@@ -66,7 +67,7 @@ public:
     void stop() override;
     
 private:
-    void setMotorOutput(int32_t desiredOutput);
+    void setMotorVelocity(int32_t velocity);
     void updateMotorEncoderPid(
         modm::Pid<int32_t>* pid,
         tap::motor::DjiMotor* const motor,
