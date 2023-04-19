@@ -161,9 +161,5 @@ private:
 
 }  // namespace aruwsrc
 
-<<<<<<< HEAD
-#endif  // CONTROL_OPERATOR_INTERFACE_HPP_
-=======
 
 #endif  // CONTROL_OPERATOR_INTERFACE_HPP_
->>>>>>> 66fcba06 (mr stuff)
