@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "aruwsrc/control/motion/five_bar_motion_subsystem.hpp"
-
 #include "tap/architecture/clock.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 

@@ -20,6 +20,7 @@
 #ifndef TESTBED_CHASSIS_CONSTANTS_HPP_
 #define TESTBED_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
@@ -89,7 +90,7 @@ static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 
-static const tap::algorithms::SmoothPidConfig AUTOROTATION_PID {
+static const tap::algorithms::SmoothPidConfig AUTOROTATION_PID{
     .kp = AUTOROTATION_PID_KP,
     .ki = 0,
     .kd = AUTOROTATION_PID_KD,
@@ -177,6 +178,7 @@ static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
     .kd = 1000,
     .maxOutput = 5000,
     .errDeadzone = 0,
+
     .errorDerivativeFloor = 1,
 };
 
@@ -190,6 +192,22 @@ static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
 static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
 static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
 static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
+
+static const tap::algorithms::FuzzyPDConfig LF_LEG_MOTOR_FUZZY_PID_CONFIG = {
+    .maxError = modm::toRadian(90),
+    .maxErrorDerivative = 100.0f,
+    .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
+        std::array<float, 3>(
+            {15'000, 10'000, 5'000}),
+        std::array<float, 3>(
+            {9, 6, 3})),
+};
+static const tap::algorithms::FuzzyPDConfig LR_LEG_MOTOR_FUZZY_PID_CONFIG =
+    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
+static const tap::algorithms::FuzzyPDConfig RF_LEG_MOTOR_FUZZY_PID_CONFIG =
+    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
+static const tap::algorithms::FuzzyPDConfig RR_LEG_MOTOR_FUZZY_PID_CONFIG =
+    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
 
 // static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
 //     .kp = 10000,

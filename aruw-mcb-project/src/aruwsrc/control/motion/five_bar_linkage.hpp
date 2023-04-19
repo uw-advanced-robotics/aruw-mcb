@@ -20,7 +20,6 @@
 #ifndef FIVE_BAR_LINKAGE_HPP_
 #define FIVE_BAR_LINKAGE_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 #include "tap/motor/motor_interface.hpp"

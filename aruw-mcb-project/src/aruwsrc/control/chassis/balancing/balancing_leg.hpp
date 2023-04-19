@@ -20,6 +20,7 @@
 #ifndef BALANCING_LEG_HPP_
 #define BALANCING_LEG_HPP_
 
+#include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
@@ -43,7 +44,9 @@ public:
         tap::Drivers* drivers,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
         const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
+        const tap::algorithms::FuzzyPDConfig fivebarMotor1FuzzyPDconfig,
         const tap::algorithms::SmoothPidConfig fivebarMotor2PidConfig,
+        const tap::algorithms::FuzzyPDConfig fivebarMotor2FuzzyPDconfig,
         tap::motor::MotorInterface* wheelMotor,
         const float wheelRadius,
         const tap::algorithms::SmoothPidConfig driveWheelPidConfig);
@@ -90,8 +93,8 @@ private:
 
     aruwsrc::control::motion::FiveBarLinkage* fivebar;
 
-    tap::algorithms::SmoothPid fiveBarMotor1Pid;
-    tap::algorithms::SmoothPid fiveBarMotor2Pid;
+    tap::algorithms::FuzzyPD fiveBarMotor1Pid;
+    tap::algorithms::FuzzyPD fiveBarMotor2Pid;
 
     tap::motor::MotorInterface* driveWheel;
 
@@ -104,19 +107,19 @@ private:
      *
      */
     tap::algorithms::SmoothPidConfig xPidConfig{
-        .kp = .0001,
-        .ki = 0.001,
+        .kp = .03,
+        .ki = 0,
         .kd = 0,
         .maxICumulative = .1,
-        .maxOutput = .03,
+        .maxOutput = .05,
     };
     tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
 
     tap::algorithms::SmoothPidConfig thetaLPidConfig{
-        .kp = 100,
+        .kp = 1,
         .ki = 0,
         .kd = 0,
-        .maxOutput = 10,
+        .maxOutput = 40,
     };
 
     tap::algorithms::SmoothPid thetaLPid = tap::algorithms::SmoothPid(thetaLPidConfig);
@@ -128,6 +131,7 @@ private:
     float iwdes = 0;
     float debug1;
     float debug2;
+    float debug3;
 
     float zDesired,  // m, world-frame height
         zCurrent;    // m
@@ -143,10 +147,17 @@ private:
     float motorLinkAnglePrev;  // rad, angle of the link that the wheel motor is attached to for
                                // offsetting
 
-    float tl,        // rad, angle of the metaphyiscal pendulum
-        tl_prev,     // rad
-        tl_dot,      // rad/s
-        tl_dotPrev;  // rad/s
+    std::array<float, 10> tlWindow;
+    uint8_t tlWindowIndex = 0;
+    float tl_dot_w, tl_ddot_w;
+
+    float tl,          // rad, angle of the metaphyiscal pendulum
+        tl_prev,       // rad
+        tl_prev_prev,  // rad
+        tl_dot,        // rad/s
+        tl_dotPrev,    // rad/s
+        tl_ddot,       // rad/s/s
+        tl_ddotPrev;   // rad/s/s
 
     float realWheelSpeed;    // rad/s, rotation of wheel, +rotation = forward motion
     float wheelPosPrev = 0;  // rad, just used to compute the wheel's speed

@@ -130,7 +130,9 @@ BalancingLeg legLeft(
     drivers(),
     &fiveBarLeft,
     LF_LEG_MOTOR_PID_CONFIG,
+    LF_LEG_MOTOR_FUZZY_PID_CONFIG,
     LR_LEG_MOTOR_PID_CONFIG,
+    LR_LEG_MOTOR_FUZZY_PID_CONFIG,
     &leftWheel,
     WHEEL_RADIUS,
     LEFT_WHEEL_MOTOR_PID_CONFIG);
@@ -139,7 +141,9 @@ BalancingLeg legRight(
     drivers(),
     &fiveBarRight,
     RF_LEG_MOTOR_PID_CONFIG,
+    RF_LEG_MOTOR_FUZZY_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG,
+    RR_LEG_MOTOR_FUZZY_PID_CONFIG,
     &RightWheel,
     WHEEL_RADIUS,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);

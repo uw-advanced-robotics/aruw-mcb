@@ -20,6 +20,7 @@
 #ifndef FIVE_BAR_MOTION_SUBSYSTEM_HPP_
 #define FIVE_BAR_MOTION_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 

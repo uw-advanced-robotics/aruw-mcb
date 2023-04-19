@@ -26,9 +26,9 @@ BalancingChassisSubsystem::BalancingChassisSubsystem(
     BalancingLeg& leftLeg,
     BalancingLeg& rightLeg)
     : Subsystem(drivers),
+      rotationPid(AUTOROTATION_PID),
       leftLeg(leftLeg),
-      rightLeg(rightLeg),
-      rotationPid(AUTOROTATION_PID)
+      rightLeg(rightLeg)
 {
 }
 
@@ -43,9 +43,9 @@ void BalancingChassisSubsystem::initialize()
 
 void BalancingChassisSubsystem::refresh()
 {
-    const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
+    // const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+    // const uint32_t dt = curTime - prevTime;
+    // prevTime = curTime;
 
     // 1. Update yaw and roll values
     pitch = drivers->mpu6500.getRoll() * M_TWOPI / 360;
@@ -67,18 +67,19 @@ void BalancingChassisSubsystem::refresh()
     // 4. run outputs
     leftLeg.setDesiredTranslationSpeed(-yawAdjustment + desiredX);  // m/s
     rightLeg.setDesiredTranslationSpeed(yawAdjustment + desiredX);
-    
+
     leftLeg.setChassisAngle(pitch);
     rightLeg.setChassisAngle(pitch);
-
 
     leftLeg.update();
     rightLeg.update();
     // do this here for safety. Only called once per subsystem
     static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())->sendCanMessage();
     static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
+        ->sendCanMessage();
+    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
+        ->sendCanMessage();
 }
 
 void BalancingChassisSubsystem::computeState()
