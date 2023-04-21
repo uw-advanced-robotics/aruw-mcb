@@ -22,8 +22,8 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 namespace aruwsrc::control::sentry
 {
@@ -49,7 +49,9 @@ public:
         SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
         chassis::HolonomicChassisSubsystem *chassis);
+
+    float x, y, r;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::sentry
 
 #endif  // SENTRY_CHASSIS_REL_DRIVE_HPP_

@@ -135,7 +135,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR4,
-    tap::can::CanBus::CAN_BUS2,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     false,
     "Right Front Swerve Drive Motor");
@@ -143,7 +143,7 @@ VirtualDjiMotor rightFrontDriveMotor(
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR8,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     false,
     "Right Front Swerve Azimuth Motor");
@@ -167,7 +167,7 @@ VirtualDjiMotor leftBackAzimuthMotor(
 VirtualDjiMotor rightBackDriveMotor(
     drivers(),
     MOTOR3,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     false,
     "Right Back Swerve Drive Motor");
@@ -175,7 +175,7 @@ VirtualDjiMotor rightBackDriveMotor(
 VirtualDjiMotor rightBackAzimuthMotor(
     drivers(),
     MOTOR7,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     false,
     "Right Back Swerve Azimuth Motor");

@@ -130,6 +130,10 @@ private:
      */
     void swerveDriveCalculate(float x, float y, float r, float maxWheelSpeed);
 
+    float desx = -1, desy = -1, desz = -1;
+    float actx = -1, acty = -1, actz = -1;
+
+
 };  // class SwerveChassisSubsystem
 
 }  // namespace chassis

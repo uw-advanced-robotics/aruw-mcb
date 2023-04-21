@@ -50,7 +50,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
-
+    
     *chassisXDesiredWheelspeed = limitVal(
         operatorInterface->getChassisXVelocity(),
         -rotationLimitedMaxTranslationalSpeed,

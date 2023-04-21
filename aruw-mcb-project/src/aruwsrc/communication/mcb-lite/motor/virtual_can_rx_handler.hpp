@@ -42,6 +42,7 @@ public:
 
     uint32_t can1Data = 0;
     uint32_t can2Data = 0;
+    modm::can::Message currentMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB
