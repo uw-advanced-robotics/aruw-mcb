@@ -18,6 +18,7 @@
  */
 
 #include "balancing_chassis_rel_drive_command.hpp"
+#include <cassert>
 
 namespace aruwsrc
 {
