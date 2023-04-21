@@ -39,8 +39,7 @@ VirtualMCBHandler::VirtualMCBHandler(
       port(port),
       calibrateIMUMessage(),
       currentIMUData(),
-      currentCurrentSensorData(),
-      currentCanData()
+      currentCurrentSensorData()
 {
 }
 
