@@ -42,7 +42,7 @@ namespace aruwsrc::algorithms::odometry
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
-class SentryKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class SentryKFOdometry 
 {
 public:
     /**
@@ -65,17 +65,43 @@ public:
         const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
         const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight);
 
-    virtual void update() const;
+    void update();
 
-    virtual modm::Location2D<float> getCurrentLocation2D() const override;
+    modm::Location2D<float> getCurrentLocation2D();
 
-    virtual modm::Vector2f getCurrentVelocity2D() const override;
+    modm::Vector2f getCurrentVelocity2D();
 
-    virtual uint32_t getLastComputedOdometryTime() const override;
+    uint32_t getLastComputedOdometryTime();
 
-    virtual float getYaw() const override;
+    /**
+     * @return chassis yaw in world frame.
+     */
+    float getChassisYaw();
 
+    /**
+     * @return major yaw in world frame.
+     */
+    float getMajorYaw();
+    
+    /**
+     * @return left minor yaw in world frame. 
+     */
+    float getLeftMinorYaw();
 
+    /**
+     * @return left minor pitch in world frame.
+     */
+    float getLeftMinorPitch();
+
+    /**
+     * @return right minor yaw in world frame.
+     */
+    float getRightMinorYaw();
+
+    /**
+     * @return right minor pitch in world frame.
+     */
+    float getRightMinorPitch();
 private:
 
     tap::Drivers& drivers;
@@ -91,8 +117,6 @@ private:
         ACC_X,
         VEL_Y,
         ACC_Y,
-        POS_YAW,
-        VEL_YAW,
         NUM_INPUTS
     };
 
@@ -103,9 +127,6 @@ private:
         POS_Y,
         VEL_Y,
         ACC_Y,
-        POS_YAW,
-        VEL_YAW,
-        ACC_YAW,
         NUM_STATES
     };
 
@@ -127,57 +148,44 @@ private:
     * Positional Kalman Filter matrices
     */
     static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 , 0            ,
-        0, 1 , DT           , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 1            , 0, 0 , 0            , 0, 0 , 0            ,
-        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
-        0, 0 , 0            , 0, 1 , DT           , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 1            , 0, 0 , 0            ,
-        0, 0 , 0            , 0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-        0, 0 , 0            , 0, 0 , 0            , 0, 1 , DT           ,
-        0, 0 , 0            , 0, 0 , 0            , 0, 0 , 1            ,
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
+        0, 1 , DT           , 0, 0 , 0            ,
+        0, 0 , 1            , 0, 0 , 0            ,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+        0, 0 , 0            , 0, 1 , DT           ,
+        0, 0 , 0            , 0, 0 , 1            ,
     };
 
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 1,
+        0, 1, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 1,
     };
 
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E1, 0  , 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 1E0, 0   , 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 1E-1, 0  , 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 1E1, 0  , 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 1E0, 0   , 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 1E-1, 0  , 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 1E1, 0  , 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 1E0, 0   ,
-        0  , 0  , 0   , 0  , 0  , 0   , 0  , 0  , 1E-1,
+        1E1, 0  , 0   , 0  , 0  , 0   ,
+        0  , 1E0, 0   , 0  , 0  , 0   ,
+        0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 0   , 1E1, 0  , 0   ,
+        0  , 0  , 0   , 0  , 1E0, 0   ,
+        0  , 0  , 0   , 0  , 0  , 1E-1,
     };
 
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        1.0, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1.2, 0  , 0  , 0  , 0  ,
-        0  , 0  , 1.0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1.2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1.0, 0  ,
-        0  , 0  , 0  , 0  , 0  , 1.2,
+        1.0, 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  ,
+        0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 1.2,
     };
 
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+        1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3,
     };
 };
 } // namespace namespace aruwsrc::algorithms::odometry
