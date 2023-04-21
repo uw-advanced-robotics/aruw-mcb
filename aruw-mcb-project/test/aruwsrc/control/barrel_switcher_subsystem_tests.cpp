@@ -30,7 +30,11 @@ using namespace testing;
 class BarrelSwitcherSubsystemTest : public Test
 {
 protected:
-    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, motorid, config) {}
+    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, motorid, 
+    aruwsrc::control::HomingConfig{
+        .minRPM = 100,
+        .maxTorque = 10
+    }) {}
 
     tap::Drivers drivers;
     tap::motor::MotorId motorid;
@@ -38,11 +42,46 @@ protected:
     BarrelSwitcherSubsystem barrelSwitcher;
 };
 
-TEST_F(BarrelSwitcherSubsystemTest, correctly_sets_motor_velocity) {}
 
-TEST_F(BarrelSwitcherSubsystemTest, returns_homing_output)
-{
-    EXPECT_EQ(barrelSwitcher.getHomingMotorOutput(), SHRT_MAX / 2);
+TEST_F(BarrelSwitcherSubsystemTest, move_to_lower_bound_changes_state) {
+    barrelSwitcher.moveTowardLowerBound();
+    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::HOMING_TOWARD_LOWER_BOUND);
 }
 
-TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {}
+TEST_F(BarrelSwitcherSubsystemTest, move_to_upper_bound_changes_state)
+{
+    barrelSwitcher.moveTowardUpperBound();
+    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::HOMING_TOWARD_UPPER_BOUND);
+}
+
+TEST_F(BarrelSwitcherSubsystemTest, stop_changes_state)
+{
+    barrelSwitcher.stop();
+    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::SWITCHING_BETWEEN_BARRELS);
+}
+
+TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
+    
+    tap::motor::DjiMotor motor(&drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "cool motor");
+    int16_t rpm;
+    int16_t torque;
+
+    ON_CALL(motor, getShaftRPM).willByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor, getTorque).willByDefault(ReturnPointee(&torque));
+
+    rpm = config.minRPM + 1;
+    torque = config.maxTorque + 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+    
+    rpm = config.minRPM - 1;
+    torque = config.maxTorque + 1;
+    EXPECT_EQ(true, barrelSwitcher.isStalled());
+
+    rpm = config.minRPM + 1;
+    torque = config.maxTorque - 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+
+    rpm = config.minRPM - 1;
+    torque = config.maxTorque - 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+}

@@ -29,6 +29,7 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(tap::Drivers* drivers,
             aruwsrc::control::HomingConfig config) : 
     HomeableSubsystemInterface(drivers), 
     motor(drivers, motorid, tap::can::CanBus::CAN_BUS2, false, "barrel switching motor"), //canbus tbd
+    config(config),
     encoderPid(
         POSITION_PID_KP,
         POSITION_PID_KI,
@@ -43,31 +44,37 @@ void BarrelSwitcherSubsystem::initialize() {
 }
 
 void BarrelSwitcherSubsystem::refresh() {
-    switch (firingPosition) {
-        case FiringPosition::USING_LEFT_BARREL:
-            // updateMotorEncoderPid();
+    switch (barrelState) {
+        case BarrelState::HOMING_TOWARD_LOWER_BOUND:
+            setMotorOutput(-HOMING_MOTOR_OUTPUT);
             break;
-        case FiringPosition::USING_RIGHT_BARREL:
-
+        case BarrelState::HOMING_TOWARD_UPPER_BOUND:
+            setMotorOutput(HOMING_MOTOR_OUTPUT);
             break;
-        case FiringPosition::SWITCHING_BETWEEN_BARRELS:
-
+        case BarrelState::USING_LEFT_BARREL:
+            updateMotorEncoderPid(&encoderPid, &motor, LEFT_BARREL_ENCODER_POSITION);
+            break;
+        case BarrelState::USING_RIGHT_BARREL:
+            updateMotorEncoderPid(&encoderPid, &motor, RIGHT_BARREL_ENCODER_POSITION);
+            break;
+        case BarrelState::SWITCHING_BETWEEN_BARRELS:
+            
             break;
     }
 }
 
-void BarrelSwitcherSubsystem::setMotorVelocity(int32_t velocity) {
+BarrelState BarrelSwitcherSubsystem::getBarrelState() {
+    return barrelState;
+}
+
+void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput) {
     if(lowerBoundSet && upperBoundSet && 
-        ((motor.getEncoderUnwrapped() < 0 && velocity < 0) ||
-        (motor.getEncoderUnwrapped() > motorUpperBound && velocity > 0)))
+        ((motor.getEncoderUnwrapped() < 0 && desiredOutput < 0) ||
+        (motor.getEncoderUnwrapped() > motorUpperBound && desiredOutput > 0)))
     {
-        velocity = 0;
+        desiredOutput = 0;
     }
-    motor.setDesiredOutput(velocity); //replace with better logic
-}
-
-int32_t BarrelSwitcherSubsystem::getHomingMotorOutput() {
-    return SHRT_MAX / 2;
+    motor.setDesiredOutput(desiredOutput);
 }
 
 bool BarrelSwitcherSubsystem::isStalled() const {
@@ -84,20 +91,21 @@ void BarrelSwitcherSubsystem::setUpperBound() {
     upperBoundSet = true;
 }
 
-// void BarrelSwitcherSubsystem::moveTowardUpperBound() {
-//     this->setMotorOutput(HOMING_MOTOR_OUTPUT);
-// }
+void BarrelSwitcherSubsystem::moveTowardUpperBound() {
+    barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
+}
 
-// void BarrelSwitcherSubsystem::moveTowardLowerBound() {
-//     this->setMotorOutput(-HOMING_MOTOR_OUTPUT);
-// }
+void BarrelSwitcherSubsystem::moveTowardLowerBound() {
+    barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
+}
 
-// void BarrelSwitcherSubsystem::stop() {
-//     this->setMotorOutput(0);
-// }
+void BarrelSwitcherSubsystem::stop() {
+    this->setMotorOutput(0);
+    barrelState = BarrelState::SWITCHING_BETWEEN_BARRELS;
+}
 
 void BarrelSwitcherSubsystem::updateMotorEncoderPid(modm::Pid<int32_t>* pid, tap::motor::DjiMotor* const motor, int32_t desiredEncoderPosition) {
     pid->update(desiredEncoderPosition - motor->getEncoderUnwrapped());
-    setMotorVelocity(pid->getValue());
+    setMotorOutput(pid->getValue());
 }
 };

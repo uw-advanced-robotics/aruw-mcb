@@ -28,7 +28,7 @@
 namespace aruwsrc::control
 {
 
-// static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
+static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
 
 
 static constexpr int32_t USING_RIGHT_BARREL_POSITION = 25; //find actual value after hardware testing
@@ -40,9 +40,13 @@ static constexpr float POSITION_PID_KI = 1.0f;
 static constexpr float POSITION_PID_KD = 1.0f;
 static constexpr int32_t POSITION_PID_MAX_ERROR_SUM = 1;
 static constexpr int32_t POSITION_PID_MAX_OUTPUT = 1;
+static constexpr int32_t LEFT_BARREL_ENCODER_POSITION = 0;
+static constexpr int32_t RIGHT_BARREL_ENCODER_POSITION = 0;
 
-enum class FiringPosition
+enum class BarrelState
     {
+        HOMING_TOWARD_LOWER_BOUND,
+        HOMING_TOWARD_UPPER_BOUND,
         USING_LEFT_BARREL,
         USING_RIGHT_BARREL,
         SWITCHING_BETWEEN_BARRELS
@@ -58,16 +62,16 @@ public:
     
     void initialize() override;
     void refresh() override;
-    int32_t getHomingMotorOutput() override;
     bool isStalled() const override;
     void setLowerBound() override;
     void setUpperBound() override;
     void moveTowardUpperBound() override;
     void moveTowardLowerBound() override; 
     void stop() override;
+    BarrelState getBarrelState();
     
 private:
-    void setMotorVelocity(int32_t velocity);
+    void setMotorOutput(int32_t velocity);
     void updateMotorEncoderPid(
         modm::Pid<int32_t>* pid,
         tap::motor::DjiMotor* const motor,
@@ -101,9 +105,9 @@ private:
     /**
      * Stores the state of this barrel switcher's firing position; which barrel is in use
     */
-    FiringPosition firingPosition;
+    BarrelState barrelState;
 
-    modm::Pid<int32_t>* encoderPid;
+    modm::Pid<int32_t> encoderPid;
 };
 } //namespace aruwsrc::control
 #endif

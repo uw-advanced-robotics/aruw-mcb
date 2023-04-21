@@ -50,18 +50,6 @@ public:
      * Moves the motor on the homeable axis towards its lower mechanical limit.
     */
     virtual void moveTowardLowerBound() = 0;
-
-    /**
-     * Sets the velocity of the motor of this homeable subsystem's axis.
-     *
-     * @param[in] velocity The desired velocity of the motor to be set.
-     */
-    virtual void setMotorVelocity(int32_t velocity) = 0;
-
-    /**
-     * @return the velocity at which the motor moves toward its bounds.
-     */
-    virtual int32_t getHomingMotorOutput() = 0;
     
     /**
      * Stops the motor on the homeable axis.

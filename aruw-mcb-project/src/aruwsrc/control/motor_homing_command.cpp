@@ -26,7 +26,7 @@ namespace aruwsrc::control
  */
 void MotorHomingCommand::initialize()
 {
-    subsystem.setMotorVelocity(-subsystem.getHomingMotorOutput());
+    subsystem.moveTowardLowerBound();
     homingState = HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND;
 }
 
@@ -39,7 +39,7 @@ void MotorHomingCommand::execute()
             if (subsystem.isStalled())
             {
                 subsystem.setLowerBound();
-                subsystem.setMotorVelocity(subsystem.getHomingMotorOutput());
+                subsystem.moveTowardUpperBound();
                 homingState = HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND;
             }
             break;
@@ -49,7 +49,7 @@ void MotorHomingCommand::execute()
             if (subsystem.isStalled())
             {
                 subsystem.setUpperBound();
-                subsystem.setMotorVelocity(0);
+                subsystem.stop();
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;
@@ -61,7 +61,7 @@ void MotorHomingCommand::execute()
     }
 }
 
-void MotorHomingCommand::end(bool) { subsystem.setMotorVelocity(0); }
+void MotorHomingCommand::end(bool) { subsystem.stop(); }
 
 bool MotorHomingCommand::isFinished() const
 {
