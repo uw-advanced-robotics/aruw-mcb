@@ -26,9 +26,10 @@
 
 #include <string>
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
+
+#include "modm/math/geometry/angle.hpp"
 
 #include "motor_interface.hpp"
 
@@ -105,25 +106,13 @@ public:
 
     void initialize() override;
 
+    float getPositionUnwrapped() const override;
+
+    float getPositionWrapped() const override;
+
     int64_t getEncoderUnwrapped() const override;
 
     uint16_t getEncoderWrapped() const override;
-
-    /***
-     * @returns Angular position of motor, unwrapped, in radians.
-     */
-    float getPositionUnwrapped() const
-    {
-        return (float)getEncoderUnwrapped() / (float)ENC_RESOLUTION * M_TWOPI;
-    };
-
-    /***
-     * @returns Angular position of motor, wrapped to one rotation, in radians.
-     */
-    float getPositionWrapped() const
-    {
-        return (float)getEncoderWrapped() / (float)ENC_RESOLUTION * M_TWOPI;
-    };
 
     DISALLOW_COPY_AND_ASSIGN(DjiMotor)
 
@@ -231,8 +220,6 @@ private:
     int8_t temperature;
 
     int16_t torque;
-
-    int debug;
 
     /**
      * If `false` the positive rotation direction of the shaft is counter-clockwise when

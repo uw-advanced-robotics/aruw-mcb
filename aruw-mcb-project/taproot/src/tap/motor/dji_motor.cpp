@@ -69,15 +69,12 @@ void DjiMotor::initialize()
 {
     drivers->djiMotorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
-    debug = 3;
 }
 
 void DjiMotor::processMessage(const modm::can::Message& message)
 {
-    debug = 1;
     if (message.getIdentifier() != DjiMotor::getMotorIdentifier())
     {
-        debug = -1;
         return;
     }
     uint16_t encoderActual =
@@ -148,6 +145,16 @@ int64_t DjiMotor::getEncoderUnwrapped() const
 }
 
 uint16_t DjiMotor::getEncoderWrapped() const { return encoderWrapped; }
+
+float DjiMotor::getPositionUnwrapped() const
+{
+    return getEncoderUnwrapped() * M_TWOPI / ENC_RESOLUTION;
+}
+
+float DjiMotor::getPositionWrapped() const
+{
+    return getEncoderWrapped() * M_TWOPI / ENC_RESOLUTION;
+}
 
 void DjiMotor::updateEncoderValue(uint16_t newEncWrapped)
 {
