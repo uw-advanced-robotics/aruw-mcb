@@ -27,12 +27,12 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -42,7 +42,7 @@ namespace aruwsrc::algorithms::odometry
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
-class SentryKFOdometry 
+class SentryKFOdometry
 {
 public:
     /**
@@ -82,9 +82,9 @@ public:
      * @return major yaw in world frame.
      */
     float getMajorYaw();
-    
+
     /**
-     * @return left minor yaw in world frame. 
+     * @return left minor yaw in world frame.
      */
     float getLeftMinorYaw();
 
@@ -102,17 +102,18 @@ public:
      * @return right minor pitch in world frame.
      */
     float getRightMinorPitch();
-private:
 
+private:
     tap::Drivers& drivers;
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
-    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor; 
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight;
 
     // Kalman Filter enums
     // Chassis Inputs
-    enum class OdomInput {
+    enum class OdomInput
+    {
         VEL_X = 0,
         ACC_X,
         VEL_Y,
@@ -120,7 +121,8 @@ private:
         NUM_INPUTS
     };
 
-    enum class OdomState {
+    enum class OdomState
+    {
         POS_X = 0,
         VEL_X,
         ACC_X,
@@ -139,9 +141,8 @@ private:
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-
     static constexpr float DT = 0.002f;
-    
+
     // clang-format off
 
     /**
