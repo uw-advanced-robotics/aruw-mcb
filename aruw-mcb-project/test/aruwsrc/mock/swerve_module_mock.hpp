@@ -22,29 +22,26 @@
 
 #include <gmock/gmock.h>
 
+#include "tap/mock/dji_motor_mock.hpp"
+
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-
-#include "tap/mock/dji_motor_mock.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-constexpr float SWERVE_FORWARD_MATRIX[24] {
-    0.25, 0.0, 0.25, 0.0, 0.25, 0., 0.25, 0.0, 
-    0.0, 0.25, 0., 0.25, 0., 0.25, 0., 0.25, 
-    -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325
-};
+constexpr float SWERVE_FORWARD_MATRIX[24]{
+    0.25,      0.0,       0.25,      0.0,      0.25,     0.,        0.25,     0.0,
+    0.0,       0.25,      0.,        0.25,     0.,       0.25,      0.,       0.25,
+    -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325};
 class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
 {
 public:
-    // SwerveModuleMock(tap::Drivers *drivers);
-
     SwerveModuleMock(
         testing::NiceMock<tap::mock::DjiMotorMock>& driMotor,
         testing::NiceMock<tap::mock::DjiMotorMock>& aziMotor,
-        aruwsrc::chassis::SwerveModuleConfig &config);
+        aruwsrc::chassis::SwerveModuleConfig& config);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());

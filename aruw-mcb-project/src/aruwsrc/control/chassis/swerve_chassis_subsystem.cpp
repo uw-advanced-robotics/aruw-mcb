@@ -35,11 +35,7 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::gpio::Analog::Pin currentPin)
     : HolonomicChassisSubsystem(drivers, currentPin),
       NUM_MODULES(4),
-      modules{
-          moduleLeftFront,
-          moduleRightFront,
-          moduleLeftBack,
-          moduleRightBack},
+      modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {
 }
@@ -72,10 +68,10 @@ Module* SwerveChassisSubsystem::getModule(unsigned int i)
 
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    x = modules[LF]->wheel.rpmToMps(x);  // convert input from motor rpm to m/s
-    y = modules[LF]->wheel.rpmToMps(y);  // convert input from motor rpm to m/s
+    x = modules[LF]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
+    y = modules[LF]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
     r = modules[LF]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
-    //TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
+    // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
         x,
@@ -136,10 +132,10 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelati
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
-        actualModuleVectors[2*i][0] = moduleVel[0][0];
-        actualModuleVectors[2*i+1][0] = moduleVel[1][0];
+        actualModuleVectors[2 * i][0] = moduleVel[0][0];
+        actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
-    return forwardMatrix*actualModuleVectors;
+    return forwardMatrix * actualModuleVectors;
 }
 
 modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
@@ -148,10 +144,10 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelat
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
-        desiredModuleVectors[2*i][0] = moduleVel[0][0];
-        desiredModuleVectors[2*i+1][0] = moduleVel[1][0];
+        desiredModuleVectors[2 * i][0] = moduleVel[0][0];
+        desiredModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
-    return forwardMatrix*desiredModuleVectors;
+    return forwardMatrix * desiredModuleVectors;
 }
 
 }  // namespace chassis

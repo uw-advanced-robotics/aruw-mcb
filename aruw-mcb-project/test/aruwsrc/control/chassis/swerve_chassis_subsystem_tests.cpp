@@ -44,35 +44,28 @@ static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0
                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
 
-constexpr float SWERVE_FORWARD_MATRIX[24] {
-    0.25, 0.0, 0.25, 0.0, 0.25, 0., 0.25, 0.0, 
-    0.0, 0.25, 0., 0.25, 0., 0.25, 0., 0.25, 
-    -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325
-};
+constexpr float SWERVE_FORWARD_MATRIX[24]{
+    0.25,      0.0,       0.25,      0.0,      0.25,     0.,        0.25,     0.0,
+    0.0,       0.25,      0.,        0.25,     0.,       0.25,      0.,       0.25,
+    -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325};
 
 class SwerveChassisSubsystemTest : public Test
 {
 protected:
     SwerveChassisSubsystemTest()
         : LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
-        LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
-        RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
-        RFAz(&drivers, tap::motor::MOTOR4, CAN_BUS_MOTORS, false, "rf azimuth mock"),
-        LBDr(&drivers, tap::motor::MOTOR5, CAN_BUS_MOTORS, false, "lb drive mock"),
-        LBAz(&drivers, tap::motor::MOTOR6, CAN_BUS_MOTORS, false, "lb azimuth mock"),
-        RBDr(&drivers, tap::motor::MOTOR7, CAN_BUS_MOTORS, false, "rb drive mock"),
-        RBAz(&drivers, tap::motor::MOTOR8, CAN_BUS_MOTORS, false, "rb azimuth mock"),
-        moduleLF(LFDr, LFAz, DEFAULT_SWERVE_CONFIG),
-        moduleRF(RFDr, RFAz, DEFAULT_SWERVE_CONFIG),
-        moduleLB(LBDr, LBAz, DEFAULT_SWERVE_CONFIG),
-        moduleRB(RBDr, RBAz, DEFAULT_SWERVE_CONFIG),
-        chassis(
-              &drivers,
-              &moduleLF,
-              &moduleRF,
-              &moduleLB,
-              &moduleRB,
-              SWERVE_FORWARD_MATRIX)
+          LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
+          RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
+          RFAz(&drivers, tap::motor::MOTOR4, CAN_BUS_MOTORS, false, "rf azimuth mock"),
+          LBDr(&drivers, tap::motor::MOTOR5, CAN_BUS_MOTORS, false, "lb drive mock"),
+          LBAz(&drivers, tap::motor::MOTOR6, CAN_BUS_MOTORS, false, "lb azimuth mock"),
+          RBDr(&drivers, tap::motor::MOTOR7, CAN_BUS_MOTORS, false, "rb drive mock"),
+          RBAz(&drivers, tap::motor::MOTOR8, CAN_BUS_MOTORS, false, "rb azimuth mock"),
+          moduleLF(LFDr, LFAz, DEFAULT_SWERVE_CONFIG),
+          moduleRF(RFDr, RFAz, DEFAULT_SWERVE_CONFIG),
+          moduleLB(LBDr, LBAz, DEFAULT_SWERVE_CONFIG),
+          moduleRB(RBDr, RBAz, DEFAULT_SWERVE_CONFIG),
+          chassis(&drivers, &moduleLF, &moduleRF, &moduleLB, &moduleRB, SWERVE_FORWARD_MATRIX)
     {
     }
 
@@ -97,8 +90,6 @@ protected:
     NiceMock<aruwsrc::mock::SwerveModuleMock> moduleRB;
     SwerveChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
-
-    
 };
 
 TEST_F(SwerveChassisSubsystemTest, numModulesInitializedCorrectly)

@@ -31,7 +31,12 @@ namespace mock
 class SwerveChassisSubsystemMock : public aruwsrc::chassis::SwerveChassisSubsystem
 {
 public:
-    SwerveChassisSubsystemMock(tap::Drivers *drivers);
+    SwerveChassisSubsystemMock(
+        tap::Drivers* drivers,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rb);
     virtual ~SwerveChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
