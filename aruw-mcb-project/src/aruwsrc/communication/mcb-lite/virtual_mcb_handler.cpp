@@ -137,9 +137,21 @@ void VirtualMCBHandler::processCanMessage(
     const ReceivedSerialMessage& completeMessage,
     tap::can::CanBus canbus)
 {
-    modm::can::Message msg;
-    memcpy(&msg, completeMessage.data, sizeof(modm::can::Message));
-    canRxHandler.refresh(canbus, msg);
+    memcpy(
+        &(canbus == tap::can::CanBus::CAN_BUS1 ? can1Data : can2Data),
+        completeMessage.data,
+        sizeof(can1Data));
+    for (int i = 0; i < 8; i++)
+    {
+        modm::can::Message msg;
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            // Get back the motor num
+            msg.identifier = i * 8 + tap::motor::MotorId::MOTOR1;
+            memcpy(&msg.data, &completeMessage.data[i], sizeof(msg.data));
+            canRxHandler.refresh(canbus, msg);
+        }
+    }
 }
 
 void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeMessage)
