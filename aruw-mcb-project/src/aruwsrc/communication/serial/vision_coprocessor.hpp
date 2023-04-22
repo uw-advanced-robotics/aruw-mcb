@@ -272,6 +272,9 @@ private:
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
+        CV_MESSAGE_TYPE_REFEREE_REALTIME_DATA = 3,
+        CV_MESSAGE_TYPE_REFEREE_COMPETITION_RESULT = 4,
+        CV_MESSAGE_TYPE_REFEREE_WARNING = 5,
         CV_MESSAGE_TYPE_ROBOT_ID = 6,
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
@@ -296,6 +299,12 @@ private:
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
+
+    /// Time in ms between sending referee real time message.
+    static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 5'000;
+
+    /// Time in ms between sending competition result status (as reported by the ref system).
+    static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
 
     static VisionCoprocessor* visionCoprocessorInstance;
 
@@ -323,6 +332,12 @@ private:
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
+    tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
+
+    tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    uint32_t lastSentRefereeWarningTime = 0;
+
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim
      * data information, and updates the `lastAimData`.
@@ -339,6 +354,9 @@ public:
 #endif
 
     void sendOdometryData();
+    void sendRefereeRealtimeData();
+    void sendRefereeCompetitionResult();
+    void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
     void sendTimeSyncMessage();

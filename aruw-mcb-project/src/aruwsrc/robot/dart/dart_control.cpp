@@ -60,7 +60,6 @@ HoldRepeatCommandMapping rightSwitchDown(
     true);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* only being used for the encoder motor */
 tap::motor::DjiMotor deadMotor1(
@@ -90,17 +89,9 @@ void registerDartSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
-void setDefaultDartCommands(Drivers*)
-{
-    dart.setDefaultCommand(&dartCommand);
-    buzzer.setDefaultCommand(&lowBatteryCommand);
-}
+void setDefaultDartCommands(Drivers*) { dart.setDefaultCommand(&dartCommand); }
 
-void startDartCommands(Drivers* drivers)
-{
-    drivers->commandScheduler.addCommand(&dartCommand);
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
-}
+void startDartCommands(Drivers* drivers) { drivers->commandScheduler.addCommand(&dartCommand); }
 
 void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
 
