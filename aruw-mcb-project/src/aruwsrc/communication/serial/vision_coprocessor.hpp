@@ -175,6 +175,19 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
+    /**
+     * Localization data received from Jetson
+     */
+    struct LocalizationData {
+        float x; // Positional values
+        float y;
+        float z;
+        float qw; // Quaternion orientation values
+        float qx;
+        float qy;
+        float qz;
+    } modm_packed;
+
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
