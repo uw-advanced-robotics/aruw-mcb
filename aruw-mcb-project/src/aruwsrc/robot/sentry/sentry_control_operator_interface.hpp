@@ -69,7 +69,7 @@ public:
     /**
      * @return The value used for chassis rotational velocity, 
      */
-    // mockable float getChassisYawVelocity();
+    mockable float getChassisYawVelocity();
     
 
     // Turret control mode functions

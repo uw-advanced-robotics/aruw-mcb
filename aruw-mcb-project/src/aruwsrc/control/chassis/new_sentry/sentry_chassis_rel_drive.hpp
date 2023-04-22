@@ -49,8 +49,6 @@ public:
         SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
         chassis::HolonomicChassisSubsystem *chassis);
-
-    float x, y, r;
 };
 }  // namespace aruwsrc::control::sentry
 

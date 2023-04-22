@@ -5,6 +5,8 @@ namespace aruwsrc::sentry::chassis
 
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
+// Distance from center of rotation to a swerve module projected onto a cardinal axis
+static constexpr float WHEELBASE_COORD = CENTER_TO_WHEELBASE_RADIUS / 1.41421356237;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 constexpr float SWERVE_FORWARD_MATRIX[24] {
@@ -15,23 +17,27 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0,
+    .azimuthZeroOffset = 2313,
+    .positionWithinChassisX = -WHEELBASE_COORD,
+    .positionWithinChassisY = WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .positionWithinChassisX = -0.205,
-    .positionWithinChassisY = 0.0,
+    .azimuthZeroOffset = 7060,
+    .positionWithinChassisX = WHEELBASE_COORD,
+    .positionWithinChassisY = WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .positionWithinChassisX = 0.0,
-    .positionWithinChassisY = -0.205,
+    .azimuthZeroOffset = 7048,
+    .positionWithinChassisX = -WHEELBASE_COORD,
+    .positionWithinChassisY = -WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .positionWithinChassisX = 0.205,
-    .positionWithinChassisY = 0.0,
+    .azimuthZeroOffset = 2270,
+    .positionWithinChassisX = WHEELBASE_COORD,
+    .positionWithinChassisY = -WHEELBASE_COORD,
 };
 
 } // namespace aruwsrc::control::turret
