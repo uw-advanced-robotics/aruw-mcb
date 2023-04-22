@@ -33,6 +33,8 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -59,7 +61,8 @@ public:
      * qualify this class as an `Odometry2DInterface`.
      */
     SentryKFOdometry(
-        tap::Drivers& drivers,
+        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+        tap::communication::sensors::imu::mpu6500::Mpu6500& mpu,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
         const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
@@ -103,12 +106,30 @@ public:
      */
     float getRightMinorPitch();
 
+
 private:
-    tap::Drivers& drivers;
+    
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    tap::communication::sensors::imu::mpu6500::Mpu6500& mpu;
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight;
+
+
+    // updates the internal odometry if there 
+    // is a new odometry localization data to 
+    // replace the odometry with
+    void handleOdometryReset();
+
+    /**
+    * Resets the 
+    */
+    void resetOdometry();
+
+    // returns true if there is new odometry localization data
+    bool newOdometryLocalization();
+
 
     // Kalman Filter enums
     // Chassis Inputs

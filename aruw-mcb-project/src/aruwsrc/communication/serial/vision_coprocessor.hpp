@@ -186,6 +186,7 @@ public:
         float qx;
         float qy;
         float qz;
+        uint32_t timestamp;
     } modm_packed;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -326,6 +327,9 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    // The last localization data received from the Jetson.
+    LocalizationData lastLocalizationData;
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -355,6 +359,17 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
+
+    /**
+     * Interprets a raw `SerialMessage`'s `data` field to extract position and orientation (in Euler angles)
+     * from a Jetson localization message, and updates the `lastLocalizationData`.
+     *
+     * @param[in] message the message to be decoded.
+     * @param[out] localizationData a return parameter through which the decoded message is returned. TODO: Check this, I copied it over
+     * @return `false` if the message length doesn't match `sizeof(*localizationData)`, `true`
+     *      otherwise.
+     */
+    bool decodeToLocalizationData(const ReceivedSerialMessage& message);
 
 #ifdef ENV_UNIT_TESTS
 public:

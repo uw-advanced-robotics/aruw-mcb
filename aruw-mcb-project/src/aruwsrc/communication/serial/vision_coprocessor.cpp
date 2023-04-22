@@ -138,6 +138,11 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     return true;
 }
 
+bool VisionCoprocessor::decodeToLocalizationData(const ReceivedSerialMessage& message)
+{
+    
+}
+
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
