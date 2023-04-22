@@ -67,6 +67,8 @@ public:
 
     void end(bool interrupt) override;
 
+    const char* getName() const override { return "motor homing"; };
+
 private:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
     HomingState homingState;

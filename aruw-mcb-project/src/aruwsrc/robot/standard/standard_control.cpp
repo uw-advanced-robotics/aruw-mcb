@@ -75,6 +75,8 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/control/barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/motor_homing_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -169,6 +171,13 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
+BarrelSwitcherSubsystem barrelSwitcher(drivers(),  
+    aruwsrc::control::HomingConfig {
+        .minRPM = 100,
+        .maxTorque = 10
+    },
+    tap::motor::MotorId::MOTOR8);
+
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
     sentryRequestSubsystem);
@@ -252,6 +261,8 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
+
+MotorHomingCommand motorHoming(barrelSwitcher);
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -491,6 +502,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&barrelSwitcher);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -505,6 +517,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    barrelSwitcher.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

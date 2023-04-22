@@ -25,11 +25,11 @@
 namespace aruwsrc::control
 {
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(tap::Drivers* drivers, 
-            tap::motor::MotorId motorid, 
-            aruwsrc::control::HomingConfig config) : 
+            aruwsrc::control::HomingConfig config,
+            tap::motor::MotorId motorid) : 
     HomeableSubsystemInterface(drivers), 
-    motor(drivers, motorid, tap::can::CanBus::CAN_BUS2, false, "barrel switching motor"), //canbus tbd
-    config(config),
+    config(config), 
+    motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor"),
     encoderPid(
         POSITION_PID_KP,
         POSITION_PID_KI,

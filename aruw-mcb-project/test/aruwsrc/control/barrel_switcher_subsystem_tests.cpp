@@ -30,7 +30,7 @@ using namespace testing;
 class BarrelSwitcherSubsystemTest : public Test
 {
 protected:
-    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, motorid, config) {}
+    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, config, motorid) {}
 
     tap::Drivers drivers;
     tap::motor::MotorId motorid;
@@ -44,19 +44,19 @@ protected:
 
 TEST_F(BarrelSwitcherSubsystemTest, move_to_lower_bound_changes_state) {
     barrelSwitcher.moveTowardLowerBound();
-    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::HOMING_TOWARD_LOWER_BOUND);
+    EXPECT_EQ(BarrelState::HOMING_TOWARD_LOWER_BOUND, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, move_to_upper_bound_changes_state)
 {
     barrelSwitcher.moveTowardUpperBound();
-    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::HOMING_TOWARD_UPPER_BOUND);
+    EXPECT_EQ(BarrelState::HOMING_TOWARD_UPPER_BOUND, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, stop_changes_state)
 {
     barrelSwitcher.stop();
-    EXPECT_EQ(barrelSwitcher.getBarrelState(), BarrelState::SWITCHING_BETWEEN_BARRELS);
+    EXPECT_EQ(BarrelState::SWITCHING_BETWEEN_BARRELS, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {

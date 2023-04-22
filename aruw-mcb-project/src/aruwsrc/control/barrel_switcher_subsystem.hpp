@@ -64,7 +64,8 @@ class BarrelSwitcherSubsystem : public aruwsrc::control::HomeableSubsystemInterf
 public:
     BarrelSwitcherSubsystem(
         tap::Drivers* drivers, 
-        tap::motor::MotorId motorid, aruwsrc::control::HomingConfig config
+        aruwsrc::control::HomingConfig config, 
+        tap::motor::MotorId motorid
     );
     
     void initialize() override;
