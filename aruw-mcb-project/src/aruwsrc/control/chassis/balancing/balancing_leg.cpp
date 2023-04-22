@@ -81,11 +81,12 @@ void BalancingLeg::update()
     desiredWheelLocation.setX(tap::algorithms::limitVal(desiredx, -.1f, .1f));
     desiredWheelLocation.setY(tap::algorithms::limitVal(desiredz, -.35f, -.1f));
 
-    float u = thetaLPid.runController(0 - (chassisAngle), tl_dot_w + chassisAngledot, dt);
-    u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
+    // float u = thetaLPid.runController(0 - (chassisAngle), tl_dot_w + chassisAngledot, dt);
+    // u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
 
-    float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    debug1 = wheelTorque;
+    // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
+    float wheelCurrent = -310 * tl - 73 * tl_dot - 5 * realWheelSpeed;
+    debug1 = wheelCurrent;
     // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
 
     // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
@@ -95,12 +96,13 @@ void BalancingLeg::update()
     // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
     // 3. Send New Output Values
-    int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
+    // int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
+    int32_t driveWheelOutput = wheelCurrent * 16384 / 20; //convert from i to output
     // debug1 = driveWheelOutput;
-    driveWheel->setDesiredOutput(driveWheelOutput);
+    // driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
-    fiveBarController(dt/1000);
+    fiveBarController(dt / 1000);
 }
 
 void BalancingLeg::fiveBarController(uint32_t dt)
@@ -140,7 +142,7 @@ void BalancingLeg::computeState(uint32_t dt)
                fivebar->getCurrentPosition().getY() * cos(chassisAngle);
     float x_l = fivebar->getCurrentPosition().getX() * cos(chassisAngle) +
                 fivebar->getCurrentPosition().getY() * sin(chassisAngle);
-    tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS/2);  // rad
+    tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS / 2);  // rad
 
     // Increment and store tl
     tlWindowIndex = (tlWindowIndex + 1) % tlWindow.size();
@@ -177,7 +179,7 @@ void BalancingLeg::computeState(uint32_t dt)
 
     float wheelPos = 0;
     wheelPos = driveWheel->getPositionUnwrapped() * CHASSIS_GEARBOX_RATIO;  // rad
-    realWheelSpeed = 1'000'000 * (wheelPos - wheelPosPrev) / dt;                 // rad/s
+    realWheelSpeed = 1'000'000 * (wheelPos - wheelPosPrev) / dt;            // rad/s
     wheelPosPrev = wheelPos;
 
     vCurrent = realWheelSpeed * WHEEL_RADIUS - zCurrent * tl_dot;  // m/s
