@@ -30,15 +30,14 @@ using namespace testing;
 class BarrelSwitcherSubsystemTest : public Test
 {
 protected:
-    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, motorid, 
-    aruwsrc::control::HomingConfig{
-        .minRPM = 100,
-        .maxTorque = 10
-    }) {}
+    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, motorid, config) {}
 
     tap::Drivers drivers;
     tap::motor::MotorId motorid;
-    aruwsrc::control::HomingConfig config;
+    aruwsrc::control::HomingConfig config = aruwsrc::control::HomingConfig{
+        .minRPM = 100,
+        .maxTorque = 10
+    };
     BarrelSwitcherSubsystem barrelSwitcher;
 };
 
@@ -66,8 +65,8 @@ TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
     int16_t rpm;
     int16_t torque;
 
-    ON_CALL(motor, getShaftRPM).willByDefault(ReturnPointee(&rpm));
-    ON_CALL(motor, getTorque).willByDefault(ReturnPointee(&torque));
+    ON_CALL(barrelSwitcher.motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(barrelSwitcher.motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
     rpm = config.minRPM + 1;
     torque = config.maxTorque + 1;

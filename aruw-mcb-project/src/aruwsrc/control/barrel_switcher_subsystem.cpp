@@ -96,7 +96,7 @@ void BarrelSwitcherSubsystem::moveTowardUpperBound() {
 }
 
 void BarrelSwitcherSubsystem::moveTowardLowerBound() {
-    barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
+    barrelState = BarrelState::HOMING_TOWARD_LOWER_BOUND;
 }
 
 void BarrelSwitcherSubsystem::stop() {

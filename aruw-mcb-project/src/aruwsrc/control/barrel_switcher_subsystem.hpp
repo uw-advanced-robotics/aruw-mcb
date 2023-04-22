@@ -25,6 +25,13 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <gmock/gmock.h>
+
+#include "tap/mock/dji_motor_mock.hpp"
+#endif
+
+
 namespace aruwsrc::control
 {
 
@@ -79,11 +86,6 @@ private:
     );
 
     /**
-     * The motor that switches the turret's barrels
-    */
-   tap::motor::DjiMotor motor;
-
-    /**
      * upper bound for motor's encoder
      * note: the lower bound is 0
     */
@@ -108,6 +110,19 @@ private:
     BarrelState barrelState;
 
     modm::Pid<int32_t> encoderPid;
+
+private:
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+    testing::NiceMock<tap::mock::DjiMotorMock> motor;
+
+private:
+#else
+/**
+    * The motor that switches the turret's barrels
+*/
+tap::motor::DjiMotor motor;
+#endif
 };
 } //namespace aruwsrc::control
 #endif
