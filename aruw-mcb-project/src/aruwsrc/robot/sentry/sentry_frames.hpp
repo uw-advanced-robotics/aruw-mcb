@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SENTRY
 
-#endif
+#ifndef SENTRY_FRAMES_HPP_
+
+#endif // ENTRY_FRAMES_HPP_
