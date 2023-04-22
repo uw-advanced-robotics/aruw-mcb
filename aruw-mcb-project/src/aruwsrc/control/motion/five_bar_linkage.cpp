@@ -65,6 +65,23 @@ void FiveBarLinkage::refresh()
     computePositionFromAngles();
 }
 
+float FiveBarLinkage::getMotor1Error()
+{
+    return tap::algorithms::limitVal(
+               motor1Setpoint,
+               fiveBarConfig.motor1MinAngle,
+               fiveBarConfig.motor1MaxAngle) -
+           motor1RelativePosition;
+};
+float FiveBarLinkage::getMotor2Error()
+{
+    return tap::algorithms::limitVal(
+               motor2Setpoint,
+               fiveBarConfig.motor1MinAngle,
+               fiveBarConfig.motor2MaxAngle) -
+           motor2RelativePosition;
+};
+
 void FiveBarLinkage::moveMotors(float motor1output, float motor2output)
 {
     motor1->setDesiredOutput(motor1output);

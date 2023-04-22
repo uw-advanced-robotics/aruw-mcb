@@ -39,6 +39,13 @@ struct FiveBarConfig
     float motor2toJoint2Length;
     float joint1toTipLength;
     float joint2toTipLength;
+    /**
+     *  minimum and maximum angles for the motors. See below doc for sign convention.
+     */
+    float motor1MinAngle;
+    float motor1MaxAngle;
+    float motor2MinAngle;
+    float motor2MaxAngle;
 };
 
 class FiveBarLinkage
@@ -67,17 +74,22 @@ public:
 
     modm::Location2D<float> getCurrentPosition() { return currentPosition; };
 
-    float getMotor1Error() {return motor1Setpoint - motor1RelativePosition;};
-    float getMotor2Error() {return motor2Setpoint - motor2RelativePosition;};
+    /**
+     * Gets the difference between the current position and the desired position of the motor (rad).
+     * This function automatically bounds the error such that the error becomes zero when the motor
+     * is at the limits definde in the FiveBarConfig
+     */
+    float getMotor1Error();
+    float getMotor2Error();
 
-    float getMotor1RelativePosition() {return motor1RelativePosition;};
-    float getMotor2RelativePosition() {return motor2RelativePosition;};
+    float getMotor1RelativePosition() { return motor1RelativePosition; };
+    float getMotor2RelativePosition() { return motor2RelativePosition; };
 
     FiveBarConfig getFiveBarConfig() { return fiveBarConfig; };
 
-    tap::motor::MotorInterface* getMotor1() {return motor1;};
+    tap::motor::MotorInterface* getMotor1() { return motor1; };
 
-    tap::motor::MotorInterface* getMotor2() {return motor2;};
+    tap::motor::MotorInterface* getMotor2() { return motor2; };
 
     void refresh();
 

@@ -71,6 +71,11 @@ using namespace aruwsrc::testbed;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 namespace testbed_control
 {
 /* define subsystems --------------------------------------------------------*/
@@ -160,7 +165,11 @@ motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
     RF_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG);
 
-aruwsrc::chassis::BalancingChassisSubsystem chassis(drivers(), legLeft, legRight);
+aruwsrc::chassis::BalancingChassisSubsystem chassis(
+    drivers(),
+    getTurretMCBCanComm(),
+    legLeft,
+    legRight);
 
 BalancingChassisRelativeDriveCommand manualDriveCommand(
     drivers(),

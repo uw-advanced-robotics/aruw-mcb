@@ -103,7 +103,8 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE) || \
+    defined(TARGET_TESTBED)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
@@ -135,7 +136,9 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-
+#if defined(TARGET_TESTBED)
+    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+#endif
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();

@@ -158,8 +158,8 @@ static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const float MAX_WHEEL_SPEED = 5'000;
 
-static constexpr float ROTATION_REMOTE_SCALAR = .005;
-static constexpr float TRANSLATION_REMOTE_SCALAR = .01;
+static constexpr float ROTATION_REMOTE_SCALAR = .001       ;
+static constexpr float TRANSLATION_REMOTE_SCALAR = .0002;
 
 static constexpr float MASS_CHASSIS = 8.0f;  // kg
 
@@ -248,16 +248,11 @@ static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
     .motor2toJoint2Length = .150f,
     .joint1toTipLength = .250f,
     .joint2toTipLength = .250f,
+    .motor1MinAngle = modm::toRadian(285),
+    .motor1MaxAngle = modm::toRadian(20) + M_TWOPI,
+    .motor2MinAngle = modm::toRadian(160),
+    .motor2MaxAngle = modm::toRadian(255),
 };
-
-static constexpr float LQR_K11 = 0.345042268056633;
-static constexpr float LQR_K12 = 0.101992377224230f;
-static constexpr float LQR_K13 = 0.0695263958858381f;
-static constexpr float LQR_K31 = -26.6851196423879f;
-static constexpr float LQR_K32 = -5.94397865116958f;
-static constexpr float LQR_K33 = 14.2007324723501f;
-
-// other Ks are 0.
 
 }  // namespace aruwsrc::chassis
 

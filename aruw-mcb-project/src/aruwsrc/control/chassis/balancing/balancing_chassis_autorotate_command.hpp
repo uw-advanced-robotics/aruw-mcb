@@ -118,18 +118,6 @@ private:
      * for motion planning superceeds rotation of the chassis for autorotation.
      */
     bool chassisMotionPlanning;
-
-    /**
-     * Computes the setpoint to autorotate the chassis towards
-     *
-     * @param turretAngleFromCenter the current angle of the turret relative to the chassis
-     * @param maxAngleFromCenter the maximum angle difference to either side before the autorotation
-     * setpoint swaps
-     * @return how much to rotate the chassis to get it aligned with the turret
-     */
-    virtual float computeAngleFromCenterForAutorotation(
-        float turretAngleFromCenter,
-        float maxAngleFromCenter);
 };  // class BalancingChassisRelativeDriveCommand
 
 }  // namespace chassis

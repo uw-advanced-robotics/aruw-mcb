@@ -31,7 +31,7 @@ static const float FIVE_BAR_T1_DELTA = -5.0;
 static const float FIVE_BAR_T2_MIN = 155.0;
 static const float FIVE_BAR_T2_MAX = 275.0;
 static const float FIVE_BAR_T2_DELTA = 5.0;
-static const std::array<std::array<short, 115>, 115> FIVE_BAR_LUT_X = {{
+static const std::array<std::array<short, 25>, 25> FIVE_BAR_LUT_X = {{
     {-108, -111, -113, -117, -121, -125, -130, -135, -141, -148, -155, -163, -172,
      -181, -191, -202, -213, -225, -237, -249, -262, -275, -288, -301, -314},
     {-105, -108, -111, -114, -118, -122, -127, -133, -139, -146, -153, -161, -170,
@@ -83,7 +83,7 @@ static const std::array<std::array<short, 115>, 115> FIVE_BAR_LUT_X = {{
     {98, 96, 93,  90,  85,  80,  74,  67,  60,  52,  42,   33,  22,
      11, 0,  -12, -25, -37, -50, -62, -74, -85, -95, -103, -108},
 }};  // FIVE_BAR_LUT_X
-static const std::array<std::array<short, 115>, 115> FIVE_BAR_LUT_Y = {{
+static const std::array<std::array<short, 25>, 25> FIVE_BAR_LUT_Y = {{
     {-99,  -102, -105, -109, -113, -117, -122, -126, -131, -137, -142, -147, -153,
      -158, -163, -167, -172, -176, -179, -182, -184, -186, -186, -187, -186},
     {-102, -105, -109, -113, -117, -122, -127, -132, -137, -143, -149, -155, -160,

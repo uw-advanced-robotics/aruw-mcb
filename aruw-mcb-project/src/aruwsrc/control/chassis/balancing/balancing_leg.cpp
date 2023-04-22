@@ -74,31 +74,33 @@ void BalancingLeg::update()
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
     xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
-    xoffset = 0;
+    // xoffset = 0;
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
 
     desiredWheelLocation.setX(tap::algorithms::limitVal(desiredx, -.1f, .1f));
     desiredWheelLocation.setY(tap::algorithms::limitVal(desiredz, -.35f, -.1f));
 
-    float u = thetaLPid.runControllerDerivateError(0 - tl_ddot, dt);
+    float u = thetaLPid.runController(0 - (chassisAngle), tl_dot_w + chassisAngledot, dt);
+    u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
+
     float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
+    debug1 = wheelTorque;
+    // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
 
-    desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
+    // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
 
-    float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
+    // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
 
-    float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
-
-    driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
+    // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
     // 3. Send New Output Values
-    // int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
+    int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
     // debug1 = driveWheelOutput;
     driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
-    fiveBarController(dt);
+    fiveBarController(dt/1000);
 }
 
 void BalancingLeg::fiveBarController(uint32_t dt)
@@ -119,11 +121,11 @@ void BalancingLeg::fiveBarController(uint32_t dt)
     float motor1output = fiveBarMotor1Pid.runController(
         motor1error,
         fivebar->getMotor1()->getShaftRPM() * M_TWOPI / 60,
-        dt / 1000);
+        dt);
     float motor2output = fiveBarMotor2Pid.runController(
         motor2error,
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
-        dt / 1000);
+        dt);
 
     motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
     // motor direction so minus
@@ -138,7 +140,7 @@ void BalancingLeg::computeState(uint32_t dt)
                fivebar->getCurrentPosition().getY() * cos(chassisAngle);
     float x_l = fivebar->getCurrentPosition().getX() * cos(chassisAngle) +
                 fivebar->getCurrentPosition().getY() * sin(chassisAngle);
-    tl = atan2(-x_l, -zCurrent);  // rad
+    tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS/2);  // rad
 
     // Increment and store tl
     tlWindowIndex = (tlWindowIndex + 1) % tlWindow.size();
@@ -175,16 +177,17 @@ void BalancingLeg::computeState(uint32_t dt)
 
     float wheelPos = 0;
     wheelPos = driveWheel->getPositionUnwrapped() * CHASSIS_GEARBOX_RATIO;  // rad
-    realWheelSpeed = 1000 * (wheelPos - wheelPosPrev) / dt;                 // rad/s
+    realWheelSpeed = 1'000'000 * (wheelPos - wheelPosPrev) / dt;                 // rad/s
     wheelPosPrev = wheelPos;
 
     vCurrent = realWheelSpeed * WHEEL_RADIUS - zCurrent * tl_dot;  // m/s
-    aCurrent = (vCurrent - vCurrentPrev) * 1000 / dt;
+    aCurrent = (vCurrent - vCurrentPrev) * 1'000'000 / dt;
     vCurrentPrev = vCurrent;
     aCurrentPrev = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
     aCurrent = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
 
-    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1000 / dt;
+    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1'000'000 / dt;
+    chassisAnglePrev = chassisAngle;
 
     chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .5);
     // chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .1);

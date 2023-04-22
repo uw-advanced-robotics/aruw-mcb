@@ -23,9 +23,11 @@ namespace aruwsrc::chassis
 {
 BalancingChassisSubsystem::BalancingChassisSubsystem(
     tap::Drivers* drivers,
+    aruwsrc::can::TurretMCBCanComm& turretMCB,
     BalancingLeg& leftLeg,
     BalancingLeg& rightLeg)
     : Subsystem(drivers),
+      turretMCB(turretMCB),
       rotationPid(AUTOROTATION_PID),
       leftLeg(leftLeg),
       rightLeg(rightLeg)
@@ -49,6 +51,7 @@ void BalancingChassisSubsystem::refresh()
 
     // 1. Update yaw and roll values
     pitch = drivers->mpu6500.getRoll() * M_TWOPI / 360;
+    pitchC = turretMCB.getPitch();
     roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
     computeState();
 
@@ -68,8 +71,8 @@ void BalancingChassisSubsystem::refresh()
     leftLeg.setDesiredTranslationSpeed(-yawAdjustment + desiredX);  // m/s
     rightLeg.setDesiredTranslationSpeed(yawAdjustment + desiredX);
 
-    leftLeg.setChassisAngle(pitch);
-    rightLeg.setChassisAngle(pitch);
+    leftLeg.setChassisAngle(pitchC);
+    rightLeg.setChassisAngle(pitchC);
 
     leftLeg.update();
     rightLeg.update();

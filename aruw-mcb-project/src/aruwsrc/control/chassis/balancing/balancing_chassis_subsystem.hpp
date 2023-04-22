@@ -22,6 +22,7 @@
 
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 #include "balancing_leg.hpp"
@@ -31,7 +32,11 @@ namespace aruwsrc::chassis
 class BalancingChassisSubsystem : public tap::control::Subsystem
 {
 public:
-    BalancingChassisSubsystem(tap::Drivers* drivers, BalancingLeg& leftLeg, BalancingLeg& rightLeg);
+    BalancingChassisSubsystem(
+        tap::Drivers* drivers,
+        aruwsrc::can::TurretMCBCanComm& turretMCB,
+        BalancingLeg& leftLeg,
+        BalancingLeg& rightLeg);
 
     void initialize() override;
 
@@ -60,6 +65,8 @@ public:
 private:
     void computeState();
 
+    aruwsrc::can::TurretMCBCanComm& turretMCB;
+
     BalancingLeg &leftLeg, rightLeg;
 
     float pitchAdjustment = 0;
@@ -69,6 +76,7 @@ private:
     float targetPitch;
 
     float pitch;
+    float pitchC;
     float roll;
     float yaw;
 

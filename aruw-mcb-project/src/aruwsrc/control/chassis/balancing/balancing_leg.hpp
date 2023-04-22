@@ -107,22 +107,34 @@ private:
      *
      */
     tap::algorithms::SmoothPidConfig xPidConfig{
-        .kp = .03,
-        .ki = 0,
+        .kp = .1,
+        .ki = 4e-7,
         .kd = 0,
-        .maxICumulative = .1,
-        .maxOutput = .05,
+        .maxICumulative = .05,
+        .maxOutput = .07,
     };
     tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
 
     tap::algorithms::SmoothPidConfig thetaLPidConfig{
-        .kp = 1,
+        .kp = 25,
+        .ki = 0,
+        .kd = 0,
+        .maxICumulative = 2,
+        .maxOutput = 40,
+        .tRProportionalKalman = .5,
+    };
+
+    tap::algorithms::SmoothPidConfig thetaLdotPidConfig{
+        .kp = 8,
         .ki = 0,
         .kd = 0,
         .maxOutput = 40,
+        .tRProportionalKalman = .5,
     };
 
     tap::algorithms::SmoothPid thetaLPid = tap::algorithms::SmoothPid(thetaLPidConfig);
+    
+    tap::algorithms::SmoothPid thetaLdotPid = tap::algorithms::SmoothPid(thetaLdotPidConfig);
 
     uint32_t prevTime = 0;
 
