@@ -42,7 +42,8 @@ class BalancingLeg
 public:
     /**
      * @param[in] drivers pointer
-     * @param[in] fivebar instantiated in robot_control
+     * @param[in] fivebar instantiated in robot_control.
+     * See FiveBarLinkage class for definitions of Motor1 and Motor2.
      * @param[in] fivebarMotor1PidConfig
      * @param[in] fivebarMotor1FuzzyPDconfig
      * @param[in] fivebarMotor2PidConfig
@@ -106,6 +107,9 @@ public:
 private:
     void computeState(uint32_t dt);
 
+    /**
+     * Applies gravity compensation and runs the five-bar linkage controller.
+    */
     void fiveBarController(uint32_t dt);
 
     const float WHEEL_RADIUS;   // (m) radius of the drive wheel
@@ -178,6 +182,7 @@ private:
 
     float motorLinkAnglePrev;   // (rad) angle of the link that the wheel motor is attached to for offsetting
 
+    // TODO: Derek WTF are these
     std::array<float, 10> tlWindow;
     uint8_t tlWindowIndex = 0;
     float tl_dot_w, tl_ddot_w;

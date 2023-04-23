@@ -57,14 +57,13 @@ void BalancingLeg::initialize()
 
 void BalancingLeg::update()
 {
-    // 1. Update Current State
-
+    /* 1. Compute dt and Update Current State */
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
     int32_t dt = currentTime - prevTime;
     prevTime = currentTime;
     computeState(dt);
 
-    // 2. Apply Control Law
+    /* 2. Compute Setpoints */
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.150);
     float desiredWheelSpeed = vDesired;
     float desiredWheelAngle = 0;
@@ -85,18 +84,14 @@ void BalancingLeg::update()
     u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
 
     float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    debug1 = wheelTorque;
+    
     // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
-
     // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
-
     // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
-
     // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
 
-    // 3. Send New Output Values
+    /* 3. Send New Output Values to Actuators */
     int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
-    // debug1 = driveWheelOutput;
     driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
