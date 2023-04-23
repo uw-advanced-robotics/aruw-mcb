@@ -190,7 +190,6 @@ void BalancingLeg::computeState(uint32_t dt)
     chassisAnglePrev = chassisAngle;
 
     chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .5);
-    // chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .1);
 }
 }  // namespace chassis
 }  // namespace aruwsrc

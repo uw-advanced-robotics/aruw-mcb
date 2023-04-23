@@ -40,6 +40,16 @@ namespace chassis
 class BalancingLeg
 {
 public:
+    /**
+     * @param[in] drivers pointer
+     * @param[in] fivebar instantiated in robot_control
+     * @param[in] fivebarMotor1PidConfig
+     * @param[in] fivebarMotor1FuzzyPDconfig
+     * @param[in] fivebarMotor2PidConfig
+     * @param[in] fivebarMotor2FuzzyPDconfig
+     * @param[in] wheelMotor instantiated in robot_control
+     * @param[in] driveWheelPidConfig
+    */
     BalancingLeg(
         tap::Drivers* drivers,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
@@ -54,33 +64,42 @@ public:
     void initialize();
 
     /**
-     *
+     * @param[in] height in mm for the leg to maintain.
      */
     inline void setDesiredHeight(float height) { zDesired = height; };
 
+    /**
+     * @param[in] angle of the chassis relative to the wheel to maintain.
+     */
     inline void setChassisAngle(float angle) { chassisAngle = angle; };
 
     /**
-     *
+     * @param[in] speed of the chassis to maintain.
      */
     inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
 
     /**
-     *
+     * @return leg height in mm.
      */
     inline float getCurrentHeight() { return zCurrent; };
 
     /**
-     *
+     * @return chassis speed in m/s.
      */
     inline float getCurrentTranslationSpeed() { return vCurrent; };
 
+    /**
+     * @return FiveBarLinkage instance used by the leg.
+     */
     inline aruwsrc::control::motion::FiveBarLinkage* getFiveBar() { return fivebar; };
 
+    /**
+     * @return the stand-by position of the fivebar.
+     */
     inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
 
     /**
-     *
+     * Updates the state and control action of the balancing leg.
      */
     void update();
 
@@ -89,22 +108,23 @@ private:
 
     void fiveBarController(uint32_t dt);
 
-    const float WHEEL_RADIUS;
+    const float WHEEL_RADIUS;   // (m) radius of the drive wheel
+
+    /* Pointers to required actuators */
 
     aruwsrc::control::motion::FiveBarLinkage* fivebar;
+    tap::motor::MotorInterface* driveWheel;
+
+    /* PID Controllers for actuators */
 
     tap::algorithms::FuzzyPD fiveBarMotor1Pid;
     tap::algorithms::FuzzyPD fiveBarMotor2Pid;
-
-    tap::motor::MotorInterface* driveWheel;
-
     tap::algorithms::SmoothPid driveWheelPid;
 
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
      * output units are m
-     *
      */
     tap::algorithms::SmoothPidConfig xPidConfig{
         .kp = .1,
@@ -145,42 +165,41 @@ private:
     float debug2;
     float debug3;
 
-    float zDesired,  // m, world-frame height
-        zCurrent;    // m
+    float zDesired,     // (m) world-frame height of the chassis
+        zCurrent;       // (m)
 
-    float vDesired;      // m/s, world-frame leg speed in x-direction
-    float vCurrent;      // m/s
-    float vCurrentPrev;  // m/s
+    float vDesired;     // (m/s) world-frame leg speed in the x-direciton
+    float vCurrent;     // (m/s)
+    float vCurrentPrev; // (m/s)
 
-    float chassisAngle,     // rad, with positive = pitch down
-        chassisAnglePrev;   // rad
-    float chassisAngledot;  // rad/s, see chassisAngle
+    float chassisAngle,     // (rad) positive-down pitch angle of the chassis
+    chassisAnglePrev;       // (rad)
+    float chassisAngledot;  // (rad/s)
 
-    float motorLinkAnglePrev;  // rad, angle of the link that the wheel motor is attached to for
-                               // offsetting
+    float motorLinkAnglePrev;   // (rad) angle of the link that the wheel motor is attached to for offsetting
 
     std::array<float, 10> tlWindow;
     uint8_t tlWindowIndex = 0;
     float tl_dot_w, tl_ddot_w;
 
-    float tl,          // rad, angle of the metaphyiscal pendulum
-        tl_prev,       // rad
-        tl_prev_prev,  // rad
-        tl_dot,        // rad/s
-        tl_dotPrev,    // rad/s
-        tl_ddot,       // rad/s/s
-        tl_ddotPrev;   // rad/s/s
+    float tl,          // (rad) angle of the metaphyiscal pendulum
+        tl_prev,       // (rad)
+        tl_prev_prev,  // (rad)
+        tl_dot,        // (rad/s)
+        tl_dotPrev,    // (rad/s)
+        tl_ddot,       // (rad/s^2)
+        tl_ddotPrev;   // (rad/s^2)
 
-    float realWheelSpeed;    // rad/s, rotation of wheel, +rotation = forward motion
-    float wheelPosPrev = 0;  // rad, just used to compute the wheel's speed
+    float realWheelSpeed;    // (rad/s) rotation of wheel, +rotation = forward motion
+    float wheelPosPrev = 0;  // (rad) just used to compute the wheel's speed
 
-    float aCurrent,    // m/s/s, rate of change of vCurrent
-        aCurrentPrev,  // m/s/s
-        aDesired,      // m/s/s
-        aDesiredPrev;  // m/s/s
+    float aCurrent,    // (m/s^2) rate of change of vCurrent
+        aCurrentPrev,  // (m/s^2)
+        aDesired,      // (m/s^2)
+        aDesiredPrev;  // (m/s^2)
 
-    float xoffset,  // m, x-offset used to drive linear acceleration
-        xoffsetPrev;
+    float xoffset,      // (m) x-offset used to drive linear acceleration
+        xoffsetPrev;    // (m)
 };
 }  // namespace chassis
 }  // namespace aruwsrc
