@@ -142,6 +142,7 @@ void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendHealthMessage();
     sendRefereeRealtimeData();
     sendRefereeCompetitionResult();
     sendRefereeWarning();
