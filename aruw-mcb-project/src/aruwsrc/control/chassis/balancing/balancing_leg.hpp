@@ -42,12 +42,11 @@ class BalancingLeg
 public:
     /**
      * @param[in] drivers pointer
-     * @param[in] fivebar instantiated in robot_control.
-     * See FiveBarLinkage class for definitions of Motor1 and Motor2.
-     * @param[in] fivebarMotor1PidConfig
-     * @param[in] fivebarMotor1FuzzyPDconfig
-     * @param[in] fivebarMotor2PidConfig
-     * @param[in] fivebarMotor2FuzzyPDconfig
+     * @param[in] fivebar instantiated in robot_control
+     * @param[in] fivebarMotor1PidConfig for the left fivebar motor
+     * @param[in] fivebarMotor1FuzzyPDconfig for the left fivebar motor
+     * @param[in] fivebarMotor2PidConfig for the right fivebar motor
+     * @param[in] fivebarMotor2FuzzyPDconfig for the right fivebar motor.
      * @param[in] wheelMotor instantiated in robot_control
      * @param[in] driveWheelPidConfig
     */
@@ -65,27 +64,27 @@ public:
     void initialize();
 
     /**
-     * @param[in] height in mm for the leg to maintain.
+     * @param[in] height: (mm) Setpoint for chassis height.
      */
     inline void setDesiredHeight(float height) { zDesired = height; };
 
     /**
-     * @param[in] angle of the chassis relative to the wheel to maintain.
+     * @param[in] angle: (rad) Pitch angle to set from external source
      */
     inline void setChassisAngle(float angle) { chassisAngle = angle; };
 
     /**
-     * @param[in] speed of the chassis to maintain.
+     * @param[in] speed: (m/s) Setpoint for chassis translational speed.
      */
     inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
 
     /**
-     * @return leg height in mm.
+     * @return Leg height in mm.
      */
     inline float getCurrentHeight() { return zCurrent; };
 
     /**
-     * @return chassis speed in m/s.
+     * @return Chassis speed in m/s.
      */
     inline float getCurrentTranslationSpeed() { return vCurrent; };
 
@@ -95,7 +94,7 @@ public:
     inline aruwsrc::control::motion::FiveBarLinkage* getFiveBar() { return fivebar; };
 
     /**
-     * @return the stand-by position of the fivebar.
+     * @return The stand-by position of the fivebar.
      */
     inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
 
@@ -105,12 +104,13 @@ public:
     void update();
 
 private:
+    /**
+     * @param[in] dt (us)
+     */
     void computeState(uint32_t dt);
 
-    /**
-     * Applies gravity compensation and runs the five-bar linkage controller.
-    */
-    void fiveBarController(uint32_t dt);
+    /// Runs control logic with gravity compensation for the five-bar linkage
+    void fivebarController(uint32_t dt);
 
     const float WHEEL_RADIUS;   // (m) radius of the drive wheel
 
@@ -121,8 +121,8 @@ private:
 
     /* PID Controllers for actuators */
 
-    tap::algorithms::FuzzyPD fiveBarMotor1Pid;
-    tap::algorithms::FuzzyPD fiveBarMotor2Pid;
+    tap::algorithms::FuzzyPD fivebarMotor1Pid;
+    tap::algorithms::FuzzyPD fivebarMotor2Pid;
     tap::algorithms::SmoothPid driveWheelPid;
 
     /**
@@ -182,7 +182,7 @@ private:
 
     float motorLinkAnglePrev;   // (rad) angle of the link that the wheel motor is attached to for offsetting
 
-    // TODO: Derek WTF are these
+    // TODO: Derek wtf are these - Manoli
     std::array<float, 10> tlWindow;
     uint8_t tlWindowIndex = 0;
     float tl_dot_w, tl_ddot_w;
@@ -210,3 +210,4 @@ private:
 }  // namespace aruwsrc
 
 #endif  // BALANCING_LEG_HPP_
+
