@@ -99,12 +99,11 @@ private:
     tap::motor::MotorInterface* driveWheel;
 
     tap::algorithms::SmoothPid driveWheelPid;
-
+    
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
      * output units are m
-     *
      */
     tap::algorithms::SmoothPidConfig xPidConfig{
         .kp = .1,

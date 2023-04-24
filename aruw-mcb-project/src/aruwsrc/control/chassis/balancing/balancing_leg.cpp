@@ -80,12 +80,12 @@ void BalancingLeg::update()
 
     desiredWheelLocation.setX(tap::algorithms::limitVal(desiredx, -.1f, .1f));
     desiredWheelLocation.setY(tap::algorithms::limitVal(desiredz, -.35f, -.1f));
-
+    float tl_desired = atan2(-xoffset, zCurrent);
     // float u = thetaLPid.runController(0 - (chassisAngle), tl_dot_w + chassisAngledot, dt);
     // u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
 
     // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    float wheelCurrent = -310 * tl - 73 * tl_dot - 5 * realWheelSpeed;
+    float wheelCurrent = -310 * (-tl_desired + tl) - 73 * tl_dot - 5 * realWheelSpeed;
     debug1 = wheelCurrent;
     // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
 
