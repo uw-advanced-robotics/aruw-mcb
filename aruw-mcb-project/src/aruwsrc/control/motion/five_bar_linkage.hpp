@@ -28,26 +28,50 @@
 
 namespace aruwsrc::control::motion
 {
+
+/**
+ * Sign convention for angles is z+ with 0 at the x-axis.
+ * 
+ * See FiveBarLinkage class for diagram and further details.
+*/
 struct FiveBarConfig
 {
     modm::Vector2f defaultPosition;
-    /***
-     * All lengths in Meters, see below for where motor1 and motor2 are.
-     */
-    float motor1toMotor2Length;
-    float motor1toJoint1Length;
-    float motor2toJoint2Length;
-    float joint1toTipLength;
-    float joint2toTipLength;
-    /**
-     *  minimum and maximum angles for the motors. See below doc for sign convention.
-     */
-    float motor1MinAngle;
-    float motor1MaxAngle;
-    float motor2MinAngle;
-    float motor2MaxAngle;
+
+    float motor1toMotor2Length;     // (m)
+    float motor1toJoint1Length;     // (m)
+    float motor2toJoint2Length;     // (m)
+    float joint1toTipLength;        // (m)
+    float joint2toTipLength;        // (m)
+
+    float motor1MinAngle;           // (rad)
+    float motor1MaxAngle;           // (rad)
+    float motor2MinAngle;           // (rad)
+    float motor2MaxAngle;           // (rad)
 };
 
+/**
+ * Wrapper class for a five-bar linkage object.
+ * 
+ * COORDINATE SYSTEM CONVENTION
+ * 
+ * X+ = from motor 2 to motor 1
+ * Y+ = to the left of x+
+ * orientation = angle of motor link (x+ side)
+ *      (M2)  y+ ^  (M1)
+ *          ____|____         x+ ->
+ *         /         \
+ *        /           \
+ *       /             \
+ *      O               O
+ *       \             / (orientation)
+ *        \           /
+ *         \         /
+ *          \       /
+ *           \     /
+ *            \   /
+ *              O
+ */
 class FiveBarLinkage
 {
 public:
@@ -96,66 +120,37 @@ public:
     void moveMotors(float motor1output, float motor2output);
 
 private:
-    /**
-     * Position of the five bar linkage relative to the centerpoint between the two motors.
-     * X+ = from motor 2 to motor 1
-     * Y+ = to the left of x+
-     * orientation = angle of motor link (x+ side)
-     *      (M2)  y+ ^  (M1)
-     *          ____|____         x+ ->
-     *         /         \
-     *        /           \
-     *       /             \
-     *      O               O
-     *       \             / (orientation)
-     *        \           /
-     *         \         /
-     *          \       /
-     *           \     /
-     *            \   /
-     *              O
-     */
-    modm::Location2D<float> currentPosition;
-
-    /**
-     * Desired position. See sign convention above.
-     */
-    modm::Vector2f desiredPosition;
+    modm::Location2D<float> currentPosition;    // (m) for position, (rad) for orientation
+    modm::Vector2f desiredPosition;             // (m)
 
     tap::motor::MotorInterface* motor1;
     tap::motor::MotorInterface* motor2;
 
-    float motor1home;
-    float motor2home;
-    bool motor1homed = false;
-    bool motor2homed = false;
+    float motor1Home;   // (rad)
+    float motor2Home;   // (rad)
+    bool motor1IsHomed = false;
+    bool motor2IsHomed = false;
 
-    float motor1RelativePosition;
-    float motor2RelativePosition;
+    float motor1RelativePosition;   // (rad)
+    float motor2RelativePosition;   // (rad)
 
     FiveBarConfig fiveBarConfig;
 
     uint32_t prevTime = 0;
 
-    float motor1Setpoint;
-    float motor2Setpoint;
+    float motor1Setpoint;   // (rad)
+    float motor2Setpoint;   // (rad)
 
     bool withinEnvelope(modm::Vector2f point);
 
-    int motorsMoved = 0;
-
-    float debug1 = 0;
-    float debug2 = 0;
-    float debug3 = 0;
-
     /***
-     * There's some magic numbers going on here
-     * do the math if you want to
+     * Converts setpoints from XY-coordinates to motor angles using inverse kinematics.
      */
-    void computeMotorAngles();
+    void computeMotorAngleSetpoints();
 
     /**
-     * Forward Kinematic Solution. Updates currentPosition based on actual motor1 and motor2 angles.
+     * Forward Kinematic Solution.
+     * Updates currentPosition based on actual motor1 and motor2 angles using a look-up table.
      */
     void computePositionFromAngles();
 

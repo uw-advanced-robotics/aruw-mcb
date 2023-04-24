@@ -38,8 +38,8 @@ BalancingLeg::BalancingLeg(
     const float wheelRadius,
     const tap::algorithms::SmoothPidConfig driveWheelPidConfig)
     : fivebar(fivebar),
-      fiveBarMotor1Pid(fivebarMotor1FuzzyPDconfig, fivebarMotor1PidConfig),
-      fiveBarMotor2Pid(fivebarMotor2FuzzyPDconfig, fivebarMotor2PidConfig),
+      fivebarMotor1Pid(fivebarMotor1FuzzyPDconfig, fivebarMotor1PidConfig),
+      fivebarMotor2Pid(fivebarMotor2FuzzyPDconfig, fivebarMotor2PidConfig),
       driveWheel(wheelMotor),
       WHEEL_RADIUS(wheelRadius),
       driveWheelPid(driveWheelPidConfig)
@@ -57,14 +57,15 @@ void BalancingLeg::initialize()
 
 void BalancingLeg::update()
 {
-    // 1. Update Current State
+    /* 1. Compute dt and Update Current State */
 
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
     int32_t dt = currentTime - prevTime;
     prevTime = currentTime;
     computeState(dt);
 
-    // 2. Apply Control Law
+    /* 2. Compute Setpoints */
+
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.150);
     float desiredWheelSpeed = vDesired;
     float desiredWheelAngle = 0;
@@ -88,12 +89,10 @@ void BalancingLeg::update()
     float wheelCurrent = -310 * (-tl_desired + tl) - 73 * tl_dot - 5 * realWheelSpeed;
     debug1 = wheelCurrent;
     // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
-
     // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
-
     // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
 
-    // driveWheelOutput += desiredWheelAngle * 1000 / dt;  // add to rad/s, rad to move within a dt
+    /* 3. Send New Output Values to Actuators */
 
     // 3. Send New Output Values
     // int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
@@ -105,7 +104,7 @@ void BalancingLeg::update()
     fiveBarController(dt / 1000);
 }
 
-void BalancingLeg::fiveBarController(uint32_t dt)
+void BalancingLeg::fivebarController(uint32_t dt)
 {
     float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
     float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
@@ -120,11 +119,11 @@ void BalancingLeg::fiveBarController(uint32_t dt)
     float motor1error = fivebar->getMotor1Error();
     float motor2error = fivebar->getMotor2Error();
 
-    float motor1output = fiveBarMotor1Pid.runController(
+    float motor1output = fivebarMotor1Pid.runController(
         motor1error,
         fivebar->getMotor1()->getShaftRPM() * M_TWOPI / 60,
         dt);
-    float motor2output = fiveBarMotor2Pid.runController(
+    float motor2output = fivebarMotor2Pid.runController(
         motor2error,
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
         dt);
@@ -192,7 +191,6 @@ void BalancingLeg::computeState(uint32_t dt)
     chassisAnglePrev = chassisAngle;
 
     chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .5);
-    // chassisAngledot = tap::algorithms::lowPassFilter(chassisAngledot, chassisAngledotNew, .1);
 }
 }  // namespace chassis
 }  // namespace aruwsrc
