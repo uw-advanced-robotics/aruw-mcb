@@ -39,13 +39,13 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
             this->voltage = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2]));
             this->current = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0]));
             this->availableEnergy = 1.0 / 2.0 * this->capacitance * powf(this->voltage, 2);
-            
+
             this->powerLimiter.setExternalEnergyBuffer(this->availableEnergy);
             break;
         default:
             // Ignore unknown message IDs
             break;
-    }    
+    }
 }
 
 void ExternalCapacitorBank::start() const
@@ -64,7 +64,8 @@ void ExternalCapacitorBank::stop() const
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
-void ExternalCapacitorBank::setPowerLimit(float watts) {
+void ExternalCapacitorBank::setPowerLimit(float watts)
+{
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[7] = MessageType::SET_CHARGE_SPEED;

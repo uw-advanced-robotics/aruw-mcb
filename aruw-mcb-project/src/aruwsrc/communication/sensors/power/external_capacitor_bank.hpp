@@ -20,9 +20,9 @@
 #ifndef EXTERNAL_CAPACITOR_BANK_HPP_
 #define EXTERNAL_CAPACITOR_BANK_HPP_
 
-#include "tap/drivers.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
+#include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
 
@@ -34,7 +34,8 @@ namespace aruwsrc::communication::sensors::power
 
 const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
-enum MessageType {
+enum MessageType
+{
     START = 0x01,
     STOP = 0x02,
     STATUS = 0x04,
@@ -50,12 +51,14 @@ enum Status
     FAULT
 };
 
-class ExternalCapacitorBank
-    : public tap::can::CanRxListener
+class ExternalCapacitorBank : public tap::can::CanRxListener
 {
-
 public:
-    ExternalCapacitorBank(tap::Drivers* drivers, tap::can::CanBus canBus, tap::control::chassis::PowerLimiter& powerLimiter, const float capacitance);
+    ExternalCapacitorBank(
+        tap::Drivers* drivers,
+        tap::can::CanBus canBus,
+        tap::control::chassis::PowerLimiter& powerLimiter,
+        const float capacitance);
 
     int getAvailableEnergy() const { return availableEnergy; };
 
@@ -63,7 +66,7 @@ public:
 
     void start() const;
     void stop() const;
-    void setPowerLimit(float watts); 
+    void setPowerLimit(float watts);
 
 private:
     tap::control::chassis::PowerLimiter& powerLimiter;
