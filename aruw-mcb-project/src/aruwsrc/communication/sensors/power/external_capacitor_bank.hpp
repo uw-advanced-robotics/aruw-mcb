@@ -66,11 +66,13 @@ public:
 
     void start() const;
     void stop() const;
-    void setPowerLimit(float watts);
+    void setPowerLimit(uint16_t watts);
 
 private:
     tap::control::chassis::PowerLimiter& powerLimiter;
     const float capacitance;
+
+    uint16_t powerLimit;
 
     float availableEnergy;
     float current;

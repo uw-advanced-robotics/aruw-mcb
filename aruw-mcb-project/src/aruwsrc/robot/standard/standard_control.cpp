@@ -523,6 +523,8 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    
+    capacitorBank.start();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

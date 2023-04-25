@@ -46,6 +46,12 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
             // Ignore unknown message IDs
             break;
     }
+
+    uint16_t powerLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+    if (powerLimit != this->powerLimit)
+    {
+        this->setPowerLimit(powerLimit);
+    }
 }
 
 void ExternalCapacitorBank::start() const
@@ -64,12 +70,14 @@ void ExternalCapacitorBank::stop() const
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
-void ExternalCapacitorBank::setPowerLimit(float watts)
+void ExternalCapacitorBank::setPowerLimit(uint16_t watts)
 {
+    this->powerLimit = watts;
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[7] = MessageType::SET_CHARGE_SPEED;
-
+    message.data[0] = watts;
+    message.data[1] = watts >> 8; // Should always be zero or we are drawing 250+ watts.
     this->drivers->can.sendMessage(this->canBus, message);
 }
 }  // namespace aruwsrc::communication::sensors::power
