@@ -26,13 +26,8 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor,
-#else
-    tap::motor::DjiMotor& driveMotor,
-    tap::motor::DjiMotor& azimuthMotor,
-#endif
+    Motor& driveMotor,
+    Motor& azimuthMotor,
     SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       driveMotor(driveMotor),
