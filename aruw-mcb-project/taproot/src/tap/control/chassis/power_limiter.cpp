@@ -37,14 +37,12 @@ PowerLimiter::PowerLimiter(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
-    float energyBufferCritThreshold,
-    tap::communication::sensors::power::ExternalPowerSourceInterface *externalPowerSource)
+    float energyBufferCritThreshold)
     : drivers(drivers),
       currentSensor(currentSensor),
       startingEnergyBuffer(startingEnergyBuffer),
       energyBufferLimitThreshold(energyBufferLimitThreshold),
       energyBufferCritThreshold(energyBufferCritThreshold),
-      externalPowerSource(externalPowerSource),
       energyBuffer(startingEnergyBuffer),
       consumedPower(0.0f),
       prevTime(0),
@@ -90,9 +88,14 @@ void PowerLimiter::updatePowerAndEnergyBuffer()
     prevTime = tap::arch::clock::getTimeMilliseconds();
     float energyConsumed = (consumedPower - chassisData.powerConsumptionLimit) * dt / 1000.0f;
 
-    if (externalPowerSource != nullptr)
+    if (this->externalEnergyBuffer > energyConsumed)
     {
-        energyConsumed = externalPowerSource->consumeAvailablePower(energyConsumed);
+        this->externalEnergyBuffer -= energyConsumed;
+    }
+    else
+    {
+        energyConsumed -= this->externalEnergyBuffer;
+        this->externalEnergyBuffer = 0;
     }
 
     energyBuffer -= energyConsumed;

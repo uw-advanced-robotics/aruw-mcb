@@ -20,10 +20,11 @@
 #ifndef EXTERNAL_CAPACITOR_BANK_HPP_
 #define EXTERNAL_CAPACITOR_BANK_HPP_
 
+#include "tap/drivers.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/sensors/power/external_power_source_interface.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
 
-#include "aruwsrc/drivers.hpp"
+#include "modm/architecture/interface/can_message.hpp"
 
 /**
  * Can communication protocol:
@@ -33,46 +34,45 @@ namespace aruwsrc::communication::sensors::power
 
 const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
-class ExternalCapacitorBank
-    : public tap::communication::sensors::power::ExternalPowerSourceInterface,
-      public tap::can::CanRxListener
+enum MessageType {
+    START = 0x01,
+    STOP = 0x02,
+    STATUS = 0x04,
+    SET_CHARGE_SPEED = 0x08
+};
+
+enum Status
 {
-    enum Status
-    {
-        UNKNOWN = -1,
-        RESET,
-        CHARGE,
-        DISCHARGE,
-        FAULT
-    };
+    UNKNOWN = -1,
+    RESET,
+    CHARGE,
+    DISCHARGE,
+    FAULT
+};
+
+class ExternalCapacitorBank
+    : public tap::can::CanRxListener
+{
 
 public:
-    ExternalCapacitorBank(Drivers* drivers, tap::can::CanBus canBus, const float capacitance);
+    ExternalCapacitorBank(tap::Drivers* drivers, tap::can::CanBus canBus, tap::control::chassis::PowerLimiter& powerLimiter, const float capacitance);
 
-    int getAvailablePower() { return availablePower; };
-
-    int consumeAvailablePower(int consumed) override;
+    int getAvailableEnergy() const { return availableEnergy; };
 
     void processMessage(const modm::can::Message& message) override;
 
-    void requestP() const { this->requestPIValue(true); };
-    void requestI() const { this->requestPIValue(false); };
-    void setP(float p) const { this->setPIValue(p, true); };
-    void setI(float i) const { this->setPIValue(i, false); };
     void start() const;
     void stop() const;
+    void setPowerLimit(float watts); 
 
 private:
-    void requestPIValue(bool isP) const;
-    void setPIValue(float value, bool isP) const;
-
+    tap::control::chassis::PowerLimiter& powerLimiter;
     const float capacitance;
-    float availablePower;
+
+    float availableEnergy;
     float current;
     float voltage;
     Status status = Status::UNKNOWN;
-
-    float p, i;
 };
 }  // namespace aruwsrc::communication::sensors::power
 

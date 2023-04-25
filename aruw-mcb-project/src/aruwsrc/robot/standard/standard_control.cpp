@@ -40,6 +40,7 @@
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
+#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -135,6 +136,8 @@ StandardTurretSubsystem turret(
     &getTurretMCBCanComm());
 
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
+
+aruwsrc::communication::sensors::power::ExternalCapacitorBank capacitorBank(drivers(), tap::can::CanBus::CAN_BUS1, chassis.chassisPowerLimiter, 1.0);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
