@@ -29,6 +29,7 @@ namespace chassis
 {
 BalancingLeg::BalancingLeg(
     tap::Drivers* drivers,
+    aruwsrc::can::TurretMCBCanComm& chassisMCB,
     aruwsrc::control::motion::FiveBarLinkage* fivebar,
     const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
     const tap::algorithms::FuzzyPDConfig fivebarMotor1FuzzyPDconfig,
@@ -37,11 +38,13 @@ BalancingLeg::BalancingLeg(
     tap::motor::MotorInterface* wheelMotor,
     const float wheelRadius,
     const tap::algorithms::SmoothPidConfig driveWheelPidConfig)
-    : fivebar(fivebar),
+    : drivers(drivers),
+      chassisMCB(chassisMCB),
+      WHEEL_RADIUS(wheelRadius),
+      fivebar(fivebar),
+      driveWheel(wheelMotor),
       fivebarMotor1Pid(fivebarMotor1FuzzyPDconfig, fivebarMotor1PidConfig),
       fivebarMotor2Pid(fivebarMotor2FuzzyPDconfig, fivebarMotor2PidConfig),
-      driveWheel(wheelMotor),
-      WHEEL_RADIUS(wheelRadius),
       driveWheelPid(driveWheelPidConfig)
 {
     assert(fivebar != nullptr);
@@ -67,27 +70,31 @@ void BalancingLeg::update()
     /* 2. Compute Setpoints */
 
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.150);
-    float desiredWheelSpeed = vDesired;
     float desiredWheelAngle = 0;
 
     desiredWheelAngle -=
         fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
-    xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
-    // xoffset = 0;
+    xoffset = xPid.runController(vDesired - vCurrent, aCurrent, dt);
+    xoffset = 0;
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
 
     desiredWheelLocation.setX(tap::algorithms::limitVal(desiredx, -.1f, .1f));
     desiredWheelLocation.setY(tap::algorithms::limitVal(desiredz, -.35f, -.1f));
-    float tl_desired = atan2(-xoffset, zCurrent);
-    // float u = thetaLPid.runController(0 - (chassisAngle), tl_dot_w + chassisAngledot, dt);
-    // u += thetaLdotPid.runControllerDerivateError(0 - (chassisAngledot), dt);
+    float tl_desired = atan2(-xoffset, -zCurrent);
+    // float u = thetaLPid.runController(0 - (chassisMCB.getPitch()), tl_dot_w + chassisAngledot,
+    // dt); u += thetaLdotPid.runControllerDerivateError(0 - (chassisMCB.getPitchVelocity()), dt);
 
     // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    float wheelCurrent = -310 * (-tl_desired + tl) - 73 * tl_dot - 5 * realWheelSpeed;
-    debug1 = wheelCurrent;
+    float wheelCurrent =
+        -(-52 * (-tl_desired + tl) - 10 * tl_dot - 5 * chassisSpeed / WHEEL_RADIUS);
+    debug1 = -52 * (-tl_desired + tl);
+    debug2 = -10 * tl_dot;
+    debug3 = -5 * chassisSpeed / WHEEL_RADIUS;
+    wheelCurrent = tap::algorithms::limitVal(wheelCurrent, -5.0f, 5.0f);
+
     // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
     // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
     // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
@@ -96,12 +103,12 @@ void BalancingLeg::update()
 
     // 3. Send New Output Values
     // int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;
-    int32_t driveWheelOutput = wheelCurrent * 16384 / 20; //convert from i to output
-    // debug1 = driveWheelOutput;
-    // driveWheel->setDesiredOutput(driveWheelOutput);
+    int32_t driveWheelOutput = wheelCurrent * 16384 / 20;  // convert from i to output
+
+    driveWheel->setDesiredOutput(driveWheelOutput);
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
-    fiveBarController(dt / 1000);
+    fivebarController(dt / 1000);
 }
 
 void BalancingLeg::fivebarController(uint32_t dt)
@@ -143,26 +150,13 @@ void BalancingLeg::computeState(uint32_t dt)
                 fivebar->getCurrentPosition().getY() * sin(chassisAngle);
     tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS / 2);  // rad
 
-    // Increment and store tl
-    tlWindowIndex = (tlWindowIndex + 1) % tlWindow.size();
-    tlWindow[tlWindowIndex] = tl;
-
-    tl_dot_w = 0;
-    float tl_ddot_w_new = 0;
-    for (uint8_t tl_idx = (tlWindowIndex + 3) % tlWindow.size(); tl_idx != tlWindowIndex;
-         tl_idx = (tl_idx + 1) % tlWindow.size())
-    {
-        tl_ddot_w_new += tlWindow[tl_idx] - 2 * tlWindow[(tl_idx - 1) % tlWindow.size()] +
-                         tlWindow[(tl_idx - 2) % tlWindow.size()];
-    }
-    tl_ddot_w_new /= powf((static_cast<float>(dt) / 1'000'000.0f), 2) * tlWindow.size();
-    tl_ddot_w = tap::algorithms::lowPassFilter(tl_ddot_w, tl_ddot_w_new, .1);
-    tl_dot_w = tlWindow[tlWindowIndex] - tlWindow[(tlWindowIndex + 1) % tlWindow.size()];
-    tl_dot_w *= 1'000'000.0f / ((float)dt) / tlWindow.size();
-
     // dt is in us, 1000 to get s
-    debug3 = tl - tl_prev;
-    tl_dot = 1'000'000.0f / ((float)dt) * (tl - tl_prev);  // rad/s
+    float tl_dot1 = 1'000'000.0f / static_cast<float>(dt) * (tl - tl_prev);            // rad/s
+    float tl_dot2 = 1'000'000.0f / static_cast<float>(dt) * (tl_prev - tl_prev_prev);  // rad/s
+    float tl_dot3 = 1'000'000.0f / static_cast<float>(2 * dt) * (tl - tl_prev_prev);   // rad/s
+    tl_dot =
+        tap::algorithms::lowPassFilter(tl_dot, (tl_dot1 + tl_dot2 + tl_dot3) / 3, .1);  // Avg of 3
+
     // tl_dotPrev = tap::algorithms::lowPassFilter(tl_dotPrev, tl_dot, .1);
     // tl_dotPrev = tap::algorithms::lowPassFilter(tl_dotPrev, tl_dot, .1);
     // tl_dot = tap::algorithms::lowPassFilter(tl_dotPrev, tl_dot, .1);
@@ -178,15 +172,23 @@ void BalancingLeg::computeState(uint32_t dt)
 
     float wheelPos = 0;
     wheelPos = driveWheel->getPositionUnwrapped() * CHASSIS_GEARBOX_RATIO;  // rad
-    realWheelSpeed = 1'000'000 * (wheelPos - wheelPosPrev) / dt;            // rad/s
+    realWheelSpeedPrev = tap::algorithms::lowPassFilter(
+        realWheelSpeed,
+        1'000'000 * (wheelPos - wheelPosPrev) / dt,
+        .1);  // rad/s
+    realWheelSpeed = tap::algorithms::lowPassFilter(realWheelSpeed, realWheelSpeedPrev, .3);
     wheelPosPrev = wheelPos;
 
-    vCurrent = realWheelSpeed * WHEEL_RADIUS - zCurrent * tl_dot;  // m/s
-    aCurrent = (vCurrent - vCurrentPrev) * 1'000'000 / dt;
+    float vCurrentTemp =
+        realWheelSpeed * WHEEL_RADIUS - zCurrent * tl_dot * powf(1 / cos(tl), 2);  // m/s
+    vCurrent = tap::algorithms::lowPassFilter(vCurrent, vCurrentTemp, .2);
+    float aCurrentTemp = (vCurrent - vCurrentPrev) * 1'000'000 / dt;
     vCurrentPrev = vCurrent;
-    aCurrentPrev = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
-    aCurrent = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrent, .1);
 
+    aCurrentPrev = tap::algorithms::lowPassFilter(aCurrentPrev, aCurrentTemp, .02);
+    aCurrent = tap::algorithms::lowPassFilter(aCurrent, aCurrentPrev, .02);
+
+    chassisAngle = chassisMCB.getPitch();
     float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1'000'000 / dt;
     chassisAnglePrev = chassisAngle;
 

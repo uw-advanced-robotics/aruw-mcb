@@ -71,8 +71,8 @@ void BalancingChassisSubsystem::refresh()
     leftLeg.setDesiredTranslationSpeed(-yawAdjustment + desiredX);  // m/s
     rightLeg.setDesiredTranslationSpeed(yawAdjustment + desiredX);
 
-    leftLeg.setChassisAngle(pitchC);
-    rightLeg.setChassisAngle(pitchC);
+    leftLeg.setChassisSpeed(currentV);
+    rightLeg.setChassisSpeed(currentV);
 
     leftLeg.update();
     rightLeg.update();

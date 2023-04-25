@@ -133,6 +133,7 @@ motion::FiveBarLinkage fiveBarRight(&legmotorRF, &legmotorRR, FIVE_BAR_CONFIG);
 
 BalancingLeg legLeft(
     drivers(),
+    getTurretMCBCanComm(),
     &fiveBarLeft,
     LF_LEG_MOTOR_PID_CONFIG,
     LF_LEG_MOTOR_FUZZY_PID_CONFIG,
@@ -144,6 +145,7 @@ BalancingLeg legLeft(
 
 BalancingLeg legRight(
     drivers(),
+    getTurretMCBCanComm(),
     &fiveBarRight,
     RF_LEG_MOTOR_PID_CONFIG,
     RF_LEG_MOTOR_FUZZY_PID_CONFIG,

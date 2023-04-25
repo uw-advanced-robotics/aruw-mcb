@@ -23,6 +23,7 @@
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 
@@ -41,7 +42,7 @@ class BalancingLeg
 {
 public:
     /**
-     * @param[in] drivers pointer
+     * @param[in] chassisMCB reference to type C on chassis
      * @param[in] fivebar instantiated in robot_control
      * @param[in] fivebarMotor1PidConfig for the left fivebar motor
      * @param[in] fivebarMotor1FuzzyPDconfig for the left fivebar motor
@@ -49,9 +50,10 @@ public:
      * @param[in] fivebarMotor2FuzzyPDconfig for the right fivebar motor.
      * @param[in] wheelMotor instantiated in robot_control
      * @param[in] driveWheelPidConfig
-    */
+     */
     BalancingLeg(
         tap::Drivers* drivers,
+        aruwsrc::can::TurretMCBCanComm& chassisMCB,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
         const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
         const tap::algorithms::FuzzyPDConfig fivebarMotor1FuzzyPDconfig,
@@ -71,7 +73,7 @@ public:
     /**
      * @param[in] angle: (rad) Pitch angle to set from external source
      */
-    inline void setChassisAngle(float angle) { chassisAngle = angle; };
+    inline void setChassisSpeed(float Speed) { chassisSpeed = Speed; };
 
     /**
      * @param[in] speed: (m/s) Setpoint for chassis translational speed.
@@ -104,6 +106,12 @@ public:
     void update();
 
 private:
+    tap::Drivers* drivers;
+    /**
+     * Reference to the chassis-mounted Type C MCB
+     */
+    aruwsrc::can::TurretMCBCanComm& chassisMCB;
+
     /**
      * @param[in] dt (us)
      */
@@ -112,7 +120,7 @@ private:
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController(uint32_t dt);
 
-    const float WHEEL_RADIUS;   // (m) radius of the drive wheel
+    const float WHEEL_RADIUS;  // (m) radius of the drive wheel
 
     /* Pointers to required actuators */
 
@@ -124,7 +132,7 @@ private:
     tap::algorithms::FuzzyPD fivebarMotor1Pid;
     tap::algorithms::FuzzyPD fivebarMotor2Pid;
     tap::algorithms::SmoothPid driveWheelPid;
-    
+
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
@@ -157,7 +165,7 @@ private:
     };
 
     tap::algorithms::SmoothPid thetaLPid = tap::algorithms::SmoothPid(thetaLPidConfig);
-    
+
     tap::algorithms::SmoothPid thetaLdotPid = tap::algorithms::SmoothPid(thetaLdotPidConfig);
 
     uint32_t prevTime = 0;
@@ -169,23 +177,23 @@ private:
     float debug2;
     float debug3;
 
-    float zDesired,     // (m) world-frame height of the chassis
-        zCurrent;       // (m)
+    float zDesired,  // (m) world-frame height of the chassis
+        zCurrent;    // (m)
 
-    float vDesired;     // (m/s) world-frame leg speed in the x-direciton
-    float vCurrent;     // (m/s)
-    float vCurrentPrev; // (m/s)
+    float vDesired;      // (m/s) world-frame leg speed in the x-direciton
+    float vCurrent;      // (m/s)
+    float vCurrentPrev;  // (m/s)
+
+    float realWheelSpeedPrev;  // (rad/s) Used for LPF
+
+    float chassisSpeed;        // (m/s) Total speed of chassis (avg of both legs)
 
     float chassisAngle,     // (rad) positive-down pitch angle of the chassis
-    chassisAnglePrev;       // (rad)
+        chassisAnglePrev;   // (rad)
     float chassisAngledot;  // (rad/s)
 
-    float motorLinkAnglePrev;   // (rad) angle of the link that the wheel motor is attached to for offsetting
-
-    // TODO: Derek wtf are these - Manoli
-    std::array<float, 10> tlWindow;
-    uint8_t tlWindowIndex = 0;
-    float tl_dot_w, tl_ddot_w;
+    float motorLinkAnglePrev;  // (rad) angle of the link that the wheel motor is attached to for
+                               // offsetting
 
     float tl,          // (rad) angle of the metaphyiscal pendulum
         tl_prev,       // (rad)
@@ -198,16 +206,16 @@ private:
     float realWheelSpeed;    // (rad/s) rotation of wheel, +rotation = forward motion
     float wheelPosPrev = 0;  // (rad) just used to compute the wheel's speed
 
-    float aCurrent,    // (m/s^2) rate of change of vCurrent
-        aCurrentPrev,  // (m/s^2)
+    float aCurrent,  // (m/s^2) rate of change of vCurrent
+        aCurrentPrev,
         aDesired,      // (m/s^2)
         aDesiredPrev;  // (m/s^2)
+    float aChassis;    // (m/s^2)
 
-    float xoffset,      // (m) x-offset used to drive linear acceleration
-        xoffsetPrev;    // (m)
+    float xoffset,    // (m) x-offset used to drive linear acceleration
+        xoffsetPrev;  // (m)
 };
 }  // namespace chassis
 }  // namespace aruwsrc
 
 #endif  // BALANCING_LEG_HPP_
-
