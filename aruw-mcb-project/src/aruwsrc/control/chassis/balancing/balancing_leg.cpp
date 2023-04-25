@@ -72,8 +72,7 @@ void BalancingLeg::update()
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.150);
     float desiredWheelAngle = 0;
 
-    desiredWheelAngle -=
-        fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
+    desiredWheelAngle -= fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
     xoffset = xPid.runController(vDesired - vCurrent, aCurrent, dt);
