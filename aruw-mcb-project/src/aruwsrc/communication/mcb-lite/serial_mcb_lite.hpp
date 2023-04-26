@@ -63,8 +63,8 @@ struct CurrentSensorMessage
  * This class is used to communicate with the the virtual MCB using the UART port.
  * This class handles the sending and receiving of motor data, as well as receiving
  * IMU and current sensor data. To use: call initialize() once to setup the port baudrate.
- * Afterwards, call updateSerial() as fast as possible to process receiving data as fast as possible. 
- * Call sendData per loop to send motor desired outputs at a consistent rate.
+ * Afterwards, call updateSerial() as fast as possible to process receiving data as fast as
+ * possible. Call sendData per loop to send motor desired outputs at a consistent rate.
  */
 class SerialMCBLite : public tap::communication::serial::DJISerial
 {
