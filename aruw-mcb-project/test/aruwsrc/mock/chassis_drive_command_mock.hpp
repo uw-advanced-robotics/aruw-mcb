@@ -34,7 +34,7 @@ public:
     ChassisDriveCommandMock(
         tap::Drivers *d,
         aruwsrc::control::ControlOperatorInterface *operatorInterface,
-        chassis::HolonomicChassisSubsystem *cs);
+        chassis::MecanumChassisSubsystem *cs);
     virtual ~ChassisDriveCommandMock();
 
     MOCK_METHOD(void, initialize, (), (override));

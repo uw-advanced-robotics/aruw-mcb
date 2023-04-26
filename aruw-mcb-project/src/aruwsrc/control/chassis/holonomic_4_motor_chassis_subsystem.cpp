@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
@@ -216,6 +212,11 @@ modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChas
     wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
     wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+}
+
+modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
 }  // namespace chassis

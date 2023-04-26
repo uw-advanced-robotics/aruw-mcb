@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -15,10 +15,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/*
- * Copyright (c) 2019 Sanger_X
  */
 
 #include "holonomic_chassis_subsystem.hpp"
@@ -56,6 +52,8 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
 }
+
+// HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
 
 float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
@@ -102,11 +100,6 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-}
-
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
-{
-    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
 }  // namespace chassis

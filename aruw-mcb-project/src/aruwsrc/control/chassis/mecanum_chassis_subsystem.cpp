@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #include "mecanum_chassis_subsystem.hpp"
 
 #include "tap/drivers.hpp"
