@@ -294,7 +294,7 @@ private:
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
 
-    /** Time in ms between sending the robot ID message. */
+    /** Time in ms between sending the robot health message. */
     static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
 
     /** Time in ms between sending the time sync message. */
