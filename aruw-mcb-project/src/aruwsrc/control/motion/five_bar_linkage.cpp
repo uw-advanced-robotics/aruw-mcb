@@ -61,7 +61,7 @@ void FiveBarLinkage::refresh()
     motor1RelativePosition = motor1->getPositionUnwrapped() + motor1Home;
     motor2RelativePosition = motor2->getPositionUnwrapped() + motor2Home;
 
-    // TODO: Why is this here, it doesn't do anything
+    // TODO: Replace/remove this call once motor homing is merged
     motor1->isMotorOnline();
     motor2->isMotorOnline();
 
@@ -77,6 +77,7 @@ float FiveBarLinkage::getMotor1Error()
                fiveBarConfig.motor1MaxAngle) -
            motor1RelativePosition;
 };
+
 float FiveBarLinkage::getMotor2Error()
 {
     return tap::algorithms::limitVal(
@@ -86,15 +87,15 @@ float FiveBarLinkage::getMotor2Error()
            motor2RelativePosition;
 };
 
-void FiveBarLinkage::moveMotors(float motor1output, float motor2output)
+void FiveBarLinkage::moveMotors(float motor1Output, float motor2Output)
 {
-    motor1->setDesiredOutput(motor1output);
-    motor2->setDesiredOutput(motor2output);
+    motor1->setDesiredOutput(motor1Output);
+    motor2->setDesiredOutput(motor2Output);
 }
 
 void FiveBarLinkage::computeMotorAngleSetpoints()
 {
-    // Move the computation point form the center to motor 1
+    // Move the computation point from the center of the motors to motor 1
 
     float xp = desiredPosition.getX() +
                fiveBarConfig.motor1toMotor2Length / 2;
@@ -158,12 +159,17 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
 
 bool FiveBarLinkage::withinEnvelope(modm::Vector2f point)
 {
-    // TODO: this
+    // TODO: Replace/remove this function once motor homing is merged
     return true;
 }
 
 void FiveBarLinkage::computePositionFromAngles()
 {
+    /** Use bilinear interpolation to compute xy-values from lookup table.
+     *  See tap::algorithms for further docs.
+    */
+    // TODO: Replace this with bilinear interpolator when it's merged into taproot
+
     float currentX = tap::algorithms::interpolateLinear2D(
                          chassis::FIVE_BAR_LUT_X,
                          chassis::FIVE_BAR_T1_MIN,
@@ -175,8 +181,12 @@ void FiveBarLinkage::computePositionFromAngles()
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
                      1000;                           // check units with LUT
+
+    // TODO: Unfuck the table (yes Derek, I will do it for you - Manoli)
+    
     currentX += fiveBarConfig.motor1toMotor2Length;  // I fucked up the table so fix it here
     currentX = -currentX;
+
     float currentY = tap::algorithms::interpolateLinear2D(
                          chassis::FIVE_BAR_LUT_Y,
                          chassis::FIVE_BAR_T1_MIN,
@@ -188,7 +198,10 @@ void FiveBarLinkage::computePositionFromAngles()
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
                      1000;
+    
+    // Set current position to computed values
     currentPosition.setPosition(modm::Vector2f(currentX, currentY));
+    
     // finds the angle of the joint1-tip link relative to the refernce 0 (+x ax) using trig
     float psi = motor1RelativePosition -
                 atan2f(currentY, currentX + fiveBarConfig.motor1toMotor2Length / 2);
