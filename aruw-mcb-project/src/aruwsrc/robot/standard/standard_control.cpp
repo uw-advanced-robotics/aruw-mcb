@@ -141,7 +141,7 @@ aruwsrc::communication::sensors::power::ExternalCapacitorBank capacitorBank(
     drivers(),
     tap::can::CanBus::CAN_BUS1,
     chassis.chassisPowerLimiter,
-    1.0);
+    6.667);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
@@ -524,7 +524,7 @@ void initializeSubsystems()
     clientDisplay.initialize();
     buzzer.initialize();
     
-    capacitorBank.start();
+    capacitorBank.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

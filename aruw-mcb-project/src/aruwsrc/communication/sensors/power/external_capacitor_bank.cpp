@@ -36,8 +36,8 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
     {
         case MessageType::STATUS:  // Update message
             this->status = static_cast<Status>(message.data[4]);
-            this->voltage = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2]));
-            this->current = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0]));
+            this->voltage = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
+            this->current = *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
             this->availableEnergy = 1.0 / 2.0 * this->capacitance * powf(this->voltage, 2);
 
             this->powerLimiter.setExternalEnergyBuffer(this->availableEnergy);
@@ -52,6 +52,16 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
     {
         this->setPowerLimit(powerLimit);
     }
+
+    if (!this->started) {
+        this->start();
+        this->started = true;
+    }
+}
+
+void ExternalCapacitorBank::initialize() {
+    this->attachSelfToRxHandler();
+    this->started = false;
 }
 
 void ExternalCapacitorBank::start() const

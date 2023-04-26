@@ -45,10 +45,11 @@ enum MessageType
 enum Status
 {
     UNKNOWN = -1,
-    RESET,
-    CHARGE,
-    DISCHARGE,
-    FAULT
+    RESET = 0,
+    CHARGE = 1,
+    CHARGE_DISCHARGE = 2,
+    DISCHARGE = 3,
+    FAULT = 4
 };
 
 class ExternalCapacitorBank : public tap::can::CanRxListener
@@ -64,6 +65,8 @@ public:
 
     void processMessage(const modm::can::Message& message) override;
 
+    void initialize();
+
     void start() const;
     void stop() const;
     void setPowerLimit(uint16_t watts);
@@ -78,6 +81,8 @@ private:
     float current;
     float voltage;
     Status status = Status::UNKNOWN;
+
+    bool started = false; // Set to true once any message from the cap bank is received
 };
 }  // namespace aruwsrc::communication::sensors::power
 
