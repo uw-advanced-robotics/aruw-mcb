@@ -25,7 +25,7 @@ namespace aruwsrc::virtualMCB
 {
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
-    friend class VirtualMCBHandler;
+    friend class SerialMCBLite;
 
 public:
     VirtualCurrentSensor() {}

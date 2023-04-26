@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_MCB_HANDLER_HPP_
-#define VIRTUAL_MCB_HANDLER_HPP_
+#ifndef SERIAL_MCB_LITE_HPP_
+#define SERIAL_MCB_LITE_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -64,10 +64,10 @@ struct CurrentSensorMessage
  * This class handles the sending and receiving of motor data, as well as receiving
  * IMU and current sensor data. Call refresh() to update the data.
  */
-class VirtualMCBHandler : public tap::communication::serial::DJISerial
+class SerialMCBLite : public tap::communication::serial::DJISerial
 {
 public:
-    VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+    SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
 

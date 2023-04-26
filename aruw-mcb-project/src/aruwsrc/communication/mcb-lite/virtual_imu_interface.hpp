@@ -29,7 +29,7 @@ namespace aruwsrc::virtualMCB
 {
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
-    friend class VirtualMCBHandler;
+    friend class SerialMCBLite;
 
 public:
     VirtualIMUInterface() {}
