@@ -25,10 +25,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-SwerveModule::SwerveModule(
-    Motor& driveMotor,
-    Motor& azimuthMotor,
-    SwerveModuleConfig& config)
+SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
