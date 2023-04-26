@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -39,10 +39,6 @@ public:
     VirtualCanRxHandler(tap::Drivers* drivers);
 
     void refresh(tap::can::CanBus canbus, modm::can::Message message);
-
-    uint32_t can1Data = 0;
-    uint32_t can2Data = 0;
-    modm::can::Message currentMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB
