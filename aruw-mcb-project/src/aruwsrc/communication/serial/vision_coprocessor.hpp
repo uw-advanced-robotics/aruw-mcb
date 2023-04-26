@@ -300,6 +300,7 @@ private:
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
+        CV_MESSAGE_TYPES_HEALTH_DATA = 12,
     };
 
     enum RxMessageTypes
@@ -312,6 +313,9 @@ private:
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+
+    /** Time in ms between sending the robot health message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
@@ -344,6 +348,8 @@ private:
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
+    tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
+
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
@@ -372,6 +378,7 @@ public:
     void sendRefereeCompetitionResult();
     void sendRefereeWarning();
     void sendRobotTypeData();
+    void sendHealthMessage();
     void sendTimeSyncMessage();
 };
 }  // namespace serial
