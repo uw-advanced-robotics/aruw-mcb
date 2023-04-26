@@ -214,6 +214,20 @@ float interpolateLinear2D(
            (q11 * x2x * y2y + q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
 }
 
+/**
+ * @brief Applies a 
+ * 
+ * @tparam T 
+ * @param value 
+ * @param deadzone 
+ * @return T 
+ */
+template <typename T>
+inline T deadZone(T value, T deadzone)
+{
+    return compareFloatClose(value, 0, deadzone) ? 0 : value;
+}
+
 }  // namespace algorithms
 
 }  // namespace tap

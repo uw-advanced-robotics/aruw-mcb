@@ -114,7 +114,7 @@ tap::motor::DjiMotor leftWheel(
     false,
     "Left Wheel Motor");
 
-tap::motor::DjiMotor RightWheel(
+tap::motor::DjiMotor rightWheel(
     drivers(),
     tap::motor::MOTOR6,
     tap::can::CanBus::CAN_BUS1,
@@ -151,7 +151,7 @@ BalancingLeg legRight(
     RF_LEG_MOTOR_FUZZY_PID_CONFIG,
     RR_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_FUZZY_PID_CONFIG,
-    &RightWheel,
+    &rightWheel,
     WHEEL_RADIUS,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);
 

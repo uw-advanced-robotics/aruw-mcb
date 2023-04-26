@@ -52,6 +52,12 @@ public:
         tap::algorithms::limitVal<float>(desiredZ, -.35, -.15);
     };
 
+    /**
+     * @brief Defines x position and r rotation angle that we want the chassis to be in
+     * 
+     * @param x: (m) Positional Setpoint Relative to current position
+     * @param r: (rad) Yaw Setpoint relative to current Yaw
+     */
     void setDesiredOutput(float x, float r)
     {
         desiredX = x;
@@ -76,9 +82,10 @@ private:
     float targetPitch;
 
     float pitch;
-    float pitchC;
     float roll;
     float yaw;
+    float yawPrev;
+    float yawRate;
 
     float desiredX, desiredR, desiredZ;
     float currentX, currentV, currentR, currentZ;

@@ -27,6 +27,8 @@
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 
+using namespace tap::algorithms;
+
 namespace aruwsrc
 {
 namespace chassis
@@ -55,13 +57,13 @@ public:
         tap::Drivers* drivers,
         aruwsrc::can::TurretMCBCanComm& chassisMCB,
         aruwsrc::control::motion::FiveBarLinkage* fivebar,
-        const tap::algorithms::SmoothPidConfig fivebarMotor1PidConfig,
-        const tap::algorithms::FuzzyPDConfig fivebarMotor1FuzzyPDconfig,
-        const tap::algorithms::SmoothPidConfig fivebarMotor2PidConfig,
-        const tap::algorithms::FuzzyPDConfig fivebarMotor2FuzzyPDconfig,
+        const SmoothPidConfig fivebarMotor1PidConfig,
+        const FuzzyPDConfig fivebarMotor1FuzzyPDconfig,
+        const SmoothPidConfig fivebarMotor2PidConfig,
+        const FuzzyPDConfig fivebarMotor2FuzzyPDconfig,
         tap::motor::MotorInterface* wheelMotor,
         const float wheelRadius,
-        const tap::algorithms::SmoothPidConfig driveWheelPidConfig);
+        const SmoothPidConfig driveWheelPidConfig);
 
     void initialize();
 
@@ -79,6 +81,17 @@ public:
      * @param[in] speed: (m/s) Setpoint for chassis translational speed.
      */
     inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
+
+    /**
+     * @param[in] yaw: (rad) Setpoint for desired yaw angle, AKA Yaw, relative to where we want to
+     * yaw.
+     * @param[in] yawRate (rad/s) Current yaw rate
+     */
+    inline void setChassisYaw(float yaw, float yawRate)
+    {
+        chassisYaw = yaw;
+        chassisYawRate = yawRate;
+    }
 
     /**
      * @return Leg height in mm.
@@ -101,6 +114,11 @@ public:
     inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
 
     /**
+     * @return the online-ness of the 3 motors in the balancing leg.
+     */
+    inline bool wheelMotorOnline() { return driveWheel->isMotorOnline(); }
+
+    /**
      * Updates the state and control action of the balancing leg.
      */
     void update();
@@ -121,6 +139,7 @@ private:
     void fivebarController(uint32_t dt);
 
     const float WHEEL_RADIUS;  // (m) radius of the drive wheel
+    const float KpPosVel = 0.2;
 
     /* Pointers to required actuators */
 
@@ -129,25 +148,25 @@ private:
 
     /* PID Controllers for actuators */
 
-    tap::algorithms::FuzzyPD fivebarMotor1Pid;
-    tap::algorithms::FuzzyPD fivebarMotor2Pid;
-    tap::algorithms::SmoothPid driveWheelPid;
+    FuzzyPD fivebarMotor1Pid;
+    FuzzyPD fivebarMotor2Pid;
+    SmoothPid driveWheelPid;
 
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
      * output units are m
      */
-    tap::algorithms::SmoothPidConfig xPidConfig{
+    SmoothPidConfig xPidConfig{
         .kp = .1,
         .ki = 4e-7,
         .kd = 0,
         .maxICumulative = .05,
         .maxOutput = .07,
     };
-    tap::algorithms::SmoothPid xPid = tap::algorithms::SmoothPid(xPidConfig);
+    SmoothPid xPid = SmoothPid(xPidConfig);
 
-    tap::algorithms::SmoothPidConfig thetaLPidConfig{
+    SmoothPidConfig thetaLPidConfig{
         .kp = 25,
         .ki = 0,
         .kd = 0,
@@ -156,7 +175,7 @@ private:
         .tRProportionalKalman = .5,
     };
 
-    tap::algorithms::SmoothPidConfig thetaLdotPidConfig{
+    SmoothPidConfig thetaLdotPidConfig{
         .kp = 8,
         .ki = 0,
         .kd = 0,
@@ -164,9 +183,9 @@ private:
         .tRProportionalKalman = .5,
     };
 
-    tap::algorithms::SmoothPid thetaLPid = tap::algorithms::SmoothPid(thetaLPidConfig);
+    SmoothPid thetaLPid = SmoothPid(thetaLPidConfig);
 
-    tap::algorithms::SmoothPid thetaLdotPid = tap::algorithms::SmoothPid(thetaLdotPidConfig);
+    SmoothPid thetaLdotPid = SmoothPid(thetaLdotPidConfig);
 
     uint32_t prevTime = 0;
 
@@ -176,17 +195,21 @@ private:
     float debug1;
     float debug2;
     float debug3;
+    float debug4;
+    float debug5;
+    float debug6;
 
     float zDesired,  // (m) world-frame height of the chassis
         zCurrent;    // (m)
 
-    float vDesired;      // (m/s) world-frame leg speed in the x-direciton
+    float vDesired;  // (m/s) world-frame leg speed in the x-direciton
+    float vDesiredPrev;
     float vCurrent;      // (m/s)
     float vCurrentPrev;  // (m/s)
 
-    float realWheelSpeedPrev;  // (rad/s) Used for LPF
-
-    float chassisSpeed;        // (m/s) Total speed of chassis (avg of both legs)
+    float chassisSpeed;  // (m/s) Total speed of chassis (avg of both legs)
+    float chassisYaw;
+    float chassisYawRate;
 
     float chassisAngle,     // (rad) positive-down pitch angle of the chassis
         chassisAnglePrev;   // (rad)
@@ -203,8 +226,11 @@ private:
         tl_ddot,       // (rad/s^2)
         tl_ddotPrev;   // (rad/s^2)
 
-    float realWheelSpeed;    // (rad/s) rotation of wheel, +rotation = forward motion
-    float wheelPosPrev = 0;  // (rad) just used to compute the wheel's speed
+    float realWheelSpeed;      // (rad/s) rotation of wheel, +rotation = forward motion
+    float realWheelSpeedPrev;  // (rad/s) Used for LPF
+    float wheelPosDesired;     // (rad)
+    float wheelPos;
+    float wheelPosPrev;  // (rad) just used to compute the wheel's speed
 
     float aCurrent,  // (m/s^2) rate of change of vCurrent
         aCurrentPrev,
@@ -214,6 +240,7 @@ private:
 
     float xoffset,    // (m) x-offset used to drive linear acceleration
         xoffsetPrev;  // (m)
+    float prevOutput;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

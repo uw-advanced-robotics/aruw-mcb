@@ -158,8 +158,8 @@ static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 static const float MAX_WHEEL_SPEED = 5'000;
 
-static constexpr float ROTATION_REMOTE_SCALAR = .001       ;
-static constexpr float TRANSLATION_REMOTE_SCALAR = .0002;
+static constexpr float ROTATION_REMOTE_SCALAR = .001;
+static constexpr float TRANSLATION_REMOTE_SCALAR = .001;
 
 static constexpr float MASS_CHASSIS = 8.0f;  // kg
 

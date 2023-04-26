@@ -45,14 +45,10 @@ void BalancingChassisSubsystem::initialize()
 
 void BalancingChassisSubsystem::refresh()
 {
-    // const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-    // const uint32_t dt = curTime - prevTime;
-    // prevTime = curTime;
-
     // 1. Update yaw and roll values
-    pitch = drivers->mpu6500.getRoll() * M_TWOPI / 360;
-    pitchC = turretMCB.getPitch();
+    pitch = turretMCB.getPitch();
     roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
+    yaw = turretMCB.getYaw();
     computeState();
 
     // 2. Apply scaling and/or control laws to yaw and roll values
@@ -67,26 +63,39 @@ void BalancingChassisSubsystem::refresh()
 
     yawAdjustment = desiredR * WIDTH_BETWEEN_WHEELS_Y / 2;  // m/s
 
-    // 4. run outputs
-    leftLeg.setDesiredTranslationSpeed(-yawAdjustment + desiredX);  // m/s
-    rightLeg.setDesiredTranslationSpeed(yawAdjustment + desiredX);
-
     leftLeg.setChassisSpeed(currentV);
     rightLeg.setChassisSpeed(currentV);
+    leftLeg.setChassisYaw(-desiredR, -yawRate);
+    // Right leg values are negated due to fun LQR logic
+    rightLeg.setChassisYaw(desiredR, yawRate);
+
+    // 4. run outputs
+    leftLeg.setDesiredTranslationSpeed(desiredX);  // m/s
+    rightLeg.setDesiredTranslationSpeed(desiredX);
 
     leftLeg.update();
     rightLeg.update();
-    // do this here for safety. Only called once per subsystem
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
-        ->sendCanMessage();
-    static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
-        ->sendCanMessage();
+    // do this here for safety. Only called once per subsystem. Don't arm leg motors until wheel
+    // motors are also online.
+    if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline())
+    {
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
+            ->sendCanMessage();
+    }
 }
 
 void BalancingChassisSubsystem::computeState()
 {
+    uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = curTime - prevTime;
+    prevTime = curTime;
+
     currentV = (rightLeg.getCurrentTranslationSpeed() + leftLeg.getCurrentTranslationSpeed()) / 2;
 
     float rightRot =
@@ -96,6 +105,9 @@ void BalancingChassisSubsystem::computeState()
     currentZ = rightLeg.getCurrentHeight() > leftLeg.getCurrentHeight()
                    ? rightLeg.getCurrentHeight()
                    : leftLeg.getCurrentHeight();
+
+    yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    yawPrev = yaw;
 }
 
 void BalancingChassisSubsystem::runHardwareTests() {}
