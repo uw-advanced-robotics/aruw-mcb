@@ -52,11 +52,15 @@ float SentryKFOdometry::getMajorYaw() {
     return turretMajor.getWorldYaw() + this->turretMajorYawError; 
 }
 
-float SentryKFOdometry::getLeftMinorYaw() { return turretMinorLeft.getWorldYaw(); }
+float SentryKFOdometry::getLeftMinorYaw() { 
+    return turretMinorLeft.getWorldYaw() + leftMinorYawError; 
+}
 
 float SentryKFOdometry::getLeftMinorPitch() { return turretMinorLeft.getWorldPitch(); }
 
-float SentryKFOdometry::getRightMinorYaw() { return turretMinorRight.getWorldYaw(); }
+float SentryKFOdometry::getRightMinorYaw() { 
+    return turretMinorRight.getWorldYaw() + rightMinorYawError; 
+}
 
 float SentryKFOdometry::getRightMinorPitch() { return turretMinorRight.getWorldPitch(); }
 
@@ -89,16 +93,20 @@ void SentryKFOdometry::update()
 }
 
 void SentryKFOdometry::resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData) {
-    // reset kalman filter
-    // visionCoprocessor.
-    float newMajorYaw = newData.yaw;
-
     // naively reset kalman filter
     // (need transformer in order to transform minors to chassis position - some constant offset) 
+    // TODO: rotate velocity and acceleration to new frame
     kf.init({newData.x, 0.0f, 0.0f, newData.y, 0.0f, 0.0f});
 
-    float currentMajorYawEstimate = this->getMajorYaw();
-    this->turretMajorYawError = currentMajorYawEstimate - newMajorYaw;
+    if (newData.turretID == 0) {
+        // left turret minor
+        float currentLeftMinorYaw = this->getLeftMinorYaw();
+        this->leftMinorYawError = currentLeftMinorYaw - newData.yaw;
+    } else {
+        // right turret minor
+        float currentRightMinorYaw = this->getRightMinorYaw();
+        this->rightMinorYawError =  currentRightMinorYaw - newData.yaw;
+    }
 }
 
 }  // namespace aruwsrc::algorithms::odometry

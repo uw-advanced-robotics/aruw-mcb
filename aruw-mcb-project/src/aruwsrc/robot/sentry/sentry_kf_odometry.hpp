@@ -47,7 +47,7 @@ namespace aruwsrc::algorithms::odometry
 class SentryKFOdometry
 {
 public:
-    /**
+    /** TODO: update parameter documentation
      * @param[in] drivers: A reference to the drivers object. Used to obtain chassis IMU
      * measurements from the mpu6500 onboard the MCB, as well as to construct an
      * `OttoChassisWorldYawObserver` so that this class can be an `Odometry2DInterface`.
@@ -135,9 +135,8 @@ private:
 
     float turretMajorYawError = 0.0f;
 
-    // returns true if there is new odometry localization data
-    bool newOdometryLocalization();
-
+    float leftMinorYawError = 0.0f;
+    float rightMinorYawError = 0.0f;
 
     // Kalman Filter enums
     // Chassis Inputs
