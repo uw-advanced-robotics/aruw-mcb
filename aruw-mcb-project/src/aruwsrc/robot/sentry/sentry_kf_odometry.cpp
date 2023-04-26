@@ -23,8 +23,7 @@
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
-
-
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -44,11 +43,14 @@ SentryKFOdometry::SentryKFOdometry(
         turretMinorRight(turretMinorRight),
         kf(KF_A, KF_C, KF_Q, KF_R, KF_P0)
 {
+    kf.init({0, 0, 0, 0, 0, 0});
 }
 
 float SentryKFOdometry::getChassisYaw() { return mpu.getYaw(); }
 
-float SentryKFOdometry::getMajorYaw() { return turretMajor.getWorldYaw(); }
+float SentryKFOdometry::getMajorYaw() { 
+    return turretMajor.getWorldYaw() + this->turretMajorYawError; 
+}
 
 float SentryKFOdometry::getLeftMinorYaw() { return turretMinorLeft.getWorldYaw(); }
 
@@ -60,10 +62,13 @@ float SentryKFOdometry::getRightMinorPitch() { return turretMinorRight.getWorldP
 
 void SentryKFOdometry::update()
 {
-
     // check if there is new odometry data to reset ours with
-    // if ()
-
+    aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData lastLocData = visionCoprocessor.getLastLocalizationData();
+    // uint32_t currentMessageTimestamp =  visionCoprocessor.getLastLocalizationData().timestamp;
+    if (lastResetTimestamp != UNINITIALIZED_TIMESTAMP 
+            && lastResetTimestamp < lastLocData.timestamp) {
+                resetOdometry(lastLocData);
+    }
 
     // Get chassis positional values
     modm::Matrix<float, 3, 1> chassisPos = chassis.getActualVelocityChassisRelative();
@@ -83,20 +88,17 @@ void SentryKFOdometry::update()
     kf.performUpdate(newOdomInput);
 }
 
-void handleOdometryReset() {
-    
-}
-
-bool SentryKFOdometry:: newOdometryLocalization() {
-
-}
-
-void SentryKFOdometry::resetOdometry() {
+void SentryKFOdometry::resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData) {
     // reset kalman filter
     // visionCoprocessor.
+    float newMajorYaw = newData.yaw;
 
+    // naively reset kalman filter
+    // (need transformer in order to transform minors to chassis position - some constant offset) 
+    kf.init({newData.x, 0.0f, 0.0f, newData.y, 0.0f, 0.0f});
 
-    
+    float currentMajorYawEstimate = this->getMajorYaw();
+    this->turretMajorYawError = currentMajorYawEstimate - newMajorYaw;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

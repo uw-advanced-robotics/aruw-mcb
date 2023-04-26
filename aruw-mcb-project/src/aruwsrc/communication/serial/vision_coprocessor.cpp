@@ -63,6 +63,9 @@ VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
         this->lastAimData[i].pva.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
+
+    // start with uninitialized localization data
+    this->lastLocalizationData.timestamp = -1;
 }
 
 VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
@@ -97,6 +100,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
             decodeToTurretAimData(completeMessage);
+            return;
+        }
+        case CV_MESSAGE_TYPE_LOCALIZATION:
+        {
+            decodeToLocalizationData(completeMessage);
             return;
         }
         default:
@@ -140,9 +148,50 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 bool VisionCoprocessor::decodeToLocalizationData(const ReceivedSerialMessage& message)
 {
-    
+    memcpy(&lastLocalizationData, &message.data[0], sizeof(LocalizationData));
+
+    LocalizationCartesianData cartesian = toCartesianValues(lastLocalizationData);
+
+    if (lastLocalizationData.turretID == 0) {
+        lastLeftMinorLocalizationCartesianData = cartesian;
+    } else {
+        lastRightMinorLocalizationCartesianData = cartesian;
+    }
+    return true;
 }
 
+VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData) {
+    float sinRoll = 2 * (newQuaterionData.qw * newQuaterionData.qx +
+                         newQuaterionData.qy * newQuaterionData.qz);
+    float cosRoll = 1- 2 * (pow(newQuaterionData.qx, 2) + pow(newQuaterionData.qy, 2));
+
+    float sinPitch = sqrt(1 + 2 * (newQuaterionData.qw * newQuaterionData.qy -
+                                   newQuaterionData.qx * newQuaterionData.qz));
+    float cosPitch = sqrt(1 - 2 * (newQuaterionData.qw * newQuaterionData.qy -
+                                   newQuaterionData.qx * newQuaterionData.qz));
+
+    float sinYaw = 2 * (newQuaterionData.qw * newQuaterionData.qz +
+                        newQuaterionData.qx * newQuaterionData.qy);
+    float cosYaw = 1- 2 * (pow(newQuaterionData.qy, 2) + pow(newQuaterionData.qz, 2));
+    
+    VisionCoprocessor::LocalizationCartesianData cartesian;
+    cartesian.timestamp = newQuaterionData.timestamp;
+    cartesian.x = newQuaterionData.x;
+    cartesian.y = newQuaterionData.y;
+    cartesian.z = newQuaterionData.z;
+    cartesian.roll = atan2(sinRoll, cosRoll);
+    cartesian.pitch = atan2(sinPitch, cosPitch);
+    cartesian.yaw = atan2(sinYaw, cosYaw);
+    return cartesian;
+}
+
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLeftMinorLocalizationData() {
+    return lastRightMinorLocalizationCartesianData;
+}
+
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastRightMinorLocalizationData() {
+    return lastLeftMinorLocalizationCartesianData;
+}
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();

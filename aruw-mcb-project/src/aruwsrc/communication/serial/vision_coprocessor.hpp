@@ -179,6 +179,7 @@ public:
      * Localization data received from Jetson
      */
     struct LocalizationData {
+        uint8_t turretID;
         float x; // Positional values
         float y;
         float z;
@@ -186,6 +187,17 @@ public:
         float qx;
         float qy;
         float qz;
+        uint32_t timestamp;
+    } modm_packed;
+
+    struct LocalizationCartesianData {
+        uint8_t turretID;
+        float x;
+        float y;
+        float z;
+        float roll;
+        float pitch;
+        float yaw;
         uint32_t timestamp;
     } modm_packed;
 
@@ -282,6 +294,8 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    LocalizationCartesianData getLastLocalizationData();
+
 private:
     enum TxMessageTypes
     {
@@ -299,6 +313,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_LOCALIZATION = 0xA, 
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -330,6 +345,21 @@ private:
     // The last localization data received from the Jetson.
     LocalizationData lastLocalizationData;
 
+    // The last localization data for the left minor turret received from the Jetson.
+    LocalizationCartesianData lastLeftMinorLocalizationCartesianData;
+
+    // The last localization data for the right minor turret received from the Jetson.
+    LocalizationCartesianData lastRightMinorLocalizationCartesianData;
+
+    /**
+     * Helper function to convert a quaternion localization message 
+     * to a cartesian message
+    */
+    VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData);
+
+    VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLeftMinorLocalizationData();
+
+    VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastRightMinorLocalizationData();
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;

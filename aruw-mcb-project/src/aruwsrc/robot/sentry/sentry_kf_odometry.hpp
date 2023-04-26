@@ -120,12 +120,20 @@ private:
     // updates the internal odometry if there 
     // is a new odometry localization data to 
     // replace the odometry with
-    void handleOdometryReset();
+    // void handleOdometryReset();
+
+
 
     /**
-    * Resets the 
+    * Resets the odometry using visioncoprocessor's localization method
     */
-    void resetOdometry();
+    void resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData);
+
+    static constexpr uint32_t UNINITIALIZED_TIMESTAMP = -1;
+
+    uint32_t lastResetTimestamp = UNINITIALIZED_TIMESTAMP;
+
+    float turretMajorYawError = 0.0f;
 
     // returns true if there is new odometry localization data
     bool newOdometryLocalization();
