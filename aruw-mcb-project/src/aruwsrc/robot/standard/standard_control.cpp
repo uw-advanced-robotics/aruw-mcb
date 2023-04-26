@@ -523,7 +523,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
-    
+
     capacitorBank.initialize();
 }
 

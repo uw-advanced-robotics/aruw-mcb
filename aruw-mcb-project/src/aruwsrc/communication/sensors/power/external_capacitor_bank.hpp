@@ -31,7 +31,6 @@
  */
 namespace aruwsrc::communication::sensors::power
 {
-
 const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
 enum MessageType
@@ -82,7 +81,7 @@ private:
     float voltage;
     Status status = Status::UNKNOWN;
 
-    bool started = false; // Set to true once any message from the cap bank is received
+    bool started = false;  // Set to true once any message from the cap bank is received
 };
 }  // namespace aruwsrc::communication::sensors::power
 
