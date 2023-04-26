@@ -81,7 +81,7 @@ public:
     float calculate(float x, float y, float r);
 
     /**
-     * Returns MPS of the wheel
+     * Returns the signed speed of the drive wheel in m/s
      */
     float getDriveVelocity() const;
 
