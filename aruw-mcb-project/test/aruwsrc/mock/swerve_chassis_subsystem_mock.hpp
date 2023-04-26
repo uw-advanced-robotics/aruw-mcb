@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_SUBSYSTEM_MOCK_HPP_
-#define CHASSIS_SUBSYSTEM_MOCK_HPP_
+#ifndef SWERVE_CHASSIS_SUBSYSTEM_MOCK_HPP_
+#define SWERVE_CHASSIS_SUBSYSTEM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-class ChassisSubsystemMock : public aruwsrc::chassis::Holonomic4MotorChassisSubsystem
+class SwerveChassisSubsystemMock : public aruwsrc::chassis::SwerveChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(tap::Drivers *drivers);
-    virtual ~ChassisSubsystemMock();
+    SwerveChassisSubsystemMock(
+        tap::Drivers* drivers,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,
+        testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rb);
+    virtual ~SwerveChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
@@ -46,8 +50,8 @@ public:
     MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));
     MOCK_METHOD(int16_t, getRightBackRpmActual, (), (const override));
     MOCK_METHOD(float, getDesiredRotation, (), (const override));
-};  // class ChassisSubsystemMock
+};  // class SwerveChassisSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // CHASSIS_SUBSYSTEM_MOCK_HPP_
+#endif  // SWERVE_CHASSIS_SUBSYSTEM_MOCK_HPP_

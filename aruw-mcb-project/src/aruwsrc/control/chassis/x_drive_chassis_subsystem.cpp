@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -15,10 +15,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/*
- * Copyright (c) 2019 Sanger_X
  */
 
 #include "x_drive_chassis_subsystem.hpp"
