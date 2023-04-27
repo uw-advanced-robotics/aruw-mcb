@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/motion/five_bar_linkage.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 
@@ -62,7 +63,6 @@ public:
         const SmoothPidConfig fivebarMotor2PidConfig,
         const FuzzyPDConfig fivebarMotor2FuzzyPDconfig,
         tap::motor::MotorInterface* wheelMotor,
-        const float wheelRadius,
         const SmoothPidConfig driveWheelPidConfig);
 
     void initialize();
@@ -92,6 +92,24 @@ public:
         chassisYaw = yaw;
         chassisYawRate = yawRate;
     }
+
+    /**
+     * @brief Sets the average position of the chassis and the desired position (computed from
+     * velocity input)
+     *
+     */
+    inline void setChassisPos(float chassispos, float chassisposdesired)
+    {
+        chassisPos = chassispos;
+        chassisPosDesired = chassisposdesired;
+    }
+
+    /**
+     * @brief Get the linear position of the wheel
+     *
+     * @return (m) position of wheel relative to encoder 0
+     */
+    inline float getWheelPos() { return wheelPos * WHEEL_RADIUS; }
 
     /**
      * @return Leg height in mm.
@@ -138,7 +156,6 @@ private:
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController(uint32_t dt);
 
-    const float WHEEL_RADIUS;  // (m) radius of the drive wheel
     const float KpPosVel = 0.2;
 
     /* Pointers to required actuators */
@@ -158,8 +175,8 @@ private:
      * output units are m
      */
     SmoothPidConfig xPidConfig{
-        .kp = .1,
-        .ki = 4e-7,
+        .kp = 0.003,
+        .ki = 0,
         .kd = 0,
         .maxICumulative = .05,
         .maxOutput = .07,
@@ -207,6 +224,8 @@ private:
     float vCurrent;      // (m/s)
     float vCurrentPrev;  // (m/s)
 
+    float chassisPos;  // (m) Position of chassis (avg of both legs)
+    float chassisPosDesired;
     float chassisSpeed;  // (m/s) Total speed of chassis (avg of both legs)
     float chassisYaw;
     float chassisYawRate;
@@ -241,6 +260,11 @@ private:
     float xoffset,    // (m) x-offset used to drive linear acceleration
         xoffsetPrev;  // (m)
     float prevOutput;
+
+    // represents if the robot has falled over, and to retract the legs if so
+    bool isFallen = true;
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
+    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
 };
 }  // namespace chassis
 }  // namespace aruwsrc

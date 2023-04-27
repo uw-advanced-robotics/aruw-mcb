@@ -215,19 +215,54 @@ float interpolateLinear2D(
 }
 
 /**
- * @brief Applies a 
- * 
- * @tparam T 
- * @param value 
- * @param deadzone 
- * @return T 
+ * @brief Applies a dead Band to a value. Note the difference from dead Zone, which has continuous
+ * behavior while the dead band does not
+ *      ^ output axis
+ *         /
+ *        /
+ *       |
+ *    ___|   --> input axis
+ *   |
+ *   |
+ *  /
+ * /
+ *
+ * @param value Value to apply deadband to
+ * @param deadzone Size of deadband
+ * @return If |`value`| is less than |`deadband`|, then 0 is returned, otherwise, value is returned
  */
 template <typename T>
-inline T deadZone(T value, T deadzone)
+inline T deadBand(T value, T deadband)
 {
-    return compareFloatClose(value, 0, deadzone) ? 0 : value;
+    return compareFloatClose(value, 0, deadband) ? 0 : value;
 }
 
+/**
+ * @brief Applies a deadzone to a value
+ *       ^ output axis
+ *          /
+ *         /
+ *    ____/   --> input axis
+ *   /
+ *  /
+ * /
+ * @param value Value to apply deadzone to
+ * @param deadzone Size of deadzone
+ * @return If |`value`| is less than |`deadzone`|, then 0 is returned, otherwise, value is returned
+ * shifted by deadzone
+ */
+template <typename T>
+inline T deadZone(T value, T deadZone)
+{
+    if (compareFloatClose(value, 0, deadZone))
+    {
+        return 0;
+    }
+    else
+    {
+        return value > 0 ? value - deadZone : value + deadZone;
+    }
+}
 }  // namespace algorithms
 
 }  // namespace tap

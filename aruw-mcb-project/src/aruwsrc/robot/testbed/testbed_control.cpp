@@ -140,7 +140,6 @@ BalancingLeg legLeft(
     LR_LEG_MOTOR_PID_CONFIG,
     LR_LEG_MOTOR_FUZZY_PID_CONFIG,
     &leftWheel,
-    WHEEL_RADIUS,
     LEFT_WHEEL_MOTOR_PID_CONFIG);
 
 BalancingLeg legRight(
@@ -152,7 +151,6 @@ BalancingLeg legRight(
     RR_LEG_MOTOR_PID_CONFIG,
     RR_LEG_MOTOR_FUZZY_PID_CONFIG,
     &rightWheel,
-    WHEEL_RADIUS,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);
 
 motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(

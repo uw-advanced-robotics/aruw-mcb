@@ -19,9 +19,9 @@
 
 #include "balancing_leg.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include <assert.h>
 
-#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 using namespace tap::algorithms;
 
@@ -38,11 +38,9 @@ BalancingLeg::BalancingLeg(
     const SmoothPidConfig fivebarMotor2PidConfig,
     const FuzzyPDConfig fivebarMotor2FuzzyPDconfig,
     tap::motor::MotorInterface* wheelMotor,
-    const float wheelRadius,
     const SmoothPidConfig driveWheelPidConfig)
     : drivers(drivers),
       chassisMCB(chassisMCB),
-      WHEEL_RADIUS(wheelRadius),
       fivebar(fivebar),
       driveWheel(wheelMotor),
       fivebarMotor1Pid(fivebarMotor1FuzzyPDconfig, fivebarMotor1PidConfig),
@@ -74,36 +72,39 @@ void BalancingLeg::update()
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.150);
     float desiredWheelAngle = 0;
 
-    desiredWheelAngle -= fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
+    desiredWheelAngle -=
+        fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
-    // xoffset = xPid.runController(vDesired - vCurrent, aCurrent, dt);
-    xoffset = 0;
-    float desiredx = cos(-chassisMCB.getPitch()) * xoffset + sin(-chassisMCB.getPitch()) * zDesired;
-    float desiredz =
-        -sin(-chassisMCB.getPitch()) * xoffset + cos(-chassisMCB.getPitch()) * zDesired;
-
-    desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
-    desiredWheelLocation.setY(limitVal(desiredz, -.35f, -.1f));
+    xoffset = xPid.runControllerDerivateError(vDesired, dt);
+    // xoffset = .01;
+    float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
+    float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
+    if (!isFallen)
+    {
+        desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
+        desiredWheelLocation.setY(limitVal(desiredz, -.35f, -.1f));
+    }
+    else
+    {
+        desiredWheelLocation = fivebar->getDefaultPosition();
+    }
     float tl_desired = atan2(-xoffset, -zCurrent);
     // float u = thetaLPid.runController(0 - (chassisMCB.getPitch()), tl_dot_w + chassisAngledot,
     // dt); u += thetaLdotPid.runControllerDerivateError(0 - (chassisMCB.getPitchVelocity()), dt);
 
     // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    float lqrPos = -.4 * ((wheelPos - wheelPosDesired) * WHEEL_RADIUS);
-    float lqrVel = -2.2785 * deadZone(chassisSpeed - vDesired, .01f);
-    float lqrPitch = -39 * deadZone(chassisMCB.getPitch(), modm::toRadian(.5));
-    float lqrPitchRate = -6.1564 * deadZone(chassisMCB.getPitchVelocity(), modm::toRadian(.35));
-
-    // float lqrPitch = -39 * deadZone(tl, modm::toRadian(5));
-    // float lqrPitchRate = -6.1564 * deadZone(tl_dot, modm::toRadian(0.35));
-    float lqrYaw = 2.2361 * chassisYaw;
-    float lqrYawRate = 1.1498 * chassisYawRate;
+    float lqrPos = -3.0 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
+    float lqrVel = -3.0393 * deadZone(chassisSpeed - vDesired, .0f);
+    float lqrPitch = deadZone(-46 * (chassisAngle - tl_desired), .0f);
+    float lqrPitchRate = deadZone(-2.0 * chassisAngledot, .0);
+    // float lqrPitch = -38 * deadZone(tl - tl_desired, modm::toRadian(.05));
+    // float lqrPitchRate = -6.3527 * deadZone(tl_dot, .2f);
+    float lqrYaw = 0.7071 * chassisYaw;
+    float lqrYawRate = 0.7646 * chassisYawRate;
     float wheelTorque = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
 
-
-
-    wheelTorque = limitVal(0.5f * wheelTorque, -2.0f, 2.0f);
+    wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
     // float wheelCurrent =
     //     -(-52 * (-tl_desired + tl) - 10 * tl_dot - 5 * chassisSpeed / WHEEL_RADIUS);
     // wheelCurrent = limitVal(wheelCurrent, -5.0f, 5.0f);
@@ -117,7 +118,7 @@ void BalancingLeg::update()
     // 3. Send New Output Values
     int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;  // convert from Torque to output
     // int32_t driveWheelOutput = wheelCurrent * 16384 / 20;  // convert from i to output
-    driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, .3);
+    driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     // debug1 = driveWheelOutput;
     driveWheel->setDesiredOutput(driveWheelOutput);
@@ -129,13 +130,14 @@ void BalancingLeg::update()
 void BalancingLeg::fivebarController(uint32_t dt)
 {
     float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
+    float B = chassisMCB.getPitch();
     float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
                    cos(fivebar->getMotor1RelativePosition()) *
-                   ((fivebar->getCurrentPosition().getX() + (L / 2)) / L) *
+                   ((fivebar->getCurrentPosition().getX() + (L * cos(B) / 2)) / L * cos(B)) *
                    (MASS_CHASSIS * 9.81 / 2);
     float gravT2 = fivebar->getFiveBarConfig().motor2toJoint2Length *
                    cos(M_PI - fivebar->getMotor2RelativePosition()) *
-                   (-(fivebar->getCurrentPosition().getX() - (L / 2)) / L) *
+                   (-(fivebar->getCurrentPosition().getX() - (L * cos(B) / 2)) / L * cos(B)) *
                    (MASS_CHASSIS * 9.81 / 2);
 
     float motor1error = fivebar->getMotor1Error();
@@ -149,16 +151,23 @@ void BalancingLeg::fivebarController(uint32_t dt)
         motor2error,
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
         dt);
-
-    motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-    // motor direction so minus
-    motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-
+    if (!isFallen)
+    {
+        motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        // motor direction so minus
+        motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+    }
     fivebar->moveMotors(motor1output, motor2output);
 }
 
 void BalancingLeg::computeState(uint32_t dt)
 {
+    chassisAngle = lowPassFilter(chassisAnglePrev, chassisMCB.getPitch(), 1);
+    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1'000'000 / dt;
+    chassisAnglePrev = chassisAngle;
+    // chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .3);
+    chassisAngledot = lowPassFilter(chassisAngledot, chassisMCB.getPitchVelocity(), .2);
+
     zCurrent = fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
                fivebar->getCurrentPosition().getY() * cos(chassisAngle);
     float x_l = fivebar->getCurrentPosition().getX() * cos(chassisAngle) +
@@ -176,7 +185,7 @@ void BalancingLeg::computeState(uint32_t dt)
     // tl_dot = lowPassFilter(tl_dotPrev, tl_dot, .1);
     float tl_ddot_new = (tl - 2 * tl_prev + tl_prev_prev) /
                         powf((static_cast<float>(dt) / 1'000'000.0f), 2);  // rad/s/s
-    tl_ddot = lowPassFilter(tl_ddot, tl_ddot_new, .05);
+    tl_ddot = lowPassFilter(tl_ddot, tl_ddot_new, .1);
     // tl_ddot = tl_ddot_new;
 
     tl_prev_prev = tl_prev;
@@ -191,20 +200,9 @@ void BalancingLeg::computeState(uint32_t dt)
         .1);  // rad/s
     realWheelSpeed = lowPassFilter(realWheelSpeed, realWheelSpeedPrev, .3);
     wheelPosPrev = wheelPos;
-    // rad = (m/s) / (m) * (us/1e6)
-
-    if (vDesired == 0 && vDesiredPrev != 0)
-    {
-        wheelPosDesired = wheelPos;
-    }
-    else if (vDesired != 0)
-    {
-        wheelPosDesired += vDesired / WHEEL_RADIUS * dt / 1'000'000;
-    }
-    vDesiredPrev = vDesired;
 
     float vCurrentTemp =
-        realWheelSpeed * WHEEL_RADIUS - zCurrent * tl_dot * powf(1 / cos(tl), 2);  // m/s
+        realWheelSpeed * WHEEL_RADIUS;  // m/s  - zCurrent * tl_dot * powf(1 / cos(tl), 2)
     vCurrent = lowPassFilter(vCurrent, vCurrentTemp, .1);
     float aCurrentTemp = (vCurrent - vCurrentPrev) * 1'000'000 / dt;
     vCurrentPrev = vCurrent;
@@ -212,11 +210,14 @@ void BalancingLeg::computeState(uint32_t dt)
     aCurrentPrev = lowPassFilter(aCurrentPrev, aCurrentTemp, .02);
     aCurrent = lowPassFilter(aCurrent, aCurrentPrev, .02);
 
-    chassisAngle = chassisMCB.getPitch();
-    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1'000'000 / dt;
-    chassisAnglePrev = chassisAngle;
-
-    chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .5);
+    if (abs(chassisAngle) > abs(FALLEN_ANGLE_THRESHOLD))
+    {
+        isFallen = true;
+    }
+    else if (abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN))
+    {
+        isFallen = false;
+    }
 }
 }  // namespace chassis
 }  // namespace aruwsrc

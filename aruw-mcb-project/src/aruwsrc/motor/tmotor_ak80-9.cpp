@@ -44,7 +44,11 @@ Tmotor_AK809::Tmotor_AK809(
     motorDisconnectTimeout.stop();
 }
 
-void Tmotor_AK809::initialize() { attachSelfToRxHandler(); }
+void Tmotor_AK809::initialize()
+{
+    attachSelfToRxHandler();
+    sendPositionHomeGetMessage();
+}
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {

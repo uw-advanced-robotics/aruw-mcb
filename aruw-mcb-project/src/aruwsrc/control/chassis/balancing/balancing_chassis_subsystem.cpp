@@ -19,16 +19,31 @@
 
 #include "balancing_chassis_subsystem.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+
 namespace aruwsrc::chassis
 {
 BalancingChassisSubsystem::BalancingChassisSubsystem(
     tap::Drivers* drivers,
     aruwsrc::can::TurretMCBCanComm& turretMCB,
     BalancingLeg& leftLeg,
-    BalancingLeg& rightLeg)
+    BalancingLeg& rightLeg,
+    tap::gpio::Analog::Pin currentPin)
     : Subsystem(drivers),
-      turretMCB(turretMCB),
       rotationPid(AUTOROTATION_PID),
+      turretMCB(turretMCB),
+      currentSensor(
+          {&drivers->analog,
+           currentPin,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+      chassisPowerLimiter(
+          drivers,
+          &currentSensor,
+          STARTING_ENERGY_BUFFER,
+          ENERGY_BUFFER_LIMIT_THRESHOLD,
+          ENERGY_BUFFER_CRIT_THRESHOLD),
       leftLeg(leftLeg),
       rightLeg(rightLeg)
 {
@@ -52,7 +67,8 @@ void BalancingChassisSubsystem::refresh()
     computeState();
 
     // 2. Apply scaling and/or control laws to yaw and roll values
-    float yawAdjustment = 0;
+
+    // float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
     float rollAdjustment = 0;
 
     // 3. Set each side's actuators to compensate appropriate for yaw and roll error
@@ -61,8 +77,8 @@ void BalancingChassisSubsystem::refresh()
     rightLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ - rollAdjustment, -.35, -.15));
 
-    yawAdjustment = desiredR * WIDTH_BETWEEN_WHEELS_Y / 2;  // m/s
-
+    leftLeg.setChassisPos(currentX, desiredX);
+    rightLeg.setChassisPos(currentX, desiredX);
     leftLeg.setChassisSpeed(currentV);
     rightLeg.setChassisSpeed(currentV);
     leftLeg.setChassisYaw(-desiredR, -yawRate);
@@ -70,8 +86,8 @@ void BalancingChassisSubsystem::refresh()
     rightLeg.setChassisYaw(desiredR, yawRate);
 
     // 4. run outputs
-    leftLeg.setDesiredTranslationSpeed(desiredX);  // m/s
-    rightLeg.setDesiredTranslationSpeed(desiredX);
+    leftLeg.setDesiredTranslationSpeed(desiredV);  // m/s
+    rightLeg.setDesiredTranslationSpeed(desiredV);
 
     leftLeg.update();
     rightLeg.update();
@@ -96,7 +112,9 @@ void BalancingChassisSubsystem::computeState()
     uint32_t dt = curTime - prevTime;
     prevTime = curTime;
 
-    currentV = (rightLeg.getCurrentTranslationSpeed() + leftLeg.getCurrentTranslationSpeed()) / 2;
+    float newCurrentV =
+        (rightLeg.getCurrentTranslationSpeed() + leftLeg.getCurrentTranslationSpeed()) / 2;
+    currentV = lowPassFilter(currentV, newCurrentV, 1);
 
     float rightRot =
         2 * (rightLeg.getCurrentTranslationSpeed() - currentV) / WIDTH_BETWEEN_WHEELS_Y;
@@ -108,6 +126,17 @@ void BalancingChassisSubsystem::computeState()
 
     yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
     yawPrev = yaw;
+
+    currentX = (leftLeg.getWheelPos() + rightLeg.getWheelPos()) / 2;
+    if (desiredV == 0 && prevVdesired != 0)
+    {
+        desiredX = currentX;
+    }
+    else if (desiredV != 0)
+    {
+        desiredX += desiredV / WHEEL_RADIUS * dt / 1'000'000;
+    }
+    prevVdesired = desiredV;
 }
 
 void BalancingChassisSubsystem::runHardwareTests() {}
