@@ -51,7 +51,7 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-        //   visionCoprocessor(this),
+          visionCoprocessor(this),
         //   oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
@@ -70,7 +70,7 @@ public:
 #else
 public:
     control::sentry::SentryControlOperatorInterface controlOperatorInterface;
-    // serial::VisionCoprocessor visionCoprocessor;
+    serial::VisionCoprocessor visionCoprocessor;
     // display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;

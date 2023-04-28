@@ -126,7 +126,7 @@ public:
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+        // aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const uint8_t turretID);
 
     void initialize() override;

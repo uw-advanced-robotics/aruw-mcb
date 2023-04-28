@@ -396,8 +396,8 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1Co
 
 void targetNewQuadrantMessageHandler()
 {
-    // turretZero.turretCVCommand.changeScanningQuadrant();
-    // turretOne.turretCVCommand.changeScanningQuadrant();
+    turretZero.turretCVCommand.changeScanningQuadrant();
+    turretOne.turretCVCommand.changeScanningQuadrant();
 }
 
 // void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
@@ -425,14 +425,18 @@ void pauseProjectileLaunchMessageHandler()
 
 
 
-// HoldCommandMapping leftSwitchDown(
-//     drivers(),
-//     {&chassisDriveCommand, &turretMajorControlCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-// HoldCommandMapping leftSwitchMid(
-//     drivers(),
-//     {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&chassisDriveCommand, &turretMajorControlCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+HoldCommandMapping leftSwitchMid(
+    drivers(),
+    {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&turretZero.turretCVCommand, &turretOne.turretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 
 bool isInitialized = false;

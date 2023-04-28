@@ -171,13 +171,15 @@ public:
               &chassisFramePitchTurretController,
               MINOR_USER_YAW_INPUT_SCALAR,
               MINOR_USER_PITCH_INPUT_SCALAR),
-        //   turretCVCommand(
-            //   &drivers.visionCoprocessor,
-            //   &turretSubsystem,
-            //   &worldFrameYawTurretImuController,
-            //   &chassisFramePitchTurretController,
+        // =======
+          turretCVCommand(
+              &drivers.visionCoprocessor,
+              &turretSubsystem,
+              &worldFrameYawTurretImuController,
+              &chassisFramePitchTurretController,
             //   &ballisticsSolver,
-            //   config.turretID),
+              config.turretID),
+        // ====
           turretUturnCommand(&turretSubsystem, M_PI),
           rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG)
@@ -245,7 +247,7 @@ public:
     // limits fire rate
     aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretManual;
 
-    // cv::SentryTurretCVCommand turretCVCommand;
+    cv::SentryTurretCVCommand turretCVCommand;
 
     user::TurretQuickTurnCommand turretUturnCommand;
 
