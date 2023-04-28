@@ -72,44 +72,6 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-    /** @return turret pitch angle in rad, a value normalized between [-pi, pi] */
-    mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
-    /** @return turret pitch angular velocity in rad/sec */
-    mockable inline float getPitchVelocity() const
-    {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
-    }
-    /**
-     * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
-     * the number of revolutions that the attached turret IMU has taken, and the number of
-     * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
-     */
-    mockable inline float getPitchUnwrapped() const
-    {
-        return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
-    }
-
-    /** @return turret yaw angle in radians, normalized between [-pi, pi] */
-    mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
-    /** @return turret yaw angular velocity in rad/sec */
-    mockable inline float getYawVelocity() const
-    {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
-    }
-    /**
-     * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
-     * the number of revolutions that the attached turret IMU has taken, and the number of
-     * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
-     */
-    mockable inline float getYawUnwrapped() const
-    {
-        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
-    }
-
     inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
@@ -134,22 +96,18 @@ public:
 
     mockable void sendData();
 
-    mockable inline uint32_t getIMUDataTimestamp() const
-    {
-        return lastCompleteImuData.turretDataTimestamp;
-    }
-
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
     enum CanIDs
     {
-        SYNC_RX_CAN_ID = 0x1f9,
-        SYNC_TX_CAN_ID = 0x1fa,
-        TURRET_STATUS_RX_CAN_ID = 0x1fb,
-        PITCH_RX_CAN_ID = 0x1fc,
-        YAW_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
+        SYNC_RX_CAN_ID = 0x1f8,
+        SYNC_TX_CAN_ID = 0x1f9,
+        TURRET_STATUS_RX_CAN_ID = 0x1fa,
+        X_AXIS_RX_CAN_ID = 0x1fb,
+        Y_AXIS_RX_CAN_ID = 0x1fc,
+        Z_AXIS_RX_CAN_ID = 0x1fd,
+        CHASSIS_MCB_COMMAND_TX_CAN_ID = 0x1fe,
     };
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
@@ -172,12 +130,12 @@ private:
         CanCommListenerFunc funcToCall;
     };
 
-    struct AngleMessageData
+    struct AxisMessageData
     {
         int16_t angleFixedPoint;
         int16_t angleAngularVelocityRaw;
+        uint16_t linearAcceleration;
         uint8_t seq;
-        uint16_t timestamp;
     } modm_packed;
 
     struct ImuData
@@ -186,9 +144,12 @@ private:
         int16_t rawYawVelocity;        ///< Raw yaw velocity, in counts per second
         float pitch;                   ///< Normalized pitch value, between [-pi, pi]
         int16_t rawPitchVelocity;      ///< Raw pitch velocity, in counts per second
-        uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was measured on the
-                                       ///< turret MCB
-        uint8_t seq;                   ///< Sequence number for synchronizing pitch/yaw messages
+        float roll;                    ///< Normalized roll value, between [-pi, pi]
+        int16_t rawRollVelocity;       ///< Raw roll velocity, in counts per second
+        float xAcceleration;           ///< (m/s^2) X-Acceleration
+        float yAcceleration;           ///< (m/s^2) Y-Acceleration
+        float zAcceleration;           ///< (m/s^2) Z-Acceleration
+        uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };
 
     const tap::can::CanBus canBus;
@@ -197,12 +158,14 @@ private:
 
     ImuData currProcessingImuData;
     ImuData lastCompleteImuData;
+
     int yawRevolutions;
     int pitchRevolutions;
+    int rollRevolutions;
 
-    TurretMcbRxHandler yawAngleGyroMessageHandler;
-
-    TurretMcbRxHandler pitchAngleGyroMessageHandler;
+    TurretMcbRxHandler xAxisMessageHandler;
+    TurretMcbRxHandler yAxisMessageHandler;
+    TurretMcbRxHandler zAxisMessageHandler;
 
     TurretMcbRxHandler turretStatusRxHandler;
 
@@ -220,9 +183,7 @@ private:
 
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
 
-    void handleYawAngleGyroMessage(const modm::can::Message& message);
-
-    void handlePitchAngleGyroMessage(const modm::can::Message& message);
+    void handleAxisMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
 

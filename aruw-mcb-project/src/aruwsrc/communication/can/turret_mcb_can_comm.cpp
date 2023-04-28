@@ -34,15 +34,21 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
       lastCompleteImuData{},
       yawRevolutions(0),
       pitchRevolutions(0),
-      yawAngleGyroMessageHandler(
+      xAxisMessageHandler(
           drivers,
-          YAW_RX_CAN_ID,
+          X_AXIS_RX_CAN_ID,
           canBus,
           this,
           &TurretMCBCanComm::handleYawAngleGyroMessage),
-      pitchAngleGyroMessageHandler(
+      yAxisMessageHandler(
           drivers,
-          PITCH_RX_CAN_ID,
+          Y_AXIS_RX_CAN_ID,
+          canBus,
+          this,
+          &TurretMCBCanComm::handlePitchAngleGyroMessage),
+      zAxisMessageHandler(
+          drivers,
+          Z_AXIS_RX_CAN_ID,
           canBus,
           this,
           &TurretMCBCanComm::handlePitchAngleGyroMessage),
@@ -65,8 +71,9 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
 
 void TurretMCBCanComm::init()
 {
-    yawAngleGyroMessageHandler.attachSelfToRxHandler();
-    pitchAngleGyroMessageHandler.attachSelfToRxHandler();
+    xAxisMessageHandler.attachSelfToRxHandler();
+    yAxisMessageHandler.attachSelfToRxHandler();
+    zAxisMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
     timeSynchronizationRxHandler.attachSelfToRxHandler();
 }
@@ -96,6 +103,8 @@ void TurretMCBCanComm::sendData()
         pitchRevolutions = 0;
     }
 }
+
+void
 
 void TurretMCBCanComm::handleYawAngleGyroMessage(const modm::can::Message& message)
 {
@@ -141,7 +150,15 @@ void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& mes
         lastCompleteImuData.pitch,
         pitchRevolutions);
 
-    updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
+    updateRevolutionCounter(
+        currProcessingImuData.yaw,
+        lastCompleteImuData.yaw,
+        yawRevolutions);
+
+    updateRevolutionCounter(
+        currProcessingImuData.roll,
+        lastCompleteImuData.roll,
+        rollRevolutions);
 
     lastCompleteImuData = currProcessingImuData;
 
