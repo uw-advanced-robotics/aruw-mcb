@@ -70,7 +70,7 @@
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-// #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
@@ -95,7 +95,7 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::launcher;
-// using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
 using namespace aruwsrc::sentry;
@@ -425,14 +425,14 @@ void pauseProjectileLaunchMessageHandler()
 
 
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&chassisDriveCommand, &turretMajorControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+// HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&chassisDriveCommand, &turretMajorControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+// HoldCommandMapping leftSwitchMid(
+//     drivers(),
+//     {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretZero.turretCVCommand, &turretOne.turretCVCommand},
@@ -454,7 +454,7 @@ void initializeSubsystems()
     turretOne.turretSubsystem.initialize();
 
     turretMajor.initialize();
-    // odometrySubsystem.initialize();
+    odometrySubsystem.initialize();
     // turret
  
     // leftFrontDriveMotor.setDesiredOutput(500);
@@ -483,8 +483,8 @@ void registerSentrySubsystems(Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 }

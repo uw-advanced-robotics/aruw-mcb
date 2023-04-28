@@ -40,14 +40,14 @@ SentryTurretCVCommand::SentryTurretCVCommand(
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    // aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
       turretSubsystem(turretSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
-    //   ballisticsSolver(ballisticsSolver),
+      ballisticsSolver(ballisticsSolver),
       pitchScanner({PITCH_MIN_SCAN_ANGLE, PITCH_MAX_SCAN_ANGLE, PITCH_SCAN_DELTA_ANGLE}),
       yawScanner(
           {turretSubsystem->yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,

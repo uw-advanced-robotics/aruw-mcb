@@ -93,7 +93,7 @@ using namespace aruwsrc::sentry;
 namespace sentry_control
 {
 	
-extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
+// extern SentryOttoKFOdometry2DSubsystem odometrySubsystem; // I hate this
 // TODO: rename this 
 class SentryMinorTurretGovernor
 {
@@ -119,13 +119,13 @@ public:
         : 
         
         agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
-        //   frictionWheels(
-            //   &drivers,
-            //   LEFT_MOTOR_ID,
-            //   RIGHT_MOTOR_ID,
-            //   config.turretCanBus,
-            //   &config.turretMCBCanComm,
-            //   config.turretBarrelMechanismId),
+          frictionWheels(
+              &drivers,
+              LEFT_MOTOR_ID,
+              RIGHT_MOTOR_ID,
+              config.turretCanBus,
+              &config.turretMCBCanComm,
+              config.turretBarrelMechanismId),
           pitchMotor(config.pitchMotor),
           yawMotor(config.yawMotor),
           turretSubsystem(
@@ -136,17 +136,17 @@ public:
               config.yawMotorConfig,
               &config.turretMCBCanComm,
               config.turretID),
-          /*ballisticsSolver(
+          ballisticsSolver(
               drivers.visionCoprocessor,
               odometrySubsystem,
               turretSubsystem,
               frictionWheels,
               29.5f,  // defaultLaunchSpeed
               config.turretID),
-          autoAimLaunchTimer(
-              aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-              &drivers.visionCoprocessor,
-              &ballisticsSolver),*/
+        //   autoAimLaunchTimer(
+        //       aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+        //       &drivers.visionCoprocessor,
+        //       &ballisticsSolver),
         //   spinFrictionWheels(
         //       &drivers,
         //       &frictionWheels,
@@ -177,7 +177,7 @@ public:
               &turretSubsystem,
               &worldFrameYawTurretImuController,
               &chassisFramePitchTurretController,
-            //   &ballisticsSolver,
+              &ballisticsSolver,
               config.turretID),
         // ====
           turretUturnCommand(&turretSubsystem, M_PI),
@@ -223,13 +223,15 @@ public:
 
     // subsystems
     VelocityAgitatorSubsystem agitator;
-    // RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
+    RefereeFeedbackFrictionWheelSubsystem<LAUNCH_SPEED_AVERAGING_DEQUE_SIZE> frictionWheels;
     DjiMotor* pitchMotor;
     DjiMotor* yawMotor;
     SentryTurretMinorSubsystem turretSubsystem;
 
-    /*OttoBallisticsSolver ballisticsSolver;
-    AutoAimLaunchTimer autoAimLaunchTimer;*/
+    OttoBallisticsSolver ballisticsSolver;
+    // AutoAimLaunchTimer autoAimLaunchTimer;
+
+    SentryOttoKFOdometry2DSubsystem odometrySubsystem;
 
     // friction wheel commands
     // FrictionWheelSpinRefLimitedCommand spinFrictionWheels;
