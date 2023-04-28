@@ -357,9 +357,9 @@ private:
     */
     VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData);
 
-    VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLeftMinorLocalizationData();
+    VisionCoprocessor::LocalizationCartesianData getLastLeftMinorLocalizationData();
 
-    VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastRightMinorLocalizationData();
+    VisionCoprocessor::LocalizationCartesianData getLastRightMinorLocalizationData();
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
