@@ -160,7 +160,7 @@ bool VisionCoprocessor::decodeToLocalizationData(const ReceivedSerialMessage& me
     return true;
 }
 
-VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData) {
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData) {
     float sinRoll = 2 * (newQuaterionData.qw * newQuaterionData.qx +
                          newQuaterionData.qy * newQuaterionData.qz);
     float cosRoll = 1- 2 * (pow(newQuaterionData.qx, 2) + pow(newQuaterionData.qy, 2));
