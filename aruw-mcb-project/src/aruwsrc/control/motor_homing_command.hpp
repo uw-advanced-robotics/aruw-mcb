@@ -46,9 +46,9 @@ public:
     enum class HomingState
     {
         /** While in this state, the motor is commanded to move toward the lower bound. */
-        INITIATE_MOVE_TOWARD_LOWER_BOUND,
+        MOVING_TOWARD_LOWER_BOUND,
         /** While in this state, the motor is commanded to move toward the upper bound. */
-        INITIATE_MOVE_TOWARD_UPPER_BOUND,
+        MOVING_TOWARD_UPPER_BOUND,
         /** While in this state, the motor homing is completed. */
         HOMING_COMPLETE
     };

@@ -27,24 +27,24 @@ namespace aruwsrc::control
 void MotorHomingCommand::initialize()
 {
     subsystem.moveTowardLowerBound();
-    homingState = HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND;
+    homingState = HomingState::MOVING_TOWARD_LOWER_BOUND;
 }
 
 void MotorHomingCommand::execute()
 {
     switch (homingState)
     {
-        case (HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND):
+        case (HomingState::MOVING_TOWARD_LOWER_BOUND):
         {
             if (subsystem.isStalled())
             {
                 subsystem.setLowerBound();
                 subsystem.moveTowardUpperBound();
-                homingState = HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND;
+                homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
             }
             break;
         }
-        case (HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND):
+        case (HomingState::MOVING_TOWARD_UPPER_BOUND):
         {
             if (subsystem.isStalled())
             {

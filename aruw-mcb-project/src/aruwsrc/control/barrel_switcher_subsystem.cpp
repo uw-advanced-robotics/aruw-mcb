@@ -58,7 +58,6 @@ void BarrelSwitcherSubsystem::refresh() {
             updateMotorEncoderPid(&encoderPid, &motor, RIGHT_BARREL_ENCODER_POSITION);
             break;
         case BarrelState::SWITCHING_BETWEEN_BARRELS:
-            
             break;
     }
 }
@@ -69,8 +68,8 @@ BarrelState BarrelSwitcherSubsystem::getBarrelState() {
 
 void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput) {
     if(lowerBoundSet && upperBoundSet && 
-        ((motor.getEncoderUnwrapped() < 0 && desiredOutput < 0) ||
-        (motor.getEncoderUnwrapped() > motorUpperBound && desiredOutput > 0)))
+        ((motor.getEncoderUnwrapped() <= 0 && desiredOutput < 0) ||
+        (motor.getEncoderUnwrapped() >= motorUpperBound && desiredOutput > 0)))
     {
         desiredOutput = 0;
     }
@@ -82,7 +81,7 @@ bool BarrelSwitcherSubsystem::isStalled() const {
 }
 
 void BarrelSwitcherSubsystem::setLowerBound() {
-    // motor.resetEncoder();
+    motor.resetEncoderValue();
     lowerBoundSet = true;
 }
 
@@ -108,4 +107,7 @@ void BarrelSwitcherSubsystem::updateMotorEncoderPid(modm::Pid<int32_t>* pid, tap
     pid->update(desiredEncoderPosition - motor->getEncoderUnwrapped());
     setMotorOutput(pid->getValue());
 }
+
+
+
 };
