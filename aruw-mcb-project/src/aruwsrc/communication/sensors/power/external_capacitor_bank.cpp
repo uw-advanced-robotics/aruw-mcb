@@ -24,11 +24,9 @@ namespace aruwsrc::communication::sensors::power
 ExternalCapacitorBank::ExternalCapacitorBank(
     tap::Drivers* drivers,
     tap::can::CanBus canBus,
-    tap::control::chassis::PowerLimiter& powerLimiter,
     const float capacitance)
     : tap::can::CanRxListener(drivers, CAP_BANK_CAN_ID, canBus),
-      capacitance(capacitance),
-      powerLimiter(powerLimiter){};
+      capacitance(capacitance){};
 
 void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
 {
@@ -36,13 +34,20 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
     {
         case MessageType::STATUS:  // Update message
             this->status = static_cast<Status>(message.data[4]);
-            this->voltage = 
-		    *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
-            this->current = 
-		    *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
+            this->voltage =
+                *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
+            this->current =
+                *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
             this->availableEnergy = 1.0 / 2.0 * this->capacitance * powf(this->voltage, 2);
 
-            this->powerLimiter.setExternalEnergyBuffer(this->availableEnergy);
+            if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT))
+            {
+                this->powerLimiter->setExternalEnergyBuffer(this->availableEnergy);
+            }
+            else
+            {
+                this->powerLimiter->setExternalEnergyBuffer(0);
+            }
             break;
         default:
             // Ignore unknown message IDs
@@ -55,17 +60,18 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
         this->setPowerLimit(powerLimit);
     }
 
-    if (!this->started)
+    if (!this->started || this->status == Status::RESET)
     {
         this->start();
         this->started = true;
     }
 }
 
-void ExternalCapacitorBank::initialize()
+void ExternalCapacitorBank::initialize(tap::control::chassis::PowerLimiter& powerLimiter)
 {
     this->attachSelfToRxHandler();
     this->started = false;
+    this->powerLimiter = &powerLimiter;
 }
 
 void ExternalCapacitorBank::start() const

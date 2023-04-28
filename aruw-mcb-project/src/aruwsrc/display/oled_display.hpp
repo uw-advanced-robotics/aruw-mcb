@@ -26,6 +26,7 @@
 #include "tap/display/sh1106.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
@@ -47,7 +48,8 @@ public:
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        can::TurretMCBCanComm *turretMCBCanCommBus2,
+        communication::sensors::power::ExternalCapacitorBank *capacitorBank);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 

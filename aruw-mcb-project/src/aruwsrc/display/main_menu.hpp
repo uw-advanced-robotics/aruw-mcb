@@ -27,10 +27,12 @@
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
+#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "about_menu.hpp"
+#include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
@@ -53,7 +55,8 @@ public:
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        can::TurretMCBCanComm *turretMCBCanCommBus2,
+        communication::sensors::power::ExternalCapacitorBank *capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -78,9 +81,11 @@ private:
     TurretMCBMenu turretStatusMenuBus1;
     TurretMCBMenu turretStatusMenuBus2;
     AboutMenu aboutMenu;
+    CapacitorBankMenu capBankMenu;
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
+    communication::sensors::power::ExternalCapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -94,6 +99,7 @@ private:
     void addTurretMCBMenuBus1Callback();
     void addTurretMCBMenuBus2Callback();
     void addAboutMenuCallback();
+    void addCapacitorBankMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

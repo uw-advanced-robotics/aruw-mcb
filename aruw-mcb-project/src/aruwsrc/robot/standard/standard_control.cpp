@@ -137,12 +137,6 @@ StandardTurretSubsystem turret(
 
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
 
-aruwsrc::communication::sensors::power::ExternalCapacitorBank capacitorBank(
-    drivers(),
-    tap::can::CanBus::CAN_BUS1,
-    chassis.chassisPowerLimiter,
-    6.667);
-
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
 VelocityAgitatorSubsystem agitator(
@@ -509,6 +503,8 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+
+    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -523,8 +519,6 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
-
-    capacitorBank.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

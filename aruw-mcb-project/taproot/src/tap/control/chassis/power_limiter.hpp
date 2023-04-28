@@ -120,7 +120,7 @@ private:
     const float energyBufferCritThreshold;
 
     float energyBuffer;
-    float externalEnergyBuffer;
+    float externalEnergyBuffer = 0.0f;
     float consumedPower;
     uint32_t prevTime;
     uint32_t prevRobotDataReceivedTimestamp;

@@ -54,31 +54,30 @@ enum Status
 class ExternalCapacitorBank : public tap::can::CanRxListener
 {
 public:
-    ExternalCapacitorBank(
-        tap::Drivers* drivers,
-        tap::can::CanBus canBus,
-        tap::control::chassis::PowerLimiter& powerLimiter,
-        const float capacitance);
-
-    int getAvailableEnergy() const { return availableEnergy; };
+    ExternalCapacitorBank(tap::Drivers* drivers, tap::can::CanBus canBus, const float capacitance);
 
     void processMessage(const modm::can::Message& message) override;
 
-    void initialize();
+    void initialize(tap::control::chassis::PowerLimiter& powerLimiter);
 
     void start() const;
     void stop() const;
     void setPowerLimit(uint16_t watts);
 
+    int getAvailableEnergy() const { return this->availableEnergy; };
+    float getCurrent() const { return this->current; };
+    float getVoltage() const { return this->voltage; };
+    Status getStatus() const { return this->status; };
+
 private:
-    tap::control::chassis::PowerLimiter& powerLimiter;
+    tap::control::chassis::PowerLimiter* powerLimiter = nullptr;
     const float capacitance;
 
-    uint16_t powerLimit;
+    uint16_t powerLimit = 0;
 
-    float availableEnergy;
-    float current;
-    float voltage;
+    float availableEnergy = 0;
+    float current = 0;
+    float voltage = 0;
     Status status = Status::UNKNOWN;
 
     bool started = false;  // Set to true once any message from the cap bank is received
