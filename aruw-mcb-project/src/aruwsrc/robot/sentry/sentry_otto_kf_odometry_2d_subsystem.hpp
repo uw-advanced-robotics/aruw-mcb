@@ -26,10 +26,8 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
-
-#include "sentry_chassis_kf_odometry.hpp"
 
 // Forward declarations
 namespace tap
@@ -56,8 +54,7 @@ namespace aruwsrc::algorithms::odometry
  *
  * @see ChassisKFOdometry
  */
-class SentryOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public SentryChassisKFOdometry
+class SentryOttoKFOdometry2DSubsystem final : public tap::control::Subsystem, public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -68,10 +65,96 @@ public:
      */
     SentryOttoKFOdometry2DSubsystem(
         tap::Drivers& drivers,
-        const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
+        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretSubsystem& turret);
 
     void refresh() override;
+
+    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
+
+    inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
+
+    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
+
+    inline float getYaw() const override { return chassisYaw; }
+
+    void update();
+
+private:
+    /// Chassis location in the world frame
+    modm::Location2D<float> location;
+    /// Chassis velocity in the world frame
+    modm::Vector2f velocity;
+    /// Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
+
+    /// Previous time `update` was called, in microseconds
+    uint32_t prevTime = 0;
+
+    enum class OdomState
+    {
+        POS_Y = 0,
+        VEL_Y,
+        ACC_Y,
+        NUM_STATES,
+    };
+
+    enum class OdomInput
+    {
+        POS_Y = 0,
+        VEL_Y,
+        ACC_Y,
+        NUM_INPUTS,
+    };
+
+    static constexpr int STATES_SQUARED =
+        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
+    static constexpr int INPUTS_SQUARED =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
+    static constexpr int INPUTS_MULT_STATES =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+
+    /// Assumed time difference between calls to `update`, in seconds
+    static constexpr float DT = 0.002f;
+
+    // clang-format off
+    static constexpr float KF_A[STATES_SQUARED] = {
+        1, DT, 0.5 * DT * DT,
+        0, 1 , DT           ,
+        0, 0 , 1            ,
+    };
+    static constexpr float KF_C[INPUTS_MULT_STATES] = {
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1,
+    };
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        1E0, 0  , 0  ,
+        0  , 1E0, 0  ,
+        0  , 0  , 1E0,
+    };
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        1.0, 0  , 0  ,
+        0  , 1.0, 0  ,
+        0  , 0  , 1E6,
+    };
+    static constexpr float KF_P0[STATES_SQUARED] = {
+        1E3, 0  , 0  ,
+        0  , 1E3, 0  ,
+        0  , 0  , 1E3,
+    };
+    // clang-format on
+
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver chassisYawObserver;
+    tap::communication::sensors::imu::ImuInterface& chassisIMU;
+
+    tap::algorithms::KalmanFilter<
+        static_cast<int>(OdomState::NUM_STATES),
+        static_cast<int>(OdomInput::NUM_INPUTS)>
+        kf;
+
+    void updateChassisStateFromKF();
 };
 
 }  // namespace aruwsrc::algorithms::odometry

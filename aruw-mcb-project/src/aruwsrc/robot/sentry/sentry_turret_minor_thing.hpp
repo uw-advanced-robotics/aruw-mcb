@@ -32,9 +32,6 @@
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
-#include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -45,9 +42,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
@@ -75,7 +70,6 @@
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::sentry::drive;
 using namespace tap::gpio;
 using namespace aruwsrc::control;
 using namespace tap::control;
@@ -85,6 +79,7 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::launcher;
+using namespace aruwsrc::chassis;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
 using namespace tap::communication::serial;
@@ -94,60 +89,41 @@ namespace sentry_control
 {
 	
 // extern SentryOttoKFOdometry2DSubsystem odometrySubsystem; // I hate this
-// TODO: rename this 
-class SentryMinorTurretGovernor
+class SentryTurretMinor
 {
 public:
-    struct Config
-    {
-        aruwsrc::agitator::VelocityAgitatorSubsystemConfig agitatorConfig;
-        DjiMotor* pitchMotor;
-        DjiMotor* yawMotor;
-        TurretMotorConfig pitchMotorConfig;
-        TurretMotorConfig yawMotorConfig;
-        tap::can::CanBus turretCanBus;
-        uint8_t turretID;
-        RefSerialData::Rx::MechanismID turretBarrelMechanismId;
-        tap::algorithms::SmoothPidConfig pitchPidConfig;
-        tap::algorithms::SmoothPidConfig yawPidConfig;
-        tap::algorithms::SmoothPidConfig yawPosPidConfig;
-        tap::algorithms::SmoothPidConfig yawVelPidConfig;
-        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
-    };
-
-    SentryMinorTurretGovernor(Drivers &drivers, const Config &config)
-        : 
-        
+    SentryTurret(Drivers &drivers, 
+        const HolonomicChassisSubsystem &driveSubsystem) : 
         agitator(&drivers, constants::AGITATOR_PID_CONFIG, config.agitatorConfig),
-          frictionWheels(
-              &drivers,
-              LEFT_MOTOR_ID,
-              RIGHT_MOTOR_ID,
-              config.turretCanBus,
-              &config.turretMCBCanComm,
-              config.turretBarrelMechanismId),
-          pitchMotor(config.pitchMotor),
-          yawMotor(config.yawMotor),
-          turretSubsystem(
-              &drivers,
-              pitchMotor,
-              yawMotor,
-              config.pitchMotorConfig,
-              config.yawMotorConfig,
-              &config.turretMCBCanComm,
-              config.turretID),
-          ballisticsSolver(
-              drivers.visionCoprocessor,
-              odometrySubsystem,
-              turretSubsystem,
-              frictionWheels,
-              29.5f,  // defaultLaunchSpeed
-              config.turretID),
-
-            odometrySubsystem(
-                drivers,
-                
-            )
+        frictionWheels(
+            &drivers,
+            LEFT_MOTOR_ID,
+            RIGHT_MOTOR_ID,
+            config.turretCanBus,
+            &config.turretMCBCanComm,
+            config.turretBarrelMechanismId),
+        pitchMotor(config.pitchMotor),
+        yawMotor(config.yawMotor),
+        turretSubsystem(
+            &drivers,
+            pitchMotor,
+            yawMotor,
+            config.pitchMotorConfig,
+            config.yawMotorConfig,
+            &config.turretMCBCanComm,
+            config.turretID),
+        ballisticsSolver(
+            drivers.visionCoprocessor,
+            odometrySubsystem,
+            turretSubsystem,
+            frictionWheels,
+            29.5f,  // defaultLaunchSpeed
+            config.turretID),
+        odometrySubsystem(
+            drivers,
+            driveSubsystem,
+            turretSubsystem,
+        ),
         //   autoAimLaunchTimer(
         //       aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
         //       &drivers.visionCoprocessor,
@@ -159,35 +135,35 @@ public:
         //       true,
         //       config.turretBarrelMechanismId),
         //   stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
-          chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
-          chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
-          worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
-          worldFrameYawTurretImuVelPid(config.yawVelPidConfig),
-          worldFrameYawTurretImuController(
-              config.turretMCBCanComm,
-              turretSubsystem.yawMotor,
-              worldFrameYawTurretImuPosPid,
-              worldFrameYawTurretImuVelPid),
-          turretManual(
-              &drivers,
-              drivers.controlOperatorInterface,
-              &turretSubsystem,
-              &worldFrameYawTurretImuController,
-              &chassisFramePitchTurretController,
-              MINOR_USER_YAW_INPUT_SCALAR,
-              MINOR_USER_PITCH_INPUT_SCALAR),
-        // =======
-          turretCVCommand(
-              &drivers.visionCoprocessor,
-              &turretSubsystem,
-              &worldFrameYawTurretImuController,
-              &chassisFramePitchTurretController,
-              &ballisticsSolver,
-              config.turretID),
-        // ====
-          turretUturnCommand(&turretSubsystem, M_PI),
-          rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
-          unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG)
+        chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
+        chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
+        worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
+        worldFrameYawTurretImuVelPid(config.yawVelPidConfig),
+        worldFrameYawTurretImuController(
+            config.turretMCBCanComm,
+            turretSubsystem.yawMotor,
+            worldFrameYawTurretImuPosPid,
+            worldFrameYawTurretImuVelPid),
+        turretManual(
+            &drivers,
+            drivers.controlOperatorInterface,
+            &turretSubsystem,
+            &worldFrameYawTurretImuController,
+            &chassisFramePitchTurretController,
+            MINOR_USER_YAW_INPUT_SCALAR,
+            MINOR_USER_PITCH_INPUT_SCALAR),
+    // =======
+        turretCVCommand(
+            &drivers.visionCoprocessor,
+            &turretSubsystem,
+            &worldFrameYawTurretImuController,
+            &chassisFramePitchTurretController,
+            &ballisticsSolver,
+            config.turretID),
+    // ====
+        turretUturnCommand(&turretSubsystem, M_PI),
+        rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG),
+        unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG)
         //   rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator)
         //   frictionWheelsOnGovernor(frictionWheels)
         //   heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER)

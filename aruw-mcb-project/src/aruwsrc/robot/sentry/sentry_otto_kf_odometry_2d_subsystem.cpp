@@ -18,6 +18,7 @@
  */
 
 #include "sentry_otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 #include "tap/drivers.hpp"
 
@@ -25,10 +26,9 @@ namespace aruwsrc::algorithms::odometry
 {
 SentryOttoKFOdometry2DSubsystem::SentryOttoKFOdometry2DSubsystem(
     tap::Drivers& drivers,
-    const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretSubsystem& turret)
-    : Subsystem(&drivers),
-      SentryChassisKFOdometry(drivers, chassis, turret)
+    : Subsystem(&drivers)
 {
 }
 

@@ -23,7 +23,6 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -60,8 +59,7 @@ public:
         const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -161,12 +159,6 @@ private:
      * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.
      */
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
-
-    /**
-     * SentryResponseHandler that provides information about whether or not the sentry is
-     * moving.
-     */
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,

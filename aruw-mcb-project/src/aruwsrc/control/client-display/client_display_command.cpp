@@ -46,8 +46,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -59,8 +58,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           hopperSubsystem,
           frictionWheelSubsystem,
           agitatorSubsystem,
-          imuCalibrateCommand,
-          sentryResponseHandler),
+          imuCalibrateCommand),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,

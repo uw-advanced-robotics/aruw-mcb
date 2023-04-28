@@ -313,6 +313,8 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;

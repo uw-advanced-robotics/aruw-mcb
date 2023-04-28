@@ -112,8 +112,7 @@ public:
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
 
     const char *getName() const override { return "client display"; }
 

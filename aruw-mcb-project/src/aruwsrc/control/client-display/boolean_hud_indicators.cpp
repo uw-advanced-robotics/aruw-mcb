@@ -47,15 +47,13 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand)
     : HudIndicator(refSerialTransmitter),
       commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
-      sentryResponseHandler(sentryResponseHandler),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -113,9 +111,6 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
 
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
-
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;

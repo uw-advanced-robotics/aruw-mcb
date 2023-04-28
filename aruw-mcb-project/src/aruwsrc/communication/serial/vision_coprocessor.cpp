@@ -221,6 +221,8 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryMessage.setCRC16();
 
+    lastOdometryMessage = odometryMessage;
+
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&odometryMessage),

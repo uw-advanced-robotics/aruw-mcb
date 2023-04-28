@@ -33,8 +33,6 @@
 // #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -74,7 +72,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_turret_minor_governor.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_thing.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
@@ -85,7 +83,6 @@
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::sentry::drive;
 using namespace tap::gpio;
 using namespace aruwsrc::control;
 using namespace tap::control;
@@ -111,8 +108,6 @@ namespace sentry_control
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
-
-aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
 /* define swerve motors --------------------------------------------------------*/
 
@@ -266,8 +261,9 @@ algorithms::ChassisFrameYawTurretController turretMajorYawController = algorithm
     aruwsrc::control::turret::chassis_rel::turretMajor::YAW_PID_CONFIG
 );
 
-SentryMinorTurretGovernor turretZero(
+SentryTurretMinor turretZero(
     *drivers(),
+    aruwsrc::control::
     {
         .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor0::AGITATOR_CONFIG,
         .pitchMotor = &turretMinor0PitchMotor,
@@ -284,23 +280,23 @@ SentryMinorTurretGovernor turretZero(
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
     });
 
-SentryMinorTurretGovernor turretOne(
-    *drivers(),
-    {
-        .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor1::AGITATOR_CONFIG,
-        .pitchMotor = &turretMinor1PitchMotor,
-        .yawMotor = &turretMinor1YawMotor,
-        .pitchMotorConfig = aruwsrc::control::turret::turretMinor1::PITCH_MOTOR_CONFIG,
-        .yawMotorConfig = aruwsrc::control::turret::turretMinor1::YAW_MOTOR_CONFIG,
-        .turretCanBus = aruwsrc::control::turret::turretMinor1::CAN_BUS_MOTORS,
-        .turretID = 1,
-        .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-        .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::PITCH_PID_CONFIG,
-        .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::YAW_PID_CONFIG,
-        .yawPosPidConfig = world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG,
-        .yawVelPidConfig = world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG,
-        .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
-    });
+// SentryMinorTurretThing turretOne(
+//     *drivers(),
+//     {
+//         .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor1::AGITATOR_CONFIG,
+//         .pitchMotor = &turretMinor1PitchMotor,
+//         .yawMotor = &turretMinor1YawMotor,
+//         .pitchMotorConfig = aruwsrc::control::turret::turretMinor1::PITCH_MOTOR_CONFIG,
+//         .yawMotorConfig = aruwsrc::control::turret::turretMinor1::YAW_MOTOR_CONFIG,
+//         .turretCanBus = aruwsrc::control::turret::turretMinor1::CAN_BUS_MOTORS,
+//         .turretID = 1,
+//         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::PITCH_PID_CONFIG,
+//         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::YAW_PID_CONFIG,
+//         .yawPosPidConfig = world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG,
+//         .yawVelPidConfig = world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG,
+//         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
+//     });
 
 /* define commands ----------------------------------------------------------*/
 imu::ImuCalibrateCommand imuCalibrateCommand(
@@ -512,9 +508,6 @@ void startSentryCommands(Drivers *drivers)
     // // //     pauseProjectileLaunchMessageHandler);
     // // sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
     // sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
-        &sentryRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
