@@ -20,9 +20,12 @@
 #ifndef STANDARD_TURRET_CONSTANTS_HPP_
 #define STANDARD_TURRET_CONSTANTS_HPP_
 
+#include <climits>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/homeable_subsystem_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -89,6 +92,11 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .minAngle = modm::toRadian(50),
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
+};
+
+static constexpr aruwsrc::control::HomingConfig HOMING_CONFIG = {
+    .minRPM = 10,
+    .maxTorque = SHRT_MAX / 4,
 };
 #endif
 
@@ -229,6 +237,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret
 

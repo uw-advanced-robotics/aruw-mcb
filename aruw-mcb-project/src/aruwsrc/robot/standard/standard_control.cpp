@@ -75,8 +75,11 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/control/barrel_switcher_subsystem.hpp"
+
+#ifdef TARGET_STANDARD_SPIDER
 #include "aruwsrc/control/motor_homing_command.hpp"
+#include "aruwsrc/control/barrel_switcher_subsystem.hpp"
+#endif
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -171,12 +174,11 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
+#ifdef TARGET_STANDARD_SPIDER
 BarrelSwitcherSubsystem barrelSwitcher(drivers(),  
-    aruwsrc::control::HomingConfig {
-        .minRPM = 100,
-        .maxTorque = 10
-    },
+    HOMING_CONFIG,
     tap::motor::MotorId::MOTOR8);
+#endif
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
@@ -262,7 +264,9 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
-MotorHomingCommand motorHoming(barrelSwitcher);
+#ifdef TARGET_STANDARD_SPIDER
+MotorHomingCommand motorHomingCommand(barrelSwitcher);
+#endif
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -405,6 +409,15 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
+
+// For motor homing
+#ifdef TARGET_STANDARD_SPIDER
+PressCommandMapping hPressed(
+    drivers(),
+    {&motorHomingCommand},
+    RemoteMapState({Remote::Key::CTRL}, {Remote::Key::R}));
+#endif
+
 PressCommandMapping cPressed(
     drivers(),
     {&sentryToggleDriveMovementCommand},
@@ -502,7 +515,9 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    #ifdef TARGET_STANDARD_SPIDER
     drivers->commandScheduler.registerSubsystem(&barrelSwitcher);
+    #endif
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -517,7 +532,9 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    #ifdef TARGET_STANDARD_SPIDER
     barrelSwitcher.initialize();
+    #endif
 }
 
 /* set any default commands to subsystems here ------------------------------*/

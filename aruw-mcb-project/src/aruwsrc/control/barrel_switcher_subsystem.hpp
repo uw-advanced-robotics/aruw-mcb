@@ -35,7 +35,7 @@
 namespace aruwsrc::control
 {
 
-static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 2;
+static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 16;
 
 
 static constexpr int32_t USING_RIGHT_BARREL_POSITION = 25; //find actual value after hardware testing
