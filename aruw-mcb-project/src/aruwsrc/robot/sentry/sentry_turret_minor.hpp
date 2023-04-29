@@ -229,10 +229,9 @@ public:
     // turret commands
     // limits fire rate
     aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretManual;
-
     cv::SentryTurretCVCommand turretCVCommand;
 
-    user::TurretQuickTurnCommand turretUturnCommand;
+    // user::TurretQuickTurnCommand turretUturnCommand;
 
     // base agitator commands
     MoveIntegralCommand rotateAgitator;

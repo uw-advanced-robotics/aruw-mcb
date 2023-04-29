@@ -56,24 +56,21 @@ namespace aruwsrc::control::turret::cv
 {
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
- * aims the turret accordingly using a position PID controller.
- *
- * This command, unlike the `SentryTurretCVCommand`, is not responsible for firing projectiles
- * when the auto aim system determines it should fire. Nor does this class scan the turret back and
- * forth.
- *
- * @note If the auto aim system is offline, does not have a target acquired, or has an invalid
- * target (for example, the target is too far away), then user input from the
- * `ControlOperatorInterface` is used to control the turret instead.
+ * aims the turrets accordingly using a position PID controller.
+ * 
+ * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
+ * of movement. (This is why we need both minors controlled by a single command.)
  */
 class SentryTurretCVCommand : public TurretCVCommandInterface
 {
 public:
-    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
-    /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
-    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
+    // TODO: config someplace
+    static constexpr float MINOR_TURRET_PITCH = modm::toRadian(0.0f);
 
+    static constexpr float YAW_GIRLBOSS_MIN = modm::toRadian(0.0f);
+    static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(0.0f);
+    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(0.0f);
+    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(0.0f);
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
      * turret will turn around and start scanning around.
@@ -122,12 +119,16 @@ public:
      * for more information.
      */
     SentryTurretCVCommand(
-        serial::VisionCoprocessor *visionCoprocessor,
-        RobotTurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-        const uint8_t turretID);
+        serial::VisionCoprocessor &visionCoprocessor,
+        RobotTurretSubsystem &turretMajorSubsystem,
+        RobotTurretSubsystem &turretMinorGirlbossSubsystem,
+        RobotTurretSubsystem &turretMinorMalewifeSubsystem,
+        algorithms::TurretYawControllerInterface &yawControllerGirlboss,  // TODO: painnn
+        algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
+        algorithms::TurretYawControllerInterface &yawControllerMalewife,
+        algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
+        aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver);
 
     void initialize() override;
 
@@ -149,8 +150,6 @@ public:
     /// of it.
     void changeScanningQuadrant();
 
-    bool getTurretID() const override { return turretID; }
-
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
@@ -159,28 +158,27 @@ public:
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
-    serial::VisionCoprocessor *visionCoprocessor;
+    serial::VisionCoprocessor &visionCoprocessor;
 
-    RobotTurretSubsystem *turretSubsystem;
+    RobotTurretSubsystem &turretMajorSubsystem;
+    RobotTurretSubsystem &turretMinorGirlbossSubsystem;
+    RobotTurretSubsystem &turretMinorMalewifeSubsystem;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretYawControllerInterface &yawControllerGirlboss;
+    algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
+    algorithms::TurretYawControllerInterface &yawControllerMalewife;
+    algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
 
-    const uint8_t turretID;
-
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver;
 
     uint32_t prevTime;
 
     /**
-     * Handles scanning logic in the pitch direction
-     */
-    SetpointScanner pitchScanner;
-
-    /**
      * Handles scanning logic in the yaw direction
      */
-    SetpointScanner yawScanner;
+    SetpointScanner yawGirlbossScanner;
+    SetpointScanner yawMalewifeScanner;
 
     bool scanning = false;
 
@@ -196,17 +194,16 @@ private:
      */
     unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
 
-    inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
+    inline void enterScanMode(float yawSetpoint)
     {
-        if (yawController != nullptr)
-        {
-            yawSetpoint = yawController->convertControllerAngleToChassisFrame(yawSetpoint);
-        }
+        // FIXME: coordinate yawSetpoints when entering scan
+        float yawSetpointGirlboss = yawControllerGirlboss.convertControllerAngleToChassisFrame(yawSetpoint);
+        float yawSetpointMalewife = yawControllerMalewife.convertControllerAngleToChassisFrame(-yawSetpoint);
 
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        yawScanner.setScanSetpoint(yawSetpoint);
-        pitchScanner.setScanSetpoint(pitchSetpoint);
+        yawGirlbossScanner.setScanSetpoint(yawSetpointGirlboss);
+        yawMalewifeScanner.setScanSetpoint(yawSetpointMalewife);
     }
 
     inline void exitScanMode()
@@ -222,7 +219,7 @@ private:
      * @param[out] yawSetpoint The current yaw setpoint, which this function will update
      * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
      */
-    void performScanIteration(float &yawSetpoint, float &pitchSetpoint);
+    void performScanIteration(float &yawSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv

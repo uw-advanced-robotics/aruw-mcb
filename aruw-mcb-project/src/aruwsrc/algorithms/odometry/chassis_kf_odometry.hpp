@@ -21,6 +21,7 @@
 #define CHASSIS_KF_ODOMETRY_HPP_
 
 #include "tap/algorithms/kalman_filter.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -35,7 +36,7 @@ namespace aruwsrc::algorithms::odometry
 /**
  * An odometry interface that uses a kalman filter to measure odometry. This class is designed
  * specifically for robots whose chassis does not measure absolute position (i.e. all ground
- * robots). For those robots that measure chassis position directly (sentry, for example), a
+ * robots). For those robots that measure chassis position directly, a
  * tweaked version of the kalman filter used in this implementation should be used.
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
@@ -46,15 +47,20 @@ public:
     ChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-        tap::communication::sensors::imu::ImuInterface& imu);
+        tap::communication::sensors::imu::ImuInterface& imu,
+        modm::Location2D<float> imuToChassisCenter);
 
-    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
+    inline modm::Location2D<float> getCurrentLocation2D() const final { 
+        modm::Vector2f offset = imuToChassisCenter.getPosition();
+        tap::algorithms::rotateVector(&offset[0], &offset[1], imuToChassisCenter.getOrientation());
+        return modm::Location2D<float>(location.getPosition() + offset, imuToChassisCenter.getOrientation()); // TODO: where's that transformer when you need it?
+    }
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
-    inline float getYaw() const override { return chassisYaw; }
+    inline float getYaw() const override { return location.getOrientation() + imuToChassisCenter.getOrientation(); }
 
     void update();
 
@@ -143,6 +149,7 @@ private:
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+    modm::Location2D<float> imuToChassisCenter;
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
@@ -150,8 +157,6 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
-    // Chassis yaw orientation in world frame (radians)
-    float chassisYaw = 0;
 
     /// Chassis measured change in velocity since the last time `update` was called, in the chassis
     /// frame

@@ -380,19 +380,26 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
+// Right switch down => Stop spinning flywheels
 HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+// Right switch up => Spin agitator with unjamming, heat, and CV limiting
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
+
+// Left switch down => Beyblade
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+// Left switch up => CV
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},

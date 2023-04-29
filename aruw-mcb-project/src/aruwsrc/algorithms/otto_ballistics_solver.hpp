@@ -108,6 +108,7 @@ public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] turretSubsystem lol idk
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the

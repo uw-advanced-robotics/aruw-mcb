@@ -27,6 +27,7 @@
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 // Forward declarations
@@ -66,7 +67,9 @@ public:
     SentryOttoKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        const aruwsrc::control::turret::TurretSubsystem& turret);
+        const aruwsrc::control::turret::RobotTurretSubsystem& turretMajor,
+        const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlboss,
+        const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife);
 
     void refresh() override;
 
@@ -93,8 +96,11 @@ private:
 
     enum class OdomState
     {
+        POS_X = 0,
         POS_Y = 0,
+        VEL_X,
         VEL_Y,
+        ACC_X,
         ACC_Y,
         NUM_STATES,
     };
@@ -139,9 +145,9 @@ private:
         0  , 0  , 1E6,
     };
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  ,
-        0  , 1E3, 0  ,
-        0  , 0  , 1E3,
+        1E6, 0  , 0  ,
+        0  , 1E6, 0  ,
+        0  , 0  , 1E6,
     };
     // clang-format on
 

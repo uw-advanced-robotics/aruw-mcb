@@ -27,7 +27,9 @@ namespace aruwsrc::algorithms::odometry
 SentryOttoKFOdometry2DSubsystem::SentryOttoKFOdometry2DSubsystem(
     tap::Drivers& drivers,
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-    const aruwsrc::control::turret::TurretSubsystem& turret)
+    const aruwsrc::control::turret::RobotTurretSubsystem& turretMajor,
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlboss,
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife)
     : Subsystem(&drivers)
 {
 }

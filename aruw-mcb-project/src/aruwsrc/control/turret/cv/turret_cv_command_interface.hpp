@@ -27,7 +27,7 @@ namespace aruwsrc::control::turret::cv
 class TurretCVCommandInterface : public tap::control::Command
 {
 public:
-    virtual bool getTurretID() const = 0;
+    // virtual bool getTurretID() const = 0;
     virtual bool isAimingWithinLaunchingTolerance() const = 0;
 };
 }  // namespace aruwsrc::control::turret::cv

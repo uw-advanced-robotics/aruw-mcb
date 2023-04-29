@@ -67,7 +67,8 @@ public:
     OttoKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::control::chassis::ChassisSubsystemInterface& chassis);
+        tap::control::chassis::ChassisSubsystemInterface& chassis,
+        modm::Location2D<float> imuToChassisCenter);
 
     void refresh() override;
 

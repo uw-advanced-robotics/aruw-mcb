@@ -26,10 +26,12 @@ namespace aruwsrc::algorithms::odometry
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-    tap::communication::sensors::imu::ImuInterface& imu)
+    tap::communication::sensors::imu::ImuInterface& imu,
+    modm::Location2D<float> imuToChassisCenter)
     : chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
+      imuToChassisCenter(imuToChassisCenter),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,

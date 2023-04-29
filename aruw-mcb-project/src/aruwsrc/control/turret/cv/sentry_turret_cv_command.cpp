@@ -36,14 +36,20 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::control::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    serial::VisionCoprocessor *visionCoprocessor,
-    RobotTurretSubsystem *turretSubsystem,
-    algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-    const uint8_t turretID)
+        serial::VisionCoprocessor &visionCoprocessor,
+        RobotTurretSubsystem &turretMajorSubsystem,
+        RobotTurretSubsystem &turretMinorGirlbossSubsystem,
+        RobotTurretSubsystem &turretMinorMalewifeSubsystem,
+        algorithms::TurretYawControllerInterface &yawControllerGirlboss,
+        algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,
+        algorithms::TurretYawControllerInterface &yawControllerMalewife,
+        algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
+        aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver)
     : visionCoprocessor(visionCoprocessor),
-      turretSubsystem(turretSubsystem),
+    turretMajorSubsystem(turretMajorSubsystem),
+      turretMinorGirlbossSubsystem(turretMinorGirlbossSubsystem),
+      turretMinorMalewifeSubsystem(turretMinorMalewifeSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       turretID(turretID),
