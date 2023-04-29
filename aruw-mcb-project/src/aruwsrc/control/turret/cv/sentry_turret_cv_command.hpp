@@ -32,6 +32,8 @@
 #include "setpoint_scanner.hpp"
 #include "turret_cv_command_interface.hpp"
 
+#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
+
 namespace tap::control::odometry
 {
 class Odometry2DInterface;
@@ -71,8 +73,13 @@ class SentryTurretCVCommand : public TurretCVCommandInterface
 public:
     /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
     /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
-    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
+    // static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
+    // static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
+
+    // TODO: clean this later, for now I'm scared of the minors breaking their necks
+    static constexpr float PITCH_MIN_SCAN_ANGLE = aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG.minAngle;
+    static constexpr float PITCH_MAX_SCAN_ANGLE = aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG.maxAngle;
+
 
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
