@@ -81,6 +81,7 @@ public:
         LB = 2,
         RB = 3,
     };
+    void refreshSafeDisconnect() override;
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
