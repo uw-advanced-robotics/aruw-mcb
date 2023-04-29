@@ -23,7 +23,7 @@
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-// #include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
@@ -35,8 +35,7 @@
 #include "modm/math/interpolation/linear.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
-#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+// #include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -46,7 +45,7 @@ namespace aruwsrc::algorithms::odometry
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
-class SentryKFOdometry
+class SentryKFOdometry /**: public tap::algorithms::odometry::Odometry2DInterface */
 {
 public:
     /** TODO: update parameter documentation
@@ -64,7 +63,7 @@ public:
      */
     SentryKFOdometry(
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-        aruwsrc::virtualMCB::VirtualIMUInterface chassisIMU,
+        tap::communication::sensors::imu::ImuInterface& chassisIMU,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
         const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
@@ -111,7 +110,7 @@ public:
 private:
     
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
-    aruwsrc::virtualMCB::VirtualIMUInterface chassisIMU;
+    tap::communication::sensors::imu::ImuInterface& chassisIMU;
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft;

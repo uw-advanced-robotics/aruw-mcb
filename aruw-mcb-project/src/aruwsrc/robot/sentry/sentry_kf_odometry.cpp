@@ -29,7 +29,7 @@ namespace aruwsrc::algorithms::odometry
 {
 SentryKFOdometry::SentryKFOdometry(
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-    aruwsrc::virtualMCB::VirtualIMUInterface chassisIMU,
+    tap::communication::sensors::imu::ImuInterface& chassisIMU,
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
