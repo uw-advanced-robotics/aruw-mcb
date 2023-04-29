@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "virtual_mcb_handler.hpp"
+#include "serial_mcb_lite.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
@@ -28,9 +28,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
-VirtualMCBHandler::VirtualMCBHandler(
-    tap::Drivers* drivers,
-    tap::communication::serial::Uart::UartPort port)
+SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
       canRxHandler(VirtualCanRxHandler(drivers)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
@@ -43,7 +41,7 @@ VirtualMCBHandler::VirtualMCBHandler(
 {
 }
 
-void VirtualMCBHandler::initialize()
+void SerialMCBLite::initialize()
 {
     switch (this->port)
     {
@@ -70,7 +68,7 @@ void VirtualMCBHandler::initialize()
     }
 }
 
-void VirtualMCBHandler::sendData()
+void SerialMCBLite::sendData()
 {
     if (drivers->uart.isWriteFinished(port))
     {
@@ -103,14 +101,14 @@ void VirtualMCBHandler::sendData()
     }
 }
 
-void VirtualMCBHandler::calibrateIMU()
+void SerialMCBLite::calibrateIMU()
 {
     calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU;
     calibrateIMUMessage.setCRC16();
     sendIMUCalibrationMessage = true;
 }
 
-void VirtualMCBHandler::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
+void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     switch (completeMessage.messageType)
     {
@@ -133,7 +131,7 @@ void VirtualMCBHandler::messageReceiveCallback(const ReceivedSerialMessage& comp
     }
 }
 
-void VirtualMCBHandler::processCanMessage(
+void SerialMCBLite::processCanMessage(
     const ReceivedSerialMessage& completeMessage,
     tap::can::CanBus canbus)
 {
@@ -147,14 +145,14 @@ void VirtualMCBHandler::processCanMessage(
         for (uint8_t i = 0; i < 8; i++)
         {
             // Get back the motor num
-            msg.identifier = i + tap::motor::MotorId::MOTOR1;
-            memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
+            msg.identifier = i * 8 + tap::motor::MotorId::MOTOR1;
+            memcpy(&msg.data, &completeMessage.data[i], sizeof(msg.data));
             canRxHandler.refresh(canbus, msg);
         }
     }
 }
 
-void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeMessage)
+void SerialMCBLite::processIMUMessage(const ReceivedSerialMessage& completeMessage)
 {
     memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
     imu.pitch = currentIMUData.pitch;
@@ -170,7 +168,7 @@ void VirtualMCBHandler::processIMUMessage(const ReceivedSerialMessage& completeM
     imu.temperature = currentIMUData.temperature;
 }
 
-void VirtualMCBHandler::processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage)
+void SerialMCBLite::processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage)
 {
     memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(currentCurrentSensorData));
     currentSensor.current = currentCurrentSensorData.current;

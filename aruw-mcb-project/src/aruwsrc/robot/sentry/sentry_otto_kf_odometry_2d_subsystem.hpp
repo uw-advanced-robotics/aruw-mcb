@@ -29,7 +29,10 @@
 #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
-#include "sentry_chassis_kf_odometry.hpp"
+// #include "sentry_chassis_kf_odometry.hpp"
+
+
+#include "sentry_kf_odometry.hpp"
 
 // Forward declarations
 namespace tap
@@ -57,7 +60,7 @@ namespace aruwsrc::algorithms::odometry
  * @see ChassisKFOdometry
  */
 class SentryOttoKFOdometry2DSubsystem final : public tap::control::Subsystem,
-                                              public SentryChassisKFOdometry
+                                              public SentryKFOdometry
 {
 public:
     /**
@@ -67,11 +70,21 @@ public:
      * for how it is used
      */
     SentryOttoKFOdometry2DSubsystem(
-        tap::Drivers& drivers,
-        const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
-        const aruwsrc::control::turret::TurretSubsystem& turret);
+    tap::Drivers& drivers,
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+    tap::communication::sensors::imu::ImuInterface& chassisIMU,
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis
+    // const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
+    // const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
+    // const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight
+    );
 
     void refresh() override;
+
+    // void initializeReferences(
+    //     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
+    //     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
+    //     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight);
 };
 
 }  // namespace aruwsrc::algorithms::odometry

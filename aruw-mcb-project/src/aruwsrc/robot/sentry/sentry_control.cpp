@@ -32,7 +32,7 @@
 // #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 // #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
@@ -81,6 +81,8 @@
 #include "aruwsrc/control/turret/sentry/turret_major_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
+
+#include "aruwsrc/robot/sentry/sentry_kf_odometry.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -266,6 +268,16 @@ algorithms::ChassisFrameYawTurretController turretMajorYawController = algorithm
     aruwsrc::control::turret::chassis_rel::turretMajor::YAW_PID_CONFIG
 );
 
+aruwsrc::algorithms::odometry::SentryOttoKFOdometry2DSubsystem odometrySubsystem(
+    *(drivers()),
+    drivers()->visionCoprocessor,
+    drivers()->mcbLite.imu,
+    sentryDrive
+    // turretMajor,
+    // turretZero.turretSubsystem,
+    // turretOne.turretSubsystem
+);
+
 SentryMinorTurretGovernor turretZero(
     *drivers(),
     {
@@ -282,6 +294,7 @@ SentryMinorTurretGovernor turretZero(
         .yawPosPidConfig = world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
+        .odometrySubsystem = odometrySubsystem,
     });
 
 SentryMinorTurretGovernor turretOne(
@@ -300,6 +313,7 @@ SentryMinorTurretGovernor turretOne(
         .yawPosPidConfig = world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG,
         .yawVelPidConfig = world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG,
         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
+        .odometrySubsystem = odometrySubsystem,
     });
 
 /* define commands ----------------------------------------------------------*/
@@ -355,6 +369,9 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1Co
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR,
     1);
+
+
+    
 
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
 //     drivers(),
@@ -454,19 +471,13 @@ void initializeSubsystems()
     turretOne.turretSubsystem.initialize();
 
     turretMajor.initialize();
-    odometrySubsystem.initialize();
+    odometrySubsystem.initializeReferences(
+        turretMajor,
+        turretZero.turretSubsystem,
+        turretOne.turretSubsystem
+    );
     // turret
  
-    // leftFrontDriveMotor.setDesiredOutput(500);
-    // leftFrontAzimuthMotor.setDesiredOutput(500);
-    // rightFrontDriveMotor.setDesiredOutput(500);
-    // rightFrontAzimuthMotor.setDesiredOutput(500);
-    // leftBackDriveMotor.setDesiredOutput(500);
-    // leftBackAzimuthMotor.setDesiredOutput(500);
-    // rightBackDriveMotor.setDesiredOutput(500);
-    // rightBackAzimuthMotor.setDesiredOutput(500);
-
-    // rightFrontDriveMotor.initialize();
     isInitialized = true;
 }
 
@@ -484,7 +495,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 }

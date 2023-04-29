@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,7 +29,7 @@ namespace aruwsrc::virtualMCB
 {
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
-    friend class VirtualMCBHandler;
+    friend class SerialMCBLite;
 
 public:
     VirtualIMUInterface() {}

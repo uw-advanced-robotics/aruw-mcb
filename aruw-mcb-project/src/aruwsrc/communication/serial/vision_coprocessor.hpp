@@ -175,6 +175,32 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
+    /**
+     * Localization data received from Jetson
+     */
+    struct LocalizationData {
+        uint8_t turretID;
+        float x; // Positional values
+        float y;
+        float z;
+        float qw; // Quaternion orientation values
+        float qx;
+        float qy;
+        float qz;
+        uint32_t timestamp;
+    } modm_packed;
+
+    struct LocalizationCartesianData {
+        uint8_t turretID;
+        float x;
+        float y;
+        float z;
+        float roll;
+        float pitch;
+        float yaw;
+        uint32_t timestamp;
+    } modm_packed;
+
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
@@ -268,6 +294,8 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    LocalizationCartesianData getLastLocalizationData();
+
 private:
     enum TxMessageTypes
     {
@@ -280,11 +308,13 @@ private:
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
+        CV_MESSAGE_TYPES_HEALTH_DATA = 12,
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_LOCALIZATION = 0xA, 
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -292,6 +322,9 @@ private:
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+
+    /** Time in ms between sending the robot health message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
@@ -313,6 +346,24 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    // The last localization data received from the Jetson.
+    LocalizationCartesianData lastLocalizationData;
+
+    // The last localization data for the left minor turret received from the Jetson.
+    LocalizationCartesianData lastLeftMinorLocalizationCartesianData;
+
+    // The last localization data for the right minor turret received from the Jetson.
+    LocalizationCartesianData lastRightMinorLocalizationCartesianData;
+
+    /**
+     * Helper function to convert a quaternion localization message 
+     * to a cartesian message
+    */
+    VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData);
+
+    VisionCoprocessor::LocalizationCartesianData getLastLeftMinorLocalizationData();
+
+    VisionCoprocessor::LocalizationCartesianData getLastRightMinorLocalizationData();
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -323,6 +374,8 @@ private:
         turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
+
+    tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
@@ -343,6 +396,17 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    /**
+     * Interprets a raw `SerialMessage`'s `data` field to extract position and orientation (in Euler angles)
+     * from a Jetson localization message, and updates the `lastLocalizationData`.
+     *
+     * @param[in] message the message to be decoded.
+     * @param[out] localizationData a return parameter through which the decoded message is returned. TODO: Check this, I copied it over
+     * @return `false` if the message length doesn't match `sizeof(*localizationData)`, `true`
+     *      otherwise.
+     */
+    bool decodeToLocalizationData(const ReceivedSerialMessage& message);
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
@@ -352,6 +416,7 @@ public:
     void sendRefereeCompetitionResult();
     void sendRefereeWarning();
     void sendRobotTypeData();
+    void sendHealthMessage();
     void sendTimeSyncMessage();
 };
 }  // namespace serial

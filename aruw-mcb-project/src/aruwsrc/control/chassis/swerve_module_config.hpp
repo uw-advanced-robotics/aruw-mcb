@@ -52,7 +52,7 @@ struct SwerveModuleConfig
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
-    const float drivePidKp = 10.0f;//10.0f
+    const float drivePidKp = 10.0f;
     const float drivePidKi = 0.0f;
     const float drivePidKd = 0.0f;
     const float drivePidMaxIntegralErrorSum = 0.0f;
@@ -60,9 +60,9 @@ struct SwerveModuleConfig
     const float drivePidFeedForwardConstant = 0.0f;
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 10000.0f,//10000.0f
+        .kp = 8000.0f,
         .ki = 0.0f,
-        .kd = 0.0f,//12.0f
+        .kd = 1.0f,
         .maxICumulative = 0.0f,
         .maxOutput = 16'000.0f,
         .errDeadzone = 0.0f,

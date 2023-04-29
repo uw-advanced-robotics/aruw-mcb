@@ -31,7 +31,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
@@ -113,6 +113,7 @@ public:
         tap::algorithms::SmoothPidConfig yawPosPidConfig;
         tap::algorithms::SmoothPidConfig yawVelPidConfig;
         aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+        aruwsrc::algorithms::odometry::SentryOttoKFOdometry2DSubsystem& odometrySubsystem;
     };
 
     SentryMinorTurretGovernor(Drivers &drivers, const Config &config)
@@ -138,7 +139,7 @@ public:
               config.turretID),
           ballisticsSolver(
               drivers.visionCoprocessor,
-              odometrySubsystem,
+              config.odometrySubsystem,
               turretSubsystem,
               frictionWheels,
               29.5f,  // defaultLaunchSpeed
@@ -231,7 +232,7 @@ public:
     OttoBallisticsSolver ballisticsSolver;
     // AutoAimLaunchTimer autoAimLaunchTimer;
 
-    SentryOttoKFOdometry2DSubsystem odometrySubsystem;
+    // SentryOttoKFOdometry2DSubsystem odometrySubsystem;
 
     // friction wheel commands
     // FrictionWheelSpinRefLimitedCommand spinFrictionWheels;

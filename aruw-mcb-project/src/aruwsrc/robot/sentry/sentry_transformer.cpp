@@ -16,26 +16,3 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VIRTUAL_CURRENT_SENSOR_HPP_
-#define VIRTUAL_CURRENT_SENSOR_HPP_
-
-#include "tap/communication/sensors/current/current_sensor_interface.hpp"
-
-namespace aruwsrc::virtualMCB
-{
-class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
-{
-    friend class SerialMCBLite;
-
-public:
-    VirtualCurrentSensor() {}
-    void update() override {}
-    float getCurrentMa() const override { return current; }
-
-private:
-    float current;
-};
-
-}  // namespace aruwsrc::virtualMCB
-
-#endif
