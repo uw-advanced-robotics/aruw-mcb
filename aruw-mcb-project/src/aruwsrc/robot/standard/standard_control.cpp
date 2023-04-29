@@ -77,8 +77,8 @@
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #ifdef TARGET_STANDARD_SPIDER
-#include "aruwsrc/control/motor_homing_command.hpp"
 #include "aruwsrc/control/barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/motor_homing_command.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
@@ -175,9 +175,7 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitcherSubsystem barrelSwitcher(drivers(),  
-    HOMING_CONFIG,
-    tap::motor::MotorId::MOTOR8);
+BarrelSwitcherSubsystem barrelSwitcher(drivers(), HOMING_CONFIG, tap::motor::MotorId::MOTOR8);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -412,10 +410,10 @@ HoldCommandMapping leftSwitchUp(
 
 // For motor homing
 #ifdef TARGET_STANDARD_SPIDER
-PressCommandMapping hPressed(
+PressCommandMapping rCtrlPressed(
     drivers(),
-    {&motorHomingCommand},
-    RemoteMapState({Remote::Key::CTRL}, {Remote::Key::R}));
+    {&turretCVCommand},
+    RemoteMapState({Remote::Key::R, Remote::Key::CTRL}));
 #endif
 
 PressCommandMapping cPressed(
@@ -452,9 +450,9 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     false);
-HoldCommandMapping rightMousePressed(
+PressCommandMapping rightMousePressed(
     drivers(),
-    {&turretCVCommand},
+    {&motorHomingCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
@@ -515,9 +513,9 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
-    #ifdef TARGET_STANDARD_SPIDER
+#ifdef TARGET_STANDARD_SPIDER
     drivers->commandScheduler.registerSubsystem(&barrelSwitcher);
-    #endif
+#endif
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -532,9 +530,9 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
-    #ifdef TARGET_STANDARD_SPIDER
+#ifdef TARGET_STANDARD_SPIDER
     barrelSwitcher.initialize();
-    #endif
+#endif
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -580,6 +578,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&cPressed);
+    drivers->commandMapper.addMap(&rCtrlPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);

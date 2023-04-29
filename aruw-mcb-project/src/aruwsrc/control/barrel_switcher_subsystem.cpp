@@ -24,27 +24,35 @@
 
 namespace aruwsrc::control
 {
-BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(tap::Drivers* drivers, 
-            aruwsrc::control::HomingConfig config,
-            tap::motor::MotorId motorid) : 
-    HomeableSubsystemInterface(drivers), 
-    config(config), 
-    motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor"),
-    encoderPid(
-        POSITION_PID_KP,
-        POSITION_PID_KI,
-        POSITION_PID_KD,
-        POSITION_PID_MAX_ERROR_SUM,
-        POSITION_PID_MAX_OUTPUT
-    )
-    {}
-    
-void BarrelSwitcherSubsystem::initialize() {
+BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
+    tap::Drivers* drivers,
+    aruwsrc::control::HomingConfig config,
+    tap::motor::MotorId motorid)
+    : HomeableSubsystemInterface(drivers),
+      config(config),
+      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor"),
+      encoderPid(
+          POSITION_PID_KP,
+          POSITION_PID_KI,
+          POSITION_PID_KD,
+          POSITION_PID_MAX_ERROR_SUM,
+          POSITION_PID_MAX_OUTPUT)
+{
+}
+
+void BarrelSwitcherSubsystem::initialize()
+{
+    barrelState = BarrelState::SWITCHING_BETWEEN_BARRELS;
     motor.initialize();
 }
 
-void BarrelSwitcherSubsystem::refresh() {
-    switch (barrelState) {
+void BarrelSwitcherSubsystem::refresh()
+{
+    outputDesiredDebug = motor.getOutputDesired();
+    torqueDebug = motor.getTorque();
+    shaftRPMDebug = motor.getShaftRPM();
+    switch (barrelState)
+    {
         case BarrelState::HOMING_TOWARD_LOWER_BOUND:
             setMotorOutput(-HOMING_MOTOR_OUTPUT);
             break;
@@ -62,52 +70,59 @@ void BarrelSwitcherSubsystem::refresh() {
     }
 }
 
-BarrelState BarrelSwitcherSubsystem::getBarrelState() {
-    return barrelState;
-}
+BarrelState BarrelSwitcherSubsystem::getBarrelState() { return barrelState; }
 
-void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput) {
-    if(lowerBoundSet && upperBoundSet && 
+void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
+{
+    if (lowerBoundSet && upperBoundSet &&
         ((motor.getEncoderUnwrapped() <= 0 && desiredOutput < 0) ||
-        (motor.getEncoderUnwrapped() >= motorUpperBound && desiredOutput > 0)))
+         (motor.getEncoderUnwrapped() >= motorUpperBound && desiredOutput > 0)))
     {
         desiredOutput = 0;
     }
     motor.setDesiredOutput(desiredOutput);
 }
 
-bool BarrelSwitcherSubsystem::isStalled() const {
+bool BarrelSwitcherSubsystem::isStalled() const
+{
     return (motor.getShaftRPM() < config.minRPM && motor.getTorque() > config.maxTorque);
 }
 
-void BarrelSwitcherSubsystem::setLowerBound() {
+void BarrelSwitcherSubsystem::setLowerBound()
+{
     motor.resetEncoderValue();
     lowerBoundSet = true;
 }
 
-void BarrelSwitcherSubsystem::setUpperBound() {
+void BarrelSwitcherSubsystem::setUpperBound()
+{
     motorUpperBound = motor.getEncoderUnwrapped();
     upperBoundSet = true;
 }
 
-void BarrelSwitcherSubsystem::moveTowardUpperBound() {
+void BarrelSwitcherSubsystem::moveTowardUpperBound()
+{
     barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
 }
 
-void BarrelSwitcherSubsystem::moveTowardLowerBound() {
+void BarrelSwitcherSubsystem::moveTowardLowerBound()
+{
     barrelState = BarrelState::HOMING_TOWARD_LOWER_BOUND;
 }
 
-void BarrelSwitcherSubsystem::stop() {
+void BarrelSwitcherSubsystem::stop()
+{
     this->setMotorOutput(0);
     barrelState = BarrelState::SWITCHING_BETWEEN_BARRELS;
 }
 
-void BarrelSwitcherSubsystem::updateMotorEncoderPid(modm::Pid<int32_t>* pid, tap::motor::DjiMotor* const motor, int32_t desiredEncoderPosition) {
+void BarrelSwitcherSubsystem::updateMotorEncoderPid(
+    modm::Pid<int32_t>* pid,
+    tap::motor::DjiMotor* const motor,
+    int32_t desiredEncoderPosition)
+{
     pid->update(desiredEncoderPosition - motor->getEncoderUnwrapped());
     setMotorOutput(pid->getValue());
 }
 
-
-
-};
+};  // namespace aruwsrc::control
