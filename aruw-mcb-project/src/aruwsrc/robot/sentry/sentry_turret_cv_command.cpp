@@ -98,8 +98,8 @@ void SentryTurretCVCommand::execute()
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> girlbossBallisticsSolution =
         girlbossBallisticsSolver.computeTurretAimAngles();
-    std::optional<OttoBallisticsSolver::BallisticsSolution> malewifeBallisticsSolution =
-        malewifeBallisticsSolver.computeTurretAimAngles();
+    // std::optional<OttoBallisticsSolver::BallisticsSolution> malewifeBallisticsSolution =
+    //     malewifeBallisticsSolver.computeTurretAimAngles();
 
     // If target spotted
     // TODO: PAIIINNNN
@@ -109,14 +109,14 @@ void SentryTurretCVCommand::execute()
 
         // Target available
         girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
-        malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
-        girlbossYawSetpoint = girlbossBallisticsSolution->pitchAngle;
-        malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
+        // malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
+        girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
+        // malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
 
         girlbossYawSetpoint = yawControllerGirlboss.convertChassisAngleToControllerFrame(girlbossYawSetpoint);
-        malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
+        // malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
         girlbossPitchSetpoint = pitchControllerGirlboss.convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
-        malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
+        // malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -124,9 +124,9 @@ void SentryTurretCVCommand::execute()
          * that is closest to the unwrapped measured angle.
          */
         girlbossYawSetpoint = turretMinorGirlbossSubsystem.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
-        malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
+        // malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
         girlbossPitchSetpoint = turretMinorGirlbossSubsystem.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
-        malewifePitchSetpoint = turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
+        // malewifePitchSetpoint = turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
 
         auto differenceWrapped = [](float measurement, float setpoint) {
             return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
@@ -136,10 +136,10 @@ void SentryTurretCVCommand::execute()
             differenceWrapped(yawControllerGirlboss.getMeasurement(), girlbossYawSetpoint),
             differenceWrapped(pitchControllerGirlboss.getMeasurement(), girlbossPitchSetpoint),
             girlbossBallisticsSolution->distance);
-        withinAimingTolerance = withinAimingTolerance && OttoBallisticsSolver::withinAimingTolerance(
-            differenceWrapped(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
-            differenceWrapped(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
-            malewifeBallisticsSolution->distance);
+        // withinAimingTolerance = withinAimingTolerance && OttoBallisticsSolver::withinAimingTolerance(
+        //     differenceWrapped(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
+        //     differenceWrapped(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
+        //     malewifeBallisticsSolution->distance);
     }
     else
     {

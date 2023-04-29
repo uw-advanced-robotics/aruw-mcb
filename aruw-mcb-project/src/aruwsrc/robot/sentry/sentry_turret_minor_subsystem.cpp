@@ -61,11 +61,12 @@ modm::Vector3f SentryTurretMinorSubsystem::getTurretOffset() const
 {
     if (turretID == 1)
     {
-        return modm::Vector3f(0, 0, 0);
+        // control::turret::OFFSET_TURRET_0_TO_TURRET_1;
+        return  modm::Vector3f(0, 0, 0) - (control::turret::OFFSET_TURRET_0_TO_TURRET_1) / 2;
     }
     else
     {
-        return control::turret::OFFSET_TURRET_0_TO_TURRET_1;
+        return control::turret::OFFSET_TURRET_0_TO_TURRET_1 / 2;
     }
 }
 
