@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -25,8 +25,8 @@
 
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/mock/chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/mecanum_chassis_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -70,7 +70,7 @@ protected:
     }
 
     tap::Drivers drivers;
-    NiceMock<aruwsrc::mock::ChassisSubsystemMock> chassis;
+    NiceMock<aruwsrc::mock::MecanumChassisSubsystemMock> chassis;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     Mpu6500::ImuState imuState = Mpu6500::ImuState::IMU_CALIBRATED;
