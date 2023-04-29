@@ -46,7 +46,7 @@ SentryKFOdometry::SentryKFOdometry(
     kf.init({0, 0, 0, 0, 0, 0});
 }
 
-float SentryKFOdometry::getChassisYaw() { return chassisIMU.getYaw(); }
+// float SentryKFOdometry::getChassisYaw() { return chassisIMU.getYaw(); }
 
 float SentryKFOdometry::getMajorYaw() { 
     return turretMajor.getWorldYaw() + this->turretMajorYawError; 
@@ -63,6 +63,35 @@ float SentryKFOdometry::getRightMinorYaw() {
 }
 
 float SentryKFOdometry::getRightMinorPitch() { return turretMinorRight.getWorldPitch(); }
+
+modm::Location2D<float> SentryKFOdometry::getCurrentLocation2D() {
+    auto state = kf.getStateVectorAsMatrix();
+    modm::Location2D<float> loc;
+    loc.setPosition(state[int(OdomState::POS_X)], state[int(OdomState::POS_Y)]);
+    return loc;
+}
+
+/**
+ * @return The current x and y velocity (in m/s).
+ */
+modm::Vector2f SentryKFOdometry::getCurrentVelocity2D() {
+    auto state = kf.getStateVectorAsMatrix();
+    modm::Vector2f vel(state[int(OdomState::VEL_X)], state[int(OdomState::VEL_Y)]);
+    return vel;
+}
+
+/**
+ * @return The current yaw orientation of the chassis in the world frame in radians.
+ */
+float SentryKFOdometry::getYaw() const {
+    return modm::toRadian(chassisIMU.getYaw());
+}
+
+/**
+ * @return The last time that odometry was computed (in microseconds).
+ */
+uint32_t SentryKFOdometry::getLastComputedOdometryTime() { return lastComputedOdometryTime; }
+
 
 void SentryKFOdometry::update()
 {
@@ -90,6 +119,8 @@ void SentryKFOdometry::update()
     };
 
     kf.performUpdate(newOdomInput);
+
+    lastComputedOdometryTime = tap::arch::clock::getTimeMicroseconds();
 }
 
 // void SentryKFOdometry::resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData) {

@@ -45,7 +45,7 @@ namespace aruwsrc::algorithms::odometry
  *
  * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
-class SentryKFOdometry /**: public tap::algorithms::odometry::Odometry2DInterface */
+class SentryKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /** TODO: update parameter documentation
@@ -80,7 +80,7 @@ public:
     /**
      * @return chassis yaw in world frame.
      */
-    float getChassisYaw();
+    // float getChassisYaw();
 
     /**
      * @return major yaw in world frame.
@@ -107,6 +107,27 @@ public:
      */
     float getRightMinorPitch();
 
+    /** inherited methods from Odometry2DInterface*/
+    /**
+     * @return The current location (x and y coordinate) and orientation (in radians).
+     */
+    virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
+
+    /**
+     * @return The current x and y velocity (in m/s).
+     */
+    virtual modm::Vector2f getCurrentVelocity2D() const = 0;
+
+    /**
+     * @return The current yaw orientation of the chassis in the world frame in radians.
+     */
+    virtual float getYaw() const = 0;
+
+    /**
+     * @return The last time that odometry was computed (in microseconds).
+     */
+    virtual uint32_t getLastComputedOdometryTime() const = 0;
+
 private:
     
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
@@ -115,6 +136,8 @@ private:
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft;
     const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight;
+
+    uint32_t lastComputedOdometryTime = 0;
 
     /**
     * Resets the odometry using visioncoprocessor's localization method
