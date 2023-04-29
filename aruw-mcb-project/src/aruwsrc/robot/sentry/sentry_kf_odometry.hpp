@@ -137,7 +137,7 @@ private:
     /**
     * Resets the odometry using visioncoprocessor's localization method
     */
-    void resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData);
+    // void resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData);
 
     static constexpr uint32_t UNINITIALIZED_TIMESTAMP = -1;
 

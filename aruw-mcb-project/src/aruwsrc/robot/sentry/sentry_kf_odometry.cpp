@@ -94,12 +94,12 @@ uint32_t SentryKFOdometry::getLastComputedOdometryTime() const { return lastComp
 void SentryKFOdometry::update()
 {
     // check if there is new odometry data to reset ours with
-    aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData lastLocData = visionCoprocessor.getLastLocalizationData();
-    // uint32_t currentMessageTimestamp =  visionCoprocessor.getLastLocalizationData().timestamp;
-    if (lastResetTimestamp != UNINITIALIZED_TIMESTAMP 
-            && lastResetTimestamp < lastLocData.timestamp) {
-                resetOdometry(lastLocData);
-    }
+    // aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData lastLocData = visionCoprocessor.getLastLocalizationData();
+    // // uint32_t currentMessageTimestamp =  visionCoprocessor.getLastLocalizationData().timestamp;
+    // if (lastResetTimestamp != UNINITIALIZED_TIMESTAMP 
+    //         && lastResetTimestamp < lastLocData.timestamp) {
+    //             resetOdometry(lastLocData);
+    // }
 
     // Get chassis positional values
     modm::Matrix<float, 3, 1> chassisPos = chassis.getActualVelocityChassisRelative();
@@ -121,21 +121,21 @@ void SentryKFOdometry::update()
     lastComputedOdometryTime = tap::arch::clock::getTimeMicroseconds();
 }
 
-void SentryKFOdometry::resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData) {
-    // naively reset kalman filter
-    // (need transformer in order to transform minors to chassis position - some constant offset) 
-    // TODO: rotate velocity and acceleration to new frame
-    kf.init({newData.x, 0.0f, 0.0f, newData.y, 0.0f, 0.0f});
+// void SentryKFOdometry::resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData) {
+//     // naively reset kalman filter
+//     // (need transformer in order to transform minors to chassis position - some constant offset) 
+//     // TODO: rotate velocity and acceleration to new frame
+//     kf.init({newData.x, 0.0f, 0.0f, newData.y, 0.0f, 0.0f});
 
-    if (newData.turretID == 0) {
-        // left turret minor
-        float currentLeftMinorYaw = this->getLeftMinorYaw();
-        this->leftMinorYawError = currentLeftMinorYaw - newData.yaw;
-    } else {
-        // right turret minor
-        float currentRightMinorYaw = this->getRightMinorYaw();
-        this->rightMinorYawError =  currentRightMinorYaw - newData.yaw;
-    }
-}
+//     if (newData.turretID == 0) {
+//         // left turret minor
+//         float currentLeftMinorYaw = this->getLeftMinorYaw();
+//         this->leftMinorYawError = currentLeftMinorYaw - newData.yaw;
+//     } else {
+//         // right turret minor
+//         float currentRightMinorYaw = this->getRightMinorYaw();
+//         this->rightMinorYawError =  currentRightMinorYaw - newData.yaw;
+//     }
+// }
 
 }  // namespace aruwsrc::algorithms::odometry
