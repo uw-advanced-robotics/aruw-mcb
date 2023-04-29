@@ -153,6 +153,13 @@ private:
      */
     void computeState(uint32_t dt);
 
+    /**
+     * @brief Heuristic to determing if the robot is in a fallen state, with hysteresis to avoid
+     * oscillation. Sets the `isFallen` flag accordingly.
+     *
+     */
+    void iveFallenAndICantGetUp();
+
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController(uint32_t dt);
 
@@ -265,6 +272,7 @@ private:
     bool isFallen = true;
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = .1;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

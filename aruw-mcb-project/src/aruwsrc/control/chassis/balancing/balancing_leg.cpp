@@ -19,9 +19,9 @@
 
 #include "balancing_leg.hpp"
 
-#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include <assert.h>
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 using namespace tap::algorithms;
 
@@ -94,14 +94,18 @@ void BalancingLeg::update()
     // dt); u += thetaLdotPid.runControllerDerivateError(0 - (chassisMCB.getPitchVelocity()), dt);
 
     // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
-    float lqrPos = -3.0 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
-    float lqrVel = -3.0393 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = deadZone(-46 * (chassisAngle - tl_desired), .0f);
-    float lqrPitchRate = deadZone(-2.0 * chassisAngledot, .0);
+    float LQR_K2 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
+    float LQR_K3 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
+    float LQR_K4 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
+
+    float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
+    float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
+    float lqrPitch = deadZone(LQR_K3 * (chassisAngle - tl_desired), .0f);
+    float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, .0f);
     // float lqrPitch = -38 * deadZone(tl - tl_desired, modm::toRadian(.05));
     // float lqrPitchRate = -6.3527 * deadZone(tl_dot, .2f);
-    float lqrYaw = 0.7071 * chassisYaw;
-    float lqrYawRate = 0.7646 * chassisYawRate;
+    float lqrYaw = LQR_K5 * chassisYaw;
+    float lqrYawRate = LQR_K6 * chassisYawRate;
     float wheelTorque = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
 
     wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
@@ -209,15 +213,21 @@ void BalancingLeg::computeState(uint32_t dt)
 
     aCurrentPrev = lowPassFilter(aCurrentPrev, aCurrentTemp, .02);
     aCurrent = lowPassFilter(aCurrent, aCurrentPrev, .02);
+}
 
+void BalancingLeg::iveFallenAndICantGetUp()
+{
     if (abs(chassisAngle) > abs(FALLEN_ANGLE_THRESHOLD))
     {
         isFallen = true;
     }
-    else if (abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN))
+    else if (
+        abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
+        abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
     {
         isFallen = false;
     }
 }
+
 }  // namespace chassis
 }  // namespace aruwsrc

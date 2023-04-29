@@ -51,7 +51,9 @@ BalancingChassisSubsystem::BalancingChassisSubsystem(
 
 void BalancingChassisSubsystem::initialize()
 {
-    desiredX = leftLeg.getDefaultPosition().getX();
+    velocityRamper = tap::algorithms::Ramp();
+    desiredX = currentX = 0;
+    desiredV = velocityRamper.getValue();
     desiredR = 0;
     desiredZ = leftLeg.getDefaultPosition().getY();
     leftLeg.initialize();
@@ -61,9 +63,6 @@ void BalancingChassisSubsystem::initialize()
 void BalancingChassisSubsystem::refresh()
 {
     // 1. Update yaw and roll values
-    pitch = turretMCB.getPitch();
-    roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
-    yaw = turretMCB.getYaw();
     computeState();
 
     // 2. Apply scaling and/or control laws to yaw and roll values
@@ -81,9 +80,9 @@ void BalancingChassisSubsystem::refresh()
     rightLeg.setChassisPos(currentX, desiredX);
     leftLeg.setChassisSpeed(currentV);
     rightLeg.setChassisSpeed(currentV);
-    leftLeg.setChassisYaw(-desiredR, -yawRate);
+    leftLeg.setChassisYaw(desiredR, yawRate);
     // Right leg values are negated due to fun LQR logic
-    rightLeg.setChassisYaw(desiredR, yawRate);
+    rightLeg.setChassisYaw(-desiredR, -yawRate);
 
     // 4. run outputs
     leftLeg.setDesiredTranslationSpeed(desiredV);  // m/s
@@ -111,6 +110,13 @@ void BalancingChassisSubsystem::computeState()
     uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = curTime - prevTime;
     prevTime = curTime;
+
+    pitch = turretMCB.getPitch();
+    roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
+    yaw = turretMCB.getYaw();
+
+    velocityRamper.update(dt / 1000 * MAX_ACCELERATION);
+    desiredV = velocityRamper.getTarget();
 
     float newCurrentV =
         (rightLeg.getCurrentTranslationSpeed() + leftLeg.getCurrentTranslationSpeed()) / 2;

@@ -23,6 +23,33 @@
 
 namespace aruwsrc::chassis
 {
+
+static constexpr float LQR_K1 = -0.2236;
+static constexpr float LQR_K5 = -0.7071;
+static constexpr float LQR_K6 = -4.5924;
+
+static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K2[] = {
+    {0.35, -0.8086},
+    {0.15, -0.7913},
+};
+static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K3[] = {
+    {0.35, -22.5617},
+    {0.15, -18.5857},
+};
+static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K4[] = {
+    {0.35, -5.0050},
+    {0.15, -3.4027},
+};
+static modm::interpolation::Linear<modm::Pair<float, float>> HEIGHT_TO_LQR_K2_INTERPOLATOR(
+    HEIGHT_TO_LQR_LOOKUP_K2,
+    MODM_ARRAY_SIZE(HEIGHT_TO_LQR_LOOKUP_K2));
+static modm::interpolation::Linear<modm::Pair<float, float>> HEIGHT_TO_LQR_K3_INTERPOLATOR(
+    HEIGHT_TO_LQR_LOOKUP_K3,
+    MODM_ARRAY_SIZE(HEIGHT_TO_LQR_LOOKUP_K3));
+static modm::interpolation::Linear<modm::Pair<float, float>> HEIGHT_TO_LQR_K4_INTERPOLATOR(
+    HEIGHT_TO_LQR_LOOKUP_K4,
+    MODM_ARRAY_SIZE(HEIGHT_TO_LQR_LOOKUP_K4));
+
 // angle is in degrees
 // distances are in mm (to store as ints)
 static const float FIVE_BAR_T1_MIN = 385.0;

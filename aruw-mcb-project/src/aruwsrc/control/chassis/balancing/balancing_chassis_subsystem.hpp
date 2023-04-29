@@ -20,6 +20,7 @@
 #ifndef BALANCING_CHASSIS_SUBSYSTEM_HPP_
 #define BALANCING_CHASSIS_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/control/subsystem.hpp"
@@ -62,7 +63,7 @@ public:
      */
     void setDesiredOutput(float v, float r)
     {
-        desiredV = v;
+        velocityRamper.setTarget(v);
         desiredR = r;
     };
 
@@ -90,6 +91,9 @@ public:
     tap::algorithms::SmoothPid rotationPid;
 
 private:
+    tap::algorithms::Ramp velocityRamper;
+    static constexpr float MAX_ACCELERATION = 4;  // m/s/s
+
     void computeState();
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
@@ -97,7 +101,7 @@ private:
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
-    BalancingLeg& leftLeg, rightLeg;
+    BalancingLeg &leftLeg, rightLeg;
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
@@ -115,7 +119,7 @@ private:
 
     float desiredX, desiredV, desiredR, desiredZ;
     float currentX, currentV, currentR, currentZ;
-    float prevX,    prevV,    prevR,    prevZ;
+    float prevX, prevV, prevR, prevZ;
     float prevXdesired, prevVdesired;
     uint32_t prevTime;
 };
