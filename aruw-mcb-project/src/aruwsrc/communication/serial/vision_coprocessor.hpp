@@ -347,7 +347,7 @@ private:
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
     // The last localization data received from the Jetson.
-    LocalizationData lastLocalizationData;
+    LocalizationCartesianData lastLocalizationData;
 
     // The last localization data for the left minor turret received from the Jetson.
     LocalizationCartesianData lastLeftMinorLocalizationCartesianData;

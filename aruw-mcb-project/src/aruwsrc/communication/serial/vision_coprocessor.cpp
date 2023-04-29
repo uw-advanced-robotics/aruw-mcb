@@ -148,15 +148,18 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 bool VisionCoprocessor::decodeToLocalizationData(const ReceivedSerialMessage& message)
 {
-    memcpy(&lastLocalizationData, &message.data[0], sizeof(LocalizationData));
+    LocalizationData quaterionData;
+    memcpy(&quaterionData, &message.data[0], sizeof(LocalizationData));
 
-    LocalizationCartesianData cartesian = toCartesianValues(lastLocalizationData);
+    lastLocalizationData = toCartesianValues(quaterionData);
+
 
     if (lastLocalizationData.turretID == 0) {
-        lastLeftMinorLocalizationCartesianData = cartesian;
+        lastLeftMinorLocalizationCartesianData = lastLocalizationData;
     } else {
-        lastRightMinorLocalizationCartesianData = cartesian;
+        lastRightMinorLocalizationCartesianData = lastLocalizationData;
     }
+
     return true;
 }
 
@@ -192,6 +195,11 @@ VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLeftMinor
 VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastRightMinorLocalizationData() {
     return lastLeftMinorLocalizationCartesianData;
 }
+
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLocalizationData() {
+    return lastLocalizationData;
+}
+
 void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
@@ -532,7 +540,7 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
 //     {
 //         case CV_MESSAGE_TYPE_TURRET_AIM:
 //         {
-//             decodeToTurretAimData(completeMessage);
+            // decodeToTurretAimData(completeMessage);
 //             return;
 //         }
 //         default:

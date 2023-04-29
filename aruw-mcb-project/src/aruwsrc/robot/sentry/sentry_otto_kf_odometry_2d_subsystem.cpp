@@ -25,10 +25,20 @@ namespace aruwsrc::algorithms::odometry
 {
 SentryOttoKFOdometry2DSubsystem::SentryOttoKFOdometry2DSubsystem(
     tap::Drivers& drivers,
-    const aruwsrc::control::sentry::drive::SentryDriveSubsystem& chassis,
-    const aruwsrc::control::turret::TurretSubsystem& turret)
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+    tap::communication::sensors::imu::ImuInterface& chassisIMU,
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorLeft,
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorRight)
     : Subsystem(&drivers),
-      SentryChassisKFOdometry(drivers, chassis, turret)
+      SentryKFOdometry(
+        visionCoprocessor,
+        chassisIMU,
+        chassis,
+        turretMajor,
+        turretMinorLeft,
+        turretMinorRight)
 {
 }
 

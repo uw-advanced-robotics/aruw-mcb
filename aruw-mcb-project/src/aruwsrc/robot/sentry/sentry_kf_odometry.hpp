@@ -106,22 +106,22 @@ public:
     /**
      * @return The current location (x and y coordinate) and orientation (in radians).
      */
-    virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
+    modm::Location2D<float> getCurrentLocation2D() const override;
 
     /**
      * @return The current x and y velocity (in m/s).
      */
-    virtual modm::Vector2f getCurrentVelocity2D() const = 0;
+    modm::Vector2f getCurrentVelocity2D() const override;
 
     /**
      * @return The current yaw orientation of the chassis in the world frame in radians.
      */
-    virtual float getYaw() const = 0;
+    float getYaw() const override;
 
     /**
      * @return The last time that odometry was computed (in microseconds).
      */
-    virtual uint32_t getLastComputedOdometryTime() const = 0;
+    uint32_t getLastComputedOdometryTime() const override;
 
 private:
     

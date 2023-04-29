@@ -70,7 +70,7 @@
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-// #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
@@ -81,6 +81,8 @@
 #include "aruwsrc/control/turret/sentry/turret_major_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
+
+#include "aruwsrc/robot/sentry/sentry_kf_odometry.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -355,6 +357,18 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinor1Co
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR,
     1);
+
+aruwsrc::algorithms::odometry::SentryOttoKFOdometry2DSubsystem odometrySubsystem(
+    *(drivers()),
+    drivers()->visionCoprocessor,
+    drivers()->mcbLite.imu,
+    sentryDrive,
+    turretMajor,
+    turretZero.turretSubsystem,
+    turretOne.turretSubsystem
+);
+
+    
 
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
 //     drivers(),

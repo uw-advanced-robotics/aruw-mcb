@@ -93,7 +93,7 @@ using namespace aruwsrc::sentry;
 namespace sentry_control
 {
 	
-extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
+// extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
 // TODO: rename this 
 class SentryMinorTurretGovernor
 {

@@ -62,7 +62,7 @@ float SentryKFOdometry::getRightMinorYaw() {
 
 float SentryKFOdometry::getRightMinorPitch() { return turretMinorRight.getWorldPitch(); }
 
-modm::Location2D<float> SentryKFOdometry::getCurrentLocation2D() {
+modm::Location2D<float> SentryKFOdometry::getCurrentLocation2D() const {
     auto state = kf.getStateVectorAsMatrix();
     modm::Location2D<float> loc;
     loc.setPosition(state[int(OdomState::POS_X)], state[int(OdomState::POS_Y)]);
@@ -72,7 +72,7 @@ modm::Location2D<float> SentryKFOdometry::getCurrentLocation2D() {
 /**
  * @return The current x and y velocity (in m/s).
  */
-modm::Vector2f SentryKFOdometry::getCurrentVelocity2D() {
+modm::Vector2f SentryKFOdometry::getCurrentVelocity2D() const {
     auto state = kf.getStateVectorAsMatrix();
     modm::Vector2f vel(state[int(OdomState::VEL_X)], state[int(OdomState::VEL_Y)]);
     return vel;
@@ -88,7 +88,7 @@ float SentryKFOdometry::getYaw() const {
 /**
  * @return The last time that odometry was computed (in microseconds).
  */
-uint32_t SentryKFOdometry::getLastComputedOdometryTime() { return lastComputedOdometryTime; }
+uint32_t SentryKFOdometry::getLastComputedOdometryTime() const { return lastComputedOdometryTime; }
 
 
 void SentryKFOdometry::update()
