@@ -117,8 +117,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     if (prevUpdateCounterChassisYInput != updateCounter)
     {
-        // coord system shift (-)
-        chassisYInput.update(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
+        chassisYInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
         prevUpdateCounterChassisYInput = updateCounter;
     }
 

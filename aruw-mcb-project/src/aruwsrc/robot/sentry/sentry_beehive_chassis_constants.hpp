@@ -22,7 +22,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
  * 0, 1,  RB_X
  * 
 */
-constexpr float SWERVE_FORWARD_MATRIX[24] {
+constexpr float SWERVE_FORWARD_MATRIX[24] {//TODO: UPDATE/CONFIRM THIS WITH COORD SYSTEM CHANGE
     0.25, 0.0, 0.25, 0.0, 0.25, 0., 0.25, 0.0, 
     0.0, 0.25, 0.0, 0.25, 0.0, 0.25, 0.0, 0.25, 
     -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325
@@ -31,26 +31,26 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {
 // todo: hopefullly these can live as constants here soon :)
 // also todo: these positions use a +y-forward coord system, should use +x-forward
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .azimuthZeroOffset = 2313,
-    .positionWithinChassisX = -WHEELBASE_COORD,
+    .azimuthZeroOffset = -2313,
+    .positionWithinChassisX = WHEELBASE_COORD,
     .positionWithinChassisY = WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = 7060,
+    .azimuthZeroOffset = -7060,
     .positionWithinChassisX = WHEELBASE_COORD,
-    .positionWithinChassisY = WHEELBASE_COORD,
-};
-
-aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = 7048,
-    .positionWithinChassisX = -WHEELBASE_COORD,
     .positionWithinChassisY = -WHEELBASE_COORD,
 };
 
+aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
+    .azimuthZeroOffset = -7048,
+    .positionWithinChassisX = -WHEELBASE_COORD,
+    .positionWithinChassisY = WHEELBASE_COORD,
+};
+
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .azimuthZeroOffset = 2270,
-    .positionWithinChassisX = WHEELBASE_COORD,
+    .azimuthZeroOffset = -2270,
+    .positionWithinChassisX = -WHEELBASE_COORD,
     .positionWithinChassisY = -WHEELBASE_COORD,
 };
 

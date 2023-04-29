@@ -25,25 +25,12 @@ namespace aruwsrc
 {
 namespace chassis
 {
-SwerveModule::SwerveModule(
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::DjiMotorMock>& driveMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock>& azimuthMotor,
-#else
-    tap::motor::DjiMotor& driveMotor,
-    tap::motor::DjiMotor& azimuthMotor,
-#endif
-    SwerveModuleConfig& config)
+SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),
-      drivePid(
-          config.drivePidKp,
-          config.drivePidKi,
-          config.drivePidKd,
-          config.drivePidMaxIntegralErrorSum,
-          config.drivePidMaxOutput),
+      drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
       rotationVectorY(config.positionWithinChassisX),
@@ -84,7 +71,7 @@ float SwerveModule::calculate(float x, float y, float r)
         newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
-        // normal angle wrapping
+        // normal angle unwrapping
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
             rotationOffset -=
@@ -125,8 +112,8 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpointRPM - getDriveRPM());
-    driveMotor.setDesiredOutput(drivePid.getValue());
+    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+    driveMotor.setDesiredOutput(drivePid.getOutput());
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());

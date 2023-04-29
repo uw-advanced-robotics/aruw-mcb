@@ -167,11 +167,10 @@ private:
 
     const SwerveModuleConfig config;
 
-    modm::Pid<float> drivePid;
-    tap::algorithms::SmoothPid azimuthPid;
+    tap::algorithms::SmoothPid drivePid, azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
+    float rotationSetpoint, speedSetpointRPM;  // pid setpoints, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians, moveVectorX, moveVectorY;
 

@@ -48,19 +48,22 @@ struct SwerveModuleConfig
     float positionWithinChassisY = 0.2f;
 
     // Whether any motor is inverted
-    const bool driveMotorInverted = false, azimuthMotorInverted = false;
+    const bool driveMotorInverted = false, azimuthMotorInverted = true;
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
-    const float drivePidKp = 10.0f;//10.0f
-    const float drivePidKi = 0.0f;
-    const float drivePidKd = 0.0f;
-    const float drivePidMaxIntegralErrorSum = 0.0f;
-    const float drivePidMaxOutput = 16'384.0f;
-    const float drivePidFeedForwardConstant = 0.0f;
+    tap::algorithms::SmoothPidConfig drivePidConfig = {
+        .kp = 8.0f,
+        .ki = 0.0f,
+        .kd = 0.0f,
+        .maxICumulative = 0.0f,
+        .maxOutput = 16'000.0f,
+        .errDeadzone = 50.0f,
+        .errorDerivativeFloor = 0.0f,
+    };
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 10000.0f,//10000.0f
+        .kp = 15000.0f,//10000.0f
         .ki = 0.0f,
         .kd = 0.0f,//12.0f
         .maxICumulative = 0.0f,
