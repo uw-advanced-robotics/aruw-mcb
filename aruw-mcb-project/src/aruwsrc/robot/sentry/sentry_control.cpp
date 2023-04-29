@@ -464,19 +464,9 @@ void initializeSubsystems()
     turretOne.turretSubsystem.initialize();
 
     turretMajor.initialize();
-    // odometrySubsystem.initialize();
+    odometrySubsystem.initialize();
     // turret
  
-    // leftFrontDriveMotor.setDesiredOutput(500);
-    // leftFrontAzimuthMotor.setDesiredOutput(500);
-    // rightFrontDriveMotor.setDesiredOutput(500);
-    // rightFrontAzimuthMotor.setDesiredOutput(500);
-    // leftBackDriveMotor.setDesiredOutput(500);
-    // leftBackAzimuthMotor.setDesiredOutput(500);
-    // rightBackDriveMotor.setDesiredOutput(500);
-    // rightBackAzimuthMotor.setDesiredOutput(500);
-
-    // rightFrontDriveMotor.initialize();
     isInitialized = true;
 }
 
@@ -493,7 +483,7 @@ void registerSentrySubsystems(Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
