@@ -31,7 +31,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
 #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
 #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
