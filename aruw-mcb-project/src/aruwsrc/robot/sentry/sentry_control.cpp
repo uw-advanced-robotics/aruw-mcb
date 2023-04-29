@@ -29,6 +29,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
 // #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 // #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
@@ -59,7 +60,6 @@
 // #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 // #include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 // #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 // #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 // #include "aruwsrc/control/safe_disconnect.hpp"
@@ -69,12 +69,14 @@
 // #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 // #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_turret_minor.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
@@ -96,6 +98,7 @@ using namespace aruwsrc::control::agitator;
 // using namespace aruwsrc::control::launcher;
 // using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::odometry;
 using namespace tap::communication::serial;
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::virtualMCB;
@@ -244,6 +247,14 @@ tap::motor::DjiMotor turretMinor1PitchMotor(
     "Minor 1 Pitch Turret"
 );
 
+/* turret can ---------------------------------------------------------------*/
+
+// @todo errrr
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
 /* define subsystems --------------------------------------------------------*/
 
 // Chassis
@@ -372,14 +383,18 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawControll
 
 // Odometry ----------------------------------------------------------------------------------
 
+SentryChassisWorldYawObserver sentryChassisWorldYawObserver(
+    turretMajor, turretMinorGirlboss, turretMinorMalewife
+);
+
 // On other robots, the turret IMU defines the world frame on initialization, apparently because type C's have better IMUs than type A's
 // We need to decide which IMU to use
 // Also subsystem for odometry is cringe (?) so we're not using it
 ChassisKFOdometry odometry(
     sentryDrive,
-    turretMajor,  // ????
+    sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
-    modm::Location2D<float>(0., 0., 0.));
+    modm::Location2D<float>(0., 0., 0.));  // TODO: this
 
 // Otto ballistics solver --------------------------------------------------------------------
 
@@ -466,6 +481,7 @@ cv::SentryTurretCVCommand sentryTurretCVCommand(
     turretMajor,
     turretMinorGirlboss,
     turretMinorMalewife,
+    turretMajorYawController,  // Create + use CV version??
     girlbossYawControllerCv,
     girlbossPitchControllerCv,
     malewifeYawControllerCv,

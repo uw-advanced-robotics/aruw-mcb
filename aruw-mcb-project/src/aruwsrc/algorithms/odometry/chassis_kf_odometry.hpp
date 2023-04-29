@@ -50,6 +50,7 @@ public:
         tap::communication::sensors::imu::ImuInterface& imu,
         modm::Location2D<float> imuToChassisCenter);
 
+    // TODO: reimplement this with transforms
     inline modm::Location2D<float> getCurrentLocation2D() const final { 
         modm::Vector2f offset = imuToChassisCenter.getPosition();
         tap::algorithms::rotateVector(&offset[0], &offset[1], imuToChassisCenter.getOrientation());
@@ -157,6 +158,8 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+
+    float chassisYaw = 0;
 
     /// Chassis measured change in velocity since the last time `update` was called, in the chassis
     /// frame

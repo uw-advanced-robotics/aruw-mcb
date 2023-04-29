@@ -33,6 +33,7 @@ namespace aruwsrc::control::turret
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from above.
  */
+// Cannot inherit RobotTurretSubsystem because it has no pitch motor
 class SentryTurretMajorSubsystem final : public tap::control::Subsystem
 {
 public:
@@ -50,6 +51,15 @@ public:
      * turret counterclockwise when looking at the turret from above.
      */
     float getWorldYaw() const;
+
+    // // Turret major has no pitch
+    // inline float getWorldPitch() const override final { return 0.; };
+
+    // // Turret major is inline with chassis center
+    // inline modm::Vector3f getTurretOffset() const override final { return modm::Vector3f{0., 0., 0.}; };
+
+    // // Turret major has no pitch lol
+    // inline float getPitchOffset() const override final { return 0.; };
     /**
      * @return Timestamp of when the turret subsystem returns the angle
      * measurements.

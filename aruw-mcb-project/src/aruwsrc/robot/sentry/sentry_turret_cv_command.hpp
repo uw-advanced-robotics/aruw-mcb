@@ -24,13 +24,15 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "../algorithms/turret_controller_interface.hpp"
-#include "../constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-#include "setpoint_scanner.hpp"
-#include "turret_cv_command_interface.hpp"
+#include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
+
+#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 
 namespace tap::control::odometry
 {
@@ -120,9 +122,10 @@ public:
      */
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
-        RobotTurretSubsystem &turretMajorSubsystem,
+        SentryTurretMajorSubsystem &turretMajorSubsystem,
         RobotTurretSubsystem &turretMinorGirlbossSubsystem,
         RobotTurretSubsystem &turretMinorMalewifeSubsystem,
+        algorithms::TurretYawControllerInterface &yawControllerMajor,
         algorithms::TurretYawControllerInterface &yawControllerGirlboss,  // TODO: painnn
         algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
         algorithms::TurretYawControllerInterface &yawControllerMalewife,
@@ -155,10 +158,13 @@ public:
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
-    RobotTurretSubsystem &turretMajorSubsystem;
+    // TODO: control turret major
+    // TODO: uhh i don't think we actually ever use the subsystems themselves lol
+    SentryTurretMajorSubsystem &turretMajorSubsystem;
     RobotTurretSubsystem &turretMinorGirlbossSubsystem;
     RobotTurretSubsystem &turretMinorMalewifeSubsystem;
 
+    algorithms::TurretYawControllerInterface &yawControllerMajor;
     algorithms::TurretYawControllerInterface &yawControllerGirlboss;
     algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
     algorithms::TurretYawControllerInterface &yawControllerMalewife;
@@ -220,7 +226,11 @@ private:
      *
      * @param[out] yawSetpoint The current yaw setpoint, which this function will update
      */
-    void performScanIteration(float &yawSetpoint);
+    void performScanIteration(
+        float &girlbossYawSetpoint, 
+        float &malewifeYawSetpoint, 
+        float &girlbossPitchSetpoint, 
+        float &malewifePitchSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv

@@ -111,6 +111,7 @@ public:
      * @return angular velocity of the turret, in rad/sec, positive rotation is defined by the
      * motor.
      */
+    // Terrible name but ok
     mockable inline float getChassisFrameVelocity() const
     {
         return (M_TWOPI / 60) * motor->getShaftRPM();

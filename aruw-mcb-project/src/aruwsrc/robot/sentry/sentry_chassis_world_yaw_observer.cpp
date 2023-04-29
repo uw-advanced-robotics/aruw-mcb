@@ -17,33 +17,38 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_chassis_world_yaw_observer.hpp"
+#include "sentry_chassis_world_yaw_observer.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::sentry
 {
-OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
-    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
-    : turretSubsystem(turretSubsystem)
+SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajorSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem,
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewifeSubsystem)
+    : turretMajorSubsystem(turretMajorSubsystem),
+      turretMinorGirlbossSubsystem(turretMinorGirlbossSubsystem),
+      turretMinorMalewifeSubsystem(turretMinorMalewifeSubsystem)
 {
 }
 
-bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
+bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // We need both turret IMU data and turret yaw data to generate odometry which is
     // meaningful for the vision system.
     /// @todo in the future we could have the odometry subsystem fall back to using
     /// just chassis IMU and turret when turret IMU is offline.
 
-    // the turret must have a turret IMU for this function to work
-    auto turretMCB = turretSubsystem.getTurretMCB();
+    // the turret minor must have a turret IMU for this function to work
+    // using turret minor because type C's have more accurate IMUs
+    auto turretMCB = turretMinorGirlbossSubsystem.getTurretMCB();
     assert(turretMCB != nullptr);
 
-    if (!turretMCB->isConnected() || !turretSubsystem.yawMotor.isOnline())
+    if (!turretMCB->isConnected() || !turretMinorGirlbossSubsystem.yawMotor.isOnline() || !turretMajorSubsystem.yawMotor.isOnline())
     {
         return false;
     }
@@ -55,11 +60,13 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         // do that here. This doesn't specify which direction positive yaw sweeps.
         float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
         // Normalized angle in range (-pi, pi)
-        float turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
+        // @todo: supplant with transformer
+        float turretMinorMajorYawRadians = turretMinorGirlbossSubsystem.yawMotor.getAngleFromCenter();
+        float turretMajorChassisYawRadians = turretMajorSubsystem.yawMotor.getAngleFromCenter();
 
-        *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
+        *output = modm::Angle::normalize(turretWorldYawRadians - turretMinorMajorYawRadians - turretMajorChassisYawRadians);
         return true;
     }
 }
 
-}  // namespace aruwsrc::algorithms::odometry
+}  // namespace aruwsrc::sentry
