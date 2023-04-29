@@ -431,7 +431,7 @@ OttoBallisticsSolver girlbossBallisticsSolver(
     drivers()->visionCoprocessor,
     odometry,
     turretMinorGirlboss,
-    frictionWheels,
+    frictionWheelsGirlboss,
     14.0f,  // defaultLaunchSpeed
     0);
 
@@ -439,7 +439,7 @@ OttoBallisticsSolver malewifeBallisticsSolver(
     drivers()->visionCoprocessor,
     odometry,
     turretMinorMalewife,
-    frictionWheels,
+    frictionWheelsMalewife,
     14.0f,  // defaultLaunchSpeed
     1);
 
@@ -491,8 +491,7 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorGir
     girlbossYawController,
     girlbossPitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
-    MINOR_USER_PITCH_INPUT_SCALAR,
-    0);
+    MINOR_USER_PITCH_INPUT_SCALAR);
 
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMalewifeControlCommand(
     drivers(),
@@ -501,8 +500,7 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
     malewifeYawController,
     malewifePitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
-    MINOR_USER_PITCH_INPUT_SCALAR,
-    1);
+    MINOR_USER_PITCH_INPUT_SCALAR);
 
 // random command
 cv::SentryTurretCVCommand sentryTurretCVCommand(
