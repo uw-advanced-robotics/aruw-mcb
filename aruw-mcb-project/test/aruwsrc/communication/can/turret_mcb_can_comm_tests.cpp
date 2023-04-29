@@ -141,18 +141,18 @@ TEST(TurretMCBCanComm, receive_turret_data)
 
     tap::arch::convertToLittleEndian<int16_t>(0x1234, xAxisMessage.data);
     tap::arch::convertToLittleEndian<int16_t>(0x4567, xAxisMessage.data + 2);
-    tap::arch::convertToLittleEndian<uint8_t>(0x4321, xAxisMessage.data + 4);
-    tap::arch::convertToLittleEndian<uint16_t>(0x12, xAxisMessage.data + 6);
+    tap::arch::convertToLittleEndian<int16_t>(0x4321, xAxisMessage.data + 4);
+    tap::arch::convertToLittleEndian<uint8_t>(0x12, xAxisMessage.data + 6);
 
     tap::arch::convertToLittleEndian<int16_t>(0x2345, yAxisMessage.data);
     tap::arch::convertToLittleEndian<int16_t>(0x5678, yAxisMessage.data + 2);
-    tap::arch::convertToLittleEndian<uint8_t>(0x5432, yAxisMessage.data + 4);
-    tap::arch::convertToLittleEndian<uint16_t>(0x12, yAxisMessage.data + 6);
+    tap::arch::convertToLittleEndian<int16_t>(0x5432, yAxisMessage.data + 4);
+    tap::arch::convertToLittleEndian<uint8_t>(0x12, yAxisMessage.data + 6);
 
     tap::arch::convertToLittleEndian<int16_t>(0x3456, zAxisMessage.data);
     tap::arch::convertToLittleEndian<int16_t>(0x6789, zAxisMessage.data + 2);
-    tap::arch::convertToLittleEndian<uint8_t>(0x6543, zAxisMessage.data + 4);
-    tap::arch::convertToLittleEndian<uint16_t>(0x12, zAxisMessage.data + 6);
+    tap::arch::convertToLittleEndian<int16_t>(0x6543, zAxisMessage.data + 4);
+    tap::arch::convertToLittleEndian<uint8_t>(0x12, zAxisMessage.data + 6);
 
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
