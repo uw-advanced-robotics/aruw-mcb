@@ -78,11 +78,6 @@ public:
     uint32_t getLastComputedOdometryTime();
 
     /**
-     * @return chassis yaw in world frame.
-     */
-    // float getChassisYaw();
-
-    /**
      * @return major yaw in world frame.
      */
     float getMajorYaw();
@@ -142,7 +137,7 @@ private:
     /**
     * Resets the odometry using visioncoprocessor's localization method
     */
-    // void resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData);
+    void resetOdometry(aruwsrc::serial::VisionCoprocessor::LocalizationCartesianData newData);
 
     static constexpr uint32_t UNINITIALIZED_TIMESTAMP = -1;
 
