@@ -31,4 +31,9 @@ float DroneTurretSubsystem::getWorldYaw() const { return 0.0f; }
  */
 float DroneTurretSubsystem::getWorldPitch() const { return 0.0f; }
 
+/**
+ *  TODO: implement this
+ */
+uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
+
 }  // namespace aruwsrc::control::turret

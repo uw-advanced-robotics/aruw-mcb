@@ -32,6 +32,7 @@ class HeroTurretSubsystem final : public RobotTurretSubsystem
     using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
     float getPitchOffset() const override { return 0; };
 };  // class HeroTurretSubsystem

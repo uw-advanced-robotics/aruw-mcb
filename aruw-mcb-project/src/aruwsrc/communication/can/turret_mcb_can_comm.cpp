@@ -113,17 +113,23 @@ void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
 
     const AxisMessageData* xAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);
 
-    currProcessingImuData.roll = modm::toRadian(static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.roll = modm::toRadian(
+        static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawRollVelocity = xAxisMessage->angleAngularVelocityRaw;
-    currProcessingImuData.xAcceleration = static_cast<float>(xAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+    currProcessingImuData.xAcceleration =
+        static_cast<float>(xAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
     /**
      * Since this is the first axis data received for a full IMU message,
      * set the IMU sequence to the current one to check the other axis
      * data against.
-    */
+     * 
+     * Set the timestamp as well since this is the closest we'll get to
+     * when the data was measured on the turret mcb.
+     */
 
     currProcessingImuData.seq = xAxisMessage->seq;
+    currProcessingImuData.turretDataTimestamp = tap::arch::clock::getTimeMicroseconds();
 }
 
 void TurretMCBCanComm::handleYAxisMessage(const modm::can::Message& message)

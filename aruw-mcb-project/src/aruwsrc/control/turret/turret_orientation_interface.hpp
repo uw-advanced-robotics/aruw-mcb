@@ -53,6 +53,12 @@ public:
     virtual inline float getWorldPitch() const = 0;
 
     /**
+     * @return Timestamp of when the turret subsystem returns the angle
+     * measurements.
+     */
+    virtual inline uint32_t getLastMeasurementTimeMicros() const = 0;
+
+    /**
      *  @return Distance between the turret and the chassis origin in the chassis frame. units of
      * meters
      */
@@ -62,6 +68,7 @@ public:
      * @return Distance between the pitch axis and the yaw axis in the X-Y plane. Units meters
      */
     virtual inline float getPitchOffset() const = 0;
+
 };  // class TurretOrientation
 
 }  // namespace aruwsrc::control::turret

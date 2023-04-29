@@ -162,6 +162,11 @@ public:
         return lastCompleteImuData.zAcceleration;
     }
 
+    mockable inline uint32_t getIMUDataTimestamp() const
+    {
+        return lastCompleteImuData.turretDataTimestamp;
+    }
+
     inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
@@ -240,6 +245,7 @@ private:
         float xAcceleration;           ///< (m/s^2) X-Acceleration
         float yAcceleration;           ///< (m/s^2) Y-Acceleration
         float zAcceleration;           ///< (m/s^2) Z-Acceleration
+        uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was received
         uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };
 
