@@ -49,8 +49,7 @@ public:
     modm::Vector3f getTurretOffset() const override;
     float getPitchOffset() const override;
 
-private:
-    uint8_t turretID;
+    const uint8_t turretID;
 };  // class SentryTurretMinorSubsystem
 
 }  // namespace aruwsrc::control::turret

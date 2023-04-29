@@ -54,6 +54,7 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     }
     else
     {
+        // @todo average
         // turret IMU and turret subsystem are in business
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we

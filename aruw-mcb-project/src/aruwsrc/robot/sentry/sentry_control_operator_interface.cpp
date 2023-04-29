@@ -185,7 +185,7 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
     return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
-float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
+float SentryControlOperatorInterface::getTurretMinorGirlbossPitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
     
@@ -200,7 +200,7 @@ float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
     
 }
 
-float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
+float SentryControlOperatorInterface::getTurretMinorMalewifePitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 

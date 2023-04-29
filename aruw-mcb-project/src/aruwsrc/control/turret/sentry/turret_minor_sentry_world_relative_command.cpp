@@ -28,11 +28,11 @@ namespace aruwsrc::control::turret::sentry
 TurretMinorSentryWorldRelativeCommand::TurretMinorSentryWorldRelativeCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
-    SentryTurretMinorSubsystem *turretSubsystem,
-    algorithms::TurretYawControllerInterface *chassisImuYawController,
-    algorithms::TurretPitchControllerInterface *chassisImuPitchController,
-    algorithms::TurretYawControllerInterface *turretImuYawController,
-    algorithms::TurretPitchControllerInterface *turretImuPitchController,
+    SentryTurretMinorSubsystem &turretSubsystem,
+    algorithms::TurretYawControllerInterface &chassisImuYawController,
+    algorithms::TurretPitchControllerInterface &chassisImuPitchController,
+    algorithms::TurretYawControllerInterface &turretImuYawController,
+    algorithms::TurretPitchControllerInterface &turretImuPitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -44,8 +44,7 @@ TurretMinorSentryWorldRelativeCommand::TurretMinorSentryWorldRelativeCommand(
           chassisImuYawController,
           chassisImuPitchController,
           userYawInputScalar,
-          userPitchInputScalar,
-          turretID),
+          userPitchInputScalar),
       turretWRTurretImuCommand(
           drivers,
           controlOperatorInterface,
@@ -53,11 +52,11 @@ TurretMinorSentryWorldRelativeCommand::TurretMinorSentryWorldRelativeCommand(
           turretImuYawController,
           turretImuPitchController,
           userYawInputScalar,
-          userPitchInputScalar,
-          turretID)
+          userPitchInputScalar)
 {
-    comprisedCommandScheduler.registerSubsystem(turretSubsystem);
-    addSubsystemRequirement(turretSubsystem);
+    // question: do we need to register twice?
+    comprisedCommandScheduler.registerSubsystem(&turretSubsystem);
+    addSubsystemRequirement(&turretSubsystem);
 }
 
 bool TurretMinorSentryWorldRelativeCommand::isReady()

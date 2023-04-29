@@ -75,11 +75,11 @@ public:
     TurretMinorSentryWorldRelativeCommand(
         tap::Drivers *drivers,
         SentryControlOperatorInterface &controlOperatorInterface,
-        SentryTurretMinorSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *chassisImuYawController,
-        algorithms::TurretPitchControllerInterface *chassisImuPitchController,
-        algorithms::TurretYawControllerInterface *turretImuYawController,
-        algorithms::TurretPitchControllerInterface *turretImuPitchController,
+        SentryTurretMinorSubsystem &turretSubsystem,
+        algorithms::TurretYawControllerInterface &chassisImuYawController,
+        algorithms::TurretPitchControllerInterface &chassisImuPitchController,
+        algorithms::TurretYawControllerInterface &turretImuYawController,
+        algorithms::TurretPitchControllerInterface &turretImuPitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);

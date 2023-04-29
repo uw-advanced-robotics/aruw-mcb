@@ -90,6 +90,7 @@ void SentryTurretCVCommand::initialize()
 
 void SentryTurretCVCommand::execute()
 {
+    float majorSetpoint = yawControllerMajor.getSetpoint();
     float girlbossYawSetpoint = yawControllerGirlboss.getSetpoint();
     float malewifeYawSetpoint = yawControllerMalewife.getSetpoint();
     float girlbossPitchSetpoint = pitchControllerGirlboss.getSetpoint();

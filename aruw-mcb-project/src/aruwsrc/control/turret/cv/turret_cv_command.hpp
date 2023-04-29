@@ -113,8 +113,6 @@ public:
 
     const char *getName() const override { return "turret CV"; }
 
-    bool getTurretID() const override { return turretID; }
-
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further

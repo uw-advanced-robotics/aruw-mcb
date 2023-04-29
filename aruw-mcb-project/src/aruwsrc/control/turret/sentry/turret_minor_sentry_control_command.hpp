@@ -59,8 +59,7 @@ public:
         algorithms::TurretYawControllerInterface &yawController,
         algorithms::TurretPitchControllerInterface &pitchController,
         float userYawInputScalar,
-        float userPitchInputScalar,
-        uint8_t turretID = 0);
+        float userPitchInputScalar);
 
     bool isReady() override;
 
@@ -77,17 +76,15 @@ public:
 private:
     tap::Drivers *drivers;
     SentryControlOperatorInterface &controlOperatorInterface;
-    SentryTurretMinorSubsystem *turretMinorSubsystem;
+    SentryTurretMinorSubsystem &turretMinorSubsystem;
 
     uint32_t prevTime = 0;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretYawControllerInterface &yawController;
+    algorithms::TurretPitchControllerInterface &pitchController;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;
-
-    const uint8_t turretID;
 };
 }  // namespace aruwsrc::control::turret::sentry
 

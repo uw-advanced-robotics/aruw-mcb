@@ -26,30 +26,28 @@ namespace aruwsrc::control::turret::sentry
 TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
-    SentryTurretMinorSubsystem *turretMinorSubsystem,
-    algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController,
+    SentryTurretMinorSubsystem &turretMinorSubsystem,
+    algorithms::TurretYawControllerInterface &yawController,
+    algorithms::TurretPitchControllerInterface &pitchController,
     float userYawInputScalar,
-    float userPitchInputScalar,
-    uint8_t turretID)
+    float userPitchInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
       turretMinorSubsystem(turretMinorSubsystem),
       yawController(yawController),
       pitchController(pitchController),
       userYawInputScalar(userYawInputScalar),
-      userPitchInputScalar(userPitchInputScalar),
-      turretID(turretID)
+      userPitchInputScalar(userPitchInputScalar)
 {
-    addSubsystemRequirement(turretMinorSubsystem);
+    addSubsystemRequirement(&turretMinorSubsystem);
 }
 
 bool TurretMinorSentryControlCommand::isReady() { return !isFinished(); }
 
 void TurretMinorSentryControlCommand::initialize()
 {
-    yawController->initialize();
-    pitchController->initialize();
+    yawController.initialize();
+    pitchController.initialize();
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
@@ -61,13 +59,13 @@ void TurretMinorSentryControlCommand::execute()
 
     // Get pitch input from control operator interface
     float pitchInput;
-    switch (turretID)
+    switch (turretMinorSubsystem.turretID)
     {
         case 0:
-            pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
+            pitchInput = controlOperatorInterface.getTurretMinorGirlbossPitchVelocity();
             break;
         case 1:
-            pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
+            pitchInput = controlOperatorInterface.getTurretMinorMalewifePitchVelocity();
             break;
         default:
             pitchInput = 0;
@@ -75,7 +73,7 @@ void TurretMinorSentryControlCommand::execute()
 
     // Get yaw input from control operator interface
     float yawInput;
-    switch (turretID)
+    switch (turretMinorSubsystem.turretID)
     {
         case 0:
             yawInput = controlOperatorInterface.getTurretMinor1YawVelocity();
@@ -88,25 +86,25 @@ void TurretMinorSentryControlCommand::execute()
     }
 
     const float pitchSetpoint =
-        pitchController->getSetpoint() +
+        pitchController.getSetpoint() +
         userPitchInputScalar * pitchInput;
-    pitchController->runController(dt, pitchSetpoint);
+    pitchController.runController(dt, pitchSetpoint);
 
     const float yawSetpoint =
-        yawController->getSetpoint() +
+        yawController.getSetpoint() +
         userYawInputScalar * yawInput;
-    yawController->runController(dt, yawSetpoint);
+    yawController.runController(dt, yawSetpoint);
 }
 
 bool TurretMinorSentryControlCommand::isFinished() const
 {
-    return !pitchController->isOnline() && !yawController->isOnline();
+    return !pitchController.isOnline() && !yawController.isOnline();
 }
 
 void TurretMinorSentryControlCommand::end(bool)
 {
-    turretMinorSubsystem->yawMotor.setMotorOutput(0);
-    turretMinorSubsystem->pitchMotor.setMotorOutput(0);
+    turretMinorSubsystem.yawMotor.setMotorOutput(0);
+    turretMinorSubsystem.pitchMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::sentry
