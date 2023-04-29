@@ -67,10 +67,10 @@ public:
     // TODO: config someplace
     static constexpr float MINOR_TURRET_PITCH = modm::toRadian(0.0f);
 
-    static constexpr float YAW_GIRLBOSS_MIN = modm::toRadian(0.0f);
-    static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(0.0f);
-    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(0.0f);
-    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(0.0f);
+    static constexpr float YAW_GIRLBOSS_MIN = modm::toRadian(10.0f);
+    static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(10.0f);
+    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
+    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
      * turret will turn around and start scanning around.
@@ -145,11 +145,6 @@ public:
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
 
-    /// Request the desired turret setpoint to a new currently-unseen by CV "quadrant". Useful if
-    /// the sentry is getting shot at by a robot from behind and being baited by a robot in front
-    /// of it.
-    void changeScanningQuadrant();
-
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
@@ -194,11 +189,18 @@ private:
      */
     unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
 
-    inline void enterScanMode(float yawSetpoint)
+    /**
+     * Initializes scanning mode.
+     * 
+     * Sets the yaw scanners to the current setpoints of the turret minor controllers.
+     * @param girlbossYawSetpoint The current setpoint returned from the girlboss yaw controller.
+     * @param malewifeYawSetpoint The current setpoint returned from the malewife yaw controller.
+    */
+    inline void enterScanMode(float girlbossYawSetpoint, float malewifeYawSetpoint)
     {
         // FIXME: coordinate yawSetpoints when entering scan
-        float yawSetpointGirlboss = yawControllerGirlboss.convertControllerAngleToChassisFrame(yawSetpoint);
-        float yawSetpointMalewife = yawControllerMalewife.convertControllerAngleToChassisFrame(-yawSetpoint);
+        float yawSetpointGirlboss = yawControllerGirlboss.convertControllerAngleToChassisFrame(girlbossYawSetpoint);
+        float yawSetpointMalewife = yawControllerMalewife.convertControllerAngleToChassisFrame(malewifeYawSetpoint);
 
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
@@ -213,11 +215,10 @@ private:
     }
 
     /**
-     * Performs a single scan iteration, updating the pitch and yaw setpoints based on the pitch/yaw
+     * Performs a single scan iteration, updating the yaw setpoint based on the yaw
      * setpoint scanners.
      *
      * @param[out] yawSetpoint The current yaw setpoint, which this function will update
-     * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
      */
     void performScanIteration(float &yawSetpoint);
 };

@@ -60,12 +60,10 @@ SentryTurretCVCommand::SentryTurretCVCommand(
            turretSubsystem->yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
            YAW_SCAN_DELTA_ANGLE})
 {
-    assert(turretSubsystem != nullptr);
-    assert(pitchController != nullptr);
-    assert(yawController != nullptr);
-    assert(ballisticsSolver != nullptr);
 
-    this->addSubsystemRequirement(turretSubsystem);
+    this->addSubsystemRequirement(turretMajorSubsystem);
+    this->addSubsystemRequirement(turretMinorGirlbossSubsystem);
+    this->addSubsystemRequirement(turretMinorMalewifeSubsystem);
 
     ignoreTargetTimeout.restart(0);
 }
@@ -74,51 +72,66 @@ bool SentryTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentryTurretCVCommand::initialize()
 {
-    pitchController->initialize();
-    yawController->initialize();
+    girlbossYawController->initialize();
+    malewifeYawController->initialize();
 
     prevTime = getTimeMilliseconds();
 
     visionCoprocessor->sendSelectNewTargetMessage();
 
-    enterScanMode(yawController->getSetpoint(), pitchController->getSetpoint());
+    enterScanMode(girlbossYawController->getSetpoint(), malewifeYawController->getSetpoint());
 }
 
 void SentryTurretCVCommand::execute()
 {
-    float pitchSetpoint = pitchController->getSetpoint();
-    float yawSetpoint = yawController->getSetpoint();
+    float girlbossYawSetpoint = girlbossYawController->getSetpoint();
+    float malewifeYawSetpoint = malewifeYawController->getSetpoint();
+    float girlbossPitchSetpoint = girlbossPitchController->getSetpoint();
+    float malewifePitchSetpoint = malewifePitchController->getSetpoint();
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+    std::optional<OttoBallisticsSolver::BallisticsSolution> girlbossBallisticsSolution =
+        ballisticsSolver->computeTurretAimAngles();
+    std::optional<OttoBallisticsSolver::BallisticsSolution> malewifeBallisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
+    // If target spotted
     if (ignoreTargetTimeout.isExpired() && ballisticsSolution != std::nullopt)
     {
         exitScanMode();
 
         // Target available
-        pitchSetpoint = ballisticsSolution->pitchAngle;
-        yawSetpoint = ballisticsSolution->yawAngle;
+        girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
+        malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
+        girlbossYawSetpoint = girlbossBallisticsSolution->pitchAngle;
+        malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
 
-        yawSetpoint = yawController->convertChassisAngleToControllerFrame(yawSetpoint);
-        pitchSetpoint = pitchController->convertChassisAngleToControllerFrame(pitchSetpoint);
+        girlbossYawSetpoint = girlbossYawController->convertChassisAngleToControllerFrame(girlbossYawSetpoint);
+        malewifeYawSetpoint = malewifeYawController->convertChassisAngleToControllerFrame(malewifeYawSetpoint);
+        girlbossPitchSetpoint = girlbossPitchController->convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
+        malewifePitchSetpoint = malewifePitchController->convertChassisAngleToControllerFrame(malewifePitchSetpoint);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
          * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
          * that is closest to the unwrapped measured angle.
          */
-        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
-        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
+        girlbossYawSetpoint = turretMinorGirlboss.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
+        malewifeYawSetpoint = turretMinorMalewife.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
+        girlbossPitchSetpoint = turretMinorGirlboss.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
+        malewifePitchSetpoint = turretMinorMalewife.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
 
         auto differenceWrapped = [](float measurement, float setpoint) {
             return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
         };
 
-        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            differenceWrapped(yawController->getMeasurement(), yawSetpoint),
-            differenceWrapped(pitchController->getMeasurement(), pitchSetpoint),
-            ballisticsSolution->distance);
+        withinAimingTolerance = OttoBallisticsSolver::withinAimingTolerance(
+            differenceWrapped(girlbossYawController->getMeasurement(), girlbossYawSetpoint),
+            differenceWrapped(girlbossPitchController->getMeasurement(), girlbossPitchSetpoint),
+            girlbossBallisticsSolution->distance);
+        withinAimingTolerance = withinAimingTolerance && OttoBallisticsSolver::withinAimingTolerance(
+            differenceWrapped(malewifeYawController->getMeasurement(), malewifeYawSetpoint),
+            differenceWrapped(malewifePitchController->getMeasurement(), malewifePitchSetpoint),
+            malewifeBallisticsSolution->distance);
     }
     else
     {
@@ -133,23 +146,24 @@ void SentryTurretCVCommand::execute()
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
         }
-        else if (ignoreTargetTimeout.isExpired())
-        {
-            performScanIteration(yawSetpoint, pitchSetpoint);
-        }
+        // TODO: reimplement scanning
+        //       for now just holds position
+        // else if (ignoreTargetTimeout.isExpired())
+        // {
+        //     performScanIteration(girlbossYawSetpoint, malewifeYawSetpoint);
+        // }
     }
 
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // updates the turret pitch setpoint based on either CV or user input, runs the PID controller,
-    // and sets the turret subsystem's desired pitch output
-    pitchController->runController(dt, pitchSetpoint);
-
-    // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
-    // and sets the turret subsystem's desired yaw output
-    yawController->runController(dt, yawSetpoint);
+    // updates the turret pitch/yaw setpoint, runs the PID controller,
+    // and sets the turret subsystem's desired pitch/yaw output
+    girlbossPitchController->runController(dt, girlbossPitchSetpoint);
+    malewifePitchController->runController(dt, malewifePitchSetpoint);
+    girlbossYawController->runController(dt, girlbossYawSetpoint);
+    malewifeYawController->runController(dt, malewifeYawSetpoint);
 }
 
 bool SentryTurretCVCommand::isFinished() const
@@ -170,37 +184,31 @@ void SentryTurretCVCommand::requestNewTarget()
     visionCoprocessor->sendSelectNewTargetMessage();
 }
 
-void SentryTurretCVCommand::changeScanningQuadrant()
-{
-    float currentYawAngle = yawController->getSetpoint();
-
-    float newSetpoint =
-        tap::algorithms::ContiguousFloat(currentYawAngle + M_PI, 0, M_TWOPI).getValue();
-    newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
-    yawController->setSetpoint(newSetpoint);
-    exitScanMode();
-    ignoreTargetTimeout.restart(TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS);
-}
-
-void SentryTurretCVCommand::performScanIteration(float &yawSetpoint, float &pitchSetpoint)
+// TODO: implement scanning
+void SentryTurretCVCommand::performScanIteration(
+    float &girlbossYawSetpoint, 
+    float &malewifeYawSetpoint, 
+    float &girlbossPitchSetpoint, 
+    float &malewifePitchSetpoint)
 {
     if (!scanning)
     {
-        enterScanMode(yawSetpoint, pitchSetpoint);
+        enterScanMode(girlbossYawSetpoint, malewifeYawSetpoint);
     }
 
-    float yawScanValue = yawScanner.scan();
-    float pitchScanValue = pitchScanner.scan();
+    // TODO: implement linear interpolation from each turret's pitch to the scan pitch
+    //       maybe something a la the setpoint scanner but just moves pitch once...
+    //       seems like it deserves a less ad hoc approach
+    //       or maybe just snap to it? lol it seems like that's what it does on target lock
+    // TODO: implement sync between turret yaws
+    float yawScanValue = girlbossYawScanner.scan();
+    float yawScanValue = malewifeYawScanner.scan();
 
-    auto yawController = turretSubsystem->yawMotor.getTurretController();
+    girlbossYawScanValue = girlbossYawController->convertChassisAngleToControllerFrame(yawScanValue);
+    malewifeYawScanValue = malewifeYawController->convertChassisAngleToControllerFrame(yawScanValue);
 
-    if (yawController != nullptr)
-    {
-        yawScanValue = yawController->convertChassisAngleToControllerFrame(yawScanValue);
-    }
-
-    yawSetpoint = lowPassFilter(yawSetpoint, yawScanValue, SCAN_LOW_PASS_ALPHA);
-    pitchSetpoint = lowPassFilter(pitchSetpoint, pitchScanValue, SCAN_LOW_PASS_ALPHA);
+    girlbossYawSetpoint = lowPassFilter(girlbossYawSetpoint, girlbossYawScanValue, SCAN_LOW_PASS_ALPHA);
+    malewifeYawSetpoint = lowPassFilter(malewifeYawSetpoint, malewifeYawScanValue, SCAN_LOW_PASS_ALPHA);
 }
 
 }  // namespace aruwsrc::control::turret::cv

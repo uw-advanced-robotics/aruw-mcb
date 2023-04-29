@@ -498,12 +498,6 @@ cv::SentryTurretCVCommand sentryTurretCVCommand(
 
 // void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
-// void targetNewQuadrantMessageHandler()
-// {
-    // turretZero.turretCVCommand.changeScanningQuadrant();
-    // turretOne.turretCVCommand.changeScanningQuadrant();
-// }
-
 // void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
 
 // void pauseProjectileLaunchMessageHandler()
