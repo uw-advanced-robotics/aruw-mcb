@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -30,7 +30,7 @@ VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
-    VirtualMCBHandler* motorHandler,
+    SerialMCBLite* motorHandler,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
@@ -49,14 +49,12 @@ VirtualDjiMotor::VirtualDjiMotor(
 
 void VirtualDjiMotor::initialize()
 {
-    initialized = true;
     motorHandler->motorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
 }
 
 void VirtualDjiMotor::attachSelfToRxHandler()
 {
-    isAttachedToRxHandler = true;
     motorHandler->canRxHandler.attachReceiveHandler(this);
 }
 

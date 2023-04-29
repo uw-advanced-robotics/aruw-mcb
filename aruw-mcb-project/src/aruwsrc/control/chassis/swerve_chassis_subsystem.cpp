@@ -68,9 +68,6 @@ Module* SwerveChassisSubsystem::getModule(unsigned int i)
 
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    desx = x;
-    desy = y;
-    desz = r;
     x = modules[LF]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
     y = modules[LF]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
     r = modules[LF]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s

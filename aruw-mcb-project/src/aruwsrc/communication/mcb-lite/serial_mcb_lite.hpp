@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_MCB_HANDLER_HPP_
-#define VIRTUAL_MCB_HANDLER_HPP_
+#ifndef SERIAL_MCB_LITE_HPP_
+#define SERIAL_MCB_LITE_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -62,14 +62,14 @@ struct CurrentSensorMessage
 /**
  * This class is used to communicate with the the virtual MCB using the UART port.
  * This class handles the sending and receiving of motor data, as well as receiving
- * IMU and current sensor data. Call refresh() to update the data.
+ * IMU and current sensor data. To use: call initialize() once to setup the port baudrate.
+ * Afterwards, call updateSerial() as fast as possible to process receiving data as fast as
+ * possible. Call sendData per loop to send motor desired outputs at a consistent rate.
  */
-class VirtualMCBHandler : public tap::communication::serial::DJISerial
+class SerialMCBLite : public tap::communication::serial::DJISerial
 {
 public:
-    VirtualMCBHandler(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
-
-    bool getCanMessage(tap::can::CanBus canbus, modm::can::Message* message);
+    SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
 
@@ -79,7 +79,7 @@ public:
 
     void initialize();
 
-    constexpr static int UART_BAUDRATE = 500'000;//1'000'000
+    constexpr static int UART_BAUDRATE = 1'000'000;
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
