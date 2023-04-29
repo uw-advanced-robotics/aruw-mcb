@@ -43,10 +43,10 @@ class TurretMinorSentryControlCommand : public tap::control::Command
 public:
     /**
      * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
+     * @param[in] yawController Reference to a yaw controller that will be used to control the yaw
      * axis of the turret.
-     * @param[in] turretMinorSubsystem Pointer to the sentry turret to control.
-     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
+     * @param[in] turretMinorSubsystem Reference to the sentry turret to control.
+     * @param[in] pitchController Reference to a pitch controller that will be used to control the
      * pitch axis of the turret.
      * @param[in] userYawInputScalar Value to scale the user input from `ControlOperatorInterface`
      * by. Basically mouse sensitivity.
@@ -55,9 +55,9 @@ public:
     TurretMinorSentryControlCommand(
         tap::Drivers *drivers,
         SentryControlOperatorInterface &controlOperatorInterface,
-        SentryTurretMinorSubsystem *turretMinorSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
+        SentryTurretMinorSubsystem &turretMinorSubsystem,
+        algorithms::TurretYawControllerInterface &yawController,
+        algorithms::TurretPitchControllerInterface &pitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);

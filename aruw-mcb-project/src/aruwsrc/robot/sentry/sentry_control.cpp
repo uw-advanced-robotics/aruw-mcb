@@ -290,7 +290,10 @@ SentryTurretMinorSubsystem turretMinorMalewife(
 // And then the controller accessed by a command
 // Seems to be kinda bypassing the command-subsystem hierarchy
 
+// EDIT: Apparently Derek tells me that there's a plan to move the controller into the subsystem as a field
+
 // Pitch
+// CV
 tap::algorithms::SmoothPid girlbossPitchPosPidCv(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid girlbossPitchVelPidCv(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
 
@@ -309,7 +312,27 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchCont
     malewifePitchPosPidCv,
     malewifePitchVelPidCv);
 
+// Manual
+tap::algorithms::SmoothPid girlbossPitchPosPid(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid girlbossPitchVelPid(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossPitchController(
+    getTurretMCBCanComm(),
+    turretMinorGirlboss.pitchMotor,
+    girlbossPitchPosPid,
+    girlbossPitchVelPid);
+
+tap::algorithms::SmoothPid malewifePitchPosPid(world_rel_turret_imu::turretMinor1::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid malewifePitchVelPid(world_rel_turret_imu::turretMinor1::PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchController(
+    getTurretMCBCanComm(),
+    turretMinorGirlboss.pitchMotor,
+    malewifePitchPosPid,
+    malewifePitchVelPid);
+
 // Yaw
+// CV
 tap::algorithms::SmoothPid girlbossYawPosPidCv(world_rel_turret_imu::turretMinor0::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid girlbossYawVelPidCv(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
 
@@ -328,8 +351,30 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawControll
     malewifeYawPosPidCv,
     malewifeYawVelPidCv);
 
+// Manual
+tap::algorithms::SmoothPid girlbossYawPosPid(world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid girlbossYawVelPid(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawController(
+    getTurretMCBCanComm(),
+    turretMinorGirlboss.yawMotor,
+    girlbossYawPosPid,
+    girlbossYawVelPid);
+
+tap::algorithms::SmoothPid malewifeYawPosPid(world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid malewifeYawVelPid(world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawController(
+    getTurretMCBCanComm(),
+    turretMinorGirlboss.yawMotor,
+    malewifeYawPosPid,
+    malewifeYawVelPid);
+
 // Odometry ----------------------------------------------------------------------------------
 
+// On other robots, the turret IMU defines the world frame on initialization, apparently because type C's have better IMUs than type A's
+// We need to decide which IMU to use
+// Also subsystem for odometry is cringe (?) so we're not using it
 ChassisKFOdometry odometry(
     sentryDrive,
     turretMajor,  // ????
@@ -358,44 +403,6 @@ OttoBallisticsSolver malewifeBallisticsSolver(
 // What if controllers were mix-ins for susbsystems or something?
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
-
-// SentryTurretMinor turretZero(
-//     *drivers(),
-//     aruwsrc::control::
-//     {
-//         .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor0::AGITATOR_CONFIG,
-//         .pitchMotor = &turretMinor0PitchMotor,
-//         .yawMotor = &turretMinor0YawMotor,
-//         .pitchMotorConfig = aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG,
-//         .yawMotorConfig = aruwsrc::control::turret::turretMinor0::YAW_MOTOR_CONFIG,
-//         .turretCanBus = aruwsrc::control::turret::turretMinor0::CAN_BUS_MOTORS,
-//         .turretID = 0,
-//         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-//         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor0::PITCH_PID_CONFIG,
-//         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor0::YAW_PID_CONFIG,
-//         .yawPosPidConfig = world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG,
-//         .yawVelPidConfig = world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG,
-//         .turretMCBCanComm = drivers()->turretMCBCanCommBus1,
-//     });
-
-// SentryMinorTurretThing turretOne(
-//     *drivers(),
-//     {
-//         .agitatorConfig = aruwsrc::control::agitator::constants::turretMinor1::AGITATOR_CONFIG,
-//         .pitchMotor = &turretMinor1PitchMotor,
-//         .yawMotor = &turretMinor1YawMotor,
-//         .pitchMotorConfig = aruwsrc::control::turret::turretMinor1::PITCH_MOTOR_CONFIG,
-//         .yawMotorConfig = aruwsrc::control::turret::turretMinor1::YAW_MOTOR_CONFIG,
-//         .turretCanBus = aruwsrc::control::turret::turretMinor1::CAN_BUS_MOTORS,
-//         .turretID = 1,
-//         .turretBarrelMechanismId = RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-//         .pitchPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::PITCH_PID_CONFIG,
-//         .yawPidConfig = aruwsrc::control::turret::chassis_rel::turretMinor1::YAW_PID_CONFIG,
-//         .yawPosPidConfig = world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG,
-//         .yawVelPidConfig = world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG,
-//         .turretMCBCanComm = drivers()->turretMCBCanCommBus2,
-//     });
-
 /* define commands ----------------------------------------------------------*/
 // imu::ImuCalibrateCommand imuCalibrateCommand(
 //     drivers(),
@@ -417,11 +424,13 @@ OttoBallisticsSolver malewifeBallisticsSolver(
 //     },
 //     &sentryDrive);
 
+// Chassis drive manual
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &sentryDrive);
 
+// Turret major control manual
 aruwsrc::control::turret::sentry::TurretMajorSentryControlCommand turretMajorControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -430,12 +439,13 @@ aruwsrc::control::turret::sentry::TurretMajorSentryControlCommand turretMajorCon
     aruwsrc::control::turret::MAJOR_USER_YAW_INPUT_SCALAR
 );
 
+// Turret minor control manual
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorGirlbossControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
-    &turretZero.turretSubsystem,
-    &turretZero.chassisFrameYawTurretController,
-    &turretZero.chassisFramePitchTurretController,
+    turretMinorGirlboss,
+    girlbossYawController,
+    girlbossPitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR,
     0);
@@ -443,9 +453,9 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorGir
 aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMalewifeControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
-    &turretOne.turretSubsystem,
-    &turretOne.chassisFrameYawTurretController,
-    &turretOne.chassisFramePitchTurretController,
+    turretMinorMalewife,
+    malewifeYawController,
+    malewifePitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR,
     1);
@@ -538,12 +548,14 @@ void initializeSubsystems()
     sentryDrive.initialize();
     // turretZero.agitator.initialize();
     // turretZero.frictionWheels.initialize();
-    turretZero.turretSubsystem.initialize();
+    // turretZero.turretSubsystem.initialize();
     // turretOne.agitator.initialize();
     // turretOne.frictionWheels.initialize();
-    turretOne.turretSubsystem.initialize();
+    // turretOne.turretSubsystem.initialize();
 
     turretMajor.initialize();
+    turretMinorGirlboss.initialize();
+    turretMinorMalewife.initialize();
     // odometrySubsystem.initialize();
     // turret
  
@@ -568,10 +580,10 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&sentryDrive);
     // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
     // drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&turretZero.turretSubsystem);
+    drivers->commandScheduler.registerSubsystem(&turretMinorGirlboss);
     // drivers->commandScheduler.registerSubsystem(&turretOne.agitator);
     // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
+    drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
