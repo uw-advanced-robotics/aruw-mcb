@@ -70,9 +70,9 @@ public:
     static constexpr float MINOR_TURRET_PITCH = modm::toRadian(0.0f);
 
     static constexpr float YAW_GIRLBOSS_MIN = modm::toRadian(10.0f);
-    static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(10.0f);
+    // static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(10.0f);
     static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
-    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
+    // static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
     /**
      * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
      * turret will turn around and start scanning around.

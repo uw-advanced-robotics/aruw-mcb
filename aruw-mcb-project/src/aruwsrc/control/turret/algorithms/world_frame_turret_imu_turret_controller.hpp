@@ -60,6 +60,7 @@ public:
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
+        const TurretMotor &majorMotor, // used to transform world to major
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid);
 
@@ -94,6 +95,8 @@ private:
     tap::algorithms::SmoothPid &velocityPid;
 
     float worldFrameSetpoint;
+
+    const TurretMotor& majorMotor;
 };
 
 /**

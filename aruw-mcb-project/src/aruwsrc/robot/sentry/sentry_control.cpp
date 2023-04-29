@@ -351,6 +351,7 @@ tap::algorithms::SmoothPid girlbossYawVelPidCv(world_rel_turret_imu::turretMinor
 algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawControllerCv(
     getTurretMCBCanComm(),
     turretMinorGirlboss.yawMotor,
+    turretMajor.yawMotor,
     girlbossYawPosPidCv,
     girlbossYawVelPidCv);
 
@@ -360,6 +361,7 @@ tap::algorithms::SmoothPid malewifeYawVelPidCv(world_rel_turret_imu::turretMinor
 algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawControllerCv(
     getTurretMCBCanComm(),
     turretMinorGirlboss.yawMotor,
+    turretMajor.yawMotor,
     malewifeYawPosPidCv,
     malewifeYawVelPidCv);
 
@@ -370,6 +372,7 @@ tap::algorithms::SmoothPid girlbossYawVelPid(world_rel_turret_imu::turretMinor0:
 algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawController(
     getTurretMCBCanComm(),
     turretMinorGirlboss.yawMotor,
+    turretMajor.yawMotor,
     girlbossYawPosPid,
     girlbossYawVelPid);
 
@@ -379,6 +382,7 @@ tap::algorithms::SmoothPid malewifeYawVelPid(world_rel_turret_imu::turretMinor1:
 algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawController(
     getTurretMCBCanComm(),
     turretMinorGirlboss.yawMotor,
+    turretMajor.yawMotor,
     malewifeYawPosPid,
     malewifeYawVelPid);
 
