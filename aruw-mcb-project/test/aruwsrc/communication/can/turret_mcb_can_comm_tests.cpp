@@ -165,6 +165,8 @@ TEST(TurretMCBCanComm, receive_turret_data)
     drivers.canRxHandler.CanRxHandler::pollCanData();
     messageToSend = &yAxisMessage;
     drivers.canRxHandler.CanRxHandler::pollCanData();
+    messageToSend = &zAxisMessage;
+    drivers.canRxHandler.CanRxHandler::pollCanData();
 
     EXPECT_NEAR(
         modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234),
