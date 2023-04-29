@@ -52,11 +52,6 @@ float SentryTurretSubsystem::getWorldPitch() const
     return pitchMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
-uint32_t SentryTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return tap::arch::clock::getTimeMicroseconds();
-}
-
 modm::Vector3f SentryTurretSubsystem::getTurretOffset() const
 {
 #ifdef TARGET_SENTRY_BEEHIVE

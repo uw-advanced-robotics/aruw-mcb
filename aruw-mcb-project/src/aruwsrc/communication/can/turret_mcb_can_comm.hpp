@@ -72,6 +72,96 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+    /**
+     * @return turret yaw angle in radians, normalized between [-pi, pi]
+     */
+    mockable inline float getRoll() const { return lastCompleteImuData.roll; }
+
+    /** 
+     * @return turret yaw angular velocity in rad/sec
+     */
+    mockable inline float getRollVelocity() const
+    {
+        return modm::toRadian(
+            static_cast<float>(lastCompleteImuData.rawRollVelocity) /
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+    }
+    
+    /**
+     * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
+     * the number of revolutions that the attached turret IMU has taken, and the number of
+     * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
+     */
+    mockable inline float getRollUnwrapped() const
+    {
+        return lastCompleteImuData.roll + M_TWOPI * static_cast<float>(rollRevolutions);
+    }
+
+    /**
+     * @return turret pitch angle in rad, a value normalized between [-pi, pi]
+     */
+    mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
+
+    /**
+     * @return turret pitch angular velocity in rad/sec
+     */
+    mockable inline float getPitchVelocity() const
+    {
+        return modm::toRadian(
+            static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+    }
+
+    /**
+     * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
+     * the number of revolutions that the attached turret IMU has taken, and the number of
+     * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
+     */
+    mockable inline float getPitchUnwrapped() const
+    {
+        return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
+    }
+
+    /**
+     * @return turret yaw angle in radians, normalized between [-pi, pi]
+     */
+    mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
+
+    /** 
+     * @return turret yaw angular velocity in rad/sec
+     */
+    mockable inline float getYawVelocity() const
+    {
+        return modm::toRadian(
+            static_cast<float>(lastCompleteImuData.rawYawVelocity) /
+            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+    }
+
+    /**
+     * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
+     * the number of revolutions that the attached turret IMU has taken, and the number of
+     * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
+     */
+    mockable inline float getYawUnwrapped() const
+    {
+        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
+    }
+
+    mockable inline float getAx() const
+    {
+        return lastCompleteImuData.xAcceleration;
+    }
+
+    mockable inline float getAy() const
+    {
+        return lastCompleteImuData.yAcceleration;
+    }
+
+    mockable inline float getAz() const
+    {
+        return lastCompleteImuData.zAcceleration;
+    }
+
     inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
 
     mockable inline bool isConnected() const
@@ -107,11 +197,12 @@ private:
         X_AXIS_RX_CAN_ID = 0x1fb,
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
-        CHASSIS_MCB_COMMAND_TX_CAN_ID = 0x1fe,
+        TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
+    static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
@@ -134,7 +225,7 @@ private:
     {
         int16_t angleFixedPoint;
         int16_t angleAngularVelocityRaw;
-        uint16_t linearAcceleration;
+        int16_t linearAcceleration;
         uint8_t seq;
     } modm_packed;
 
@@ -183,7 +274,11 @@ private:
 
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
 
-    void handleAxisMessage(const modm::can::Message& message);
+    void handleXAxisMessage(const modm::can::Message& message);
+    
+    void handleYAxisMessage(const modm::can::Message& message);
+    
+    void handleZAxisMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
 

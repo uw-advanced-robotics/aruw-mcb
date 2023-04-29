@@ -27,9 +27,4 @@ float HeroTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw()
 
 float HeroTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
 
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return getTurretMCB()->getIMUDataTimestamp();
-}
-
 }  // namespace aruwsrc::control::turret

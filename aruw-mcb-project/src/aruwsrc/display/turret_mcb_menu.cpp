@@ -48,8 +48,6 @@ void TurretMCBMenu::draw()
         static_cast<double>(modm::toDegree(turretMCBCanComm.getYawVelocity())),
         static_cast<double>(modm::toDegree(turretMCBCanComm.getPitch())),
         static_cast<double>(modm::toDegree(turretMCBCanComm.getPitchVelocity())));
-    display << "IMU latency (us): "
-            << (tap::arch::clock::getTimeMicroseconds() - turretMCBCanComm.getIMUDataTimestamp());
 }
 
 void TurretMCBMenu::update() {}
