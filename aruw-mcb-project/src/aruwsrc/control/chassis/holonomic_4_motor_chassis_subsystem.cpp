@@ -106,6 +106,14 @@ void Holonomic4MotorChassisSubsystem::refresh()
     limitChassisPower();
 }
 
+void Holonomic4MotorChassisSubsystem::refreshSafeDisconnect()
+{
+    for (int i = 0; i < getNumChassisMotors(); i++)
+    {
+        motors[i]->setDesiredOutput(0);
+    }
+}
+
 void Holonomic4MotorChassisSubsystem::limitChassisPower()
 {
     int NUM_MOTORS = getNumChassisMotors();

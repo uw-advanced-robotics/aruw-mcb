@@ -67,6 +67,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
     inline void setZeroRPM() override { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
     /**
