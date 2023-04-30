@@ -132,7 +132,8 @@ public:
      * real target and CV is online).
      *
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
-     * fields even if the solution's validSolutionFound function is false
+     * fields even if the solution's validSolutionFound function is false. Returns none if CV is
+     * offline or trajectory intersection does not exist. 
      */
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 

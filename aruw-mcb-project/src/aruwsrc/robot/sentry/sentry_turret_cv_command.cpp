@@ -105,64 +105,71 @@ void SentryTurretCVCommand::execute()
 
     // If target spotted
     // TODO: PAIIINNNN
-    if (ignoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt)
-    {
-        exitScanMode();
+    // if (ignoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt)
+    // {
+    //     exitScanMode();
 
-        // Target available
-        girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
-        // malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
-        girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
-        // malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
+    //     // Target available
+    //     girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
+    //     // malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
+    //     girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
+    //     // malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
 
-        girlbossYawSetpoint = yawControllerGirlboss.convertChassisAngleToControllerFrame(girlbossYawSetpoint);
-        // malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
-        girlbossPitchSetpoint = pitchControllerGirlboss.convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
-        // malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
+    //     girlbossYawSetpoint = yawControllerGirlboss.convertChassisAngleToControllerFrame(girlbossYawSetpoint);
+    //     // malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
+    //     girlbossPitchSetpoint = pitchControllerGirlboss.convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
+    //     // malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
 
-        /**
-         * the setpoint returned by the ballistics solver is between [0, 2*PI)
-         * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
-         * that is closest to the unwrapped measured angle.
-         */
-        girlbossYawSetpoint = turretMinorGirlbossSubsystem.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
-        // malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
-        girlbossPitchSetpoint = turretMinorGirlbossSubsystem.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
-        // malewifePitchSetpoint = turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
+    //     /**
+    //      * the setpoint returned by the ballistics solver is between [0, 2*PI)
+    //      * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+    //      * that is closest to the unwrapped measured angle.
+    //      */
+    //     girlbossYawSetpoint = turretMinorGirlbossSubsystem.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
+    //     // malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
+    //     girlbossPitchSetpoint = turretMinorGirlbossSubsystem.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
+    //     // malewifePitchSetpoint = turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
 
-        auto differenceWrapped = [](float measurement, float setpoint) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
-        };
+    //     auto differenceWrapped = [](float measurement, float setpoint) {
+    //         return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+    //     };
 
-        withinAimingTolerance = OttoBallisticsSolver::withinAimingTolerance(
-            differenceWrapped(yawControllerGirlboss.getMeasurement(), girlbossYawSetpoint),
-            differenceWrapped(pitchControllerGirlboss.getMeasurement(), girlbossPitchSetpoint),
-            girlbossBallisticsSolution->distance);
-        // withinAimingTolerance = withinAimingTolerance && OttoBallisticsSolver::withinAimingTolerance(
-        //     differenceWrapped(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
-        //     differenceWrapped(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
-        //     malewifeBallisticsSolution->distance);
-    }
-    else
-    {
-        // Target unavailable
-        withinAimingTolerance = false;
+    //     withinAimingTolerance = OttoBallisticsSolver::withinAimingTolerance(
+    //         differenceWrapped(yawControllerGirlboss.getMeasurement(), girlbossYawSetpoint),
+    //         differenceWrapped(pitchControllerGirlboss.getMeasurement(), girlbossPitchSetpoint),
+    //         girlbossBallisticsSolution->distance);
+    //     // withinAimingTolerance = withinAimingTolerance && OttoBallisticsSolver::withinAimingTolerance(
+    //     //     differenceWrapped(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
+    //     //     differenceWrapped(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
+    //     //     malewifeBallisticsSolution->distance);
 
-        // See how recently we lost target
-        if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
-        {
-            // We recently had a target. Don't start scanning yet
-            lostTargetCounter++;
-            // Pitch and yaw setpoint already at reasonable default value
-            // by this point
-        }
-        // TODO: reimplement scanning
-        //       for now just holds position
-        // else if (ignoreTargetTimeout.isExpired())
-        // {
-        //     performScanIteration(girlbossYawSetpoint, malewifeYawSetpoint);
-        // }
-    }
+        
+    // tap::algorithms::ContiguousFloat chassisToMajor = turretMajorSubsystem.yawMotor.getChassisFrameMeasuredAngle();
+
+    // // transform yaw by subtracting yaw of the major from the setpoint
+    // tap::algorithms::ContiguousFloat wrappedGirlbossYawSetpoint(girlbossYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
+    // tap::algorithms::ContiguousFloat wrappedMalewifeYawSetpoint(malewifeYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
+    // }
+    // else
+    // {
+    //     // Target unavailable
+    //     withinAimingTolerance = false;
+
+    //     // See how recently we lost target
+    //     if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
+    //     {
+    //         // We recently had a target. Don't start scanning yet
+    //         lostTargetCounter++;
+    //         // Pitch and yaw setpoint already at reasonable default value
+    //         // by this point
+    //     }
+    //     // TODO: reimplement scanning
+    //     //       for now just holds position
+    //     // else if (ignoreTargetTimeout.isExpired())
+    //     // {
+    //     //     performScanIteration(girlbossYawSetpoint, malewifeYawSetpoint);
+    //     // }
+    // }
 
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
@@ -178,12 +185,9 @@ void SentryTurretCVCommand::execute()
     pitchControllerGirlboss.runController(dt, girlbossPitchSetpoint);
     pitchControllerMalewife.runController(dt, malewifePitchSetpoint);
 
-    tap::algorithms::ContiguousFloat chassisToMajor = turretMajorSubsystem.yawMotor.getChassisFrameMeasuredAngle();
-
-    // transform yaw by subtracting yaw of the major from the setpoint
-    tap::algorithms::ContiguousFloat wrappedGirlBossYawSetpoint(girlbossYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
-    tap::algorithms::ContiguousFloat wrappedMaleWifeYawSetpoint(malewifeYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
-    yawControllerGirlboss.runController(dt, wrappedGirlBossYawSetpoint.getValue());
+    // yawControllerGirlboss.runController(dt, wrappedGirlbossYawSetpoint.getValue());
+    // yawControllerMalewife.runController(dt, wrappedMalewifeYawSetpoint.getValue());
+    yawControllerGirlboss.runController(dt, girlbossYawSetpoint);
     yawControllerMalewife.runController(dt, malewifeYawSetpoint);
 }
 

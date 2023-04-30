@@ -54,7 +54,7 @@ public:
     using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
 #endif
 
-    static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
+    static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");  // is there a better place for this static assert??
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
@@ -108,7 +108,7 @@ public:
 
     struct PositionData
     {
-        FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
+        FireRate firerate;  ///< Firerate of sentry (low 0 - 3 high)
 
         float xPos;  ///< x position of the target (in m).
         float yPos;  ///< y position of the target (in m).
