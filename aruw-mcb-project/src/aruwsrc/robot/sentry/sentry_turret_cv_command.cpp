@@ -28,6 +28,8 @@
 
 #include "sentry_turret_cv_command.hpp"
 
+#include "tap/algorithms/contiguous_float.hpp"
+
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
 using namespace aruwsrc::algorithms;
@@ -170,9 +172,18 @@ void SentryTurretCVCommand::execute()
     // and sets the turret subsystem's desired pitch/yaw output
 
     // TODO: need to transform these worldframe setpoints to major frame
+    // to transform to major frame: subtract out major yaw
+
+    // pitch needs no transformation
     pitchControllerGirlboss.runController(dt, girlbossPitchSetpoint);
     pitchControllerMalewife.runController(dt, malewifePitchSetpoint);
-    yawControllerGirlboss.runController(dt, girlbossYawSetpoint);
+
+    tap::algorithms::ContiguousFloat chassisToMajor = turretMajorSubsystem.yawMotor.getChassisFrameMeasuredAngle();
+
+    // transform yaw by subtracting yaw of the major from the setpoint
+    tap::algorithms::ContiguousFloat wrappedGirlBossYawSetpoint(girlbossYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
+    tap::algorithms::ContiguousFloat wrappedMaleWifeYawSetpoint(malewifeYawSetpoint - chassisToMajor.getValue(), 0, M_TWOPI);
+    yawControllerGirlboss.runController(dt, wrappedGirlBossYawSetpoint.getValue());
     yawControllerMalewife.runController(dt, malewifeYawSetpoint);
 }
 
