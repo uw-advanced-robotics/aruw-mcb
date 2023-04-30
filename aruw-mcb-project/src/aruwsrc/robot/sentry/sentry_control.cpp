@@ -429,10 +429,10 @@ void pauseProjectileLaunchMessageHandler()
 //     drivers(),
 //     {&chassisDriveCommand, &turretMajorControlCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-// HoldCommandMapping leftSwitchMid(
-//     drivers(),
-//     {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+HoldCommandMapping leftSwitchMid(
+    drivers(),
+    {&turretMinor0ControlCommand, &turretMinor1ControlCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 
 bool isInitialized = false;
@@ -512,7 +512,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchUp);
     // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchMid);
+    drivers->commandMapper.addMap(&leftSwitchMid);
 }
 }  // namespace sentry_control
 
