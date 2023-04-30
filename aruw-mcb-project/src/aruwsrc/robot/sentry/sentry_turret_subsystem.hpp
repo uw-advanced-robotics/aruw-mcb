@@ -40,6 +40,7 @@ public:
         uint8_t turretID);
     float getWorldYaw() const override;
     float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
     modm::Vector3f getTurretOffset() const override;
     float getPitchOffset() const override;
 

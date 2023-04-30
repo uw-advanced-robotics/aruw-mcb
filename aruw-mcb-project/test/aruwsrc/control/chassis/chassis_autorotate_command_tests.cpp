@@ -174,9 +174,10 @@ public:
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
-        });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float angle, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d); });
     }
 
     float yawAngleFromCenter;
@@ -340,7 +341,8 @@ INSTANTIATE_TEST_SUITE_P(
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         }),
-    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info)
+    {
         std::stringstream ss;
         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
            << PrintToString(info.param.r) << "_yawAngle_"

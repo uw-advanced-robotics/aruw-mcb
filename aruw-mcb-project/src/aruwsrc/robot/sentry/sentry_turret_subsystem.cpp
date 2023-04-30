@@ -20,6 +20,7 @@
 #include "sentry_turret_subsystem.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -50,6 +51,11 @@ float SentryTurretSubsystem::getWorldYaw() const
 float SentryTurretSubsystem::getWorldPitch() const
 {
     return pitchMotor.getChassisFrameMeasuredAngle().getValue();
+}
+
+uint32_t SentryTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return getTurretMCB()->getIMUDataTimestamp();
 }
 
 modm::Vector3f SentryTurretSubsystem::getTurretOffset() const

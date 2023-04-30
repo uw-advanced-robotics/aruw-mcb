@@ -77,7 +77,7 @@ public:
      */
     mockable inline float getRoll() const { return lastCompleteImuData.roll; }
 
-    /** 
+    /**
      * @return turret yaw angular velocity in rad/sec
      */
     mockable inline float getRollVelocity() const
@@ -86,7 +86,7 @@ public:
             static_cast<float>(lastCompleteImuData.rawRollVelocity) /
             tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
     }
-    
+
     /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
      * the number of revolutions that the attached turret IMU has taken, and the number of
@@ -127,7 +127,7 @@ public:
      */
     mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
 
-    /** 
+    /**
      * @return turret yaw angular velocity in rad/sec
      */
     mockable inline float getYawVelocity() const
@@ -147,20 +147,11 @@ public:
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
     }
 
-    mockable inline float getAx() const
-    {
-        return lastCompleteImuData.xAcceleration;
-    }
+    mockable inline float getAx() const { return lastCompleteImuData.xAcceleration; }
 
-    mockable inline float getAy() const
-    {
-        return lastCompleteImuData.yAcceleration;
-    }
+    mockable inline float getAy() const { return lastCompleteImuData.yAcceleration; }
 
-    mockable inline float getAz() const
-    {
-        return lastCompleteImuData.zAcceleration;
-    }
+    mockable inline float getAz() const { return lastCompleteImuData.zAcceleration; }
 
     mockable inline uint32_t getIMUDataTimestamp() const
     {
@@ -281,9 +272,9 @@ private:
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
 
     void handleXAxisMessage(const modm::can::Message& message);
-    
+
     void handleYAxisMessage(const modm::can::Message& message);
-    
+
     void handleZAxisMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);

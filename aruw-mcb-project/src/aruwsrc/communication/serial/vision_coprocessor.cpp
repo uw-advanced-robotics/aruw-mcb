@@ -213,7 +213,8 @@ void VisionCoprocessor::sendOdometryData()
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
         assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].timestamp = turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
+        odometryData->turretOdometry[i].timestamp =
+            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
         odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
         odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
     }

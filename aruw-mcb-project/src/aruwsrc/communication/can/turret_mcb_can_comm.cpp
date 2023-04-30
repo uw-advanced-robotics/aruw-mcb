@@ -123,7 +123,7 @@ void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
      * Since this is the first axis data received for a full IMU message,
      * set the IMU sequence to the current one to check the other axis
      * data against.
-     * 
+     *
      * Set the timestamp as well since this is the closest we'll get to
      * when the data was measured on the turret mcb.
      */
@@ -142,9 +142,11 @@ void TurretMCBCanComm::handleYAxisMessage(const modm::can::Message& message)
         return;
     }
 
-    currProcessingImuData.pitch = modm::toRadian(static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.pitch = modm::toRadian(
+        static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawPitchVelocity = yAxisMessage->angleAngularVelocityRaw;
-    currProcessingImuData.yAcceleration = static_cast<float>(yAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+    currProcessingImuData.yAcceleration =
+        static_cast<float>(yAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 }
 
 void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
@@ -157,31 +159,27 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
         return;
     }
 
-    currProcessingImuData.yaw = modm::toRadian(static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.yaw = modm::toRadian(
+        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
     currProcessingImuData.rawYawVelocity = zAxisMessage->angleAngularVelocityRaw;
-    currProcessingImuData.zAcceleration = static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+    currProcessingImuData.zAcceleration =
+        static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
     /**
      * Since this is the last axis data received for a full IMU data message,
      * apply post-processing and update the lastCompleteImuData to the processed data.
      * Also call the callback function if one exists.
-    */
+     */
 
-    updateRevolutionCounter(
-        currProcessingImuData.roll,
-        lastCompleteImuData.roll,
-        rollRevolutions);
+    updateRevolutionCounter(currProcessingImuData.roll, lastCompleteImuData.roll, rollRevolutions);
 
     updateRevolutionCounter(
         currProcessingImuData.pitch,
         lastCompleteImuData.pitch,
         pitchRevolutions);
 
-    updateRevolutionCounter(
-        currProcessingImuData.yaw,
-        lastCompleteImuData.yaw,
-        yawRevolutions);
-    
+    updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
+
     lastCompleteImuData = currProcessingImuData;
 
     if (imuDataReceivedCallbackFunc != nullptr)
