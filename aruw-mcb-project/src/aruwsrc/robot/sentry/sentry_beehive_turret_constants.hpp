@@ -39,17 +39,16 @@ namespace aruwsrc::control::turret
 
 // new 
 
-// TODO: change this name
+namespace turretMajor
+{
+
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 6162,
+    .startEncoderValue = 1500,  // 6162
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
 };
-
-namespace turretMajor
-{
 
 // Turret Major has a double DJI motor, so we need to have two CAN Buses
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
@@ -61,13 +60,15 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 
 namespace turretMinor0
 {
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 6842,
-    .minAngle = modm::toRadian(-210),
-    .maxAngle = modm::toRadian(30),
+    // .minAngle = modm::toRadian(-210),
+    // .maxAngle = modm::toRadian(30),    
+    .minAngle = modm::toRadian(-0),
+    .maxAngle = modm::toRadian(1),
     .limitMotorAngles = true,
 };
 
@@ -83,13 +84,15 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 namespace turretMinor1
 {
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 1345,
-    .minAngle = modm::toRadian(-30),
-    .maxAngle = modm::toRadian(210),
+    // .minAngle = modm::toRadian(-30),
+    // .maxAngle = modm::toRadian(210),
+    .minAngle = modm::toRadian(-0),
+    .maxAngle = modm::toRadian(1),
     .limitMotorAngles = true,
 };
 

@@ -25,7 +25,7 @@ namespace aruwsrc::algorithms::odometry
 {
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,  // @todo everything const
     tap::communication::sensors::imu::ImuInterface& imu,
     modm::Location2D<float> imuToChassisCenter)
     : chassisSubsystem(chassisSubsystem),

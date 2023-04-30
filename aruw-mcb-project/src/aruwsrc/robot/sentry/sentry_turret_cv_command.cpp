@@ -85,7 +85,7 @@ void SentryTurretCVCommand::initialize()
 
     visionCoprocessor.sendSelectNewTargetMessage();
 
-    enterScanMode(yawControllerGirlboss.getSetpoint(), yawControllerMalewife.getSetpoint());
+    // enterScanMode(yawControllerGirlboss.getSetpoint(), yawControllerMalewife.getSetpoint());
 }
 
 void SentryTurretCVCommand::execute()

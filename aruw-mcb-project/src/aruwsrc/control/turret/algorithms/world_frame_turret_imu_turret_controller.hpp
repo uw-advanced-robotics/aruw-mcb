@@ -28,6 +28,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 #include "turret_controller_interface.hpp"
+#include "tap/algorithms/contiguous_float.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -58,7 +59,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,  // @todo pass and use ChassisKFOdometry
         TurretMotor &yawMotor,
         const TurretMotor &majorMotor, // used to transform world to major
         tap::algorithms::SmoothPid &positionPid,
@@ -94,7 +95,7 @@ private:
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    tap::algorithms::ContiguousFloat worldFrameSetpoint;
 
     const TurretMotor& majorMotor;
 };
@@ -157,7 +158,7 @@ private:
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    tap::algorithms::ContiguousFloat worldFrameSetpoint;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

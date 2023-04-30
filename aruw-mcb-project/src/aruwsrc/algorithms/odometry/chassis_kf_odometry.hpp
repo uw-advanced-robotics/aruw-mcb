@@ -39,7 +39,7 @@ namespace aruwsrc::algorithms::odometry
  * robots). For those robots that measure chassis position directly, a
  * tweaked version of the kalman filter used in this implementation should be used.
  *
- * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
+ * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.  // Bruh what's that supposed to me
  */
 class ChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
