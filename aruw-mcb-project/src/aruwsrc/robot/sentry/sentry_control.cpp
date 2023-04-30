@@ -595,7 +595,7 @@ HoldCommandMapping leftSwitchUp(
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&turretMajorControlCommand},
+    {&turretMajorControlCommand}, // TODO: add driving back
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftSwitchMid(
