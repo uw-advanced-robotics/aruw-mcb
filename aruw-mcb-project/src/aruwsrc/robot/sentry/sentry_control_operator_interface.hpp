@@ -86,7 +86,7 @@ public:
     /**
      * @return the value used for turret minor 1 pitch velocity in radians / second
      */
-    mockable float getTurretMinorGirlbossPitchVelocity();
+    mockable float getTurretMinor1PitchVelocity();
     
     /**
      * @return the value used for turret minor 2 yaw velocity in radians / second
@@ -96,7 +96,7 @@ public:
     /**
      * @return the value used for turret minor 2 pitch velocity in radians / second
      */
-    mockable float getTurretMinorMalewifePitchVelocity();
+    mockable float getTurretMinor2PitchVelocity();
 
 
     // TODO: add autodrive commands

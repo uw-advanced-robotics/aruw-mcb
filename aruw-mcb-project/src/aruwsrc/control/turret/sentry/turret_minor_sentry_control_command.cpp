@@ -62,10 +62,10 @@ void TurretMinorSentryControlCommand::execute()
     switch (turretMinorSubsystem.turretID)
     {
         case 0:
-            pitchInput = controlOperatorInterface.getTurretMinorGirlbossPitchVelocity();
+            pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
             break;
         case 1:
-            pitchInput = controlOperatorInterface.getTurretMinorMalewifePitchVelocity();
+            pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
             break;
         default:
             pitchInput = 0;
