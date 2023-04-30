@@ -326,23 +326,33 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchCont
     malewifePitchVelPidCv);
 
 // Manual
-tap::algorithms::SmoothPid girlbossPitchPosPid(world_rel_turret_imu::turretMinor1::PITCH_POS_PID_CONFIG);
-tap::algorithms::SmoothPid girlbossPitchVelPid(world_rel_turret_imu::turretMinor1::PITCH_VEL_PID_CONFIG);
+// tap::algorithms::SmoothPid girlbossPitchPosPid(world_rel_turret_imu::turretMinor1::PITCH_POS_PID_CONFIG);
+// tap::algorithms::SmoothPid girlbossPitchVelPid(world_rel_turret_imu::turretMinor1::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossPitchController(
-    getTurretMCBCanComm(),
+// algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossPitchController(
+//     getTurretMCBCanComm(),
+//     turretMinorGirlboss.pitchMotor,
+//     girlbossPitchPosPid,
+//     girlbossPitchVelPid);
+
+algorithms::ChassisFramePitchTurretController girlbossPitchController(
     turretMinorGirlboss.pitchMotor,
-    girlbossPitchPosPid,
-    girlbossPitchVelPid);
+    chassis_rel::turretMinor1::PITCH_PID_CONFIG
+);
 
-tap::algorithms::SmoothPid malewifePitchPosPid(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_CONFIG);
-tap::algorithms::SmoothPid malewifePitchVelPid(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
+// tap::algorithms::SmoothPid malewifePitchPosPid(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_CONFIG);
+// tap::algorithms::SmoothPid malewifePitchVelPid(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchController(
-    getTurretMCBCanComm(),
-    turretMinorGirlboss.pitchMotor,
-    malewifePitchPosPid,
-    malewifePitchVelPid);
+// algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchController(
+//     getTurretMCBCanComm(),
+//     turretMinorGirlboss.pitchMotor,
+//     malewifePitchPosPid,
+//     malewifePitchVelPid); 
+
+algorithms::ChassisFramePitchTurretController malewifePitchController(
+    turretMinorMalewife.pitchMotor,
+    chassis_rel::turretMinor0::PITCH_PID_CONFIG
+);
 
 // Yaw
 // CV
@@ -367,25 +377,38 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawControll
     malewifeYawVelPidCv);
 
 // Manual
-tap::algorithms::SmoothPid girlbossYawPosPid(world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid girlbossYawVelPid(world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG);
+// tap::algorithms::SmoothPid girlbossYawPosPid(world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG);
+// tap::algorithms::SmoothPid girlbossYawVelPid(world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawController(
-    getTurretMCBCanComm(),
+// algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawController(
+//     getTurretMCBCanComm(),
+//     turretMinorGirlboss.yawMotor,
+//     turretMajor.yawMotor,
+//     girlbossYawPosPid,
+//     girlbossYawVelPid);
+
+algorithms::ChassisFrameYawTurretController girlbossYawController(
     turretMinorGirlboss.yawMotor,
-    turretMajor.yawMotor,
-    girlbossYawPosPid,
-    girlbossYawVelPid);
+    chassis_rel::turretMinor1::YAW_PID_CONFIG
+);
 
-tap::algorithms::SmoothPid malewifeYawPosPid(world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid malewifeYawVelPid(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
+// tap::algorithms::SmoothPid malewifeYawPosPid(world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG);
+// tap::algorithms::SmoothPid malewifeYawVelPid(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawController(
-    getTurretMCBCanComm(),
-    turretMinorGirlboss.yawMotor,
-    turretMajor.yawMotor,
-    malewifeYawPosPid,
-    malewifeYawVelPid);
+// algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawController(
+//     getTurretMCBCanComm(),
+//     turretMinorGirlboss.yawMotor,
+//     turretMajor.yawMotor,
+//     malewifeYawPosPid,
+//     malewifeYawVelPid);
+
+algorithms::ChassisFrameYawTurretController malewifeYawController(
+    turretMinorMalewife.yawMotor,
+    chassis_rel::turretMinor0::YAW_PID_CONFIG
+);
+
+
+
 
 // Friction wheels ---------------------------------------------------------------------------
 

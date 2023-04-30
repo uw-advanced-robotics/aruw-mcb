@@ -168,6 +168,8 @@ void SentryTurretCVCommand::execute()
 
     // updates the turret pitch/yaw setpoint, runs the PID controller,
     // and sets the turret subsystem's desired pitch/yaw output
+
+    // TODO: need to transform these worldframe setpoints to major frame
     pitchControllerGirlboss.runController(dt, girlbossPitchSetpoint);
     pitchControllerMalewife.runController(dt, malewifePitchSetpoint);
     yawControllerGirlboss.runController(dt, girlbossYawSetpoint);
