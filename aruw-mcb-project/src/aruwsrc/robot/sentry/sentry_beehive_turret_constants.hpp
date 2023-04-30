@@ -44,7 +44,7 @@ namespace turretMajor
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 1500,  // 6162
+    .startEncoderValue = 5667,  // 6162
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -74,7 +74,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 3335,
+    // .startEncoderValue = 3335,
+    .startEncoderValue = 4940,
     .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
@@ -98,7 +99,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 2035,
+    // .startEncoderValue = 2035,
+    .startEncoderValue = 6244,
     .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,

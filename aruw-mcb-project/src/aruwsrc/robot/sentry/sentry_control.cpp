@@ -528,18 +528,18 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
     MINOR_USER_PITCH_INPUT_SCALAR);
 
 // random command
-// cv::SentryTurretCVCommand sentryTurretCVCommand(
-//     drivers()->visionCoprocessor,
-//     turretMajor,
-//     turretMinorGirlboss,
-//     turretMinorMalewife,
-//     turretMajorYawController,  // Create + use CV version??
-//     girlbossYawControllerCv,
-//     girlbossPitchControllerCv,
-//     malewifeYawControllerCv,
-//     malewifePitchControllerCv,
-//     girlbossBallisticsSolver,
-//     malewifeBallisticsSolver);
+cv::SentryTurretCVCommand sentryTurretCVCommand(
+    drivers()->visionCoprocessor,
+    turretMajor,
+    turretMinorGirlboss,
+    turretMinorMalewife,
+    turretMajorYawController,  // Create + use CV version??
+    girlbossYawController,
+    girlbossPitchController,
+    malewifeYawController,
+    malewifePitchController,
+    girlbossBallisticsSolver,
+    malewifeBallisticsSolver);
 
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
 //     drivers(),
@@ -588,14 +588,14 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
 //     true);
 
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&sentryTurretCVCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&sentryTurretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&turretMajorControlCommand}, // TODO: add driving back
+    {&turretMajorControlCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftSwitchMid(
@@ -621,7 +621,7 @@ void initializeSubsystems()
     turretMajor.initialize();
     turretMinorGirlboss.initialize();
     turretMinorMalewife.initialize();
-    odometrySubsystem.initialize();
+    // odometrySubsystem.initialize();
     // turret
  
     // leftFrontDriveMotor.setDesiredOutput(500);
@@ -650,7 +650,7 @@ void registerSentrySubsystems(Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
@@ -661,7 +661,7 @@ void setDefaultSentryCommands(Drivers *)
 {
     // sentryDrive.setDefaultCommand(&chassisAutorotateCommand);
     // TEMP: Setting default command to manual drive
-    sentryDrive.setDefaultCommand(&chassisDriveCommand);
+    // sentryDrive.setDefaultCommand(&chassisDriveCommand);
     // turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
     // turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
     // turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
@@ -690,7 +690,7 @@ void registerSentryIoMappings(Drivers *drivers)
 {
     // drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);
 }

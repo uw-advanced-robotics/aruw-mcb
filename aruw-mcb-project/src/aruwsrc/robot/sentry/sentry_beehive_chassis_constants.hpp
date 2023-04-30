@@ -31,25 +31,29 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {
 // todo: hopefullly these can live as constants here soon :)
 // also todo: these positions use a +y-forward coord system, should use +x-forward
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .azimuthZeroOffset = 2313,
+    // .azimuthZeroOffset = 2313,
+    .azimuthZeroOffset = 3300,
     .positionWithinChassisX = -WHEELBASE_COORD,
     .positionWithinChassisY = WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = 7060,
+    // .azimuthZeroOffset = 7060,
+    .azimuthZeroOffset = 5360,
     .positionWithinChassisX = WHEELBASE_COORD,
     .positionWithinChassisY = WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = 7048,
+    // .azimuthZeroOffset = 7048,
+    .azimuthZeroOffset = 2620,
     .positionWithinChassisX = -WHEELBASE_COORD,
     .positionWithinChassisY = -WHEELBASE_COORD,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .azimuthZeroOffset = 2270,
+    // .azimuthZeroOffset = 2270,
+    .azimuthZeroOffset = 3123,
     .positionWithinChassisX = WHEELBASE_COORD,
     .positionWithinChassisY = -WHEELBASE_COORD,
 };

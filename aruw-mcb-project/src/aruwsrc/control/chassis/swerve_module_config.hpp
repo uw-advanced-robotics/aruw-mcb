@@ -52,6 +52,7 @@ struct SwerveModuleConfig
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
+    // TODO: Tune me
     const float drivePidKp = 10.0f;//10.0f
     const float drivePidKi = 0.0f;
     const float drivePidKd = 0.0f;
