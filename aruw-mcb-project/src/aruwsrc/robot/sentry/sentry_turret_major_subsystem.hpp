@@ -22,7 +22,7 @@
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret  // @todo what namespace do we want? do we want to genericize this to non-pitching turrets?
 {
 /**
  * Turret major subsystem for the Sentry.
@@ -39,7 +39,7 @@ class SentryTurretMajorSubsystem final : public tap::control::Subsystem
 public:
     SentryTurretMajorSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface* yawMotor,
+        tap::motor::MotorInterface* yawMotor,  // @todo stop using pointers!!
         const TurretMotorConfig& yawMotorConfig);
 
     void refresh();
@@ -70,7 +70,7 @@ public:
 
 private:
     /// Associated with and contains logic for controlling the turret's yaw motor
-    uint8_t turretID;
+    uint8_t turretID;  // @todo remove?? unclear whether this helps anything or if it's just a copy-and-paste artifact
 
 };  // class SentryTurretMajorSubsystem
 

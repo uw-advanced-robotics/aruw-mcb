@@ -122,7 +122,7 @@ public:
      * and the turret motors' specified "start angle" (specified upon construction in the
      * TurretMotorConfig struct).
      */
-    mockable inline float getAngleFromCenter() const
+    mockable inline float getAngleFromCenter() const  // @todo getAngleFromStart would be far superior
     {
         return tap::algorithms::ContiguousFloat(
                    chassisFrameMeasuredAngle.getValue() - config.startAngle,

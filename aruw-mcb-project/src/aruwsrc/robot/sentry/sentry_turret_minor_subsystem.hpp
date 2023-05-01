@@ -26,7 +26,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::turret  // @todo change namespace??
 {
 /**
  * Turret minor subsystem for the Sentry.

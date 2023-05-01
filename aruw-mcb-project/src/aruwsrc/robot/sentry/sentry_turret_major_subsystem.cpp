@@ -41,11 +41,6 @@ void SentryTurretMajorSubsystem::initialize()
     yawMotor.initialize();
 }
 
-float SentryTurretMajorSubsystem::getWorldYaw() const
-{
-    return yawMotor.getChassisFrameMeasuredAngle().getValue();
-}
-
 uint32_t SentryTurretMajorSubsystem::getLastMeasurementTimeMicroseconds() const
 {
     return tap::arch::clock::getTimeMicroseconds();

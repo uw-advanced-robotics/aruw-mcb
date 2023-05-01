@@ -144,7 +144,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
     
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYawnputCalledTime;
+    uint32_t dt = currTime - prevChassisYawnputCalledTime;  // @todo typo lol
     prevChassisYawnputCalledTime = currTime;
 
     if (prevUpdateCounterChassisYawInput != updateCounter)

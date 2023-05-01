@@ -85,6 +85,9 @@
 #include "aruwsrc/control/turret/sentry/turret_major_sentry_control_command.hpp"
 #include "aruwsrc/control/turret/sentry/turret_minor_sentry_control_command.hpp"
 
+#include "sentry_transform_constants.hpp"
+#include "sentry_transforms.hpp"
+
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -407,9 +410,6 @@ algorithms::ChassisFrameYawTurretController malewifeYawController(
     chassis_rel::turretMinor0::YAW_PID_CONFIG
 );
 
-
-
-
 // Friction wheels ---------------------------------------------------------------------------
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -449,6 +449,16 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
     modm::Location2D<float>(0., 0., 0.));  // TODO: this
+
+// Transforms --------------------------------------------------------------------------------
+
+SentryTransformsSubsystem sentryTransforms(
+    *drivers(),
+    odometrySubsystem,
+    turretMajor,
+    turretMinorGirlboss,
+    turretMinorMalewife,
+    SENTRY_TRANSFORM_CONFIG);
 
 // Otto ballistics solver --------------------------------------------------------------------
 
@@ -621,7 +631,8 @@ void initializeSubsystems()
     turretMajor.initialize();
     turretMinorGirlboss.initialize();
     turretMinorMalewife.initialize();
-    // odometrySubsystem.initialize();
+    odometrySubsystem.initialize();
+    sentryTransforms.initialize();
     // turret
  
     // leftFrontDriveMotor.setDesiredOutput(500);
@@ -650,8 +661,9 @@ void registerSentrySubsystems(Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentryTransforms);
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 }

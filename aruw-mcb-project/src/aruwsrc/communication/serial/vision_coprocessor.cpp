@@ -189,14 +189,15 @@ void VisionCoprocessor::sendOdometryData()
     float pitch = modm::toRadian(drivers->mpu6500.getPitch());
     float roll = modm::toRadian(drivers->mpu6500.getRoll());
     // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
+    // @todo wtf is this
+    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);  // @todo move MCB_ROTATION_OFFSET to geometry config
 
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
-#if defined(ALL_SENTRIES)
+#if defined(ALL_SENTRIES)  // @todo FIXFIXFIXFIX
     odometryData->chassisOdometry.pitch = 0;
     odometryData->chassisOdometry.roll = 0;
     odometryData->chassisOdometry.yaw = 0;
