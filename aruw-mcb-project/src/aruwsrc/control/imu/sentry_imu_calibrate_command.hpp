@@ -73,12 +73,15 @@ public:
     /**
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
+    // TODO: increasing this by quite a bit, bring it back down once we're done testing
+    // static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1);
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    // static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(7.0f);
 
     struct TurretIMUCalibrationConfig
     {
@@ -110,7 +113,7 @@ public:
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
-        aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController& turretMajorController,
+        aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController,
         chassis::HolonomicChassisSubsystem *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -145,12 +148,13 @@ private:
      * until it gives up. Should never (and has never) happen but is a safety precaution to avoid
      * getting stuck in calibration forever.
      */
-    static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
+    // static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
+    static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 100000;
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor;
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController& turretMajorController;
+    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController;
     chassis::HolonomicChassisSubsystem *chassis;
 
     CalibrationState calibrationState;

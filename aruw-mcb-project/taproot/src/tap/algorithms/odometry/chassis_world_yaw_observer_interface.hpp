@@ -52,7 +52,6 @@ public:
      * @return `true` if valid chassis orientation data was available,
      *      `false` otherwise.
      */
-    // todo: reconst
     virtual bool getChassisWorldYaw(float* yaw) const = 0;
 };
 

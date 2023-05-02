@@ -117,14 +117,14 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
+// #ifdef TARGET_SENTRY_BEEHIVE
+// #endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
-            // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(TARGET_SENTRY_BEEHIVE)
@@ -158,7 +158,7 @@ static void initializeIo(tap::Drivers *drivers)
 #endif
 
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
-    // ((Drivers *)drivers)->visionCoprocessor.initializeCV();
+    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
 #if defined(TARGET_SENTRY_BEEHIVE)

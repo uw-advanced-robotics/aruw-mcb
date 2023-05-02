@@ -45,10 +45,12 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
     // the turret minor must have a turret IMU for this function to work
     // using turret minor because type C's have more accurate IMUs
-    auto turretMCB = turretMinorGirlbossSubsystem.getTurretMCB();
+    // auto turretMCB = turretMinorGirlbossSubsystem.getTurretMCB();
+    auto turretMCB = turretMinorMalewifeSubsystem.getTurretMCB();
     assert(turretMCB != nullptr);
 
-    if (!turretMCB->isConnected() || !turretMinorGirlbossSubsystem.yawMotor.isOnline() || !turretMajorSubsystem.yawMotor.isOnline())
+    // if (!turretMCB->isConnected() || !turretMinorGirlbossSubsystem.yawMotor.isOnline() || !turretMajorSubsystem.yawMotor.isOnline())
+    if (!turretMCB->isConnected() || !turretMinorMalewifeSubsystem.yawMotor.isOnline() || !turretMajorSubsystem.yawMotor.isOnline())
     {
         return false;
     }
@@ -70,7 +72,8 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         // turretWorldYawRadians1 = turretWorldYawRadians;
         // Normalized angle in range (-pi, pi)
         // @todo: supplant with transformer
-        float turretMinorMajorYawRadians = turretMinorGirlbossSubsystem.yawMotor.getAngleFromCenter();
+        // float turretMinorMajorYawRadians = turretMinorGirlbossSubsystem.yawMotor.getAngleFromCenter();
+        float turretMinorMajorYawRadians = turretMinorMalewifeSubsystem.yawMotor.getAngleFromCenter();
         float turretMajorChassisYawRadians = turretMajorSubsystem.yawMotor.getAngleFromCenter();
 
         *output = modm::Angle::normalize(turretWorldYawRadians - turretMinorMajorYawRadians - turretMajorChassisYawRadians);

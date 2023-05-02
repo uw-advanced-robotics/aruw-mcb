@@ -26,6 +26,7 @@
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/util_macros.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
@@ -198,9 +199,11 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
 #if defined(ALL_SENTRIES)  // @todo FIXFIXFIXFIX
-    odometryData->chassisOdometry.pitch = 0;
-    odometryData->chassisOdometry.roll = 0;
-    odometryData->chassisOdometry.yaw = 0;
+    assert(sentryTransforms != nullptr);
+    auto& worldToChassisTransform = this->sentryTransforms->getWorldToChassis();
+    odometryData->chassisOdometry.roll = worldToChassisTransform.getRoll();
+    odometryData->chassisOdometry.pitch = worldToChassisTransform.getRoll();
+    odometryData->chassisOdometry.yaw = worldToChassisTransform.getYaw();
 #else
     odometryData->chassisOdometry.pitch = pitch;
     odometryData->chassisOdometry.roll = roll;
@@ -211,15 +214,35 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->numTurrets = control::turret::NUM_TURRETS;
 
     // turret odometry
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
-    {
-        assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].timestamp =
-            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
-        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
-    }
+    // for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
+    // {
+    //     assert(turretOrientationInterfaces[i] != nullptr);
+    //     odometryData->turretOdometry[i].timestamp =
+    //         turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
+    //     odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
+    //     odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
+    // }
 
+
+    odometryData->numTurrets = 2;
+    auto& worldToGirlBoss = sentryTransforms->getWorldToTurretGirlboss();
+    
+    odometryData->turretOdometry[0].xPos = worldToGirlBoss.getX();
+    odometryData->turretOdometry[0].yPos = worldToGirlBoss.getY();
+    odometryData->turretOdometry[0].zPos = worldToGirlBoss.getZ();
+
+    odometryData->turretOdometry[0].roll = worldToChassisTransform.getRoll();
+    odometryData->turretOdometry[0].pitch = worldToChassisTransform.getPitch();
+    odometryData->turretOdometry[0].yaw = worldToChassisTransform.getYaw();
+
+    odometryData->turretOdometry[1].xPos = worldToGirlBoss.getX();
+    odometryData->turretOdometry[1].yPos = worldToGirlBoss.getY();
+    odometryData->turretOdometry[1].zPos = worldToGirlBoss.getZ();
+
+    odometryData->turretOdometry[1].roll = worldToChassisTransform.getRoll();
+    odometryData->turretOdometry[1].pitch = worldToChassisTransform.getPitch();
+    odometryData->turretOdometry[1].yaw = worldToChassisTransform.getYaw();
+    
     odometryMessage.setCRC16();
 
     lastOdometryMessage = odometryMessage;

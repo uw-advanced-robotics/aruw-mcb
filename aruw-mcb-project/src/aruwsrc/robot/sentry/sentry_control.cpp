@@ -484,26 +484,27 @@ OttoBallisticsSolver malewifeBallisticsSolver(
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
 /* define commands ----------------------------------------------------------*/
-// imu::SentryImuCalibrateCommand imuCalibrateCommand(
-//     drivers(),
-//     {
-//         {
-//             &drivers()->turretMCBCanCommBus2,
-//             &turretMinorGirlboss,
-//             &girlbossYawController,
-//             &girlbossPitchController,
-//             false,
-//         },
-//         {
-//             &drivers()->turretMCBCanCommBus1,
-//             &turretMinorMalewife,
-//             &malewifeYawController,
-//             &malewifePitchController,
-//             false,
-//         },
-//     },
-//     turretMajor,
-//     &sentryDrive);
+imu::SentryImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {
+        {
+            &drivers()->turretMCBCanCommBus2,
+            &turretMinorGirlboss,
+            &girlbossYawController,
+            &girlbossPitchController,
+            true,
+        },
+        {
+            &drivers()->turretMCBCanCommBus1,
+            &turretMinorMalewife,
+            &malewifeYawController,
+            &malewifePitchController,
+            true,
+        },
+    },
+    &turretMajor,
+    &turretMajorYawController,
+    &sentryDrive);
 
 
 
@@ -602,15 +603,26 @@ cv::SentryTurretCVCommand sentryTurretCVCommand(
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
 //     true);
 
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&sentryTurretCVCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&sentryTurretCVCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&turretMajorControlCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+// HoldCommandMapping leftSwitchMid(
+//     drivers(),
+//     {&imuCalibrateCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 HoldCommandMapping leftSwitchMid(
     drivers(),
@@ -668,8 +680,11 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&sentryTransforms);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
+    // drivers->visionCoprocessor.attachTurretOrientationInterface()
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
+
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -693,7 +708,7 @@ void setDefaultSentryCommands(Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers)
 {
-    // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
     // sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
     // // //     pauseProjectileLaunchMessageHandler);

@@ -31,6 +31,7 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -152,20 +153,34 @@ public:
         float xPos;          ///< x position of the chassis (in m).
         float yPos;          ///< y position of the chassis (in m).
         float zPos;          ///< z position of the chassis (in m).
+        float roll;          ///< world frame roll of the chassis (in rad).
         float pitch;         ///< world frame pitch of the chassis (in rad).
         float yaw;           ///< world frame yaw of the chassis (in rad).
-        float roll;          ///< world frame roll of the chassis (in rad).
     } modm_packed;
 
     /**
      * Turret odometry data to send to Jetson.
      */
+    // struct TurretOdometryData
+    // {
+    //     uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
+    //     float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
+    //                          ///< rad).
+    //     float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+    // } modm_packed;
+
+    /**
+     * World-frame turret odometry data to send to Jetson.
+     */
     struct TurretOdometryData
     {
-        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
-        float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
-                             ///< rad).
-        float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+        float xPos;          ///< x position of the turret (in m).
+        float yPos;          ///< y position of the turret (in m).
+        float zPos;          ///< z position of the turret (in m).
+        float roll;          ///< world frame roll of the turret (in rad).
+        float pitch;         ///< world frame pitch of the turret (in rad).
+        float yaw;           ///< world frame yaw of the turret (in rad).
+
     } modm_packed;
 
     struct OdometryData
@@ -257,6 +272,11 @@ public:
         turretOrientationInterfaces[turretID] = turretOrientationInterface;
     }
 
+
+    inline void attachSentryTransformer(aruwsrc::sentry::SentryTransforms* sentryTransforms) {
+        this->sentryTransforms = sentryTransforms;
+    }
+
     mockable void sendShutdownMessage();
 
     mockable void sendRebootMessage();
@@ -323,6 +343,8 @@ private:
 
     aruwsrc::control::turret::TurretOrientationInterface*
         turretOrientationInterfaces[control::turret::NUM_TURRETS];
+
+    aruwsrc::sentry::SentryTransforms* sentryTransforms;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 

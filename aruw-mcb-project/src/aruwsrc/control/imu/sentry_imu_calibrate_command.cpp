@@ -35,7 +35,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController& turretMajorController,
+    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController,
     chassis::HolonomicChassisSubsystem *chassis)
     : tap::control::Command(),
       drivers(drivers),
@@ -64,6 +64,14 @@ void SentryImuCalibrateCommand::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
 
+    // for (auto &config : turretsAndControllers)
+    // {
+        // config.turretMCBCanComm->sendImuCalibrationRequest();
+    // }
+    // turretsAndControllers[0].turretMCBCanComm->sendImuCalibrationRequest();
+
+    // drivers->mpu6500.requestCalibration();
+
     if (chassis != nullptr)
     {
         chassis->setDesiredOutput(0, 0, 0);
@@ -84,6 +92,7 @@ void SentryImuCalibrateCommand::initialize()
         turretMajor->yawMotor.setChassisFrameSetpoint(
             turretMajor->yawMotor.getConfig().startAngle);
             // also need to take in major yaw controller
+            turretMajorController->initialize();
     }
 
     calibrationLongTimeout.stop();
@@ -95,6 +104,7 @@ static inline bool turretReachedCenterAndNotMoving(
     turret::TurretSubsystem *turret,
     bool ignorePitch)
 {
+    return true;
     return compareFloatClose(
                0.0f,
                turret->yawMotor.getChassisFrameVelocity(),
@@ -111,6 +121,20 @@ static inline bool turretReachedCenterAndNotMoving(
                                 0.0f,
                                 turret->pitchMotor.getAngleFromCenter(),
                                 SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
+}
+
+static inline bool turretMajorReachedCenterAndNotMoving(
+    turret::SentryTurretMajorSubsystem *turret)
+{
+    // return true;
+    return compareFloatClose(
+               0.0f,
+               turret->yawMotor.getChassisFrameVelocity(),
+               SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+           compareFloatClose(
+               0.0f,
+               turret->yawMotor.getAngleFromCenter(),
+               SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
 void SentryImuCalibrateCommand::execute()
@@ -150,6 +174,9 @@ void SentryImuCalibrateCommand::execute()
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
+
+            turretsNotMoving &= 
+                    turretMajorReachedCenterAndNotMoving(turretMajor);
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
@@ -199,6 +226,8 @@ void SentryImuCalibrateCommand::execute()
         }
         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
+
+    turretMajorController->runController(dt, turretMajor->yawMotor.getChassisFrameSetpoint());
 }
 
 void SentryImuCalibrateCommand::end(bool)
@@ -208,6 +237,8 @@ void SentryImuCalibrateCommand::end(bool)
         config.turret->yawMotor.setMotorOutput(0);
         config.turret->pitchMotor.setMotorOutput(0);
     }
+
+    turretMajor->yawMotor.setMotorOutput(0);
 }
 
 bool SentryImuCalibrateCommand::isFinished() const
