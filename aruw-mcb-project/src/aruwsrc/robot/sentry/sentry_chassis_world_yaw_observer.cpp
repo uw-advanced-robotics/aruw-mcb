@@ -36,7 +36,7 @@ SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
 {
 }
 
-bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
+bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const 
 {
     // We need both turret IMU data and turret yaw data to generate odometry which is
     // meaningful for the vision system.
@@ -59,7 +59,15 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
+
+        // TODO: for testing without chassis yaw, world yaw = majorYaw
+        // so try that rather than treating girlboss' yaw as the world yaw
+
+        // also, in visioncoprocessor, we send that we have 0 yaw when we are the sentry
+        // so we should either change that in visioncopro, or make this (temporarily) return 0
+
         float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
+        // turretWorldYawRadians1 = turretWorldYawRadians;
         // Normalized angle in range (-pi, pi)
         // @todo: supplant with transformer
         float turretMinorMajorYawRadians = turretMinorGirlbossSubsystem.yawMotor.getAngleFromCenter();

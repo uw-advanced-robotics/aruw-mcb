@@ -63,6 +63,10 @@ public:
      */
     bool getChassisWorldYaw(float* yaw) const final;
 
+
+    float turretWorldYawRadians;
+    float turretMinorMajorYawRadians;
+    float turretMajorChassisYawRadians;
 private:
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajorSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem;

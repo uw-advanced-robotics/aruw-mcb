@@ -161,6 +161,9 @@ static void initializeIo(tap::Drivers *drivers)
     // ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+#if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
+#endif
     // ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 }
