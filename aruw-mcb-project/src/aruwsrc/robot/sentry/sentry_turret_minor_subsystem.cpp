@@ -54,7 +54,7 @@ float SentryTurretMinorSubsystem::getWorldPitch() const
 
 uint32_t SentryTurretMinorSubsystem::getLastMeasurementTimeMicros() const
 {
-    return tap::arch::clock::getTimeMicroseconds();
+    return tap::arch::clock::getTimeMicroseconds();  // @todo wtf is this
 }
 
 modm::Vector3f SentryTurretMinorSubsystem::getTurretOffset() const

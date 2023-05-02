@@ -250,31 +250,8 @@ public:
         return hasTarget;
     }
 
-    mockable inline void attachOdometryInterface(
-        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
-    {
-        this->odometryInterface = odometryInterface;
-    }
-
-    /**
-     * Specify the turret orientation for auto-aim to reference based on the target robot.
-     *
-     * @param[in] turretOrientationInterface The interface that provides turret information to the
-     * vision coprocessor
-     * @param[in] turretID The turret ID of the orientation interface that will be used to identify
-     * the turret.
-     */
-    mockable inline void attachTurretOrientationInterface(
-        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
-        uint8_t turretID)
-    {
-        assert(turretID < control::turret::NUM_TURRETS);
-        turretOrientationInterfaces[turretID] = turretOrientationInterface;
-    }
-
-
-    inline void attachSentryTransformer(aruwsrc::sentry::SentryTransforms* sentryTransforms) {
-        this->sentryTransforms = sentryTransforms;
+    inline void attachSentryTransformer(aruwsrc::sentry::SentryTransforms* transforms) {
+        this->transforms = transforms;
     }
 
     mockable void sendShutdownMessage();
@@ -339,12 +316,8 @@ private:
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
-
-    aruwsrc::control::turret::TurretOrientationInterface*
-        turretOrientationInterfaces[control::turret::NUM_TURRETS];
-
-    aruwsrc::sentry::SentryTransforms* sentryTransforms;
+    // @todo generic transforms interface
+    aruwsrc::sentry::SentryTransforms* transforms = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
