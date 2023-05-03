@@ -95,8 +95,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 
 static constexpr aruwsrc::control::HomingConfig HOMING_CONFIG = {
-    .minRPM = 10,
-    .maxTorque = SHRT_MAX / 4,
+    .minRPM = -5,
+    .maxRPM = 5,
+    .minTorque = -800,
+    .maxTorque = 800,
 };
 #endif
 
