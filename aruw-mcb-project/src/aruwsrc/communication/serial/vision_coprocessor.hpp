@@ -172,6 +172,7 @@ public:
     {
         float x;
         float y;
+        int timestamp;
     } modm_packed;
 
     struct OdometryData
@@ -313,7 +314,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{0.0f, 0.0f};  // TODO: bad initialized timestamp
+    AutoNavSetpointData lastSetpointData{0.0f, 0.0f, 0};
 
     // CV online variables.
     /// Timer for determining if serial is offline.
