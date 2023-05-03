@@ -49,7 +49,8 @@ SentryTurretCVCommand::SentryTurretCVCommand(
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
         aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver)
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
+        aruwsrc::sentry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       turretMajorSubsystem(turretMajorSubsystem),
       turretMinorGirlbossSubsystem(turretMinorGirlbossSubsystem),
@@ -61,6 +62,7 @@ SentryTurretCVCommand::SentryTurretCVCommand(
       pitchControllerMalewife(pitchControllerMalewife),
       girlbossBallisticsSolver(girlbossBallisticsSolver),
       malewifeBallisticsSolver(malewifeBallisticsSolver),
+      sentryTransforms(sentryTransforms),
       yawGirlbossScanner(
           {turretMinorGirlbossSubsystem.yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
            turretMinorGirlbossSubsystem.yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
@@ -94,6 +96,7 @@ void SentryTurretCVCommand::initialize()
 
 void SentryTurretCVCommand::execute()
 {
+    // setpoints are in chassis frame
     float majorSetpoint = yawControllerMajor.getSetpoint();
     float girlbossYawSetpoint = yawControllerGirlboss.getSetpoint();
     float malewifeYawSetpoint = yawControllerMalewife.getSetpoint();
@@ -109,17 +112,28 @@ void SentryTurretCVCommand::execute()
     {
         exitScanMode();
 
-        // Target available
-        // Get world yaw setpoints
+        // Get world-relative setpoints
         girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
         // malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
         girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
         // malewifeYawSetpoint = malewifeBallisticsSolution->pitchAngle;
 
-        girlbossYawSetpoint = yawControllerGirlboss.convertChassisAngleToControllerFrame(girlbossYawSetpoint);
-        // malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
-        girlbossPitchSetpoint = pitchControllerGirlboss.convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
-        // malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
+
+        // convert world-relative setpoints to respective turret frame setpoint
+        // hold on, is it minor frame or major frame that the controllers are running in?
+        // girlbossYawSetpoint = girlbossYawSetpoint - sentryTransforms.getWorldToTurretGirlboss().getYaw();
+        // girlbossPitchSetpoint = girlbossPitchSetpoint - sentryTransforms.getWorldToTurretGirlboss().getPitch();
+        // convert world-relative setpoints to turret major frame setpoint
+        girlbossYawSetpoint = girlbossYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
+        girlbossPitchSetpoint = girlbossPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
+
+        // ask benjamin about code in this chunk start
+        // this code just keeps the same angle, not modifying it
+        // girlbossYawSetpoint = yawControllerGirlboss.convertChassisAngleToControllerFrame(girlbossYawSetpoint);
+        // // malewifeYawSetpoint = yawControllerMalewife.convertChassisAngleToControllerFrame(malewifeYawSetpoint);
+        // girlbossPitchSetpoint = pitchControllerGirlboss.convertChassisAngleToControllerFrame(girlbossPitchSetpoint);
+        // // malewifePitchSetpoint = pitchControllerMalewife.convertChassisAngleToControllerFrame(malewifePitchSetpoint);
+        // ask benjamin about code in this chunk end
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)

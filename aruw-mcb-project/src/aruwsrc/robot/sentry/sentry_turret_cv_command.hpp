@@ -133,7 +133,8 @@ public:
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
         aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver);
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
+        aruwsrc::sentry::SentryTransforms& sentryTransforms);
 
     void initialize() override;
 
@@ -174,6 +175,8 @@ private:
 
     aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver;
     aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver;
+
+    aruwsrc::sentry::SentryTransforms& sentryTransforms;
 
     uint32_t prevTime;
 

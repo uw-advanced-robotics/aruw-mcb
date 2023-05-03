@@ -558,7 +558,8 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeYawController,
     malewifePitchController,
     girlbossBallisticsSolver,
-    malewifeBallisticsSolver);
+    malewifeBallisticsSolver,
+    sentryTransforms);
 
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
 //     drivers(),
