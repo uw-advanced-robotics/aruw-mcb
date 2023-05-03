@@ -21,14 +21,14 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::sentry
 {
 SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* pitchMotor,
     tap::motor::MotorInterface* yawMotor,
-    const TurretMotorConfig& pitchMotorConfig,
-    const TurretMotorConfig& yawMotorConfig,
+    const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+    const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
     const aruwsrc::can::TurretMCBCanComm* turretMCB,
     uint8_t turretID)
     : RobotTurretSubsystem(
@@ -74,4 +74,4 @@ float SentryTurretMinorSubsystem::getPitchOffset() const
 {
     return control::turret::PITCH_YAW_OFFSET;
 }
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::sentry

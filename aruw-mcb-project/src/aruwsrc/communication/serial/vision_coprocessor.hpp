@@ -334,7 +334,6 @@ private:
      * data information, and updates the `lastAimData`.
      *
      * @param[in] message the message to be decoded.
-     * @param[out] aimData a return parameter through which the decoded message is returned.
      * @return `false` if the message length doesn't match `sizeof(*aimData)`, `true`
      *      otherwise.
      */

@@ -26,20 +26,20 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 
-namespace aruwsrc::control::turret  // @todo change namespace??
+namespace aruwsrc::sentry
 {
 /**
  * Turret minor subsystem for the Sentry.
  */
-class SentryTurretMinorSubsystem final : public RobotTurretSubsystem
+class SentryTurretMinorSubsystem final : public aruwsrc::control::turret::RobotTurretSubsystem
 {
 public:
     SentryTurretMinorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
-        const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+        const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
         const aruwsrc::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
 
@@ -52,6 +52,6 @@ public:
     const uint8_t turretID;
 };  // class SentryTurretMinorSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::sentry
 
 #endif  // SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_

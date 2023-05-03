@@ -34,23 +34,28 @@ using namespace modm;
 
 namespace aruwsrc::algorithms
 {
-OttoBallisticsSolver::OttoBallisticsSolver(
+template<typename TurretFrame>
+OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
+    const aruwsrc::sentry::SentryTransforms &transforms,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
-      turretSubsystem(turretSubsystem),
+      worldToTurret(worldToTurret),
+      lastOdometryTimestamp(lastOdometryTimestamp),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
+      
       turretID(turretID)
 {
 }
 
-std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
+template<typename TurretFrame>
+std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
     computeTurretAimAngles()
 {
     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
@@ -62,10 +67,10 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     }
 
     if (lastAimDataTimestamp != aimData.timestamp ||
-        lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
+        lastOdometryTimestamp != transforms.lastComputedTimestamp())
     {
         lastAimDataTimestamp = aimData.timestamp;
-        lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
+        lastOdometryTimestamp = transforms.lastComputedTimestamp();
 
         // if the friction wheel launch speed is 0, use a default launch speed so ballistics
         // gives a reasonable computation
@@ -75,29 +80,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             launchSpeed = defaultLaunchSpeed;
         }
 
-        // defines the turret where the chassis is, under the assumption that the chassis origin and
-        // turret origin coincide
-        modm::Vector3f turretPosition =
-            modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
-
-        // Puts turret in it's place in world frame
-        // If no offset, skip all offsetting
-        if (turretSubsystem.getTurretOffset() != modm::Vector3f(0, 0, 0))
-        {
-            // make this in here to minimize resource usage I guess
-            modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
-            // yaw is 0, so chassis frame and world frame share orientation. They may not share
-            // translation, so we still need to add that.
-            if (compareFloatClose(odometryInterface.getYaw(), 0.0f, 1e-5f))
-            {
-                // Assume that z is parallel to yaw and needs not adjusting.
-                // This breaks if the robot rolls, but we'd need to implement 3D odometry anyways
-                // soooo not my problem! For now, skips 3D vector rotation.
-                rotateVector(&turretOffset.x, &turretOffset.y, odometryInterface.getYaw());
-            }
-            turretPosition += turretOffset;
-        }
-
+        modm::Vector3f turretPosition = modm::Vector3f(worldToTurret.getX(), worldToTurret.getY(), 0);
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
         // target state, frame whose axis is at the turret center and z is up

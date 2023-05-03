@@ -22,6 +22,11 @@
 
 #include <optional>
 
+#include "tap/algorithms/transforms/transform.hpp"
+
+// @todo genericize world frame
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::chassis
@@ -55,9 +60,11 @@ namespace aruwsrc::algorithms
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
  */
+template<typename TurretFrame>
 class OttoBallisticsSolver
 {
 public:
+    // @todo make angles contiguous floats
     struct BallisticsSolution
     {
         /// The computed straight line distance between the turret and target, in m.
@@ -119,7 +126,8 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
+        const aruwsrc::sentry::SentryTransforms &transforms,  // @todo only used for getting timestamp, which is bad
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -140,10 +148,12 @@ public:
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    modm::Vector3f turretOrigin;
+
+    // @todo genericize world frame
+    const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret;
+    const aruwsrc::sentry::SentryTransforms &transforms;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;

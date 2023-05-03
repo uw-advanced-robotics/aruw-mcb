@@ -74,8 +74,7 @@ void TurretCVCommand::execute()
     float pitchSetpoint = pitchController->getSetpoint();
     float yawSetpoint = yawController->getSetpoint();
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
-        ballisticsSolver->computeTurretAimAngles();
+    auto ballisticsSolution = ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
     {

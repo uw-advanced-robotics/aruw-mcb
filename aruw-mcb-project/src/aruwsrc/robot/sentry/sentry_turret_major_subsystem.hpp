@@ -22,7 +22,7 @@
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret  // @todo what namespace do we want? do we want to genericize this to non-pitching turrets?
+namespace aruwsrc::sentry  // @todo what namespace do we want? do we want to genericize this to non-pitching turrets?
 {
 /**
  * Turret major subsystem for the Sentry.
@@ -40,17 +40,11 @@ public:
     SentryTurretMajorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* yawMotor,  // @todo stop using pointers!!
-        const TurretMotorConfig& yawMotorConfig);
+        const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig);
 
     void refresh();
 
     void initialize();
-
-    /**
-     * @return An angle between [0, M_TWOPI] that is the world-relative angle of the
-     * turret counterclockwise when looking at the turret from above.
-     */
-    float getWorldYaw() const;
 
     // // Turret major has no pitch
     // inline float getWorldPitch() const override final { return 0.; };
@@ -66,7 +60,7 @@ public:
      */
     uint32_t getLastMeasurementTimeMicroseconds() const;
 
-    TurretMotor yawMotor;
+    aruwsrc::control::turret::TurretMotor yawMotor;
 
 private:
     /// Associated with and contains logic for controlling the turret's yaw motor
@@ -74,6 +68,6 @@ private:
 
 };  // class SentryTurretMajorSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::sentry
 
 #endif  // SENTRY_TURRET_MAJOR_SUBSYSTEM_HPP_

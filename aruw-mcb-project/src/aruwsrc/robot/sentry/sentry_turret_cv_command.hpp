@@ -33,6 +33,8 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 
 namespace tap::control::odometry
 {
@@ -54,7 +56,7 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace aruwsrc::control::turret::cv
+namespace aruwsrc::sentry
 {
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
@@ -63,7 +65,7 @@ namespace aruwsrc::control::turret::cv
  * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
  * of movement. (This is why we need both minors controlled by a single command.)
  */
-class SentryTurretCVCommand : public TurretCVCommandInterface
+class SentryTurretCVCommand : public aruwsrc::control::turret::cv::TurretCVCommandInterface
 {
 public:
     // TODO: config someplace
@@ -105,7 +107,7 @@ public:
     static constexpr uint32_t TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS = 1'000;
 
     /**
-     * Constructs a TurretCVCommand
+     * Constructor.
      *
      * @param[in] visionCoprocessor Pointer to a global visionCoprocessor object.
      * @param[in] turretSubsystem Pointer to the turret to control.
@@ -123,15 +125,15 @@ public:
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
         SentryTurretMajorSubsystem &turretMajorSubsystem,
-        RobotTurretSubsystem &turretMinorGirlbossSubsystem,
-        RobotTurretSubsystem &turretMinorMalewifeSubsystem,
-        algorithms::TurretYawControllerInterface &yawControllerMajor,
-        algorithms::TurretYawControllerInterface &yawControllerGirlboss,  // TODO: painnn
-        algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
-        algorithms::TurretYawControllerInterface &yawControllerMalewife,
-        algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver);
+        SentryTurretMinorSubsystem &turretMinorGirlbossSubsystem,
+        SentryTurretMinorSubsystem &turretMinorMalewifeSubsystem,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss,  // TODO: painnn
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
+        aruwsrc::algorithms::OttoBallisticsSolver<TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver<TurretMinorMalewifeFrame> &malewifeBallisticsSolver);
 
     void initialize() override;
 
@@ -164,22 +166,22 @@ private:
     RobotTurretSubsystem &turretMinorGirlbossSubsystem;
     RobotTurretSubsystem &turretMinorMalewifeSubsystem;
 
-    algorithms::TurretYawControllerInterface &yawControllerMajor;
-    algorithms::TurretYawControllerInterface &yawControllerGirlboss;
-    algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
-    algorithms::TurretYawControllerInterface &yawControllerMalewife;
-    algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
 
-    aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<TurretMinorGirlbossFrame> &girlbossBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<TurretMinorMalewifeFrame> &malewifeBallisticsSolver;
 
     uint32_t prevTime;
 
     /**
      * Handles scanning logic in the yaw direction
      */
-    SetpointScanner yawGirlbossScanner;
-    SetpointScanner yawMalewifeScanner;
+    aruwsrc::control::turret::cv::SetpointScanner yawGirlbossScanner;
+    aruwsrc::control::turret::cv::SetpointScanner yawMalewifeScanner;
 
     bool scanning = false;
 

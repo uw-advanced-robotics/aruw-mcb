@@ -21,12 +21,12 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::sentry
 {
 SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* yawMotor,
-    const TurretMotorConfig& yawMotorConfig)
+    const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig)
     : Subsystem(drivers),
       yawMotor(yawMotor, yawMotorConfig)
 {
@@ -46,4 +46,4 @@ uint32_t SentryTurretMajorSubsystem::getLastMeasurementTimeMicroseconds() const
     return tap::arch::clock::getTimeMicroseconds();
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::sentry
