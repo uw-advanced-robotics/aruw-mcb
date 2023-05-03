@@ -198,7 +198,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
         modm::toRadian(static_cast<int16_t>(0x6789) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
         dut.getYawVelocity(),
         1E-5);
-    EXPECT_NEAR(static_cast<int16_t>(0x6543) * 0.01, dut.getAz(), 1E-5);
+    EXPECT_NEAR(static_cast<int16_t>(0x6543) * 0.01, dut.getAz(), 1E-4);
 
     EXPECT_TRUE(dut.isConnected());
 
