@@ -51,6 +51,7 @@ void BarrelSwitcherSubsystem::refresh()
     outputDesiredDebug = motor.getOutputDesired();
     torqueDebug = motor.getTorque();
     shaftRPMDebug = motor.getShaftRPM();
+    stalled = this->isStalled();
     switch (barrelState)
     {
         case BarrelState::HOMING_TOWARD_LOWER_BOUND:
@@ -85,7 +86,9 @@ void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
 
 bool BarrelSwitcherSubsystem::isStalled() const
 {
-    return (motor.getShaftRPM() < config.minRPM && motor.getTorque() > config.maxTorque);
+    return (
+        (motor.getShaftRPM() > config.minRPM && motor.getShaftRPM() < config.maxRPM) &&
+        (motor.getTorque() > config.maxTorque || motor.getTorque() < config.minTorque));
 }
 
 void BarrelSwitcherSubsystem::setLowerBound()

@@ -27,6 +27,8 @@ namespace aruwsrc::control
 
 struct HomingConfig {
     int16_t minRPM;
+    int16_t maxRPM;
+    int16_t minTorque;
     int16_t maxTorque;
 };
 

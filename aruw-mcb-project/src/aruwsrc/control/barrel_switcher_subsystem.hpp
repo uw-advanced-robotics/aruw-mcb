@@ -34,7 +34,7 @@
 namespace aruwsrc::control
 {
 
-static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX / 32;
+static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX * 3 / 5;
 
 static constexpr int32_t USING_RIGHT_BARREL_POSITION =
     25;  // find actual value after hardware testing
@@ -87,6 +87,7 @@ private:
     int16_t outputDesiredDebug;
     int16_t torqueDebug;
     int16_t shaftRPMDebug;
+    bool stalled;
 
     /**
      * upper bound for motor's encoder

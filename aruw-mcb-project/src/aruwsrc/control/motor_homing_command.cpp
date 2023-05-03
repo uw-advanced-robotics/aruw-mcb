@@ -41,12 +41,13 @@ void MotorHomingCommand::execute()
                 subsystem.setLowerBound();
                 subsystem.moveTowardUpperBound();
                 homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
+                calibrationTimer.restart(1000);
             }
             break;
         }
         case (HomingState::MOVING_TOWARD_UPPER_BOUND):
         {
-            if (subsystem.isStalled())
+            if (calibrationTimer.isExpired() && subsystem.isStalled())
             {
                 subsystem.setUpperBound();
                 subsystem.stop();

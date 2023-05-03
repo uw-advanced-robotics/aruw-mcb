@@ -23,6 +23,8 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/homeable_subsystem_interface.hpp"
+#include "tap/architecture/timeout.hpp"
+
 
 namespace aruwsrc::control
 {
@@ -73,6 +75,9 @@ public:
 private:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
     HomingState homingState;
+
+    tap::arch::MilliTimeout calibrationTimer;
+
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control
 #endif
