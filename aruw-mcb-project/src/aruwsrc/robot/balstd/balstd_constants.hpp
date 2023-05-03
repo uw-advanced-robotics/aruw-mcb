@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,15 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/util_macros.hpp"
+#ifndef BALSTD_CONSTANTS_HPP_
+#define BALSTD_CONSTANTS_HPP_
 
-#if defined(TARGET_BALSTD) && defined(PLATFORM_HOSTED)
 
-#include "robot_sim.hpp"
-
-namespace aruwsrc::sim
-{
-void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
 
 #endif

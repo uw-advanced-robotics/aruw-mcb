@@ -19,7 +19,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#ifdef TARGET_TESTBED
+#ifdef TARGET_BALSTD
 
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/command_mapper.hpp"
@@ -36,21 +36,29 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/motion/five_bar_motion_subsystem.hpp"
 #include "aruwsrc/control/motion/five_bar_move_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
-#include "aruwsrc/robot/testbed/spin_motor_command.hpp"
-#include "aruwsrc/robot/testbed/testbed_constants.hpp"
-#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
-#include "aruwsrc/robot/testbed/tmotor_subsystem.hpp"
+#include "aruwsrc/robot/balstd/balstd_constants.hpp"
+#include "aruwsrc/robot/balstd/balstd_drivers.hpp"
+#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -58,10 +66,10 @@
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
-using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::testbed;
+using namespace aruwsrc::balstd;
+using namespace aruwsrc::control::turret;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -76,7 +84,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
     return drivers()->turretMCBCanCommBus1;
 }
 
-namespace testbed_control
+namespace balstd_control
 {
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::motor::Tmotor_AK809 legmotorLF(
@@ -121,11 +129,16 @@ tap::motor::DjiMotor rightWheel(
     true,
     "Right Wheel Motor");
 
-// aruwsrc::testbed::TMotorSubsystem motorSubsystemLF(drivers(), &legmotorLF);
-// aruwsrc::testbed::TMotorSubsystem motorSubsystemLR(drivers(), &legmotorLR);
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    turret::CAN_BUS_MOTORS,
+    false,
+    "Pitch Motor");
 
-// aruwsrc::testbed::SpinMotorCommand spinMotorLF(drivers(), &motorSubsystemLF, 500);
-// aruwsrc::testbed::SpinMotorCommand spinMotorLR(drivers(), &motorSubsystemLR, -500);
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, turret::CAN_BUS_MOTORS, true, "Yaw Motor");
+
+// END HARDWARE INIT
 
 motion::FiveBarLinkage fiveBarLeft(&legmotorLF, &legmotorLR, FIVE_BAR_CONFIG);
 
@@ -153,17 +166,79 @@ BalancingLeg legRight(
     &rightWheel,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);
 
-motion::FiveBarMotionSubsystem fiveBarSubsystemLeft(
-    drivers(),
-    &fiveBarLeft,
-    LF_LEG_MOTOR_PID_CONFIG,
-    LR_LEG_MOTOR_PID_CONFIG);
+aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    turret,
+    frictionWheels,
+    14.0f,  // defaultLaunchSpeed
+    0       // turretID
+);
 
-motion::FiveBarMotionSubsystem fiveBarSubsystemRight(
-    drivers(),
-    &fiveBarRight,
-    RF_LEG_MOTOR_PID_CONFIG,
-    RR_LEG_MOTOR_PID_CONFIG);
+auto_aim::AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
+
+// Turret controllers
+// algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+//     turret.pitchMotor,
+//     chassis_rel::PITCH_PID_CONFIG);
+
+// algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+//     turret.yawMotor,
+//     chassis_rel::YAW_PID_CONFIG);
+
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
+    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPid,
+    worldFramePitchTurretImuVelPid);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
+    worldFramePitchTurretImuVelPid);
+
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    getTurretMCBCanComm(),
+    turret.yawMotor,
+    worldFrameYawTurretImuPosPid,
+    worldFrameYawTurretImuVelPid);
+
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
+    world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.yawMotor,
+    worldFrameYawTurretImuPosPidCv,
+    worldFrameYawTurretImuVelPidCv);
+
+// BEGIN SUBSYSTEMS
+
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
 
 aruwsrc::chassis::BalancingChassisSubsystem chassis(
     drivers(),
@@ -171,41 +246,30 @@ aruwsrc::chassis::BalancingChassisSubsystem chassis(
     legLeft,
     legRight);
 
+aruwsrc::control::turret::StandardTurretSubsystem turret(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
+
 BalancingChassisRelativeDriveCommand manualDriveCommand(
     drivers(),
     &chassis,
     drivers()->controlOperatorInterface);
 
-motion::FiveBarMoveCommand moveFiveBarLeftCircle(drivers(), &fiveBarSubsystemLeft, motion::CIRCLE);
-
-motion::FiveBarMoveCommand moveFiveBarLeftSquare(
+BalancingChassisAutorotateCommand autorotateDriveCommand(
     drivers(),
-    &fiveBarSubsystemLeft,
-    motion::UP_AND_DOWN);
+    &chassis,
+    drivers()->controlOperatorInterface,
+    &turret.yawMotor);
 
-motion::FiveBarMoveCommand moveFiveBarRightCircle(
+BalancingChassisAutorotateCommand autorotateDriveCommand(
     drivers(),
-    &fiveBarSubsystemRight,
-    motion::CIRCLE);
-
-motion::FiveBarMoveCommand moveFiveBarRightSquare(
-    drivers(),
-    &fiveBarSubsystemRight,
-    motion::UP_AND_DOWN);
-
-HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&moveFiveBarLeftCircle, &moveFiveBarRightCircle},
-    RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
-
-HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&moveFiveBarLeftSquare, &moveFiveBarRightSquare},
-    RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
+    &chassis,
+    drivers()->controlOperatorInterface,
+    &turret.yawMotor);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -213,22 +277,11 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerTestbedSubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&motorSubsystemLF);
-    // drivers->commandScheduler.registerSubsystem(&motorSubsystemLR);
-    drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemLeft);
-    drivers->commandScheduler.registerSubsystem(&fiveBarSubsystemRight);
     drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    // motorSubsystemLF.initialize();
-    // motorSubsystemLR.initialize();
-    fiveBarSubsystemLeft.initialize();
-    fiveBarSubsystemRight.initialize();
-    chassis.initialize();
-}
+void initializeSubsystems() { chassis.initialize(); }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultTestbedCommands(Drivers *) { chassis.setDefaultCommand(&manualDriveCommand); }
@@ -237,25 +290,21 @@ void setDefaultTestbedCommands(Drivers *) { chassis.setDefaultCommand(&manualDri
 void startTestbedCommands(Drivers *drivers) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerTestbedIoMappings(Drivers *drivers)
-{
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-}
-}  // namespace testbed_control
+void registerTestbedIoMappings(Drivers *drivers) {}
+}  // namespace balstd_control
 
-namespace aruwsrc::testbed
+namespace aruwsrc::balstd
 {
 void initSubsystemCommands(Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &testbed_control::remoteSafeDisconnectFunction);
-    testbed_control::initializeSubsystems();
-    testbed_control::registerTestbedSubsystems(drivers);
-    testbed_control::setDefaultTestbedCommands(drivers);
-    testbed_control::startTestbedCommands(drivers);
-    testbed_control::registerTestbedIoMappings(drivers);
+        &balstd_control::remoteSafeDisconnectFunction);
+    balstd_control::initializeSubsystems();
+    balstd_control::registerTestbedSubsystems(drivers);
+    balstd_control::setDefaultTestbedCommands(drivers);
+    balstd_control::startTestbedCommands(drivers);
+    balstd_control::registerTestbedIoMappings(drivers);
 }
-}  // namespace aruwsrc::testbed
+}  // namespace aruwsrc::balstd
 
-#endif  // TARGET_TESTBED
+#endif  // TARGET_BALSTD

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TESTBED_CHASSIS_CONSTANTS_HPP_
-#define TESTBED_CHASSIS_CONSTANTS_HPP_
+#ifndef BALSTD_CHASSIS_CONSTANTS_HPP_
+#define BALSTD_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/smooth_pid.hpp"

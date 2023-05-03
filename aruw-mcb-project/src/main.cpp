@@ -70,8 +70,8 @@ using namespace aruwsrc::drone;
 using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
-#elif defined(TARGET_TESTBED)
-using namespace aruwsrc::testbed;
+#elif defined(TARGET_BALSTD)
+using namespace aruwsrc::balstd;
 #endif
 
 int main()
@@ -104,7 +104,7 @@ int main()
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE) || \
-    defined(TARGET_TESTBED)
+    defined(TARGET_BALSTD)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
@@ -112,7 +112,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
-#ifndef TARGET_TESTBED
+#ifndef TARGET_BALSTD
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
@@ -136,7 +136,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
-#if defined(TARGET_TESTBED)
+#if defined(TARGET_BALSTD)
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)

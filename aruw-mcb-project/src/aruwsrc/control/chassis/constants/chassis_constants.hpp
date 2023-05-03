@@ -28,8 +28,8 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
+#elif defined(TARGET_BALSTD)
+#include "aruwsrc/robot/balstd/balstd_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif

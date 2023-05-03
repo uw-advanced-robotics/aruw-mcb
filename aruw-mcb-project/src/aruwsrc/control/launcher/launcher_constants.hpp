@@ -77,6 +77,14 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
+#elif defined(TARGET_BALSTD)
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {15.0f, 4325.0f},
+    {18.0f, 4800.0f},
+    {30.0f, 6900.0f},
+    {32.0f, 8400.0f},
+};
 #elif defined(TARGET_STANDARD_WOODY)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
@@ -111,7 +119,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 #endif
 
-#if defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS) || defined(TARGET_BALSTD)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO_CYCLONE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
