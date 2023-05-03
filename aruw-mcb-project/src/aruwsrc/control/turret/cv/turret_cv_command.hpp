@@ -96,7 +96,7 @@ public:
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver<tap::algorithms::transforms::Frame> *ballisticsSolver,
         const float userYawInputScalar,
         const float userPitchInputScalar,
         uint8_t turretID = 0);
@@ -131,7 +131,7 @@ private:
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<tap::algorithms::transforms::Frame> *ballisticsSolver;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

@@ -463,18 +463,22 @@ SentryTransformsSubsystem sentryTransforms(
 
 // Otto ballistics solver --------------------------------------------------------------------
 
-OttoBallisticsSolver girlbossBallisticsSolver(
+OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    turretMinorGirlboss,
+    sentryTransforms.getWorldToTurretGirlboss(),
+    sentryTransforms,
+    // turretMinorGirlboss,
     frictionWheelsGirlboss,
     14.0f,  // defaultLaunchSpeed
     0);
 
-OttoBallisticsSolver malewifeBallisticsSolver(
+OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    turretMinorMalewife,
+    sentryTransforms.getWorldToTurretMalewife(),
+    sentryTransforms,
+    // turretMinorMalewife,
     frictionWheelsMalewife,
     14.0f,  // defaultLaunchSpeed
     1);
@@ -543,7 +547,7 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
     MINOR_USER_PITCH_INPUT_SCALAR);
 
 // random command
-cv::SentryTurretCVCommand sentryTurretCVCommand(
+aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     drivers()->visionCoprocessor,
     turretMajor,
     turretMinorGirlboss,
@@ -604,19 +608,24 @@ cv::SentryTurretCVCommand sentryTurretCVCommand(
 //     true);
 
 
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
 // HoldCommandMapping leftSwitchUp(
 //     drivers(),
-//     {&sentryTurretCVCommand},
+//     {&imuCalibrateCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&sentryTurretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+// HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&turretMajorControlCommand, &chassisDriveCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&turretMajorControlCommand, &chassisDriveCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // HoldCommandMapping leftSwitchMid(
@@ -624,6 +633,10 @@ HoldCommandMapping leftSwitchDown(
 //     {&imuCalibrateCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
+// HoldCommandMapping leftSwitchMid(
+//     drivers(),
+//     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
@@ -679,7 +692,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&sentryTransforms);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
     // drivers->visionCoprocessor.attachTurretOrientationInterface()
     // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);

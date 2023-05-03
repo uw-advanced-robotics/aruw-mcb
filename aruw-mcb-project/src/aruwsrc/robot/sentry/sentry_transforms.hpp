@@ -12,7 +12,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
-
+using namespace aruwsrc::control::turret;
 namespace aruwsrc::sentry
 {
 
@@ -24,6 +24,7 @@ class TurretMinorGirlbossFrame : tap::algorithms::transforms::Frame {};
 class TurretMinorMalewifeFrame : tap::algorithms::transforms::Frame {};
 
 
+// @todo incorporate velocities? for example, the otto ballistics solver requires chassis velocity
 class SentryTransforms
 {
 public:
@@ -36,17 +37,19 @@ public:
 
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-        const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
-        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorGirlboss,
-        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorMalewife,
+        const SentryTurretMajorSubsystem& turretMajor,
+        const SentryTurretMinorSubsystem& turretMinorGirlboss,
+        const SentryTurretMinorSubsystem& turretMinorMalewife,
         const TransformConfig& config);
 
     void updateTransforms();
 
-    inline const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& getWorldToChassis() { return worldToChassis; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() { return worldToTurretMajor; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() { return worldToTurretGirlboss; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() { return worldToTurretMalewife; };
+    inline const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& getWorldToChassis() const { return worldToChassis; };
+    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() const { return worldToTurretMajor; };
+    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
+    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
+
+    inline const uint32_t lastComputedTimestamp() const { return lastComputedTime; };
 
 private:
     TransformConfig config;
@@ -64,9 +67,11 @@ private:
 
     // @todo move to odometry class
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
-    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor;
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorGirlboss;
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorMalewife;
+    const SentryTurretMajorSubsystem& turretMajor;
+    const SentryTurretMinorSubsystem& turretMinorGirlboss;
+    const SentryTurretMinorSubsystem& turretMinorMalewife;
+
+    uint32_t lastComputedTime = 0;
 };
 
 
@@ -76,9 +81,9 @@ public:
     SentryTransformsSubsystem(
         tap::Drivers &drivers,
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-        const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
-        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorGirlboss,
-        const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorMalewife,
+        const SentryTurretMajorSubsystem& turretMajor,
+        const SentryTurretMinorSubsystem& turretMinorGirlboss,
+        const SentryTurretMinorSubsystem& turretMinorMalewife,
         const TransformConfig& config);
     
     void refresh() override;

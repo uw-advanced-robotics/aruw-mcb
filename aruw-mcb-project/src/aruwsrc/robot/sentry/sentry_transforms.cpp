@@ -1,3 +1,5 @@
+#include "tap/architecture/clock.hpp"
+
 #include "sentry_transforms.hpp"
 
 
@@ -8,9 +10,9 @@ namespace aruwsrc::sentry
 
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorGirlboss,
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorMalewife,
+    const SentryTurretMajorSubsystem& turretMajor,
+    const SentryTurretMinorSubsystem& turretMinorGirlboss,
+    const SentryTurretMinorSubsystem& turretMinorMalewife,
     const SentryTransforms::TransformConfig& config)
     : chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
@@ -43,15 +45,17 @@ void SentryTransforms::updateTransforms()
     worldToTurretGirlboss = compose(worldToTurretMajor, turretMajorToTurretGirlboss);
     worldToTurretMalewife = compose(worldToTurretMajor, turretMajorToTurretMalewife);
 
+    lastComputedTime = tap::arch::clock::getTimeMicroseconds();  // @todo not necessarily the best way
+
     // Alternatively, we use the imus
 }
 
 SentryTransformsSubsystem::SentryTransformsSubsystem(
     tap::Drivers& drivers,
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-    const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajor,
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorGirlboss,
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem& turretMinorMalewife,
+    const SentryTurretMajorSubsystem& turretMajor,
+    const SentryTurretMinorSubsystem& turretMinorGirlboss,
+    const SentryTurretMinorSubsystem& turretMinorMalewife,
     const SentryTransforms::TransformConfig& config)
     : tap::control::Subsystem(&drivers),
       SentryTransforms(

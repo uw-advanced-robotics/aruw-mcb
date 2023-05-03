@@ -22,42 +22,60 @@
 
 #include <optional>
 
+#include "tap/algorithms/transforms/transform.hpp"
+
+// @todo genericize world frame
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-namespace aruwsrc::chassis
-{
-class HolonomicChassisSubsystem;
-}
+#include "otto_ballistics_solver.hpp"
 
-namespace aruwsrc::control::turret
-{
-class RobotTurretSubsystem;
-}
+#include "tap/algorithms/ballistics.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
-namespace aruwsrc::serial
-{
-class VisionCoprocessor;
-}
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+// namespace aruwsrc::chassis
+// {
+// class HolonomicChassisSubsystem;
+// }
 
-namespace aruwsrc::control::launcher
-{
-class LaunchSpeedPredictorInterface;
-}
+// namespace aruwsrc::control::turret
+// {
+// class RobotTurretSubsystem;
+// }
 
-namespace tap::algorithms::odometry
-{
-class Odometry2DInterface;
-}
+// namespace aruwsrc::serial
+// {
+// class VisionCoprocessor;
+// }
 
+// namespace aruwsrc::control::launcher
+// {
+// class LaunchSpeedPredictorInterface;
+// }
+
+// namespace tap::algorithms::odometry
+// {
+// class Odometry2DInterface;
+// }
+using namespace tap::algorithms;
 namespace aruwsrc::algorithms
 {
 /**
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
  */
+template<typename TurretFrame>
 class OttoBallisticsSolver
 {
 public:
+    // @todo make angles contiguous floats
     struct BallisticsSolution
     {
         /// The computed straight line distance between the turret and target, in m.
@@ -98,10 +116,10 @@ public:
         }
 
         return (abs(yawAngleError) < atan2f(
-                                         aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
+                                         aruwsrc::algorithms::OttoBallisticsSolver<int>::PLATE_WIDTH,
                                          2.0f * targetDistance)) &&
                (abs(pitchAngleError) < atan2f(
-                                           aruwsrc::algorithms::OttoBallisticsSolver::PLATE_HEIGHT,
+                                           aruwsrc::algorithms::OttoBallisticsSolver<int>::PLATE_HEIGHT,
                                            2.0f * targetDistance));
     }
 
@@ -119,7 +137,8 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
+        const aruwsrc::sentry::SentryTransforms &transforms,  // @todo only used for getting timestamp, which is bad
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -140,10 +159,12 @@ public:
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    modm::Vector3f turretOrigin;
+
+    // @todo genericize world frame
+    const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret;
+    const aruwsrc::sentry::SentryTransforms &transforms;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
@@ -151,7 +172,105 @@ private:
 
 public:
     const uint8_t turretID;
-};
+}; // ottoballisticssolver
+
+
+template<typename TurretFrame>
+OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
+    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
+    const aruwsrc::sentry::SentryTransforms &transforms,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const float defaultLaunchSpeed,
+    const uint8_t turretID)
+    : visionCoprocessor(visionCoprocessor),
+      odometryInterface(odometryInterface),
+      frictionWheels(frictionWheels),
+      defaultLaunchSpeed(defaultLaunchSpeed),
+      worldToTurret(worldToTurret),
+      transforms(transforms),
+      turretID(turretID)
+{
+}
+
+template<typename TurretFrame>
+std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
+    computeTurretAimAngles()
+{
+    const auto &aimData = visionCoprocessor.getLastAimData(turretID);
+    // Verify that CV is actually online and that the aimData had a target
+    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
+    {
+        lastComputedSolution = std::nullopt;
+        return std::nullopt;
+    }
+
+    if (lastAimDataTimestamp != aimData.timestamp ||
+        lastOdometryTimestamp != transforms.lastComputedTimestamp())
+    {
+        lastAimDataTimestamp = aimData.timestamp;
+        lastOdometryTimestamp = transforms.lastComputedTimestamp();
+
+        // if the friction wheel launch speed is 0, use a default launch speed so ballistics
+        // gives a reasonable computation
+        float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
+        if (tap::algorithms::compareFloatClose(launchSpeed, 0.0f, 1e-5f))
+        {
+            launchSpeed = defaultLaunchSpeed;
+        }
+
+        modm::Vector3f turretPosition = modm::Vector3f(worldToTurret.getX(), worldToTurret.getY(), 0);
+        const modm::Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
+
+        // target state, frame whose axis is at the turret center and z is up
+        // assume acceleration of the chassis is 0 since we don't measure it
+
+        ballistics::MeasuredKinematicState targetState = {
+            .position =
+                {aimData.pva.xPos - turretPosition.x,
+                 aimData.pva.yPos - turretPosition.y,
+                 aimData.pva.zPos - turretPosition.z},
+            .velocity =
+                {aimData.pva.xVel - chassisVel.x,
+                 aimData.pva.yVel - chassisVel.y,
+                 aimData.pva.zVel},
+            .acceleration =
+                {aimData.pva.xAcc,
+                 aimData.pva.yAcc,
+                 aimData.pva.zAcc},  // TODO consider using chassis
+                                     // acceleration from IMU
+        };
+
+        // time in microseconds to project the target position ahead by
+        int64_t projectForwardTimeDt =
+            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+            static_cast<int64_t>(aimData.timestamp);
+
+        // project the target position forward in time s.t. we are computing a ballistics solution
+        // for a target "now" rather than whenever the camera saw the target
+        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+
+        lastComputedSolution = BallisticsSolution();
+        lastComputedSolution->distance = targetState.position.getLength();
+
+        if (!ballistics::findTargetProjectileIntersection(
+                targetState,
+                launchSpeed,
+                3,
+                &lastComputedSolution->pitchAngle,
+                &lastComputedSolution->yawAngle,
+                &lastComputedSolution->timeOfFlight,
+                -worldToTurret.getPitch()))
+        {
+            lastComputedSolution = std::nullopt;
+        }
+    }
+
+    return lastComputedSolution;
+}
 }  // namespace aruwsrc::algorithms
+
+#include "otto_ballistics_solver.cpp"
 
 #endif  // OTTO_BALLISTICS_SOLVER_HPP_

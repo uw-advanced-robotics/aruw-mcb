@@ -190,6 +190,6 @@ static void updateIo(tap::Drivers *drivers)
 #endif
 #ifdef TARGET_SENTRY_BEEHIVE
     // ((Drivers *)drivers)->oledDisplay.updateDisplay();
-    // ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 }

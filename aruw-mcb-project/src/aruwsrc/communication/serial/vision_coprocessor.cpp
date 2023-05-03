@@ -90,6 +90,7 @@ void VisionCoprocessor::initializeCV()
 
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
+    lastMessageReceivedTimestamp = tap::arch::clock::getTimeMicroseconds();
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
     switch (completeMessage.messageType)
     {
@@ -111,6 +112,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
         uint8_t flags = message.data[currIndex];
         lastAimData[j].pva.updated = 0;
         lastAimData[j].timing.updated = 0;
+
 
         currIndex += messageWidths::FLAGS_BYTES;
         memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);

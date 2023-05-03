@@ -266,6 +266,9 @@ public:
     }
 
 private:
+
+    //@TODO: remove this timestamp
+    uint32_t lastMessageReceivedTimestamp;
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
