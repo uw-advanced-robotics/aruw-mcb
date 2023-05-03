@@ -38,8 +38,9 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(sub, setDesiredRpm)
-            .WillByDefault([&](float desiredRpm) { this->desiredRpm = desiredRpm; });
+        ON_CALL(sub, setDesiredRpm).WillByDefault([&](float desiredRpm) {
+            this->desiredRpm = desiredRpm;
+        });
 
         ON_CALL(sub, getDesiredRpm).WillByDefault(ReturnPointee(&desiredRpm));
 
