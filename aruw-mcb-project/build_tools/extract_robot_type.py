@@ -33,15 +33,16 @@ VALID_ROBOT_TYPES = ["TARGET_STANDARD_WOODY",
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")
-    # Configure robot type and check against valid robot type
-    # If there is no optional argument, revert back to the macro in robot_type.hpp
-    if robot_type == None:
-        with open(ROBOT_TYPE_FILE, "r") as robot_type_file_reader:
-            for word in robot_type_file_reader.read().splitlines():
-                if "#define" in word and "TARGET_" in word:
-                    robot_type = word.split()[-1]
-                    break
+
+    if robot_type not in VALID_ROBOT_TYPES:
+        prompt = "Please enter a valid robot type out of the following:\n"
+        for type in VALID_ROBOT_TYPES:
+            prompt += type + "\n"
+        prompt += "--> "
+        robot_type = input(prompt)
+    
+    # Check against valid robot type
     if robot_type not in VALID_ROBOT_TYPES:
         raise Exception(USAGE)
 
-    return robot_type
+    return "TARGET_" + robot_type
