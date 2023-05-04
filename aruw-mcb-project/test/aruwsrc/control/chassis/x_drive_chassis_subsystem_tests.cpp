@@ -49,13 +49,13 @@ class XDriveChassisSubsystemTest : public Test
 {
 protected:
     XDriveChassisSubsystemTest()
-    : currentSensor(
-             {&drivers.analog,
-              aruwsrc::chassis::CURRENT_SENSOR_PIN,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-      chassis(&drivers, &currentSensor) {}
+        : currentSensor(
+              {&drivers.analog,
+               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          chassis(&drivers, &currentSensor) {}
 
     void SetUp() override
     {

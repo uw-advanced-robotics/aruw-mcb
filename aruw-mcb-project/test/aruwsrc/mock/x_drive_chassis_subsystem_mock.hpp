@@ -32,7 +32,7 @@ class XDriveChassisSubsystemMock : public aruwsrc::chassis::XDriveChassisSubsyst
 {
 public:
     XDriveChassisSubsystemMock(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
     virtual ~XDriveChassisSubsystemMock();
 

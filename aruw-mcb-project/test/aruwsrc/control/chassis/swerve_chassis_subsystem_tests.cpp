@@ -56,11 +56,11 @@ class SwerveChassisSubsystemTest : public Test
 protected:
     SwerveChassisSubsystemTest()
         : currentSensor(
-             {&drivers.analog,
-              aruwsrc::chassis::CURRENT_SENSOR_PIN,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+              {&drivers.analog,
+               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
           LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
           LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
           RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
@@ -73,7 +73,14 @@ protected:
           moduleRF(RFDr, RFAz, DEFAULT_SWERVE_CONFIG),
           moduleLB(LBDr, LBAz, DEFAULT_SWERVE_CONFIG),
           moduleRB(RBDr, RBAz, DEFAULT_SWERVE_CONFIG),
-          chassis(&drivers, &currentSensor, &moduleLF, &moduleRF, &moduleLB, &moduleRB, SWERVE_FORWARD_MATRIX)
+          chassis(
+              &drivers,
+              &currentSensor,
+              &moduleLF,
+              &moduleRF,
+              &moduleLB,
+              &moduleRB,
+              SWERVE_FORWARD_MATRIX)
     {
     }
 

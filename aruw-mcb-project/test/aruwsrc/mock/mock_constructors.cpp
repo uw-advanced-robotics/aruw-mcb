@@ -94,7 +94,7 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
     : MecanumChassisSubsystem(drivers, currentSensor)
 {
 }
@@ -102,7 +102,7 @@ MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
     : XDriveChassisSubsystem(drivers, currentSensor)
 {
 }
@@ -110,7 +110,7 @@ XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
 
 SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
