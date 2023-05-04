@@ -147,7 +147,7 @@ public:
      * fields even if the solution's validSolutionFound function is false. Returns none if CV is
      * offline or trajectory intersection does not exist. 
      */
-    mockable std::optional<BallisticsSolution> computeTurretAimAngles();
+    mockable std::optional<BallisticsSolution> computeTurretAimAngles(const aruwsrc::serial::VisionCoprocessor::TurretAimData& aimData);
 
 private:
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
@@ -171,7 +171,8 @@ public:
 template<typename TurretFrame>
 OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const aruwsrc::control::turret::SentryTurretMinorSubsystem &turretMinor,  // @todo REALLY BAD
+    // const aruwsrc::control::turret::SentryTurretMinorSubsystem &turretMinor,  // @todo REALLY BAD
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem &turretMajor, 
     const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
     const aruwsrc::sentry::SentryTransforms &transforms,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -187,7 +188,7 @@ OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
 
 template<typename TurretFrame>
 std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
-    computeTurretAimAngles(const TurretAimData& aimData)
+    computeTurretAimAngles(const aruwsrc::serial::VisionCoprocessor::TurretAimData& aimData)
 {
     // Verify that CV is actually online and that the aimData had a target
     if (!aimData.pva.updated)
@@ -215,6 +216,7 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
+        auto& worldToMajor = transforms.getWorldToTurretMajor();
 
         ballistics::MeasuredKinematicState targetState = {
             .position =
@@ -222,8 +224,10 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
             .velocity =
-                {aimData.pva.xVel - chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(), // need to subtract out rotational velocity of major
-                 aimData.pva.yVel - chassisVel.y,
+                // chassis-forward is +x
+                // someone needs to check my math on the below two calculations
+                {aimData.pva.xVel - (chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw())), // need to subtract out rotational velocity of major
+                 aimData.pva.yVel - (chassisVel.y + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw())),
                  aimData.pva.zVel},
             .acceleration =
                 {aimData.pva.xAcc,

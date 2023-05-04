@@ -24,6 +24,7 @@
 namespace aruwsrc::control::auto_aim
 {
 AutoAimLaunchTimer::AutoAimLaunchTimer(
+    // TODO: to get this to build, we're gonna need to pass some identifier that tells us which aim data to pull from in the coprocessor
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
     aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics)
