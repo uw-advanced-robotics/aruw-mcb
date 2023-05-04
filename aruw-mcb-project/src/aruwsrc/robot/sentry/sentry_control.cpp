@@ -427,7 +427,7 @@ void pauseProjectileLaunchMessageHandler()
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&chassisDriveCommand, &turretMajorControlCommand},
+    {&chassisDriveCommand},//, &turretMajorControlCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchMid(
     drivers(),

@@ -141,13 +141,13 @@ void SerialMCBLite::processCanMessage(
         sizeof(can1Data));
     for (int i = 0; i < 8; i++)
     {
-        modm::can::Message msg;
         for (uint8_t i = 0; i < 8; i++)
         {
             // Get back the motor num
-            msg.identifier = i * 8 + tap::motor::MotorId::MOTOR1;
-            memcpy(&msg.data, &completeMessage.data[i], sizeof(msg.data));
+            msg.identifier = i + tap::motor::MotorId::MOTOR1;
+            memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
             canRxHandler.refresh(canbus, msg);
+            sentMsg++;
         }
     }
 }

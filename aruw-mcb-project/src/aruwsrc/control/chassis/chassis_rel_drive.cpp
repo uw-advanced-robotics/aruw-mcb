@@ -67,7 +67,7 @@ void ChassisRelDrive::onExecute(
     tap::Drivers *drivers,
     HolonomicChassisSubsystem *chassis)
 {
-    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput();
+    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput() * 50;
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;

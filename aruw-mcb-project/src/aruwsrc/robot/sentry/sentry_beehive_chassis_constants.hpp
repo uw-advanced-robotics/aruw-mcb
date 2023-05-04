@@ -31,27 +31,27 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {//TODO: UPDATE/CONFIRM THIS WITH COOR
 // todo: hopefullly these can live as constants here soon :)
 // also todo: these positions use a +y-forward coord system, should use +x-forward
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .azimuthZeroOffset = -2313,
-    .positionWithinChassisX = WHEELBASE_COORD,
-    .positionWithinChassisY = WHEELBASE_COORD,
+    .azimuthZeroOffset = -3300,
+    .positionWithinChassisX = 0,
+    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = -7060,
-    .positionWithinChassisX = WHEELBASE_COORD,
-    .positionWithinChassisY = -WHEELBASE_COORD,
+    .azimuthZeroOffset = -5360,
+    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS,
+    .positionWithinChassisY = 0,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = -7048,
-    .positionWithinChassisX = -WHEELBASE_COORD,
-    .positionWithinChassisY = WHEELBASE_COORD,
+    .azimuthZeroOffset = -2620,
+    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS,
+    .positionWithinChassisY = 0,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .azimuthZeroOffset = -2270,
-    .positionWithinChassisX = -WHEELBASE_COORD,
-    .positionWithinChassisY = -WHEELBASE_COORD,
+    .azimuthZeroOffset = -3123,
+    .positionWithinChassisX = 0,
+    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS,
 };
 
 } // namespace aruwsrc::control::turret
