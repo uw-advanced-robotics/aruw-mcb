@@ -305,7 +305,10 @@ void SentryTurretCVCommand::requestNewTarget()
     visionCoprocessor.sendSelectNewTargetMessage();
 }
 
-// TODO: implement scanning
+// TODO: implement scanning NOW!!!
+// if no target: set minors to point outwards opposite, rotate major (scan major yaw)
+// if 1 target: feed same target message into both ballistics solvers, aim major directly at the target 
+// if 2 targets: feed each turret its target
 void SentryTurretCVCommand::performScanIteration(
     float &girlbossYawSetpoint, 
     float &malewifeYawSetpoint, 

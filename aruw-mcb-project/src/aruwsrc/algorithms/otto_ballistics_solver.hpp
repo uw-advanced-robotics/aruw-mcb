@@ -196,7 +196,7 @@ OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
 
 template<typename TurretFrame>
 std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
-    computeTurretAimAngles()
+    computeTurretAimAngles() // TODO pass aim data as parameter rather than pulling from visioncoprocessor
 {
     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
@@ -232,7 +232,7 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
             .velocity =
-                {aimData.pva.xVel - chassisVel.x,
+                {aimData.pva.xVel - chassisVel.x, // need to subtract out rotational velocity of major
                  aimData.pva.yVel - chassisVel.y,
                  aimData.pva.zVel},
             .acceleration =

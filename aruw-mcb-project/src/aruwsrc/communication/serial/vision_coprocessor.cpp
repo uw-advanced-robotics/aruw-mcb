@@ -106,6 +106,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
+    // TODO: check number of targets to read from in vision message, read that many
     int currIndex = 0;
     for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {

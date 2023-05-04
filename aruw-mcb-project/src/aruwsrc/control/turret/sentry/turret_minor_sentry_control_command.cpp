@@ -103,9 +103,14 @@ bool TurretMinorSentryControlCommand::isFinished() const
 
 void TurretMinorSentryControlCommand::end(bool)
 // TODO: change this to do something other than hold position when we deschedule
-{
-    turretMinorSubsystem.yawMotor.setMotorOutput(0);
+{   
+    // uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    // uint32_t dt = currTime - prevTime;
+    // pitchController.runController(dt, 0);
+    // yawController.runController(dt, 0);
+    
     turretMinorSubsystem.pitchMotor.setMotorOutput(0);
+    turretMinorSubsystem.yawMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::sentry
