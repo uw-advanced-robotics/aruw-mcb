@@ -40,11 +40,11 @@ class Holonomic4MotorChassisSubsystem : public HolonomicChassisSubsystem
 public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
 
     inline bool allMotorsOnline() const override
     {

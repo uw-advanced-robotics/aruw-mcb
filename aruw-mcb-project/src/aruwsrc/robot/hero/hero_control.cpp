@@ -36,6 +36,7 @@
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -108,7 +109,14 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
-XDriveChassisSubsystem chassis(drivers());
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
+XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(

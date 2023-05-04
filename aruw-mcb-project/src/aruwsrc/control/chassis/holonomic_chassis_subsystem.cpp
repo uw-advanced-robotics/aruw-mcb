@@ -23,8 +23,6 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -36,17 +34,12 @@ modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
-    tap::gpio::Analog::Pin currentPin)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
-      currentSensor(
-          {&drivers->analog,
-           currentPin,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+      currentSensor(currentSensor),
       chassisPowerLimiter(
           drivers,
-          &currentSensor,
+          currentSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)
