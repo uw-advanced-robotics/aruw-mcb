@@ -112,7 +112,7 @@ int main()
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
-            // PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
@@ -164,7 +164,7 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->turretMCBCanCommBus2.init();
 #endif
-    // ((Drivers *)drivers)->oledDisplay.initialize();
+    ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 }
 
@@ -189,7 +189,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 #ifdef TARGET_SENTRY_BEEHIVE
-    // ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 }

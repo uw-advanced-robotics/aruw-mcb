@@ -183,12 +183,32 @@ public:
 
     } modm_packed;
 
+    // TODO: sentry only, refactor, comment
+    struct TurretMajorOrientationData
+    {
+        float roll;
+        float pitch;
+        float yaw;
+    } modm_packed;
+
+    //
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
+        // TODO: this is temporary for sentry debugging, want to make a new
+        // sentry odometry struct later
+        TurretMajorOrientationData majorOrientation;
     } modm_packed;
+
+
+    // TODO: this a temp variable
+    float lastTurretGirlBossSentPitch;
+    float lastTurretMalewifeSentPitch;
+
+    float lastTurretGirlBossSentYaw;
+    float lastTurretMalewifeSentYaw;
 
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);

@@ -220,7 +220,9 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryData->turretOdometry[0].roll = worldToGirlboss.getRoll();
     odometryData->turretOdometry[0].pitch = worldToGirlboss.getPitch();
+    lastTurretGirlBossSentPitch = worldToGirlboss.getPitch(); 
     odometryData->turretOdometry[0].yaw = worldToGirlboss.getYaw();
+    lastTurretGirlBossSentYaw = worldToGirlboss.getYaw(); 
 
     odometryData->turretOdometry[1].xPos = worldToMalewife.getX();
     odometryData->turretOdometry[1].yPos = worldToMalewife.getY();
@@ -228,8 +230,15 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryData->turretOdometry[1].roll = worldToMalewife.getRoll();
     odometryData->turretOdometry[1].pitch = worldToMalewife.getPitch();
+    lastTurretMalewifeSentPitch = worldToMalewife.getPitch();
     odometryData->turretOdometry[1].yaw = worldToMalewife.getYaw();
-    
+    lastTurretMalewifeSentYaw = worldToMalewife.getYaw(); 
+
+    auto& worldToMajor = transforms->getWorldToTurretMajor();
+    odometryData->majorOrientation.roll = worldToMajor.getRoll();
+    odometryData->majorOrientation.pitch = worldToMajor.getPitch();
+    odometryData->majorOrientation.yaw = worldToMajor.getYaw();
+
     odometryMessage.setCRC16();
 
     lastOdometryMessage = odometryMessage;

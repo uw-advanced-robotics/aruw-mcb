@@ -65,7 +65,7 @@ namespace aruwsrc::control::turret
  * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
  * of movement. (This is why we need both minors controlled by a single command.)
  */
-class SentryTurretCVCommand : public aruwsrc::control::turret::cv::TurretCVCommandInterface
+class SentryTurretCVCommand : public tap::control::Command
 {
 public:
     // TODO: config someplace
@@ -134,19 +134,19 @@ public:
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
         aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
         aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
-        aruwsrc::sentry::SentryTransforms& sentryTransforms);
+        aruwsrc::sentry::SentryTransforms& sentryTransforms); // @todo: pass in needed transforms, not
 
-    void initialize() override;
+    void initialize() ;
 
-    bool isReady() override;
+    bool isReady() ;
 
-    void execute() override;
+    void execute() ;
 
-    bool isFinished() const override;
+    bool isFinished() const ;
 
-    void end(bool) override;
+    void end(bool) ;
 
-    const char *getName() const override { return "sentry turret CV"; }
+    const char *getName() const { return "sentry turret CV"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -156,7 +156,9 @@ public:
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
+    bool isAimingWithinLaunchingToleranceGirlboss() const { return withinAimingToleranceGirlboss; }
+    bool isAimingWithinLaunchingToleranceMalewife() const { return withinAimingToleranceMalewife; }
+
 
 private:
     serial::VisionCoprocessor &visionCoprocessor;
@@ -188,7 +190,8 @@ private:
 
     bool scanning = false;
 
-    bool withinAimingTolerance = false;
+    bool withinAimingToleranceGirlboss = false;
+    bool withinAimingToleranceMalewife = false;
 
     tap::arch::MilliTimeout ignoreTargetTimeout;
 

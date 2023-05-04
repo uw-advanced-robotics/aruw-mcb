@@ -232,13 +232,15 @@ void SentryImuCalibrateCommand::execute()
 
 void SentryImuCalibrateCommand::end(bool)
 {
-    for (auto &config : turretsAndControllers)
-    {
-        config.turret->yawMotor.setMotorOutput(0);
-        config.turret->pitchMotor.setMotorOutput(0);
-    }
+    // TODO: this bing commented out causes turrets to hold position when this deschedules
+    // change if you want
+    // for (auto &config : turretsAndControllers)
+    // {
+    //     config.turret->yawMotor.setMotorOutput(0);
+    //     config.turret->pitchMotor.setMotorOutput(0);
+    // }
 
-    turretMajor->yawMotor.setMotorOutput(0);
+    // turretMajor->yawMotor.setMotorOutput(0);
 }
 
 bool SentryImuCalibrateCommand::isFinished() const

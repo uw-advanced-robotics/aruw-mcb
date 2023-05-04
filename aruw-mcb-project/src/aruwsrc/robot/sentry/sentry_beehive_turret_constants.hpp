@@ -26,6 +26,7 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -75,12 +76,14 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     // .startEncoderValue = 3335,
-    .startEncoderValue = 4940,
-    .minAngle = modm::toRadian(-15),
+    // .startEncoderValue = 4940,
+    .startEncoderValue = 3285,
+    .minAngle = modm::toRadian(-12),
     .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
 
+// tap::communication::serial::RefSerialData::Rx::MechanismID BARREL_ID = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
 }
 
 namespace turretMinor1
@@ -100,11 +103,14 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     // .startEncoderValue = 2035,
-    .startEncoderValue = 6244,
-    .minAngle = modm::toRadian(-15),
+    // .startEncoderValue = 6244,
+    .startEncoderValue = 1900,
+    .minAngle = modm::toRadian(-12),
     .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
+
+// tap::communication::serial::RefSerialData::Rx::MechanismID BARREL_ID = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
 }
 

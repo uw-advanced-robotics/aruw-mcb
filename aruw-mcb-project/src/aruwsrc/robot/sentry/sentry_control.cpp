@@ -37,7 +37,7 @@
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
-// #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 // #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 // #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 // #include "aruwsrc/control/chassis/beyblade_command.hpp"
@@ -61,7 +61,7 @@
 // #include "aruwsrc/control/governor/pause_command_governor.hpp"
 // #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/imu/sentry_imu_calibrate_command.hpp"
-// #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -233,7 +233,7 @@ tap::motor::DjiMotor turretMinor0PitchMotor(
     drivers(),
     MOTOR5,
     turretMinor0::CAN_BUS_MOTORS,
-    false,
+    true,
     "Minor 0 Pitch Turret"
 );
 
@@ -249,7 +249,7 @@ tap::motor::DjiMotor turretMinor1PitchMotor(
     drivers(),
     MOTOR5,
     turretMinor1::CAN_BUS_MOTORS,
-    true,
+    false,
     "Minor 1 Pitch Turret"
 );
 
@@ -435,6 +435,16 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);  // @todo idk what they actually are
 
+// Agitators
+VelocityAgitatorSubsystem girlBossAgitator(
+    drivers(),
+    constants::AGITATOR_PID_CONFIG,
+    constants::turretMinor1::AGITATOR_CONFIG);
+
+VelocityAgitatorSubsystem maleWifeAgitator(
+    drivers(),
+    constants::AGITATOR_PID_CONFIG,
+    constants::turretMinor0::AGITATOR_CONFIG);
 // Odometry ----------------------------------------------------------------------------------
 
 SentryChassisWorldYawObserver sentryChassisWorldYawObserver(
@@ -561,6 +571,40 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
+
+// spin friction wheels command
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsGirlboss,
+    0000001.0f,
+    false,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+
+
+
+// agitator commands
+MoveIntegralCommand girlBossRotateAgitator(girlBossAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
+    *drivers(),
+    girlBossAgitator,
+    girlBossRotateAgitator,
+    girlBossUnjamAgitator);
+
+MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
+    *drivers(),
+    maleWifeAgitator,
+    maleWifeRotateAgitator,
+    maleWifeUnjamAgitator);
+
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     0000001.0f,
+//     false,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 // aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand turretMinor0ControlCommand(
 //     drivers(),
 //     &turretZero.turretSubsystem,
@@ -614,20 +658,12 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
 //     {&imuCalibrateCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&sentryTurretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // HoldCommandMapping leftSwitchDown(
 //     drivers(),
 //     {&turretMajorControlCommand, &chassisDriveCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // HoldCommandMapping leftSwitchMid(
 //     drivers(),
@@ -638,11 +674,26 @@ HoldCommandMapping leftSwitchDown(
 //     drivers(),
 //     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&sentryTurretCVCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+HoldCommandMapping rightSwitchUp(
+    drivers(),
+    {&girlBossFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 bool isInitialized = false;
 
@@ -664,6 +715,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     sentryTransforms.initialize();
     // turret
+    frictionWheelsGirlboss.initialize();
+    frictionWheelsMalewife.initialize();
  
     // leftFrontDriveMotor.setDesiredOutput(500);
     // leftFrontAzimuthMotor.setDesiredOutput(500);
@@ -693,6 +746,9 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&sentryTransforms);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
+
     // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
     // drivers->visionCoprocessor.attachTurretOrientationInterface()
@@ -734,7 +790,7 @@ void startSentryCommands(Drivers *drivers)
 void registerSentryIoMappings(Drivers *drivers)
 {
     // drivers->commandMapper.addMap(&rightSwitchDown);
-    // drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);

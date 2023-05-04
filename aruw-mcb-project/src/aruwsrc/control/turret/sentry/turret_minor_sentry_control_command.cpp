@@ -102,6 +102,7 @@ bool TurretMinorSentryControlCommand::isFinished() const
 }
 
 void TurretMinorSentryControlCommand::end(bool)
+// TODO: change this to do something other than hold position when we deschedule
 {
     turretMinorSubsystem.yawMotor.setMotorOutput(0);
     turretMinorSubsystem.pitchMotor.setMotorOutput(0);
