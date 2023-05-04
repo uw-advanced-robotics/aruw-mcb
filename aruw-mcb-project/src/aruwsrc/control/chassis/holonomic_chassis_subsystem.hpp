@@ -23,7 +23,7 @@
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/gpio/analog.hpp"
-#include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
@@ -58,7 +58,7 @@ class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystem
 public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -151,7 +151,7 @@ public:
 
     float desiredRotation = 0;
 
-    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 

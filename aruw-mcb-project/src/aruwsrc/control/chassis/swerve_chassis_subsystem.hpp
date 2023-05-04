@@ -62,12 +62,12 @@ class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 public:
     SwerveChassisSubsystem(
         tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         Module* moduleLeftFront,
         Module* moduleRightFront,
         Module* moduleLeftBack,
         Module* moduleRightBack,
-        const float forwardMatrixArray[24],
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        const float forwardMatrixArray[24]);
 
     void initialize() override;
 
