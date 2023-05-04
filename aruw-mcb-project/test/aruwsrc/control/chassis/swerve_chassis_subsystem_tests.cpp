@@ -20,8 +20,10 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/mock/swerve_module_mock.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -53,7 +55,13 @@ class SwerveChassisSubsystemTest : public Test
 {
 protected:
     SwerveChassisSubsystemTest()
-        : LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
+        : currentSensor(
+              {&drivers.analog,
+               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
           LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
           RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
           RFAz(&drivers, tap::motor::MOTOR4, CAN_BUS_MOTORS, false, "rf azimuth mock"),
@@ -65,7 +73,14 @@ protected:
           moduleRF(RFDr, RFAz, DEFAULT_SWERVE_CONFIG),
           moduleLB(LBDr, LBAz, DEFAULT_SWERVE_CONFIG),
           moduleRB(RBDr, RBAz, DEFAULT_SWERVE_CONFIG),
-          chassis(&drivers, &moduleLF, &moduleRF, &moduleLB, &moduleRB, SWERVE_FORWARD_MATRIX)
+          chassis(
+              &drivers,
+              &currentSensor,
+              &moduleLF,
+              &moduleRF,
+              &moduleLB,
+              &moduleRB,
+              SWERVE_FORWARD_MATRIX)
     {
     }
 
@@ -76,6 +91,7 @@ protected:
     }
 
     tap::Drivers drivers;
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     NiceMock<tap::mock::DjiMotorMock> LFDr;
     NiceMock<tap::mock::DjiMotorMock> LFAz;
     NiceMock<tap::mock::DjiMotorMock> RFDr;

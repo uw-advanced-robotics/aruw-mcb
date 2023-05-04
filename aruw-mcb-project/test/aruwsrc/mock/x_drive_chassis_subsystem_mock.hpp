@@ -31,7 +31,9 @@ namespace mock
 class XDriveChassisSubsystemMock : public aruwsrc::chassis::XDriveChassisSubsystem
 {
 public:
-    XDriveChassisSubsystemMock(aruwsrc::Drivers *drivers);
+    XDriveChassisSubsystemMock(
+        tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
     virtual ~XDriveChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

@@ -19,8 +19,10 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -39,7 +41,13 @@ class ChassisAutorotateCommandTest : public Test
 protected:
     ChassisAutorotateCommandTest()
         : drivers(),
-          chassis(&drivers),
+          currentSensor(
+              {&drivers.analog,
+               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          chassis(&drivers, &currentSensor),
           turret(&drivers),
           controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
@@ -55,6 +63,7 @@ protected:
     }
 
     tap::Drivers drivers;
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     NiceMock<MecanumChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
