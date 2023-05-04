@@ -21,7 +21,6 @@
 
 #ifdef ALL_STANDARDS
 
-#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
