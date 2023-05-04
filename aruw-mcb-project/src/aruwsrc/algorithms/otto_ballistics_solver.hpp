@@ -42,6 +42,7 @@
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transform_constants.hpp"
 // namespace aruwsrc::chassis
 // {
 // class HolonomicChassisSubsystem;
@@ -226,8 +227,9 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
             .velocity =
                 // chassis-forward is +x
                 // someone needs to check my math on the below two calculations
-                {aimData.pva.xVel - (chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw())), // need to subtract out rotational velocity of major
-                 aimData.pva.yVel - (chassisVel.y + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw())),
+                // @todo incorporate velocity into the transforms
+                {aimData.pva.xVel - (chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * aruwsrc::sentry::SENTRY_TRANSFORM_CONFIG.turretMinorOffset), // need to subtract out rotational velocity of major
+                 aimData.pva.yVel - (chassisVel.y + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * aruwsrc::sentry::SENTRY_TRANSFORM_CONFIG.turretMinorOffset),
                  aimData.pva.zVel},
             .acceleration =
                 {aimData.pva.xAcc,
