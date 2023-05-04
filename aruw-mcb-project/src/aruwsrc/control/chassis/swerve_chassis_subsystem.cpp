@@ -32,8 +32,8 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     Module* moduleLeftBack,
     Module* moduleRightBack,
     const float forwardMatrixArray[24],
-    tap::gpio::Analog::Pin currentPin)
-    : HolonomicChassisSubsystem(drivers, currentPin),
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    : HolonomicChassisSubsystem(drivers, currentSensor),
       NUM_MODULES(4),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
@@ -111,7 +111,7 @@ void SwerveChassisSubsystem::refresh()
 void SwerveChassisSubsystem::limitChassisPower()
 {
     // use power limiting object to compute initial power limiting fraction
-    currentSensor.update();
+    currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // short circuit if power limiting doesn't need to be applied

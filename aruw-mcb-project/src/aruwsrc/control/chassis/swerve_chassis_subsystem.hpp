@@ -67,7 +67,7 @@ public:
         Module* moduleLeftBack,
         Module* moduleRightBack,
         const float forwardMatrixArray[24],
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     void initialize() override;
 
