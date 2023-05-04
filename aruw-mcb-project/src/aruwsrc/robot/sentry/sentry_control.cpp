@@ -448,6 +448,7 @@ VelocityAgitatorSubsystem maleWifeAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
     constants::turretMinor0::AGITATOR_CONFIG);
+
 // Odometry ----------------------------------------------------------------------------------
 
 SentryChassisWorldYawObserver sentryChassisWorldYawObserver(

@@ -40,6 +40,8 @@
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 // namespace aruwsrc::chassis
 // {
 // class HolonomicChassisSubsystem;
@@ -48,11 +50,6 @@
 // namespace aruwsrc::control::turret
 // {
 // class RobotTurretSubsystem;
-// }
-
-// namespace aruwsrc::serial
-// {
-// class VisionCoprocessor;
 // }
 
 // namespace aruwsrc::control::launcher
@@ -124,24 +121,20 @@ public:
     }
 
     /**
-     * @param[in] drivers Pointer to a global drivers object.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
      * @param[in] turretSubsystem lol idk
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
-     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
-     * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
-        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const aruwsrc::control::turret::SentryTurretMajorSubsystem &turretMajor,
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
         const aruwsrc::sentry::SentryTransforms &transforms,  // @todo only used for getting timestamp, which is bad
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
-        const uint8_t turretID);
+        const float defaultLaunchSpeed);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -157,8 +150,8 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem &turretMajor;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
 
@@ -177,30 +170,27 @@ public:
 
 template<typename TurretFrame>
 OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem &turretMinor,  // @todo REALLY BAD
     const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
     const aruwsrc::sentry::SentryTransforms &transforms,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed,
-    const uint8_t turretID)
-    : visionCoprocessor(visionCoprocessor),
-      odometryInterface(odometryInterface),
+    const float defaultLaunchSpeed)
+    : odometryInterface(odometryInterface),
+      turretMajor(turretMajor),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       worldToTurret(worldToTurret),
-      transforms(transforms),
-      turretID(turretID)
+      transforms(transforms)
 {
 }
 
 template<typename TurretFrame>
 std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
-    computeTurretAimAngles() // TODO pass aim data as parameter rather than pulling from visioncoprocessor
+    computeTurretAimAngles(const TurretAimData& aimData)
 {
-    const auto &aimData = visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
-    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
+    if (!aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;
@@ -232,7 +222,7 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
             .velocity =
-                {aimData.pva.xVel - chassisVel.x, // need to subtract out rotational velocity of major
+                {aimData.pva.xVel - chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(), // need to subtract out rotational velocity of major
                  aimData.pva.yVel - chassisVel.y,
                  aimData.pva.zVel},
             .acceleration =

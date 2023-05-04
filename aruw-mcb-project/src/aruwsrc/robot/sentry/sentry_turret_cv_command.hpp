@@ -69,26 +69,13 @@ class SentryTurretCVCommand : public tap::control::Command
 {
 public:
     // TODO: config someplace
-    static constexpr float MINOR_TURRET_PITCH = modm::toRadian(0.0f);
+    static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(0.0f);
 
-    static constexpr float YAW_GIRLBOSS_MIN = modm::toRadian(10.0f);
-    // static constexpr float YAW_GIRLBOSS_MAX = modm::toRadian(10.0f);
-    static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
-    // static constexpr float YAW_MALEWIFE_MIN = modm::toRadian(10.0f);
-    /**
-     * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
-     * turret will turn around and start scanning around.
-     */
-    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(0.5f);
+    static constexpr float SCAN_GIRLBOSS_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_MALEWIFE_YAW = modm::toRadian(270.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in radians.
-     */
-    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.4f);
-
-    /**
-     * Yaw angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
     static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.3f);
@@ -185,15 +172,14 @@ private:
     /**
      * Handles scanning logic in the yaw direction
      */
-    aruwsrc::control::turret::cv::SetpointScanner yawGirlbossScanner;
-    aruwsrc::control::turret::cv::SetpointScanner yawMalewifeScanner;
-
     bool scanning = false;
+    tap::algorithms::WrappedFloat majorScanValue(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceGirlboss = false;
     bool withinAimingToleranceMalewife = false;
 
-    tap::arch::MilliTimeout ignoreTargetTimeout;
+    tap::arch::MilliTimeout girlbossIgnoreTargetTimeout;
+    tap::arch::MilliTimeout malewifeIgnoreTargetTimeout;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
@@ -206,20 +192,14 @@ private:
     /**
      * Initializes scanning mode.
      * 
-     * Sets the yaw scanners to the current setpoints of the turret minor controllers.
-     * @param girlbossYawSetpoint The current setpoint returned from the girlboss yaw controller.
-     * @param malewifeYawSetpoint The current setpoint returned from the malewife yaw controller.
+     * Sets the yaw scanner to the current setpoint of the turret major.
     */
-    inline void enterScanMode(float girlbossYawSetpoint, float malewifeYawSetpoint)
+    inline void enterScanMode(float majorYawSetpoint)
     {
-        // FIXME: coordinate yawSetpoints when entering scan
-        float yawSetpointGirlboss = yawControllerGirlboss.convertControllerAngleToChassisFrame(girlbossYawSetpoint);
-        float yawSetpointMalewife = yawControllerMalewife.convertControllerAngleToChassisFrame(malewifeYawSetpoint);
-
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        yawGirlbossScanner.setScanSetpoint(yawSetpointGirlboss);
-        yawMalewifeScanner.setScanSetpoint(yawSetpointMalewife);
+        // @todo set function for wrapped float that retains bounds
+        majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI)
     }
 
     inline void exitScanMode()
@@ -227,18 +207,6 @@ private:
         scanning = false;
         lostTargetCounter = 0;
     }
-
-    /**
-     * Performs a single scan iteration, updating the yaw setpoint based on the yaw
-     * setpoint scanners.
-     *
-     * @param[out] yawSetpoint The current yaw setpoint, which this function will update
-     */
-    void performScanIteration(
-        float &girlbossYawSetpoint, 
-        float &malewifeYawSetpoint, 
-        float &girlbossPitchSetpoint, 
-        float &malewifePitchSetpoint);
 };
 
 }  // namespace aruwsrc::control::turret::cv
