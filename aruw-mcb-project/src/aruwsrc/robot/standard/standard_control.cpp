@@ -136,13 +136,12 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor({
-    &drivers()->analog,
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+   {&drivers()->analog,
     aruwsrc::chassis::CURRENT_SENSOR_PIN,
     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-    aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA
-    });
+    aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
 
