@@ -20,8 +20,10 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
@@ -46,7 +48,14 @@ static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_
 class MecanumChassisSubsystemTest : public Test
 {
 protected:
-    MecanumChassisSubsystemTest() : chassis(&drivers) {}
+    MecanumChassisSubsystemTest()
+    : currentSensor(
+             {&drivers.analog,
+              aruwsrc::chassis::CURRENT_SENSOR_PIN,
+              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+              aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+      chassis(&drivers, &currentSensor) {}
 
     void SetUp() override
     {
@@ -55,6 +64,7 @@ protected:
     }
 
     tap::Drivers drivers;
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };

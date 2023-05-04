@@ -33,6 +33,7 @@ class SwerveChassisSubsystemMock : public aruwsrc::chassis::SwerveChassisSubsyst
 public:
     SwerveChassisSubsystemMock(
         tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,
