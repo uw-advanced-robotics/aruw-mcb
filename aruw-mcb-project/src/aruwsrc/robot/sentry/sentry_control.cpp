@@ -251,6 +251,7 @@ tap::motor::DjiMotor turretMinor1PitchMotor(
 
 aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
     drivers(),
+    &drivers()->mcbLite.currentSensor,
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,

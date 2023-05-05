@@ -156,6 +156,11 @@ private:
      */
     void setDesiredState(float metersPerSecond, float radianOutput);
 
+    /**
+     * calls setDesiredOutput() with the ___desiredOutput variable for each motor
+    */
+    void updateMotorOutputs(float driveOutput, float azimuthOutput);
+
     inline float wrapAngle(float angle, float denomination)
     {
         return fmod(
@@ -171,6 +176,7 @@ private:
 
     const float rotationVectorX, rotationVectorY;
     float rotationSetpoint, speedSetpointRPM;  // pid setpoints, in radians and rpm respectively
+    float azimuthDesiredOutput{0}, driveDesiredOutput{0};
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians, moveVectorX, moveVectorY;
 
