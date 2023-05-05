@@ -228,7 +228,16 @@ void SentryTurretCVCommand::execute()
         auto& worldToChassisTransform = sentryTransforms.getWorldToChassis();
         WrappedFloat majorYawWrapped = girlBossYawWrapped.minDifference(maleWifeYawWrapped);
 
-        majorYawWrapped /= -2.0f;
+        if (majorYawWrapped.getValue() < M_PI)
+        {
+            majorYawWrapped /= -2.0f;
+        }
+        else
+        {
+            majorYawWrapped /= 2.0f;
+            majorYawWrapped += WrappedFloat(M_PI, 0.0f, M_TWOPI);
+            majorYawWrapped /= -1.0f;
+        }
         majorYawWrapped += maleWifeYawWrapped;
         // majorYawWrapped = maleWifeYawWrapped - majorYawWrapped;
 
@@ -237,7 +246,6 @@ void SentryTurretCVCommand::execute()
 
         // // majorYawWrapped -= worldToChassisTransform.getYaw();
         // majorYawWrapped.shiftDown(worldToChassisTransform.getYaw());
-        // WrappedFloat majorChassisFrameSetpoint = 
         
 
         // transform to major frame
