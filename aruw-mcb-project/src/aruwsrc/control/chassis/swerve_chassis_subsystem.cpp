@@ -60,6 +60,11 @@ void SwerveChassisSubsystem::setZeroRPM()
     for (unsigned int i = 0; i < NUM_MODULES; i++) modules[i]->setZeroRPM();
 }
 
+void SwerveChassisSubsystem::refreshSafeDisconnect()
+{
+    setZeroRPM();
+}
+
 Module* SwerveChassisSubsystem::getModule(unsigned int i)
 {
     if (i >= NUM_MODULES) return nullptr;

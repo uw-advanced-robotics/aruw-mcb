@@ -81,6 +81,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
     const char* getName() override { return "Turret"; }
 
     void onHardwareTestStart() override;

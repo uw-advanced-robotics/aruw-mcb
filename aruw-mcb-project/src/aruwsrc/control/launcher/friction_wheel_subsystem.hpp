@@ -92,6 +92,8 @@ public:
      */
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;
