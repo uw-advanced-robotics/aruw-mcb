@@ -13,6 +13,17 @@ namespace aruwsrc::control
 class BarrelSwitchCommand : public tap::control::Command
 {
 public:
+
+    /**
+     * The state of the command, whether the barrel switching is being controlled 
+     * through manual input, or automatically using the HeatTrackers
+    */
+    enum class SwitchControlMode {
+        MANUAL_CONTROL,
+        AUTO_HEAT_CONTROL
+    };
+
+    //needs to take in two HeatTracker references once those are made
     BarrelSwitchCommand(aruwsrc::control::BarrelSwitcherSubsystem& barrelSwitcher)
         : barrelSwitcher(barrelSwitcher)
     {
@@ -29,8 +40,10 @@ public:
 
     const char* getName() const override { return "barrel switch command"; };
 private:
-    aruwsrc::control::BarrelSwitcherSubsystem& barrelSwitcher;
+    void switchBarrels();
 
+    aruwsrc::control::BarrelSwitcherSubsystem& barrelSwitcher;
+    SwitchControlMode controlMode;
 
 }; // class BarrelSwitchCommand
 } // namespace aruwsrc::control

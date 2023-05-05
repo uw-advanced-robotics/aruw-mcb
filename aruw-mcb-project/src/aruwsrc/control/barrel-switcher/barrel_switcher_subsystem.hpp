@@ -72,6 +72,7 @@ public:
     bool isStalled() const override;
     void setLowerBound() override;
     void setUpperBound() override;
+    bool isHomed();
     void moveTowardUpperBound() override;
     void moveTowardLowerBound() override;
     void stop() override;

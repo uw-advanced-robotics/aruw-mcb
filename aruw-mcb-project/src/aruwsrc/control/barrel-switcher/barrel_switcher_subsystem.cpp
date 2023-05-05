@@ -61,10 +61,10 @@ void BarrelSwitcherSubsystem::refresh()
             setMotorOutput(HOMING_MOTOR_OUTPUT);
             break;
         case BarrelState::USING_LEFT_BARREL:
-            updateMotorEncoderPid(&encoderPid, &motor, LEFT_BARREL_ENCODER_POSITION);
+            updateMotorEncoderPid(&encoderPid, &motor, 0);
             break;
         case BarrelState::USING_RIGHT_BARREL:
-            updateMotorEncoderPid(&encoderPid, &motor, RIGHT_BARREL_ENCODER_POSITION);
+            updateMotorEncoderPid(&encoderPid, &motor, motorUpperBound);
             break;
         case BarrelState::SWITCHING_BETWEEN_BARRELS:
             break;
@@ -101,6 +101,10 @@ void BarrelSwitcherSubsystem::setUpperBound()
 {
     motorUpperBound = motor.getEncoderUnwrapped();
     upperBoundSet = true;
+}
+
+bool BarrelSwitcherSubsystem::isHomed() {
+    return upperBoundSet && lowerBoundSet;
 }
 
 void BarrelSwitcherSubsystem::moveTowardUpperBound()

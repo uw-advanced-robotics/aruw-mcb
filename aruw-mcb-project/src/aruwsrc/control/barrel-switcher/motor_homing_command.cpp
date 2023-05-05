@@ -21,9 +21,7 @@
 
 namespace aruwsrc::control
 {
-/**
- * A command that homes a homeable subystem by finding and setting its upper and lower bound.
- */
+
 void MotorHomingCommand::initialize()
 {
     subsystem.moveTowardLowerBound();
@@ -62,11 +60,12 @@ void MotorHomingCommand::execute()
     }
 }
 
-void MotorHomingCommand::end(bool) { subsystem.stop(); }
-
 bool MotorHomingCommand::isFinished() const
 {
     return (homingState == HomingState::HOMING_COMPLETE);
 }
+
+void MotorHomingCommand::end(bool) { subsystem.stop(); }
+
 
 }  // namespace aruwsrc::control
