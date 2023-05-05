@@ -50,8 +50,8 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          visionCoprocessor(this),
-          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
+        //   visionCoprocessor(this),
+        //   oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500)
@@ -60,16 +60,16 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
-    testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
-    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
+    // testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
+    // testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    aruwsrc::serial::VisionCoprocessor visionCoprocessor;
-    display::OledDisplay oledDisplay;
+    // aruwsrc::serial::VisionCoprocessor visionCoprocessor;
+    // display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;

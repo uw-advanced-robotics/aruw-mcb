@@ -36,8 +36,6 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_autorotate_command.hpp"
@@ -56,7 +54,6 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
-#include "aruwsrc/robot/balstd/balstd_constants.hpp"
 #include "aruwsrc/robot/balstd/balstd_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
@@ -69,7 +66,6 @@ using namespace tap::control::governor;
 using namespace aruwsrc::control;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::balstd;
-using namespace aruwsrc::control::turret;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -166,20 +162,6 @@ BalancingLeg legRight(
     &rightWheel,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);
 
-aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
-    drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
-    frictionWheels,
-    14.0f,  // defaultLaunchSpeed
-    0       // turretID
-);
-
-auto_aim::AutoAimLaunchTimer autoAimLaunchTimer(
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-    &drivers()->visionCoprocessor,
-    &ballisticsSolver);
-
 // Turret controllers
 // algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
 //     turret.pitchMotor,
@@ -190,42 +172,49 @@ auto_aim::AutoAimLaunchTimer autoAimLaunchTimer(
 //     chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
-    world_rel_turret_imu::PITCH_POS_PID_CONFIG);
+    turret::world_rel_turret_imu::PITCH_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
-    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+    turret::world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
-    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+    turret::world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    getTurretMCBCanComm(),
-    turret.pitchMotor,
-    worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid);
+turret::algorithms::
+    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+        getTurretMCBCanComm(),
+        turret.pitchMotor,
+        worldFramePitchTurretImuPosPid,
+        worldFramePitchTurretImuVelPid);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
-    getTurretMCBCanComm(),
-    turret.pitchMotor,
-    worldFramePitchTurretImuPosPidCv,
-    worldFramePitchTurretImuVelPid);
+turret::algorithms::
+    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+        getTurretMCBCanComm(),
+        turret.pitchMotor,
+        worldFramePitchTurretImuPosPidCv,
+        worldFramePitchTurretImuVelPid);
 
-tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(
+    turret::world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(
+    turret::world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    getTurretMCBCanComm(),
-    turret.yawMotor,
-    worldFrameYawTurretImuPosPid,
-    worldFrameYawTurretImuVelPid);
+turret::algorithms::
+    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        worldFrameYawTurretImuPosPid,
+        worldFrameYawTurretImuVelPid);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
-    world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
-tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+    turret::world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(
+    turret::world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
-    getTurretMCBCanComm(),
-    turret.yawMotor,
-    worldFrameYawTurretImuPosPidCv,
-    worldFrameYawTurretImuVelPidCv);
+turret::algorithms::
+    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        worldFrameYawTurretImuPosPidCv,
+        worldFrameYawTurretImuVelPidCv);
 
 // BEGIN SUBSYSTEMS
 
@@ -238,7 +227,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
 
 aruwsrc::chassis::BalancingChassisSubsystem chassis(
     drivers(),
