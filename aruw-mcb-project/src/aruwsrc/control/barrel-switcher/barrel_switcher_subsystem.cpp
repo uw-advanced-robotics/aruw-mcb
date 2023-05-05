@@ -29,14 +29,14 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     aruwsrc::control::HomingConfig config,
     tap::motor::MotorId motorid)
     : HomeableSubsystemInterface(drivers),
-      config(config),
-      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor"),
       encoderPid(
           POSITION_PID_KP,
           POSITION_PID_KI,
           POSITION_PID_KD,
           POSITION_PID_MAX_ERROR_SUM,
-          POSITION_PID_MAX_OUTPUT)
+          POSITION_PID_MAX_OUTPUT),
+      config(config),
+      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
 {
 }
 

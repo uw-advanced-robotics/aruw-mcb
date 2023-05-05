@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/homeable_subsystem_interface.hpp"
+#include "aruwsrc/control/barrel-switcher/homeable_subsystem_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include <gmock/gmock.h>
@@ -84,6 +84,7 @@ private:
         tap::motor::DjiMotor* const motor,
         int32_t desiredEncoderPosition);
 
+    //FOR DEBUGGING, to be removed!
     int16_t outputDesiredDebug;
     int16_t torqueDebug;
     int16_t shaftRPMDebug;
@@ -95,11 +96,6 @@ private:
      */
     int32_t motorUpperBound;
 
-    /**
-     * stores the thresholds for shaftRPM and torque; used to indicate motor stall
-     */
-    aruwsrc::control::HomingConfig config;
-
     bool lowerBoundSet;
     bool upperBoundSet;
 
@@ -109,13 +105,18 @@ private:
     int32_t motorPosition;
 
     /**
-     * Stores the state of this barrel switcher's firing position; which barrel is in use
+     * Stores the state of this barrel switcher's state,
+     * including homing states and which barrel (left or right) is in use
      */
     BarrelState barrelState;
 
     modm::Pid<int32_t> encoderPid;
 
-private:
+    /**
+     * stores the thresholds for shaftRPM and torque; used to indicate motor stall
+     */
+    aruwsrc::control::HomingConfig config;
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<tap::mock::DjiMotorMock> motor;

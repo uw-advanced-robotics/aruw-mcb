@@ -25,7 +25,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/homeable_subsystem_interface.hpp"
+#include "aruwsrc/control/barrel-switcher/homeable_subsystem_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 

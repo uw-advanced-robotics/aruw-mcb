@@ -77,8 +77,8 @@
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 #ifdef TARGET_STANDARD_SPIDER
-#include "aruwsrc/control/barrel_switcher_subsystem.hpp"
-#include "aruwsrc/control/motor_homing_command.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/motor_homing_command.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
