@@ -35,12 +35,12 @@ namespace chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
-    tap::gpio::Analog::Pin currentPin)
-    : HolonomicChassisSubsystem(drivers, currentPin),
+    tap::motor::MotorId rightBackMotorId)
+    : HolonomicChassisSubsystem(drivers, currentSensor),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
@@ -111,7 +111,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     int NUM_MOTORS = getNumChassisMotors();
 
     // use power limiting object to compute initial power limiting fraction
-    currentSensor.update();
+    currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // short circuit if power limiting doesn't need to be applied

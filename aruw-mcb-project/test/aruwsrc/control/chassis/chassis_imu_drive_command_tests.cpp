@@ -21,8 +21,10 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
@@ -41,7 +43,13 @@ class ChassisImuDriveCommandTest : public Test
 protected:
     ChassisImuDriveCommandTest()
         : drivers(),
-          chassis(&drivers),
+          currentSensor(
+              {&drivers.analog,
+               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          chassis(&drivers, &currentSensor),
           controlOperatorInterface(&drivers),
           robotData{}
     {
@@ -70,6 +78,7 @@ protected:
     }
 
     tap::Drivers drivers;
+    tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     NiceMock<aruwsrc::mock::MecanumChassisSubsystemMock> chassis;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
