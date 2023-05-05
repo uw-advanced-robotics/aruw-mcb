@@ -34,8 +34,8 @@
 // #include "aruwsrc/communication/_command."
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
-#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
+// #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
+// #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -739,14 +739,21 @@ HoldCommandMapping leftSwitchUp(
 
 HoldCommandMapping leftSwitchMid(
     drivers(),
-    {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
+    {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand, &turretMajorControlCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 // re-map whenever you wanna recalibrate
+// TODO CHANGE BACK TEMP TO ALLOW SWERVE MANUAL DRIVE
+
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&imuCalibrateCommand},
+    {&chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 // HoldCommandMapping rightSwitchUp(
 //     drivers(),
