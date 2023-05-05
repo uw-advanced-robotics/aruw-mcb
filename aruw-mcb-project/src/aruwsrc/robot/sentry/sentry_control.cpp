@@ -33,7 +33,9 @@
 // #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 // #include "aruwsrc/communication/_command."
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_mcb_handler.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
+#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
+#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
 // #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 // #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -130,7 +132,7 @@ VirtualDjiMotor leftFrontDriveMotor(
     MOTOR1,
     aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.driveMotorInverted,
     "Left Front Swerve Drive Motor");
 
 VirtualDjiMotor leftFrontAzimuthMotor(
@@ -138,7 +140,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
     MOTOR5,
     aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
 
 VirtualDjiMotor rightFrontDriveMotor(
@@ -146,7 +148,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     MOTOR4,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor");
 
 VirtualDjiMotor rightFrontAzimuthMotor(
@@ -154,7 +156,7 @@ VirtualDjiMotor rightFrontAzimuthMotor(
     MOTOR8,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor");
 
 VirtualDjiMotor leftBackDriveMotor(
@@ -162,7 +164,7 @@ VirtualDjiMotor leftBackDriveMotor(
     MOTOR2,
     aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
 
 VirtualDjiMotor leftBackAzimuthMotor(
@@ -170,7 +172,7 @@ VirtualDjiMotor leftBackAzimuthMotor(
     MOTOR6,
     aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
 
 VirtualDjiMotor rightBackDriveMotor(
@@ -178,7 +180,7 @@ VirtualDjiMotor rightBackDriveMotor(
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.driveMotorInverted,
     "Right Back Swerve Drive Motor");
 
 VirtualDjiMotor rightBackAzimuthMotor(
@@ -186,7 +188,7 @@ VirtualDjiMotor rightBackAzimuthMotor(
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    false,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
@@ -269,6 +271,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 // Chassis
 aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
     drivers(),
+    &drivers()->mcbLite.currentSensor,
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,

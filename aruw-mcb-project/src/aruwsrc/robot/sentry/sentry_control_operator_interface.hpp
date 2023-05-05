@@ -35,6 +35,7 @@ class SentryControlOperatorInterface
 public:
     float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
     float DEFAULT_CHASSIS_Y_VELOCITY = 0.f;
+    float DEFAULT_CHASSIS_YAW_VELOCITY = 0.f;
     float DEFAULT_TURRET_MAJOR_VELOCITY = 0.f;
 
     /**
@@ -46,6 +47,7 @@ public:
     static constexpr float MAX_DECELERATION_Y = 20'000.0f;
     static constexpr float MAX_ACCELERATION_R = 10'000.0f; // TODO: change the values?
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
+    static constexpr float MAX_CHASSIS_YAW_SPEED = 200; // TODO: refine this
     static constexpr float MAX_TURRET_MAJOR_YAW_SPEED = 10; // TODO: refine this
     static constexpr float MAX_TURRET1_MINOR_YAW_SPEED = 10; // TODO: refine this
     static constexpr float MAX_TURRET2_MINOR_YAW_SPEED = 10; // TODO: refine this

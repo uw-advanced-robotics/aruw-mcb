@@ -117,8 +117,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     if (prevUpdateCounterChassisYInput != updateCounter)
     {
-        // coord system shift (-)
-        chassisYInput.update(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
+        chassisYInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
@@ -140,7 +139,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 }
 
 float SentryControlOperatorInterface::getChassisYawVelocity() {
-    if (!isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
+    if (!isDriveMode()) return DEFAULT_CHASSIS_YAW_VELOCITY;
     
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -155,7 +154,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
         prevUpdateCounterChassisYawInput = updateCounter;
     }
     
-    const float maxChassisYawSpeed = MAX_TURRET_MAJOR_YAW_SPEED;
+    const float maxChassisYawSpeed = MAX_CHASSIS_YAW_SPEED;
 
     float finalR = maxChassisYawSpeed *
                    limitVal(chassisYawInput.getInterpolatedValue(currTime), -1.0f, 1.0f);

@@ -30,12 +30,7 @@ SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleC
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),
-      drivePid(
-          config.drivePidKp,
-          config.drivePidKi,
-          config.drivePidKd,
-          config.drivePidMaxIntegralErrorSum,
-          config.drivePidMaxOutput),
+      drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
       rotationVectorY(config.positionWithinChassisX),
@@ -76,7 +71,7 @@ float SwerveModule::calculate(float x, float y, float r)
         newRawRotationSetpointRadians = atan2f(moveVectorY, moveVectorX);
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
-        // normal angle wrapping
+        // normal angle unwrapping
         if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
         {
             rotationOffset -=
@@ -117,11 +112,22 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpointRPM - getDriveRPM());
-    driveMotor.setDesiredOutput(drivePid.getValue());
+    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+
+    // updateMotorOutputs(drivePid.getOutput(), azimuthPid.getOutput());
+    driveDesiredOutput = drivePid.getOutput();
+    azimuthDesiredOutput = azimuthPid.getOutput();
+}
+
+void SwerveModule::updateMotorOutputs(float driveOutput, float azimuthOutput)
+{
+    driveDesiredOutput = driveOutput;
+    driveMotor.setDesiredOutput(driveDesiredOutput);
+
+    azimuthDesiredOutput = azimuthOutput;
+    azimuthMotor.setDesiredOutput(azimuthDesiredOutput);
 }
 
 float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
@@ -143,12 +149,13 @@ float SwerveModule::getAngularVelocity() const
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor.setDesiredOutput(
-        driveMotor.getOutputDesired() * frac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(
-        azimuthMotor.getOutputDesired() * frac *
-        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    updateMotorOutputs(driveDesiredOutput * (frac * frac), azimuthDesiredOutput * fmin(2.0f * frac , 1.0f));
+    // driveMotor.setDesiredOutput(
+    //     driveDesiredOutput * (frac * frac));// *
+        // (1 - angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle()))));
+    // azimuthMotor.setDesiredOutput(
+    //     azimuthDesiredOutput);// * fmin(2 , 1));// *
+    //     (angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle()))));
 }
 
 }  // namespace chassis
