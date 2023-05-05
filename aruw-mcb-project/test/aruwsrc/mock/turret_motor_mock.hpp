@@ -46,7 +46,7 @@ public:
     MOCK_METHOD(bool, isOnline, (), (const override));
     MOCK_METHOD(float, getChassisFrameSetpoint, (), (const override));
     MOCK_METHOD(
-        const tap::algorithms::ContiguousFloat &,
+        const tap::algorithms::WrappedFloat &,
         getChassisFrameMeasuredAngle,
         (),
         (const override));

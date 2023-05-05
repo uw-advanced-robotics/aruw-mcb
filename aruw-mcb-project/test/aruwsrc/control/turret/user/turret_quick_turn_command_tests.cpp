@@ -56,8 +56,8 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     TurretQuickTurnCommand turretUturnCommand180Deg(&turret, M_PI);
     TurretQuickTurnCommand turretUturnCommand90Deg(&turret2, M_PI_2);
 
-    tap::algorithms::ContiguousFloat turretYawValue(0, 0, M_TWOPI);
-    tap::algorithms::ContiguousFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat turretYawValue(0, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
 
     EXPECT_CALL(turret.yawMotor, attachTurretController(nullptr));
     ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
@@ -77,7 +77,7 @@ TEST_F(TurretQuickTurnCommandTest, successfully_registers_with_scheduler)
     tap::control::CommandScheduler commandScheduler(&drivers, true);
 
     EXPECT_CALL(turret.yawMotor, isOnline).WillOnce(Return(true));
-    tap::algorithms::ContiguousFloat currentYawValue(0, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat currentYawValue(0, 0, M_TWOPI);
     ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
         .WillByDefault(ReturnRef(currentYawValue));
 

@@ -107,8 +107,8 @@ TEST_F(TurretUserControlCommandTest, end_sets_motor_out_to_0)
 
 TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 {
-    tap::algorithms::ContiguousFloat yawActual(M_PI_2, 0, M_TWOPI);
-    tap::algorithms::ContiguousFloat pitchActual(M_PI_2, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat yawActual(M_PI_2, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat pitchActual(M_PI_2, 0, M_TWOPI);
     float yawSetpoint = M_PI_2;
     float pitchSetpoint = M_PI_2;
 
@@ -142,8 +142,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 {
     float pitchSetpoint = M_PI_2;
     float yawSetpoint = M_PI_2;
-    tap::algorithms::ContiguousFloat yawActual(M_PI_2, 0, M_TWOPI);
-    tap::algorithms::ContiguousFloat pitchActual(M_PI_2, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat yawActual(M_PI_2, 0, M_TWOPI);
+    tap::algorithms::WrappedFloat pitchActual(M_PI_2, 0, M_TWOPI);
     ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(1));
     ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
     ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)

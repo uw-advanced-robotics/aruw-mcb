@@ -131,8 +131,8 @@ float TurretMotor::getValidChassisMeasurementError() const
 float TurretMotor::getValidChassisMeasurementErrorWrapped() const
 {
     // equivalent to this - other
-    return ContiguousFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI)
-        .difference(chassisFrameSetpoint);
+    return WrappedFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI)
+        .minDifference(chassisFrameSetpoint).getValue();
 }
 
 float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
@@ -146,14 +146,14 @@ float TurretMotor::getValidMinError(const float setpoint, const float measuremen
     {
         // the error can be wrapped around the unit circle
         // equivalent to this - other
-        return ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+        return WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint).getValue();
     }
 }
 
 float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
 {
-    return ContiguousFloat(
-               ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint),
+    return WrappedFloat(
+               WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint).getValue(),
                -M_PI,
                M_PI)
                .getValue() +

@@ -161,7 +161,7 @@ TEST_F(
     {
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
-        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().difference(angle), 1E-3);
+        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle).getValue(), 1E-3);
     }
 }
 
@@ -223,7 +223,7 @@ TEST_F(
 TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
     uint16_t minEncoderValue =
-        ContiguousFloat(
+        WrappedFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI +
@@ -233,7 +233,7 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
             .getValue();
 
     uint16_t maxEncoderValue =
-        ContiguousFloat(
+        WrappedFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI -

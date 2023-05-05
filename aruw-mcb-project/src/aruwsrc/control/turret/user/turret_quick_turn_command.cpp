@@ -36,7 +36,7 @@ bool TurretQuickTurnCommand::isReady() { return turretSubsystem->yawMotor.isOnli
 
 void TurretQuickTurnCommand::initialize()
 {
-    float newSetpoint = tap::algorithms::ContiguousFloat(
+    float newSetpoint = tap::algorithms::WrappedFloat(
                             turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getValue() +
                                 targetOffsetToTurn,
                             0,

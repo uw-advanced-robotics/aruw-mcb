@@ -51,12 +51,12 @@ float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
         !operatorInterface->isSlowMode())
     {
         angleFromCenterForChassisAutorotate =
-            ContiguousFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getValue() + M_PI_4;
+            WrappedFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getValue() + M_PI_4;
     }
     else
     {
         angleFromCenterForChassisAutorotate =
-            ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+            WrappedFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
                 .getValue();
     }
     return angleFromCenterForChassisAutorotate;

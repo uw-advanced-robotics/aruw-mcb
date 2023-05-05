@@ -62,7 +62,7 @@ protected:
     tap::Drivers drivers;
     NiceMock<TurretSubsystemMock> turretSubsystem;
     float setpoint;
-    ContiguousFloat currentAngle;
+    WrappedFloat currentAngle;
 };
 
 class PitchControllerTest : public ChassisFrameTurretControllerTest
