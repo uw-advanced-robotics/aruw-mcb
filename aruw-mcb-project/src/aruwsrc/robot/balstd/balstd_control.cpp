@@ -52,6 +52,8 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/motor/tmotor_ak80-9.hpp"
 #include "aruwsrc/robot/balstd/balstd_drivers.hpp"
@@ -127,12 +129,17 @@ tap::motor::DjiMotor rightWheel(
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
-    PITCH_MOTOR_ID,
+    turret::PITCH_MOTOR_ID,
     turret::CAN_BUS_MOTORS,
     false,
     "Pitch Motor");
 
-tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, turret::CAN_BUS_MOTORS, true, "Yaw Motor");
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    turret::YAW_MOTOR_ID,
+    turret::CAN_BUS_MOTORS,
+    true,
+    "Yaw Motor");
 
 // END HARDWARE INIT
 
@@ -162,14 +169,39 @@ BalancingLeg legRight(
     &rightWheel,
     RIGHT_WHEEL_MOTOR_PID_CONFIG);
 
-// Turret controllers
-// algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-//     turret.pitchMotor,
-//     chassis_rel::PITCH_PID_CONFIG);
+// BEGIN SUBSYSTEMS
 
-// algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-//     turret.yawMotor,
-//     chassis_rel::YAW_PID_CONFIG);
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
+aruwsrc::chassis::BalancingChassisSubsystem chassis(
+    drivers(),
+    getTurretMCBCanComm(),
+    legLeft,
+    legRight);
+
+aruwsrc::control::turret::StandardTurretSubsystem turret(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    turret::PITCH_MOTOR_CONFIG,
+    turret::YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
+// Turret controllers
+turret::algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    turret.pitchMotor,
+    turret::chassis_rel::PITCH_PID_CONFIG);
+
+turret::algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    turret.yawMotor,
+    turret::chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     turret::world_rel_turret_imu::PITCH_POS_PID_CONFIG);
@@ -177,6 +209,8 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
     turret::world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     turret::world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidVc(
+    turret::world_rel_turret_imu::PITCH_VEL_PID_AUTO_AIM_CONFIG);
 
 turret::algorithms::
     WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
@@ -216,31 +250,31 @@ turret::algorithms::
         worldFrameYawTurretImuPosPidCv,
         worldFrameYawTurretImuVelPidCv);
 
-// BEGIN SUBSYSTEMS
+// commands
 
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheels(
-        drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-aruwsrc::chassis::BalancingChassisSubsystem chassis(
+// turret commands
+turret::user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
-    getTurretMCBCanComm(),
-    legLeft,
-    legRight);
+    drivers()->controlOperatorInterface,
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController,
+    turret::USER_YAW_INPUT_SCALAR,
+    turret::USER_PITCH_INPUT_SCALAR);
 
-aruwsrc::control::turret::StandardTurretSubsystem turret(
-    drivers(),
-    &pitchMotor,
-    &yawMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+// cv::TurretCVCommand turretCVCommand(
+//     &drivers()->visionCoprocessor,
+//     &drivers()->controlOperatorInterface,
+//     &turret,
+//     &worldFrameYawTurretImuControllerCv,
+//     &worldFramePitchTurretImuControllerCv,
+//     &ballisticsSolver,
+//     USER_YAW_INPUT_SCALAR,
+//     USER_PITCH_INPUT_SCALAR);
+
+turret::user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 BalancingChassisRelativeDriveCommand manualDriveCommand(
     drivers(),
@@ -253,11 +287,13 @@ BalancingChassisAutorotateCommand autorotateDriveCommand(
     drivers()->controlOperatorInterface,
     &turret.yawMotor);
 
-BalancingChassisAutorotateCommand autorotateDriveCommand(
+BalancingChassisBeybladeCommand beybladeDriveCommand(
     drivers(),
     &chassis,
     drivers()->controlOperatorInterface,
     &turret.yawMotor);
+
+// Map Commands
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -266,13 +302,24 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void registerTestbedSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&turret);
+    drivers->commandScheduler.registerSubsystem(&frictionWheels);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { chassis.initialize(); }
+void initializeSubsystems()
+{
+    chassis.initialize();
+    turret.initialize();
+    frictionWheels.initialize();
+}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultTestbedCommands(Drivers *) { chassis.setDefaultCommand(&manualDriveCommand); }
+void setDefaultTestbedCommands(Drivers *)
+{
+    chassis.setDefaultCommand(&autorotateDriveCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+}
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startTestbedCommands(Drivers *drivers) {}

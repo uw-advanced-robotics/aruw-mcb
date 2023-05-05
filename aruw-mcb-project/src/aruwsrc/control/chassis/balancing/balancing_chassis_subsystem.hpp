@@ -71,6 +71,8 @@ public:
 
     static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
+        static modm::Pair<int, float> lastComputedMaxWheelSpeed =
+            CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
         if (!refSerialOnline)
         {
             chassisPower = 0;
