@@ -40,7 +40,7 @@ TurretCVCommand::TurretCVCommand(
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
-    aruwsrc::algorithms::OttoBallisticsSolver<tap::algorithms::transforms::Frame> *ballisticsSolver,
+    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userYawInputScalar,
     const float userPitchInputScalar,
     uint8_t turretID)
@@ -94,7 +94,7 @@ void TurretCVCommand::execute()
             return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
         };
 
-        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver<tap::algorithms::transforms::Frame>::withinAimingTolerance(
+        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             differenceWrapped(yawController->getMeasurement(), yawSetpoint),
             differenceWrapped(pitchController->getMeasurement(), pitchSetpoint),
             ballisticsSolution->distance);

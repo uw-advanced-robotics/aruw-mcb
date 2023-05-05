@@ -217,8 +217,8 @@ void SentryTurretCVCommand::execute()
     }
     
     // major averaging
-if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std::nullopt &&
-    girlbossIgnoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt) {
+    if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std::nullopt &&
+            girlbossIgnoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt) {
         WrappedFloat girlBossYawWrapped(girlbossBallisticsSolution->yawAngle, 0, M_TWOPI);
         WrappedFloat maleWifeYawWrapped(malewifeBallisticsSolution->yawAngle, 0, M_TWOPI);
 
