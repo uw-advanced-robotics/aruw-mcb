@@ -1,3 +1,4 @@
+#ifndef TARGET_SENTRY_BEEHIVE
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -135,3 +136,4 @@ void TurretCVCommand::end(bool)
 }
 
 }  // namespace aruwsrc::control::turret::cv
+#endif

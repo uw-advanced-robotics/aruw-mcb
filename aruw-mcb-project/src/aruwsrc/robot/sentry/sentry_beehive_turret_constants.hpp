@@ -44,10 +44,10 @@ namespace turretMajor
 {
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 5667,  // 6162
     .minAngle = 0,
-    .maxAngle = M_PI,
+    .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
 };
 
@@ -66,8 +66,11 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 6842,
+    // .startEncoderValue = 1375,
     .minAngle = modm::toRadian(-210),
     .maxAngle = modm::toRadian(30),    
+    // .minAngle = modm::toRadian(-210),
+    // .maxAngle = modm::toRadian(30),    
     // .minAngle = modm::toRadian(-0),
     // .maxAngle = modm::toRadian(1),
     .limitMotorAngles = true,

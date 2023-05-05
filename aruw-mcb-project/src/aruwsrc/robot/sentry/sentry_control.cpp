@@ -478,24 +478,28 @@ SentryTransformsSubsystem sentryTransforms(
 // Otto ballistics solver --------------------------------------------------------------------
 
 OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
-    drivers()->visionCoprocessor,
+    // drivers()->visionCoprocessor,
     odometrySubsystem,
+    turretMajor,
     sentryTransforms.getWorldToTurretGirlboss(),
     sentryTransforms,
     // turretMinorGirlboss,
     frictionWheelsGirlboss,
-    14.0f,  // defaultLaunchSpeed
-    0);
+    14.0f,
+    0.145);  // defaultLaunchSpeed
+    // 0);
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
-    drivers()->visionCoprocessor,
+    // drivers()->visionCoprocessor,
     odometrySubsystem,
+    turretMajor,
     sentryTransforms.getWorldToTurretMalewife(),
     sentryTransforms,
     // turretMinorMalewife,
     frictionWheelsMalewife,
-    14.0f,  // defaultLaunchSpeed
-    1);
+    14.0f,
+    -0.145);  // defaultLaunchSpeed
+    // 1);
 
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and things like that.
 // What if controllers were mix-ins for susbsystems or something?
@@ -704,10 +708,10 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionW
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&turretMajorControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+// HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&turretMajorControlCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // for controlling turret major
 // HoldCommandMapping rightSwitchDown(
@@ -736,16 +740,20 @@ HoldCommandMapping leftSwitchMid(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 // re-map whenever you wanna recalibrate
-// HoldCommandMapping leftSwitchDown(
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+// HoldCommandMapping rightSwitchUp(
 //     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+//     {&girlBossFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping rightSwitchUp(
     drivers(),
     {&girlBossFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
 bool isInitialized = false;
 
 

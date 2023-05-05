@@ -1,3 +1,4 @@
+#ifndef TARGET_SENTRY_BEEHIVE
 /*
  * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -91,3 +92,4 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
 }
 }  // namespace aruwsrc::control::auto_aim
+#endif

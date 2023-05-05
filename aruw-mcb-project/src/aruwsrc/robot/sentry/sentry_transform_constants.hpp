@@ -1,5 +1,6 @@
+#ifndef SENTRY_TRANSFORM_CONSTANTS_HPP_
+#define SENTRY_TRANSFORM_CONSTANTS_HPP_
 #include "sentry_transforms.hpp"
-
 
 namespace aruwsrc::sentry
 {
@@ -9,3 +10,4 @@ SentryTransforms::TransformConfig SENTRY_TRANSFORM_CONFIG{
 };
 
 }
+#endif // SENTRY_TRANSFORMS_CONSTANTS_HPP_

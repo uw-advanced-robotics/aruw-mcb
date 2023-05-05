@@ -35,6 +35,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 namespace tap::control::odometry
 {
@@ -72,13 +73,13 @@ public:
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(0.0f);
 
     static constexpr float SCAN_GIRLBOSS_YAW = modm::toRadian(90.0f);
-    static constexpr float SCAN_MALEWIFE_YAW = modm::toRadian(270.0f);
+    static constexpr float SCAN_MALEWIFE_YAW = modm::toRadian(-90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.3f);
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.2f);  // 0.3
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
@@ -146,7 +147,9 @@ public:
     bool isAimingWithinLaunchingToleranceGirlboss() const { return withinAimingToleranceGirlboss; }
     bool isAimingWithinLaunchingToleranceMalewife() const { return withinAimingToleranceMalewife; }
 
-
+    WrappedFloat debug1 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    WrappedFloat debug2 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    WrappedFloat debug3 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
@@ -173,7 +176,7 @@ private:
      * Handles scanning logic in the yaw direction
      */
     bool scanning = false;
-    tap::algorithms::WrappedFloat majorScanValue(0.0f, 0.0f, M_TWOPI);
+    tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceGirlboss = false;
     bool withinAimingToleranceMalewife = false;
@@ -199,7 +202,7 @@ private:
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
         // @todo set function for wrapped float that retains bounds
-        majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI)
+        majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI);
     }
 
     inline void exitScanMode()

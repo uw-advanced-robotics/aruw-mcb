@@ -42,7 +42,7 @@
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_transform_constants.hpp"
+// #include "aruwsrc/robot/sentry/sentry_transform_constants.hpp"
 // namespace aruwsrc::chassis
 // {
 // class HolonomicChassisSubsystem;
@@ -135,7 +135,8 @@ public:
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
         const aruwsrc::sentry::SentryTransforms &transforms,  // @todo only used for getting timestamp, which is bad
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed);
+        const float defaultLaunchSpeed,
+        const float turretToMajorRadius);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -165,7 +166,8 @@ private:
     std::optional<BallisticsSolution> lastComputedSolution = {};
 
 public:
-    const uint8_t turretID;
+    // const uint8_t turretID;
+    const float turretToMajorRadius;
 }; // ottoballisticssolver
 
 
@@ -177,13 +179,15 @@ OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
     const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
     const aruwsrc::sentry::SentryTransforms &transforms,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed)
+    const float defaultLaunchSpeed,
+    const float turretToMajorRadius)
     : odometryInterface(odometryInterface),
       turretMajor(turretMajor),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       worldToTurret(worldToTurret),
-      transforms(transforms)
+      transforms(transforms),
+    turretToMajorRadius(turretToMajorRadius)
 {
 }
 
@@ -228,8 +232,8 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                 // chassis-forward is +x
                 // someone needs to check my math on the below two calculations
                 // @todo incorporate velocity into the transforms
-                {aimData.pva.xVel - (chassisVel.x + turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * aruwsrc::sentry::SENTRY_TRANSFORM_CONFIG.turretMinorOffset), // need to subtract out rotational velocity of major
-                 aimData.pva.yVel - (chassisVel.y + turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * aruwsrc::sentry::SENTRY_TRANSFORM_CONFIG.turretMinorOffset),
+                {aimData.pva.xVel - (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * turretToMajorRadius), // need to subtract out rotational velocity of major
+                 aimData.pva.yVel - (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * turretToMajorRadius),
                  aimData.pva.zVel},
             .acceleration =
                 {aimData.pva.xAcc,
