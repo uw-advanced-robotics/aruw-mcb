@@ -570,8 +570,8 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlbossFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsGirlboss,
-    0000001.0f,
-    false,
+    0.1f,
+    true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 
