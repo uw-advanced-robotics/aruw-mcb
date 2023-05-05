@@ -32,10 +32,10 @@ namespace aruwsrc::control
  * A command whose job is to locate and set the upper and lower bounds of the motor in a homeable
  * subsystem. When this command is scheduled, it performs the following actions:
  * 1. Command the motor to move toward its lower bound.
- * 2. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * 2. Constantly detect the motion of the motor until it stalls. Then, set the lower
  * bound to its position at this point.
  * 3. Command the motor to move in the opposite direction.
- * 4. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * 4. Constantly detect the motion of the motor and until it stalls. Then, set the lower
  * bound to its position at this point.
  * 5. At this point, the motor homing is complete. End the command.
  */
