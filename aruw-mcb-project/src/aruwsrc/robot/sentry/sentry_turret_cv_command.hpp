@@ -120,8 +120,8 @@ public:
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver,
         aruwsrc::sentry::SentryTransforms& sentryTransforms); // @todo: pass in needed transforms, not
 
     void initialize() ;
@@ -146,10 +146,9 @@ public:
      */
     bool isAimingWithinLaunchingToleranceGirlboss() const { return withinAimingToleranceGirlboss; }
     bool isAimingWithinLaunchingToleranceMalewife() const { return withinAimingToleranceMalewife; }
+    // for the satisfaction of the CVOnTargetGovernor
+    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const { return (turretID == 0) ? withinAimingToleranceGirlboss : withinAimingToleranceMalewife; }
 
-    WrappedFloat debug1 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
-    WrappedFloat debug2 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
-    WrappedFloat debug3 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
@@ -165,8 +164,8 @@ private:
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife;
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
 
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver;
 
     aruwsrc::sentry::SentryTransforms& sentryTransforms;
 
@@ -176,7 +175,7 @@ private:
      * Handles scanning logic in the yaw direction
      */
     bool scanning = false;
-    tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    tap::algorithms::WrappedFloat majorScanValue = tap::algorithms::WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceGirlboss = false;
     bool withinAimingToleranceMalewife = false;

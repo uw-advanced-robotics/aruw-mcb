@@ -49,8 +49,8 @@ SentryTurretCVCommand::SentryTurretCVCommand(
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &malewifeBallisticsSolver,
         aruwsrc::sentry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       turretMajorSubsystem(turretMajorSubsystem),
@@ -227,10 +227,6 @@ if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std
 
         auto& worldToChassisTransform = sentryTransforms.getWorldToChassis();
         WrappedFloat majorYawWrapped = girlBossYawWrapped.minDifference(maleWifeYawWrapped);
-
-        debug1 = majorYawWrapped;
-        debug2 = girlBossYawWrapped;
-        debug3 = maleWifeYawWrapped;
 
         majorYawWrapped /= -2.0f;
         majorYawWrapped += maleWifeYawWrapped;

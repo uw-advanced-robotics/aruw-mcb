@@ -40,14 +40,6 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 // #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 // #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-// #include "aruwsrc/control/chassis/beyblade_command.hpp"
-// #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-// #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-// #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 // #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -61,6 +53,7 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 // #include "aruwsrc/control/governor/pause_command_governor.hpp"
 // #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 
 #include "aruwsrc/control/imu/sentry_imu_calibrate_command.hpp"
@@ -438,8 +431,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);  // @todo idk what they actually are
 
-// Agitators
-VelocityAgitatorSubsystem girlBossAgitator(
+// Agitators ----------------------------------------------------------------------------------
+VelocityAgitatorSubsystem girlbossAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
     constants::turretMinor1::AGITATOR_CONFIG);
@@ -477,29 +470,23 @@ SentryTransformsSubsystem sentryTransforms(
 
 // Otto ballistics solver --------------------------------------------------------------------
 
-OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
-    // drivers()->visionCoprocessor,
+OttoBallisticsSolver girlbossBallisticsSolver(
     odometrySubsystem,
     turretMajor,
-    sentryTransforms.getWorldToTurretGirlboss(),
     sentryTransforms,
-    // turretMinorGirlboss,
     frictionWheelsGirlboss,
     14.0f,
-    0.145);  // defaultLaunchSpeed
-    // 0);
+    0.145,  // defaultLaunchSpeed
+    0);
 
-OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
-    // drivers()->visionCoprocessor,
+OttoBallisticsSolver malewifeBallisticsSolver(
     odometrySubsystem,
-    turretMajor,
-    sentryTransforms.getWorldToTurretMalewife(),
+    turretMajor,  // @todo we should just get rid of templates in transforms
     sentryTransforms,
-    // turretMinorMalewife,
     frictionWheelsMalewife,
     14.0f,
-    -0.145);  // defaultLaunchSpeed
-    // 1);
+    -0.145,  // defaultLaunchSpeed
+    1);
 
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and things like that.
 // What if controllers were mix-ins for susbsystems or something?
@@ -564,7 +551,7 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
-// random command
+// Turret control cv
 aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     drivers()->visionCoprocessor,
     turretMajor,
@@ -579,9 +566,8 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
-
-// spin friction wheels commands
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
+// Friction wheel commands
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlbossFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsGirlboss,
     0000001.0f,
@@ -589,61 +575,68 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionW
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
 
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     0000001.0f,
+//     false,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
+
+// Agitator commands (girl boss) -------------------------------------------------------------------------
+// @todo: is it necessary to stack the governors in sequence or can we stack all at once at the end?
+MoveIntegralCommand girlbossRotateAgitator(girlbossAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand girlbossUnjamAgitator(girlbossAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand girlbossRotateAndUnjamAgitator(
+    *drivers(),
+    girlbossAgitator,
+    girlbossRotateAgitator,
+    girlbossUnjamAgitator);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
+    drivers()->refSerial,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+
+ManualFireRateReselectionManager girlbossManualFireRateReselectionManager;
+FireRateLimitGovernor fireRateLimitGovernorGirlboss(girlbossManualFireRateReselectionManager);
+
+FrictionWheelsOnGovernor girlbossFrictionWheelsOnGovernor(frictionWheelsGirlboss);
+// FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife(frictionWheelsMalewife);
+
+GovernorLimitedCommand<3> girlbossRotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernorGirlboss, &girlbossFrictionWheelsOnGovernor, &fireRateLimitGovernorGirlboss});
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor girlbossHeatLimitGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    constants::HEAT_LIMIT_BUFFER);
+
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&girlbossHeatLimitGovernor});
+
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &girlbossBallisticsSolver);
+
+// rotates agitator when aiming at target and within heat limit
+CvOnTargetGovernor girlbossCvOnTargetGovernor(
     drivers(),
-    &frictionWheelsMalewife,
-    0000001.0f,
-    false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    drivers()->visionCoprocessor,
+    sentryTurretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    0);
 
-
-
-// FrictionWheelsOnGovernor frictionWheelsOnGovernorGirlboss(frictionWheelsGirlboss);
-
-// // Agitator commands (girl boss)
-// MoveIntegralCommand girlBossRotateAgitator(girlBossAgitator, constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
-//     *drivers(),
-//     girlBossAgitator,
-//     girlBossRotateAgitator,
-//     girlBossUnjamAgitator);
-
-// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
-//     drivers()->refSerial,
-//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-
-// ManualFireRateReselectionManager manualFireRateReselectionManagerGirlboss;
-// FireRateLimitGovernor fireRateLimitGovernorGirlboss(manualFireRateReselectionManagerGirlboss);
-
-// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss(
-//     {&girlBossAgitator},
-//     girlBossRotateAndUnjamAgitator,
-//     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
-
-// // rotates agitator with heat limiting applied
-// HeatLimitGovernor heatLimitGovernorGirlboss(
-//     *drivers(),
-//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-//     constants::HEAT_LIMIT_BUFFER);
-
-// GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
-//     {&girlBossAgitator},
-//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-//     {&heatLimitGovernorGirlboss});
-
-// // rotates agitator when aiming at target and within heat limit
-// CvOnTargetGovernor cvOnTargetGovernorGirlboss(
-//     ((tap::Drivers *)(drivers())),
-//     drivers()->visionCoprocessor,
-//     turretCVCommand,
-//     autoAimLaunchTimer,
-//     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
-
-// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
-//     {&girlBossAgitator},
-//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-//     {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+GovernorLimitedCommand<2> girlbossRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&girlbossHeatLimitGovernor, &girlbossCvOnTargetGovernor});
 
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -669,12 +662,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionW
 //     &turretOne.chassisFramePitchTurretController,
 //     USER_YAW_INPUT_SCALAR,
 // );
-// aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-//     drivers(),
-//     &drivers()->controlOperatorInterface,
-//     &sentryDrive,
-//     &turretMajor.yawMotor,
-//     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 
 // void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
@@ -701,11 +688,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionW
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
 //     true);
 
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 
 // HoldCommandMapping leftSwitchDown(
@@ -745,14 +727,9 @@ HoldCommandMapping leftSwitchDown(
     {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-// HoldCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&girlBossFrictionWheelSpinCommand},
+    {&girlbossRotateAndUnjamAgitatorWithHeatAndCVLimiting, &girlbossFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 bool isInitialized = false;
 
@@ -761,12 +738,6 @@ bool isInitialized = false;
 void initializeSubsystems()
 {
     sentryDrive.initialize();
-    // turretZero.agitator.initialize();
-    // turretZero.frictionWheels.initialize();
-    // turretZero.turretSubsystem.initialize();
-    // turretOne.agitator.initialize();
-    // turretOne.frictionWheels.initialize();
-    // turretOne.turretSubsystem.initialize();
 
     turretMajor.initialize();
     turretMinorGirlboss.initialize();
@@ -776,17 +747,7 @@ void initializeSubsystems()
     // turret
     frictionWheelsGirlboss.initialize();
     frictionWheelsMalewife.initialize();
- 
-    // leftFrontDriveMotor.setDesiredOutput(500);
-    // leftFrontAzimuthMotor.setDesiredOutput(500);
-    // rightFrontDriveMotor.setDesiredOutput(500);
-    // rightFrontAzimuthMotor.setDesiredOutput(500);
-    // leftBackDriveMotor.setDesiredOutput(500);
-    // leftBackAzimuthMotor.setDesiredOutput(500);
-    // rightBackDriveMotor.setDesiredOutput(500);
-    // rightBackAzimuthMotor.setDesiredOutput(500);
 
-    // rightFrontDriveMotor.initialize();
     isInitialized = true;
 }
 
@@ -796,23 +757,16 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&sentryDrive);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretMinorGirlboss);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&sentryTransforms);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
+    drivers->commandScheduler.registerSubsystem(&girlbossAgitator);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
 
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface()
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 
 }
 

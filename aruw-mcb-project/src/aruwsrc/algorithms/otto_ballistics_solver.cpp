@@ -1,132 +1,104 @@
-// /*
-//  * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
-//  *
-//  * This file is part of aruw-mcb.
-//  *
-//  * aruw-mcb is free software: you can redistribute it and/or modify
-//  * it under the terms of the GNU General Public License as published by
-//  * the Free Software Foundation, either version 3 of the License, or
-//  * (at your option) any later version.
-//  *
-//  * aruw-mcb is distributed in the hope that it will be useful,
-//  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  * GNU General Public License for more details.
-//  *
-//  * You should have received a copy of the GNU General Public License
-//  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-//  */
+#include "otto_ballistics_solver.hpp"
 
-// #include "otto_ballistics_solver.hpp"
 
-// #include "tap/algorithms/ballistics.hpp"
-// #include "tap/algorithms/math_user_utils.hpp"
-// #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+using namespace tap::algorithms;
+namespace aruwsrc::algorithms
+{
 
-// #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-// #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-// #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
-// #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-// #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+OttoBallisticsSolver::OttoBallisticsSolver(
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const aruwsrc::control::turret::SentryTurretMajorSubsystem &turretMajor,
+    const aruwsrc::sentry::SentryTransforms &transforms,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const float defaultLaunchSpeed,
+    const float turretToMajorRadius,
+    uint8_t turretID)
+    : odometryInterface(odometryInterface),
+      turretMajor(turretMajor),
+      frictionWheels(frictionWheels),
+      defaultLaunchSpeed(defaultLaunchSpeed),
+      transforms(transforms),
+      turretToMajorRadius(turretToMajorRadius),
+      turretID(turretID)
+{
+}
 
-// using namespace tap::algorithms;
-// using namespace modm;
+std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
+    computeTurretAimAngles(const aruwsrc::serial::VisionCoprocessor::TurretAimData& aimData)
+{
+    // Verify that CV is actually online and that the aimData had a target
+    if (!aimData.pva.updated)
+    {
+        lastComputedSolution = std::nullopt;
+        return std::nullopt;
+    }
 
-// namespace aruwsrc::algorithms
-// {
-// template<typename TurretFrame>
-// OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
-//     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-//     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-//     const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, TurretFrame> &worldToTurret,
-//     const aruwsrc::sentry::SentryTransforms &transforms,
-//     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-//     const float defaultLaunchSpeed,
-//     const uint8_t turretID)
-//     : visionCoprocessor(visionCoprocessor),
-//       odometryInterface(odometryInterface),
-//       worldToTurret(worldToTurret),
-//       lastOdometryTimestamp(lastOdometryTimestamp),
-//       frictionWheels(frictionWheels),
-//       defaultLaunchSpeed(defaultLaunchSpeed),
-//       turretID(turretID)
-// {
-// }
+    if (lastAimDataTimestamp != aimData.timestamp ||
+        lastOdometryTimestamp != transforms.lastComputedTimestamp())
+    {
+        lastAimDataTimestamp = aimData.timestamp;
+        lastOdometryTimestamp = transforms.lastComputedTimestamp();
 
-// template<typename TurretFrame>
-// std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> OttoBallisticsSolver<TurretFrame>::
-//     computeTurretAimAngles()
-// {
-//     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
-//     // Verify that CV is actually online and that the aimData had a target
-//     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
-//     {
-//         lastComputedSolution = std::nullopt;
-//         return std::nullopt;
-//     }
+        // if the friction wheel launch speed is 0, use a default launch speed so ballistics
+        // gives a reasonable computation
+        float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
+        if (tap::algorithms::compareFloatClose(launchSpeed, 0.0f, 1e-5f))
+        {
+            launchSpeed = defaultLaunchSpeed;
+        }
 
-//     if (lastAimDataTimestamp != aimData.timestamp ||
-//         lastOdometryTimestamp != transforms.lastComputedTimestamp())
-//     {
-//         lastAimDataTimestamp = aimData.timestamp;
-//         lastOdometryTimestamp = transforms.lastComputedTimestamp();
+        modm::Vector3f turretPosition = modm::Vector3f(transforms.getWorldToTurretX(turretID), transforms.getWorldToTurretY(turretID), 0);
+        const modm::Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
-//         // if the friction wheel launch speed is 0, use a default launch speed so ballistics
-//         // gives a reasonable computation
-//         float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
-//         if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
-//         {
-//             launchSpeed = defaultLaunchSpeed;
-//         }
+        // target state, frame whose axis is at the turret center and z is up
+        // assume acceleration of the chassis is 0 since we don't measure it
+        auto& worldToMajor = transforms.getWorldToTurretMajor();
 
-//         modm::Vector3f turretPosition = modm::Vector3f(worldToTurret.getX(), worldToTurret.getY(), 0);
-//         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
+        ballistics::MeasuredKinematicState targetState = {
+            .position =
+                {aimData.pva.xPos - turretPosition.x,
+                 aimData.pva.yPos - turretPosition.y,
+                 aimData.pva.zPos - turretPosition.z},
+            .velocity =
+                // chassis-forward is +x
+                // someone needs to check my math on the below two calculations
+                // @todo incorporate velocity into the transforms
+                {aimData.pva.xVel - (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * turretToMajorRadius), // need to subtract out rotational velocity of major
+                 aimData.pva.yVel - (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * turretToMajorRadius),
+                 aimData.pva.zVel},
+            .acceleration =
+                {aimData.pva.xAcc,
+                 aimData.pva.yAcc,
+                 aimData.pva.zAcc},  // TODO consider using chassis
+                                     // acceleration from IMU
+        };
 
-//         // target state, frame whose axis is at the turret center and z is up
-//         // assume acceleration of the chassis is 0 since we don't measure it
+        // time in microseconds to project the target position ahead by
+        int64_t projectForwardTimeDt =
+            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+            static_cast<int64_t>(aimData.timestamp);
 
-//         ballistics::MeasuredKinematicState targetState = {
-//             .position =
-//                 {aimData.pva.xPos - turretPosition.x,
-//                  aimData.pva.yPos - turretPosition.y,
-//                  aimData.pva.zPos - turretPosition.z},
-//             .velocity =
-//                 {aimData.pva.xVel - chassisVel.x,
-//                  aimData.pva.yVel - chassisVel.y,
-//                  aimData.pva.zVel},
-//             .acceleration =
-//                 {aimData.pva.xAcc,
-//                  aimData.pva.yAcc,
-//                  aimData.pva.zAcc},  // TODO consider using chassis
-//                                      // acceleration from IMU
-//         };
+        // project the target position forward in time s.t. we are computing a ballistics solution
+        // for a target "now" rather than whenever the camera saw the target
+        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
 
-//         // time in microseconds to project the target position ahead by
-//         int64_t projectForwardTimeDt =
-//             static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-//             static_cast<int64_t>(aimData.timestamp);
+        lastComputedSolution = BallisticsSolution();
+        lastComputedSolution->distance = targetState.position.getLength();
 
-//         // project the target position forward in time s.t. we are computing a ballistics solution
-//         // for a target "now" rather than whenever the camera saw the target
-//         targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+        if (!ballistics::findTargetProjectileIntersection(
+                targetState,
+                launchSpeed,
+                3,
+                &lastComputedSolution->pitchAngle,
+                &lastComputedSolution->yawAngle,
+                &lastComputedSolution->timeOfFlight,
+                transforms.getWorldToTurretPitch(turretID)))
+        {
+            lastComputedSolution = std::nullopt;
+        }
+    }
 
-//         lastComputedSolution = BallisticsSolution();
-//         lastComputedSolution->distance = targetState.position.getLength();
+    return lastComputedSolution;
+}
 
-//         if (!ballistics::findTargetProjectileIntersection(
-//                 targetState,
-//                 launchSpeed,
-//                 3,
-//                 &lastComputedSolution->pitchAngle,
-//                 &lastComputedSolution->yawAngle,
-//                 &lastComputedSolution->timeOfFlight,
-//                 // turretSubsystem.getPitchOffset())
-//                 0.0f))
-//         {
-//             lastComputedSolution = std::nullopt;
-//         }
-//     }
-
-//     return lastComputedSolution;
-// }
-// }  // namespace aruwsrc::algorithms
+}

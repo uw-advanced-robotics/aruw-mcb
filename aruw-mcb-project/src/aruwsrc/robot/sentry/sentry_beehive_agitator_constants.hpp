@@ -49,7 +49,7 @@ namespace turretMinor0
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
     .isAgitatorInverted = false,
     /**
      * The jamming constants. Agitator is considered jammed if difference between setpoint

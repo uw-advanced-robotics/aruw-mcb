@@ -1,4 +1,3 @@
-#ifndef TARGET_SENTRY_BEEHIVE
 /*
  * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -28,7 +27,7 @@ AutoAimLaunchTimer::AutoAimLaunchTimer(
     // TODO: to get this to build, we're gonna need to pass some identifier that tells us which aim data to pull from in the coprocessor
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics)
+    aruwsrc::algorithms::OttoBallisticsSolver *ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
       ballistics(ballistics)
@@ -54,7 +53,8 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::GATED_DENY;
     }
 
-    auto ballisticsSolution = ballistics->computeTurretAimAngles();
+    // @note everything's recomputed again???!?
+    auto ballisticsSolution = ballistics->computeTurretAimAngles(aimData);
     if (!ballisticsSolution.has_value())
     {
         return LaunchInclination::GATED_DENY;
@@ -92,4 +92,3 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
 }
 }  // namespace aruwsrc::control::auto_aim
-#endif

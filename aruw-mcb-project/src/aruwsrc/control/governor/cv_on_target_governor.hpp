@@ -25,6 +25,7 @@
 
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -39,6 +40,8 @@ enum class CvOnTargetGovernorMode
     ON_TARGET_AND_GATED
 };
 
+// @todo modified for sentry; massive refactors are necessary to adapt this to be generalized
+// the problem is just that all these massive classes are passed in just for a couple functionalities
 /**
  * A governor that allows a Command to run when a TurretCVCommand has acquired and is aiming at a
  * target.
@@ -49,14 +52,16 @@ public:
     CvOnTargetGovernor(
         tap::Drivers *drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
+        aruwsrc::control::turret::SentryTurretCVCommand &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
-        CvOnTargetGovernorMode mode)
+        CvOnTargetGovernorMode mode,
+        uint8_t turretID)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand),
           launchTimer(launchTimer),
-          mode(mode)
+          mode(mode),
+          turretID(turretID)
     {
     }
 
@@ -85,7 +90,7 @@ public:
      */
     mockable bool inShotTimingMode() const
     {
-        bool gating = launchTimer.getCurrentLaunchInclination(0) ==  // @todo BADBADBADBADBADBADBAD
+        bool gating = launchTimer.getCurrentLaunchInclination(turretID) ==
                       AutoAimLaunchTimer::LaunchInclination::UNGATED;
         return isGovernorGating() && !gating;
     }
@@ -97,7 +102,7 @@ public:
             return true;
         }
 
-        bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
+        bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance(turretID);
         if (!isOnTarget)
         {
             return false;
@@ -108,8 +113,7 @@ public:
 
     mockable bool isGateSatisfied()
     {
-        auto autoLaunchInclination =
-            launchTimer.getCurrentLaunchInclination(0);  // @todo BADBADBADBADBADBAD
+        auto autoLaunchInclination = launchTimer.getCurrentLaunchInclination(turretID);
         switch (autoLaunchInclination)
         {
             case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
@@ -136,10 +140,11 @@ public:
 private:
     tap::Drivers *drivers;
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
+    aruwsrc::control::turret::SentryTurretCVCommand &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
     bool enabled = true;
+    uint8_t turretID;
 };
 }  // namespace aruwsrc::control::governor
 

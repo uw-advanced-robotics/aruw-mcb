@@ -25,6 +25,7 @@ class TurretMinorMalewifeFrame : tap::algorithms::transforms::Frame {};
 
 
 // @todo incorporate velocities? for example, the otto ballistics solver requires chassis velocity
+// @todo remove templates; makes it impossible for other classes to internally store references to transforms
 class SentryTransforms
 {
 public:
@@ -48,6 +49,11 @@ public:
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() const { return worldToTurretMajor; };
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
+
+    // @todo EXTREMELY HACKY SOLUTION for the fact that transforms cannot be passed into otto ballistics solver without screwing over everything
+    inline const float& getWorldToTurretX(uint8_t turretID) const { return (turretID == 0) ? worldToTurretMalewife.getX() : worldToTurretGirlboss.getX(); };
+    inline const float& getWorldToTurretY(uint8_t turretID) const { return (turretID == 0) ? worldToTurretMalewife.getY() : worldToTurretGirlboss.getY(); };
+    inline const float& getWorldToTurretPitch(uint8_t turretID) const { return (turretID == 0) ? worldToTurretMalewife.getPitch() : worldToTurretGirlboss.getPitch(); };
 
     inline const uint32_t lastComputedTimestamp() const { return lastComputedTime; };
 

@@ -52,13 +52,13 @@ public:
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics;
+    aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
 
 public:
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics);
+        aruwsrc::algorithms::OttoBallisticsSolver *ballistics);  // @todo REALLY BAD
 
     /**
      * Compute a firing inclination for the current time and specified turret.
