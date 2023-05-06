@@ -42,7 +42,7 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
 
 void BarrelSwitcherSubsystem::initialize()
 {
-    barrelState = BarrelState::SWITCHING_BETWEEN_BARRELS;
+    barrelState = BarrelState::BETWEEN_BARRELS;
     motor.initialize();
 }
 
@@ -54,11 +54,19 @@ void BarrelSwitcherSubsystem::refresh()
     stalled = this->isStalled();
     switch (barrelState)
     {
-        case BarrelState::HOMING_TOWARD_LOWER_BOUND:
+        case BarrelState::MOVING_TOWARD_LOWER_BOUND:
             setMotorOutput(-HOMING_MOTOR_OUTPUT);
+            if(this->isHomed() && motor.getEncoderUnwrapped() <= 0)
+            {
+                this->barrelState = BarrelState::USING_LEFT_BARREL;
+            }
             break;
-        case BarrelState::HOMING_TOWARD_UPPER_BOUND:
+        case BarrelState::MOVING_TOWARD_UPPER_BOUND:
             setMotorOutput(HOMING_MOTOR_OUTPUT);
+            if(this->isHomed() && motor.getEncoderUnwrapped() >= 0)
+            {
+                this->barrelState = BarrelState::USING_RIGHT_BARREL;
+            }
             break;
         case BarrelState::USING_LEFT_BARREL:
             updateMotorEncoderPid(&encoderPid, &motor, 0);
@@ -66,7 +74,7 @@ void BarrelSwitcherSubsystem::refresh()
         case BarrelState::USING_RIGHT_BARREL:
             updateMotorEncoderPid(&encoderPid, &motor, motorUpperBound);
             break;
-        case BarrelState::SWITCHING_BETWEEN_BARRELS:
+        case BarrelState::BETWEEN_BARRELS:
             break;
     }
 }
@@ -109,18 +117,18 @@ bool BarrelSwitcherSubsystem::isHomed() {
 
 void BarrelSwitcherSubsystem::moveTowardUpperBound()
 {
-    barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
+    barrelState = BarrelState::MOVING_TOWARD_UPPER_BOUND;
 }
 
 void BarrelSwitcherSubsystem::moveTowardLowerBound()
 {
-    barrelState = BarrelState::HOMING_TOWARD_LOWER_BOUND;
+    barrelState = BarrelState::MOVING_TOWARD_LOWER_BOUND;
 }
 
 void BarrelSwitcherSubsystem::stop()
 {
     this->setMotorOutput(0);
-    barrelState = BarrelState::SWITCHING_BETWEEN_BARRELS;
+    barrelState = BarrelState::USING_RIGHT_BARREL;
 }
 
 void BarrelSwitcherSubsystem::updateMotorEncoderPid(

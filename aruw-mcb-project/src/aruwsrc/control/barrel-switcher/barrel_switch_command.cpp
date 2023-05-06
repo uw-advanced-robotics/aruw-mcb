@@ -2,30 +2,16 @@
 
 namespace aruwsrc::control {
 
-    void BarrelSwitchCommand::initialize() {
-        controlMode = SwitchControlMode::MANUAL_CONTROL;
-    }
-
     void BarrelSwitchCommand::execute() {
-        switch(controlMode) {
-            case (SwitchControlMode::MANUAL_CONTROL):
-            {
-                
-                break;
-            }
-            case (SwitchControlMode::AUTO_HEAT_CONTROL):
-            {
-
-                break;
-            }
+        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
+            barrelSwitcher.moveTowardUpperBound();
+        } else {
+            barrelSwitcher.moveTowardLowerBound();
         }
+        finished = true;
     }
 
     bool BarrelSwitchCommand::isFinished() const {
-        return false;
-    }
-
-    void BarrelSwitchCommand::end(bool interrupt) {
-        barrelSwitcher.stop();
+        return finished;
     }
 } // namespace aruwsrc::control

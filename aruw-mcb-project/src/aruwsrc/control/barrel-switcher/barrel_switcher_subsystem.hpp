@@ -52,11 +52,11 @@ static constexpr int32_t RIGHT_BARREL_ENCODER_POSITION = 0;
 
 enum class BarrelState
 {
-    HOMING_TOWARD_LOWER_BOUND,
-    HOMING_TOWARD_UPPER_BOUND,
+    MOVING_TOWARD_LOWER_BOUND,
+    MOVING_TOWARD_UPPER_BOUND,
     USING_LEFT_BARREL,
     USING_RIGHT_BARREL,
-    SWITCHING_BETWEEN_BARRELS
+    BETWEEN_BARRELS //at a position that is neither left nor right barrel
 };
 
 class BarrelSwitcherSubsystem : public aruwsrc::control::HomeableSubsystemInterface
@@ -76,6 +76,8 @@ public:
     void moveTowardUpperBound() override;
     void moveTowardLowerBound() override;
     void stop() override;
+    void useRightBarrel();
+    void useLeftBarrel();
     BarrelState getBarrelState();
 
 private:
