@@ -123,7 +123,6 @@ public:
         }
 
         FrameHeader header;
-        uint16_t messageType;
         uint8_t data[DATA_SIZE];
         uint16_t CRC16;
     } modm_packed;

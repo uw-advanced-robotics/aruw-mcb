@@ -19,6 +19,8 @@
 
 #include "mavlink_receiver.hpp"
 
+#include "tap/errors/create_errors.hpp"
+
 using namespace tap::communication::serial;
 
 /**
@@ -60,6 +62,86 @@ void MavlinkReceiver::initialize()
             break;
         default:
             break;
+    }
+}
+
+void MavlinkReceiver::updateSerial()
+{
+    switch (mavlinkSerialRxState)
+    {
+        case SERIAL_HEADER_SEARCH:
+        {
+            // keep scanning for the head byte as long as you are here and have not yet found it.
+            while (mavlinkSerialRxState == SERIAL_HEADER_SEARCH &&
+                   READ(&newMessage.header.headByte, 1))
+            {
+                // we found it, store the head byte
+                if (newMessage.header.headByte == SERIAL_HEAD_BYTE)
+                {
+                    mavlinkSerialRxState = PROCESS_FRAME_HEADER;
+                    frameCurrReadByte = 0;
+                }
+            }
+            break;
+        }
+        case PROCESS_FRAME_HEADER:  // the frame header consists of the length, seq, and message id
+        {
+            frameCurrReadByte += READ(
+                reinterpret_cast<uint8_t *>(&newMessage) + frameCurrReadByte + 1,
+                sizeof(newMessage.header) - frameCurrReadByte - 1);
+
+            // We have the complete message header in the frameHeader buffer
+            if (frameCurrReadByte == sizeof(newMessage.header) - 1)
+            {
+                frameCurrReadByte = 0;
+
+                if (newMessage.header.dataLength >= SERIAL_RX_BUFF_SIZE)
+                {
+                    mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
+                    RAISE_ERROR(drivers, "received message length longer than allowed max");
+                    return;
+                }
+
+                // move on to processing message body
+                mavlinkSerialRxState = PROCESS_FRAME_DATA;
+            }
+            break;
+            case PROCESS_FRAME_DATA:  // READ bulk of message
+            {
+                int bytesToRead = newMessage.header.dataLength;
+
+                frameCurrReadByte += READ(
+                    reinterpret_cast<uint8_t *>(&newMessage) + sizeof(newMessage.header) +
+                        frameCurrReadByte,
+                    bytesToRead - frameCurrReadByte);
+
+                if (frameCurrReadByte == bytesToRead)
+                {
+                    if (newMessage.CRC16 !=
+                        tap::algorithms::calculateCRC16(
+                            reinterpret_cast<uint8_t *>(&newMessage),
+                            sizeof(newMessage.header) + newMessage.header.dataLength))
+                    {
+                        mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
+                        RAISE_ERROR(drivers, "CRC16 failure");
+                        return;
+                    }
+
+                    mostRecentMessage = newMessage;
+
+                    messageReceiveCallback(mostRecentMessage);
+
+                    mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
+                }
+                else if (frameCurrReadByte > bytesToRead)
+                {
+                    frameCurrReadByte = 0;
+                    RAISE_ERROR(drivers, "Invalid message length");
+                    mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
+                }
+                break;
+            }
+        }
     }
 }
 
