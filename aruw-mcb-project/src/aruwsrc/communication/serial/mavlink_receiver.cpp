@@ -119,8 +119,9 @@ void MavlinkReceiver::updateSerial()
                 {
                     if (newMessage.CRC16 !=
                         tap::algorithms::calculateCRC16(
-                            reinterpret_cast<uint8_t *>(&newMessage),
-                            sizeof(newMessage.header) + newMessage.header.dataLength))
+                            reinterpret_cast<uint8_t *>(&newMessage) +
+                                1,  // We ignore the head byte
+                            sizeof(newMessage.header) - 1 + newMessage.header.dataLength))
                     {
                         mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(drivers, "CRC16 failure");
