@@ -124,8 +124,9 @@ void BalancingChassisAutorotateCommand::execute()
         chassis->setDesiredOutput(
             operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
             operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
-        chassis->setDesiredHeight(0.001 * operatorInterface.getTurretPitchInput(0));
     }
+    chassis->setDesiredHeight(
+        0.01 * drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
 }
 
 float BalancingChassisAutorotateCommand::getAutorotationSetpoint(float turretAngleFromCenter)

@@ -20,18 +20,23 @@
 #include "balancing_chassis_subsystem.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 namespace aruwsrc::chassis
 {
 BalancingChassisSubsystem::BalancingChassisSubsystem(
     tap::Drivers* drivers,
     aruwsrc::can::TurretMCBCanComm& turretMCB,
+    const aruwsrc::control::turret::TurretMotor& pitchMotor,
+    const aruwsrc::control::turret::TurretMotor& yawMotor,
     BalancingLeg& leftLeg,
     BalancingLeg& rightLeg,
     tap::gpio::Analog::Pin currentPin)
     : Subsystem(drivers),
       rotationPid(AUTOROTATION_PID),
       turretMCB(turretMCB),
+      pitchMotor(pitchMotor),
+      yawMotor(yawMotor),
       currentSensor(
           {&drivers->analog,
            currentPin,
@@ -83,6 +88,8 @@ void BalancingChassisSubsystem::refresh()
     leftLeg.setChassisYaw(desiredR, yawRate);
     // Right leg values are negated due to fun LQR logic
     rightLeg.setChassisYaw(-desiredR, -yawRate);
+    leftLeg.setChassisAngle(pitch, pitchRate);
+    rightLeg.setChassisAngle(pitch, pitchRate);
 
     // 4. run outputs
     leftLeg.setDesiredTranslationSpeed(desiredV);  // m/s
@@ -92,16 +99,23 @@ void BalancingChassisSubsystem::refresh()
     rightLeg.update();
     // do this here for safety. Only called once per subsystem. Don't arm leg motors until wheel
     // motors are also online.
-    if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline())
+    if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline() && armed)
     {
-        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
-            ->sendCanMessage();
-        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
-            ->sendCanMessage();
-        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
-            ->sendCanMessage();
-        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
-            ->sendCanMessage();
+        // static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
+        //     ->sendCanMessage();
+        // static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
+        //     ->sendCanMessage();
+        // static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
+        //     ->sendCanMessage();
+        // static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
+        //     ->sendCanMessage();
+        // if (!rightLeg.getArmState()) rightLeg.armLeg();
+        // if (!leftLeg.getArmState()) leftLeg.armLeg();
+    }
+    else
+    {
+        rightLeg.disarmLeg();
+        leftLeg.disarmLeg();
     }
 }
 
@@ -111,9 +125,23 @@ void BalancingChassisSubsystem::computeState()
     uint32_t dt = curTime - prevTime;
     prevTime = curTime;
 
-    pitch = turretMCB.getPitch();
-    roll = drivers->mpu6500.getPitch() * M_TWOPI / 360;
-    yaw = turretMCB.getYaw();
+    // Value from [0, 2Pi]
+    float currentTurretPitch = pitchMotor.getChassisFrameMeasuredAngle().getValue() -
+                               aruwsrc::control::turret::PITCH_MOTOR_CONFIG.startAngle;
+    if (currentTurretPitch > M_PI) currentTurretPitch -= M_TWOPI;
+    float currentTurretYaw = yawMotor.getChassisFrameUnwrappedMeasuredAngle();
+    if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
+
+    pitch = modm::toRadian(drivers->mpu6500.getRoll());
+    roll = modm::toRadian(drivers->mpu6500.getPitch());
+    yaw = modm::toRadian(drivers->mpu6500.getYaw());
+
+    float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
+    pitchPrev = pitch;
+    // chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .3);
+    pitchRate = lowPassFilter(pitchRate, modm::toRadian(drivers->mpu6500.getGx()), .2);
+    yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    yawPrev = yaw;
 
     velocityRamper.update(dt / 1000 * MAX_ACCELERATION);
     desiredV = velocityRamper.getTarget();
@@ -129,9 +157,6 @@ void BalancingChassisSubsystem::computeState()
     currentZ = rightLeg.getCurrentHeight() > leftLeg.getCurrentHeight()
                    ? rightLeg.getCurrentHeight()
                    : leftLeg.getCurrentHeight();
-
-    yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
-    yawPrev = yaw;
 
     currentX = (leftLeg.getWheelPos() + rightLeg.getWheelPos()) / 2;
     if (desiredV == 0 && prevVdesired != 0)

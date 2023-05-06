@@ -77,7 +77,7 @@ void BalancingLeg::update()
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
     xoffset = xPid.runControllerDerivateError(vDesired, dt);
-    // xoffset = .01;
+    xoffset = .00;
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
     if (!isFallen)
@@ -108,6 +108,13 @@ void BalancingLeg::update()
     float lqrYawRate = LQR_K6 * chassisYawRate;
     float wheelTorque = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
 
+    debug1 = lqrPos;
+    debug2 = lqrVel;
+    debug3 = lqrPitch;
+    debug4 = lqrPitchRate;
+    debug5 = lqrYaw;
+    debug6 = lqrYawRate;
+
     wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
     // float wheelCurrent =
     //     -(-52 * (-tl_desired + tl) - 10 * tl_dot - 5 * chassisSpeed / WHEEL_RADIUS);
@@ -125,16 +132,19 @@ void BalancingLeg::update()
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     // debug1 = driveWheelOutput;
-    driveWheel->setDesiredOutput(driveWheelOutput);
-    fivebar->setDesiredPosition(desiredWheelLocation);
-    fivebar->refresh();
-    fivebarController(dt / 1000);
+    if (armed)
+    {
+        driveWheel->setDesiredOutput(driveWheelOutput);
+        fivebar->setDesiredPosition(desiredWheelLocation);
+        fivebar->refresh();
+        fivebarController(dt / 1000);
+    }
 }
 
 void BalancingLeg::fivebarController(uint32_t dt)
 {
     float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
-    float B = chassisMCB.getPitch();
+    float B = chassisAngle;
     float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
                    cos(fivebar->getMotor1RelativePosition()) *
                    ((fivebar->getCurrentPosition().getX() + (L * cos(B) / 2)) / L * cos(B)) *
@@ -166,11 +176,7 @@ void BalancingLeg::fivebarController(uint32_t dt)
 
 void BalancingLeg::computeState(uint32_t dt)
 {
-    chassisAngle = lowPassFilter(chassisAnglePrev, chassisMCB.getPitch(), 1);
-    float chassisAngledotNew = (chassisAngle - chassisAnglePrev) * 1'000'000 / dt;
-    chassisAnglePrev = chassisAngle;
-    // chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .3);
-    chassisAngledot = lowPassFilter(chassisAngledot, chassisMCB.getPitchVelocity(), .2);
+ 
 
     zCurrent = fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
                fivebar->getCurrentPosition().getY() * cos(chassisAngle);

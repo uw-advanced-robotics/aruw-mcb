@@ -104,6 +104,12 @@ public:
         chassisPosDesired = chassisposdesired;
     }
 
+    inline void setChassisAngle(float chassisangle, float chassisanglerate)
+    {
+        chassisAngle = chassisangle;
+        chassisAngledot = chassisanglerate;
+    }
+
     /**
      * @brief Get the linear position of the wheel
      *
@@ -141,6 +147,11 @@ public:
      */
     void update();
 
+    inline void armLeg() { armed = true; };
+    inline void disarmLeg() { armed = false; };
+    inline void toggleArm() { armed ? armed = false : armed = true; };
+    inline bool getArmState() { return armed; };
+
 private:
     tap::Drivers* drivers;
     /**
@@ -162,8 +173,6 @@ private:
 
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController(uint32_t dt);
-
-    const float KpPosVel = 0.2;
 
     /* Pointers to required actuators */
 
@@ -213,6 +222,8 @@ private:
 
     uint32_t prevTime = 0;
 
+    bool armed = false;
+
     // debugging variables for when I'm too much of a bitch to turn the robot on
     float xdes = 0;
     float iwdes = 0;
@@ -223,8 +234,8 @@ private:
     float debug5;
     float debug6;
 
-    float zDesired,  // (m) world-frame height of the chassis
-        zCurrent;    // (m)
+    float zDesired,                                       // (m) world-frame height of the chassis
+        zCurrent = fivebar->getDefaultPosition().getY();  // (m)
 
     float vDesired;  // (m/s) world-frame leg speed in the x-direciton
     float vDesiredPrev;

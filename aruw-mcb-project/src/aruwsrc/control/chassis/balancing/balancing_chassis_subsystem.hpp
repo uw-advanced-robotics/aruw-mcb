@@ -27,6 +27,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 #include "balancing_leg.hpp"
 
@@ -38,6 +39,8 @@ public:
     BalancingChassisSubsystem(
         tap::Drivers* drivers,
         aruwsrc::can::TurretMCBCanComm& turretMCB,
+        const aruwsrc::control::turret::TurretMotor& pitchMotor,
+        const aruwsrc::control::turret::TurretMotor& yawMotor,
         BalancingLeg& leftLeg,
         BalancingLeg& rightLeg,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
@@ -71,8 +74,7 @@ public:
 
     static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
-        static modm::Pair<int, float> lastComputedMaxWheelSpeed =
-            CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
+        static modm::Pair<int, float> lastComputedMaxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
         if (!refSerialOnline)
         {
             chassisPower = 0;
@@ -90,15 +92,23 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
+    inline void armChassis() { armed = true; };
+    inline void disarmChassis() { armed = false; };
+    inline void toggleArm() { armed ? armed = false : armed = true; };
+    inline bool getArmState() { return armed; };
+
     tap::algorithms::SmoothPid rotationPid;
 
 private:
+    bool armed = false;
     tap::algorithms::Ramp velocityRamper;
     static constexpr float MAX_ACCELERATION = 4;  // m/s/s
 
     void computeState();
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
+    const aruwsrc::control::turret::TurretMotor& pitchMotor;
+    const aruwsrc::control::turret::TurretMotor& yawMotor;
 
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
@@ -114,6 +124,8 @@ private:
     float targetPitch;
 
     float pitch;
+    float pitchPrev;
+    float pitchRate;
     float roll;
     float yaw;
     float yawPrev;
