@@ -22,6 +22,8 @@
 
 #include <cassert>
 
+#include "aruwsrc/control/governor/heat_tracker.hpp"
+
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
 
@@ -38,59 +40,16 @@ public:
         tap::Drivers &drivers,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
         const uint16_t heatLimitBuffer)
-        : drivers(drivers),
-          firingSystemMechanismID(firingSystemMechanismID),
-          heatLimitBuffer(heatLimitBuffer)
+        : heatTracker(drivers, firingSystemMechanismID, heatLimitBuffer)
     {
     }
 
-    bool isReady() final { return enoughHeatToLaunchProjectile(); }
+    bool isReady() final { return heatTracker.enoughHeatToLaunchProjectile(); }
 
-    bool isFinished() final { return !enoughHeatToLaunchProjectile(); }
+    bool isFinished() final { return !heatTracker.enoughHeatToLaunchProjectile(); }
 
 private:
-    tap::Drivers &drivers;
-
-    const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
-
-    const uint16_t heatLimitBuffer;
-
-    bool enoughHeatToLaunchProjectile() const
-    {
-        if (!drivers.refSerial.getRefSerialReceivingData())
-        {
-            return true;
-        }
-
-        const auto &robotData = drivers.refSerial.getRobotData();
-
-        uint16_t heat = 0, heatLimit = 0;
-
-        switch (firingSystemMechanismID)
-        {
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                heat = robotData.turret.heat17ID1;
-                heatLimit = robotData.turret.heatLimit17ID1;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                heat = robotData.turret.heat17ID2;
-                heatLimit = robotData.turret.heatLimit17ID2;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                heat = robotData.turret.heat42;
-                heatLimit = robotData.turret.heatLimit42;
-                break;
-            default:
-                // don't perform heat limiting
-                heat = 0;
-                heatLimit = heatLimitBuffer;
-        }
-
-        const bool heatBelowLimit = heat + heatLimitBuffer <= heatLimit;
-
-        return !tap::communication::serial::RefSerial::heatAndLimitValid(heat, heatLimit) ||
-               heatBelowLimit;
-    }
+    aruwsrc::control::governor::HeatTracker heatTracker;
 };
 }  // namespace aruwsrc::control::governor
 
