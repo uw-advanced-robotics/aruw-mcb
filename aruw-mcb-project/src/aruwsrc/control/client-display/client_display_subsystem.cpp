@@ -24,4 +24,6 @@
 namespace aruwsrc::control::client_display
 {
 ClientDisplaySubsystem::ClientDisplaySubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
+
+void ClientDisplaySubsystem::refreshSafeDisconnect() {}
 }  // namespace aruwsrc::control::client_display

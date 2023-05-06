@@ -89,6 +89,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
     /**
      * @return The angle set in `setSetpoint`.
      */

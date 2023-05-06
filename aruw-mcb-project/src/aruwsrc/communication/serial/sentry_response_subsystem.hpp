@@ -52,6 +52,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
 private:
     tap::Drivers &drivers;
     aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand;

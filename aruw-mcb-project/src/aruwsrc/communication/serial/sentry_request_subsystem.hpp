@@ -39,6 +39,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override;
+
     inline mockable void queueRequest(SentryRequestMessageType type)
     {
         sentryRequestTransmitter.queueRequest(type);

@@ -36,6 +36,8 @@ public:
 
     void playNoise();
 
+    void refreshSafeDisconnect() override;
+
     void stop();
 };
 

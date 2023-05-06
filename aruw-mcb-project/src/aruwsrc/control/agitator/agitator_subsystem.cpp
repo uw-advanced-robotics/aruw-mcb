@@ -81,6 +81,11 @@ void AgitatorSubsystem::refresh()
     }
 }
 
+void AgitatorSubsystem::refreshSafeDisconnect()
+{
+    agitatorMotor.setDesiredOutput(0);
+}
+
 void AgitatorSubsystem::agitatorRunPositionPid()
 {
     if (!agitatorIsCalibrated)
