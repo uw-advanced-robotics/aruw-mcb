@@ -37,10 +37,10 @@ namespace aruwsrc::control::governor
  * avoid running commands that cause ref-system overheating and to avoid commands
  * that require the barrels to be in position.
  */
-class HeatLimitGovernor : public tap::control::governor::CommandGovernorInterface
+class HeatLimitDualBarrelSwitcherGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    HeatLimitGovernor(
+    HeatLimitDualBarrelSwitcherGovernor(
         tap::Drivers &drivers,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDLeft,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDRight,

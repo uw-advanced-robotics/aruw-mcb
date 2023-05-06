@@ -29,6 +29,8 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 
+#include "modm/math/geometry/angle.hpp"
+
 #include "motor_interface.hpp"
 
 namespace tap::motor
@@ -103,6 +105,10 @@ public:
     mockable ~DjiMotor();
 
     void initialize() override;
+
+    float getPositionUnwrapped() const override;
+
+    float getPositionWrapped() const override;
 
     int64_t getEncoderUnwrapped() const override;
 

@@ -75,6 +75,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
 
 #ifdef TARGET_STANDARD_SPIDER
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
@@ -337,6 +338,18 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
+
+// rotates agitator with heat limiting applied
+HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1, //TODO: what id
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    constants::HEAT_LIMIT_BUFFER,
+    barrelSwitcher);
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimitingDualBarrels(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&heatLimitGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
