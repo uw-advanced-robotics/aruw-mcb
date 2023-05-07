@@ -101,16 +101,16 @@ void BalancingChassisSubsystem::refresh()
     // motors are also online.
     if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline() && armed)
     {
-        // static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
-        //     ->sendCanMessage();
-        // static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
-        //     ->sendCanMessage();
-        // static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
-        //     ->sendCanMessage();
-        // static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
-        //     ->sendCanMessage();
-        // if (!rightLeg.getArmState()) rightLeg.armLeg();
-        // if (!leftLeg.getArmState()) leftLeg.armLeg();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor1())
+            ->sendCanMessage();
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
+            ->sendCanMessage();
+        if (!rightLeg.getArmState()) rightLeg.armLeg();
+        if (!leftLeg.getArmState()) leftLeg.armLeg();
     }
     else
     {
@@ -132,15 +132,19 @@ void BalancingChassisSubsystem::computeState()
     float currentTurretYaw = yawMotor.getChassisFrameUnwrappedMeasuredAngle();
     if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
 
-    pitch = modm::toRadian(drivers->mpu6500.getRoll());
+    pitch = -(turretMCB.getPitch() + currentTurretPitch);
     roll = modm::toRadian(drivers->mpu6500.getPitch());
-    yaw = modm::toRadian(drivers->mpu6500.getYaw());
+    yaw = -(turretMCB.getYaw() - currentTurretYaw);
 
-    float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
+    // float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
     pitchPrev = pitch;
     // chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .3);
-    pitchRate = lowPassFilter(pitchRate, modm::toRadian(drivers->mpu6500.getGx()), .2);
-    yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    pitchRate = lowPassFilter(
+        pitchRate,
+        -turretMCB.getPitchVelocity() - pitchMotor.getChassisFrameVelocity(),
+        .2);
+    // yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    yawRate = turretMCB.getYawVelocity() - yawMotor.getChassisFrameVelocity();
     yawPrev = yaw;
 
     velocityRamper.update(dt / 1000 * MAX_ACCELERATION);

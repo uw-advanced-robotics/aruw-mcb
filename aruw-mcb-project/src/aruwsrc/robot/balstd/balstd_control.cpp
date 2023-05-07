@@ -294,7 +294,7 @@ GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-HEAT_LIMIT_BUFFER);
+    HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
@@ -357,9 +357,18 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
 
 // Map Commands
 
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&stopFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&rotateAndUnjamAgitatorWithHeatLimiting},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&turretUserWorldRelativeCommand},
+    {&beybladeDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 // HoldCommandMapping leftSwitchUp(
 //     drivers(),
@@ -399,7 +408,13 @@ void setDefaultBalstdCommands(Drivers *)
 void startBalstdCommands(Drivers *drivers) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerBalstdIoMappings(Drivers *drivers) {}
+void registerBalstdIoMappings(Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchUp);
+}
 }  // namespace balstd_control
 
 namespace aruwsrc::balstd

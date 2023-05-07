@@ -160,8 +160,9 @@ static const float MAX_WHEEL_SPEED = 5'000;
 
 static constexpr float ROTATION_REMOTE_SCALAR = .001;
 static constexpr float TRANSLATION_REMOTE_SCALAR = .001;
+static constexpr float HEIGHT_REMOTE_SCALAR = .0003;
 
-static constexpr float MASS_CHASSIS = 10.0f;  // kg
+static constexpr float MASS_CHASSIS = 18.5f;  // kg
 
 static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.15, 0.35};
 
@@ -186,10 +187,10 @@ static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 4500,
-    .ki = 3,
+    .ki = 100,
     .kd = 6,
-    .maxICumulative = 3000,
-    .maxOutput = 10000,
+    .maxICumulative = 10000,
+    .maxOutput = 20000,
 };
 static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
 static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
@@ -199,8 +200,8 @@ static const tap::algorithms::FuzzyPDConfig LF_LEG_MOTOR_FUZZY_PID_CONFIG = {
     .maxError = modm::toRadian(90),
     .maxErrorDerivative = 100.0f,
     .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
-        std::array<float, 3>({25'000, 14'000, 10'000}),
-        std::array<float, 3>({10, 15, 30})),
+        std::array<float, 3>({35'000, 35'000, 35'000}),
+        std::array<float, 3>({30, 20, 30})),
 };
 static const tap::algorithms::FuzzyPDConfig LR_LEG_MOTOR_FUZZY_PID_CONFIG =
     LF_LEG_MOTOR_FUZZY_PID_CONFIG;

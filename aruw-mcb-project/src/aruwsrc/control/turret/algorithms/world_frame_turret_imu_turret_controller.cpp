@@ -316,8 +316,8 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     const float desiredSetpoint)
 {
     const float chassisFramePitch = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
-    const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
-    const float worldFramePitchVelocity = turretMCBCanComm.getPitchVelocity();
+    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
+    const float worldFramePitchVelocity = -turretMCBCanComm.getPitchVelocity();
 
     updateWorldFrameSetpoint(
         desiredSetpoint,

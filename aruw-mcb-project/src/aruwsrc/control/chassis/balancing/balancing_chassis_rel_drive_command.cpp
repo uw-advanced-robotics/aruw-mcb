@@ -41,16 +41,18 @@ void BalancingChassisRelativeDriveCommand::initialize() { chassis->setDesiredOut
 
 void BalancingChassisRelativeDriveCommand::execute()
 {
+    if (!chassis->getArmState()) chassis->armChassis();
     chassis->setDesiredOutput(
         operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
         -operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
     chassis->setDesiredHeight(
-        0.01 * drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
+        HEIGHT_REMOTE_SCALAR * drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
 }
 
 void BalancingChassisRelativeDriveCommand::end(bool interrupted)
 {
     chassis->setDesiredOutput(0, 0);
+    chassis->disarmChassis();
 }
 
 bool BalancingChassisRelativeDriveCommand::isFinished() const { return false; }

@@ -43,6 +43,7 @@ void BalancingChassisBeybladeCommand::initialize() { chassis->setDesiredOutput(0
 
 void BalancingChassisBeybladeCommand::execute()
 {
+    if (!chassis->getArmState()) chassis->armChassis();
     // get user input
     motionDesiredTurretRelative =
         modm::Vector2f(operatorInterface.getChassisXInput(), operatorInterface.getChassisYInput());
@@ -99,10 +100,15 @@ void BalancingChassisBeybladeCommand::execute()
             operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
     }
     chassis->setDesiredHeight(
-            0.01 * drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
+        HEIGHT_REMOTE_SCALAR *
+        drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
 }
 
-void BalancingChassisBeybladeCommand::end(bool interrupted) { chassis->setDesiredOutput(0, 0); }
+void BalancingChassisBeybladeCommand::end(bool interrupted)
+{
+    chassis->setDesiredOutput(0, 0);
+    chassis->disarmChassis();
+}
 
 bool BalancingChassisBeybladeCommand::isFinished() const { return false; }
 }  // namespace chassis

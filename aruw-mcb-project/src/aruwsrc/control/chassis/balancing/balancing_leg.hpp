@@ -233,6 +233,7 @@ private:
     float debug4;
     float debug5;
     float debug6;
+    float debug7;
 
     float zDesired,                                       // (m) world-frame height of the chassis
         zCurrent = fivebar->getDefaultPosition().getY();  // (m)
@@ -281,9 +282,9 @@ private:
 
     // represents if the robot has falled over, and to retract the legs if so
     bool isFallen = true;
-    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(35);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = .1;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 5;
 };
 }  // namespace chassis
 }  // namespace aruwsrc
