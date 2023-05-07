@@ -104,6 +104,8 @@ private:
     /** Autorotation setpoint, smoothed using a low pass filter. */
     float desiredRotationAverage = 0;
 
+    float DESIRED_ROTATION_SCALAR = -.001;
+
     /**
      * `true` if the chassis is currently actually autorotating, `false` otherwise
      * (in which case on rotation may happen). Autorotation may not happen if the

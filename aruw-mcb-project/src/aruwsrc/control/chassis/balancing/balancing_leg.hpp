@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/algorithms/ramp.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -185,6 +186,14 @@ private:
     FuzzyPD fivebarMotor2Pid;
     SmoothPid driveWheelPid;
 
+    /**
+     * Ramps desired height to avoid big step inputs which may cause cringe such as undesired
+     * airborneness. To get desired airborneness, override the value.
+     *
+     */
+    tap::algorithms::Ramp zDesRamper;
+    // m/s
+    static constexpr float Z_RAMP_RATE = .05;
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.

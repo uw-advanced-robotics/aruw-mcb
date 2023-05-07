@@ -363,7 +363,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWithHeatLimiting},
+    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -399,9 +399,9 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultBalstdCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&manualDriveCommand);
+    chassis.setDefaultCommand(&autorotateDriveCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheels.setDefaultCommand(&stopFrictionWheels);
+    frictionWheels.setDefaultCommand(&spinFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

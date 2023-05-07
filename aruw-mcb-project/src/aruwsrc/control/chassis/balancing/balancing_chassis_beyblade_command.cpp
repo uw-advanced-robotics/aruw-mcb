@@ -45,8 +45,9 @@ void BalancingChassisBeybladeCommand::execute()
 {
     if (!chassis->getArmState()) chassis->armChassis();
     // get user input
-    motionDesiredTurretRelative =
-        modm::Vector2f(operatorInterface.getChassisXInput(), operatorInterface.getChassisYInput());
+    motionDesiredTurretRelative = modm::Vector2f(
+        operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
+        operatorInterface.getChassisYInput() * TRANSLATION_REMOTE_SCALAR);
 
     // calculate pid for chassis rotation
     // returns a chassis rotation speed

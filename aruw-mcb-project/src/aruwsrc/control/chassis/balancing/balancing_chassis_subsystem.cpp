@@ -142,7 +142,7 @@ void BalancingChassisSubsystem::computeState()
     pitchRate = lowPassFilter(
         pitchRate,
         -turretMCB.getPitchVelocity() - pitchMotor.getChassisFrameVelocity(),
-        .2);
+        .05);
     // yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
     yawRate = turretMCB.getYawVelocity() - yawMotor.getChassisFrameVelocity();
     yawPrev = yaw;

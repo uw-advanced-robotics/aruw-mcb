@@ -85,6 +85,7 @@ float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 
 void FrictionWheelSubsystem::refresh()
 {
+    if (!leftWheel.isMotorOnline() && !rightWheel.isMotorOnline()) desiredRpmRamp.setValue(0);
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     if (currTime == prevTime)
     {
@@ -94,8 +95,13 @@ void FrictionWheelSubsystem::refresh()
     prevTime = currTime;
 
     velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
     velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
+    if (compareFloatClose(desiredRpmRamp.getValue(), 0, 300))
+    {
+        leftWheel.setDesiredOutput(0);
+        rightWheel.setDesiredOutput(0);
+    }
+    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 

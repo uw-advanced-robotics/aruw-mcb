@@ -68,6 +68,9 @@ void BalancingLeg::update()
     computeState(dt);
 
     /* 2. Compute Setpoints */
+    zDesRamper.setTarget(zDesired);
+    zDesRamper.update(Z_RAMP_RATE * dt / 1000);
+    float zDesiredRamped = zDesRamper.getValue();
 
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.115);
     float desiredWheelAngle = 0;
@@ -77,9 +80,9 @@ void BalancingLeg::update()
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
     xoffset = xPid.runControllerDerivateError(vDesired, dt);
-    xoffset = .00;
-    float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
-    float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
+    // xoffset = .00;
+    float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesiredRamped;
+    float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesiredRamped;
     if (!isFallen)
     {
         desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
@@ -91,18 +94,15 @@ void BalancingLeg::update()
     }
     float tl_desired = atan2(-xoffset, -zCurrent);
     tl_desired = 0;
-    // float u = thetaLPid.runController(0 - (chassisMCB.getPitch()), tl_dot_w + chassisAngledot,
-    // dt); u += thetaLdotPid.runControllerDerivateError(0 - (chassisMCB.getPitchVelocity()), dt);
 
-    // float wheelTorque = 0.174 / cos(tl) * (14.7621 * sin(tl) - u);
     float LQR_K2 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
     float LQR_K3 = HEIGHT_TO_LQR_K3_INTERPOLATOR.interpolate(-zCurrent);
     float LQR_K4 = HEIGHT_TO_LQR_K4_INTERPOLATOR.interpolate(-zCurrent);
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
     float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (chassisAngle - tl_desired), .0f);
-    float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, .0f);
+    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .08f);
+    float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     // float lqrPitch = -38 * deadZone(tl - tl_desired, modm::toRadian(.05));
     // float lqrPitchRate = -6.3527 * deadZone(tl_dot, .2f);
     float lqrYaw = LQR_K5 * chassisYaw;
@@ -136,7 +136,9 @@ void BalancingLeg::update()
     if (armed)
     {
         driveWheel->setDesiredOutput(driveWheelOutput);
-    } else {
+    }
+    else
+    {
         driveWheel->setDesiredOutput(0);
     }
     fivebar->setDesiredPosition(desiredWheelLocation);

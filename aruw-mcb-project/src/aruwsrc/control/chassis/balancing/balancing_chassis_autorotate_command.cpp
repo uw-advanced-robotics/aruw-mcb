@@ -53,6 +53,10 @@ void BalancingChassisAutorotateCommand::updateAutorotateState()
         chassisMotionPlanning = true;
         return;
     }
+    else
+    {
+        chassisMotionPlanning = false;
+    }
     if (chassisAutorotating && !yawMotor->getConfig().limitMotorAngles &&
         turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
@@ -90,20 +94,33 @@ void BalancingChassisAutorotateCommand::execute()
     prevTime = time;
 
     // get user input
-    motionDesiredTurretRelative =
-        modm::Vector2f(operatorInterface.getChassisXInput(), operatorInterface.getChassisYInput());
+    motionDesiredTurretRelative = modm::Vector2f(
+        operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
+        operatorInterface.getChassisYInput() * TRANSLATION_REMOTE_SCALAR);
 
     // calculate pid for chassis rotation
     // returns a chassis rotation speed
     if (yawMotor->isOnline())
     {
+        bool moveBackwards = false;
         float turretAngleFromCenter = yawMotor->getAngleFromCenter();
         updateAutorotateState();  // initiate or not autorotation
         float chassisRotationSetpoint = 0;
 
         if (chassisMotionPlanning)
         {
-            chassisRotationSetpoint = plotPath(turretAngleFromCenter);
+            tap::algorithms::rotateVector(
+                &motionDesiredTurretRelative.x,
+                &motionDesiredTurretRelative.y,
+                turretAngleFromCenter);
+            float angleToTarget =
+                atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX());
+            if (!tap::algorithms::compareFloatClose(angleToTarget, 0, maxAngleFromCenter))
+            {
+                angleToTarget = -angleToTarget;
+                moveBackwards = true;
+            }
+            chassisRotationSetpoint = angleToTarget;
         }
         else if (chassisAutorotating)
         {
@@ -113,9 +130,8 @@ void BalancingChassisAutorotateCommand::execute()
 
         // we are now turning the robot towards the desired direction. Apply motion to chassis
         // accordingly.
-        float chassisXoutput = motionDesiredTurretRelative.getLength() *
-                               cos(chassisRotationSetpoint - turretAngleFromCenter);
-        float chassisRoutput = desiredRotationAverage;
+        float chassisXoutput = motionDesiredTurretRelative.getLength() * (moveBackwards ? -1 : 1);
+        float chassisRoutput = DESIRED_ROTATION_SCALAR * desiredRotationAverage;
 
         chassis->setDesiredOutput(chassisXoutput, chassisRoutput);
     }
