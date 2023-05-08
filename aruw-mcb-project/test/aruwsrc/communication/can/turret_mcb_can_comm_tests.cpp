@@ -226,7 +226,7 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
             return true;
         });
 
-    modm::can::Message syncMessage(0x1fa, 4, 0, false);
+    modm::can::Message syncMessage(0x1f9, 4, 0, false);
     tap::arch::convertToLittleEndian(getTimeMicroseconds(), syncMessage.data);
     EXPECT_CALL(drivers.can, sendMessage(_, Eq(syncMessage)));
 
