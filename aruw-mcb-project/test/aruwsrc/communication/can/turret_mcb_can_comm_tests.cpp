@@ -228,7 +228,7 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
 
     modm::can::Message syncMessage(0x1f9, 4, 0, false);
     tap::arch::convertToLittleEndian(getTimeMicroseconds(), syncMessage.data);
-    EXPECT_CALL(drivers.can, sendMessage(_, Eq(syncMessage)));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(syncMessage)));
 
     dut.init();
 
