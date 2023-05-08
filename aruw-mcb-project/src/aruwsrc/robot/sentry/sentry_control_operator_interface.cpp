@@ -172,7 +172,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 {
-    if (!isTurretControlMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
+    if (!isTurretControlMode() && !isDriveMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
 
     return drivers->remote.getChannel(Remote::Channel::WHEEL);
 }

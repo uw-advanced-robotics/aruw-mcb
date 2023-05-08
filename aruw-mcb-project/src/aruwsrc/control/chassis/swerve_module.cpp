@@ -150,12 +150,7 @@ float SwerveModule::getAngularVelocity() const
 void SwerveModule::limitPower(float frac)
 {
     updateMotorOutputs(driveDesiredOutput * (frac * frac), azimuthDesiredOutput * fmin(2.0f * frac , 1.0f));
-    // driveMotor.setDesiredOutput(
-    //     driveDesiredOutput * (frac * frac));// *
-        // (1 - angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle()))));
-    // azimuthMotor.setDesiredOutput(
-    //     azimuthDesiredOutput);// * fmin(2 , 1));// *
-    //     (angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle()))));
+    // visualized here: https://www.desmos.com/calculator/bnasr8n8ge
 }
 
 }  // namespace chassis
