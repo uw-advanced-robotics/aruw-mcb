@@ -197,7 +197,9 @@ private:
      */
     uint16_t frameCurrReadByte;
 
-    constexpr static int UART_BAUDRATE = 500'000;
+    // This is default on a cube orange as per:
+    // https://docs.cubepilot.org/user-guides/autopilot/the-cube-user-manual
+    constexpr static int UART_BAUDRATE = 57'600;
 
 protected:
     tap::Drivers *drivers;
