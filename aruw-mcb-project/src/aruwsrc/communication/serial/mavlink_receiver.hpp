@@ -39,6 +39,8 @@ namespace aruwsrc::communication::serial
  *
  * Extend this class and implement messageReceiveCallback if you
  * want to use this mavlink protocol on a serial line.
+ * 
+ * Note, the CRC does not include the header byte in computation.
  *
  * Structure of a Mavlink Message:
  * \rst
@@ -63,10 +65,9 @@ namespace aruwsrc::communication::serial
  * +-----------------+------------------------------------------------------------+
  * | Message CRC                                                                  |
  * +-----------------+------------------------------------------------------------+
- * | 7 + Data Length | CRC16
- * |
+ * | 7 + Data Length | CRC16                                                      |
  * +-----------------+------------------------------------------------------------+
- * | 8 + Data Length | CRC16 |
+ * | 8 + Data Length | CRC16                                                      |   
  * +-----------------+------------------------------------------------------------+
  * \endrst
  */
@@ -127,8 +128,8 @@ public:
         uint16_t CRC16;
     } modm_packed;
 
-    static const uint16_t SERIAL_RX_BUFF_SIZE = 256;
-    static const uint16_t SERIAL_HEAD_BYTE = 0xFE;
+    static const uint8_t SERIAL_RX_BUFF_SIZE = 255; // This is 256 in DJI serial but like max is 255 
+    static const uint8_t SERIAL_HEAD_BYTE = 0xFE;
 
     using ReceivedMavlinkMessage = MavlinkMessage<SERIAL_RX_BUFF_SIZE>;
 
