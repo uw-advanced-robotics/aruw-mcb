@@ -30,7 +30,7 @@ DroneTelemetryHandler::DroneTelemetryHandler(
 
 void DroneTelemetryHandler::messageReceiveCallback(const ReceivedMavlinkMessage& completeMessage)
 {
-    if (completeMessage.header.messageId == Local_Position_NED_MSG_ID)
+    if (completeMessage.header.messageId == LOCAL_POSITION_NED_MSG_ID)
     {
         memcpy(&localPositionNed, &completeMessage.data, sizeof(localPositionNed));
     }
