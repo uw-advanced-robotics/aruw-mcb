@@ -5,6 +5,7 @@
  * Copyright (c) 2012, Georgi Grinshpun
  * Copyright (c) 2013, Kevin Läufer
  * Copyright (c) 2014, Sascha Schade
+ * Copyright (c) 2022, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -38,10 +39,15 @@ namespace platform
  */
 class SpiMaster1 : public modm::SpiMaster
 {
-	static uint8_t state;
-	static uint8_t count;
-	static void *context;
-	static ConfigurationHandler configuration;
+protected:
+	// `state` must be protected to allow access from SpiMasterDma subclass
+	// Bit0: single transfer state
+	// Bit1: block transfer state
+	static inline uint8_t state{0};
+private:
+	static inline uint8_t count{0};
+	static inline void* context{nullptr};
+	static inline ConfigurationHandler configuration{nullptr};
 public:
 	using Hal = SpiHal1;
 
@@ -67,7 +73,7 @@ public:
 	using DataSize = Hal::DataSize;
 
 public:
-	template< template<Peripheral _> class... Signals >
+	template< class... Signals >
 	static void
 	connect()
 	{
@@ -83,7 +89,6 @@ public:
 		Connector::connect();
 	}
 
-	// start documentation inherited
 	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(5) >
 	static void
 	initialize()
@@ -99,21 +104,27 @@ public:
 		state = 0;
 	}
 
-	static modm_always_inline void
+	static void
 	setDataMode(DataMode mode)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataMode(static_cast<SpiHal1::DataMode>(mode));
+		SpiHal1::enableTransfer();
 	}
 
-	static modm_always_inline void
+	static void
 	setDataOrder(DataOrder order)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataOrder(static_cast<SpiHal1::DataOrder>(order));
+		SpiHal1::enableTransfer();
 	}
-	static modm_always_inline void
+	static void
 	setDataSize(DataSize size)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataSize(static_cast<SpiHal1::DataSize>(size));
+		SpiHal1::enableTransfer();
 	}
 
 
@@ -142,7 +153,6 @@ public:
 
 	static modm::ResumableResult<void>
 	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
-	// end documentation inherited
 };
 
 } // namespace platform

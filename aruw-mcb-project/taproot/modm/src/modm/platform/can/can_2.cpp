@@ -133,7 +133,7 @@ sendMailbox(const modm::can::Message& message, uint32_t mailboxId)
 	}
 
 	// Set up the DLC
-	mailbox->TDTR = message.getLength();
+	mailbox->TDTR = message.getDataLengthCode();
 
 	// Set up the data field (copy the 8x8-bits into two 32-bit registers)
 	const uint8_t * modm_may_alias data = message.data;
@@ -162,8 +162,7 @@ readMailbox(modm::can::Message& message, uint32_t mailboxId, uint8_t* filter_id)
 		message.setExtended(false);
 	}
 	message.setRemoteTransmitRequest(rir & CAN_RI0R_RTR);
-
-	message.length = mailbox->RDTR & CAN_TDT1R_DLC;
+	message.setDataLengthCode(mailbox->RDTR & CAN_TDT1R_DLC);
 	if(filter_id != nullptr)
         (*filter_id) = (mailbox->RDTR & CAN_RDT1R_FMI) >> CAN_RDT1R_FMI_Pos;
 
@@ -177,7 +176,6 @@ readMailbox(modm::can::Message& message, uint32_t mailboxId, uint8_t* filter_id)
  *
  * Generated when Transmit Mailbox 0..2 becomes empty.
  */
-
 MODM_ISR(CAN2_TX)
 {
 	uint32_t mailbox;

@@ -42,7 +42,7 @@
 #include "math/interpolation/linear.hpp"
 #include "math/lu_decomposition.hpp"
 #include "math/matrix.hpp"
-#include "math/saturated/saturated.hpp"
+#include "math/saturation/saturated.hpp"
 #include "math/tolerance.hpp"
 #include "math/units.hpp"
 #include "math/utils.hpp"
@@ -51,6 +51,7 @@
 #include "math/utils/bit_operation.hpp"
 #include "math/utils/crc.hpp"
 #include "math/utils/endianness.hpp"
+#include "math/utils/integer_traits.hpp"
 #include "math/utils/misc.hpp"
 #include "math/utils/operator.hpp"
 #endif	// MODM_MATH_HPP

@@ -54,7 +54,7 @@ public:
 	 * channel number, like CHANNEL_0.
 	 */
 	enum class
-	Channel : uint8_t	// TODO: What is the best type?
+	Channel : uint8_t
 	{
 		Channel0 = 0,
 		Channel1 = 1,
@@ -76,7 +76,7 @@ public:
 		Channel17 = 17,
 		Channel18 = 18,
 
-		BatDiv2 = 18, /// Half the V_BAT voltage.
+		BatDiv2 = 18, ///< Half the V_BAT voltage.
 
 		/** Measure the ambient temperature of the device.
 		 *
@@ -132,6 +132,39 @@ public:
 		Cycles480 	= 0b111		///< 480 ADCCLK cycles
 	};
 
+	enum class ExternalTriggerPolarity
+	{
+		NoTriggerDetection = 0x0u,
+		RisingEdge = 0x1u,
+		FallingEdge = 0x2u,
+		RisingAndFallingEdge = 0x3u,
+	};
+	/**
+	 * Enum mapping all events on a external trigger converter.
+	 * The source mapped to each event varies on controller family,
+	 * refer to the ADC external trigger section on reference manual
+	 * of your controller for more information
+	 */
+	enum class RegularConversionExternalTrigger
+	{
+		Event0 = 0x0u,
+		Event1 = 0x1u,
+		Event2 = 0x2u,
+		Event3 = 0x3u,
+		Event4 = 0x4u,
+		Event5 = 0x5u,
+		Event6 = 0x6u,
+		Event7 = 0x7u,
+		Event8 = 0x8u,
+		Event9 = 0x9u,
+		Event10 = 0xAu,
+		Event11 = 0xBu,
+		Event12 = 0xCu,
+		Event13 = 0xDu,
+		Event14 = 0xEu,
+		Event15 = 0xFu,
+	};
+
 	/**
 	 * Possible interrupts.
 	 *
@@ -171,7 +204,7 @@ public:
 
 public:
 	// start inherited documentation
-	template< template<Peripheral _> class... Signals >
+	template< class... Signals >
 	static void
 	connect()
 	{
@@ -190,6 +223,9 @@ public:
 	template< class SystemClock, frequency_t frequency=MHz(10), percent_t tolerance=pct(10) >
 	static void
 	initialize();
+
+	static inline void
+	enable();
 
 	static inline void
 	disable();
@@ -214,7 +250,6 @@ public:
 
 	static inline uint16_t
 	getValue();
-
 
 	static inline uint16_t
 	readChannel(Channel channel);
@@ -253,7 +288,7 @@ public:
 	static inline constexpr Channel
 	getPinChannel()
 	{
-		constexpr int8_t channel{Gpio::template AdcChannel<Peripheral::Adc1>};
+		constexpr int8_t channel{detail::AdcChannel<typename Gpio::Data, Peripheral::Adc1>};
 		static_assert(channel >= 0, "Adc1 does not have a channel for this pin!");
 		return Channel(channel);
 	}
@@ -261,20 +296,17 @@ public:
 	static inline Channel
 	getChannel();
 
-
 	static inline void
 	enableFreeRunningMode();
 
 	static inline void
 	disableFreeRunningMode();
 
-
 	static inline void
 	setLeftAdjustResult();
 
 	static inline void
 	setRightAdjustResult();
-	// stop documentation inherited
 
 	/// Switch on temperature- and V_REF measurement.
 	static inline void
@@ -345,6 +377,60 @@ public:
 	 */
 	static inline void
 	acknowledgeInterruptFlags(const InterruptFlag_t flags);
+
+	static inline uintptr_t
+	getDataRegisterAddress();
+
+	static inline void
+	enableRegularConversionExternalTrigger(
+		ExternalTriggerPolarity externalTriggerPolarity,
+		RegularConversionExternalTrigger regularConversionExternalTrigger);
+
+	/**
+	 * Enable Dma mode for the ADC
+	 */
+	static inline void
+	enableDmaMode();
+
+	/**
+	 * Disable Dma mode for the ADC
+	 */
+	static inline void
+	disableDmaMode();
+
+	/**
+	 * get if adc is enabled
+	 * @return true if ADC_CR2_ADON bit is set, false otherwise
+	 */
+	static inline bool
+	getAdcEnabled();
+
+	/**
+	* enable DMA selection for the ADC. If this is enabled DMA
+	* requests are issued as long as data are converted and
+	* the adc has dma enabled
+	 */
+	static inline void
+	enableDmaRequests();
+
+	/**
+	* disable dma selection for the ADC. If this is disabled
+	* no new DMA requests are issued after last transfer
+	 */
+	static inline void
+	disableDmaRequests();
+
+	/**
+	 * Enables scan mode
+	 */
+	static inline void
+	enableScanMode();
+
+	/**
+	 * Disables scan mode
+	 */
+	static inline void
+	disableScanMode();
 
 private:
 	/**

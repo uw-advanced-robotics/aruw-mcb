@@ -140,6 +140,12 @@ UartHal7::isTransmitRegisterEmpty()
 	return UART7->SR & USART_SR_TXE;
 }
 
+bool
+UartHal7::isTransmissionComplete()
+{
+	return UART7->SR & USART_SR_TC;
+}
+
 void
 UartHal7::enableInterruptVector(bool enable, uint32_t priority)
 {

@@ -27,7 +27,7 @@ modm::platform::Adc1::initialize()
 	assertBaudrateInTolerance<result.frequency, frequency, tolerance >();
 
 	Rcc::enable<Peripheral::Adc1>();
-	ADC1->CR2 |= ADC_CR2_ADON;			// switch on ADC
+	enable();  // switch on ADC
 
 	setPrescaler(Prescaler{result.index});
 }
@@ -73,6 +73,10 @@ modm::platform::Adc1::setChannel(const Channel channel,
 	ADC1->SQR3 = uint32_t(channel) & 0x1f;
 
 	setSampleTime(channel, sampleTime);
+	if(channel == Channel::TemperatureSensor || channel == Channel::InternalReference)
+	{
+		enableTemperatureRefVMeasurement();
+	}
 	return true;
 }
 
@@ -105,6 +109,10 @@ modm::platform::Adc1::addChannel(const Channel channel,
 	ADC1->SQR1 = (ADC1->SQR1 & ~ADC_SQR1_L) | (channel_count << 20);
 
 	setSampleTime(channel, sampleTime);
+	if(channel == Channel::TemperatureSensor || channel == Channel::InternalReference)
+	{
+		enableTemperatureRefVMeasurement();
+	}
 	return true;
 }
 
@@ -139,6 +147,12 @@ modm::platform::Adc1::disable()
 {
 	ADC1->CR2 &= ~(ADC_CR2_ADON);		// switch off ADC
 	RCC->APB2ENR &= ~RCC_APB2ENR_ADC1EN; // stop ADC Clock
+}
+
+void
+modm::platform::Adc1::enable()
+{
+	ADC1->CR2 |= ADC_CR2_ADON;  // switch on ADC
 }
 
 void
@@ -210,7 +224,64 @@ modm::platform::Adc1::getInterruptFlags()
 void
 modm::platform::Adc1::acknowledgeInterruptFlags(const InterruptFlag_t flags)
 {
-	// Flags are cleared by writing a one to the flag position.
-	// Writing a zero is ignored.
-	ADC1->SR = flags.value;
+	ADC1->SR = ~flags.value;
+}
+
+uintptr_t
+modm::platform::Adc1::getDataRegisterAddress()
+{
+	return (uintptr_t) &(ADC1->DR);
+}
+void
+modm::platform::Adc1::enableRegularConversionExternalTrigger(
+	ExternalTriggerPolarity externalTriggerPolarity,
+	RegularConversionExternalTrigger regularConversionExternalTrigger)
+{
+	const auto polarity =
+		(static_cast<uint32_t>(externalTriggerPolarity) << ADC_CR2_EXTEN_Pos);
+	const auto externalTrigger =
+		(static_cast<uint32_t>(regularConversionExternalTrigger) << ADC_CR2_EXTSEL_Pos);
+	const auto mask = ADC_CR2_EXTEN_Msk | ADC_CR2_EXTSEL_Msk;
+	ADC1->CR2 = (ADC1->CR2 & ~mask) | polarity | externalTrigger;
+}
+void
+modm::platform::Adc1::enableDmaMode()
+{
+	ADC1->CR2 |= ADC_CR2_DMA;
+}
+
+void
+modm::platform::Adc1::disableDmaMode()
+{
+	ADC1->CR2 &= ~ADC_CR2_DMA;
+}
+
+bool
+modm::platform::Adc1::getAdcEnabled()
+{
+	return (ADC1->CR2 & ADC_CR2_ADON) == ADC_CR2_ADON;
+}
+
+void
+modm::platform::Adc1::enableDmaRequests()
+{
+	ADC1->CR2 |= ADC_CR2_DDS;
+}
+
+void
+modm::platform::Adc1::disableDmaRequests()
+{
+	ADC1->CR2 &= ~ADC_CR2_DDS;
+}
+
+void
+modm::platform::Adc1::enableScanMode()
+{
+	ADC1->CR1 |= ADC_CR1_SCAN;
+}
+
+void
+modm::platform::Adc1::disableScanMode()
+{
+	ADC1->CR1 &= ~ADC_CR1_SCAN;
 }

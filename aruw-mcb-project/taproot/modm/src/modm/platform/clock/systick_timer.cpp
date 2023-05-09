@@ -13,13 +13,12 @@
 
 #include <modm/architecture/interface/atomic_lock.hpp>
 #include <modm/platform/device.hpp>
-
 #include "systick_timer.hpp"
 
 static constexpr auto systick_step(250);
-static volatile uint32_t milli_time{0};
-static volatile uint32_t micro_time{0};
-static volatile uint8_t interrupt{false};
+static volatile uint32_t milli_time{};
+static volatile uint32_t micro_time{};
+static volatile bool interrupt{};
 
 extern "C" void
 SysTick_Handler(void)
@@ -34,7 +33,7 @@ static constexpr uint8_t systick_priority{(1ul << __NVIC_PRIO_BITS) - 1ul};
 
 // ----------------------------------------------------------------------------
 void
-modm::platform::SysTickTimer::enable(uint32_t modm_unused reload, bool modm_unused prescaler8)
+modm::platform::SysTickTimer::enable([[maybe_unused]] uint32_t reload, [[maybe_unused]] bool prescaler8)
 {
 	// Lower systick interrupt priority to lowest level
 	NVIC_SetPriority(SysTick_IRQn, systick_priority);
@@ -58,8 +57,8 @@ modm::platform::SysTickTimer::disable()
 modm::chrono::milli_clock::time_point modm_weak
 modm::chrono::milli_clock::now() noexcept
 {
-	uint32_t val;
-	uint32_t ms;
+	uint32_t val, ms;
+
 	do	// We cannot use an atomic lock here, the counter still overflows even
 	{	// if the interrupt hasn't happened yet.
 		interrupt = false;
@@ -78,8 +77,8 @@ modm::chrono::milli_clock::now() noexcept
 modm::chrono::micro_clock::time_point modm_weak
 modm::chrono::micro_clock::now() noexcept
 {
-	uint32_t val;
-	uint32_t us;
+	uint32_t val, us;
+
 	do	// We cannot use an atomic lock here, the counter still overflows even
 	{	// if the interrupt hasn't happened yet.
 		interrupt = false;

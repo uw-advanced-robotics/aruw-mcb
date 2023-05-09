@@ -57,6 +57,7 @@ Rcc::enableExternalCrystal(uint32_t waitCycles)
 	return retval;
 }
 
+
 bool
 Rcc::enableLowSpeedInternalClock(uint32_t waitCycles)
 {
@@ -124,6 +125,15 @@ Rcc::enablePll(PllSource source, const PllFactors& pllFactors, uint32_t waitCycl
 }
 
 bool
+Rcc::disablePll(uint32_t waitCycles)
+{
+	RCC->CR &= ~RCC_CR_PLLON;
+	while ((RCC->CR & RCC_CR_PLLRDY) and --waitCycles)
+		;
+	return waitCycles > 0;
+}
+
+bool
 Rcc::enableOverdriveMode(uint32_t waitCycles)
 {
 	PWR->CR |= PWR_CR_ODEN;
@@ -137,14 +147,13 @@ Rcc::enableOverdriveMode(uint32_t waitCycles)
 
 	return true;
 }
-// ----------------------------------------------------------------------------
 bool
 Rcc::enableSystemClock(SystemClockSource src, uint32_t waitCycles)
 {
 	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | uint32_t(src);
 
 	// Wait till the main PLL is used as system clock source
-	src = SystemClockSource(uint32_t(src) << 2);
+	src = SystemClockSource(uint32_t(src) << RCC_CFGR_SWS_Pos);
 	while ((RCC->CFGR & RCC_CFGR_SWS) != uint32_t(src))
 		if (not --waitCycles) return false;
 

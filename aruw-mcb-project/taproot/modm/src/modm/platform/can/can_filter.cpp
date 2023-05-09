@@ -77,7 +77,7 @@ modm::platform::CanFilter::setStartFilterBankForCan2(uint8_t startBank)
 	// Initialization mode for the filter
 	CAN1->FMR |= CAN_FMR_FINIT;
 
-	CAN1->FMR = (CAN1->FMR & ~0x3f00) | (startBank << 8);
+	CAN1->FMR = (CAN1->FMR & ~CAN_FMR_CAN2SB_Msk) | (startBank << CAN_FMR_CAN2SB_Pos);
 
 	// Leave the initialization mode for the filter
 	CAN1->FMR &= ~CAN_FMR_FINIT;

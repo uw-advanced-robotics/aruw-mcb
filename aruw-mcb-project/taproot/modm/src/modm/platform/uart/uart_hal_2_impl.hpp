@@ -157,6 +157,12 @@ UsartHal2::isTransmitRegisterEmpty()
 	return USART2->SR & USART_SR_TXE;
 }
 
+bool
+UsartHal2::isTransmissionComplete()
+{
+	return USART2->SR & USART_SR_TC;
+}
+
 void
 UsartHal2::enableInterruptVector(bool enable, uint32_t priority)
 {

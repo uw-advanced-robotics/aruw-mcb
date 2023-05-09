@@ -4,6 +4,7 @@
  * Copyright (c) 2009-2010, 2016, Fabian Greif
  * Copyright (c) 2012-2013, 2016, 2018 Niklas Hauser
  * Copyright (c) 2013, Kevin Laeufer
+ * Copyright (c) 2022, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -18,7 +19,6 @@
 
 #define STM32F427xx 1
 #include <stdint.h>
-// Defines for example the modm_always_inline macro
 #include <modm/architecture/utils.hpp>
 
 // Include external device headers:

@@ -4,7 +4,8 @@
  * Copyright (c) 2010, Martin Rosekeit
  * Copyright (c) 2011, 2013-2017, Niklas Hauser
  * Copyright (c) 2013-2014, 2016, Kevin Läufer
- * Copyright (c) 2014, Sascha Schade
+ * Copyright (c) 2014, 2022, Sascha Schade
+ * Copyright (c) 2022, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -17,12 +18,12 @@
 #ifndef MODM_STM32_TIMER_3_HPP
 #define MODM_STM32_TIMER_3_HPP
 
+#include <chrono>
+#include <limits>
 #include "general_purpose_base.hpp"
 #include <modm/platform/gpio/connector.hpp>
 
-namespace modm
-{
-namespace platform
+namespace modm::platform
 {
 /**
  * General Purpose Timer 3
@@ -63,8 +64,10 @@ public:
 
 	enum class SlaveModeTrigger : uint32_t
 	{
+		Internal0 = 0,
 		Internal1 = TIM_SMCR_TS_0,
 		Internal2 = TIM_SMCR_TS_1,
+		Internal3 = TIM_SMCR_TS_1 | TIM_SMCR_TS_0,
 		TimerInput1EdgeDetector = TIM_SMCR_TS_2,
 		TimerInput1Filtered = TIM_SMCR_TS_2 | TIM_SMCR_TS_0,
 		TimerInput2Filtered = TIM_SMCR_TS_2 | TIM_SMCR_TS_1,
@@ -92,9 +95,9 @@ public:
 	};
 
 	// This type is the internal size of the counter.
-	typedef uint16_t Value;
+	using Value = uint16_t;
 
-	template< template<Peripheral _> class... Signals >
+	template< class... Signals >
 	static void
 	connect()
 	{
@@ -145,7 +148,7 @@ public:
 	static uint16_t
 	getPrescaler()
 	{
-		return (TIM3->PSC + 1);
+		return TIM3->PSC + 1;
 	}
 
 	static inline void
@@ -154,27 +157,46 @@ public:
 		TIM3->ARR = overflow;
 	}
 
-	template<class SystemClock>
-	static Value
-	setPeriod(uint32_t microseconds, bool autoApply = true)
+	static inline Value
+	getOverflow()
 	{
-		// This will be inaccurate for non-smooth frequencies (last six digits
-		// unequal to zero)
-		uint32_t cycles = microseconds * (SystemClock::Timer3 / 1'000'000UL);
-		uint16_t prescaler = (cycles + 65'535) / 65'536;	// always round up
-		Value overflow = cycles / prescaler;
+		return TIM3->ARR;
+	}
 
-		overflow = overflow - 1;	// e.g. 36'000 cycles are from 0 to 35'999
+	template<class SystemClock>
+	static constexpr uint32_t
+	getClockFrequency()
+	{
+		return SystemClock::Timer3;
+	}
+
+	template<class SystemClock, class Rep, class Period>
+	static Value
+	setPeriod(std::chrono::duration<Rep, Period> duration, bool autoApply = true)
+	{
+		// This will be inaccurate for non-smooth frequencies (last six digits unequal to zero)
+		const uint32_t cycles = duration.count() * SystemClock::Timer3 * Period::num / Period::den;
+		const uint16_t prescaler = (cycles + std::numeric_limits<Value>::max() - 1) / std::numeric_limits<Value>::max(); // always round up
+		const Value overflow = cycles / prescaler - 1;
 
 		setPrescaler(prescaler);
 		setOverflow(overflow);
 
+		// Generate Update Event to apply the new settings for ARR
 		if (autoApply) {
-			// Generate Update Event to apply the new settings for ARR
-			TIM3->EGR |= TIM_EGR_UG;
+			applyAndReset();
 		}
 
 		return overflow;
+	}
+
+	// DEPRECATE: 2023q2
+	template<class SystemClock>
+	[[deprecated("Pass microseconds as std::chrono::duration: setPeriod( {microseconds}us ) instead!")]]
+	static Value
+	setPeriod(uint32_t microseconds, bool autoApply = true)
+	{
+		return setPeriod<SystemClock>(std::chrono::microseconds(microseconds), autoApply);
 	}
 
 	/* Returns the frequency of the timer */
@@ -186,10 +208,16 @@ public:
 	}
 
 	static inline void
+	generateEvent(Event ev)
+	{
+		TIM3->EGR = static_cast<uint32_t>(ev);
+	}
+
+	static inline void
 	applyAndReset()
 	{
 		// Generate Update Event to apply the new settings for ARR
-		TIM3->EGR |= TIM_EGR_UG;
+		generateEvent(Event::Update);
 	}
 
 	static inline Value
@@ -205,102 +233,49 @@ public:
 	}
 
 
-	static inline void
-	enableOutput()
-	{
-		TIM3->BDTR |= TIM_BDTR_MOE;
-	}
-
-	static inline void
-	disableOutput()
-	{
-		TIM3->BDTR &= ~(TIM_BDTR_MOE);
-	}
-
-	/*
-	 * Enable/Disable automatic set of MOE bit at the next update event
-	 */
-	static inline void
-	setAutomaticUpdate(bool enable)
-	{
-		if(enable)
-			TIM3->BDTR |= TIM_BDTR_AOE;
-		else
-			TIM3->BDTR &= ~TIM_BDTR_AOE;
-	}
-
-	static inline void
-	setOffState(OffStateForRunMode runMode, OffStateForIdleMode idleMode)
-	{
-		uint32_t flags = TIM3->BDTR;
-		flags &= ~(TIM_BDTR_OSSR | TIM_BDTR_OSSI);
-		flags |= static_cast<uint32_t>(runMode);
-		flags |= static_cast<uint32_t>(idleMode);
-		TIM3->BDTR = flags;
-	}
-
-	/*
-	 * Set Dead Time Value
-	 *
-	 * Different Resolution Depending on DeadTime[7:5]:
-	 *     0xx =>  DeadTime[6:0]            * T(DTS)
-	 *     10x => (DeadTime[5:0] + 32) *  2 * T(DTS)
-	 *     110 => (DeadTime[4:0] + 4)  *  8 * T(DTS)
-	 *     111 => (DeadTime[4:0] + 2)  * 16 * T(DTS)
-	 */
-	static inline void
-	setDeadTime(uint8_t deadTime)
-	{
-		uint32_t flags = TIM3->BDTR;
-		flags &= ~TIM_BDTR_DTG;
-		flags |= deadTime;
-		TIM3->BDTR = flags;
-	}
-
-	/*
-	 * Set Dead Time Value
-	 *
-	 * Different Resolution Depending on DeadTime[7:5]:
-	 *     0xx =>  DeadTime[6:0]            * T(DTS)
-	 *     10x => (DeadTime[5:0] + 32) *  2 * T(DTS)
-	 *     110 => (DeadTime[4:0] + 4)  *  8 * T(DTS)
-	 *     111 => (DeadTime[4:0] + 2)  * 16 * T(DTS)
-	 */
-	static inline void
-	setDeadTime(DeadTimeResolution resolution, uint8_t deadTime)
-	{
-		uint8_t bitmask;
-		switch(resolution){
-			case DeadTimeResolution::From0With125nsStep:
-				bitmask = 0b01111111;
-				break;
-			case DeadTimeResolution::From16usWith250nsStep:
-				bitmask = 0b00111111;
-				break;
-			case DeadTimeResolution::From32usWith1usStep:
-			case DeadTimeResolution::From64usWith2usStep:
-				bitmask = 0b00011111;
-				break;
-			default:
-				bitmask = 0x00;
-				break;
-		}
-		uint32_t flags = TIM3->BDTR;
-		flags &= ~TIM_BDTR_DTG;
-		flags |= (deadTime & bitmask) | static_cast<uint32_t>(resolution);
-		TIM3->BDTR = flags;
-	}
 public:
+	static void
+	configureInputChannel(uint32_t channel, uint8_t filter);
+
+	template<typename Signal>
+	static void
+	configureInputChannel(uint8_t filter)
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		configureInputChannel(channel, filter);
+	}
+
 	static void
 	configureInputChannel(uint32_t channel, InputCaptureMapping input,
 			InputCapturePrescaler prescaler,
 			InputCapturePolarity polarity, uint8_t filter,
 			bool xor_ch1_3=false);
 
+	template<typename Signal>
+	static void
+	configureInputChannel(InputCaptureMapping input,
+			InputCapturePrescaler prescaler,
+			InputCapturePolarity polarity, uint8_t filter,
+			bool xor_ch1_3=false)
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		configureInputChannel(channel, input, prescaler, polarity, filter, xor_ch1_3);
+	}
+
 	static void
 	configureOutputChannel(uint32_t channel, OutputCompareMode_t mode,
 			Value compareValue, PinState out = PinState::Enable,
 			bool enableComparePreload = true);
+
+	template<typename Signal>
+	static void
+	configureOutputChannel(OutputCompareMode_t mode,
+			Value compareValue, PinState out = PinState::Enable,
+			bool enableComparePreload = true)
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		configureOutputChannel(channel, mode, compareValue, out, enableComparePreload);
+	}
 
 	/// Switch to Pwm Mode 2
 	///
@@ -332,6 +307,14 @@ public:
 				TIM3->CCMR2 = flags;
 			}
 		}
+	}
+
+	template<typename Signal>
+	static void
+	setInvertedPwm()
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		setInvertedPwm(channel);
 	}
 
 	/// Switch to Pwm Mode 1
@@ -366,6 +349,14 @@ public:
 		}
 	}
 
+	template<typename Signal>
+	static void
+	setNormalPwm()
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		setNormalPwm(channel);
+	}
+
 	/// Switch to Inactive Mode
 	///
 	/// The channel output will be forced to the inactive level.
@@ -395,6 +386,14 @@ public:
 				TIM3->CCMR2 = flags;
 			}
 		}
+	}
+
+	template<typename Signal>
+	static void
+	forceInactive()
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		forceInactive(channel);
 	}
 
 	/// Switch to Active Mode
@@ -428,6 +427,14 @@ public:
 		}
 	}
 
+	template<typename Signal>
+	static void
+	forceActive()
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		forceActive(channel);
+	}
+
 	/// Returns if the capture/compare channel of the timer is configured as input.
 	///
 	/// @param channel may be [1..4]
@@ -441,12 +448,28 @@ public:
 		*(&TIM3->CCR1 + (channel - 1)) = value;
 	}
 
+
+	template<typename Signal>
+	static void
+	setCompareValue(Value value)
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		setCompareValue(channel, value);
+	}
+
 	static inline Value
 	getCompareValue(uint32_t channel)
 	{
 		return *(&TIM3->CCR1 + (channel - 1));
 	}
 
+	template<typename Signal>
+	static inline Value
+	getCompareValue()
+	{
+		constexpr auto channel = signalToChannel<Peripheral::Tim3, Signal>();
+		return getCompareValue(channel);
+	}
 public:
 	static void
 	enableInterruptVector(bool enable, uint32_t priority);
@@ -496,8 +519,6 @@ public:
 	}
 };
 
-}	// namespace platform
-
-}	// namespace modm
+}	// namespace modm::platform
 
 #endif // MODM_STM32_TIMER_3_HPP

@@ -3,7 +3,7 @@
  * Copyright (c) 2012, 2017, Fabian Greif
  * Copyright (c) 2012, 2014-2017, Niklas Hauser
  * Copyright (c) 2013-2014, Kevin Läufer
- * Copyright (c) 2018, 2021, Christopher Durand
+ * Copyright (c) 2018, 2021-2022, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -16,9 +16,10 @@
 #ifndef MODM_STM32_RCC_HPP
 #define MODM_STM32_RCC_HPP
 
-#include <stdint.h>
+#include <cstdint>
 #include "../device.hpp"
 #include <modm/platform/core/peripherals.hpp>
+#include <modm/platform/gpio/connector.hpp>
 #include <modm/architecture/interface/delay.hpp>
 
 namespace modm::platform
@@ -178,46 +179,13 @@ public:
 	enablePll(PllSource source, const PllFactors& pllFactors, uint32_t waitCycles = 2048);
 
 	/**
-	 * Enable PLL.
+	 * Disable PLL.
 	 *
-	 * \code
-	 * VCO input frequency = PLL input clock frequency / PLLM [with 2 <= PLLM <= 63]
-	 * VCO output frequency = VCO input frequency × PLLN [with 64 <= PLLN <= 432]
-	 * \endcode
-	 *
-	 * \param	source
-	 * 		Source select for PLL and for plli2s. If you are using
-	 * 		HSE you must enable it first (see enableHse()).
-	 *
-	 * \param	pllM
-	 * 		Division factor for the main PLL (PLL) and
-	 * 		audio PLL (PLLI2S) input clock (with 2 <= pllM <= 63).
-	 *		The software has to set these bits correctly to ensure
-	 *		that frequency of selected source divided by pllM
-	 *		is in ranges from 1 to 2 MHz.
-	 *
-	 * \param	pllN
-	 * 		Main PLL (PLL) multiplication factor for VCO (with 64 <= pllN <= 432).
-	 * 		The software has to set these bits correctly to ensure
-	 * 		that the VCO output frequency is
-	 * 		 - 336 MHz for ST32F4. Core will run at 168 MHz.
-	 *		 - 240 MHz for ST32F2. Core will run at 120 MHz.
-	 *
-	 * Example:
-	 *
+	 * \param	waitCycles
+	 * 		Number of cycles to wait for the pll to stabilise. Default: 2048.
 	 */
-	[[deprecated("Use PllFactors as argument instead")]] static bool
-	enablePll(PllSource source, uint8_t pllM, uint16_t pllN,
-			  uint8_t pllP,
-			  uint32_t waitCycles = 2048)
-	{
-		PllFactors pllFactors{
-			.pllM = pllM,
-			.pllN = pllN,
-			  .pllP = pllP,
-		};
-		return enablePll(source, pllFactors, waitCycles);
-	}
+	static bool
+	disablePll(uint32_t waitCycles = 2048);
 	// sinks
 	static bool
 	enableSystemClock(SystemClockSource src, uint32_t waitCycles = 2048);
@@ -290,6 +258,14 @@ public:
 	static void
 	updateCoreFrequency();
 
+	template< class... Signals >
+	static void
+	connect()
+	{
+		using Connector = GpioConnector<Peripheral::Rcc, Signals...>;
+		Connector::connect();
+	}
+
 public:
 	template< Peripheral peripheral >
 	static void
@@ -312,8 +288,6 @@ private:
 	static constexpr flash_latency
 	computeFlashLatency(uint32_t Core_Hz, uint16_t Core_mV);
 };
-
-using ClockControl [[deprecated("Please use `modm::platform:Rcc` instead")]] = Rcc;
 
 }   // namespace modm::platform
 

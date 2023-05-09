@@ -24,10 +24,24 @@
 #include <stdarg.h>	// va_list
 #include <inttypes.h>
 #include <type_traits>
+#include <climits>
 
 #include "iodevice.hpp"
 #include "iodevice_wrapper.hpp" // convenience
 
+/// @cond
+extern "C"
+{
+struct printf_output_gadget_t
+{
+	void (*function)(char, void*);
+	void* extra_function_arg;
+	char* buffer;
+	unsigned int pos;
+	unsigned int max_chars;
+};
+}
+/// @endcond
 namespace modm
 {
 
@@ -238,6 +252,9 @@ private:
 private:
 	IODevice* const	device;
 	Mode mode = Mode::Ascii;
+	static void out_char(char c, void* arg)
+	{ if (c) reinterpret_cast<modm::IOStream*>(arg)->write(c); }
+	printf_output_gadget_t output_gadget{out_char, this, NULL, 0, INT_MAX};
 };
 
 /// @ingroup modm_io

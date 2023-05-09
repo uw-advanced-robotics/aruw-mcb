@@ -40,9 +40,9 @@ public:
 	static constexpr size_t TransactionBufferSize = 8;
 
 public:
-	template< template<Peripheral _> class... Signals, ResetDevices reset = ResetDevices::Standard>
+	template<class... Signals>
 	static void
-	connect(PullUps pullups = PullUps::External)
+	connect(PullUps pullups = PullUps::External, ResetDevices reset = ResetDevices::Standard)
 	{
 		using Connector = GpioConnector<Peripheral::I2c2, Signals...>;
 		using Scl = typename Connector::template GetSignal<Gpio::Signal::Scl>;
@@ -58,7 +58,7 @@ public:
 		Sda::configure(input);
 		Scl::setOutput(Gpio::OutputType::OpenDrain);
 		Sda::setOutput(Gpio::OutputType::OpenDrain);
-		if (reset != ResetDevices::NoReset) resetDevices<Scl, uint32_t(reset)>();
+		if (reset != ResetDevices::NoReset) resetDevices<Scl>(uint32_t(reset));
 		Connector::connect();
 	}
 
@@ -69,7 +69,7 @@ public:
 	 *		`Standard` or `Fast`, `High` datarate is not supported
 	 */
 	template<class SystemClock, baudrate_t baudrate=kBd(100), percent_t tolerance=pct(5)>
-	static modm_always_inline void
+	static void
 	initialize()
 	{
 		// calculate the expected clock ratio
@@ -99,7 +99,6 @@ public:
 		initializeWithPrescaler(freq, trise, prescaler);
 	}
 
-	// start documentation inherited
 	static bool
 	start(I2cTransaction *transaction, ConfigurationHandler handler = nullptr);
 
@@ -108,7 +107,6 @@ public:
 
 	static void
 	reset();
-	// end documentation inherited
 
 private:
 	static void

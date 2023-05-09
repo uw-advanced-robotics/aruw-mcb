@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019, Niklas Hauser
+# Copyright (c) 2017-2023, Niklas Hauser
 #
 # This file is part of the modm project.
 #
@@ -17,10 +17,10 @@ env["CONFIG_PROFILE"] = profile
 env["BUILDPATH"] = join(env["CONFIG_BUILD_BASE"], "scons-" + profile)
 env["BASEPATH"] = abspath("..")
 # Using homebrew gcc on macOS instead of clang
-env["COMPILERSUFFIX"] = env.Detect(["gcc-11", "gcc-10"])[3:]
+env["COMPILERSUFFIX"] = env.Detect(["gcc-12", "gcc-11", "gcc-10"])[3:]
 # SCons tools
 env.Append(toolpath=[
-    abspath(r"scons/site_tools"),
+    abspath("scons/site_tools"),
 ])
 env.Tool("build_target")
 env.Tool("comstr")
@@ -51,6 +51,7 @@ env["CCFLAGS"] = [
     "-ffile-prefix-map={project_source_dir}=.".format(project_source_dir=env["BASEPATH"]),
     "-ffunction-sections",
     "-finline-limit=10000",
+    "-fno-builtin-printf",
     "-funsigned-bitfields",
     "-funsigned-char",
     "-fwrapv",
@@ -82,7 +83,7 @@ if profile == "debug":
     ])
 
 env["CFLAGS"] = [
-    "-std=gnu11",
+    "-std=gnu2x",
     "-Wbad-function-cast",
     "-Wimplicit",
     "-Wredundant-decls",
@@ -91,7 +92,7 @@ env["CFLAGS"] = [
 
 env["CXXFLAGS"] = [
     "-fstrict-enums",
-    "-std=c++20",
+    "-std=c++23",
     "-Wno-volatile",
     "-Woverloaded-virtual",
 ]
@@ -122,54 +123,55 @@ env.AppendUnique(CPPFLAGS=[
 	"-isystem", "/usr/local/include",
 ])
 env.AppendUnique(CPPPATH=[
-    abspath(r"ext"),
-    abspath(r"src"),
+    abspath("ext"),
+    abspath("src"),
 ])
 
 files = [
-    env.File(r"src/modm/architecture/driver/atomic/flag.cpp"),
-    env.File(r"src/modm/architecture/interface/can.cpp"),
-    env.File(r"src/modm/communication/xpcc/backend/can/connector.cpp"),
-    env.File(r"src/modm/communication/xpcc/backend/header.cpp"),
-    env.File(r"src/modm/communication/xpcc/communicator.cpp"),
-    env.File(r"src/modm/communication/xpcc/dispatcher.cpp"),
-    env.File(r"src/modm/communication/xpcc/postman/dynamic_postman/dynamic_postman.cpp"),
-    env.File(r"src/modm/communication/xpcc/postman/postman.cpp"),
-    env.File(r"src/modm/container/smart_pointer.cpp"),
-    env.File(r"src/modm/debug/logger/hosted/default_style.cpp"),
-    env.File(r"src/modm/driver/io/terminal.cpp"),
-    env.File(r"src/modm/io/iostream.cpp"),
-    env.File(r"src/modm/io/iostream_printf.cpp"),
-    env.File(r"src/modm/math/geometry/angle.cpp"),
-    env.File(r"src/modm/math/geometry/vector2.cpp"),
-    env.File(r"src/modm/math/utils/bit_operation.cpp"),
-    env.File(r"src/modm/math/utils/pc/operator.cpp"),
-    env.File(r"src/modm/platform/core/assert.cpp"),
-    env.File(r"src/modm/platform/core/clock.cpp"),
-    env.File(r"src/modm/platform/core/memory.cpp"),
-    env.File(r"src/modm/ui/display/character_display.cpp"),
-    env.File(r"src/modm/ui/display/font/all_caps_3x5.cpp"),
-    env.File(r"src/modm/ui/display/font/arcade_classic.cpp"),
-    env.File(r"src/modm/ui/display/font/assertion.cpp"),
-    env.File(r"src/modm/ui/display/font/fixed_width_5x8.cpp"),
-    env.File(r"src/modm/ui/display/font/matrix_8x8.cpp"),
-    env.File(r"src/modm/ui/display/font/numbers_14x32.cpp"),
-    env.File(r"src/modm/ui/display/font/numbers_40x56.cpp"),
-    env.File(r"src/modm/ui/display/font/numbers_46x64.cpp"),
-    env.File(r"src/modm/ui/display/font/scripto_narrow.cpp"),
-    env.File(r"src/modm/ui/display/font/ubuntu_36.cpp"),
-    env.File(r"src/modm/ui/display/graphic_display.cpp"),
-    env.File(r"src/modm/ui/display/graphic_display_fill.cpp"),
-    env.File(r"src/modm/ui/display/graphic_display_text.cpp"),
-    env.File(r"src/modm/ui/display/image/home_16x16.cpp"),
-    env.File(r"src/modm/ui/display/image/logo_eurobot_90x64.cpp"),
-    env.File(r"src/modm/ui/display/image/logo_rca_90x64.cpp"),
-    env.File(r"src/modm/ui/display/image/skull_64x64.cpp"),
-    env.File(r"src/modm/ui/display/virtual_graphic_display.cpp"),
-    env.File(r"src/modm/ui/menu/choice_menu_entry.cpp"),
-    env.File(r"src/modm/ui/menu/scrollable_text.cpp"),
-    env.File(r"src/modm/utils/dummy.cpp"),
+    env.File("src/modm/architecture/driver/atomic/flag.cpp"),
+    env.File("src/modm/architecture/interface/can.cpp"),
+    env.File("src/modm/communication/xpcc/backend/can/connector.cpp"),
+    env.File("src/modm/communication/xpcc/backend/header.cpp"),
+    env.File("src/modm/communication/xpcc/communicator.cpp"),
+    env.File("src/modm/communication/xpcc/dispatcher.cpp"),
+    env.File("src/modm/communication/xpcc/postman/dynamic_postman/dynamic_postman.cpp"),
+    env.File("src/modm/communication/xpcc/postman/postman.cpp"),
+    env.File("src/modm/container/smart_pointer.cpp"),
+    env.File("src/modm/debug/logger/hosted/default_style.cpp"),
+    env.File("src/modm/driver/io/terminal.cpp"),
+    env.File("src/modm/io/iostream.cpp"),
+    env.File("src/modm/io/iostream_printf.cpp"),
+    env.File("src/modm/math/geometry/angle.cpp"),
+    env.File("src/modm/math/geometry/vector2.cpp"),
+    env.File("src/modm/math/utils/bit_operation.cpp"),
+    env.File("src/modm/math/utils/pc/operator.cpp"),
+    env.File("src/modm/platform/core/assert.cpp"),
+    env.File("src/modm/platform/core/clock.cpp"),
+    env.File("src/modm/platform/core/memory.cpp"),
+    env.File("src/modm/ui/display/character_display.cpp"),
+    env.File("src/modm/ui/display/font/all_caps_3x5.cpp"),
+    env.File("src/modm/ui/display/font/arcade_classic.cpp"),
+    env.File("src/modm/ui/display/font/assertion.cpp"),
+    env.File("src/modm/ui/display/font/fixed_width_5x8.cpp"),
+    env.File("src/modm/ui/display/font/matrix_8x8.cpp"),
+    env.File("src/modm/ui/display/font/numbers_14x32.cpp"),
+    env.File("src/modm/ui/display/font/numbers_40x56.cpp"),
+    env.File("src/modm/ui/display/font/numbers_46x64.cpp"),
+    env.File("src/modm/ui/display/font/scripto_narrow.cpp"),
+    env.File("src/modm/ui/display/font/ubuntu_36.cpp"),
+    env.File("src/modm/ui/display/graphic_display.cpp"),
+    env.File("src/modm/ui/display/graphic_display_fill.cpp"),
+    env.File("src/modm/ui/display/graphic_display_text.cpp"),
+    env.File("src/modm/ui/display/image/home_16x16.cpp"),
+    env.File("src/modm/ui/display/image/logo_eurobot_90x64.cpp"),
+    env.File("src/modm/ui/display/image/logo_rca_90x64.cpp"),
+    env.File("src/modm/ui/display/image/skull_64x64.cpp"),
+    env.File("src/modm/ui/display/virtual_graphic_display.cpp"),
+    env.File("src/modm/ui/menu/choice_menu_entry.cpp"),
+    env.File("src/modm/ui/menu/scrollable_text.cpp"),
 ]
+flags = {"CCFLAGS": ['$CCFLAGS', '-Wno-double-promotion', '-Wno-overflow'], }
+files.append(env.Object("ext/printf/printf.c", **flags))
 library = env.StaticLibrary(target="modm", source=files)
 
 env.AppendUnique(LIBS=[

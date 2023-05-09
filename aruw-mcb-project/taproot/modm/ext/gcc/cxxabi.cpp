@@ -17,17 +17,12 @@
 extern "C"
 {
 
+void *__dso_handle = &__dso_handle;
 void __cxa_pure_virtual()
 { modm_assert(0, "virt.pure", "A pure virtual function was called!"); }
 void __cxa_deleted_virtual()
 { modm_assert(0, "virt.del", "A deleted virtual function was called!"); }
 
-void* __dso_handle = (void*) &__dso_handle;
-// ARM EABI specifies __aeabi_atexit instead of __cxa_atexit
-int __aeabi_atexit(void (*)(void *), void *, void *)
-{
-	return 0;
-}
 }
 
 #include <atomic>
@@ -41,11 +36,13 @@ enum
 	INITIALIZING = 0x100,
 };
 
-// This function is only called when `(guard & 1) != 1`!
+// This function returns 1 only if the object needs to be initialized
 extern "C" int __cxa_guard_acquire(int *guard)
 {
-	std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
-	if (atomic_guard->exchange(INITIALIZING) == INITIALIZING)
+	auto atomic_guard = std::atomic_ref(*guard);
+	if (atomic_guard.load() == INITIALIZED)
+		return 0;
+	if (atomic_guard.exchange(INITIALIZING) == INITIALIZING)
 	{
 		modm_assert(0, "stat.rec",
 				"Recursive initialization of a function static!", guard);
@@ -56,8 +53,8 @@ extern "C" int __cxa_guard_acquire(int *guard)
 // After this function the compiler expects `(guard & 1) == 1`!
 extern "C" void __cxa_guard_release(int *guard) noexcept
 {
-	std::atomic_int *atomic_guard = reinterpret_cast<std::atomic_int *>(guard);
-	atomic_guard->store(INITIALIZED);
+	auto atomic_guard = std::atomic_ref(*guard);
+	atomic_guard.store(INITIALIZED);
 }
 
 // Called if the initialization terminates by throwing an exception.

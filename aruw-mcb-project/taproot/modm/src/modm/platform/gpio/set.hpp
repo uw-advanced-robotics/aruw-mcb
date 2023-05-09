@@ -9,16 +9,12 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_STM32_GPIO_SET_HPP
-#define MODM_STM32_GPIO_SET_HPP
+#pragma once
 
 #include "../device.hpp"
 #include "base.hpp"
 
-namespace modm
-{
-
-namespace platform
+namespace modm::platform
 {
 
 /// @ingroup modm_platform_gpio
@@ -62,6 +58,7 @@ protected:
 		for (const auto &m: masks) r += (m) ? 1 : 0;
 		return r;
 	}
+
 public:
 	static constexpr uint8_t width = sizeof...(Gpios);
 	static constexpr uint8_t number_of_ports = numberOfPorts();
@@ -265,48 +262,48 @@ public:
 	static void toggle()
 	{
 		if constexpr (mask(0)) {
-			uint32_t are_set = (GPIOA->ODR & mask(0));
-			uint32_t are_reset = mask(0) ^ are_set;
+			const uint32_t are_set = (GPIOA->ODR & mask(0));
+			const uint32_t are_reset = mask(0) ^ are_set;
 			GPIOA->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(1)) {
-			uint32_t are_set = (GPIOB->ODR & mask(1));
-			uint32_t are_reset = mask(1) ^ are_set;
+			const uint32_t are_set = (GPIOB->ODR & mask(1));
+			const uint32_t are_reset = mask(1) ^ are_set;
 			GPIOB->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(2)) {
-			uint32_t are_set = (GPIOC->ODR & mask(2));
-			uint32_t are_reset = mask(2) ^ are_set;
+			const uint32_t are_set = (GPIOC->ODR & mask(2));
+			const uint32_t are_reset = mask(2) ^ are_set;
 			GPIOC->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(3)) {
-			uint32_t are_set = (GPIOD->ODR & mask(3));
-			uint32_t are_reset = mask(3) ^ are_set;
+			const uint32_t are_set = (GPIOD->ODR & mask(3));
+			const uint32_t are_reset = mask(3) ^ are_set;
 			GPIOD->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(4)) {
-			uint32_t are_set = (GPIOE->ODR & mask(4));
-			uint32_t are_reset = mask(4) ^ are_set;
+			const uint32_t are_set = (GPIOE->ODR & mask(4));
+			const uint32_t are_reset = mask(4) ^ are_set;
 			GPIOE->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(5)) {
-			uint32_t are_set = (GPIOF->ODR & mask(5));
-			uint32_t are_reset = mask(5) ^ are_set;
+			const uint32_t are_set = (GPIOF->ODR & mask(5));
+			const uint32_t are_reset = mask(5) ^ are_set;
 			GPIOF->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(6)) {
-			uint32_t are_set = (GPIOG->ODR & mask(6));
-			uint32_t are_reset = mask(6) ^ are_set;
+			const uint32_t are_set = (GPIOG->ODR & mask(6));
+			const uint32_t are_reset = mask(6) ^ are_set;
 			GPIOG->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(7)) {
-			uint32_t are_set = (GPIOH->ODR & mask(7));
-			uint32_t are_reset = mask(7) ^ are_set;
+			const uint32_t are_set = (GPIOH->ODR & mask(7));
+			const uint32_t are_reset = mask(7) ^ are_set;
 			GPIOH->BSRR = (are_set << 16) | are_reset;
 		}
 		if constexpr (mask(8)) {
-			uint32_t are_set = (GPIOI->ODR & mask(8));
-			uint32_t are_reset = mask(8) ^ are_set;
+			const uint32_t are_set = (GPIOI->ODR & mask(8));
+			const uint32_t are_reset = mask(8) ^ are_set;
 			GPIOI->BSRR = (are_set << 16) | are_reset;
 		}
 	}
@@ -375,8 +372,4 @@ public:
 	}
 };
 
-} // namespace platform
-
-} // namespace modm
-
-#endif // MODM_STM32_GPIO_SET_HPP
+} // namespace modm::platform

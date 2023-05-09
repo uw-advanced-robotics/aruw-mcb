@@ -13,7 +13,6 @@
 #ifndef MODM_STM32_ADC_INTERRUPT_1_HPP
 #define MODM_STM32_ADC_INTERRUPT_1_HPP
 
-#include <modm/utils/dummy.hpp>
 #include "adc_1.hpp"
 #include <modm/architecture/interface/adc_interrupt.hpp>
 
@@ -42,7 +41,7 @@ class AdcInterrupt1 : public Adc1, public modm::AdcInterrupt
 {
 public:
 	static inline void
-	attachInterruptHandler(Handler handler=modm::dummy)
+	attachInterruptHandler(Handler handler)
 	{
 		AdcInterrupt1::handler = handler;
 	}

@@ -40,7 +40,7 @@ public:
 	static constexpr size_t TxBufferSize = 256;
 
 public:
-	template< template<Peripheral _> class... Signals >
+	template< class... Signals >
 	static void
 	connect(Gpio::InputType InputTypeRx = Gpio::InputType::PullUp,
 	        Gpio::OutputType OutputTypeTx = Gpio::OutputType::PushPull)

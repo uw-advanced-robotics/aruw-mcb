@@ -3,6 +3,7 @@
  * Copyright (c) 2016-2017, Fabian Greif
  * Copyright (c) 2016-2017, 2019, Niklas Hauser
  * Copyright (c) 2021, Raphael Lehmann
+ * Copyright (c) 2021, Christopher Durand
  *
  * This file is part of the modm project.
  *
