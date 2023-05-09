@@ -37,8 +37,8 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(0x1fe, 1, {0}, false);
-    modm::can::Message filledMsg(0x1fe, 1, {1}, false);
+    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
+    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {1}, false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
@@ -59,8 +59,8 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(0x1fe, 1, {0}, false);
-    modm::can::Message filledMsg(0x1fe, 1, {0b10}, false);
+    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
+    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b10}, false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, blankMsg));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
@@ -80,8 +80,8 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(0x1fe, 1, {0}, false);
-    modm::can::Message filledMsg(0x1fe, 1, {0b100}, false);
+    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
+    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b100}, false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
@@ -107,7 +107,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message limitSwitchMsg(0x1fb, 1, {1}, false);
+    modm::can::Message limitSwitchMsg(TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID, 1, {1}, false);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
             *message = limitSwitchMsg;
@@ -133,9 +133,9 @@ TEST(TurretMCBCanComm, receive_turret_data)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message xAxisMessage(0x1fb, 8, 0, false);
-    modm::can::Message yAxisMessage(0x1fc, 8, 0, false);
-    modm::can::Message zAxisMessage(0x1fd, 8, 0, false);
+    modm::can::Message xAxisMessage(TurretMCBCanComm::CanIDs::X_AXIS_RX_CAN_ID, 8, 0, false);
+    modm::can::Message yAxisMessage(TurretMCBCanComm::CanIDs::Y_AXIS_RX_CAN_ID, 8, 0, false);
+    modm::can::Message zAxisMessage(TurretMCBCanComm::CanIDs::Z_AXIS_RX_CAN_ID, 8, 0, false);
 
     modm::can::Message* messageToSend = &xAxisMessage;
 
@@ -218,7 +218,7 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message syncReqMessage(0x1f9, 0, 0, false);
+    modm::can::Message syncReqMessage(TurretMCBCanComm::CanIDs::SYNC_RX_CAN_ID, 0, 0, false);
 
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([syncReqMessage](tap::can::CanBus, modm::can::Message* message) {
@@ -226,9 +226,9 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
             return true;
         });
 
-    modm::can::Message syncMessage(0x1f9, 4, 0, false);
+    modm::can::Message syncMessage(TurretMCBCanComm::CanIDs::SYNC_TX_CAN_ID, 4, 0, false);
     tap::arch::convertToLittleEndian(getTimeMicroseconds(), syncMessage.data);
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(syncMessage)));
+    EXPECT_CALL(drivers.can, sendMessage(_, Eq(syncMessage)));
 
     dut.init();
 

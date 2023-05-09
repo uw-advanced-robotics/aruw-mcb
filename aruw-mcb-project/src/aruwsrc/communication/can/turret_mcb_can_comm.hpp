@@ -62,6 +62,17 @@ public:
     };
     MODM_FLAGS8(TxCommandMsgBitmask);
 
+    enum CanIDs
+    {
+        SYNC_RX_CAN_ID = 0x1f8,
+        SYNC_TX_CAN_ID = 0x1f9,
+        TURRET_STATUS_RX_CAN_ID = 0x1fa,
+        X_AXIS_RX_CAN_ID = 0x1fb,
+        Y_AXIS_RX_CAN_ID = 0x1fc,
+        Z_AXIS_RX_CAN_ID = 0x1fd,
+        TURRET_MCB_TX_CAN_ID = 0x1fe,
+    };
+
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
@@ -184,17 +195,6 @@ public:
 
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
-
-    enum CanIDs
-    {
-        SYNC_RX_CAN_ID = 0x1f8,
-        SYNC_TX_CAN_ID = 0x1f9,
-        TURRET_STATUS_RX_CAN_ID = 0x1fa,
-        X_AXIS_RX_CAN_ID = 0x1fb,
-        Y_AXIS_RX_CAN_ID = 0x1fc,
-        Z_AXIS_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
-    };
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
