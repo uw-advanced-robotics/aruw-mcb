@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRONE_TELEMETRY_HPP_
-#define DRONE_TELEMETRY_HPP_
+#ifndef DRONE_TELEMETRY_HANDLER_HPP_
+#define DRONE_TELEMETRY_HANDLER_HPP_
 
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
@@ -27,7 +27,6 @@
 
 namespace aruwsrc::drone
 {
-
 struct LocalPositionNed
 {
     uint32_t time_boot_ms;  // Timestamp (milliseconds since system boot)
