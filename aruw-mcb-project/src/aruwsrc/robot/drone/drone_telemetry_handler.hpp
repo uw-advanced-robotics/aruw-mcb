@@ -39,7 +39,7 @@ struct LocalPositionNed
     float vz;               // Z Speed in NED frame in meter / s
 } modm_packed;
 
-#define Local_Position_NED_MSG_ID 32
+#define LOCAL_POSITION_NED_MSG_ID 32
 #define MAVLINK_MSG_ID_LOCAL_POSITION_NED_LEN 28
 
 /**
