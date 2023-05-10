@@ -166,11 +166,6 @@ public:
         return mat * ratio;
     }
 
-    virtual inline int16_t getLeftFrontRpmActual() const = 0;
-    virtual inline int16_t getLeftBackRpmActual() const = 0;
-    virtual inline int16_t getRightFrontRpmActual() const = 0;
-    virtual inline int16_t getRightBackRpmActual() const = 0;
-
 };  // class HolonomicChassisSubsystem
 
 }  // namespace chassis
