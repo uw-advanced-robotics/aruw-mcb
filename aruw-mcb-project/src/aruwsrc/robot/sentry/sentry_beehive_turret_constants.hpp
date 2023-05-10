@@ -56,8 +56,6 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 static modm::Vector3f OFFSET_TURRET_0_TO_TURRET_1 = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
 static constexpr float PITCH_YAW_OFFSET = 0.045f;
 
-static float majorToMaleWifeR = -0.145;
-
 namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -80,6 +78,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
 // Turret Major has a double DJI motor, so we need to have two CAN Buses
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
@@ -106,7 +105,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static float majorToTurretR = 0.145;
+static constexpr float majorToTurretR = 0.145;
+static constexpr float default_launch_speed = 14.0f;
 }
 
 namespace maleWife
@@ -128,7 +128,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(42),
     .limitMotorAngles = true,
 };
-static float majorToTurretR = -0.145;
+static constexpr float majorToTurretR = -0.145;
+static constexpr float default_launch_speed = 14.0f;
 }
 
 namespace major_rel

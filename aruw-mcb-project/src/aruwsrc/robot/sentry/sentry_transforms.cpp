@@ -14,11 +14,11 @@ SentryTransforms::SentryTransforms(
     const SentryTurretMinorSubsystem& turretMinorGirlboss,
     const SentryTurretMinorSubsystem& turretMinorMalewife,
     const SentryTransforms::TransformConfig& config)
-    : chassisOdometry(chassisOdometry),
+    : config(config),
+      chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
       turretMinorGirlboss(turretMinorGirlboss),
       turretMinorMalewife(turretMinorMalewife),
-      config(config),
       turretMajorToTurretGirlboss(0., config.turretMinorOffset, 0., 0., 0., 0.),
       turretMajorToTurretMalewife(0., -config.turretMinorOffset, 0., 0., 0., 0.)
 {

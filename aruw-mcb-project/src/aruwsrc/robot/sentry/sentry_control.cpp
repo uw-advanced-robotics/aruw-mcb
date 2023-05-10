@@ -486,17 +486,16 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     sentryTransforms.getWorldToTurretGirlboss(),
     sentryTransforms,
     frictionWheelsGirlboss,
-    14.0f,
-    girlBoss::majorToTurretR);  // defaultLaunchSpeed
+    girlBoss::default_launch_speed,
+    girlBoss::majorToTurretR); 
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     odometrySubsystem,
     turretMajor,
     sentryTransforms.getWorldToTurretMalewife(),
     sentryTransforms,
-    // turretMinorMalewife,
     frictionWheelsMalewife,
-    14.0f,
+    maleWife::default_launch_speed,
     maleWife::majorToTurretR);  // defaultLaunchSpeed
 
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and things like that.
@@ -577,7 +576,6 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
-
 // spin friction wheels commands
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
     drivers(),
@@ -586,15 +584,12 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionW
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
 
-
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsMalewife,
     0000001.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-
 
 // FrictionWheelsOnGovernor frictionWheelsOnGovernorGirlboss(frictionWheelsGirlboss);
 
