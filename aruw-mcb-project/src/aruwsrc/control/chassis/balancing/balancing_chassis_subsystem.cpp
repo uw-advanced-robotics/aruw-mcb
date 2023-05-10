@@ -32,7 +32,7 @@ BalancingChassisSubsystem::BalancingChassisSubsystem(
     BalancingLeg& leftLeg,
     BalancingLeg& rightLeg,
     tap::gpio::Analog::Pin currentPin)
-    : Subsystem(drivers),
+    : tap::control::chassis::ChassisSubsystemInterface(drivers),
       rotationPid(AUTOROTATION_PID),
       turretMCB(turretMCB),
       pitchMotor(pitchMotor),

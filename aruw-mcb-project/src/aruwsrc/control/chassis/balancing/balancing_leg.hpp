@@ -141,7 +141,7 @@ public:
     /**
      * @return the online-ness of the 3 motors in the balancing leg.
      */
-    inline bool wheelMotorOnline() { return driveWheel->isMotorOnline(); }
+    inline bool wheelMotorOnline() const { return driveWheel->isMotorOnline(); }
 
     /**
      * Updates the state and control action of the balancing leg.

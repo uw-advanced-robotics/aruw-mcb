@@ -203,7 +203,7 @@ public:
     /**
      * Returns the gyroscope reading in the x direction, in
      * \f$\frac{\mbox{degrees}}{\mbox{second}}\f$.
-     */ 
+     */
     inline float getGx() final_mockable
     {
         return validateReading(

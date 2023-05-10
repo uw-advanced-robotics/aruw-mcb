@@ -104,6 +104,8 @@ public:
      */
     virtual void setDesiredOutput(float x, float y, float r) = 0;
 
+    virtual void stopChassis() { setDesiredOutput(0, 0, 0); };
+
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.

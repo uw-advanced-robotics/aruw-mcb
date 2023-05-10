@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/control/subsystem.hpp"
 
@@ -33,7 +34,7 @@
 
 namespace aruwsrc::chassis
 {
-class BalancingChassisSubsystem : public tap::control::Subsystem
+class BalancingChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
     BalancingChassisSubsystem(
@@ -53,9 +54,45 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
+    /**
+     * @return the number of chassis motors
+     */
+    inline int getNumChassisMotors() const override { return 2; };
+
+    /**
+     * @return `true` iff all motors are online
+     */
+    inline bool allMotorsOnline() const override
+    {
+        return leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline();
+    };
+
+    /**
+     * Retracts legs to home position and kills drive motors. Leg motors are still active to get to
+     * and hold position.
+     */
+    inline void stopChassis()
+    {
+        desiredZ = leftLeg.getDefaultPosition().getY();
+        setDesiredOutput(0, 0);
+        leftLeg.disarmLeg();
+        rightLeg.disarmLeg();
+    };
+
+    /**
+     * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the velocity calculated from the chassis's
+     *      encoders. Units: m/s
+     */
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const
+    {
+        const float data[3] = {currentV, 0, currentR};
+        return modm::Matrix<float, 3, 1>(data);
+    };
+
     void setDesiredHeight(float z)
     {
-        desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.15);
+        desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.1);
     };
 
     /**

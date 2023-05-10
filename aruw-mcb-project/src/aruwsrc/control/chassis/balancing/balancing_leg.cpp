@@ -69,7 +69,7 @@ void BalancingLeg::update()
 
     /* 2. Compute Setpoints */
     zDesRamper.setTarget(zDesired);
-    zDesRamper.update(Z_RAMP_RATE * dt / 1000);
+    zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
     float zDesiredRamped = zDesRamper.getValue();
 
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.115);
@@ -81,6 +81,9 @@ void BalancingLeg::update()
 
     xoffset = xPid.runControllerDerivateError(vDesired, dt);
     // xoffset = .00;
+    float tl_desired = atan2(-xoffset, -zCurrent);
+    tl_desired = 0;
+
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesiredRamped;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesiredRamped;
     if (!isFallen)
@@ -92,8 +95,6 @@ void BalancingLeg::update()
     {
         desiredWheelLocation = fivebar->getDefaultPosition();
     }
-    float tl_desired = atan2(-xoffset, -zCurrent);
-    tl_desired = 0;
 
     float LQR_K2 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
     float LQR_K3 = HEIGHT_TO_LQR_K3_INTERPOLATOR.interpolate(-zCurrent);

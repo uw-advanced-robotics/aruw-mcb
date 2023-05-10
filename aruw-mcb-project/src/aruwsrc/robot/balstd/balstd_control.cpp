@@ -322,6 +322,17 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
 //     USER_YAW_INPUT_SCALAR,
 //     USER_PITCH_INPUT_SCALAR);
 
+aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {{
+        &getTurretMCBCanComm(),
+        &turret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
+    &chassis);
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 BalancingChassisRelativeDriveCommand manualDriveCommand(
@@ -374,6 +385,17 @@ HoldCommandMapping leftSwitchDown(
 //     drivers(),
 //     {&turretCVCommand, &chassisDriveCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -430,5 +452,12 @@ void initSubsystemCommands(Drivers *drivers)
     balstd_control::registerBalstdIoMappings(drivers);
 }
 }  // namespace aruwsrc::balstd
+
+#ifndef PLATFORM_HOSTED
+aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand()
+{
+    return &balstd_control::imuCalibrateCommand;
+}
+#endif
 
 #endif  // TARGET_BALSTD

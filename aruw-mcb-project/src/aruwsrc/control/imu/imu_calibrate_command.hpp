@@ -106,7 +106,7 @@ public:
     ImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        chassis::HolonomicChassisSubsystem *chassis);
+        tap::control::chassis::ChassisSubsystemInterface *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -144,7 +144,7 @@ private:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
-    chassis::HolonomicChassisSubsystem *chassis;
+    tap::control::chassis::ChassisSubsystemInterface *chassis;
 
     CalibrationState calibrationState;
 
