@@ -71,11 +71,6 @@ struct SwerveModuleConfig
         .errDeadzone = 0.0f,
         .errorDerivativeFloor = 0.0f,
     };
-
-    modm::Pair<float, float> ANGULAR_POWER_FRAC_LUT[2] = {
-        {0.0f, 0.2f},
-        {M_PI_2, 0.75f},
-    };
 };
 
 static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;

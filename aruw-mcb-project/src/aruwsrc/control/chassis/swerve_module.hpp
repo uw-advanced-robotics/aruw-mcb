@@ -184,8 +184,6 @@ private:
     // multiple of PI)
     float rotationOffset{0};
 
-    modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;
-
 };  // class SwerveModule
 
 }  // namespace chassis

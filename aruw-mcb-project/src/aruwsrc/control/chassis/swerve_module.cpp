@@ -33,10 +33,7 @@ SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleC
       drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
-      rotationVectorY(config.positionWithinChassisX),
-      angularBiasLUTInterpolator(
-          config.ANGULAR_POWER_FRAC_LUT,
-          MODM_ARRAY_SIZE(config.ANGULAR_POWER_FRAC_LUT))
+      rotationVectorY(config.positionWithinChassisX)
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
