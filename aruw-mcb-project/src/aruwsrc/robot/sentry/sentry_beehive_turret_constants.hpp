@@ -21,6 +21,7 @@
 #define SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -106,6 +107,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 static constexpr float majorToTurretR = 0.145;
 static constexpr float default_launch_speed = 14.0f;
+static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 }  // namespace girlBoss
 
 namespace maleWife
@@ -129,6 +132,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 static constexpr float majorToTurretR = -0.145;
 static constexpr float default_launch_speed = 14.0f;
+static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
 }  // namespace maleWife
 
 namespace major_rel
