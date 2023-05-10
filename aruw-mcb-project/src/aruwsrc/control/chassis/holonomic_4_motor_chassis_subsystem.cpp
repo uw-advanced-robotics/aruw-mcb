@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
@@ -39,12 +35,12 @@ namespace chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
-    tap::gpio::Analog::Pin currentPin)
-    : HolonomicChassisSubsystem(drivers, currentPin),
+    tap::motor::MotorId rightBackMotorId)
+    : HolonomicChassisSubsystem(drivers, currentSensor),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
@@ -115,7 +111,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     int NUM_MOTORS = getNumChassisMotors();
 
     // use power limiting object to compute initial power limiting fraction
-    currentSensor.update();
+    currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // short circuit if power limiting doesn't need to be applied
@@ -216,6 +212,11 @@ modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChas
     wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
     wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
     return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+}
+
+modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
 }  // namespace chassis

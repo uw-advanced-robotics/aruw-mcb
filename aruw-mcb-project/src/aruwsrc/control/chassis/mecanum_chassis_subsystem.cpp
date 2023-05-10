@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #include "mecanum_chassis_subsystem.hpp"
 
 #include "tap/drivers.hpp"
@@ -35,18 +31,18 @@ namespace chassis
 {
 MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
-    tap::gpio::Analog::Pin currentPin)
+    tap::motor::MotorId rightBackMotorId)
     : Holonomic4MotorChassisSubsystem(
           drivers,
+          currentSensor,
           leftFrontMotorId,
           leftBackMotorId,
           rightFrontMotorId,
-          rightBackMotorId,
-          currentPin)
+          rightBackMotorId)
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;
