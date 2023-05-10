@@ -34,15 +34,6 @@ using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
 
-#ifndef PLATFORM_HOSTED
-MODM_ISR(EXTI0)
-{
-    // Currently the EXTI0 interrupt handler is only used by the time sync pin
-    VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
-    VisionCoprocessor::handleTimeSyncRequest();
-}
-#endif
-
 VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
@@ -69,16 +60,6 @@ VisionCoprocessor::~VisionCoprocessor() { visionCoprocessorInstance = nullptr; }
 
 void VisionCoprocessor::initializeCV()
 {
-#define DISABLE_TIME_SYNC_INTERRUPT
-#if !defined(PLATFORM_HOSTED) && !defined(DISABLE_TIME_SYNC_INTERRUPT)
-    // Set up the interrupt for the vision coprocessor sync handler
-    VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
-    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
-    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt();
-    VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
-        modm::platform::Gpio::InputTrigger::RisingEdge);
-#endif
-
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
 #if defined(TARGET_HERO_CYCLONE)
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
@@ -146,7 +127,6 @@ void VisionCoprocessor::sendMessage()
     sendRefereeRealtimeData();
     sendRefereeCompetitionResult();
     sendRefereeWarning();
-    sendTimeSyncMessage();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -337,29 +317,6 @@ void VisionCoprocessor::sendRefereeWarning()
 
         // New warning sent
         lastSentRefereeWarningTime = refereeWarningData.lastReceivedWarningRobotTime;
-    }
-}
-
-void VisionCoprocessor::sendTimeSyncMessage()
-{
-    uint32_t newRisingEdgeTime = risingEdgeTime;
-
-    if (prevRisingEdgeTime != newRisingEdgeTime)
-    {
-        prevRisingEdgeTime = newRisingEdgeTime;
-
-        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
-
-        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
-
-        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
-        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
-        timeSyncResponseMessage.setCRC16();
-
-        drivers->uart.write(
-            VISION_COPROCESSOR_TX_UART_PORT,
-            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-            sizeof(timeSyncResponseMessage));
     }
 }
 
