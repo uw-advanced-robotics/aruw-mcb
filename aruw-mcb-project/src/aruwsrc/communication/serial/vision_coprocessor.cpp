@@ -22,11 +22,11 @@
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/util_macros.hpp"
-#include "tap/algorithms/transforms/transform.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
@@ -114,7 +114,6 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
         lastAimData[j].pva.updated = 0;
         lastAimData[j].timing.updated = 0;
 
-
         currIndex += messageWidths::FLAGS_BYTES;
         memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
         currIndex += messageWidths::TIMESTAMP_BYTES;
@@ -191,7 +190,8 @@ void VisionCoprocessor::sendOdometryData()
     float roll = modm::toRadian(drivers->mpu6500.getRoll());
     // transform the pitch/roll from the chassis frame to the world frame
     // @todo wtf is this
-    // tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);  // @todo move MCB_ROTATION_OFFSET to geometry config
+    // tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() -
+    // MCB_ROTATION_OFFSET);  // @todo move MCB_ROTATION_OFFSET to geometry config
 
     // chassis odometry
     auto& worldToChassisTransform = this->transforms->getWorldToChassis();
@@ -215,16 +215,16 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->numTurrets = 2;
     auto& worldToGirlboss = transforms->getWorldToTurretGirlboss();
     auto& worldToMalewife = transforms->getWorldToTurretMalewife();
-    
+
     odometryData->turretOdometry[0].xPos = worldToGirlboss.getX();
     odometryData->turretOdometry[0].yPos = worldToGirlboss.getY();
     odometryData->turretOdometry[0].zPos = worldToGirlboss.getZ();
 
     odometryData->turretOdometry[0].roll = worldToGirlboss.getRoll();
     odometryData->turretOdometry[0].pitch = worldToGirlboss.getPitch();
-    lastTurretGirlBossSentPitch = worldToGirlboss.getPitch(); 
+    lastTurretGirlBossSentPitch = worldToGirlboss.getPitch();
     odometryData->turretOdometry[0].yaw = worldToGirlboss.getYaw();
-    lastTurretGirlBossSentYaw = worldToGirlboss.getYaw(); 
+    lastTurretGirlBossSentYaw = worldToGirlboss.getYaw();
 
     odometryData->turretOdometry[1].xPos = worldToMalewife.getX();
     odometryData->turretOdometry[1].yPos = worldToMalewife.getY();
@@ -234,7 +234,7 @@ void VisionCoprocessor::sendOdometryData()
     odometryData->turretOdometry[1].pitch = worldToMalewife.getPitch();
     lastTurretMalewifeSentPitch = worldToMalewife.getPitch();
     odometryData->turretOdometry[1].yaw = worldToMalewife.getYaw();
-    lastTurretMalewifeSentYaw = worldToMalewife.getYaw(); 
+    lastTurretMalewifeSentYaw = worldToMalewife.getYaw();
 
     auto& worldToMajor = transforms->getWorldToTurretMajor();
     odometryData->majorOrientation.roll = worldToMajor.getRoll();
