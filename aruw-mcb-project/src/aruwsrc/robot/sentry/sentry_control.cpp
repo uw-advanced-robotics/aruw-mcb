@@ -229,7 +229,7 @@ tap::motor::DoubleDjiMotor turretMajorYawMotor(
 tap::motor::DjiMotor turretMinorGirlbossYawMotor(
     drivers(),
     MOTOR6,
-    turretMinor0::CAN_BUS_MOTORS,
+    girlBoss::CAN_BUS_MOTORS,
     false,
     "Minor girlboss Yaw Turret"
 );
@@ -237,7 +237,7 @@ tap::motor::DjiMotor turretMinorGirlbossYawMotor(
 tap::motor::DjiMotor turretMinorGirlbossPitchMotor(
     drivers(),
     MOTOR5,
-    turretMinor0::CAN_BUS_MOTORS,
+    girlBoss::CAN_BUS_MOTORS,
     true,
     "Minor girlboss Pitch Turret"
 );
@@ -245,7 +245,7 @@ tap::motor::DjiMotor turretMinorGirlbossPitchMotor(
 tap::motor::DjiMotor turretMinorMalewifeYawMotor(
     drivers(),
     MOTOR6,
-    turretMinor1::CAN_BUS_MOTORS,
+    maleWife::CAN_BUS_MOTORS,
     false,
     "Minor malewife Yaw Turret"
 );
@@ -253,7 +253,7 @@ tap::motor::DjiMotor turretMinorMalewifeYawMotor(
 tap::motor::DjiMotor turretMinorMalewifePitchMotor(
     drivers(),
     MOTOR5,
-    turretMinor1::CAN_BUS_MOTORS,
+    maleWife::CAN_BUS_MOTORS,
     false,
     "Minor malewife Pitch Turret"
 );
@@ -285,15 +285,15 @@ SentryTurretMajorSubsystem turretMajor(drivers(), &turretMajorYawMotor, aruwsrc:
 // a yaw controller for the turret major ourselves
 algorithms::ChassisFrameYawTurretController turretMajorYawController(
     turretMajor.yawMotor,
-    chassis_rel::turretMajor::YAW_PID_CONFIG);
+    turretMajor::YAW_PID_CONFIG);
 
 // Turret Minors ---------------------------------------------------------
 SentryTurretMinorSubsystem turretMinorGirlboss(
     drivers(),
     &turretMinorGirlbossPitchMotor,
     &turretMinorGirlbossYawMotor,
-    aruwsrc::control::turret::turretMinor1::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turretMinor1::YAW_MOTOR_CONFIG,
+    aruwsrc::control::turret::maleWife::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::maleWife::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus2,
     0);
 
@@ -301,8 +301,8 @@ SentryTurretMinorSubsystem turretMinorMalewife(
     drivers(),
     &turretMinorMalewifePitchMotor,
     &turretMinorMalewifeYawMotor,
-    aruwsrc::control::turret::turretMinor0::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::turretMinor0::YAW_MOTOR_CONFIG,
+    aruwsrc::control::turret::girlBoss::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::girlBoss::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus1,
     1);
 
@@ -347,7 +347,7 @@ SentryTurretMinorSubsystem turretMinorMalewife(
 
 algorithms::ChassisFramePitchTurretController girlbossPitchController(
     turretMinorGirlboss.pitchMotor,
-    chassis_rel::turretMinor1::PITCH_PID_CONFIG
+    major_rel::girlBoss::PITCH_PID_CONFIG
 );
 
 // tap::algorithms::SmoothPid malewifePitchPosPid(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_CONFIG);
@@ -361,7 +361,7 @@ algorithms::ChassisFramePitchTurretController girlbossPitchController(
 
 algorithms::ChassisFramePitchTurretController malewifePitchController(
     turretMinorMalewife.pitchMotor,
-    chassis_rel::turretMinor0::PITCH_PID_CONFIG
+    major_rel::maleWife::PITCH_PID_CONFIG
 );
 
 // Yaw
@@ -399,7 +399,7 @@ algorithms::ChassisFramePitchTurretController malewifePitchController(
 
 algorithms::ChassisFrameYawTurretController girlbossYawController(
     turretMinorGirlboss.yawMotor,
-    chassis_rel::turretMinor1::YAW_PID_CONFIG
+    major_rel::girlBoss::YAW_PID_CONFIG
 );
 
 // tap::algorithms::SmoothPid malewifeYawPosPid(world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG);
@@ -414,7 +414,7 @@ algorithms::ChassisFrameYawTurretController girlbossYawController(
 
 algorithms::ChassisFrameYawTurretController malewifeYawController(
     turretMinorMalewife.yawMotor,
-    chassis_rel::turretMinor0::YAW_PID_CONFIG
+    major_rel::maleWife::YAW_PID_CONFIG
 );
 
 // Friction wheels ---------------------------------------------------------------------------
@@ -425,7 +425,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretMinor0::CAN_BUS_MOTORS,
+        girlBoss::CAN_BUS_MOTORS,
         // aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
@@ -436,7 +436,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretMinor1::CAN_BUS_MOTORS,
+        maleWife::CAN_BUS_MOTORS,
         // aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);  // @todo idk what they actually are
@@ -481,19 +481,15 @@ SentryTransformsSubsystem sentryTransforms(
 // Otto ballistics solver --------------------------------------------------------------------
 
 OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
-    // drivers()->visionCoprocessor,
     odometrySubsystem,
     turretMajor,
     sentryTransforms.getWorldToTurretGirlboss(),
     sentryTransforms,
-    // turretMinorGirlboss,
     frictionWheelsGirlboss,
     14.0f,
-    0.145);  // defaultLaunchSpeed
-    // 0);
+    girlBoss::majorToTurretR);  // defaultLaunchSpeed
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
-    // drivers()->visionCoprocessor,
     odometrySubsystem,
     turretMajor,
     sentryTransforms.getWorldToTurretMalewife(),
@@ -501,8 +497,7 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     // turretMinorMalewife,
     frictionWheelsMalewife,
     14.0f,
-    -0.145);  // defaultLaunchSpeed
-    // 1);
+    maleWife::majorToTurretR);  // defaultLaunchSpeed
 
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and things like that.
 // What if controllers were mix-ins for susbsystems or something?
