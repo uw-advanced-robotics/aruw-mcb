@@ -17,22 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BALSTD_FRAME_HPP_
-#define BALSTD_FRAME_HPP_
+#include "balstd_transforms.hpp"
 
-#include "tap/algorithms/transforms/frame.hpp"
+using namespace tap::algorithms::transforms
 
 namespace aruwsrc::balstd::transforms
 {
-/**
- * Frame is an empty class to provide type-checking for
- * generic Transforms. This class is intended to be inherited
- * by more specific frame subclasses, which should also be empty.
- */
 
-class ChassisFrame : tap::algorithms::transforms::Frame
+Transformer::Transformer(
+    const BalancingChassisSubsystem& chassis,
+    const StandardTurretSubsystem& turret
+) : chassis(chassis),
+    turret(turret)
 {
-};
-}  // namespace tap::algorithms::transforms
+    worldToChassis = Transform();
+    chassisToTurret = Transform(0, 0, 0, 0, 0, 0);
+}
 
-#endif  // TAPROOT_FRAME_HPP_
+}
