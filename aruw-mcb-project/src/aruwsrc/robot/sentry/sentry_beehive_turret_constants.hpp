@@ -21,13 +21,12 @@
 #define SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
-#include "tap/communication/serial/ref_serial_data.hpp"
-
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -72,7 +71,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kd = 10'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 25'000.0f,
-// .maxOutput = 5000.f,
+    // .maxOutput = 5000.f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
@@ -83,7 +82,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 // static constexpr boolean majorInverted = true;
-}
+}  // namespace turretMajor
 
 namespace girlBoss
 {
@@ -93,7 +92,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 6842,
     .minAngle = modm::toRadian(-210),
-    .maxAngle = modm::toRadian(30),    
+    .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
 };
 
@@ -107,7 +106,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 static constexpr float majorToTurretR = 0.145;
 static constexpr float default_launch_speed = 14.0f;
-}
+}  // namespace girlBoss
 
 namespace maleWife
 {
@@ -130,13 +129,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 static constexpr float majorToTurretR = -0.145;
 static constexpr float default_launch_speed = 14.0f;
-}
+}  // namespace maleWife
 
 namespace major_rel
 {
-namespace turretMajor
-{
-}  // namespace turretMajor
 
 namespace maleWife
 {
@@ -146,7 +142,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kd = 3'000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 25'000.0f,
-// .maxOutput = 5000.f,
+    // .maxOutput = 5000.f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -167,7 +163,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace turretMinor0
+}  // namespace maleWife
 
 namespace girlBoss
 {
@@ -197,8 +193,8 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace turretMinor1
-}  // namespace chassis_rel
+}  // namespace girlBoss
+}  // namespace major_rel
 
 }  // namespace  aruwsrc::control::turret
 

@@ -426,7 +426,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         girlBoss::CAN_BUS_MOTORS,
-        // aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
@@ -437,7 +436,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         maleWife::CAN_BUS_MOTORS,
-        // aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);  // @todo idk what they actually are
 
@@ -445,12 +443,12 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 VelocityAgitatorSubsystem girlBossAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
-    constants::turretMinor1::AGITATOR_CONFIG);
+    constants::girlBoss::AGITATOR_CONFIG);
 
 VelocityAgitatorSubsystem maleWifeAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
-    constants::turretMinor0::AGITATOR_CONFIG);
+    constants::maleWife::AGITATOR_CONFIG);
 
 // Odometry ----------------------------------------------------------------------------------
 
