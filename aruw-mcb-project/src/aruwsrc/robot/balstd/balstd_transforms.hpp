@@ -49,18 +49,24 @@ public:
         const aruwsrc::chassis::BalancingChassisSubsystem& chassis,
         const aruwsrc::control::turret::StandardTurretSubsystem& turret);
 
-    const Transform<World, Chassis>& worldToChassis() const { return worldToChassis; }
+    Transform<World, Chassis> const& getWorldToChassis() const { return worldToChassis; }
 
-    const Transform<Chassis, Turret>& chassisToTurret() const { return chassisToTurret; }
+    Transform<Chassis, Turret> const& getChassisToTurret() const { return chassisToTurret; }
 
-    const Transform<World, Turret>& worldToTurret()
+    Transform<World, Turret> const& getWorldToTurret()
     {
         return compose<World, Chassis, Turret>(worldToChassis, chassisToTurret);
     }
 
-    const Transform<Turret, Chassis>& turretToChassis() const { return chassisToTurret.inverse(); }
+    Transform<Turret, Chassis> const& getTurretToChassis()
+    {
+        return chassisToTurret.getInverse();
+    }
 
-    const Transform<Chassis, World>& chassisToWorld() const { return worldToChassis.inverse(); }
+    Transform<Chassis, World> const& getChassisToWorld()
+    {
+        return worldToChassis.getInverse();
+    }
 
     void updateTransforms();
 
@@ -68,8 +74,8 @@ private:
     Transform<World, Chassis> worldToChassis;
     Transform<Chassis, Turret> chassisToTurret;
 
-    const BalancingChassisSubsystem& chassis;
-    const StandardTurretSubsystem& turret;
+    const aruwsrc::chassis::BalancingChassisSubsystem& chassis;
+    const aruwsrc::control::turret::StandardTurretSubsystem& turret;
 };
 }  // namespace aruwsrc::balstd::transforms
 

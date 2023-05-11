@@ -34,4 +34,12 @@ Transformer::Transformer(
     chassisToTurret = Transform<Chassis, Turret>(0, 0, 0, 0, 0, 0);
 }
 
+void Transformer::updateTransforms()
+{
+    float yaw = turret.yawMotor.getChassisFrameMeasuredAngle().getValue();
+    float pitch = turret.pitchMotor.getChassisFrameMeasuredAngle().getValue();
+    chassisToTurret.updateRotation(0, pitch, yaw);
+
+}
+
 }  // namespace aruwsrc::balstd::transforms
