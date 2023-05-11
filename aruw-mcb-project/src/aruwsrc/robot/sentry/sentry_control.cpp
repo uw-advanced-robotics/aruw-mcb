@@ -598,14 +598,14 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionW
 
 // FrictionWheelsOnGovernor frictionWheelsOnGovernorGirlboss(frictionWheelsGirlboss);
 
-// // Agitator commands (girl boss)
-// MoveIntegralCommand girlBossRotateAgitator(girlBossAgitator, constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
-//     *drivers(),
-//     girlBossAgitator,
-//     girlBossRotateAgitator,
-//     girlBossUnjamAgitator);
+// Agitator commands (girl boss)
+MoveIntegralCommand girlBossRotateAgitator(girlBossAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
+    *drivers(),
+    girlBossAgitator,
+    girlBossRotateAgitator,
+    girlBossUnjamAgitator);
 
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
 //     drivers()->refSerial,
@@ -762,6 +762,11 @@ HoldCommandMapping rightSwitchUp(
     drivers(),
     {&girlBossFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+HoldCommandMapping rightSwitchMid(
+    drivers(),
+    {&girlBossRotateAndUnjamAgitator},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 bool isInitialized = false;
 
 /* initialize subsystems ----------------------------------------------------*/
