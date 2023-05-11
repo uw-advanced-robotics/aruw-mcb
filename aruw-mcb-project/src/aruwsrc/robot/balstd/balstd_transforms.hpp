@@ -31,35 +31,43 @@ using namespace tap::algorithms::transforms;
 namespace aruwsrc::balstd::transforms
 {
 /** Frame Definitions */
-class World : public Frame {};
-class Chassis : public Frame {};
-class Turret : public Frame {};
+class World : public Frame
+{
+};
+class Chassis : public Frame
+{
+};
+class Turret : public Frame
+{
+};
 
 class Transformer
 {
 public:
-Transformer(const BalancingChassisSubsystem& chassis, const StandardTurretSubsystem& turret);
+    Transformer(const BalancingChassisSubsystem& chassis, const StandardTurretSubsystem& turret);
 
-Transform<World, Chassis>& worldToChassis() { return &worldToChassis; }
+    Transform<World, Chassis>& worldToChassis() { return worldToChassis; }
 
-Transform<Chassis, Turret>& chassisToTurret() { return &chassisToTurret; }
+    Transform<Chassis, Turret>& chassisToTurret() { return chassisToTurret; }
 
-Transform<World, Turret>& worldToTurret() { return compose<World, Chassis, Turret>(worldToChassis, chassisToTurret); }
+    Transform<World, Turret>& worldToTurret()
+    {
+        return compose<World, Chassis, Turret>(worldToChassis, chassisToTurret);
+    }
 
-Transform<Turret, Chassis>& turretToChassis() { return &chassisToTurret.inverse(); }
+    Transform<Turret, Chassis>& turretToChassis() { return chassisToTurret.inverse(); }
 
-Transform<Chassis, World>& chassisToWorld() { return &worldToChassis.inverse(); }
+    Transform<Chassis, World>& chassisToWorld() { return worldToChassis.inverse(); }
 
-void updateTransforms();
+    void updateTransforms();
 
 private:
-Transform<World, Chassis> worldToChassis;
-Transform<Chassis, Turret> chassisToTurret;
+    Transform<World, Chassis> worldToChassis;
+    Transform<Chassis, Turret> chassisToTurret;
 
-const BalancingChassisSubsystem& chassis;
-const StandardTurretSubsystem& turret;
-
-}
-}  // namespace tap::algorithms::transforms
+    const BalancingChassisSubsystem& chassis;
+    const StandardTurretSubsystem& turret;
+};
+}  // namespace aruwsrc::balstd::transforms
 
 #endif  // BALSTD_TRANSFORMS_HPP_
