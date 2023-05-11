@@ -19,19 +19,19 @@
 
 #include "balstd_transforms.hpp"
 
-using namespace tap::algorithms::transforms
+using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::balstd::transforms
 {
 
 Transformer::Transformer(
-    const BalancingChassisSubsystem& chassis,
-    const StandardTurretSubsystem& turret
-) : chassis(chassis),
-    turret(turret)
+    const aruwsrc::chassis::BalancingChassisSubsystem& chassis,
+    const aruwsrc::control::turret::StandardTurretSubsystem& turret)
+    : chassis(chassis),
+      turret(turret)
 {
-    worldToChassis = Transform();
-    chassisToTurret = Transform(0, 0, 0, 0, 0, 0);
+    worldToChassis = Transform<World, Chassis>();
+    chassisToTurret = Transform<Chassis, Turret>(0, 0, 0, 0, 0, 0);
 }
 
-}
+}  // namespace aruwsrc::balstd::transforms

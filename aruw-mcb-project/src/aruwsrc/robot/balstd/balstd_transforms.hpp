@@ -20,6 +20,7 @@
 #ifndef BALSTD_TRANSFORMS_HPP_
 #define BALSTD_TRANSFORMS_HPP_
 
+#include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/transforms/frame.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
@@ -44,20 +45,22 @@ class Turret : public Frame
 class Transformer
 {
 public:
-    Transformer(const BalancingChassisSubsystem& chassis, const StandardTurretSubsystem& turret);
+    Transformer(
+        const aruwsrc::chassis::BalancingChassisSubsystem& chassis,
+        const aruwsrc::control::turret::StandardTurretSubsystem& turret);
 
-    Transform<World, Chassis>& worldToChassis() { return worldToChassis; }
+    const Transform<World, Chassis>& worldToChassis() const { return worldToChassis; }
 
-    Transform<Chassis, Turret>& chassisToTurret() { return chassisToTurret; }
+    const Transform<Chassis, Turret>& chassisToTurret() const { return chassisToTurret; }
 
-    Transform<World, Turret>& worldToTurret()
+    const Transform<World, Turret>& worldToTurret()
     {
         return compose<World, Chassis, Turret>(worldToChassis, chassisToTurret);
     }
 
-    Transform<Turret, Chassis>& turretToChassis() { return chassisToTurret.inverse(); }
+    const Transform<Turret, Chassis>& turretToChassis() const { return chassisToTurret.inverse(); }
 
-    Transform<Chassis, World>& chassisToWorld() { return worldToChassis.inverse(); }
+    const Transform<Chassis, World>& chassisToWorld() const { return worldToChassis.inverse(); }
 
     void updateTransforms();
 

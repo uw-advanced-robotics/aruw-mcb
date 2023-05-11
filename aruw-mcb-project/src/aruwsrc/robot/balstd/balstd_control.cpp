@@ -403,7 +403,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 
 // Global Objects
 
-aruwsrc::balstd::transforms::Transformer(chassis, turret);
+aruwsrc::balstd::transforms::Transformer transformer(chassis, turret);
 
 /* register subsystems here -------------------------------------------------*/
 void registerBalstdSubsystems(Drivers *drivers)
@@ -456,7 +456,7 @@ void initSubsystemCommands(Drivers *drivers)
     balstd_control::startBalstdCommands(drivers);
     balstd_control::registerBalstdIoMappings(drivers);
 }
-void updateGlobals() { transfo }
+void updateGlobals() { balstd_control::transformer.updateTransforms(); }
 }  // namespace aruwsrc::balstd
 
 #ifndef PLATFORM_HOSTED

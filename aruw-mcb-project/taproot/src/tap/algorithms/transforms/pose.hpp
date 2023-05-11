@@ -60,7 +60,7 @@ struct Pose
 
     inline float yaw() const { return asinf(orientation.data[3]/cosf(getB())); }
 
-    Position<FRAME> position.
+    Position<FRAME> position;
     CMSISMat<3, 3> orientation;
 };  // struct Pose
 }   // namespace tap::algorithms::transforms
