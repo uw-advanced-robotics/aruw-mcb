@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
@@ -44,11 +40,11 @@ class Holonomic4MotorChassisSubsystem : public HolonomicChassisSubsystem
 public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
 
     inline bool allMotorsOnline() const override
     {
@@ -71,7 +67,37 @@ public:
 
     void refresh() override;
 
+    inline void setZeroRPM() override { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
+
+    /**
+     * Used to index into the desiredWheelRPM matrix and velocityPid array.
+     */
+    enum WheelRPMIndex
+    {
+        LF = 0,
+        RF = 1,
+        LB = 2,
+        RB = 3,
+    };
+
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+
+    /**
+     * Stores the desired RPM of each of the motors in a matrix, indexed by WheelRPMIndex
+     */
+    modm::Matrix<float, 4, 1> desiredWheelRPM;
+
+    /**
+     * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
+     *      where vz is rotational velocity. This is the desired velocity calculated before any
+     *      sort of limiting occurs (other than base max RPM limiting). Units: m/s
+     * @note Equations slightly modified from this paper:
+     *      https://www.hindawi.com/journals/js/2015/347379/.
+     */
+    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+
+protected:
+    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
 private:
     /**

@@ -351,7 +351,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     nullptr);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
 
@@ -456,8 +455,6 @@ void startSentryCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
         &sentryRequestHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/

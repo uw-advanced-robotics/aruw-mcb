@@ -50,8 +50,8 @@ protected:
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
-          operatorInterface(&drivers),
           ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
               &operatorInterface,

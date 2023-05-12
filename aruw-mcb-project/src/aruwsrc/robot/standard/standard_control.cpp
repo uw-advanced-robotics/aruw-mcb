@@ -37,6 +37,7 @@
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -50,6 +51,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -140,7 +142,14 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers());
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
+aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
@@ -206,6 +215,11 @@ aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
+aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
+    (drivers()->controlOperatorInterface));
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
@@ -399,7 +413,6 @@ ClientDisplayCommand clientDisplayCommand(
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-aruwsrc::communication::LowBatteryBuzzerCommand lowBatteryCommand(buzzer, drivers());
 
 /* define command mappings --------------------------------------------------*/
 // Remote related mappings
@@ -487,15 +500,21 @@ PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
-
-PressCommandMapping qPressed(
+// The user can press q or e to manually rotate the chassis left or right.
+// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
+// automatically once a different drive mode is chosen.
+PressCommandMapping qEPressed(
+    drivers(),
+    {&wiggleCommand},
+    RemoteMapState({Remote::Key::Q, Remote::Key::E}));
+PressCommandMapping qNotEPressed(
     drivers(),
     {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::Q}));
-PressCommandMapping ePressed(
+    RemoteMapState({Remote::Key::Q}, {Remote::Key::E}));
+PressCommandMapping eNotQPressed(
     drivers(),
     {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::E}));
+    RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
 PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
@@ -555,7 +574,6 @@ void setDefaultStandardCommands(Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    buzzer.setDefaultCommand(&lowBatteryCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -569,8 +587,6 @@ void startStandardCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
-
-    drivers->commandScheduler.addCommand(&lowBatteryCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -588,8 +604,9 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&ePressed);
+    drivers->commandMapper.addMap(&qEPressed);
+    drivers->commandMapper.addMap(&qNotEPressed);
+    drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&rCtrlPressed);
