@@ -3,9 +3,14 @@
 namespace aruwsrc::control {
 
     void BarrelSwitchCommand::execute() {
-        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
+        if (barrelSwitcher.isBetweenPositions()) {
+            finished = true;
+            return;
+        }
+        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL || 
+            barrelSwitcher.getBarrelState() == BarrelState::IDLE) {
             barrelSwitcher.moveTowardUpperBound();
-        } else {
+        } else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL) {
             barrelSwitcher.moveTowardLowerBound();
         }
         finished = true;

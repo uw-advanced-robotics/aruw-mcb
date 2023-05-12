@@ -80,6 +80,7 @@
 #ifdef TARGET_STANDARD_SPIDER
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 #include "aruwsrc/control/barrel-switcher/motor_homing_command.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
@@ -265,6 +266,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 
 #ifdef TARGET_STANDARD_SPIDER
 MotorHomingCommand motorHomingCommand(barrelSwitcher);
+BarrelSwitchCommand barrelSwitchCommand(barrelSwitcher);
 #endif
 
 // turret commands
@@ -339,7 +341,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-// rotates agitator with heat limiting applied
+// rot\ate
 HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1, //TODO: what id
@@ -458,11 +460,10 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     &manualFireRateReselectionManager,
     cvOnTargetGovernor);
 
-HoldRepeatCommandMapping leftMousePressedBPressed(
+PressCommandMapping leftMousePressedBPressed(
     drivers(),
-    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    false);
+    {&barrelSwitchCommand},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}));
 PressCommandMapping rightMousePressed(
     drivers(),
     {&motorHomingCommand},

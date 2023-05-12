@@ -26,9 +26,13 @@ namespace aruwsrc::control
 {
 
 struct HomingConfig {
+    /**Mininum rpm value at which to detect a stall (should be negative)*/
     int16_t minRPM;
+    /**Maximum rpm value at which to detect a stall (should be positive)*/
     int16_t maxRPM;
+    /**Minimum torque at which to not detect a stall (should be negative)*/
     int16_t minTorque;
+    /**Maximum torque value at which to not detect a stall (should be positive)*/ 
     int16_t maxTorque;
 };
 

@@ -29,12 +29,6 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     aruwsrc::control::HomingConfig config,
     tap::motor::MotorId motorid)
     : HomeableSubsystemInterface(drivers),
-      encoderPid(
-          POSITION_PID_KP,
-          POSITION_PID_KI,
-          POSITION_PID_KD,
-          POSITION_PID_MAX_ERROR_SUM,
-          POSITION_PID_MAX_OUTPUT),
       config(config),
       motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
 {
@@ -42,7 +36,7 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
 
 void BarrelSwitcherSubsystem::initialize()
 {
-    barrelState = BarrelState::BETWEEN_BARRELS;
+    barrelState = BarrelState::IDLE;
     motor.initialize();
 }
 
@@ -54,27 +48,27 @@ void BarrelSwitcherSubsystem::refresh()
     stalled = this->isStalled();
     switch (barrelState)
     {
-        case BarrelState::MOVING_TOWARD_LOWER_BOUND:
+        case BarrelState::HOMING_TOWARD_LOWER_BOUND:
             setMotorOutput(-HOMING_MOTOR_OUTPUT);
-            if(this->isHomed() && motor.getEncoderUnwrapped() <= 0)
-            {
-                this->barrelState = BarrelState::USING_LEFT_BARREL;
-            }
             break;
-        case BarrelState::MOVING_TOWARD_UPPER_BOUND:
+        case BarrelState::HOMING_TOWARD_UPPER_BOUND:
             setMotorOutput(HOMING_MOTOR_OUTPUT);
-            if(this->isHomed() && motor.getEncoderUnwrapped() >= 0)
-            {
-                this->barrelState = BarrelState::USING_RIGHT_BARREL;
-            }
             break;
         case BarrelState::USING_LEFT_BARREL:
-            updateMotorEncoderPid(&encoderPid, &motor, 0);
+            if (motor.getEncoderUnwrapped() > MOTOR_POSITION_TOLERANCE) {
+                setMotorOutput(-HOMING_MOTOR_OUTPUT);
+            } else {
+                setMotorOutput(0);
+            }
             break;
         case BarrelState::USING_RIGHT_BARREL:
-            updateMotorEncoderPid(&encoderPid, &motor, motorUpperBound);
+            if (motor.getEncoderUnwrapped() < motorUpperBound - MOTOR_POSITION_TOLERANCE) {
+                setMotorOutput(HOMING_MOTOR_OUTPUT);
+            } else {
+                setMotorOutput(0);
+            }
             break;
-        case BarrelState::BETWEEN_BARRELS:
+        case BarrelState::IDLE:
             break;
     }
 }
@@ -99,6 +93,11 @@ bool BarrelSwitcherSubsystem::isStalled() const
         (motor.getTorque() > config.maxTorque || motor.getTorque() < config.minTorque));
 }
 
+bool BarrelSwitcherSubsystem::isBetweenPositions() const {
+    return motor.getEncoderUnwrapped() < motorUpperBound - MOTOR_POSITION_TOLERANCE &&
+        motor.getEncoderUnwrapped() > MOTOR_POSITION_TOLERANCE;
+}
+
 void BarrelSwitcherSubsystem::setLowerBound()
 {
     motor.resetEncoderValue();
@@ -111,33 +110,27 @@ void BarrelSwitcherSubsystem::setUpperBound()
     upperBoundSet = true;
 }
 
-bool BarrelSwitcherSubsystem::isHomed() {
-    return upperBoundSet && lowerBoundSet;
-}
-
 void BarrelSwitcherSubsystem::moveTowardUpperBound()
 {
-    barrelState = BarrelState::MOVING_TOWARD_UPPER_BOUND;
+    if (lowerBoundSet && upperBoundSet) {
+        barrelState = BarrelState::USING_RIGHT_BARREL;
+    } else {
+        barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
+    }
 }
 
 void BarrelSwitcherSubsystem::moveTowardLowerBound()
 {
-    barrelState = BarrelState::MOVING_TOWARD_LOWER_BOUND;
+    if (lowerBoundSet && upperBoundSet) {
+        barrelState = BarrelState::USING_LEFT_BARREL;
+    } else {
+        barrelState = BarrelState::HOMING_TOWARD_LOWER_BOUND;
+    }
 }
 
 void BarrelSwitcherSubsystem::stop()
 {
     this->setMotorOutput(0);
-    barrelState = BarrelState::USING_RIGHT_BARREL;
+    barrelState = BarrelState::IDLE;
 }
-
-void BarrelSwitcherSubsystem::updateMotorEncoderPid(
-    modm::Pid<int32_t>* pid,
-    tap::motor::DjiMotor* const motor,
-    int32_t desiredEncoderPosition)
-{
-    pid->update(desiredEncoderPosition - motor->getEncoderUnwrapped());
-    setMotorOutput(pid->getValue());
-}
-
 };  // namespace aruwsrc::control

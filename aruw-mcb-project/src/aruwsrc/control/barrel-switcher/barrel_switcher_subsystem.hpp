@@ -35,28 +35,15 @@ namespace aruwsrc::control
 {
 
 static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX * 3 / 5;
-
-static constexpr int32_t USING_RIGHT_BARREL_POSITION =
-    25;  // find actual value after hardware testing
-static constexpr int32_t USING_LEFT_BARREL_POSITION =
-    75;  // find actual value after hardware testing
-
-// find actual values after testing
-static constexpr float POSITION_PID_KP = 1.0f;
-static constexpr float POSITION_PID_KI = 1.0f;
-static constexpr float POSITION_PID_KD = 1.0f;
-static constexpr int32_t POSITION_PID_MAX_ERROR_SUM = 1;
-static constexpr int32_t POSITION_PID_MAX_OUTPUT = 1;
-static constexpr int32_t LEFT_BARREL_ENCODER_POSITION = 0;
-static constexpr int32_t RIGHT_BARREL_ENCODER_POSITION = 0;
+static constexpr int16_t MOTOR_POSITION_TOLERANCE = 100;
 
 enum class BarrelState
 {
-    MOVING_TOWARD_LOWER_BOUND,
-    MOVING_TOWARD_UPPER_BOUND,
+    HOMING_TOWARD_LOWER_BOUND,
+    HOMING_TOWARD_UPPER_BOUND,
     USING_LEFT_BARREL,
     USING_RIGHT_BARREL,
-    BETWEEN_BARRELS //at a position that is neither left nor right barrel
+    IDLE //at a position that is neither left nor right barrel
 };
 
 class BarrelSwitcherSubsystem : public aruwsrc::control::HomeableSubsystemInterface
@@ -70,22 +57,20 @@ public:
     void initialize() override;
     void refresh() override;
     bool isStalled() const override;
+    /**
+     * detects whether a barrel in the dual-barrel system is not aligned with the valid 
+     * shooting position; used to determine when the system is able to shoot
+    */
+    bool isBetweenPositions() const;
     void setLowerBound() override;
     void setUpperBound() override;
-    bool isHomed();
     void moveTowardUpperBound() override;
     void moveTowardLowerBound() override;
     void stop() override;
-    void useRightBarrel();
-    void useLeftBarrel();
     BarrelState getBarrelState();
 
 private:
     void setMotorOutput(int32_t velocity);
-    void updateMotorEncoderPid(
-        modm::Pid<int32_t>* pid,
-        tap::motor::DjiMotor* const motor,
-        int32_t desiredEncoderPosition);
 
     //FOR DEBUGGING, to be removed!
     int16_t outputDesiredDebug;
@@ -112,8 +97,6 @@ private:
      * including homing states and which barrel (left or right) is in use
      */
     BarrelState barrelState;
-
-    modm::Pid<int32_t> encoderPid;
 
     /**
      * stores the thresholds for shaftRPM and torque; used to indicate motor stall

@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 
 using namespace aruwsrc::control;
 using namespace testing;
@@ -35,7 +35,9 @@ protected:
     tap::Drivers drivers;
     tap::motor::MotorId motorid;
     aruwsrc::control::HomingConfig config = aruwsrc::control::HomingConfig{
-        .minRPM = 100,
+        .minRPM = -100,
+        .maxRPM = 100,
+        .minTorque = -10,
         .maxTorque = 10
     };
     BarrelSwitcherSubsystem barrelSwitcher;
@@ -44,43 +46,85 @@ protected:
 
 TEST_F(BarrelSwitcherSubsystemTest, move_to_lower_bound_changes_state) {
     barrelSwitcher.moveTowardLowerBound();
-    EXPECT_EQ(BarrelState::HOMING_TOWARD_LOWER_BOUND, barrelSwitcher.getBarrelState());
+    EXPECT_EQ(BarrelState::MOVING_TOWARD_LOWER_BOUND, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, move_to_upper_bound_changes_state)
 {
     barrelSwitcher.moveTowardUpperBound();
-    EXPECT_EQ(BarrelState::HOMING_TOWARD_UPPER_BOUND, barrelSwitcher.getBarrelState());
+    EXPECT_EQ(BarrelState::MOVING_TOWARD_UPPER_BOUND, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, stop_changes_state)
 {
     barrelSwitcher.stop();
-    EXPECT_EQ(BarrelState::SWITCHING_BETWEEN_BARRELS, barrelSwitcher.getBarrelState());
+    EXPECT_EQ(BarrelState::USING_RIGHT_BARREL, barrelSwitcher.getBarrelState());
 }
 
 TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
-    
-    tap::motor::DjiMotor motor(&drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "cool motor");
     int16_t rpm;
     int16_t torque;
 
     ON_CALL(barrelSwitcher.motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
     ON_CALL(barrelSwitcher.motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
-    rpm = config.minRPM + 1;
+    rpm = config.maxRPM + 1;
     torque = config.maxTorque + 1;
     EXPECT_EQ(false, barrelSwitcher.isStalled());
     
-    rpm = config.minRPM - 1;
+    rpm = config.maxRPM - 1;
     torque = config.maxTorque + 1;
     EXPECT_EQ(true, barrelSwitcher.isStalled());
 
-    rpm = config.minRPM + 1;
+    rpm = config.maxRPM + 1;
     torque = config.maxTorque - 1;
     EXPECT_EQ(false, barrelSwitcher.isStalled());
 
-    rpm = config.minRPM - 1;
+    rpm = config.maxRPM - 1;
     torque = config.maxTorque - 1;
     EXPECT_EQ(false, barrelSwitcher.isStalled());
+
+
+    rpm = config.minRPM + 1;
+    torque = config.minTorque + 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+    
+    rpm = config.minRPM - 1;
+    torque = config.minTorque + 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+
+    rpm = config.minRPM + 1;
+    torque = config.minTorque - 1;
+    EXPECT_EQ(true, barrelSwitcher.isStalled());
+
+    rpm = config.minRPM - 1;
+    torque = config.minTorque - 1;
+    EXPECT_EQ(false, barrelSwitcher.isStalled());
+}
+
+TEST_F(BarrelSwitcherSubsystemTest, isBetweenPositions_correct)
+{
+    int16_t encoderPosition;
+    
+
+    ON_CALL(barrelSwitcher.motor, getEncoderUnwrapped).WillByDefault(ReturnPointee(&encoderPosition));
+
+    //set upper bound
+    encoderPosition = 1000;
+    barrelSwitcher.setUpperBound();
+
+    encoderPosition = 0;
+    EXPECT_FALSE(barrelSwitcher.isBetweenPositions());
+
+    encoderPosition = 1000;
+    EXPECT_FALSE(barrelSwitcher.isBetweenPositions());
+
+    encoderPosition = aruwsrc::control::MOTOR_POSITION_TOLERANCE;
+    EXPECT_FALSE(barrelSwitcher.isBetweenPositions());
+
+    encoderPosition = 1000 - aruwsrc::control::MOTOR_POSITION_TOLERANCE;
+    EXPECT_FALSE(barrelSwitcher.isBetweenPositions());
+
+    encoderPosition = 500;
+    EXPECT_TRUE(barrelSwitcher.isBetweenPositions());
 }

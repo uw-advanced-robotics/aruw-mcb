@@ -53,6 +53,7 @@ public:
     }
 
     bool isReady() final { 
+        if (barrelSwitcher.isBetweenPositions()) return false;
         if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
             return heatTrackerLeft.enoughHeatToLaunchProjectile(); 
         } else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL) {
@@ -62,6 +63,7 @@ public:
     }
 
     bool isFinished() final {
+        if (barrelSwitcher.isBetweenPositions()) return true;
         if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
             return !heatTrackerLeft.enoughHeatToLaunchProjectile(); 
         } else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL) {

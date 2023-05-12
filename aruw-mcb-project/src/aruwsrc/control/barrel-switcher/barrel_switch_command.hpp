@@ -22,9 +22,13 @@ public:
         addSubsystemRequirement(&barrelSwitcher);
     };
 
+    void initialize() override {};
+
     void execute() override;
 
     bool isFinished() const override;
+
+    void end(bool interrupted) override {};
 
     const char* getName() const override { return "barrel switch command"; };
 private:
