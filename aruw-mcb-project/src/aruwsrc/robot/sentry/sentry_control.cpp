@@ -496,6 +496,11 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     girlBoss::default_launch_speed,
     girlBoss::majorToTurretR);
 
+AutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &girlbossBallisticsSolver);
+
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     odometrySubsystem,
     turretMajor,
@@ -589,6 +594,13 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionW
     true,
     girlBoss::barrelID);
 
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopGirlBossFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsGirlboss,
+    0.0f,
+    true,
+    girlBoss::barrelID);
+
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsMalewife,
@@ -627,23 +639,23 @@ HeatLimitGovernor heatLimitGovernorGirlboss(
     girlBoss::barrelID,
     constants::HEAT_LIMIT_BUFFER);
 
-// GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
-//     {&girlBossAgitator},
-//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-//     {&heatLimitGovernorGirlboss});
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&girlBossAgitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
+    {&heatLimitGovernorGirlboss});
 
-// // rotates agitator when aiming at target and within heat limit
-// CvOnTargetGovernor cvOnTargetGovernorGirlboss(
-//     ((tap::Drivers *)(drivers())),
-//     drivers()->visionCoprocessor,
-//     turretCVCommand,
-//     autoAimLaunchTimer,
-//     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+// rotates agitator when aiming at target and within heat limit
+CvOnTargetGovernor cvOnTargetGovernorGirlboss(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    sentryTurretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
-//     {&girlBossAgitator},
-//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-//     {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&girlBossAgitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
+    {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
 
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);

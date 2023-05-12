@@ -1,4 +1,3 @@
-// #ifndef TARGET_SENTRY_BEEHIVE
 /*
  * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -18,20 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "auto_aim_launch_timer.hpp"
+#include "sentry_auto_aim_launch_timer.hpp"
 
 #include <tap/architecture/clock.hpp>
+#include "sentry_transforms.hpp"
 
 namespace aruwsrc::control::auto_aim
 {
 AutoAimLaunchTimer::AutoAimLaunchTimer(
-    // TODO: to get this to build, we're gonna need to pass some identifier that tells us which aim data to pull from in the coprocessor
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics)
+    aruwsrc::algorithms::OttoBallisticsSolver<int> *ballistics,
+    uint8_t turretID)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
-      ballistics(ballistics)
+      ballistics(ballistics),
+      turretID(turretID)
 {
 }
 
@@ -53,8 +54,8 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     {
         return LaunchInclination::GATED_DENY;
     }
-
-    auto ballisticsSolution = ballistics->computeTurretAimAngles();
+    auto& aimData = visionCoprocessor->getLastAimData(turretID);
+    auto ballisticsSolution = ballistics->computeTurretAimAngles(aimData);
     if (!ballisticsSolution.has_value())
     {
         return LaunchInclination::GATED_DENY;
@@ -92,4 +93,3 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
 }
 }  // namespace aruwsrc::control::auto_aim
-// #endif
