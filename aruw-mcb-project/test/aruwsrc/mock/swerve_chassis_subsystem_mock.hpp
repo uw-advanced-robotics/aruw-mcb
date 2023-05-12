@@ -46,10 +46,6 @@ public:
     MOCK_METHOD(float, chassisSpeedRotationPID, (float, float));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(float, calculateRotationTranslationalGain, (float), ());
-    MOCK_METHOD(int16_t, getLeftFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getLeftBackRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightBackRpmActual, (), (const override));
     MOCK_METHOD(float, getDesiredRotation, (), (const override));
 };  // class SwerveChassisSubsystemMock
 }  // namespace mock
