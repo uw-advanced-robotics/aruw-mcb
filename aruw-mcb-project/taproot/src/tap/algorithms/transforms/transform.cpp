@@ -29,7 +29,7 @@ template <typename SOURCE, typename TARGET>
 Transform<SOURCE, TARGET>::Transform(CMSISMat<3, 3>& rotation, CMSISMat<3, 1>& translation)
 {
     this->rotation = std::move(rotation);
-    this->position = std::move(position);
+    this->translation = std::move(translation);
     arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
 }
 
@@ -42,36 +42,38 @@ Transform<SOURCE, TARGET>::Transform(float x, float y, float z, float A, float B
 }
 
 template <typename SOURCE, typename TARGET>
-Position<TARGET> apply(Position<SOURCE>& position)
+CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToPosition(CMSISMat<3, 1>& position)
 {
-    return Position<TARGET>(position.coordinates + translation);
+    CMSISMat<3, 1> newPos = position + this->translation;
+    return newPos;
 }
 
 template <typename SOURCE, typename TARGET>
-Pose<TARGET> apply(Pose<SOURCE>& pose)
+CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToVector(CMSISMat<3, 1>& vector)
 {
-    return Pose<TARGET>(pose.position.coordinates + translation, pose.orientation*rotation);
+    CMSISMat<3, 1> newVec = this->rotation * vector;
+    return newVec;
 }
 
 template <typename SOURCE, typename TARGET>
 Transform<TARGET, SOURCE> Transform<SOURCE, TARGET>::getInverse() const
 {
     // negative transposed rotation matrix times original position = new position
-    CMSISMat<3, 1> invTranslation = tRotation * translation;
-    invTranslation = -invTranslation;
-    return Transform<TARGET, SOURCE>(tRotation, invTranslation);
-}
-
-template <typename SOURCE, typename TARGET>
-Vector<TARGET> Transform<SOURCE, TARGET>::apply(Vector<SOURCE>& vector)
-{
-    return Vector<TARGET>(rotation*vector.entries);
+    CMSISMat<3, 1> invTranslation = -(this->tRotation * this->translation);
+    return Transform<TARGET, SOURCE>(&this->tRotation, &invTranslation);
 }
 
 template <typename SOURCE, typename TARGET>
 void Transform<SOURCE, TARGET>::updateRotation(CMSISMat<3, 3>& newRot)
 {
     this->rotation = std::move(newRot);
+    arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
+}
+
+template <typename SOURCE, typename TARGET>
+void Transform<SOURCE, TARGET>::updateRotation(float A, float B, float C)
+{
+    this->rotation = rotationMatrix(A, B, C);
     arm_mat_trans_f32(&this->rotation.matrix, &this->tRotation.matrix);
 }
 

@@ -24,12 +24,29 @@
 #define TAPROOT_TRANSFORM_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "position.hpp"
-#include "pose.hpp"
-#include "vector.hpp"
+#include "tap/algorithms/cmsis_mat.hpp"
 
 namespace tap::algorithms::transforms
 {
+
+/**
+ * Return a rotation matrix with rotation order A->B->C (roll->pitch->yaw).
+*/
+CMSISMat<3, 3> rotationMatrix(const float A, const float B, const float C)
+{
+    return CMSISMat<3,3>({
+        cosf(C) * cosf(B),
+        (cosf(C) * sinf(B) * sinf(A)) - (sinf(C) * cosf(A)),
+        (cosf(C) * sinf(B) * cosf(A)) + sinf(C) * sinf(A),
+        sinf(C) * cosf(B),
+        sinf(C) * sinf(B) * sinf(A) + cosf(C) * cosf(A),
+        sinf(C) * sinf(B) * cosf(A) - cosf(C) * sinf(A),
+        -sinf(B),
+        cosf(B) * sinf(A),
+        cosf(B) * cosf(A)
+    });
+}
+
 /**
  Represents a transformation from one coordinate frame to another.
 
@@ -91,15 +108,7 @@ public:
      * @param[in] position Position in source frame.
      * @return Position in target frame.
     */
-    Position<TARGET> apply(Position<SOURCE>& position);
-
-    /**
-     * Apply this transform to a pose.
-     * 
-     * @param[in] pose Pose in source frame.
-     * @return Pose in target frame.
-    */
-    Pose<TARGET> apply(Pose<SOURCE>& pose);
+    CMSISMat<3, 1> applyToPosition(CMSISMat<3, 1>& position);
 
     /**
      * Rotates a vector in the source frame to a vector in the target frame.
@@ -111,8 +120,8 @@ public:
      * @param vec Vector as read by source frame.
      * @return Vector in target frame's basis.
      */
-    Vector<TARGET> apply(Vector<SOURCE>& vector);
-
+    CMSISMat<3, 1> applyToVector(CMSISMat<3, 1>& vector);
+ 
     /**
      * @return Inverse of this Transform.
      */
@@ -139,10 +148,7 @@ public:
      * @param B updated rotation angle about the y-axis.
      * @param C updated rotation angle about the z-axis.
      */
-    void updateRotation(float A, float B, float C)
-    {
-        updateRotation(rotationMatrix(A, B, C));
-    }
+    void updateRotation(float A, float B, float C);
 
     /**
      * Updates the translation of the current transformation matrix.
@@ -184,24 +190,6 @@ private:
      */
     CMSISMat<3, 3> tRotation;
 };
-
-/**
- * Return a rotation matrix with rotation order A->B->C (roll->pitch->yaw).
-*/
-CMSISMat<3, 3> rotationMatrix(const float A, const float B, const float C)
-{
-    return CMSISMat<3,3>({
-        cosf(C) * cosf(B),
-        (cosf(C) * sinf(B) * sinf(A)) - (sinf(C) * cosf(A)),
-        (cosf(C) * sinf(B) * cosf(A)) + sinf(C) * sinf(A),
-        sinf(C) * cosf(B),
-        sinf(C) * sinf(B) * sinf(A) + cosf(C) * cosf(A),
-        sinf(C) * sinf(B) * cosf(A) - cosf(C) * sinf(A),
-        -sinf(B),
-        cosf(B) * sinf(A),
-        cosf(B) * cosf(A)
-    });
-}
 
 /**
  * Returns the composed transformation of the given transformations.
