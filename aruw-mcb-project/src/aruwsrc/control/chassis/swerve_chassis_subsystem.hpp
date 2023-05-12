@@ -100,12 +100,6 @@ public:
 
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    // only to satisfy chassis subsystem interface
-    inline int16_t getLeftFrontRpmActual() const override { return modules[LF]->getDriveRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return modules[LB]->getDriveRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return modules[RF]->getDriveRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return modules[RB]->getDriveRPM(); }
-
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     const unsigned int NUM_MODULES{4};
     std::array<Module*, 4> modules;
