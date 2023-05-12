@@ -496,10 +496,10 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     girlBoss::default_launch_speed,
     girlBoss::majorToTurretR);
 
-AutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-    &drivers()->visionCoprocessor,
-    &girlbossBallisticsSolver);
+// AutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
+//     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+//     &drivers()->visionCoprocessor,
+//     &girlbossBallisticsSolver);
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     odometrySubsystem,
@@ -645,17 +645,17 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorGirlboss});
 
 // rotates agitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernorGirlboss(
-    ((tap::Drivers *)(drivers())),
-    drivers()->visionCoprocessor,
-    sentryTurretCVCommand,
-    autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+// CvOnTargetGovernor cvOnTargetGovernorGirlboss(
+//     ((tap::Drivers *)(drivers())),
+//     drivers()->visionCoprocessor,
+//     sentryTurretCVCommand,
+//     autoAimLaunchTimer,
+//     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
-    {&girlBossAgitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-    {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+//     {&girlBossAgitator},
+//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
+//     {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
 
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -767,7 +767,7 @@ HoldCommandMapping leftSwitchDown(
 
 HoldCommandMapping rightSwitchMid(
     drivers(),
-    {&girlBossRotateAndUnjamAgitator, &girlBossFrictionWheelSpinCommand},
+    {&girlBossRotateAndUnjamAgitator},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 HoldCommandMapping rightSwitchDown(
