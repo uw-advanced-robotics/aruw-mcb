@@ -20,22 +20,20 @@
 #ifndef SENTRY_TURRET_CV_COMMAND_HPP_
 #define SENTRY_TURRET_CV_COMMAND_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
+#include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "tap/algorithms/wrapped_float.hpp"
 
 namespace tap::control::odometry
 {
@@ -62,7 +60,7 @@ namespace aruwsrc::control::turret
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turrets accordingly using a position PID controller.
- * 
+ *
  * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
  * of movement. (This is why we need both minors controlled by a single command.)
  */
@@ -116,23 +114,29 @@ public:
         SentryTurretMinorSubsystem &turretMinorGirlbossSubsystem,
         SentryTurretMinorSubsystem &turretMinorMalewifeSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss,  // TODO: painnn
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+            &yawControllerGirlboss,  // TODO: painnn
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
+            &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver,
-        aruwsrc::sentry::SentryTransforms& sentryTransforms); // @todo: pass in needed transforms, not
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
+            &pitchControllerMalewife,
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
+            &girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
+            &malewifeBallisticsSolver,
+        aruwsrc::sentry::SentryTransforms
+            &sentryTransforms);  // @todo: pass in needed transforms, not
 
-    void initialize() ;
+    void initialize();
 
-    bool isReady() ;
+    bool isReady();
 
-    void execute() ;
+    void execute();
 
-    bool isFinished() const ;
+    bool isFinished() const;
 
-    void end(bool) ;
+    void end(bool);
 
     const char *getName() const { return "sentry turret CV"; }
 
@@ -144,12 +148,16 @@ public:
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingToleranceGirlboss() const { return withinAimingToleranceGirlboss; }
-    bool isAimingWithinLaunchingToleranceMalewife() const { return withinAimingToleranceMalewife; }
+    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
+    {
+        return turretID == girlBoss::turretID ? withinAimingToleranceGirlboss
+                                              : withinAimingToleranceMalewife;
+    }
 
     WrappedFloat debug1 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
     WrappedFloat debug2 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
     WrappedFloat debug3 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
@@ -165,10 +173,12 @@ private:
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife;
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
 
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame> &girlbossBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame> &malewifeBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
+        &girlbossBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
+        &malewifeBallisticsSolver;
 
-    aruwsrc::sentry::SentryTransforms& sentryTransforms;
+    aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
 
@@ -194,9 +204,9 @@ private:
 
     /**
      * Initializes scanning mode.
-     * 
+     *
      * Sets the yaw scanner to the current setpoint of the turret major.
-    */
+     */
     inline void enterScanMode(float majorYawSetpoint)
     {
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
@@ -212,6 +222,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::turret::cv
+}  // namespace aruwsrc::control::turret
 
 #endif  // SENTRY_TURRET_CV_COMMAND_HPP_

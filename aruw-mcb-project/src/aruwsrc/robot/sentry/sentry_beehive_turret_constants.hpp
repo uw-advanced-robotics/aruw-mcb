@@ -87,6 +87,8 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 
 namespace girlBoss
 {
+
+static constexpr uint8_t turretID = 0;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -113,6 +115,7 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 
 namespace maleWife
 {
+static constexpr uint8_t turretID = 1;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
