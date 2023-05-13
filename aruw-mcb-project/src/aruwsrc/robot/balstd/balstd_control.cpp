@@ -129,14 +129,14 @@ aruwsrc::motor::Tmotor_AK809 legmotorRR(
 
 tap::motor::DjiMotor leftWheel(
     drivers(),
-    tap::motor::MOTOR3,
+    tap::motor::MOTOR4,
     tap::can::CanBus::CAN_BUS1,
     false,
     "Left Wheel Motor");
 
 tap::motor::DjiMotor rightWheel(
     drivers(),
-    tap::motor::MOTOR4,
+    tap::motor::MOTOR3,
     tap::can::CanBus::CAN_BUS1,
     true,
     "Right Wheel Motor");
@@ -382,10 +382,10 @@ HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&turretCVCommand, &chassisDriveCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+PressCommandMapping leftSwitchUp(
+    drivers(),
+    {},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
@@ -440,7 +440,8 @@ void registerBalstdIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
 }
 }  // namespace balstd_control
 

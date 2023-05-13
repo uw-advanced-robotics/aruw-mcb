@@ -36,10 +36,23 @@ Transformer::Transformer(
 
 void Transformer::updateTransforms()
 {
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevTime;
+    prevTime = currTime;
     float yaw = turret.yawMotor.getChassisFrameMeasuredAngle().getValue();
     float pitch = turret.pitchMotor.getChassisFrameMeasuredAngle().getValue();
     chassisToTurret.updateRotation(0, pitch, yaw);
+    worldToTurret = compose<World, Chassis, Turret>(worldToChassis, chassisToTurret);
 
+    modm::Vector2f chassisVelocityWorldFrame =
+        modm::Vector2f(chassis.getActualVelocityChassisRelative().element[0], 0);
+
+    tap::algorithms::rotateVector(
+        &chassisVelocityWorldFrame.x,
+        &chassisVelocityWorldFrame.y,
+        chassis.getChassisOrientationWorldRelative().element[2]);
+
+    chassisPositionWorldFrame += chassisVelocityWorldFrame * (dt / 1'000);
 }
 
 }  // namespace aruwsrc::balstd::transforms

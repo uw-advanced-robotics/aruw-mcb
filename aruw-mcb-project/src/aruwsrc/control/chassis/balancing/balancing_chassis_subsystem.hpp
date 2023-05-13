@@ -21,6 +21,7 @@
 #define BALANCING_CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
@@ -29,11 +30,15 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
+#include "aruwsrc/robot/balstd/balstd_frames.hpp"
 
 #include "balancing_leg.hpp"
 
+using namespace aruwsrc::balstd::transforms;
+
 namespace aruwsrc::chassis
 {
+
 class BalancingChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
@@ -90,6 +95,17 @@ public:
         return modm::Matrix<float, 3, 1>(data);
     };
 
+    /**
+     * @brief Get the Chassis Orientation relative to a fixed world orientation
+     *
+     * @return roll-pitch-yaw
+     */
+    inline modm::Matrix<float, 3, 1> getChassisOrientationWorldRelative() const
+    {
+        const float data[3] = {roll, pitch, yaw};
+        return modm::Matrix<float, 3, 1>(data);
+    };
+
     void setDesiredHeight(float z)
     {
         desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.1);
@@ -137,11 +153,16 @@ public:
     tap::algorithms::SmoothPid rotationPid;
 
 private:
+    tap::algorithms::transforms::Transform<Chassis, Turret> chassisToTurret =
+        tap::algorithms::transforms::Transform<Chassis, Turret>();
+
     bool armed = false;
     tap::algorithms::Ramp velocityRamper;
     static constexpr float MAX_ACCELERATION = 4;  // m/s/s
 
     void computeState();
+
+    void getAngles(uint32_t dt);
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
@@ -154,16 +175,27 @@ private:
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
+    float debug1;
+    float debug2;
+    float debug3;
+    float debug4;
+
     float pitchAdjustment = 0;
     float pitchAdjustmentPrev = 0;
     float velocityAdjustment = 0;
     float velocityAdjustmentPrev = 0;
     float targetPitch;
 
+    /**
+     * @brief Floating point world-relative orientation information. Angles are in rad, Angular Rate
+     * in rad/s. Prev values are used for finite-differencing and low-pass-filtering.
+     *
+     */
     float pitch;
     float pitchPrev;
     float pitchRate;
     float roll;
+    float rollRate;
     float yaw;
     float yawPrev;
     float yawRate;

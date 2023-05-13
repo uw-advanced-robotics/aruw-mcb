@@ -117,15 +117,21 @@ void BalancingChassisAutorotateCommand::execute()
                 atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX());
             if (!tap::algorithms::compareFloatClose(angleToTarget, 0, maxAngleFromCenter))
             {
-                angleToTarget = -angleToTarget;
+                angleToTarget = angleToTarget + M_PI;
                 moveBackwards = true;
             }
-            chassisRotationSetpoint = angleToTarget;
+            else
+            {
+                moveBackwards = false;
+            }
+            chassisRotationSetpoint = getAutorotationSetpoint(angleToTarget);
+            debug2 = turretAngleFromCenter;
         }
         else if (chassisAutorotating)
         {
             chassisRotationSetpoint = getAutorotationSetpoint(turretAngleFromCenter);
         }
+        debug1 = moveBackwards;
         runRotationController(chassisRotationSetpoint, dt);
 
         // we are now turning the robot towards the desired direction. Apply motion to chassis

@@ -120,6 +120,9 @@ private:
      * for motion planning superceeds rotation of the chassis for autorotation.
      */
     bool chassisMotionPlanning;
+
+    float debug1;
+    float debug2;
 };  // class BalancingChassisAutorotateCommand
 
 }  // namespace chassis

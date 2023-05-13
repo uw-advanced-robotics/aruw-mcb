@@ -148,6 +148,9 @@ private:
 
     CalibrationState calibrationState;
 
+    float debug1;
+    float debug2;
+
     uint32_t prevTime = 0;
 
     /**

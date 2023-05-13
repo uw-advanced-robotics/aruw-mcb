@@ -25,22 +25,13 @@
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
+#include "aruwsrc/robot/balstd/balstd_frames.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::balstd::transforms
 {
-/** Frame Definitions */
-class World : public Frame
-{
-};
-class Chassis : public Frame
-{
-};
-class Turret : public Frame
-{
-};
 
 class Transformer
 {
@@ -53,29 +44,25 @@ public:
 
     Transform<Chassis, Turret> const& getChassisToTurret() const { return chassisToTurret; }
 
-    Transform<World, Turret> const& getWorldToTurret()
-    {
-        return compose<World, Chassis, Turret>(worldToChassis, chassisToTurret);
-    }
+    Transform<World, Turret> const& getWorldToTurret() const { return worldToTurret; }
 
-    Transform<Turret, Chassis> const& getTurretToChassis()
-    {
-        return chassisToTurret.getInverse();
-    }
+    Transform<Turret, Chassis> const& getTurretToChassis() { return chassisToTurret.getInverse(); }
 
-    Transform<Chassis, World> const& getChassisToWorld()
-    {
-        return worldToChassis.getInverse();
-    }
+    Transform<Chassis, World> const& getChassisToWorld() { return worldToChassis.getInverse(); }
 
     void updateTransforms();
 
 private:
     Transform<World, Chassis> worldToChassis;
     Transform<Chassis, Turret> chassisToTurret;
+    Transform<World, Turret> worldToTurret;
 
     const aruwsrc::chassis::BalancingChassisSubsystem& chassis;
     const aruwsrc::control::turret::StandardTurretSubsystem& turret;
+
+    modm::Vector2f chassisPositionWorldFrame = modm::Vector2f(0,0);
+
+    uint32_t prevTime = 0;
 };
 }  // namespace aruwsrc::balstd::transforms
 

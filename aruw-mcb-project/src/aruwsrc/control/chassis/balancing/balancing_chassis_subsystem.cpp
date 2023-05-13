@@ -97,10 +97,16 @@ void BalancingChassisSubsystem::refresh()
 
     leftLeg.update();
     rightLeg.update();
-    // do this here for safety. Only called once per subsystem. Don't arm leg motors until wheel
-    // motors are also online.
+
+    /**
+     * @warning UN-COMMENT OUT THIS FLAG TO TEST CODE IN SAFE MODE
+     */
+    // armed = false;
+
     if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline() && armed)
     {
+        // do this here for safety. Only called once per subsystem. Don't arm leg motors until wheel
+        // motors are also online.
         static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor1())
             ->sendCanMessage();
         static_cast<aruwsrc::motor::Tmotor_AK809*>(leftLeg.getFiveBar()->getMotor2())
@@ -119,33 +125,83 @@ void BalancingChassisSubsystem::refresh()
     }
 }
 
+void BalancingChassisSubsystem::getAngles(uint32_t dt)
+{
+    // Value from [0, 2Pi]
+    float currentTurretPitch = pitchMotor.getChassisFrameMeasuredAngle().getValue() -
+                               aruwsrc::control::turret::PITCH_MOTOR_CONFIG.startAngle -
+                               aruwsrc::control::turret::CHASSIS_FALL_OVER_OFFSET;
+    if (currentTurretPitch > M_PI) currentTurretPitch -= M_TWOPI;
+    float currentTurretYaw = yawMotor.getChassisFrameMeasuredAngle().getValue();
+    if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
+
+    float worldRelativeTurretPitch = -turretMCB.getPitch() + M_PI;
+    if (worldRelativeTurretPitch > M_PI) worldRelativeTurretPitch -= M_TWOPI;
+    float worldRelativeTurretRoll = -turretMCB.getRoll() + M_PI;
+    if (worldRelativeTurretRoll > M_PI) worldRelativeTurretRoll -= M_TWOPI;
+    float worldRelativeTurretYaw = turretMCB.getYaw();
+
+    debug1 = worldRelativeTurretPitch;
+    debug2 = worldRelativeTurretRoll;
+    debug3 = worldRelativeTurretYaw;
+    debug4 = currentTurretPitch;
+
+    tap::algorithms::transforms::Transform<World, Turret> worldToTurret =
+        tap::algorithms::transforms::Transform<World, Turret>(
+            0,
+            0,
+            0,
+            worldRelativeTurretRoll,
+            worldRelativeTurretPitch,
+            worldRelativeTurretYaw);
+
+    // Define the transformation from Turret to Chassis based on turret encoders
+    chassisToTurret.updateRotation(0, currentTurretPitch, currentTurretYaw);
+    tap::algorithms::transforms::Transform<World, Chassis> worldToChassis =
+        tap::algorithms::transforms::compose(worldToTurret, chassisToTurret.getInverse());
+
+    // Define the current Turret Orientations in world-frame.
+    // CMSISMat<3, 1> worldRelativeTurretOrientation = {
+    //     {worldRelativeTurretRoll, worldRelativeTurretPitch, worldRelativeTurretYaw}};
+    // CMSISMat<3, 1> chassisRelativeTurretOrientation = {{0, currentTurretPitch,
+    // currentTurretYaw}};
+    // CMSISMat<3, 1> worldRelativeTurretOrientationRate = {
+    //     {-turretMCB.getRollVelocity(), -turretMCB.getPitchVelocity(), turretMCB.getYawVelocity()}};
+    // CMSISMat<3, 1> chassisRelativeTurretOrientationRate = {
+    //     {0, pitchMotor.getChassisFrameVelocity(), yawMotor.getChassisFrameVelocity()}};
+
+    roll = worldToChassis.getRoll();
+    pitch = worldToChassis.getPitch();
+    yaw = worldToChassis.getYaw();
+
+    // CMSISMat<3, 1> worldRelativeChassisOrientationRate =
+    //     chassisToTurret.applyToVector(worldRelativeTurretOrientationRate) -
+    //     chassisRelativeTurretOrientationRate;
+    // rollRate = worldRelativeChassisOrientationRate.data[0];
+    // pitchRate = worldRelativeChassisOrientationRate.data[1];
+    // yawRate = worldRelativeChassisOrientationRate.data[2];
+
+    float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
+    pitchPrev = pitch;
+    // pitchRate = lowPassFilter(
+    //     pitchRate,
+    //     -turretMCB.getPitchVelocity() - pitchMotor.getChassisFrameVelocity(),
+    //     .05);
+    pitchRate = lowPassFilter(pitchRate, pitchRateNew, .05);
+
+    float yawRateNew = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    // yawRate = turretMCB.getYawVelocity() - yawMotor.getChassisFrameVelocity();
+    yawPrev = yaw;
+    yawRate = lowPassFilter(yawRate, yawRateNew, .05);
+}
+
 void BalancingChassisSubsystem::computeState()
 {
     uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = curTime - prevTime;
     prevTime = curTime;
 
-    // Value from [0, 2Pi]
-    float currentTurretPitch = pitchMotor.getChassisFrameMeasuredAngle().getValue() -
-                               aruwsrc::control::turret::PITCH_MOTOR_CONFIG.startAngle;
-    if (currentTurretPitch > M_PI) currentTurretPitch -= M_TWOPI;
-    float currentTurretYaw = yawMotor.getChassisFrameUnwrappedMeasuredAngle();
-    if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
-
-    pitch = -(turretMCB.getPitch() + currentTurretPitch);
-    roll = modm::toRadian(drivers->mpu6500.getPitch());
-    yaw = -(turretMCB.getYaw() - currentTurretYaw);
-
-    // float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
-    pitchPrev = pitch;
-    // chassisAngledot = lowPassFilter(chassisAngledot, chassisAngledotNew, .3);
-    pitchRate = lowPassFilter(
-        pitchRate,
-        -turretMCB.getPitchVelocity() - pitchMotor.getChassisFrameVelocity(),
-        .05);
-    // yawRate = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
-    yawRate = turretMCB.getYawVelocity() - yawMotor.getChassisFrameVelocity();
-    yawPrev = yaw;
+    getAngles(dt);
 
     velocityRamper.update(dt / 1000 * MAX_ACCELERATION);
     desiredV = velocityRamper.getTarget();

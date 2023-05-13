@@ -43,21 +43,20 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 2352,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
 };
-
+static constexpr float CHASSIS_FALL_OVER_OFFSET = modm::toRadian(26.5);
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2 + modm::toRadian(25.6),
-    .startEncoderValue = 7511 - 807,
+    .startAngle = M_PI_2 - CHASSIS_FALL_OVER_OFFSET,
+    .startEncoderValue = 6909,
     .minAngle = modm::toRadian(55),
     .maxAngle = modm::toRadian(125),
     .limitMotorAngles = true,
 };
-
 
 static constexpr float TURRET_CG_X = 30.17;
 static constexpr float TURRET_CG_Z = 34.02;
@@ -163,7 +162,6 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_AUTO_AIM_CONFIG 
     .errorDerivativeFloor = 0.0f,
 };
 }  // namespace world_rel_turret_imu
-
 
 namespace chassis_rel
 {

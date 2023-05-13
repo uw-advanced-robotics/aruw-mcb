@@ -100,7 +100,7 @@ CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToPosition(const CMSISMat<3, 1>& 
 template <typename SOURCE, typename TARGET>
 CMSISMat<3, 1> Transform<SOURCE, TARGET>::applyToVector(const CMSISMat<3, 1>& vec) const
 {
-    CMSISMat<3, 1> newVec = tRotation * vec;
+    CMSISMat<3, 1> newVec = rotation * vec;
     return newVec;
 }
 

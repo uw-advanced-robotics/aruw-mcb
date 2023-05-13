@@ -100,6 +100,7 @@ static inline bool turretReachedCenterAndNotMoving(
 
 void ImuCalibrateCommand::execute()
 {
+    debug1 += 1;
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
@@ -115,6 +116,8 @@ void ImuCalibrateCommand::execute()
             {
                 turretMCBsReady &= config.turretMCBCanComm->isConnected();
                 turretsOnline &= config.turret->isOnline();
+                // debug1 = turretMCBsReady;
+                debug2 = turretsOnline;
             }
 
             if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
