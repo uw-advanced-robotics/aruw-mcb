@@ -202,6 +202,38 @@ public:
         TurretMajorOrientationData majorOrientation;
     } modm_packed;
 
+    /**
+     * Localization data received from Jetson. This handles a camera to world
+     * transform computed by Vision.  Documentation for this message can be found at:
+     * https://aruw.gitlab.io/vision/project-otto/controller_communication_protocol/jetson_to_mcb_messages.html
+     */
+    struct LocalizationData {
+        uint8_t turretID;
+        float x; // Positional values
+        float y;
+        float z;
+        float qw; // Quaternion orientation values
+        float qx;
+        float qy;
+        float qz;
+        uint32_t timestamp;
+    } modm_packed;
+
+    /**
+     * Localization data received from Jetson as represented wtih
+     * Euler angles, rather than quaternions.
+    */
+    struct LocalizationCartesianData {
+        uint8_t turretID;
+        float x;
+        float y;
+        float z;
+        float roll;
+        float pitch;
+        float yaw;
+        uint32_t timestamp;
+    } modm_packed;
+
 
     // TODO: this a temp variable
     float lastTurretGirlBossSentPitch;
@@ -285,6 +317,8 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    LocalizationCartesianData getLastLocalizationData();
+
 private:
 
     //@TODO: remove this timestamp
@@ -306,6 +340,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_LOCALIZATION = 0xA,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -339,6 +374,25 @@ private:
 
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 
+        // The last localization data received from the Jetson.
+    LocalizationCartesianData lastLocalizationData;
+
+    // The last localization data for the left minor turret received from the Jetson.
+    LocalizationCartesianData lastLeftMinorLocalizationCartesianData;
+
+    // The last localization data for the right minor turret received from the Jetson.
+    LocalizationCartesianData lastRightMinorLocalizationCartesianData;
+
+    /**
+     * Helper function to convert a quaternion localization message 
+     * to a cartesian message
+    */
+    VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData);
+
+    VisionCoprocessor::LocalizationCartesianData getLastLeftMinorLocalizationData();
+
+    VisionCoprocessor::LocalizationCartesianData getLastRightMinorLocalizationData();
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -368,6 +422,18 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
+
+    /**
+     * Interprets a raw `SerialMessage`'s `data` field to extract position and orientation (in Euler angles)
+     * from a Jetson localization message, and updates the `lastLocalizationData`.
+     *
+     * @param[in] message the message to be decoded.
+     * @param[out] localizationData a return parameter through which the decoded message is returned. TODO: Check this, I copied it over
+     * @return `false` if the message length doesn't match `sizeof(*localizationData)`, `true`
+     *      otherwise.
+     */
+    bool decodeToLocalizationData(const ReceivedSerialMessage& message);
+
 
 #ifdef ENV_UNIT_TESTS
 public:
