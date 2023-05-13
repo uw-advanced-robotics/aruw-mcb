@@ -26,15 +26,23 @@ namespace aruwsrc::sentry
 {
 SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::Drivers &drivers,
+    VisionCoprocessor &visionCoprocessor,
     tap::control::chassis::ChassisSubsystemInterface &chassis,
     SentryChassisWorldYawObserver &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
     modm::Location2D<float> imuToChassisCenter)
     : Subsystem(&drivers),
+      visionCoprocessor(visionCoprocessor),
       ChassisKFOdometry(chassis, yawObserver, imu, imuToChassisCenter)
 {
 }
 
-void SentryKFOdometry2DSubsystem::refresh() { update(); }
+void SentryKFOdometry2DSubsystem::refresh() {
+  // Check if there is an unhandled Vision localization message for Girlboss
+  if ()
+
+  // Update Kalman Filter
+  update();  
+}
 
 }  // namespace aruwsrc::sentry

@@ -156,9 +156,9 @@ bool VisionCoprocessor::decodeToLocalizationData(const ReceivedSerialMessage& me
 
 
     if (lastLocalizationData.turretID == 0) {
-        lastLeftMinorLocalizationCartesianData = lastLocalizationData;
+        lastGirlbossLocalizationCartesianData = lastLocalizationData;
     } else {
-        lastRightMinorLocalizationCartesianData = lastLocalizationData;
+        lastMalewifeLocalizationCartesianData = lastLocalizationData;
     }
 
     return true;
@@ -189,16 +189,20 @@ VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::toCartesianValue
     return cartesian;
 }
 
-VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLeftMinorLocalizationData() {
-    return lastRightMinorLocalizationCartesianData;
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastGirlbossLocalizationData() {
+    return lastGirlbossLocalizationCartesianData;
 }
 
-VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastRightMinorLocalizationData() {
-    return lastLeftMinorLocalizationCartesianData;
+VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastMalewifeLocalizationData() {
+    return lastMalewifeLocalizationCartesianData;
 }
 
-VisionCoprocessor::LocalizationCartesianData VisionCoprocessor::getLastLocalizationData() {
-    return lastLocalizationData;
+void VisionCoprocessor::setGirlbossLocalizationDataHandled() {
+    lastGirlbossLocalizationCartesianData.isHandled = true;
+}
+
+void VisionCoprocessor::setMalewifeLocalizationDataHandled() {
+    lastMalewifeLocalizationCartesianData.isHandled = true;
 }
 
 void VisionCoprocessor::sendMessage()
@@ -284,9 +288,9 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryData->turretOdometry[0].roll = worldToGirlboss.getRoll();
     odometryData->turretOdometry[0].pitch = worldToGirlboss.getPitch();
-    lastTurretGirlBossSentPitch = worldToGirlboss.getPitch();
+    lastTurretGirlbossSentPitch = worldToGirlboss.getPitch();
     odometryData->turretOdometry[0].yaw = worldToGirlboss.getYaw();
-    lastTurretGirlBossSentYaw = worldToGirlboss.getYaw();
+    lastTurretGirlbossSentYaw = worldToGirlboss.getYaw();
 
     odometryData->turretOdometry[1].xPos = worldToMalewife.getX();
     odometryData->turretOdometry[1].yPos = worldToMalewife.getY();

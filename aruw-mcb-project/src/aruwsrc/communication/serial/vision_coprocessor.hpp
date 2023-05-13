@@ -222,6 +222,8 @@ public:
     /**
      * Localization data received from Jetson as represented wtih
      * Euler angles, rather than quaternions.
+     * isHandled is a boolean field that specifies if the sentry odometry has handled
+     * this message.
     */
     struct LocalizationCartesianData {
         uint8_t turretID;
@@ -232,14 +234,15 @@ public:
         float pitch;
         float yaw;
         uint32_t timestamp;
+        bool isHandled = false;
     } modm_packed;
 
 
     // TODO: this a temp variable
-    float lastTurretGirlBossSentPitch;
+    float lastTurretGirlbossSentPitch;
     float lastTurretMalewifeSentPitch;
 
-    float lastTurretGirlBossSentYaw;
+    float lastTurretGirlbossSentYaw;
     float lastTurretMalewifeSentYaw;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -317,7 +320,19 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
-    LocalizationCartesianData getLastLocalizationData();
+    VisionCoprocessor::LocalizationCartesianData getLastGirlbossLocalizationData();
+
+    VisionCoprocessor::LocalizationCartesianData getLastMalewifeLocalizationData();
+
+    /**
+     * Set isHandled flag in last girlboss localization data
+    */
+    void setGirlbossLocalizationDataHandled();
+
+    /**
+     * Set isHandled flag in last malewife localization data
+    */
+    void setMalewifeLocalizationDataHandled();
 
 private:
 
@@ -378,20 +393,16 @@ private:
     LocalizationCartesianData lastLocalizationData;
 
     // The last localization data for the left minor turret received from the Jetson.
-    LocalizationCartesianData lastLeftMinorLocalizationCartesianData;
+    LocalizationCartesianData lastGirlbossLocalizationCartesianData;
 
     // The last localization data for the right minor turret received from the Jetson.
-    LocalizationCartesianData lastRightMinorLocalizationCartesianData;
+    LocalizationCartesianData lastMalewifeLocalizationCartesianData;
 
     /**
      * Helper function to convert a quaternion localization message 
      * to a cartesian message
     */
     VisionCoprocessor::LocalizationCartesianData toCartesianValues(VisionCoprocessor::LocalizationData newQuaterionData);
-
-    VisionCoprocessor::LocalizationCartesianData getLastLeftMinorLocalizationData();
-
-    VisionCoprocessor::LocalizationCartesianData getLastRightMinorLocalizationData();
 
     // CV online variables.
     /// Timer for determining if serial is offline.

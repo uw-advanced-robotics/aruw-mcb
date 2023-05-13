@@ -28,6 +28,9 @@
 
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
+using namespace aruwsrc::serial;
 
 // Forward declarations
 namespace tap
@@ -51,12 +54,17 @@ class SentryKFOdometry2DSubsystem final : public tap::control::Subsystem, public
 public:
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
+        VisionCoprocessor &visionCoprocessor,
         tap::control::chassis::ChassisSubsystemInterface &chassis,
         SentryChassisWorldYawObserver &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         modm::Location2D<float> imuToChassisCenter);
 
     void refresh() override;
+
+private:
+    VisionCoprocessor& visionCoprocessor;
+
 };
 
 }  // namespace aruwsrc::sentry
