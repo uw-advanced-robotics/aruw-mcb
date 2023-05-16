@@ -193,7 +193,7 @@ private:
      */
     tap::algorithms::Ramp zDesRamper;
     // m/s
-    static constexpr float Z_RAMP_RATE = .02;
+    static constexpr float Z_RAMP_RATE = .04;
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.

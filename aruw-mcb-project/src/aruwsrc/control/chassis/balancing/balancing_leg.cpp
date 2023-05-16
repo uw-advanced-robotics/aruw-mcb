@@ -136,7 +136,10 @@ void BalancingLeg::update()
     debug7 = driveWheelOutput;
     if (armed)
     {
-        driveWheel->setDesiredOutput(driveWheelOutput);
+        if (!isFallen)
+        {
+            driveWheel->setDesiredOutput(driveWheelOutput);
+        }
     }
     else
     {

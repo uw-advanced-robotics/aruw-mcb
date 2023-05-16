@@ -59,6 +59,8 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
+    inline void startHoming() { homing = true; };
+
     /**
      * @return the number of chassis motors
      */
@@ -111,6 +113,9 @@ public:
         desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.1);
     };
 
+    BalancingLeg& getLeftLeg() { return leftLeg; };
+    BalancingLeg& getRightLeg() { return rightLeg; };
+
     /**
      * @brief Defines x position and r rotation angle that we want the chassis to be in
      *
@@ -145,9 +150,14 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
-    inline void armChassis() { armed = true; };
+    inline void armChassis()
+    {
+        armed = true;
+        if (!rightLeg.getArmState()) rightLeg.armLeg();
+        if (!leftLeg.getArmState()) leftLeg.armLeg();
+    };
     inline void disarmChassis() { armed = false; };
-    inline void toggleArm() { armed ? armed = false : armed = true; };
+    inline void toggleArm() { armed ? disarmChassis() : armChassis(); };
     inline bool getArmState() { return armed; };
 
     tap::algorithms::SmoothPid rotationPid;
@@ -157,12 +167,17 @@ private:
         tap::algorithms::transforms::Transform<Chassis, Turret>();
 
     bool armed = false;
+
     tap::algorithms::Ramp velocityRamper;
     static constexpr float MAX_ACCELERATION = 4;  // m/s/s
 
-    void computeState();
+    void computeState(uint32_t dt);
 
     void getAngles(uint32_t dt);
+
+    void homeLegs(uint32_t dt);
+
+    void updateLegOdometry();
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
@@ -174,6 +189,30 @@ private:
     BalancingLeg &leftLeg, rightLeg;
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
+
+    bool homing = false;
+    SmoothPidConfig legHomingPidConfig{
+        .kp = 1000,
+        .ki = 10,
+        .kd = 3,
+        .maxICumulative = 8000,
+        .maxOutput = 8000,
+    };
+    // LF, LR, RF, RR
+    SmoothPid legHomingPid[4] = {
+        SmoothPid(legHomingPidConfig),
+        SmoothPid(legHomingPidConfig),
+        SmoothPid(legHomingPidConfig),
+        SmoothPid(legHomingPidConfig)};
+    bool legStalled[4] = {false, false, false, false};
+    uint32_t STALL_CURRENT = 6000;
+    
+    // timeout for after we reach the end to accept our fate (ms)
+    static constexpr uint32_t STALL_TIMEOUT = 1000;
+    tap::arch::MilliTimeout calibrationTimer;
+
+    static constexpr uint32_t RESET_TIMEOUT = 10'000;
+    tap::arch::MilliTimeout calibrationLongTimeout;
 
     float debug1;
     float debug2;

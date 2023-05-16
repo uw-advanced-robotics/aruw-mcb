@@ -67,33 +67,35 @@ void BalancingChassisSubsystem::initialize()
 
 void BalancingChassisSubsystem::refresh()
 {
+    uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = curTime - prevTime;
+    prevTime = curTime;
     // 1. Update yaw and roll values
-    computeState();
+    computeState(dt);
 
     // 2. Apply scaling and/or control laws to yaw and roll values
-
-    // float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
-    float rollAdjustment = 0;
-
+    updateLegOdometry();
     // 3. Set each side's actuators to compensate appropriate for yaw and roll error
+
+    // 4. run outputs
+    float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
+    float rollAdjustment = 0;
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
     rightLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ - rollAdjustment, -.35, -.15));
-
-    leftLeg.setChassisPos(currentX, desiredX);
-    rightLeg.setChassisPos(currentX, desiredX);
-    leftLeg.setChassisSpeed(currentV);
-    rightLeg.setChassisSpeed(currentV);
-    leftLeg.setChassisYaw(desiredR, yawRate);
-    // Right leg values are negated due to fun LQR logic
-    rightLeg.setChassisYaw(-desiredR, -yawRate);
-    leftLeg.setChassisAngle(pitch, pitchRate);
-    rightLeg.setChassisAngle(pitch, pitchRate);
-
-    // 4. run outputs
     leftLeg.setDesiredTranslationSpeed(desiredV);  // m/s
     rightLeg.setDesiredTranslationSpeed(desiredV);
+
+    if (homing)
+    {
+        // Call this below
+        homeLegs(dt);
+        // Call this above updating the legs to ensure that the armed flag is false, therefore
+        // sending no wheel output. This also ensure the fivebar controllers don't set output
+        leftLeg.disarmLeg();
+        rightLeg.disarmLeg();
+    }
 
     leftLeg.update();
     rightLeg.update();
@@ -115,8 +117,6 @@ void BalancingChassisSubsystem::refresh()
             ->sendCanMessage();
         static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
             ->sendCanMessage();
-        if (!rightLeg.getArmState()) rightLeg.armLeg();
-        if (!leftLeg.getArmState()) leftLeg.armLeg();
     }
     else
     {
@@ -160,47 +160,21 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
     tap::algorithms::transforms::Transform<World, Chassis> worldToChassis =
         tap::algorithms::transforms::compose(worldToTurret, chassisToTurret.getInverse());
 
-    // Define the current Turret Orientations in world-frame.
-    // CMSISMat<3, 1> worldRelativeTurretOrientation = {
-    //     {worldRelativeTurretRoll, worldRelativeTurretPitch, worldRelativeTurretYaw}};
-    // CMSISMat<3, 1> chassisRelativeTurretOrientation = {{0, currentTurretPitch,
-    // currentTurretYaw}};
-    // CMSISMat<3, 1> worldRelativeTurretOrientationRate = {
-    //     {-turretMCB.getRollVelocity(), -turretMCB.getPitchVelocity(), turretMCB.getYawVelocity()}};
-    // CMSISMat<3, 1> chassisRelativeTurretOrientationRate = {
-    //     {0, pitchMotor.getChassisFrameVelocity(), yawMotor.getChassisFrameVelocity()}};
-
     roll = worldToChassis.getRoll();
     pitch = worldToChassis.getPitch();
     yaw = worldToChassis.getYaw();
 
-    // CMSISMat<3, 1> worldRelativeChassisOrientationRate =
-    //     chassisToTurret.applyToVector(worldRelativeTurretOrientationRate) -
-    //     chassisRelativeTurretOrientationRate;
-    // rollRate = worldRelativeChassisOrientationRate.data[0];
-    // pitchRate = worldRelativeChassisOrientationRate.data[1];
-    // yawRate = worldRelativeChassisOrientationRate.data[2];
-
     float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
     pitchPrev = pitch;
-    // pitchRate = lowPassFilter(
-    //     pitchRate,
-    //     -turretMCB.getPitchVelocity() - pitchMotor.getChassisFrameVelocity(),
-    //     .05);
     pitchRate = lowPassFilter(pitchRate, pitchRateNew, .05);
 
     float yawRateNew = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
-    // yawRate = turretMCB.getYawVelocity() - yawMotor.getChassisFrameVelocity();
     yawPrev = yaw;
     yawRate = lowPassFilter(yawRate, yawRateNew, .05);
 }
 
-void BalancingChassisSubsystem::computeState()
+void BalancingChassisSubsystem::computeState(uint32_t dt)
 {
-    uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
-
     getAngles(dt);
 
     velocityRamper.update(dt / 1000 * MAX_ACCELERATION);
@@ -231,4 +205,56 @@ void BalancingChassisSubsystem::computeState()
 }
 
 void BalancingChassisSubsystem::runHardwareTests() {}
+
+void BalancingChassisSubsystem::homeLegs(uint32_t dt)
+{
+    // 1. PID legs to an angle slightly more towards their home until they reach it.
+    // Fronts want to rotate negative
+    aruwsrc::motor::Tmotor_AK809* legMotors[4] = {
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(getLeftLeg().getFiveBar()->getMotor1()),
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(getLeftLeg().getFiveBar()->getMotor2()),
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(getRightLeg().getFiveBar()->getMotor1()),
+        static_cast<aruwsrc::motor::Tmotor_AK809*>(getRightLeg().getFiveBar()->getMotor2())};
+    int i = 0;
+    for (i = 0; i < 4; i++)
+    {  // 2. When the PID output exceeds some current, stop. Set the home, and Reset the PID to hold
+        // the current position.
+        float motorAngleSetpoint = legMotors[i]->getPositionUnwrapped();
+        if (!legStalled[i])
+        {
+            motorAngleSetpoint += modm::toRadian((i % 2) == 0 ? -10 : 10);
+        }
+        float output = legHomingPid[i].runController(
+            motorAngleSetpoint,
+            legMotors[i]->getShaftRPM() * M_TWOPI / 60,
+            dt);
+        legMotors[i]->setDesiredOutput(output);
+        if (compareFloatClose(legMotors[i]->getShaftRPM(), 0, 1e-3) &&
+            !compareFloatClose(output, 0, STALL_CURRENT))
+        {
+            legStalled[i] = true;
+            legMotors[i]->sendPositionHomeGetMessage();
+        }
+    }
+    if (legStalled[0] && legStalled[1] && legStalled[2] && legStalled[3]) {
+        legStalled[0] = false;
+        legStalled[1] = false;
+        legStalled[2] = false;
+        legStalled[3] = false;
+        homing = false;
+    }
+}
+
+void BalancingChassisSubsystem::updateLegOdometry()
+{
+    leftLeg.setChassisPos(currentX, desiredX);
+    rightLeg.setChassisPos(currentX, desiredX);
+    leftLeg.setChassisSpeed(currentV);
+    rightLeg.setChassisSpeed(currentV);
+    leftLeg.setChassisYaw(desiredR, yawRate);
+    // Right leg values are negated due to fun LQR logic
+    rightLeg.setChassisYaw(-desiredR, -yawRate);
+    leftLeg.setChassisAngle(pitch, pitchRate);
+    rightLeg.setChassisAngle(pitch, pitchRate);
+}
 }  // namespace aruwsrc::chassis
