@@ -37,6 +37,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -218,19 +219,21 @@ aruwsrc::chassis::BalancingChassisSubsystem chassis(
     legLeft,
     legRight);
 
-aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem odometryTracker(
-    drivers(),
-    &turret,
-    &chassis);
+aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turret,
+    chassis);
 
 // Ballistics Solver
+
 aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
-    &drivers()->visionCoprocessor,
-    &odometryTracker,
-    &turret,
-    &frictionWheels,
-    14.0, // defaultLaunchSpeed
-    0);
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    turret,
+    frictionWheels,
+    14.0f,  // defaultLaunchSpeed
+    0       // turretID
+);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -431,6 +434,7 @@ void registerBalstdSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&agitator);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -440,6 +444,7 @@ void initializeSubsystems()
     turret.initialize();
     frictionWheels.initialize();
     agitator.initialize();
+    odometrySubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
