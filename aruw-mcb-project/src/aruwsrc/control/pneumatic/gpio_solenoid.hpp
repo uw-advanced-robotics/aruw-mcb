@@ -24,7 +24,6 @@
 
 namespace aruwsrc::control
 {
-
 enum SolenoidState
 {
     OFF,
