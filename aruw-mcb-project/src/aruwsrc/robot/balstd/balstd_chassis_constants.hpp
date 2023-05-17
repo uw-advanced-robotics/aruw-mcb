@@ -97,7 +97,7 @@ static const tap::algorithms::SmoothPidConfig AUTOROTATION_PID{
     .maxOutput = AUTOROTATION_PID_MAX_OUTPUT,
 };
 
-static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
+static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.01f;
 
 /**
  * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic

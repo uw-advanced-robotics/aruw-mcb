@@ -42,6 +42,7 @@
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_beyblade_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_home_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -335,6 +336,8 @@ aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+aruwsrc::chassis::BalancingChassisHomeCommand homeLegCommand(drivers(), &chassis);
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 BalancingChassisRelativeDriveCommand manualDriveCommand(
@@ -379,9 +382,9 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-HoldCommandMapping leftSwitchDown(
+PressCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeDriveCommand},
+    {&homeLegCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 PressCommandMapping leftSwitchUp(
     drivers(),

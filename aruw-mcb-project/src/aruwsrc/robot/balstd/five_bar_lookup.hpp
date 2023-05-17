@@ -26,11 +26,11 @@ namespace aruwsrc::chassis
 
 static constexpr float LQR_K1 =   -1.4142;
 static constexpr float LQR_K5 = -0.7071;
-static constexpr float LQR_K6 = -0.2258;
+static constexpr float LQR_K6 = -0.5258;
 
 static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K2[] = {
-    {0.35, -1.3639},
-    {0.15, -1.2565},
+    {0.35, -1.7639},
+    {0.15, -1.6565},
 };
 static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K3[] = {
     // {0.35, -120.3},

@@ -131,7 +131,7 @@ void BalancingChassisAutorotateCommand::execute()
         {
             chassisRotationSetpoint = getAutorotationSetpoint(turretAngleFromCenter);
         }
-        debug1 = moveBackwards;
+        debug1 = chassisRotationSetpoint;
         runRotationController(chassisRotationSetpoint, dt);
 
         // we are now turning the robot towards the desired direction. Apply motion to chassis
@@ -169,7 +169,7 @@ void BalancingChassisAutorotateCommand::runRotationController(
     // PD controller to find desired rotational component of the chassis control
     float desiredRotation = chassis->rotationPid.runController(
         chassisRotationSetpoint,
-        yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()),
+        yawMotor->getChassisFrameVelocity() - chassis->getChassisOrientationRates().element[2],
         dt);
 
     // find an alpha value to be used for the low pass filter, some value >

@@ -38,16 +38,25 @@ BalancingChassisHomeCommand::BalancingChassisHomeCommand(
 void BalancingChassisHomeCommand::initialize()
 {
     chassis->stopChassis();
+    calibrationLongTimeout.restart(RESET_TIMEOUT);
+    chassis->startHoming();
 }
 
-void BalancingChassisHomeCommand::execute() { chassis->startHoming(); }
+void BalancingChassisHomeCommand::execute()
+{
+    if (chassis->homingState == HOMED) end(false);
+}
 
 void BalancingChassisHomeCommand::end(bool interrupted)
 {
+    calibrationLongTimeout.stop();
     chassis->setDesiredOutput(0, 0);
     chassis->armChassis();
 }
 
-bool BalancingChassisHomeCommand::isFinished() const { return false; }
+bool BalancingChassisHomeCommand::isFinished() const
+{
+    return chassis->homingState == HOMED && calibrationLongTimeout.isExpired();
+}
 }  // namespace chassis
 }  // namespace aruwsrc

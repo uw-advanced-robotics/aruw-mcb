@@ -21,8 +21,8 @@
 #define BALANCING_LEG_HPP_
 
 #include "tap/algorithms/fuzzy_pd.hpp"
-#include "tap/motor/dji_motor.hpp"
 #include "tap/algorithms/ramp.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -149,9 +149,16 @@ public:
     void update();
 
     inline void armLeg() { armed = true; };
-    inline void disarmLeg() { armed = false; };
-    inline void toggleArm() { armed ? armed = false : armed = true; };
+    inline void disarmLeg()
+    {
+        armed = false;
+        isFallen = true;
+    };
+    inline void toggleArm(){armed ? disarmLeg() : armLeg();};
     inline bool getArmState() { return armed; };
+
+    // represents if the robot has falled over, and to retract the legs if so
+    bool isFallen = true;
 
 private:
     tap::Drivers* drivers;
@@ -193,7 +200,7 @@ private:
      */
     tap::algorithms::Ramp zDesRamper;
     // m/s
-    static constexpr float Z_RAMP_RATE = .04;
+    static constexpr float Z_RAMP_RATE = .08;
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
@@ -201,33 +208,12 @@ private:
      */
     SmoothPidConfig xPidConfig{
         .kp = 0.003,
-        .ki = 0,
+        .ki = 2.5e-08,
         .kd = 0,
-        .maxICumulative = .05,
+        .maxICumulative = .02,
         .maxOutput = .07,
     };
     SmoothPid xPid = SmoothPid(xPidConfig);
-
-    SmoothPidConfig thetaLPidConfig{
-        .kp = 25,
-        .ki = 0,
-        .kd = 0,
-        .maxICumulative = 2,
-        .maxOutput = 40,
-        .tRProportionalKalman = .5,
-    };
-
-    SmoothPidConfig thetaLdotPidConfig{
-        .kp = 8,
-        .ki = 0,
-        .kd = 0,
-        .maxOutput = 40,
-        .tRProportionalKalman = .5,
-    };
-
-    SmoothPid thetaLPid = SmoothPid(thetaLPidConfig);
-
-    SmoothPid thetaLdotPid = SmoothPid(thetaLdotPidConfig);
 
     uint32_t prevTime = 0;
 
@@ -289,10 +275,8 @@ private:
         xoffsetPrev;  // (m)
     float prevOutput;
 
-    // represents if the robot has falled over, and to retract the legs if so
-    bool isFallen = true;
-    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(35);
-    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
+    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
     static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 5;
 };
 }  // namespace chassis
