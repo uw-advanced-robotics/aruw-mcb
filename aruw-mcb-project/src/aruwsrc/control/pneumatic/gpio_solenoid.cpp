@@ -29,24 +29,28 @@ GpioSolenoid::GpioSolenoid(
       extendPin(extendPin),
       retractPin(retractPin)
 {
+    state = SolenoidState::OFF;
 }
 
 void GpioSolenoid::extend()
 {
     drivers->digital.set(extendPin, true);
     drivers->digital.set(retractPin, false);
+    state = SolenoidState::EXTENDED;
 }
 
 void GpioSolenoid::retract()
 {
     drivers->digital.set(extendPin, false);
     drivers->digital.set(retractPin, true);
+    state = SolenoidState::RETRACTED;
 }
 
 void GpioSolenoid::off()
 {
     drivers->digital.set(extendPin, false);
     drivers->digital.set(retractPin, false);
+    state = SolenoidState::OFF;
 }
 
 }  // namespace aruwsrc::control

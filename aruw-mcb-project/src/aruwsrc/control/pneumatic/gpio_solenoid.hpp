@@ -17,13 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINEAR_ACTUATOR_HPP_
-#define LINEAR_ACTUATOR_HPP_
+#ifndef GPIO_SOLENOID_HPP_
+#define GPIO_SOLENOID_HPP_
 
 #include "tap/drivers.hpp"
 
 namespace aruwsrc::control
 {
+
+enum SolenoidState
+{
+    OFF,
+    EXTENDED,
+    RETRACTED
+};
+
+/**
+ * A class for controlling a solenoid using GPIO pins.
+ */
 class GpioSolenoid
 {
 public:
@@ -35,11 +46,13 @@ public:
     void extend();
     void retract();
     void off();
+    SolenoidState* getState() { return &state; }
 
 private:
     tap::Drivers* drivers;
     tap::gpio::Digital::OutputPin extendPin;
     tap::gpio::Digital::OutputPin retractPin;
+    SolenoidState state;
 };
 }  // namespace aruwsrc::control
 
