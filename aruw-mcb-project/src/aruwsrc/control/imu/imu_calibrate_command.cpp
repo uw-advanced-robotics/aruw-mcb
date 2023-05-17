@@ -100,7 +100,10 @@ static inline bool turretReachedCenterAndNotMoving(
 
 void ImuCalibrateCommand::execute()
 {
-    debug1 += 1;
+    if (chassis != nullptr)
+    {
+        chassis->stopChassis();
+    }
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:

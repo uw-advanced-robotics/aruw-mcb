@@ -79,7 +79,7 @@ void BalancingChassisSubsystem::refresh()
 
     // 4. run outputs
     float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
-    float rollAdjustment = 0;
+
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
     rightLeg.setDesiredHeight(
@@ -87,25 +87,19 @@ void BalancingChassisSubsystem::refresh()
     leftLeg.setDesiredTranslationSpeed(desiredV);  // m/s
     rightLeg.setDesiredTranslationSpeed(desiredV);
 
-    if (homing)
+    if (homingState == HOMING)
     {
         // Call this below
         homeLegs(dt);
         // Call this above updating the legs to ensure that the armed flag is false, therefore
         // sending no wheel output. This also ensure the fivebar controllers don't set output
-        leftLeg.disarmLeg();
-        rightLeg.disarmLeg();
     }
-
+    // Call this here to pass the chassis arm state to the legs, disabling wheel motor motion.
+    !armed ? disarmChassis() : armChassis();
     leftLeg.update();
     rightLeg.update();
 
-    /**
-     * @warning UN-COMMENT OUT THIS FLAG TO TEST CODE IN SAFE MODE
-     */
-    // armed = false;
-
-    if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline() && armed)
+    if (leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline())
     {
         // do this here for safety. Only called once per subsystem. Don't arm leg motors until wheel
         // motors are also online.
@@ -117,11 +111,6 @@ void BalancingChassisSubsystem::refresh()
             ->sendCanMessage();
         static_cast<aruwsrc::motor::Tmotor_AK809*>(rightLeg.getFiveBar()->getMotor2())
             ->sendCanMessage();
-    }
-    else
-    {
-        rightLeg.disarmLeg();
-        leftLeg.disarmLeg();
     }
 }
 
@@ -140,11 +129,6 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
     float worldRelativeTurretRoll = -turretMCB.getRoll() + M_PI;
     if (worldRelativeTurretRoll > M_PI) worldRelativeTurretRoll -= M_TWOPI;
     float worldRelativeTurretYaw = turretMCB.getYaw();
-
-    debug1 = worldRelativeTurretPitch;
-    debug2 = worldRelativeTurretRoll;
-    debug3 = worldRelativeTurretYaw;
-    debug4 = currentTurretPitch;
 
     tap::algorithms::transforms::Transform<World, Turret> worldToTurret =
         tap::algorithms::transforms::Transform<World, Turret>(
@@ -208,9 +192,10 @@ void BalancingChassisSubsystem::runHardwareTests() {}
 
 void BalancingChassisSubsystem::homeLegs(uint32_t dt)
 {
+    if (homingState != HOMING) return;
     // 1. PID legs to an angle slightly more towards their home until they reach it.
     // Fronts want to rotate negative
-    aruwsrc::motor::Tmotor_AK809* legMotors[4] = {
+    static aruwsrc::motor::Tmotor_AK809* legMotors[4] = {
         static_cast<aruwsrc::motor::Tmotor_AK809*>(getLeftLeg().getFiveBar()->getMotor1()),
         static_cast<aruwsrc::motor::Tmotor_AK809*>(getLeftLeg().getFiveBar()->getMotor2()),
         static_cast<aruwsrc::motor::Tmotor_AK809*>(getRightLeg().getFiveBar()->getMotor1()),
@@ -219,11 +204,8 @@ void BalancingChassisSubsystem::homeLegs(uint32_t dt)
     for (i = 0; i < 4; i++)
     {  // 2. When the PID output exceeds some current, stop. Set the home, and Reset the PID to hold
         // the current position.
-        float motorAngleSetpoint = legMotors[i]->getPositionUnwrapped();
-        if (!legStalled[i])
-        {
-            motorAngleSetpoint += modm::toRadian((i % 2) == 0 ? -10 : 10);
-        }
+        float motorAngleSetpoint = legMotors[i]->getPositionUnwrapped() - modm::toRadian(5);
+
         float output = legHomingPid[i].runController(
             motorAngleSetpoint,
             legMotors[i]->getShaftRPM() * M_TWOPI / 60,
@@ -235,13 +217,19 @@ void BalancingChassisSubsystem::homeLegs(uint32_t dt)
             legStalled[i] = true;
             legMotors[i]->sendPositionHomeGetMessage();
         }
+        else
+        {
+            legStalled[i] = false;
+        }
     }
-    if (legStalled[0] && legStalled[1] && legStalled[2] && legStalled[3]) {
+
+    if (legStalled[0] && legStalled[1] && legStalled[2] && legStalled[3])
+    {
         legStalled[0] = false;
         legStalled[1] = false;
         legStalled[2] = false;
         legStalled[3] = false;
-        homing = false;
+        homingState = HOMED;
     }
 }
 

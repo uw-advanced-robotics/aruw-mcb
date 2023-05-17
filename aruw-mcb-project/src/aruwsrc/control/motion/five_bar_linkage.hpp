@@ -92,6 +92,10 @@ public:
         this->desiredPosition = modm::Vector2f(x, y);
     };
 
+    inline void setHomePosition() {
+        
+    }
+
     modm::Vector2f getDesiredPosition() { return desiredPosition; };
 
     modm::Vector2f getDefaultPosition() { return fiveBarConfig.defaultPosition; };

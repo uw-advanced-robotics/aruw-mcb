@@ -68,9 +68,6 @@ void BalancingLeg::update()
     computeState(dt);
 
     /* 2. Compute Setpoints */
-    zDesRamper.setTarget(zDesired);
-    zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
-    float zDesiredRamped = zDesRamper.getValue();
 
     modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.115);
     float desiredWheelAngle = 0;
@@ -79,13 +76,13 @@ void BalancingLeg::update()
         fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
     motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
 
-    xoffset = xPid.runControllerDerivateError(vDesired, dt);
+    xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
     // xoffset = .00;
     float tl_desired = atan2(-xoffset, -zCurrent);
     tl_desired = 0;
 
-    float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesiredRamped;
-    float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesiredRamped;
+    float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
+    float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
     if (!isFallen)
     {
         desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
@@ -93,7 +90,8 @@ void BalancingLeg::update()
     }
     else
     {
-        desiredWheelLocation = fivebar->getDefaultPosition();
+        desiredWheelLocation.setX(fivebar->getDefaultPosition().getX());
+        desiredWheelLocation.setY(fivebar->getDefaultPosition().getY());
     }
 
     float LQR_K2 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
@@ -102,7 +100,7 @@ void BalancingLeg::update()
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
     float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .08f);
+    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     // float lqrPitch = -38 * deadZone(tl - tl_desired, modm::toRadian(.05));
     // float lqrPitchRate = -6.3527 * deadZone(tl_dot, .2f);
@@ -117,34 +115,26 @@ void BalancingLeg::update()
     debug5 = lqrYaw;
     debug6 = lqrYawRate;
 
-    wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
-    // float wheelCurrent =
-    //     -(-52 * (-tl_desired + tl) - 10 * tl_dot - 5 * chassisSpeed / WHEEL_RADIUS);
-    // wheelCurrent = limitVal(wheelCurrent, -5.0f, 5.0f);
-
-    // desiredWheelSpeed -= thetaLPid.runControllerDerivateError(-tl, dt);
-    // float driveWheelSpeedError = desiredWheelSpeed - WHEEL_RADIUS * realWheelSpeed;
-    // float driveWheelOutput = driveWheelPid.runControllerDerivateError(driveWheelSpeedError, dt);
-
-    /* 3. Send New Output Values to Actuators */
-
+    wheelTorque = limitVal(wheelTorque, -3.0f, 3.0f);
     // 3. Send New Output Values
     int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;  // convert from Torque to output
     // int32_t driveWheelOutput = wheelCurrent * 16384 / 20;  // convert from i to output
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     debug7 = driveWheelOutput;
-    if (armed)
+    if (armed && !isFallen)
     {
-        if (!isFallen)
-        {
-            driveWheel->setDesiredOutput(driveWheelOutput);
-        }
+        driveWheel->setDesiredOutput(driveWheelOutput);
     }
     else
     {
         driveWheel->setDesiredOutput(0);
+        desiredWheelLocation = fivebar->getDefaultPosition();
     }
+    zDesRamper.setTarget(desiredWheelLocation.getY());
+    zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
+    desiredWheelLocation.setY(limitVal(zDesRamper.getValue(), -.35f, -.1f));
+
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
     fivebarController(dt / 1000);
@@ -174,13 +164,13 @@ void BalancingLeg::fivebarController(uint32_t dt)
         motor2error,
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
         dt);
-    if (!isFallen)
+    if (!isFallen && armed)
     {
         motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
         // motor direction so minus
         motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
     }
-    if (armed) fivebar->moveMotors(motor1output, motor2output);
+    fivebar->moveMotors(motor1output, motor2output);
 }
 
 void BalancingLeg::computeState(uint32_t dt)

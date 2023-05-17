@@ -39,6 +39,13 @@ using namespace aruwsrc::balstd::transforms;
 namespace aruwsrc::chassis
 {
 
+enum LegHomingState
+{
+    UNHOMED = 0,
+    HOMING,
+    HOMED
+};
+
 class BalancingChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
@@ -59,7 +66,15 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
-    inline void startHoming() { homing = true; };
+    inline void startHoming()
+    {
+        homingState = HOMING;
+        legHomingPid[0].reset();
+        legHomingPid[1].reset();
+        legHomingPid[2].reset();
+        legHomingPid[3].reset();
+        legStalled[0] = legStalled[1] = legStalled[2] = legStalled[3] = false;
+    };
 
     /**
      * @return the number of chassis motors
@@ -80,11 +95,17 @@ public:
      */
     inline void stopChassis()
     {
-        desiredZ = leftLeg.getDefaultPosition().getY();
+        leftLeg.getFiveBar()->setDesiredPosition(leftLeg.getDefaultPosition());
+        rightLeg.getFiveBar()->setDesiredPosition(rightLeg.getDefaultPosition());
         setDesiredOutput(0, 0);
-        leftLeg.disarmLeg();
-        rightLeg.disarmLeg();
+        disarmChassis();
     };
+
+    inline void setFallen()
+    {
+        leftLeg.isFallen = true;
+        rightLeg.isFallen = true;
+    }
 
     /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -98,13 +119,24 @@ public:
     };
 
     /**
-     * @brief Get the Chassis Orientation relative to a fixed world orientation
+     * @brief Get the Chassis Orientation relative to the chassis orientation
      *
      * @return roll-pitch-yaw
      */
     inline modm::Matrix<float, 3, 1> getChassisOrientationWorldRelative() const
     {
         const float data[3] = {roll, pitch, yaw};
+        return modm::Matrix<float, 3, 1>(data);
+    };
+
+    /**
+     * @brief Get the Chassis Orientation Rates relative to a fixed world orientation
+     *
+     * @return roll-pitch-yaw
+     */
+    inline modm::Matrix<float, 3, 1> getChassisOrientationRates() const
+    {
+        const float data[3] = {rollRate, pitchRate, yawRate};
         return modm::Matrix<float, 3, 1>(data);
     };
 
@@ -156,11 +188,18 @@ public:
         if (!rightLeg.getArmState()) rightLeg.armLeg();
         if (!leftLeg.getArmState()) leftLeg.armLeg();
     };
-    inline void disarmChassis() { armed = false; };
+    inline void disarmChassis()
+    {
+        armed = false;
+        if (rightLeg.getArmState()) rightLeg.disarmLeg();
+        if (leftLeg.getArmState()) leftLeg.disarmLeg();
+    };
     inline void toggleArm() { armed ? disarmChassis() : armChassis(); };
     inline bool getArmState() { return armed; };
 
     tap::algorithms::SmoothPid rotationPid;
+
+    LegHomingState homingState = HOMED;
 
 private:
     tap::algorithms::transforms::Transform<Chassis, Turret> chassisToTurret =
@@ -190,13 +229,12 @@ private:
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
-    bool homing = false;
     SmoothPidConfig legHomingPidConfig{
         .kp = 1000,
-        .ki = 10,
+        .ki = 100,
         .kd = 3,
-        .maxICumulative = 8000,
-        .maxOutput = 8000,
+        .maxICumulative = 15000,
+        .maxOutput = 15000,
     };
     // LF, LR, RF, RR
     SmoothPid legHomingPid[4] = {
@@ -205,14 +243,9 @@ private:
         SmoothPid(legHomingPidConfig),
         SmoothPid(legHomingPidConfig)};
     bool legStalled[4] = {false, false, false, false};
-    uint32_t STALL_CURRENT = 6000;
-    
-    // timeout for after we reach the end to accept our fate (ms)
-    static constexpr uint32_t STALL_TIMEOUT = 1000;
-    tap::arch::MilliTimeout calibrationTimer;
-
-    static constexpr uint32_t RESET_TIMEOUT = 10'000;
-    tap::arch::MilliTimeout calibrationLongTimeout;
+    tap::arch::MilliTimeout motorHomedTimeout[4];
+    uint32_t STALL_CURRENT = 12000;
+    uint32_t STALL_TIMEOUT = 1000;
 
     float debug1;
     float debug2;

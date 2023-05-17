@@ -48,6 +48,9 @@ private:
     tap::Drivers* drivers;
     BalancingChassisSubsystem* chassis;
 
+    static constexpr uint32_t RESET_TIMEOUT = 5'000;
+    tap::arch::MilliTimeout calibrationLongTimeout;
+
 };  // class
 
 }  // namespace chassis
