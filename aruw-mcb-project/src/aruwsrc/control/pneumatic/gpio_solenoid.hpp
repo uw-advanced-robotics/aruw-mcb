@@ -45,7 +45,7 @@ public:
     void extend();
     void retract();
     void off();
-    SolenoidState* getState() { return &state; }
+    SolenoidState getState() { return state; }
 
 private:
     tap::Drivers* drivers;
