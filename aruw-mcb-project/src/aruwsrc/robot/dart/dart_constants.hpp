@@ -34,5 +34,20 @@ static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
+static constexpr float LOADER_HOOKING_POSITION = 0.0f;
+
+static constexpr float TOP_LOADER_POSITION = 0.0f;
+static constexpr float TOP_LOADER_HOOKING_POSITION = 0.0f;
+
+static constexpr float MIDDLE_LOADER_POSITION = 0.0f;
+static constexpr float MIDDLE_LOADER_HOOKING_POSITION = 0.0f;
+
+static constexpr float BOTTOM_LOADER_POSITION = 0.0f;
+static constexpr float BOTTOM_LOADER_HOOKING_POSITION = 0.0f;
+
+static constexpr float PIVOT_OUTPOST_POSITION = 0.0f;
+static constexpr float PIVOT_BASE_POSITION = 0.0f;
+
+
 }  // namespace aruwsrc::control::turret
 #endif
