@@ -33,7 +33,7 @@ enum DoubleSolenoidState
     RETRACTED
 };
 /**
- * A class for controlling a solenoid using GPIO pins.
+ * A class for controlling a double solenoid using GPIO pins.
  */
 class GpioDoubleSolenoid
 {

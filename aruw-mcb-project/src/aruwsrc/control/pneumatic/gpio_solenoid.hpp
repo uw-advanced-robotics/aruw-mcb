@@ -35,9 +35,7 @@ enum SolenoidState
 class GpioSolenoid
 {
 public:
-    GpioSolenoid(
-        tap::Drivers* drivers,
-        tap::gpio::Digital::OutputPin extendPin);
+    GpioSolenoid(tap::Drivers* drivers, tap::gpio::Digital::OutputPin extendPin);
 
     void extend();
 
