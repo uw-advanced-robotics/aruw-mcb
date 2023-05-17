@@ -17,17 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gpio_solenoid.hpp"
+#include "gpio_double_solenoid.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::pneumatic
 {
-GpioSolenoid::GpioSolenoid(
-    tap::Drivers* drivers,
-    tap::gpio::Digital::OutputPin extendPin,
-    tap::gpio::Digital::OutputPin retractPin)
+GpioSolenoid::GpioSolenoid(tap::Drivers* drivers, tap::gpio::Digital::OutputPin extendPin)
     : drivers(drivers),
-      extendPin(extendPin),
-      retractPin(retractPin)
+      extendPin(extendPin)
 {
     state = SolenoidState::OFF;
 }
@@ -35,22 +31,13 @@ GpioSolenoid::GpioSolenoid(
 void GpioSolenoid::extend()
 {
     drivers->digital.set(extendPin, true);
-    drivers->digital.set(retractPin, false);
     state = SolenoidState::EXTENDED;
-}
-
-void GpioSolenoid::retract()
-{
-    drivers->digital.set(extendPin, false);
-    drivers->digital.set(retractPin, true);
-    state = SolenoidState::RETRACTED;
 }
 
 void GpioSolenoid::off()
 {
     drivers->digital.set(extendPin, false);
-    drivers->digital.set(retractPin, false);
     state = SolenoidState::OFF;
 }
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::pneumatic

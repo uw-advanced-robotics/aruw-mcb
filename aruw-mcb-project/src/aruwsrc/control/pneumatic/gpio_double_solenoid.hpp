@@ -17,38 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GPIO_SOLENOID_HPP_
-#define GPIO_SOLENOID_HPP_
+#ifndef GPIO_DOUBLE_SOLENOID_HPP_
+#define GPIO_DOUBLE_SOLENOID_HPP_
 
 #include "tap/drivers.hpp"
 
+#include "aruw-mcb-project/src/aruwsrc/control/pneumatic/gpio_solenoid.hpp"
+
 namespace aruwsrc::control::pneumatic
 {
-enum SolenoidState
+enum DoubleSolenoidState
 {
     OFF,
-    EXTENDED
+    EXTENDED,
+    RETRACTED
 };
 /**
  * A class for controlling a solenoid using GPIO pins.
  */
-class GpioSolenoid
+class GpioDoubleSolenoid
 {
 public:
-    GpioSolenoid(
+    GpioDoubleSolenoid(
         tap::Drivers* drivers,
-        tap::gpio::Digital::OutputPin extendPin);
+        tap::gpio::Digital::OutputPin extendPin,
+        tap::gpio::Digital::OutputPin retractPin);
 
     void extend();
-
+    void retract();
     void off();
-
-    SolenoidState getState() { return state; }
+    DoubleSolenoidState getState() { return state; }
 
 private:
     tap::Drivers* drivers;
-    tap::gpio::Digital::OutputPin extendPin;
-    SolenoidState state;
+    GpioSolenoid extensionSolenoid;
+    GpioSolenoid retractionSolenoid;
+    DoubleSolenoidState state;
 };
 }  // namespace aruwsrc::control::pneumatic
 
