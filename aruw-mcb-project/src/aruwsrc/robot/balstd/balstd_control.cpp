@@ -58,6 +58,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
@@ -313,15 +314,15 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
-// cv::TurretCVCommand turretCVCommand(
-//     &drivers()->visionCoprocessor,
-//     &drivers()->controlOperatorInterface,
-//     &turret,
-//     &worldFrameYawTurretImuControllerCv,
-//     &worldFramePitchTurretImuControllerCv,
-//     &ballisticsSolver,
-//     USER_YAW_INPUT_SCALAR,
-//     USER_PITCH_INPUT_SCALAR);
+cv::TurretCVCommand turretCVCommand(
+    &drivers()->visionCoprocessor,
+    &drivers()->controlOperatorInterface,
+    &turret,
+    &worldFrameYawTurretImuControllerCv,
+    &worldFramePitchTurretImuControllerCv,
+    &ballisticsSolver,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
 
 aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
