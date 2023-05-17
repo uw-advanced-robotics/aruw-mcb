@@ -93,6 +93,7 @@
 #include "sentry_transforms.hpp"
 #include "sentry_auto_aim_launch_timer.hpp"
 #include "sentry_minor_cv_on_target_governor.hpp"
+#include "sentry_beyblade_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -546,6 +547,15 @@ aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &sentryDrive);
+
+
+// Chassis beyblade
+aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
+    drivers(),
+    &sentryDrive,
+    &turretMajor.yawMotor,
+    drivers()->controlOperatorInterface
+);
 
 // Turret major control manual
 aruwsrc::control::turret::sentry::TurretMajorSentryControlCommand turretMajorControlCommand(
