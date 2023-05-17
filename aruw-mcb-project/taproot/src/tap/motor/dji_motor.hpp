@@ -114,6 +114,12 @@ public:
 
     uint16_t getEncoderWrapped() const override;
 
+    /**
+     * Resets this motor's current encoder home position to the current encoder position reported by
+     * CAN messages, and resets this motor's encoder revolutions to 0.
+     */
+    void resetEncoderValue() override;
+
     DISALLOW_COPY_AND_ASSIGN(DjiMotor)
 
     /**
@@ -229,8 +235,8 @@ private:
     bool motorInverted;
 
     /**
-     * The raw encoder value reported by the motor controller. It wraps around from
-     * {0..8191}, hence "Wrapped"
+     * The raw encoder value reported by the motor controller relative to
+     * encoderHomePosition. It wraps around from {0..8191}, hence "Wrapped"
      */
     uint16_t encoderWrapped;
 
@@ -242,6 +248,12 @@ private:
      * arbitrary.
      */
     int64_t encoderRevolutions;
+
+    /**
+     * The actual encoder wrapped value received from CAN messages where this motor
+     * is considered to have an encoder value of 0. encoderHomePosition is 0 by default.
+     */
+    uint16_t encoderHomePosition;
 
     tap::arch::MilliTimeout motorDisconnectTimeout;
 };

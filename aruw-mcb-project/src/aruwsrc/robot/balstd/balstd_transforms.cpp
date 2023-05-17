@@ -53,6 +53,9 @@ void Transformer::updateTransforms()
         chassis.getChassisOrientationWorldRelative().element[2]);
 
     chassisPositionWorldFrame += chassisVelocityWorldFrame * (dt / 1'000);
+
+    turretToChassis = chassisToTurret.getInverse();
+    chassisToWorld = worldToChassis.getInverse();
 }
 
 }  // namespace aruwsrc::balstd::transforms
