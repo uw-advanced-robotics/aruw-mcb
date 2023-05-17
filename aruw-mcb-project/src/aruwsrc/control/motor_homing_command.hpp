@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,6 +19,7 @@
 #ifndef MOTOR_HOMING_COMMAND_HPP_
 #define MOTOR_HOMING_COMMAND_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -30,10 +31,10 @@ namespace aruwsrc::control
  * A command whose job is to locate and set the upper and lower bounds of the motor in a homeable
  * subsystem. When this command is scheduled, it performs the following actions:
  * 1. Command the motor to move toward its lower bound.
- * 2. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * 2. Constantly detect the motion of the motor until it stalls. Then, set the lower
  * bound to its position at this point.
  * 3. Command the motor to move in the opposite direction.
- * 4. Constantly detect the motion of the motor and determine when it stalls. Then, set the lower
+ * 4. Constantly detect the motion of the motor and until it stalls. Then, set the lower
  * bound to its position at this point.
  * 5. At this point, the motor homing is complete. End the command.
  */
@@ -45,10 +46,11 @@ public:
      */
     enum class HomingState
     {
+        DEBUG_NOT_YET_SCHEDULED,
         /** While in this state, the motor is commanded to move toward the lower bound. */
-        INITIATE_MOVE_TOWARD_LOWER_BOUND,
+        MOVING_TOWARD_LOWER_BOUND,
         /** While in this state, the motor is commanded to move toward the upper bound. */
-        INITIATE_MOVE_TOWARD_UPPER_BOUND,
+        MOVING_TOWARD_UPPER_BOUND,
         /** While in this state, the motor homing is completed. */
         HOMING_COMPLETE
     };
@@ -67,9 +69,14 @@ public:
 
     void end(bool interrupt) override;
 
+    const char* getName() const override { return "motor homing"; };
+
 private:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
     HomingState homingState;
+
+    tap::arch::MilliTimeout calibrationTimer;
+
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control
 #endif

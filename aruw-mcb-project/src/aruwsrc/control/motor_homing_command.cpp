@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,35 +21,34 @@
 
 namespace aruwsrc::control
 {
-/**
- * A command that homes a homeable subystem by finding and setting its upper and lower bound.
- */
+
 void MotorHomingCommand::initialize()
 {
-    subsystem.setMotorVelocity(-subsystem.getHomingMotorOutput());
-    homingState = HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND;
+    subsystem.moveTowardLowerBound();
+    homingState = HomingState::MOVING_TOWARD_LOWER_BOUND;
 }
 
 void MotorHomingCommand::execute()
 {
     switch (homingState)
     {
-        case (HomingState::INITIATE_MOVE_TOWARD_LOWER_BOUND):
+        case (HomingState::MOVING_TOWARD_LOWER_BOUND):
         {
             if (subsystem.isStalled())
             {
                 subsystem.setLowerBound();
-                subsystem.setMotorVelocity(subsystem.getHomingMotorOutput());
-                homingState = HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND;
+                subsystem.moveTowardUpperBound();
+                homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
+                calibrationTimer.restart(1000);
             }
             break;
         }
-        case (HomingState::INITIATE_MOVE_TOWARD_UPPER_BOUND):
+        case (HomingState::MOVING_TOWARD_UPPER_BOUND):
         {
-            if (subsystem.isStalled())
+            if (calibrationTimer.isExpired() && subsystem.isStalled())
             {
                 subsystem.setUpperBound();
-                subsystem.setMotorVelocity(0);
+                subsystem.stop();
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;
@@ -61,11 +60,12 @@ void MotorHomingCommand::execute()
     }
 }
 
-void MotorHomingCommand::end(bool) { subsystem.setMotorVelocity(0); }
-
 bool MotorHomingCommand::isFinished() const
 {
     return (homingState == HomingState::HOMING_COMPLETE);
 }
+
+void MotorHomingCommand::end(bool) { subsystem.stop(); }
+
 
 }  // namespace aruwsrc::control

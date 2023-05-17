@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -24,6 +24,18 @@
 
 namespace aruwsrc::control
 {
+
+struct HomingConfig {
+    /**Mininum rpm value at which to detect a stall (should be negative)*/
+    int16_t minRPM;
+    /**Maximum rpm value at which to detect a stall (should be positive)*/
+    int16_t maxRPM;
+    /**Minimum torque at which to not detect a stall (should be negative)*/
+    int16_t minTorque;
+    /**Maximum torque value at which to not detect a stall (should be positive)*/ 
+    int16_t maxTorque;
+};
+
 /**
  * Interface for finding the bounds of a homeable subsystem.
  *
@@ -34,17 +46,21 @@ class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
     HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
-    /**
-     * Sets the velocity of the motor of this homeable subsystem's axis.
-     *
-     * @param[in] velocity The desired velocity of the motor to be set.
-     */
-    virtual void setMotorVelocity(int32_t velocity) = 0;
 
     /**
-     * @return the velocity at which the motor moves toward its bounds.
-     */
-    virtual int32_t getHomingMotorOutput() = 0;
+     * Moves the motor on the homeeable axis towards its upper mechanical limit.
+    */
+    virtual void moveTowardUpperBound() = 0;
+
+    /**
+     * Moves the motor on the homeable axis towards its lower mechanical limit.
+    */
+    virtual void moveTowardLowerBound() = 0;
+    
+    /**
+     * Stops the motor on the homeable axis.
+    */
+    virtual void stop() = 0;
 
     /**
      * Detects whether the subsystem's motor is stalled, indicating that it has reached a hard stop.
