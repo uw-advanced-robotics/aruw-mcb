@@ -60,7 +60,8 @@ DjiMotor::DjiMotor(
       torque(0),
       motorInverted(isInverted),
       encoderWrapped(encoderWrapped),
-      encoderRevolutions(encoderRevolutions)
+      encoderRevolutions(encoderRevolutions),
+      encoderHomePosition(0)
 {
     motorDisconnectTimeout.stop();
 }
@@ -90,7 +91,12 @@ void DjiMotor::processMessage(const modm::can::Message& message)
 
     // invert motor if necessary
     encoderActual = motorInverted ? ENC_RESOLUTION - 1 - encoderActual : encoderActual;
-    updateEncoderValue(encoderActual);
+
+    int32_t encoderRelativeToHome = (int32_t)encoderActual - (int32_t)encoderHomePosition;
+
+    updateEncoderValue(
+        encoderRelativeToHome < 0 ? (int32_t)ENC_RESOLUTION + encoderRelativeToHome
+                                  : encoderRelativeToHome);
 }
 
 void DjiMotor::setDesiredOutput(int32_t desiredOutput)
@@ -145,6 +151,13 @@ int64_t DjiMotor::getEncoderUnwrapped() const
 }
 
 uint16_t DjiMotor::getEncoderWrapped() const { return encoderWrapped; }
+
+void DjiMotor::resetEncoderValue()
+{
+    encoderRevolutions = 0;
+    encoderHomePosition = (encoderWrapped + encoderHomePosition) % ENC_RESOLUTION;
+    encoderWrapped = 0;
+}
 
 float DjiMotor::getPositionUnwrapped() const
 {

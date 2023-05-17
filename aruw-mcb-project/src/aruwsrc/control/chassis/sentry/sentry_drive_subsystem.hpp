@@ -94,11 +94,6 @@ public:
 
     inline int getNumChassisMotors() const override { return NUM_CHASSIS_MOTORS; }
 
-    inline int16_t getLeftFrontRpmActual() const { return leftWheel.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const { return 0; }
-    inline int16_t getRightFrontRpmActual() const { return 0; }
-    inline int16_t getRightBackRpmActual() const { return 0; }
-
     inline bool allMotorsOnline() const override
     {
         bool allOnline = true;
