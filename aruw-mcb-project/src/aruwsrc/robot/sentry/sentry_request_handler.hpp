@@ -54,29 +54,29 @@ public:
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
 
-    void attachSelectNewRobotMessageHandler(MessageReceivedCallback callback)
+    void attachNoMotionStrategyMessageHandler(MessageReceivedCallback callback)
     {
-        selectNewRobotMessageHandler = callback;
+        noStrategyHandler = callback;
     }
-    void attachTargetNewQuadrantMessageHandler(MessageReceivedCallback callback)
+    void attachGoToFriendlyBaseMessageHandler(MessageReceivedCallback callback)
     {
-        targetNewQuadrantMessageHandler = callback;
+        goToFriendlyBaseHandler = callback;
     }
-    void attachToggleDriveMovementMessageHandler(MessageReceivedCallback callback)
+    void attachGoToEnemyBaseMessagehandler(MessageReceivedCallback callback)
     {
-        toggleDriveMovementMessageHandler = callback;
+        goToEnemyBaseHandler = callback;
     }
-    void attachPauseProjectileLaunchingMessageHandler(MessageReceivedCallback callback)
+    void attachGoToSupplierZoneMessageHandler(MessageReceivedCallback callback)
     {
-        pauseProjectileLaunchingHandler = callback;
+        goToSupplierZoneHandler = callback;
     }
 
 private:
     tap::Drivers *drivers;
-    MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
-    MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
-    MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;
-    MessageReceivedCallback pauseProjectileLaunchingHandler = nullptr;
+    MessageReceivedCallback noStrategyHandler = nullptr;
+    MessageReceivedCallback goToFriendlyBaseHandler = nullptr;
+    MessageReceivedCallback goToEnemyBaseHandler = nullptr;
+    MessageReceivedCallback goToSupplierZoneHandler = nullptr;
 };
 }  // namespace aruwsrc::communication::serial
 

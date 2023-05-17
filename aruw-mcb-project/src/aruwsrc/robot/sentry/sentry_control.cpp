@@ -88,6 +88,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
 
 #include "sentry_transform_constants.hpp"
 #include "sentry_transforms.hpp"

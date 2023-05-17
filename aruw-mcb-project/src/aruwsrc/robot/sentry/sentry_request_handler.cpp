@@ -37,28 +37,28 @@ void SentryRequestHandler::operator()(
 
     switch (type)
     {
-        case SentryMotionStrategyMessages::SELECT_NEW_ROBOT:
-            if (selectNewRobotMessageHandler != nullptr)
+        case SentryMotionStrategyMessages::NONE:
+            if (noStrategyHandler != nullptr)
             {
-                selectNewRobotMessageHandler();
+                noStrategyHandler();
             }
             break;
-        case SentryMotionStrategyMessages::TARGET_NEW_QUADRANT:
-            if (targetNewQuadrantMessageHandler != nullptr)
+        case SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE:
+            if (goToFriendlyBaseHandler != nullptr)
             {
-                targetNewQuadrantMessageHandler();
+                goToFriendlyBaseHandler();
             }
             break;
-        case SentryMotionStrategyMessages::TOGGLE_DRIVE_MOVEMENT:
-            if (toggleDriveMovementMessageHandler != nullptr)
+        case SentryMotionStrategyMessages::GO_TO_ENEMY_BASE:
+            if (goToEnemyBaseHandler != nullptr)
             {
-                toggleDriveMovementMessageHandler();
+                goToEnemyBaseHandler();
             }
             break;
-        case SentryMotionStrategyMessages::PAUSE_PROJECTILE_LAUNCHING:
-            if (pauseProjectileLaunchingHandler != nullptr)
+        case SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE:
+            if (goToSupplierZoneHandler != nullptr)
             {
-                pauseProjectileLaunchingHandler();
+                goToSupplierZoneHandler();
             }
             break;
         default:
