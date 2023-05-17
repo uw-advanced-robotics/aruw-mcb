@@ -36,6 +36,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -216,6 +217,20 @@ aruwsrc::chassis::BalancingChassisSubsystem chassis(
     turret.yawMotor,
     legLeft,
     legRight);
+
+aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem odometryTracker(
+    drivers(),
+    &turret,
+    &chassis);
+
+// Ballistics Solver
+aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
+    &drivers()->visionCoprocessor,
+    &odometryTracker,
+    &turret,
+    &frictionWheels,
+    14.0, // defaultLaunchSpeed
+    0);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
