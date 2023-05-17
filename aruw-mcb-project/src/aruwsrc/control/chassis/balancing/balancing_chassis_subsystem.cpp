@@ -79,7 +79,6 @@ void BalancingChassisSubsystem::refresh()
 
     // 4. run outputs
     float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
-    float rollAdjustment = 0;
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
     rightLeg.setDesiredHeight(

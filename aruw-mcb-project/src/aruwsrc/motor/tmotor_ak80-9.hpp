@@ -112,6 +112,11 @@ public:
      */
     uint16_t getEncoderWrapped() const override;
 
+    /**
+     * Resets the motor encoder value.
+    */
+    void resetEncoderValue() override { sendPositionHomeResetMessage(); }
+
     /***
      * @returns Angular position of motor, unwrapped, in radians.
      */

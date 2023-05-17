@@ -145,7 +145,7 @@ inline CMSISMat<ROWS, COLS> operator-(const CMSISMat<ROWS, COLS> &a)
 {
     float scale(-1);
     CMSISMat<ROWS, COLS> c;
-    assert(ARM_MATH_SUCCESS == arm_mat_scale_f32(&a.matrix, &scale, &c.matrix));
+    assert(ARM_MATH_SUCCESS == arm_mat_scale_f32(&a.matrix, scale, &c.matrix));
     return c;
 }
 
