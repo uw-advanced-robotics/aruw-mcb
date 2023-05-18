@@ -22,11 +22,11 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruw-mcb-project/src/aruwsrc/control/pneumatic/gpio_solenoid.hpp"
+#include "gpio_solenoid.hpp"
 
 namespace aruwsrc::control::pneumatic
 {
-enum DoubleSolenoidState
+enum class DoubleSolenoidState
 {
     OFF,
     EXTENDED,

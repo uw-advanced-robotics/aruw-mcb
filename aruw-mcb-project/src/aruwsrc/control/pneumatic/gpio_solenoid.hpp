@@ -24,7 +24,7 @@
 
 namespace aruwsrc::control::pneumatic
 {
-enum SolenoidState
+enum class SolenoidState
 {
     OFF,
     EXTENDED
