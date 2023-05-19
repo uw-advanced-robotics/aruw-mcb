@@ -40,25 +40,25 @@ void SentryRequestHandler::operator()(
         case SentryMotionStrategyMessages::NONE:
             if (noStrategyHandler != nullptr)
             {
-                noStrategyHandler();
+                noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
         case SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE:
             if (goToFriendlyBaseHandler != nullptr)
             {
-                goToFriendlyBaseHandler();
+                goToFriendlyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
         case SentryMotionStrategyMessages::GO_TO_ENEMY_BASE:
             if (goToEnemyBaseHandler != nullptr)
             {
-                goToEnemyBaseHandler();
+                goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
         case SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
-                goToSupplierZoneHandler();
+                goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
         default:

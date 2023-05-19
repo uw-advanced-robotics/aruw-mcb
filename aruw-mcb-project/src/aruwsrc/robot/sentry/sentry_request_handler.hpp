@@ -48,25 +48,29 @@ class SentryRequestHandler
 {
 public:
     using MessageReceivedCallback = void (*)();
+    // using MessageReceivedCallback = void (*)(SentryMotionStrategyMessages);
 
     SentryRequestHandler(tap::Drivers *drivers);
 
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
 
-    void attachNoMotionStrategyMessageHandler(MessageReceivedCallback callback)
+    void attachNoStrategyHandler(MessageReceivedCallback callback)
     {
         noStrategyHandler = callback;
     }
-    void attachGoToFriendlyBaseMessageHandler(MessageReceivedCallback callback)
+
+    void attachGoToFriendlyBaseHandler(MessageReceivedCallback callback)
     {
         goToFriendlyBaseHandler = callback;
     }
-    void attachGoToEnemyBaseMessagehandler(MessageReceivedCallback callback)
+
+    void attachGoToEnemyBaseHandler(MessageReceivedCallback callback)
     {
         goToEnemyBaseHandler = callback;
     }
-    void attachGoToSupplierZoneMessageHandler(MessageReceivedCallback callback)
+
+    void attachGoToSupplierZoneHandler(MessageReceivedCallback callback)
     {
         goToSupplierZoneHandler = callback;
     }

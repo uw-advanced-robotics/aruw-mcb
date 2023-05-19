@@ -89,6 +89,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
+#include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
 
 #include "sentry_transform_constants.hpp"
 #include "sentry_transforms.hpp"
@@ -125,6 +126,8 @@ namespace sentry_control
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
+
+aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
 /* define swerve motors --------------------------------------------------------*/
 
@@ -521,6 +524,19 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
 /* define commands ----------------------------------------------------------*/
+void sendNoMotionSstrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::NONE); 
+}
+void sendGoToFriendlyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE); 
+}
+void sendGoToEnemyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_ENEMY_BASE); 
+}
+void sendGoToSupplierZoneStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE); 
+}
+
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -896,11 +912,10 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-
-    // sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-    // // //     pauseProjectileLaunchMessageHandler);
-    // // sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
-    // sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionSstrategy);
+    sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
+    sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
+    sentryRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
 }
 
 /* register io mappings here ------------------------------------------------*/

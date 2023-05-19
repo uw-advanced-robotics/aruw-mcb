@@ -32,6 +32,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -52,7 +53,7 @@ class VisionCoprocessor : public tap::communication::serial::DJISerial
 {
 public:
 #ifndef PLATFORM_HOSTED
-    using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
+    // using TimeSyncTriggerPin = modm::platform::GpioI0;  ///< Pin "A" as labeled on the type A board
 #endif
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");  // is there a better place for this static assert??
@@ -203,6 +204,7 @@ public:
     } modm_packed;
 
 
+
     // TODO: this a temp variable
     float lastTurretGirlBossSentPitch;
     float lastTurretMalewifeSentPitch;
@@ -280,10 +282,11 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
-    static inline void handleTimeSyncRequest()
-    {
-        visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
-    }
+    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages strategy);
+    // static inline void handleTimeSyncRequest()
+    // {
+    //     visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
+    // }
 
 private:
 
@@ -299,7 +302,7 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
+        CV_MESSAGE_TYPES_MOTION_STRATEGY = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
     };
 
@@ -318,7 +321,7 @@ private:
     static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
 
     /** Time in ms between sending the time sync message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
+    // static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
     /// Time in ms between sending referee real time message.
     static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 5'000;
@@ -350,7 +353,7 @@ private:
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
+    // tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
 
@@ -379,7 +382,6 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
 };
 }  // namespace serial
 }  // namespace aruwsrc

@@ -39,8 +39,8 @@ VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
 MODM_ISR(EXTI0)
 {
     // Currently the EXTI0 interrupt handler is only used by the time sync pin
-    VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
-    VisionCoprocessor::handleTimeSyncRequest();
+    // VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
+    // VisionCoprocessor::handleTimeSyncRequest();
 }
 #endif
 
@@ -147,7 +147,7 @@ void VisionCoprocessor::sendMessage()
     sendRefereeRealtimeData();
     sendRefereeCompetitionResult();
     sendRefereeWarning();
-    sendTimeSyncMessage();
+    // sendTimeSyncMessage();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -363,27 +363,37 @@ void VisionCoprocessor::sendRefereeWarning()
     }
 }
 
-void VisionCoprocessor::sendTimeSyncMessage()
-{
-    uint32_t newRisingEdgeTime = risingEdgeTime;
+// void VisionCoprocessor::sendTimeSyncMessage()
+// {
+//     uint32_t newRisingEdgeTime = risingEdgeTime;
 
-    if (prevRisingEdgeTime != newRisingEdgeTime)
-    {
-        prevRisingEdgeTime = newRisingEdgeTime;
+//     if (prevRisingEdgeTime != newRisingEdgeTime)
+//     {
+//         prevRisingEdgeTime = newRisingEdgeTime;
 
-        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
+//         DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
 
-        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
+//         timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
 
-        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
-        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
-        timeSyncResponseMessage.setCRC16();
+//         *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
+//         *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
+//         timeSyncResponseMessage.setCRC16();
 
-        drivers->uart.write(
-            VISION_COPROCESSOR_TX_UART_PORT,
-            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-            sizeof(timeSyncResponseMessage));
-    }
+//         drivers->uart.write(
+//             VISION_COPROCESSOR_TX_UART_PORT,
+//             reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
+//             sizeof(timeSyncResponseMessage));
+//     }
+// }
+void VisionCoprocessor::sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages strategy) {
+    DJISerial::SerialMessage<1> motionStrategyMessage;
+    motionStrategyMessage.messageType = CV_MESSAGE_TYPES_MOTION_STRATEGY;
+    motionStrategyMessage.data[0] = static_cast<uint8_t>(strategy);
+    motionStrategyMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&motionStrategyMessage),
+        sizeof(motionStrategyMessage));
 }
 
 void VisionCoprocessor::sendSelectNewTargetMessage()
