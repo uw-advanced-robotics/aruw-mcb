@@ -35,7 +35,7 @@ namespace aruwsrc::control
 {
 
 static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
-static constexpr int16_t MOTOR_POSITION_TOLERANCE = 10000;
+static constexpr int16_t MOTOR_POSITION_TOLERANCE = 3000;
 
 struct StallThresholdConfig {
     /**Maximum rpm value at which to detect a stall*/
@@ -77,7 +77,17 @@ private:
     int16_t shaftRPMDebug;
     bool stalled;
 
+    /**
+     * True if the barrels are in position to shoot, false otherwise (e.g. 
+     * the barrel is moving to switch)
+    */
     bool inPosition;
+
+    /**
+     * The position of where the barrel-switching motor last stalled, to use
+     * for keeping the barrel in firing position
+    */
+    int16_t desiredPosition;
 
     /**
      * Stores the state of this barrel switcher's state,

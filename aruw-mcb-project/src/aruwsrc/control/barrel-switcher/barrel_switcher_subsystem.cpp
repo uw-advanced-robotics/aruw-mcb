@@ -52,22 +52,37 @@ void BarrelSwitcherSubsystem::refresh()
     switch (barrelState)
     {
         case BarrelState::USING_LEFT_BARREL:
-            if (!isStalled() && !inPosition) {
+            if (!isStalled() && !inPosition &&
+                motor.getEncoderUnwrapped() > desiredPosition + MOTOR_POSITION_TOLERANCE) {
                 setMotorOutput(-MOTOR_OUTPUT);
             } else {
+                if (isStalled()) {
+                    desiredPosition = motor.getEncoderUnwrapped();
+                }
                 inPosition = true;
+                if (motor.getEncoderUnwrapped() > desiredPosition + MOTOR_POSITION_TOLERANCE) {
+                    inPosition = false;
+                }
                 setMotorOutput(0);
             }
             break;
         case BarrelState::USING_RIGHT_BARREL:
-            if (!isStalled() && !inPosition) {
+            if (!isStalled() && !inPosition &&
+                motor.getEncoderUnwrapped() < desiredPosition - MOTOR_POSITION_TOLERANCE) {
                 setMotorOutput(MOTOR_OUTPUT);
             } else {
+                if (isStalled()) {
+                    desiredPosition = motor.getEncoderUnwrapped();
+                }
                 inPosition = true;
+                if (motor.getEncoderUnwrapped() < desiredPosition - MOTOR_POSITION_TOLERANCE) {
+                    inPosition = false;
+                }
                 setMotorOutput(0);
             }
             break;
         case BarrelState::IDLE:
+            setMotorOutput(0);
             inPosition = false;
             break;
     }
@@ -90,12 +105,14 @@ bool BarrelSwitcherSubsystem::isStalled() const
 void BarrelSwitcherSubsystem::useRight()
 {
     barrelState = BarrelState::USING_RIGHT_BARREL;
+    desiredPosition = SHRT_MAX;
     inPosition = false;
 }
 
 void BarrelSwitcherSubsystem::useLeft()
 {
     barrelState = BarrelState::USING_LEFT_BARREL;
+    desiredPosition = SHRT_MIN;
     inPosition = false;
 }
 
