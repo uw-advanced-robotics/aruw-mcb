@@ -20,11 +20,11 @@
 #ifndef ROBOT_CONTROL_HPP_
 #define ROBOT_CONTROL_HPP_
 
-#include "aruwsrc/robot/drone/drone_drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
-#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
-#include "aruwsrc/robot/standard/standard_drivers.hpp"
+// #include "aruwsrc/robot/drone/drone_drivers.hpp"
+// #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+// #include "aruwsrc/robot/hero/hero_drivers.hpp"
+// #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
+// #include "aruwsrc/robot/standard/standard_drivers.hpp"
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
@@ -37,10 +37,20 @@ namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
+#include "aruwsrc/robot/dart/dart_control.cpp"
+#include "aruwsrc/robot/dart/dart_drivers.hpp"
 namespace aruwsrc::dart
 #endif
 {
-void initSubsystemCommands(Drivers *drivers);
+void initSubsystemCommands(Drivers *drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(&remoteSafeDisconnectFunction);
+    initializeSubsystems();
+    registerDartSubsystems(drivers);
+    setDefaultDartCommands(drivers);
+    startDartCommands(drivers);
+    registerDartIoMappings(drivers);
+}
 }  // namespace tbh whatever you want it to be
 
 #endif  // ROBOT_CONTROL_HPP_

@@ -34,7 +34,9 @@ using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
-using namespace aruwsrc::dart;
+
+namespace aruwsrc::dart
+{
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -44,8 +46,6 @@ using namespace aruwsrc::dart;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace dart_control
-{
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
@@ -95,20 +95,6 @@ void startDartCommands(Drivers* drivers) { drivers->commandScheduler.addCommand(
 
 void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
 
-}  // namespace dart_control
-
-namespace aruwsrc::dart
-{
-void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
-{
-    drivers->commandScheduler.setSafeDisconnectFunction(
-        &dart_control::remoteSafeDisconnectFunction);
-    dart_control::initializeSubsystems();
-    dart_control::registerDartSubsystems(drivers);
-    dart_control::setDefaultDartCommands(drivers);
-    dart_control::startDartCommands(drivers);
-    dart_control::registerDartIoMappings(drivers);
-}
 }  // namespace aruwsrc::dart
 
 #endif
