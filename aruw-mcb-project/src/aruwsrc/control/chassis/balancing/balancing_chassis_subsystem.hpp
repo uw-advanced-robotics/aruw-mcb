@@ -103,8 +103,8 @@ public:
 
     inline void setFallen()
     {
-        leftLeg.isFallen = true;
-        rightLeg.isFallen = true;
+        leftLeg.setBalancingState(FALLEN_MOVING);
+        rightLeg.setBalancingState(FALLEN_MOVING);
     }
 
     /**

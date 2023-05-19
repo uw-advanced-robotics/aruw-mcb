@@ -35,6 +35,22 @@ namespace aruwsrc
 {
 namespace chassis
 {
+
+/**
+ * if BALANCING -> run LQR controller for wheel outputs, if it falls, go to FALLEN_MOVING
+ * if FALLEN_MOVING -> tell it to stop, if stopped, go to FALLEN_NOT_MOVING
+ * if FALLEN_NOT_MOVING && GETUP ENABLE -> go to STANDING UP
+ * if STANDING_UP, run feedforward getupper, if it's within unfalling, goto BALANCING
+ *
+ */
+enum BalancingState
+{
+    BALANCING = 0,
+    FALLEN_MOVING,
+    FALLEN_NOT_MOVING,
+    STANDING_UP,
+};
+
 /**
  * Wrapper class for a mechanism that uses a five-bar linkage
  * with links grounded on a robot chassis and a wheel motor
@@ -67,6 +83,10 @@ public:
         const SmoothPidConfig driveWheelPidConfig);
 
     void initialize();
+
+    inline void setBalancingState(BalancingState state) { balancingState = state; }
+
+    inline BalancingState getBalancingState() { return balancingState; }
 
     /**
      * @param[in] height: (mm) Setpoint for chassis height.
@@ -152,13 +172,10 @@ public:
     inline void disarmLeg()
     {
         armed = false;
-        isFallen = true;
+        balancingState = FALLEN_MOVING;
     };
-    inline void toggleArm(){armed ? disarmLeg() : armLeg();};
+    inline void toggleArm() { armed ? disarmLeg() : armLeg(); };
     inline bool getArmState() { return armed; };
-
-    // represents if the robot has falled over, and to retract the legs if so
-    bool isFallen = true;
 
 private:
     tap::Drivers* drivers;
@@ -167,11 +184,23 @@ private:
      */
     aruwsrc::can::TurretMCBCanComm& chassisMCB;
 
+    BalancingState balancingState = FALLEN_NOT_MOVING;
+    tap::arch::MilliTimeout balanceAttemptTimeout;
+    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
+    bool standupEnable = true;
+    float STANDUP_TORQUE_GAIN = 100;
+
     /**
      * @param[in] dt (us)
      */
     void computeState(uint32_t dt);
 
+    void updateBalancing(uint32_t dt);
+    void updateFallenMoving(uint32_t dt);
+    void updateFallenNotMoving(uint32_t dt);
+    void updateStandingUp(uint32_t dt);
+
+    void setLegsRetracted();
     /**
      * @brief Heuristic to determing if the robot is in a fallen state, with hysteresis to avoid
      * oscillation. Sets the `isFallen` flag accordingly.
@@ -233,6 +262,8 @@ private:
     float zDesired,                                       // (m) world-frame height of the chassis
         zCurrent = fivebar->getDefaultPosition().getY();  // (m)
 
+    modm::Vector2f desiredWheelLocation;
+
     float vDesired;  // (m/s) world-frame leg speed in the x-direciton
     float vDesiredPrev;
     float vCurrent;      // (m/s)
@@ -277,7 +308,7 @@ private:
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 5;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

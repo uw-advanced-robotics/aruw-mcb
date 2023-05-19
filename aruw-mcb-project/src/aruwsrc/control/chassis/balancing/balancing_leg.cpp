@@ -68,31 +68,37 @@ void BalancingLeg::update()
     computeState(dt);
 
     /* 2. Compute Setpoints */
+    switch (balancingState)
+    {
+        case BALANCING:
+            updateBalancing(dt);
+        case FALLEN_MOVING:
+            updateFallenMoving(dt);
+        case FALLEN_NOT_MOVING:
+            updateFallenNotMoving(dt);
+        case STANDING_UP:
+            updateStandingUp(dt);
+    };
+    zDesRamper.setTarget(desiredWheelLocation.getY());
+    zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
+    desiredWheelLocation.setY(limitVal(zDesRamper.getValue(), -.35f, -.1f));
 
-    modm::Vector2f desiredWheelLocation = modm::Vector2f(0, 0.115);
-    float desiredWheelAngle = 0;
+    fivebar->setDesiredPosition(desiredWheelLocation);
+    fivebar->refresh();
+    fivebarController(dt / 1000);
+}
 
-    desiredWheelAngle -=
-        fivebar->getCurrentPosition().getOrientation() - motorLinkAnglePrev;  // subtract
-    motorLinkAnglePrev = fivebar->getCurrentPosition().getOrientation();
-
+void BalancingLeg::updateBalancing(uint32_t dt)
+{
+    desiredWheelLocation = fivebar->getDefaultPosition();
     xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
     // xoffset = .00;
-    float tl_desired = atan2(-xoffset, -zCurrent);
-    tl_desired = 0;
 
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
-    if (!isFallen)
-    {
-        desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
-        desiredWheelLocation.setY(limitVal(desiredz, -.35f, -.1f));
-    }
-    else
-    {
-        desiredWheelLocation.setX(fivebar->getDefaultPosition().getX());
-        desiredWheelLocation.setY(fivebar->getDefaultPosition().getY());
-    }
+
+    desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
+    desiredWheelLocation.setY(limitVal(desiredz, -.35f, -.1f));
 
     float LQR_K2 = HEIGHT_TO_LQR_K2_INTERPOLATOR.interpolate(-zCurrent);
     float LQR_K3 = HEIGHT_TO_LQR_K3_INTERPOLATOR.interpolate(-zCurrent);
@@ -102,10 +108,9 @@ void BalancingLeg::update()
     float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
     float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
-    // float lqrPitch = -38 * deadZone(tl - tl_desired, modm::toRadian(.05));
-    // float lqrPitchRate = -6.3527 * deadZone(tl_dot, .2f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
+
     float wheelTorque = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
 
     debug1 = lqrPos;
@@ -118,27 +123,59 @@ void BalancingLeg::update()
     wheelTorque = limitVal(wheelTorque, -3.0f, 3.0f);
     // 3. Send New Output Values
     int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;  // convert from Torque to output
-    // int32_t driveWheelOutput = wheelCurrent * 16384 / 20;  // convert from i to output
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     debug7 = driveWheelOutput;
-    if (armed && !isFallen)
+    driveWheel->setDesiredOutput(driveWheelOutput);
+    if (abs(chassisAngle) > abs(FALLEN_ANGLE_THRESHOLD))
     {
-        driveWheel->setDesiredOutput(driveWheelOutput);
+        balancingState = FALLEN_MOVING;
     }
-    else
-    {
-        driveWheel->setDesiredOutput(0);
-        desiredWheelLocation = fivebar->getDefaultPosition();
-    }
-    zDesRamper.setTarget(desiredWheelLocation.getY());
-    zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
-    desiredWheelLocation.setY(limitVal(zDesRamper.getValue(), -.35f, -.1f));
-
-    fivebar->setDesiredPosition(desiredWheelLocation);
-    fivebar->refresh();
-    fivebarController(dt / 1000);
 }
+
+void BalancingLeg::updateFallenMoving(uint32_t dt)
+{
+    setLegsRetracted();
+    driveWheel->setDesiredOutput(0);
+    if (compareFloatClose(vCurrent, 0, .1))
+    {
+        balancingState = FALLEN_NOT_MOVING;
+    }
+}
+void BalancingLeg::updateFallenNotMoving(uint32_t dt)
+{
+    setLegsRetracted();
+    driveWheel->setDesiredOutput(0);
+
+    if (abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
+        abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
+    {
+        balancingState = BALANCING;
+    }
+    else if (standupEnable)
+    {
+        balanceAttemptTimeout.restart(BALANCE_ATTEMPT_TIMEOUT_DURATION);
+        balancingState = STANDING_UP;
+    }
+}
+void BalancingLeg::updateStandingUp(uint32_t dt)
+{
+    if (balanceAttemptTimeout.isExpired()) balancingState = FALLEN_MOVING;
+    setLegsRetracted();
+    // Use a P-controller to apply big torque until we get up
+    float standupTorque = chassisAngle * STANDUP_TORQUE_GAIN;
+    standupTorque = limitVal(standupTorque, -3.0f, 3.0f);
+    int32_t wheelOutput = (standupTorque / .3 * 16384 / 20);
+    driveWheel->setDesiredOutput(wheelOutput);
+
+    if (abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
+        abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
+    {
+        balancingState = BALANCING;
+    }
+}
+
+void BalancingLeg::setLegsRetracted() { desiredWheelLocation = fivebar->getDefaultPosition(); }
 
 void BalancingLeg::fivebarController(uint32_t dt)
 {
@@ -164,7 +201,7 @@ void BalancingLeg::fivebarController(uint32_t dt)
         motor2error,
         fivebar->getMotor2()->getShaftRPM() * M_TWOPI / 60,
         dt);
-    if (!isFallen && armed)
+    if (balancingState == BALANCING && armed)
     {
         motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
         // motor direction so minus
@@ -219,19 +256,7 @@ void BalancingLeg::computeState(uint32_t dt)
     iveFallenAndICantGetUp();
 }
 
-void BalancingLeg::iveFallenAndICantGetUp()
-{
-    if (abs(chassisAngle) > abs(FALLEN_ANGLE_THRESHOLD))
-    {
-        isFallen = true;
-    }
-    else if (
-        abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
-        abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
-    {
-        isFallen = false;
-    }
-}
+void BalancingLeg::iveFallenAndICantGetUp() {}
 
 }  // namespace chassis
 }  // namespace aruwsrc
