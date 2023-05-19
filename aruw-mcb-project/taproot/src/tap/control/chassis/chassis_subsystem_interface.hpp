@@ -51,6 +51,12 @@ public:
     virtual inline bool allMotorsOnline() const = 0;
 
     /**
+     * Callable function to zero all chassis output, designed to be overriden by different types of
+     * chassis.
+     */
+    virtual inline void stopChassis() = 0;
+
+    /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s

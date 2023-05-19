@@ -78,6 +78,8 @@ public:
      */
     mockable float getAbsolutePosition() const;
 
+    void stopChassis() { setDesiredRpm(0); }
+
     mockable void setDesiredRpm(float desRpm);
 
     mockable float getDesiredRpm();

@@ -73,6 +73,8 @@ public:
 
     void setDesiredOutput(float x, float y, float r) override;
 
+    void stopChassis() { setDesiredOutput(0, 0, 0); }
+
     void limitChassisPower() override;
 
     void refresh() override;
