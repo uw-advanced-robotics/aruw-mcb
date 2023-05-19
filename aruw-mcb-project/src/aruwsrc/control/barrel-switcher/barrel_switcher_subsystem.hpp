@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/barrel-switcher/homeable_subsystem_interface.hpp"
+#include "tap/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include <gmock/gmock.h>
@@ -34,39 +34,38 @@
 namespace aruwsrc::control
 {
 
-static constexpr int32_t HOMING_MOTOR_OUTPUT = SHRT_MAX * 3 / 5;
-static constexpr int16_t MOTOR_POSITION_TOLERANCE = 100;
+static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
+static constexpr int16_t MOTOR_POSITION_TOLERANCE = 10000;
+
+struct StallThresholdConfig {
+    /**Maximum rpm value at which to detect a stall*/
+    int16_t maxRPM;
+    /**Minimum torque value at which to not detect a stall*/ 
+    int16_t minTorque;
+};
 
 enum class BarrelState
 {
-    HOMING_TOWARD_LOWER_BOUND,
-    HOMING_TOWARD_UPPER_BOUND,
+    IDLE, //at a position that is neither left nor right barrel
     USING_LEFT_BARREL,
-    USING_RIGHT_BARREL,
-    IDLE //at a position that is neither left nor right barrel
+    USING_RIGHT_BARREL
 };
 
-class BarrelSwitcherSubsystem : public aruwsrc::control::HomeableSubsystemInterface
+class BarrelSwitcherSubsystem : public tap::control::Subsystem
 {
 public:
     BarrelSwitcherSubsystem(
         tap::Drivers* drivers,
-        aruwsrc::control::HomingConfig config,
+        aruwsrc::control::StallThresholdConfig config,
         tap::motor::MotorId motorid);
 
     void initialize() override;
     void refresh() override;
-    bool isStalled() const override;
-    /**
-     * detects whether a barrel in the dual-barrel system is not aligned with the valid 
-     * shooting position; used to determine when the system is able to shoot
-    */
-    bool isBetweenPositions() const;
-    void setLowerBound() override;
-    void setUpperBound() override;
-    void moveTowardUpperBound() override;
-    void moveTowardLowerBound() override;
-    void stop() override;
+    bool isStalled() const;
+    bool isInPosition() const {return inPosition;}
+    void useRight();
+    void useLeft();
+    void stop();
     BarrelState getBarrelState();
 
 private:
@@ -78,19 +77,7 @@ private:
     int16_t shaftRPMDebug;
     bool stalled;
 
-    /**
-     * upper bound for motor's encoder
-     * note: the lower bound is 0
-     */
-    int32_t motorUpperBound;
-
-    bool lowerBoundSet;
-    bool upperBoundSet;
-
-    /**
-     * Stores the motor's position along the axis
-     */
-    int32_t motorPosition;
+    bool inPosition;
 
     /**
      * Stores the state of this barrel switcher's state,
@@ -101,7 +88,7 @@ private:
     /**
      * stores the thresholds for shaftRPM and torque; used to indicate motor stall
      */
-    aruwsrc::control::HomingConfig config;
+    aruwsrc::control::StallThresholdConfig config;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

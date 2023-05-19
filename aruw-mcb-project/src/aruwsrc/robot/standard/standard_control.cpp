@@ -186,7 +186,7 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitcherSubsystem barrelSwitcher(drivers(), HOMING_CONFIG, tap::motor::MotorId::MOTOR8);
+BarrelSwitcherSubsystem barrelSwitcher(drivers(), STALL_THRESHOLD_CONFIG, tap::motor::MotorId::MOTOR8);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -279,8 +279,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuVelPidCv);
 
 #ifdef TARGET_STANDARD_SPIDER
-MotorHomingCommand motorHomingCommand(barrelSwitcher);
-BarrelSwitchCommand barrelSwitchCommand(barrelSwitcher);
+BarrelSwitchCommand barrelSwitchCommand(&barrelSwitcher);
 #endif
 
 // turret commands
@@ -475,11 +474,12 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
 
 PressCommandMapping leftMousePressedBPressed(
     drivers(),
-    {&barrelSwitchCommand},
+    {&chassisAutorotateCommand},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}));
+
 PressCommandMapping rightMousePressed(
     drivers(),
-    {&motorHomingCommand},
+    {},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
@@ -517,7 +517,7 @@ PressCommandMapping eNotQPressed(
     RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
 PressCommandMapping xPressed(
     drivers(),
-    {&chassisAutorotateCommand},
+    {&barrelSwitchCommand},
     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<

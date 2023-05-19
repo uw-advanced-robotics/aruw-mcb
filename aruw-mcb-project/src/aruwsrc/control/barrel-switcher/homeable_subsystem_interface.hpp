@@ -76,6 +76,8 @@ public:
      * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
      */
     virtual void setUpperBound() = 0;
+
+    virtual void resetBounds() = 0;
 };
 }  // namespace aruwsrc::control
 

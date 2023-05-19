@@ -21,16 +21,18 @@
 
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc::control
 {
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     tap::Drivers* drivers,
-    aruwsrc::control::HomingConfig config,
+    aruwsrc::control::StallThresholdConfig config,
     tap::motor::MotorId motorid)
-    : HomeableSubsystemInterface(drivers),
+    : Subsystem(drivers),
       config(config),
-      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
+      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor"),
+    inPosition(false)
 {
 }
 
@@ -46,29 +48,27 @@ void BarrelSwitcherSubsystem::refresh()
     torqueDebug = motor.getTorque();
     shaftRPMDebug = motor.getShaftRPM();
     stalled = this->isStalled();
+    
     switch (barrelState)
     {
-        case BarrelState::HOMING_TOWARD_LOWER_BOUND:
-            setMotorOutput(-HOMING_MOTOR_OUTPUT);
-            break;
-        case BarrelState::HOMING_TOWARD_UPPER_BOUND:
-            setMotorOutput(HOMING_MOTOR_OUTPUT);
-            break;
         case BarrelState::USING_LEFT_BARREL:
-            if (motor.getEncoderUnwrapped() > MOTOR_POSITION_TOLERANCE) {
-                setMotorOutput(-HOMING_MOTOR_OUTPUT);
+            if (!isStalled() && !inPosition) {
+                setMotorOutput(-MOTOR_OUTPUT);
             } else {
+                inPosition = true;
                 setMotorOutput(0);
             }
             break;
         case BarrelState::USING_RIGHT_BARREL:
-            if (motor.getEncoderUnwrapped() < motorUpperBound - MOTOR_POSITION_TOLERANCE) {
-                setMotorOutput(HOMING_MOTOR_OUTPUT);
+            if (!isStalled() && !inPosition) {
+                setMotorOutput(MOTOR_OUTPUT);
             } else {
+                inPosition = true;
                 setMotorOutput(0);
             }
             break;
         case BarrelState::IDLE:
+            inPosition = false;
             break;
     }
 }
@@ -77,55 +77,26 @@ BarrelState BarrelSwitcherSubsystem::getBarrelState() { return barrelState; }
 
 void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
 {
-    if (lowerBoundSet && upperBoundSet &&
-        ((motor.getEncoderUnwrapped() <= 0 && desiredOutput < 0) ||
-         (motor.getEncoderUnwrapped() >= motorUpperBound && desiredOutput > 0)))
-    {
-        desiredOutput = 0;
-    }
     motor.setDesiredOutput(desiredOutput);
 }
 
 bool BarrelSwitcherSubsystem::isStalled() const
 {
     return (
-        (motor.getShaftRPM() > config.minRPM && motor.getShaftRPM() < config.maxRPM) &&
-        (motor.getTorque() > config.maxTorque || motor.getTorque() < config.minTorque));
+        (fabs(motor.getShaftRPM()) < config.maxRPM) &&
+        (fabsl(motor.getTorque()) > config.minTorque));
 }
 
-bool BarrelSwitcherSubsystem::isBetweenPositions() const {
-    return motor.getEncoderUnwrapped() < motorUpperBound - MOTOR_POSITION_TOLERANCE &&
-        motor.getEncoderUnwrapped() > MOTOR_POSITION_TOLERANCE;
-}
-
-void BarrelSwitcherSubsystem::setLowerBound()
+void BarrelSwitcherSubsystem::useRight()
 {
-    motor.resetEncoderValue();
-    lowerBoundSet = true;
+    barrelState = BarrelState::USING_RIGHT_BARREL;
+    inPosition = false;
 }
 
-void BarrelSwitcherSubsystem::setUpperBound()
+void BarrelSwitcherSubsystem::useLeft()
 {
-    motorUpperBound = motor.getEncoderUnwrapped();
-    upperBoundSet = true;
-}
-
-void BarrelSwitcherSubsystem::moveTowardUpperBound()
-{
-    if (lowerBoundSet && upperBoundSet) {
-        barrelState = BarrelState::USING_RIGHT_BARREL;
-    } else {
-        barrelState = BarrelState::HOMING_TOWARD_UPPER_BOUND;
-    }
-}
-
-void BarrelSwitcherSubsystem::moveTowardLowerBound()
-{
-    if (lowerBoundSet && upperBoundSet) {
-        barrelState = BarrelState::USING_LEFT_BARREL;
-    } else {
-        barrelState = BarrelState::HOMING_TOWARD_LOWER_BOUND;
-    }
+    barrelState = BarrelState::USING_LEFT_BARREL;
+    inPosition = false;
 }
 
 void BarrelSwitcherSubsystem::stop()

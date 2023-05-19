@@ -50,8 +50,10 @@ public:
         DEBUG_NOT_YET_SCHEDULED,
         /** While in this state, the motor is commanded to move toward the lower bound. */
         MOVING_TOWARD_LOWER_BOUND,
+        SETTING_LOWER_BOUND,
         /** While in this state, the motor is commanded to move toward the upper bound. */
         MOVING_TOWARD_UPPER_BOUND,
+        SETTING_UPPER_BOUND,
         /** While in this state, the motor homing is completed. */
         HOMING_COMPLETE
     };

@@ -36,19 +36,35 @@ void MotorHomingCommand::execute()
         {
             if (subsystem.isStalled())
             {
+                homingState = HomingState::SETTING_LOWER_BOUND;
+                calibrationTimer.restart(3000);
+            }
+            break;
+        }
+        case (HomingState::SETTING_LOWER_BOUND):
+        {
+            subsystem.stop();
+            if (calibrationTimer.isExpired()) {
                 subsystem.setLowerBound();
                 subsystem.moveTowardUpperBound();
                 homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
-                calibrationTimer.restart(1000);
             }
             break;
         }
         case (HomingState::MOVING_TOWARD_UPPER_BOUND):
         {
-            if (calibrationTimer.isExpired() && subsystem.isStalled())
+            if (subsystem.isStalled())
             {
+                homingState = HomingState::SETTING_UPPER_BOUND;
+                calibrationTimer.restart(3000);
+            }
+            break;
+        }
+        case (HomingState::SETTING_UPPER_BOUND):
+        {
+            subsystem.stop();
+            if (calibrationTimer.isExpired()) {
                 subsystem.setUpperBound();
-                subsystem.stop();
                 homingState = HomingState::HOMING_COMPLETE;
             }
             break;

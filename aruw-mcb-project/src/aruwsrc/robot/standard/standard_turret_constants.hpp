@@ -25,7 +25,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/barrel-switcher/homeable_subsystem_interface.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -94,11 +94,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr aruwsrc::control::HomingConfig HOMING_CONFIG = {
-    .minRPM = -5,
+static constexpr aruwsrc::control::StallThresholdConfig STALL_THRESHOLD_CONFIG = {
     .maxRPM = 5,
-    .minTorque = -800,
-    .maxTorque = 800,
+    .minTorque = 1000,
 };
 #endif
 
