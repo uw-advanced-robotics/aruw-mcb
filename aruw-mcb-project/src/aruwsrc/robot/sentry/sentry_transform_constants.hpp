@@ -6,7 +6,10 @@ namespace aruwsrc::sentry
 {
 
 SentryTransforms::TransformConfig SENTRY_TRANSFORM_CONFIG{
-    .turretMinorOffset = 0.145  // from sentry mk 1 CAD
+    .minorToMajorRadius = 0.145f,  // from sentry mk 1 CAD
+    .minorToCameraXOffset = 0.143f,
+    .minorToCameraYOffset = 0.035f,
+    .minorToCameraZOffset = 0.55f
 };
 
 }

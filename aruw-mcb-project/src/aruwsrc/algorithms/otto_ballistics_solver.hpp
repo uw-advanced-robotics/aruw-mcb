@@ -232,6 +232,7 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                 // chassis-forward is +x
                 // someone needs to check my math on the below two calculations
                 // @todo incorporate velocity into the transforms
+                // TODO: C'mon now, turretToMajorRadius needs to be standardized, since the value is also used in sentry_transform_constants.hpp.
                 {aimData.pva.xVel - (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * turretToMajorRadius), // need to subtract out rotational velocity of major
                  aimData.pva.yVel - (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * turretToMajorRadius),
                  aimData.pva.zVel},

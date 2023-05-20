@@ -22,6 +22,7 @@ class ChassisFrame : tap::algorithms::transforms::Frame {};
 class TurretMajorFrame : tap::algorithms::transforms::Frame {};
 class TurretMinorGirlbossFrame : tap::algorithms::transforms::Frame {};
 class TurretMinorMalewifeFrame : tap::algorithms::transforms::Frame {};
+class CameraFrame : tap::algorithms::transforms::Frame {};
 
 
 // @todo incorporate velocities? for example, the otto ballistics solver requires chassis velocity
@@ -32,7 +33,10 @@ public:
     struct TransformConfig
     {
         // Offset from turret minor yaw axis to turret major yaw axis (should only be in the y-direction of the turret major frame)
-        const float turretMinorOffset;
+        const float minorToMajorRadius;
+        const float minorToCameraXOffset;
+        const float minorToCameraYOffset;
+        const float minorToCameraZOffset;
     };
 
     SentryTransforms(
@@ -48,6 +52,7 @@ public:
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() const { return worldToTurretMajor; };
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
     inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
+
 
     inline uint32_t lastComputedTimestamp() const { return lastComputedTime; };
 
@@ -69,6 +74,8 @@ private:
     tap::algorithms::transforms::Transform<ChassisFrame, TurretMajorFrame> chassisToTurretMajor;
     tap::algorithms::transforms::Transform<TurretMajorFrame, TurretMinorGirlbossFrame> turretMajorToTurretGirlboss;
     tap::algorithms::transforms::Transform<TurretMajorFrame, TurretMinorMalewifeFrame> turretMajorToTurretMalewife;
+    tap::algorithms::transforms::Transform<TurretMinorGirlbossFrame, CameraFrame> turretGirlbossToCamera;
+    tap::algorithms::transforms::Transform<TurretMinorMalewifeFrame, CameraFrame> turretMalewifeToCamera;
 
     uint32_t lastComputedTime = 0;
 };
