@@ -55,7 +55,7 @@
 // #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 // #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 // #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
-#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+// #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 // #include "aruwsrc/rol/governor/cv_online_governor.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -88,9 +88,14 @@
 #include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
+#include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
 
 #include "sentry_transform_constants.hpp"
 #include "sentry_transforms.hpp"
+#include "sentry_auto_aim_launch_timer.hpp"
+#include "sentry_minor_cv_on_target_governor.hpp"
+#include "sentry_beyblade_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -121,6 +126,8 @@ namespace sentry_control
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
+
+aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
 /* define swerve motors --------------------------------------------------------*/
 
@@ -290,7 +297,7 @@ SentryTurretMinorSubsystem turretMinorGirlboss(
     aruwsrc::control::turret::maleWife::PITCH_MOTOR_CONFIG,
     aruwsrc::control::turret::maleWife::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus2,
-    0);
+    girlBoss::turretID);
 
 SentryTurretMinorSubsystem turretMinorMalewife(
     drivers(),
@@ -299,7 +306,7 @@ SentryTurretMinorSubsystem turretMinorMalewife(
     aruwsrc::control::turret::girlBoss::PITCH_MOTOR_CONFIG,
     aruwsrc::control::turret::girlBoss::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus1,
-    1);
+    maleWife::turretID);
 
 // Turret controllers -------------------------------------------------------
 
@@ -496,10 +503,11 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     girlBoss::default_launch_speed,
     girlBoss::majorToTurretR);
 
-// AutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
-//     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-//     &drivers()->visionCoprocessor,
-//     &girlbossBallisticsSolver);
+SentryAutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    (OttoBallisticsSolver<TurretMinorFrame>*) &girlbossBallisticsSolver,
+    girlBoss::turretID);
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     odometrySubsystem,
@@ -516,6 +524,19 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
 /* define commands ----------------------------------------------------------*/
+void sendNoMotionSstrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::NONE); 
+}
+void sendGoToFriendlyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE); 
+}
+void sendGoToEnemyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_ENEMY_BASE); 
+}
+void sendGoToSupplierZoneStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE); 
+}
+
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -543,6 +564,15 @@ aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &sentryDrive);
+
+
+// Chassis beyblade
+aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
+    drivers(),
+    &sentryDrive,
+    &turretMajor.yawMotor,
+    drivers()->controlOperatorInterface
+);
 
 // Turret major control manual
 aruwsrc::control::turret::sentry::TurretMajorSentryControlCommand turretMajorControlCommand(
@@ -591,7 +621,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionW
     drivers(),
     &frictionWheelsGirlboss,
     1.0f,
-    true,
+    false,
     girlBoss::barrelID);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopGirlBossFrictionWheelSpinCommand(
@@ -645,18 +675,23 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorGirlboss});
 
 // rotates agitator when aiming at target and within heat limit
-// CvOnTargetGovernor cvOnTargetGovernorGirlboss(
-//     ((tap::Drivers *)(drivers())),
-//     drivers()->visionCoprocessor,
-//     sentryTurretCVCommand,
-//     autoAimLaunchTimer,
-//     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    sentryTurretCVCommand,
+    autoAimLaunchTimerGirlBoss,
+    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    girlBoss::turretID);
 
 // GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
 //     {&girlBossAgitator},
 //     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-//     {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+// {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
 
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithCVLimiting(
+    {&girlBossAgitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
+    {&cvOnTargetGovernorGirlboss});
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
 // UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
@@ -762,17 +797,48 @@ HoldCommandMapping leftSwitchDown(
 
 // HoldCommandMapping rightSwitchUp(
 //     drivers(),
+//     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting, &girlBossFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+// HoldCommandMapping rightSwitchUp(
+//     drivers(),
+//     {&rotateAndUnjamAgitatorWithHeatLimiting, &girlBossFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+// this works 
+// HoldRepeatCommandMapping rightSwitchUp(
+//     drivers(),
+//     {&girlBossRotateAndUnjamAgitator},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+//     true);
+
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&rotateAndUnjamAgitatorWithCVLimiting},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
+
+// HoldCommandMapping rightSwitchUpFriction(
+//     drivers(),
 //     {&girlBossFrictionWheelSpinCommand},
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping rightSwitchMid(
-    drivers(),
-    {&girlBossRotateAndUnjamAgitator},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+// HoldCommandMapping rightSwitchMid(
+//     drivers(),
+//     {&girlBossFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
+// HoldCommandMapping rightSwitchMid(
+//     drivers(),
+//     {&girlBossRotateAndUnjamAgitator, &girlBossFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
+// HoldCommandMapping rightSwitchDown(
+//     drivers(),
+//     {&imuCalibrateCommand},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping rightSwitchDown(
     drivers(),
-    {&imuCalibrateCommand},
+    {&stopGirlBossFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 bool isInitialized = false;
@@ -838,6 +904,7 @@ void setDefaultSentryCommands(Drivers *)
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
+    frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
     // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
 }
 
@@ -845,19 +912,24 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-
-    // sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-    // // //     pauseProjectileLaunchMessageHandler);
-    // // sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
-    // sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionSstrategy);
+    sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
+    sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
+    sentryRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
+        &sentryRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
     // drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchMid);
-    // drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&rightSwitchMid);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&rightSwitchMid);
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    // drivers->commandMapper.addMap(&rightSwitchUpFriction);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchMid);

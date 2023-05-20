@@ -20,9 +20,9 @@ namespace aruwsrc::sentry
 class WorldFrame : tap::algorithms::transforms::Frame {};
 class ChassisFrame : tap::algorithms::transforms::Frame {};
 class TurretMajorFrame : tap::algorithms::transforms::Frame {};
-class TurretMinorGirlbossFrame : tap::algorithms::transforms::Frame {};
-class TurretMinorMalewifeFrame : tap::algorithms::transforms::Frame {};
-class CameraFrame : tap::algorithms::transforms::Frame {};
+class TurretMinorFrame : tap::algorithms::transforms::Frame {};
+class TurretMinorGirlbossFrame : public TurretMinorFrame {};
+class TurretMinorMalewifeFrame : public TurretMinorFrame {};
 
 
 // @todo incorporate velocities? for example, the otto ballistics solver requires chassis velocity
