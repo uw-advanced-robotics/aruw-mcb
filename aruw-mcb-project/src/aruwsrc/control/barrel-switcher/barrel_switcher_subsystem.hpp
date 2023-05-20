@@ -62,7 +62,7 @@ public:
     void initialize() override;
     void refresh() override;
     bool isStalled() const;
-    bool isInPosition() const {return inPosition;}
+    bool isInPosition() const;
     void useRight();
     void useLeft();
     void stop();
@@ -77,17 +77,7 @@ private:
     int16_t shaftRPMDebug;
     bool stalled;
 
-    /**
-     * True if the barrels are in position to shoot, false otherwise (e.g. 
-     * the barrel is moving to switch)
-    */
     bool inPosition;
-
-    /**
-     * The position of where the barrel-switching motor last stalled, to use
-     * for keeping the barrel in firing position
-    */
-    int16_t desiredPosition;
 
     /**
      * Stores the state of this barrel switcher's state,
