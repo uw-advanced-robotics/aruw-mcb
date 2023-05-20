@@ -164,4 +164,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
+#ifdef TARGET_DRONE
+    ((Drivers *)drivers)->mavlinkTelemetryHandler.updateSerial();
+#endif
 }

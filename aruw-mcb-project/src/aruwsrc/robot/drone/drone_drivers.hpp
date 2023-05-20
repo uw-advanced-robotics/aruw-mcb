@@ -22,10 +22,11 @@
 
 #include "tap/drivers.hpp"
 
+#include "drone_telemetry_handler.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
 #else
-
 #endif
 
 namespace aruwsrc::drone
@@ -37,12 +38,17 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers()
+        : tap::Drivers(),
+          mavlinkTelemetryHandler(this, tap::communication::serial::Uart::Uart1)
+    {
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
 #else
 public:
+    DroneTelemetryHandler mavlinkTelemetryHandler;
 
 #endif
 };  // class aruwsrc::DroneDrivers
