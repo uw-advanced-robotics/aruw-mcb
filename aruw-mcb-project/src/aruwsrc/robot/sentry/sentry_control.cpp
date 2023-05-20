@@ -916,6 +916,9 @@ void startSentryCommands(Drivers *drivers)
     sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
     sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
     sentryRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
+        &sentryRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
