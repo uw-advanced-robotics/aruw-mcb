@@ -66,7 +66,11 @@ public:
 
     const char* getName() override { return "Balancing Chassis Subsystem"; }
 
-    inline void startHoming()
+    /**
+     * Initializes the leg motor homing procedure, where it draws all 4 legs to the upper hardstops.
+     *
+     */
+    void startHoming()
     {
         homingState = HOMING;
         legHomingPid[0].reset();
@@ -93,7 +97,7 @@ public:
      * Retracts legs to home position and kills drive motors. Leg motors are still active to get to
      * and hold position.
      */
-    inline void stopChassis()
+    void stopChassis()
     {
         leftLeg.getFiveBar()->setDesiredPosition(leftLeg.getDefaultPosition());
         rightLeg.getFiveBar()->setDesiredPosition(rightLeg.getDefaultPosition());
@@ -132,7 +136,7 @@ public:
     /**
      * @brief Get the Chassis Orientation Rates relative to a fixed world orientation
      *
-     * @return roll-pitch-yaw
+     * @return roll-pitch-yaw derivatives
      */
     inline modm::Matrix<float, 3, 1> getChassisOrientationRates() const
     {
@@ -208,7 +212,7 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = 4;  // m/s/s
+    static constexpr float MAX_ACCELERATION = .5;  // m/s/s
 
     void computeState(uint32_t dt);
 

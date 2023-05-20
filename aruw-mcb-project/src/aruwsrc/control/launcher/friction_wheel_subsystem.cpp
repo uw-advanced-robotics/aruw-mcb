@@ -101,8 +101,11 @@ void FrictionWheelSubsystem::refresh()
         leftWheel.setDesiredOutput(0);
         rightWheel.setDesiredOutput(0);
     }
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    else
+    {
+        leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
+        rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    }
 }
 
 void FrictionWheelSubsystem::runHardwareTests()

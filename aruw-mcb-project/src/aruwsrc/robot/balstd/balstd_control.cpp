@@ -402,16 +402,16 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 PressCommandMapping leftSwitchDown(
     drivers(),
-    {&homeLegCommand},
+    {&beybladeDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 PressCommandMapping leftSwitchUp(
     drivers(),
-    {&imuCalibrateCommand},
+    {&imuCalibrateCommand,&homeLegCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
-    {&imuCalibrateCommand},
+    {&imuCalibrateCommand, &homeLegCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,

@@ -74,14 +74,20 @@ void BalancingChassisAutorotateCommand::updateAutorotateState()
         {
             chassisAutorotating = false;
         }
-        else if (
-            autorotationMode == STRICT_PLATE_FORWARD || autorotationMode == STRICT_SIDE_FORWARD)
+        if (autorotationMode == STRICT_PLATE_FORWARD || autorotationMode == STRICT_SIDE_FORWARD)
         {
             chassisAutorotating = true;
         }
-        else if (!lazyTimeout.isExpired())
+        else
         {
-            chassisAutorotating = true;
+            if (!lazyTimeout.isExpired())
+            {
+                chassisAutorotating = false;
+            }
+            else
+            {
+                chassisAutorotating = true;
+            }
         }
     }
 }
@@ -113,10 +119,14 @@ void BalancingChassisAutorotateCommand::execute()
                 &motionDesiredTurretRelative.x,
                 &motionDesiredTurretRelative.y,
                 turretAngleFromCenter);
+            // Angle from turret forwards to desired translation vector
             float angleToTarget =
                 atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX());
+
+            // If the angle to target is not within +- pi/2
             if (!tap::algorithms::compareFloatClose(angleToTarget, 0, maxAngleFromCenter))
             {
+                // flip the angle to target by 180 + mark us as going backwards
                 angleToTarget = angleToTarget + M_PI;
                 moveBackwards = true;
             }
@@ -124,13 +134,19 @@ void BalancingChassisAutorotateCommand::execute()
             {
                 moveBackwards = false;
             }
+            // wrap the target angle to the valid range (although it should be already)
             chassisRotationSetpoint = getAutorotationSetpoint(angleToTarget);
-            debug2 = turretAngleFromCenter;
         }
         else if (chassisAutorotating)
         {
+            // For normal autorotation, just rotate the chassis to follow the gimbal
             chassisRotationSetpoint = getAutorotationSetpoint(turretAngleFromCenter);
         }
+        else
+        {
+            chassisRotationSetpoint = 0;
+        }
+        debug2 = turretAngleFromCenter;
         debug1 = chassisRotationSetpoint;
         runRotationController(chassisRotationSetpoint, dt);
 

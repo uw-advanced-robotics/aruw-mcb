@@ -94,7 +94,7 @@ private:
 
     uint32_t prevTime = 0;
 
-    AutorotationMode autorotationMode = STRICT_PLATE_FORWARD;
+    AutorotationMode autorotationMode = KEEP_CHASSIS_ANGLE;
 
     modm::Vector2f motionDesiredTurretRelative;
 

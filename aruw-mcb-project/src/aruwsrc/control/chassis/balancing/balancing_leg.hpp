@@ -187,8 +187,8 @@ private:
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = true;
-    float STANDUP_TORQUE_GAIN = 100;
+    bool standupEnable = false;
+    float STANDUP_TORQUE_GAIN = 1.5;
 
     /**
      * @param[in] dt (us)

@@ -129,7 +129,7 @@ private:
     /**
      * Wait a minimum of this time to allow the turret to settle at a locked position (in ms).
      */
-    static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 2000;
+    static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 5000;
     /**
      * Wait this time after the mpu6500 is done calibrating to ensure the turret MCB's IMU is
      * calibrated.

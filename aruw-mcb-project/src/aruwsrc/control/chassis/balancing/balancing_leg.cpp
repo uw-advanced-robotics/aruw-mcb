@@ -105,7 +105,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     float LQR_K4 = HEIGHT_TO_LQR_K4_INTERPOLATOR.interpolate(-zCurrent);
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
-    float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
+    float lqrVel = LQR_K2 * deadZone(chassisSpeed, .0f);
     float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     float lqrYaw = LQR_K5 * chassisYaw;
@@ -163,7 +163,7 @@ void BalancingLeg::updateStandingUp(uint32_t dt)
     if (balanceAttemptTimeout.isExpired()) balancingState = FALLEN_MOVING;
     setLegsRetracted();
     // Use a P-controller to apply big torque until we get up
-    float standupTorque = chassisAngle * STANDUP_TORQUE_GAIN;
+    float standupTorque = sin(chassisAngle) * .347 * MASS_CHASSIS * 9.81 * STANDUP_TORQUE_GAIN;
     standupTorque = limitVal(standupTorque, -3.0f, 3.0f);
     int32_t wheelOutput = (standupTorque / .3 * 16384 / 20);
     driveWheel->setDesiredOutput(wheelOutput);
