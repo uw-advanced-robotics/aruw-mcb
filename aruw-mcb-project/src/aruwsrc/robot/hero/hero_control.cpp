@@ -479,8 +479,6 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-
-
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
 {

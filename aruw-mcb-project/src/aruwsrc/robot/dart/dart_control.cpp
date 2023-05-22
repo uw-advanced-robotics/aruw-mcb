@@ -34,60 +34,81 @@ using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
+using namespace aruwsrc::dart
+
+    namespace dart_control
+{
+    /*
+     * NOTE: We are using the DoNotUse_getDrivers() function here
+     *      because this file defines all subsystems and command
+     *      and thus we must pass in the single statically allocated
+     *      Drivers class to all of these objects.
+     */
+    driversFunc drivers = DoNotUse_getDrivers;
+
+    /* define subsystems ----------------------------------------------*/
+    tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+
+    DartSubsystem dart(drivers(), &pullMotor);
+
+    DartCommand dartCommand(dart, drivers());
+
+    HoldRepeatCommandMapping rightSwitchDown(
+        drivers(),
+        {&dartCommand},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
+        true);
+
+    aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+
+    /* only being used for the encoder motor */
+    tap::motor::DjiMotor deadMotor1(
+        drivers(),
+        DEAD_MOTOR1,
+        CAN_BUS_MOTORS,
+        false,
+        "Pitch Turret Encoder Motor 1");
+    tap::motor::DjiMotor deadMotor2(
+        drivers(),
+        DEAD_MOTOR2,
+        CAN_BUS_MOTORS,
+        false,
+        "Pitch Turret Encoder Motor 2");
+
+    RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+    void registerDartSubsystems(Drivers * drivers)
+    {
+        drivers->commandScheduler.registerSubsystem(&dart);
+        drivers->commandScheduler.registerSubsystem(&buzzer);
+    }
+
+    void setDefaultDartCommands(Drivers*) { dart.setDefaultCommand(&dartCommand); }
+
+    void startDartCommands(Drivers * drivers)
+    {
+        drivers->commandScheduler.addCommand(&dartCommand);
+    }
+
+    void registerDartIoMappings(Drivers * drivers)
+    {
+        drivers->commandMapper.addMap(&rightSwitchDown);
+    }
+
+}  // namespace dart_control
 
 namespace aruwsrc::dart
 {
-
-/*
- * NOTE: We are using the DoNotUse_getDrivers() function here
- *      because this file defines all subsystems and command
- *      and thus we must pass in the single statically allocated
- *      Drivers class to all of these objects.
- */
-driversFunc drivers = DoNotUse_getDrivers;
-
-/* define subsystems ----------------------------------------------*/
-tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
-
-DartSubsystem dart(drivers(), &pullMotor);
-
-DartCommand dartCommand(dart, drivers());
-
-HoldRepeatCommandMapping rightSwitchDown(
-    drivers(),
-    {&dartCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-    true);
-
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-
-/* only being used for the encoder motor */
-tap::motor::DjiMotor deadMotor1(
-    drivers(),
-    DEAD_MOTOR1,
-    CAN_BUS_MOTORS,
-    false,
-    "Pitch Turret Encoder Motor 1");
-tap::motor::DjiMotor deadMotor2(
-    drivers(),
-    DEAD_MOTOR2,
-    CAN_BUS_MOTORS,
-    false,
-    "Pitch Turret Encoder Motor 2");
-
-RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
-void registerDartSubsystems(Drivers* drivers)
+void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&dart);
-    drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &dart_control::remoteSafeDisconnectFunction);
+    dart_control::initializeSubsystems();
+    dart_control::registerDartSubsystems(drivers);
+    dart_control::setDefaultDartCommands(drivers);
+    dart_control::startDartCommands(drivers);
+    dart_control::registerDartIoMappings(drivers);
 }
-
-void setDefaultDartCommands(Drivers*) { dart.setDefaultCommand(&dartCommand); }
-
-void startDartCommands(Drivers* drivers) { drivers->commandScheduler.addCommand(&dartCommand); }
-
-void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
 
 }  // namespace aruwsrc::dart
 
