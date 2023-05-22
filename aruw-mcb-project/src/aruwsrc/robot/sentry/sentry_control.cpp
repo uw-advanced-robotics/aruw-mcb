@@ -393,21 +393,6 @@ HoldCommandMapping leftSwitchMid(
     {&sentryDriveManual2},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    sentryDrive.initialize();
-    turretZero.agitator.initialize();
-    turretZero.frictionWheels.initialize();
-    turretZero.turretSubsystem.initialize();
-    turretOne.agitator.initialize();
-    turretOne.frictionWheels.initialize();
-    turretOne.turretSubsystem.initialize();
-    odometrySubsystem.initialize();
-    sentryResponseSubsystem.initialize();
-    buzzer.initialize();
-}
-
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
@@ -473,7 +458,6 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &sentry_control::remoteSafeDisconnectFunction);
-    sentry_control::initializeSubsystems();
     sentry_control::registerSentrySubsystems(drivers);
     sentry_control::setDefaultSentryCommands(drivers);
     sentry_control::startSentryCommands(drivers);

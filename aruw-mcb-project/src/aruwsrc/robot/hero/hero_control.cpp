@@ -479,19 +479,7 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    sentryRequestSubsystem.initialize();
-    chassis.initialize();
-    frictionWheels.initialize();
-    odometrySubsystem.initialize();
-    clientDisplay.initialize();
-    kickerAgitator.initialize();
-    waterwheelAgitator.initialize();
-    turret.initialize();
-    buzzer.initialize();
-}
+
 
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
@@ -560,7 +548,6 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &hero_control::remoteSafeDisconnectFunction);
-    hero_control::initializeSubsystems();
     hero_control::registerHeroSubsystems(drivers);
     hero_control::setDefaultHeroCommands();
     hero_control::startHeroCommands(drivers);

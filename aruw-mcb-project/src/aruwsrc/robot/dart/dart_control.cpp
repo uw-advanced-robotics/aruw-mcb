@@ -77,12 +77,6 @@ tap::motor::DjiMotor deadMotor2(
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems()
-{
-    dart.initialize();
-    buzzer.initialize();
-}
-
 void registerDartSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&dart);

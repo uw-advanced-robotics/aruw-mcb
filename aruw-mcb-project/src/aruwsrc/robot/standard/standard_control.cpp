@@ -512,20 +512,6 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    sentryRequestSubsystem.initialize();
-    turret.initialize();
-    chassis.initialize();
-    odometrySubsystem.initialize();
-    agitator.initialize();
-    frictionWheels.initialize();
-    hopperCover.initialize();
-    clientDisplay.initialize();
-    buzzer.initialize();
-}
-
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
@@ -579,7 +565,6 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &standard_control::remoteSafeDisconnectFunction);
-    standard_control::initializeSubsystems();
     standard_control::registerStandardSubsystems(drivers);
     standard_control::setDefaultStandardCommands(drivers);
     standard_control::startStandardCommands(drivers);

@@ -42,9 +42,6 @@ namespace drone_control
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
-
 /* register subsystems here -------------------------------------------------*/
 void registerDroneSubsystems(Drivers *) {}
 
@@ -64,7 +61,6 @@ void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &drone_control::remoteSafeDisconnectFunction);
-    drone_control::initializeSubsystems();
     drone_control::registerDroneSubsystems(drivers);
     drone_control::setDefaultDroneCommands(drivers);
     drone_control::startDroneCommands(drivers);

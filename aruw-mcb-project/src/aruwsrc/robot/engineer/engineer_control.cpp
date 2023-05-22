@@ -69,9 +69,6 @@ TowSubsystem tower(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
-
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
@@ -97,7 +94,6 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
-    aruwsrc::control::initializeSubsystems();
     aruwsrc::control::registerEngineerSubsystems(drivers);
     aruwsrc::control::setDefaultEngineerCommands(drivers);
     aruwsrc::control::startEngineerCommands(drivers);
