@@ -97,7 +97,6 @@ void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &dart_control::remoteSafeDisconnectFunction);
-    dart_control::initializeSubsystems();
     dart_control::registerDartSubsystems(drivers);
     dart_control::setDefaultDartCommands(drivers);
     dart_control::startDartCommands(drivers);
