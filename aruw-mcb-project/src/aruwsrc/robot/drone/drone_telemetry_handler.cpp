@@ -24,7 +24,8 @@ namespace aruwsrc::drone
 DroneTelemetryHandler::DroneTelemetryHandler(
     tap::Drivers* drivers,
     tap::communication::serial::Uart::UartPort port)
-    : MavlinkReceiver(drivers, port)
+    : MavlinkReceiver(drivers, port),
+      setHomeCommand()
 {
 }
 
@@ -37,5 +38,16 @@ void DroneTelemetryHandler::messageReceiveCallback(const ReceivedMavlinkMessage&
 }
 
 LocalPositionNed* DroneTelemetryHandler::getLocalPositionNed() { return &localPositionNed; }
+
+void DroneTelemetryHandler::setHomePosition()
+{
+    setHomeCommand.header.componentId = 1;
+    setHomeCommand.header.systemId = 2;  // Needs to be not 0 or 1 cuz 0 invalid, 1 is drone
+    setHomeCommand.header.messageId = COMMAND_INT_MSG_ID;
+    
+    memcpy(setHomeCommand.data, &cmd, sizeof(cmd));
+    
+    drivers->uart.write(port, reinterpret_cast<uint8_t*>(&setHomeCommand), sizeof(setHomeCommand));
+}
 
 }  // namespace aruwsrc::drone

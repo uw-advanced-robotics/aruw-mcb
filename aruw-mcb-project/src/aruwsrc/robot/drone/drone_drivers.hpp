@@ -40,7 +40,7 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          mavlinkTelemetryHandler(this, tap::communication::serial::Uart::Uart1)
+          mavlinkTelemetryHandler(this, tap::communication::serial::Uart::Uart7)
     {
     }
 

@@ -59,6 +59,12 @@ void MavlinkReceiver::initialize()
         case Uart::UartPort::Uart6:
             drivers->uart.init<Uart::UartPort::Uart6, UART_BAUDRATE>();
             break;
+        case Uart::UartPort::Uart7:
+            drivers->uart.init<Uart::UartPort::Uart7, UART_BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart8:
+            drivers->uart.init<Uart::UartPort::Uart8, UART_BAUDRATE>();
+            break;
         default:
             break;
     }
@@ -79,18 +85,20 @@ void MavlinkReceiver::updateSerial()
                 {
                     mavlinkSerialRxState = PROCESS_FRAME_HEADER;
                     frameCurrReadByte = 0;
+                    headBytesCorrect++;
                 }
             }
             break;
         }
         case PROCESS_FRAME_HEADER:  // the frame header consists of the length, seq, and message id
         {
+            settingHeader++;
             frameCurrReadByte += READ(
                 reinterpret_cast<uint8_t *>(&newMessage) + frameCurrReadByte + 1,
                 sizeof(newMessage.header) - frameCurrReadByte - 1);
 
             // We have the complete message header in the frameHeader buffer
-            if (frameCurrReadByte == sizeof(newMessage.header) - 1)
+            if (frameCurrReadByte == (sizeof(newMessage.header) - 1))
             {
                 frameCurrReadByte = 0;
 
@@ -98,7 +106,12 @@ void MavlinkReceiver::updateSerial()
                 {
                     mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                     RAISE_ERROR(drivers, "received message length longer than allowed max");
+                    readHeaderAndDataLengthToLong++;
                     return;
+                }
+
+                if(newMessage.header.messageId == 32){
+                    gotaThirtyTwoMEssageID++;
                 }
 
                 // move on to processing message body
@@ -107,7 +120,7 @@ void MavlinkReceiver::updateSerial()
             break;
             case PROCESS_FRAME_DATA:  // READ bulk of message
             {
-                int bytesToRead = newMessage.header.dataLength;
+                bytesToRead = newMessage.header.dataLength;
 
                 frameCurrReadByte += READ(
                     reinterpret_cast<uint8_t *>(&newMessage) + sizeof(newMessage.header) +
@@ -124,6 +137,7 @@ void MavlinkReceiver::updateSerial()
                     {
                         mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(drivers, "CRC16 failure");
+                        failedCRC++;
                         return;
                     }
 
@@ -137,6 +151,7 @@ void MavlinkReceiver::updateSerial()
                 {
                     frameCurrReadByte = 0;
                     RAISE_ERROR(drivers, "Invalid message length");
+                    readTooMuch++;
                     mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                 }
                 break;

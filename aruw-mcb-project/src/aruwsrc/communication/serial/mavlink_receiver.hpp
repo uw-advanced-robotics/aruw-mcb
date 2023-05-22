@@ -179,8 +179,7 @@ private:
         PROCESS_FRAME_DATA     /// The data is being processed.
     };
 
-    /// The serial port you are connected to.
-    Uart::UartPort port;
+    
 
     /// stuff for RX, buffers to store parts of the header, state machine.
     SerialRxState mavlinkSerialRxState;
@@ -204,6 +203,17 @@ private:
 
 protected:
     tap::Drivers *drivers;
+    
+    /// The serial port you are connected to.
+    Uart::UartPort port;
+
+    int bytesToRead;
+    uint16_t headBytesCorrect = 0;
+    uint16_t settingHeader = 0;
+    uint16_t readHeaderAndDataLengthToLong = 0;
+    uint16_t failedCRC = 0;
+    uint16_t readTooMuch = 0;
+    uint16_t gotaThirtyTwoMEssageID = 0;
 };
 
 }  // namespace aruwsrc::communication::serial

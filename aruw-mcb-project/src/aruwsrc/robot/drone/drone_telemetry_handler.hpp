@@ -27,6 +27,10 @@
 
 namespace aruwsrc::drone
 {
+#define LOCAL_POSITION_NED_MSG_ID 32
+#define COMMAND_INT_MSG_ID 32
+#define COMMAND_SET_HOME_MSG_ID 32
+
 struct LocalPositionNed
 {
     uint32_t time_boot_ms;  // Timestamp (milliseconds since system boot)
@@ -38,8 +42,23 @@ struct LocalPositionNed
     float vz;               // Z Speed in NED frame in meter / s
 } modm_packed;
 
-#define LOCAL_POSITION_NED_MSG_ID 32
-#define MAVLINK_MSG_ID_LOCAL_POSITION_NED_LEN 28
+// See https://mavlink.io/en/messages/common.html#MAV_CMD_DO_SET_HOME for definition
+struct DoSetHomeCommandDefault
+{
+    uint8_t target_system = 1;     // System ID
+    uint8_t target_component = 1;  // Component ID
+    uint8_t frame = 1;             // The coordinate system of the COMMAND, using 1 for LOCAL_NED
+    uint16_t command = COMMAND_SET_HOME_MSG_ID;  // The scheduled action for the mission item.
+    uint8_t current = 0;                         // unused, set to 0
+    uint8_t autocontinue = 0;                    // unused, set to 0
+    float useCurrent = 1;  // Use the current location, 1 is yes, 0 is the specified location
+    float param2;          // Unused
+    float param3;          // Unused
+    float yaw = NAN;       // Heading, NAN makes it used it's heading
+    int32_t x = 0;         // local: x position
+    int32_t y = 0;         // local: y position
+    float z = 0;           // local: z position
+} modm_packed;
 
 /**
  * This class is used to get telemetry from the drone, following the Mavlink local_position_ned
@@ -54,9 +73,12 @@ public:
 
     void messageReceiveCallback(const ReceivedMavlinkMessage& completeMessage) override;
     LocalPositionNed* getLocalPositionNed();
+    void setHomePosition();
 
 private:
     LocalPositionNed localPositionNed;
+    MavlinkMessage<sizeof(DoSetHomeCommandDefault)> setHomeCommand;
+    DoSetHomeCommandDefault cmd;
 };
 
 }  // namespace aruwsrc::drone

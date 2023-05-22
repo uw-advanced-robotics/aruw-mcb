@@ -143,6 +143,10 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
+#ifdef TARGET_DRONE
+    ((Drivers *)drivers)->mavlinkTelemetryHandler.initialize();
+    ((Drivers *)drivers)->mavlinkTelemetryHandler.setHomePosition();
+#endif
 }
 
 static void updateIo(tap::Drivers *drivers)
