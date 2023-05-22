@@ -34,12 +34,12 @@ using namespace tap::communication::serial;
 namespace aruwsrc::communication::serial
 {
 MavlinkReceiver::MavlinkReceiver(tap::Drivers *drivers, Uart::UartPort port)
-    : port(port),
-      mavlinkSerialRxState(SERIAL_HEADER_SEARCH),
+    : mavlinkSerialRxState(SERIAL_HEADER_SEARCH),
       newMessage(),
       mostRecentMessage(),
       frameCurrReadByte(0),
-      drivers(drivers)
+      drivers(drivers),
+      port(port)
 {
 }
 
