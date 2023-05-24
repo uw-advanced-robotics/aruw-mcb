@@ -12,17 +12,20 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
+using namespace tap::algorithms::transforms;
+
 using namespace aruwsrc::control::turret;
 namespace aruwsrc::sentry
 {
 
 // Design decision: all frames are dependent of the robot design and thus should be defined in robot
-class WorldFrame : tap::algorithms::transforms::Frame {};
-class ChassisFrame : tap::algorithms::transforms::Frame {};
-class TurretMajorFrame : tap::algorithms::transforms::Frame {};
-class TurretMinorFrame : tap::algorithms::transforms::Frame {};
+class WorldFrame : Frame {};
+class ChassisFrame : Frame {};
+class TurretMajorFrame : Frame {};
+class TurretMinorFrame : Frame {};
 class TurretMinorGirlbossFrame : public TurretMinorFrame {};
 class TurretMinorMalewifeFrame : public TurretMinorFrame {};
+class CameraFrame : Frame {};
 
 
 // @todo incorporate velocities? for example, the otto ballistics solver requires chassis velocity
@@ -48,11 +51,15 @@ public:
 
     void updateTransforms();
 
-    inline const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& getWorldToChassis() const { return worldToChassis; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() const { return worldToTurretMajor; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
-    inline const tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
-
+    inline const Transform<WorldFrame, ChassisFrame>& getWorldToChassis() const { return worldToChassis; };
+    inline const Transform<WorldFrame, TurretMajorFrame>& getWorldToTurretMajor() const { return worldToTurretMajor; };
+    inline const Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
+    inline const Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
+    inline const Transform<TurretMinorGirlbossFrame, CameraFrame>& getTurretGirlbossToCamera() const { return turretGirlbossToCamera; };
+    inline const Transform<TurretMinorMalewifeFrame, CameraFrame>& getTurretMalewifeToCamera() const { return turretMalewifeToCamera; };
+    inline const Transform<TurretMajorFrame, TurretMinorGirlbossFrame>& getTurretMajorToTurretGirlboss() const { return turretMajorToTurretGirlboss; };
+    inline const Transform<TurretMajorFrame, TurretMinorMalewifeFrame>& getTurretMajorToTurretMalewife() const { return turretMajorToTurretMalewife; };
+    inline const Transform<ChassisFrame, TurretMajorFrame>& getChassisToTurretMajor() const { return chassisToTurretMajor; };
 
     inline uint32_t lastComputedTimestamp() const { return lastComputedTime; };
 
@@ -65,17 +72,17 @@ private:
     const SentryTurretMinorSubsystem& turretMinorMalewife;
 
     // Transforms
-    tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame> worldToChassis;
-    tap::algorithms::transforms::Transform<WorldFrame, TurretMajorFrame> worldToTurretMajor;
-    tap::algorithms::transforms::Transform<WorldFrame, TurretMinorGirlbossFrame> worldToTurretGirlboss;
-    tap::algorithms::transforms::Transform<WorldFrame, TurretMinorMalewifeFrame> worldToTurretMalewife;
+    Transform<WorldFrame, ChassisFrame> worldToChassis;
+    Transform<WorldFrame, TurretMajorFrame> worldToTurretMajor;
+    Transform<WorldFrame, TurretMinorGirlbossFrame> worldToTurretGirlboss;
+    Transform<WorldFrame, TurretMinorMalewifeFrame> worldToTurretMalewife;
 
     // Intermediary transforms
-    tap::algorithms::transforms::Transform<ChassisFrame, TurretMajorFrame> chassisToTurretMajor;
-    tap::algorithms::transforms::Transform<TurretMajorFrame, TurretMinorGirlbossFrame> turretMajorToTurretGirlboss;
-    tap::algorithms::transforms::Transform<TurretMajorFrame, TurretMinorMalewifeFrame> turretMajorToTurretMalewife;
-    tap::algorithms::transforms::Transform<TurretMinorGirlbossFrame, CameraFrame> turretGirlbossToCamera;
-    tap::algorithms::transforms::Transform<TurretMinorMalewifeFrame, CameraFrame> turretMalewifeToCamera;
+    Transform<ChassisFrame, TurretMajorFrame> chassisToTurretMajor;
+    Transform<TurretMajorFrame, TurretMinorGirlbossFrame> turretMajorToTurretGirlboss;
+    Transform<TurretMajorFrame, TurretMinorMalewifeFrame> turretMajorToTurretMalewife;
+    Transform<TurretMinorGirlbossFrame, CameraFrame> turretGirlbossToCamera;
+    Transform<TurretMinorMalewifeFrame, CameraFrame> turretMalewifeToCamera;
 
     uint32_t lastComputedTime = 0;
 };

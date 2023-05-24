@@ -19,8 +19,16 @@ SentryTransforms::SentryTransforms(
       turretMajor(turretMajor),
       turretMinorGirlboss(turretMinorGirlboss),
       turretMinorMalewife(turretMinorMalewife),
-      turretMajorToTurretGirlboss(0., config.turretMinorOffset, 0., 0., 0., 0.),
-      turretMajorToTurretMalewife(0., -config.turretMinorOffset, 0., 0., 0., 0.)
+      turretMajorToTurretGirlboss(0., config.minorToMajorRadius, 0., 0., 0., 0.),
+      turretMajorToTurretMalewife(0., -config.minorToMajorRadius, 0., 0., 0., 0.),
+      turretGirlbossToCamera(config.minorToCameraXOffset,
+                             config.minorToCameraYOffset,
+                             config.minorToCameraZOffset,
+                             0., 0., 0.),
+      turretMalewifeToCamera(config.minorToCameraXOffset,
+                             config.minorToCameraYOffset,
+                             config.minorToCameraZOffset,
+                             0., 0., 0.)
 {
 }
 

@@ -65,7 +65,11 @@ public:
 
     void update();
 
-private:
+
+protected:
+    // NOTE: This may be bad practice. These are all protected, because they are needed in the
+    // subclass "sentry_kf_odometry_2d_subsystem" in the refresh() method.  This method needs these values
+    // to update the kalman filter state vector with an odometry message from vision
     enum class OdomState
     {
         POS_X = 0,
@@ -85,7 +89,11 @@ private:
         ACC_Y,
         NUM_INPUTS,
     };
+    
+    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
 
+private:
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
@@ -148,11 +156,8 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     modm::Location2D<float> imuToChassisCenter;
-
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
@@ -175,6 +180,7 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+
 };
 }  // namespace aruwsrc::algorithms::odometry
 
