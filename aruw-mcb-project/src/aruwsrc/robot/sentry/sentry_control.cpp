@@ -134,15 +134,16 @@ aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(driver
 VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR1,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftFrontSwerveConfig.driveMotorInverted,
     "Left Front Swerve Drive Motor");
 
 VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
-    MOTOR5,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    MOTOR1,
+    // MOTOR5,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
@@ -157,7 +158,8 @@ VirtualDjiMotor rightFrontDriveMotor(
 
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
-    MOTOR8,
+    // MOTOR8,
+    MOTOR4,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
@@ -165,32 +167,32 @@ VirtualDjiMotor rightFrontAzimuthMotor(
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
-    MOTOR2,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    MOTOR3,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
-    MOTOR6,
-    aruwsrc::sentry::chassis::CAN_BUS_MOTORS,
+    MOTOR3,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
 
 VirtualDjiMotor rightBackDriveMotor(
     drivers(),
-    MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
+    MOTOR2,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::rightBackSwerveConfig.driveMotorInverted,
     "Right Back Swerve Drive Motor");
 
 VirtualDjiMotor rightBackAzimuthMotor(
     drivers(),
-    MOTOR7,
-    tap::can::CanBus::CAN_BUS1,
+    MOTOR2,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
