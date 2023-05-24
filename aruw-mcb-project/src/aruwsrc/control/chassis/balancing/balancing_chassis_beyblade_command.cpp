@@ -55,11 +55,7 @@ void BalancingChassisBeybladeCommand::execute()
     {
         // Gets current turret yaw angle
         float turretYawAngle = yawMotor->getAngleFromCenter();
-        const float maxWheelSpeed =
-            BalancingChassisSubsystem::getMaxWheelSpeed(
-                drivers->refSerial.getRefSerialReceivingData(),
-                drivers->refSerial.getRobotData().chassis.powerConsumptionLimit) /
-            (CHASSIS_GEARBOX_RATIO * 60 / M_TWOPI);
+        const float maxWheelSpeed = 30.0f;
         // Convert from motor RPM to shaft rad/s
         // convert from wheel speed to get maximum rotation rate
         float desiredRotationRate = maxWheelSpeed * WHEEL_RADIUS / (WIDTH_BETWEEN_WHEELS_Y / 2);
@@ -77,12 +73,12 @@ void BalancingChassisBeybladeCommand::execute()
             {
                 if (chassisUp)
                 {
-                    chassis->setDesiredHeight(CHASSIS_HEIGHTS.first);
+                    chassis->setDesiredHeight(DELTA_H);
                     chassisUp = false;
                 }
                 else
                 {
-                    chassis->setDesiredHeight(CHASSIS_HEIGHTS.second);
+                    chassis->setDesiredHeight(-DELTA_H);
                     chassisUp = true;
                 }
                 upDownTimeout.restart(UP_DOWN_PERIOD);
@@ -108,6 +104,7 @@ void BalancingChassisBeybladeCommand::execute()
 void BalancingChassisBeybladeCommand::end(bool interrupted)
 {
     chassis->setDesiredOutput(0, 0);
+    chassis->setDesiredHeight(DELTA_H);
     chassis->disarmChassis();
 }
 

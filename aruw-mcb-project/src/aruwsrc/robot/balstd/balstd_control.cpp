@@ -400,13 +400,13 @@ HoldRepeatCommandMapping rightSwitchUp(
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-PressCommandMapping leftSwitchDown(
+HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 PressCommandMapping leftSwitchUp(
     drivers(),
-    {&imuCalibrateCommand,&homeLegCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(

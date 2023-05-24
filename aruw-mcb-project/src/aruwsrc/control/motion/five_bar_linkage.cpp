@@ -157,12 +157,6 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
     motor2Setpoint = M_TWOPI - alpha_2 - beta_2;
 }
 
-bool FiveBarLinkage::withinEnvelope(modm::Vector2f point)
-{
-    // TODO: Replace/remove this function once motor homing is merged
-    return true;
-}
-
 void FiveBarLinkage::computePositionFromAngles()
 {
     /** Use bilinear interpolation to compute xy-values from lookup table.

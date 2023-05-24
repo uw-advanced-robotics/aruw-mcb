@@ -119,8 +119,6 @@ void ImuCalibrateCommand::execute()
             {
                 turretMCBsReady &= config.turretMCBCanComm->isConnected();
                 turretsOnline &= config.turret->isOnline();
-                // debug1 = turretMCBsReady;
-                debug2 = turretsOnline;
             }
 
             if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=

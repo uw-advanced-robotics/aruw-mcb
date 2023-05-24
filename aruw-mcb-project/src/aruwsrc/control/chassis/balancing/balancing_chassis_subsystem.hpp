@@ -233,12 +233,21 @@ private:
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
+    SmoothPidConfig rollPidConfig{
+        .kp = .05,
+        .ki = .0001,
+        .kd = .02,
+        .maxICumulative = 2,
+        .maxOutput = .1,
+    };
+    SmoothPid rollPid = SmoothPid(rollPidConfig);
+
     SmoothPidConfig legHomingPidConfig{
-        .kp = 1000,
-        .ki = 100,
+        .kp = 10000,
+        .ki = 300,
         .kd = 3,
-        .maxICumulative = 15000,
-        .maxOutput = 15000,
+        .maxICumulative = 25000,
+        .maxOutput = 25000,
     };
     // LF, LR, RF, RR
     SmoothPid legHomingPid[4] = {
@@ -248,7 +257,7 @@ private:
         SmoothPid(legHomingPidConfig)};
     bool legStalled[4] = {false, false, false, false};
     tap::arch::MilliTimeout motorHomedTimeout[4];
-    uint32_t STALL_CURRENT = 12000;
+    uint32_t STALL_CURRENT = 20000;
     uint32_t STALL_TIMEOUT = 1000;
 
     float debug1;
@@ -271,6 +280,7 @@ private:
     float pitchPrev;
     float pitchRate;
     float roll;
+    float rollPrev;
     float rollRate;
     float yaw;
     float yawPrev;

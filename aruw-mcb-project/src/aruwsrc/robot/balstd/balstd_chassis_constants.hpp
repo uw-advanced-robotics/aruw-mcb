@@ -84,8 +84,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 3000.0f;
-static constexpr float AUTOROTATION_PID_KD = 10.0f;
+static constexpr float AUTOROTATION_PID_KP = 1500.0f;
+static constexpr float AUTOROTATION_PID_KD = 40.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
@@ -132,7 +132,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.5f;
 
 /**
  * Fraction between [0, 1], what we multiply user translational input by when beyblading.
@@ -164,7 +164,7 @@ static constexpr float HEIGHT_REMOTE_SCALAR = .001;
 
 static constexpr float MASS_CHASSIS = 18.5f;  // kg
 
-static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.15, 0.35};
+static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {-0.15, -0.35};
 
 static const tap::algorithms::SmoothPidConfig LEFT_WHEEL_MOTOR_PID_CONFIG{
     .kp = 400,

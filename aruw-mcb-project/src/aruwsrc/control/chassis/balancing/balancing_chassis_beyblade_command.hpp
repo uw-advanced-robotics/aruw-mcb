@@ -45,7 +45,7 @@ enum BeybladeMode : uint8_t
     NUM_BEYBLADE_MODES,
 };
 
-static constexpr uint32_t UP_DOWN_PERIOD = 500;
+static constexpr uint32_t UP_DOWN_PERIOD = 750;
 
 class BalancingChassisBeybladeCommand : public tap::control::Command
 {
@@ -85,17 +85,17 @@ private:
     control::ControlOperatorInterface& operatorInterface;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
 
-    
     tap::arch::MilliTimeout upDownTimeout = tap::arch::MilliTimeout(UP_DOWN_PERIOD);
+    float DELTA_H = CHASSIS_HEIGHTS.first - CHASSIS_HEIGHTS.second;
 
     uint32_t prevTime = 0;
 
-    BeybladeMode beybladeMode = NORMAL_SPIN;
+    BeybladeMode beybladeMode = UP_DOWN_SPIN;
 
     modm::Vector2f motionDesiredTurretRelative;
 
     bool chassisUp = false;
-    
+
 };  // class BalancingChassisBeybladeCommand
 
 }  // namespace chassis

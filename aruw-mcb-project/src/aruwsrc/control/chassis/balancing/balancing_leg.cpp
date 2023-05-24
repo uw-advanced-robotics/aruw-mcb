@@ -72,12 +72,16 @@ void BalancingLeg::update()
     {
         case BALANCING:
             updateBalancing(dt);
+            break;
         case FALLEN_MOVING:
             updateFallenMoving(dt);
+            break;
         case FALLEN_NOT_MOVING:
             updateFallenNotMoving(dt);
+            break;
         case STANDING_UP:
             updateStandingUp(dt);
+            break;
     };
     zDesRamper.setTarget(desiredWheelLocation.getY());
     zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
@@ -105,8 +109,8 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     float LQR_K4 = HEIGHT_TO_LQR_K4_INTERPOLATOR.interpolate(-zCurrent);
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
-    float lqrVel = LQR_K2 * deadZone(chassisSpeed, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
+    float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
+    float lqrPitch = deadZone(LQR_K3 * (tl), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
@@ -126,7 +130,14 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     debug7 = driveWheelOutput;
-    driveWheel->setDesiredOutput(driveWheelOutput);
+    if (armed)
+    {
+        driveWheel->setDesiredOutput(driveWheelOutput);
+    }
+    else
+    {
+        driveWheel->setDesiredOutput(0);
+    };
     if (abs(chassisAngle) > abs(FALLEN_ANGLE_THRESHOLD))
     {
         balancingState = FALLEN_MOVING;
@@ -137,6 +148,11 @@ void BalancingLeg::updateFallenMoving(uint32_t dt)
 {
     setLegsRetracted();
     driveWheel->setDesiredOutput(0);
+    if (armed && abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
+        abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
+    {
+        balancingState = BALANCING;
+    }
     if (compareFloatClose(vCurrent, 0, .1))
     {
         balancingState = FALLEN_NOT_MOVING;
@@ -146,13 +162,17 @@ void BalancingLeg::updateFallenNotMoving(uint32_t dt)
 {
     setLegsRetracted();
     driveWheel->setDesiredOutput(0);
-
-    if (abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
+    if (!compareFloatClose(vCurrent, 0, .1))
+    {
+        balancingState = FALLEN_MOVING;
+        return;
+    }
+    if (armed && abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
         abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
     {
         balancingState = BALANCING;
     }
-    else if (standupEnable)
+    else if (standupEnable && armed)
     {
         balanceAttemptTimeout.restart(BALANCE_ATTEMPT_TIMEOUT_DURATION);
         balancingState = STANDING_UP;
@@ -160,7 +180,7 @@ void BalancingLeg::updateFallenNotMoving(uint32_t dt)
 }
 void BalancingLeg::updateStandingUp(uint32_t dt)
 {
-    if (balanceAttemptTimeout.isExpired()) balancingState = FALLEN_MOVING;
+    if (balanceAttemptTimeout.isExpired() || !armed) balancingState = FALLEN_MOVING;
     setLegsRetracted();
     // Use a P-controller to apply big torque until we get up
     float standupTorque = sin(chassisAngle) * .347 * MASS_CHASSIS * 9.81 * STANDUP_TORQUE_GAIN;

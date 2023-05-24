@@ -74,7 +74,8 @@ void BalancingChassisAutorotateCommand::updateAutorotateState()
         {
             chassisAutorotating = false;
         }
-        if (autorotationMode == STRICT_PLATE_FORWARD || autorotationMode == STRICT_SIDE_FORWARD)
+        else if (
+            autorotationMode == STRICT_PLATE_FORWARD || autorotationMode == STRICT_SIDE_FORWARD)
         {
             chassisAutorotating = true;
         }
@@ -146,8 +147,6 @@ void BalancingChassisAutorotateCommand::execute()
         {
             chassisRotationSetpoint = 0;
         }
-        debug2 = turretAngleFromCenter;
-        debug1 = chassisRotationSetpoint;
         runRotationController(chassisRotationSetpoint, dt);
 
         // we are now turning the robot towards the desired direction. Apply motion to chassis
@@ -187,7 +186,6 @@ void BalancingChassisAutorotateCommand::runRotationController(
         chassisRotationSetpoint,
         yawMotor->getChassisFrameVelocity() - chassis->getChassisOrientationRates().element[2],
         dt);
-
     // find an alpha value to be used for the low pass filter, some value >
     // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
     // angleFromCenterForChassisAutorotate, so when autorotate angle error is large, low

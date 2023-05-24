@@ -46,7 +46,8 @@ void BalancingChassisRelativeDriveCommand::execute()
         operatorInterface.getChassisXInput() * TRANSLATION_REMOTE_SCALAR,
         -operatorInterface.getChassisYInput() * ROTATION_REMOTE_SCALAR);
     chassis->setDesiredHeight(
-        HEIGHT_REMOTE_SCALAR * drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
+        HEIGHT_REMOTE_SCALAR *
+        drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL));
 }
 
 void BalancingChassisRelativeDriveCommand::end(bool interrupted)

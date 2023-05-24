@@ -78,7 +78,8 @@ void BalancingChassisSubsystem::refresh()
     // 3. Set each side's actuators to compensate appropriate for yaw and roll error
 
     // 4. run outputs
-    float rollAdjustment = WIDTH_BETWEEN_WHEELS_Y / 2 * sin(roll);
+
+    float rollAdjustment = rollPid.runController(roll, rollRate, dt);
 
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
@@ -148,10 +149,17 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
     pitch = worldToChassis.getPitch();
     yaw = worldToChassis.getYaw();
 
+    float rollRateNew = (roll - rollPrev) * 1'000 / dt;
+    rollPrev = roll;
+    rollRate = lowPassFilter(rollRate, rollRateNew, .05);
+
     float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
     pitchPrev = pitch;
     pitchRate = lowPassFilter(pitchRate, pitchRateNew, .05);
 
+    // Unwrap the yaw. We can safely assume that yaw won't change by half a rotation in 2ms.
+    if (yaw - yawPrev > M_PI) yawPrev += M_TWOPI;
+    if (yawPrev - yaw > M_PI) yawPrev -= M_TWOPI;
     float yawRateNew = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
     yawPrev = yaw;
     yawRate = lowPassFilter(yawRate, yawRateNew, .05);
@@ -204,8 +212,7 @@ void BalancingChassisSubsystem::homeLegs(uint32_t dt)
     for (i = 0; i < 4; i++)
     {  // 2. When the PID output exceeds some current, stop. Set the home, and Reset the PID to hold
         // the current position.
-        float motorAngleSetpoint = legMotors[i]->getPositionUnwrapped() - modm::toRadian(5);
-
+        float motorAngleSetpoint = ((i % 2 == 0) ? -1 : 1) * modm::toRadian(5);
         float output = legHomingPid[i].runController(
             motorAngleSetpoint,
             legMotors[i]->getShaftRPM() * M_TWOPI / 60,

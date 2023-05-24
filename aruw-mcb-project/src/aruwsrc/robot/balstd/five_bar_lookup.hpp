@@ -24,25 +24,25 @@
 namespace aruwsrc::chassis
 {
 
-static constexpr float LQR_K1 =   -1.4142;
-static constexpr float LQR_K5 = -0.7071;
-static constexpr float LQR_K6 = -0.5258;
+static constexpr float LQR_K1 = -2.2361;
+static constexpr float LQR_K5 = -1.0000;
+static constexpr float LQR_K6 = -0.5675;
 
 static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K2[] = {
-    {0.35, -1.7639},
-    {0.15, -1.6565},
+    {0.35, -1.4450},
+    {0.15, -1.1959},
 };
 static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K3[] = {
     // {0.35, -120.3},
     // {0.15, -105.7},
-    {0.35, -31.1118},
-    {0.15, -24.7064},
+    {0.35, -26.6099},
+    {0.15, -17.1387},
 };
 static constexpr modm::Pair<float, float> HEIGHT_TO_LQR_LOOKUP_K4[] = {
     // {0.35, -29.8},
     // {0.15, -24.2},
-    {0.35, -6.8600},
-    {0.15, -4.3682},
+    {0.35, -5.5504},
+    {0.15, -2.6115},
 };
 static modm::interpolation::Linear<modm::Pair<float, float>> HEIGHT_TO_LQR_K2_INTERPOLATOR(
     HEIGHT_TO_LQR_LOOKUP_K2,

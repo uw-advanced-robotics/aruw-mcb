@@ -187,8 +187,8 @@ private:
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = false;
-    float STANDUP_TORQUE_GAIN = 1.5;
+    bool standupEnable = true;
+    float STANDUP_TORQUE_GAIN = 1.1;
 
     /**
      * @param[in] dt (us)
@@ -229,7 +229,7 @@ private:
      */
     tap::algorithms::Ramp zDesRamper;
     // m/s
-    static constexpr float Z_RAMP_RATE = .08;
+    static constexpr float Z_RAMP_RATE = .2;
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
@@ -308,7 +308,7 @@ private:
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 4;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

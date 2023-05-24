@@ -145,8 +145,6 @@ private:
     float motor1Setpoint;   // (rad)
     float motor2Setpoint;   // (rad)
 
-    bool withinEnvelope(modm::Vector2f point);
-
     /***
      * Converts setpoints from XY-coordinates to motor angles using inverse kinematics.
      */
