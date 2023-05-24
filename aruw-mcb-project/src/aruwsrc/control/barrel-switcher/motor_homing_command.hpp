@@ -47,7 +47,6 @@ public:
      */
     enum class HomingState
     {
-        DEBUG_NOT_YET_SCHEDULED,
         /** While in this state, the motor is commanded to move toward the lower bound. */
         MOVING_TOWARD_LOWER_BOUND,
         SETTING_LOWER_BOUND,

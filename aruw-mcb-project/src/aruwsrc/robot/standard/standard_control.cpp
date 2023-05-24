@@ -58,6 +58,7 @@
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
+#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
@@ -77,12 +78,11 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
 
 #ifdef TARGET_STANDARD_SPIDER
+#include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 #include "aruwsrc/control/barrel-switcher/motor_homing_command.hpp"
-#include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
@@ -186,7 +186,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitcherSubsystem barrelSwitcher(drivers(), STALL_THRESHOLD_CONFIG, tap::motor::MotorId::MOTOR8);
+BarrelSwitcherSubsystem barrelSwitcher(
+    drivers(),
+    STALL_THRESHOLD_CONFIG,
+    tap::motor::MotorId::MOTOR8);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -279,7 +282,13 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuVelPidCv);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitchCommand barrelSwitchCommand(&barrelSwitcher);
+BarrelSwitchCommand barrelSwitchCommand(
+    &barrelSwitcher,
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,  // TODO: figure
+                                                                                // these out
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    constants::HEAT_LIMIT_BUFFER);
 #endif
 
 // turret commands
@@ -354,10 +363,10 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-// rot\ate
+// rotate
 HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1, //TODO: what id
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,  // TODO: what id
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     constants::HEAT_LIMIT_BUFFER,
     barrelSwitcher);
@@ -515,10 +524,10 @@ PressCommandMapping eNotQPressed(
     drivers(),
     {&chassisImuDriveCommand},
     RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
-PressCommandMapping xPressed(
-    drivers(),
-    {&barrelSwitchCommand},
-    RemoteMapState({Remote::Key::X}));
+// PressCommandMapping xPressed(
+//     drivers(),
+//     {&barrelSwitchCommand},
+//     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
@@ -530,6 +539,19 @@ CycleStateCommandMapping<
         MultiShotCvCommandMapping::SINGLE,
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
+
+#ifdef TARGET_STANDARD_SPIDER
+CycleStateCommandMapping<
+    BarrelSwitchCommand::SwitchingControlState,
+    BarrelSwitchCommand::SwitchingControlState::NUM_STATES,
+    BarrelSwitchCommand>
+    xPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::X}),
+        BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
+        &barrelSwitchCommand,
+        &BarrelSwitchCommand::setControlState);
+#endif
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -574,6 +596,10 @@ void setDefaultStandardCommands(Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
+
+#ifdef TARGET_STANDARD_SPIDER
+    barrelSwitcher.setDefaultCommand(&barrelSwitchCommand);
+#endif
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

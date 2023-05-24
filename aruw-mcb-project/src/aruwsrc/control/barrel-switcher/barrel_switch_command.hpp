@@ -11,25 +11,28 @@
 namespace aruwsrc::control
 {
 
-enum class SwitchingControlState {
-    USING_RIGHT,
-    USING_LEFT,
-    AUTOMATIC
-};
-
 class BarrelSwitchCommand : public tap::control::Command
 {
 public:
+    enum SwitchingControlState : uint8_t
+    {
+        USING_RIGHT = 0,
+        USING_LEFT = 1,
+        AUTOMATIC = 2,
+        NUM_STATES = 3
+    };
 
-    //needs to take in two HeatTracker references once those are made
-    BarrelSwitchCommand(aruwsrc::control::BarrelSwitcherSubsystem* barrelSwitcher,
-        tap::Drivers &drivers,
-        const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDLeft,
-        const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDRight,
+    BarrelSwitchCommand(
+        aruwsrc::control::BarrelSwitcherSubsystem* barrelSwitcher,
+        tap::Drivers& drivers,
+        const tap::communication::serial::RefSerialData::Rx::MechanismID
+            firingSystemMechanismIDLeft,
+        const tap::communication::serial::RefSerialData::Rx::MechanismID
+            firingSystemMechanismIDRight,
         const uint16_t heatLimitBuffer)
-        : heatTrackerLeft(drivers, firingSystemMechanismIDLeft, heatLimitBuffer),
-        heatTrackerRight(drivers, firingSystemMechanismIDRight, heatLimitBuffer),
-        barrelSwitcher(barrelSwitcher)
+        : barrelSwitcher(barrelSwitcher),
+          heatTrackerLeft(drivers, firingSystemMechanismIDLeft, heatLimitBuffer),
+          heatTrackerRight(drivers, firingSystemMechanismIDRight, heatLimitBuffer)
     {
         addSubsystemRequirement(barrelSwitcher);
     };
@@ -38,18 +41,20 @@ public:
 
     void execute() override;
 
+    void setControlState(SwitchingControlState state);
+
     bool isFinished() const override;
 
-    void end(bool) override {};
+    void end(bool interrupt) override;
 
     const char* getName() const override { return "barrel switch command"; };
-private:
 
+private:
     aruwsrc::control::BarrelSwitcherSubsystem* barrelSwitcher;
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;
     aruwsrc::control::governor::HeatTracker heatTrackerRight;
-    aruwsrc::control::SwitchingControlState controlState;
-}; // class BarrelSwitchCommand
-} // namespace aruwsrc::control
+    BarrelSwitchCommand::SwitchingControlState controlState;
+};  // class BarrelSwitchCommand
+}  // namespace aruwsrc::control
 
 #endif
