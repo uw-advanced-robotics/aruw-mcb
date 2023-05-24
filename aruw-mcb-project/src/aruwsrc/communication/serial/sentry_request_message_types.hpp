@@ -30,11 +30,10 @@ static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
 enum class SentryRequestMessageType : uint8_t
 {
-    SELECT_NEW_ROBOT = 0,
-    TARGET_NEW_QUADRANT,
-    TOGGLE_DRIVE_MOVEMENT,
-    PAUSE_PROJECTILE_LAUNCHING,
-    NUM_MESSAGE_TYPES,
+    NO_STRATEGY = 0,
+    GO_TO_FRIENDLY_BASE,
+    GO_TO_ENEMY_BASE,
+    GO_TO_SUPPLIER_ZONE,
 };
 }  // namespace aruwsrc::communication::serial
 
