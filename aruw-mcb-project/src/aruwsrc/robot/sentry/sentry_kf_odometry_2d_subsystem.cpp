@@ -118,9 +118,7 @@ void SentryKFOdometry2DSubsystem::refresh() {
     // TODO: You still need to store the offset!
 
     // Replace x and y position, velocity, and acceleration in the Kalman Filter
-    float newState[] = {
-      xEstimate, velXEstimate, accXEstimate, yEstimate, velYEstimate, accYEstimate
-    };
+    float newState[] = { xEstimate, velXEstimate, accXEstimate, yEstimate, velYEstimate, accYEstimate };
     kf.init(newState);
   }
 
