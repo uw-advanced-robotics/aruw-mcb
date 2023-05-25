@@ -763,7 +763,7 @@ GovernorLimitedCommand<3> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
 
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&sentryTurretCVCommand},
+    {&sentryTurretCVCommand, &beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftSwitchMid(
@@ -778,7 +778,7 @@ HoldCommandMapping leftSwitchMid(
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand, &turretMajorControlCommand},
+    {&chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // HoldCommandMapping rightSwitchUp(
