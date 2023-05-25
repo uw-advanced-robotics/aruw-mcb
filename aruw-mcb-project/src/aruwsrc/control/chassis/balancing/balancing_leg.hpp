@@ -101,7 +101,7 @@ public:
     /**
      * @param[in] speed: (m/s) Setpoint for chassis translational speed.
      */
-    inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
+    inline void setDesiredTranslationSpeed(float speed) { vDesRamper.setTarget(speed); }
 
     /**
      * @param[in] yaw: (rad) Setpoint for desired yaw angle, AKA Yaw, relative to where we want to
@@ -115,15 +115,9 @@ public:
     }
 
     /**
-     * @brief Sets the average position of the chassis and the desired position (computed from
-     * velocity input)
-     *
+     * @brief Sets the average position of the chassis
      */
-    inline void setChassisPos(float chassispos, float chassisposdesired)
-    {
-        chassisPos = chassispos;
-        chassisPosDesired = chassisposdesired;
-    }
+    inline void setChassisPos(float chassispos) { chassisPos = chassispos; }
 
     inline void setChassisAngle(float chassisangle, float chassisanglerate)
     {
@@ -196,9 +190,9 @@ private:
     void computeState(uint32_t dt);
 
     void updateBalancing(uint32_t dt);
-    void updateFallenMoving(uint32_t dt);
-    void updateFallenNotMoving(uint32_t dt);
-    void updateStandingUp(uint32_t dt);
+    void updateFallenMoving();
+    void updateFallenNotMoving();
+    void updateStandingUp();
 
     void setLegsRetracted();
     /**
@@ -229,7 +223,15 @@ private:
      */
     tap::algorithms::Ramp zDesRamper;
     // m/s
-    static constexpr float Z_RAMP_RATE = .2;
+    static constexpr float Z_RAMP_RATE = .3;
+
+    /**
+     * Ramps desired velocity to avoid big step inputs which may cause excessive angle.
+     */
+    tap::algorithms::Ramp vDesRamper;
+    // m/s
+    static constexpr float V_RAMP_RATE = 1.0f;
+
     /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
@@ -237,10 +239,10 @@ private:
      */
     SmoothPidConfig xPidConfig{
         .kp = 0.003,
-        .ki = 2.5e-08,
+        .ki = 0,
         .kd = 0,
-        .maxICumulative = .02,
-        .maxOutput = .07,
+        .maxICumulative = .01,
+        .maxOutput = .04,
     };
     SmoothPid xPid = SmoothPid(xPidConfig);
 
@@ -306,9 +308,9 @@ private:
         xoffsetPrev;  // (m)
     float prevOutput;
 
-    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(25);
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(28);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 4;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

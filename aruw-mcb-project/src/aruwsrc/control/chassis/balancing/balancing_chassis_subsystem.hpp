@@ -234,10 +234,10 @@ private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     SmoothPidConfig rollPidConfig{
-        .kp = .05,
-        .ki = .0001,
-        .kd = .02,
-        .maxICumulative = 2,
+        .kp = .01,
+        .ki = .00002,
+        .kd = .001,
+        .maxICumulative = .1,
         .maxOutput = .1,
     };
     SmoothPid rollPid = SmoothPid(rollPidConfig);

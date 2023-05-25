@@ -45,8 +45,6 @@ enum BeybladeMode : uint8_t
     NUM_BEYBLADE_MODES,
 };
 
-static constexpr uint32_t UP_DOWN_PERIOD = 750;
-
 class BalancingChassisBeybladeCommand : public tap::control::Command
 {
 public:
@@ -90,7 +88,8 @@ private:
 
     uint32_t prevTime = 0;
 
-    BeybladeMode beybladeMode = UP_DOWN_SPIN;
+    BeybladeMode beybladeMode = NORMAL_SPIN;
+    static constexpr uint32_t UP_DOWN_PERIOD = 500;
 
     modm::Vector2f motionDesiredTurretRelative;
 

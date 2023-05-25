@@ -102,6 +102,7 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE) || \
     defined(TARGET_BALSTD)
@@ -114,7 +115,6 @@ int main()
 
 #ifndef TARGET_BALSTD
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
         modm::delay_us(10);
@@ -138,6 +138,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
 #if defined(TARGET_BALSTD)
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
 #endif
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
@@ -163,6 +164,10 @@ static void updateIo(tap::Drivers *drivers)
 #endif
 #ifdef TARGET_SENTRY_BEEHIVE
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#ifdef TARGET_BALSTD
+    //     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 }

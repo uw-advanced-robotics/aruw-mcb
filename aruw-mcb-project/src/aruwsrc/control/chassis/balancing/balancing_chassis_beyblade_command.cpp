@@ -55,7 +55,7 @@ void BalancingChassisBeybladeCommand::execute()
     {
         // Gets current turret yaw angle
         float turretYawAngle = yawMotor->getAngleFromCenter();
-        const float maxWheelSpeed = 30.0f;
+        const float maxWheelSpeed = 20.0f;
         // Convert from motor RPM to shaft rad/s
         // convert from wheel speed to get maximum rotation rate
         float desiredRotationRate = maxWheelSpeed * WHEEL_RADIUS / (WIDTH_BETWEEN_WHEELS_Y / 2);

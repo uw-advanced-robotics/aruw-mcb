@@ -49,10 +49,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .maxAngle = M_PI,
     .limitMotorAngles = false,
 };
-static constexpr float CHASSIS_FALL_OVER_OFFSET = modm::toRadian(25.6);
+static constexpr float CHASSIS_FALL_OVER_OFFSET = modm::toRadian(26.35);
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2 - CHASSIS_FALL_OVER_OFFSET,
-    .startEncoderValue = 6908,
+    .startEncoderValue = 6897,
     .minAngle = modm::toRadian(55),
     .maxAngle = modm::toRadian(125),
     .limitMotorAngles = true,

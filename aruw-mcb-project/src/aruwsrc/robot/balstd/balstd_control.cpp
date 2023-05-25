@@ -36,10 +36,11 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_autorotate_command.hpp"
@@ -48,6 +49,9 @@
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/client-display/client_display_command.hpp"
+#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -61,8 +65,8 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -85,6 +89,8 @@ using namespace aruwsrc::control::motion;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::balstd;
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 
 /*
@@ -224,6 +230,11 @@ aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem odometrySubsystem(
     turret,
     chassis);
 
+client_display::ClientDisplaySubsystem clientDisplay(drivers());
+
+// Not subsystems but not commands
+
+aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 // Ballistics Solver
 
 aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
@@ -234,6 +245,10 @@ aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
     14.0f,  // defaultLaunchSpeed
     0       // turretID
 );
+AutoAimLaunchTimer autoAimLaunchTimer(
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &ballisticsSolver);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -284,12 +299,23 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
+// this goes here because it's special
+cv::TurretCVCommand turretCVCommand(
+    &drivers()->visionCoprocessor,
+    &drivers()->controlOperatorInterface,
+    &turret,
+    &worldFrameYawTurretImuControllerCv,
+    &worldFramePitchTurretImuControllerCv,
+    &ballisticsSolver,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
+
 // commands
 // launcher commands
 // base rotate/unjam commands
-MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamAgitator(agitator, AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
@@ -303,7 +329,7 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-aruwsrc::control::agitator::ManualFireRateReselectionManager manualFireRateReselectionManager;
+ManualFireRateReselectionManager manualFireRateReselectionManager;
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
@@ -315,11 +341,24 @@ GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor});
+
+// rotates agitator when aiming at target and within heat limit
+CvOnTargetGovernor cvOnTargetGovernor(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&heatLimitGovernor, &cvOnTargetGovernor});
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -330,16 +369,6 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
-
-cv::TurretCVCommand turretCVCommand(
-    &drivers()->visionCoprocessor,
-    &drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuControllerCv,
-    &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
@@ -397,7 +426,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -408,10 +437,42 @@ PressCommandMapping leftSwitchUp(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+// Keyboard/Mouse related mappings
+PressCommandMapping cPressed(drivers(), {}, RemoteMapState({Remote::Key::C}));
+PressCommandMapping gPressedCtrlNotPressed(
+    drivers(),
+    {},
+    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
+PressCommandMapping gCtrlPressed(
+    drivers(),
+    {},
+    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    drivers(),
+    RemoteMapState({Remote::Key::R}),
+    true,
+    &cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
+
+ToggleCommandMapping fToggled(drivers(), {&beybladeDriveCommand}, RemoteMapState({Remote::Key::F}));
+
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor);
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
-    {&imuCalibrateCommand, &homeLegCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,
@@ -419,6 +480,35 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
         {Remote::Key::CTRL},
         false,
         false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+// The user can press q or e to manually rotate the chassis left or right.
+// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
+// automatically once a different drive mode is chosen.
+PressCommandMapping qEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q, Remote::Key::E}));
+PressCommandMapping qNotEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q}, {Remote::Key::E}));
+PressCommandMapping eNotQPressed(drivers(), {}, RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
+PressCommandMapping xPressed(
+    drivers(),
+    {&autorotateDriveCommand},
+    RemoteMapState({Remote::Key::X}));
+
+extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
+CycleStateCommandMapping<
+    MultiShotCvCommandMapping::LaunchMode,
+    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+    MultiShotCvCommandMapping>
+    vPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::V}),
+        MultiShotCvCommandMapping::SINGLE,
+        &leftMousePressedBNotPressed,
+        &MultiShotCvCommandMapping::setShooterState);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -456,7 +546,11 @@ void setDefaultBalstdCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startBalstdCommands(Drivers *drivers) {}
+void startBalstdCommands(Drivers *drivers)
+{
+    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerBalstdIoMappings(Drivers *drivers)
@@ -466,6 +560,20 @@ void registerBalstdIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&bCtrlPressed);
+    drivers->commandMapper.addMap(&qEPressed);
+    drivers->commandMapper.addMap(&qNotEPressed);
+    drivers->commandMapper.addMap(&eNotQPressed);
+    drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&cPressed);
+    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    drivers->commandMapper.addMap(&gCtrlPressed);
+    drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace balstd_control
 

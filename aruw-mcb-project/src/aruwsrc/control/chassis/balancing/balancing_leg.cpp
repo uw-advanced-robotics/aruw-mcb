@@ -74,13 +74,13 @@ void BalancingLeg::update()
             updateBalancing(dt);
             break;
         case FALLEN_MOVING:
-            updateFallenMoving(dt);
+            updateFallenMoving();
             break;
         case FALLEN_NOT_MOVING:
-            updateFallenNotMoving(dt);
+            updateFallenNotMoving();
             break;
         case STANDING_UP:
-            updateStandingUp(dt);
+            updateStandingUp();
             break;
     };
     zDesRamper.setTarget(desiredWheelLocation.getY());
@@ -96,7 +96,8 @@ void BalancingLeg::updateBalancing(uint32_t dt)
 {
     desiredWheelLocation = fivebar->getDefaultPosition();
     xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
-    // xoffset = .00;
+    xoffset = .00;
+    // float tl_des = atan2(-xoffset, -zDesired - WHEEL_RADIUS);
 
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
     float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
@@ -108,9 +109,9 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     float LQR_K3 = HEIGHT_TO_LQR_K3_INTERPOLATOR.interpolate(-zCurrent);
     float LQR_K4 = HEIGHT_TO_LQR_K4_INTERPOLATOR.interpolate(-zCurrent);
 
-    float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired) * WHEEL_RADIUS);
-    float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (tl), .04f);
+    float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired));
+    float lqrVel = LQR_K2 * deadZone(chassisSpeed, .0f);
+    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
@@ -144,7 +145,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     }
 }
 
-void BalancingLeg::updateFallenMoving(uint32_t dt)
+void BalancingLeg::updateFallenMoving()
 {
     setLegsRetracted();
     driveWheel->setDesiredOutput(0);
@@ -158,7 +159,7 @@ void BalancingLeg::updateFallenMoving(uint32_t dt)
         balancingState = FALLEN_NOT_MOVING;
     }
 }
-void BalancingLeg::updateFallenNotMoving(uint32_t dt)
+void BalancingLeg::updateFallenNotMoving()
 {
     setLegsRetracted();
     driveWheel->setDesiredOutput(0);
@@ -178,7 +179,7 @@ void BalancingLeg::updateFallenNotMoving(uint32_t dt)
         balancingState = STANDING_UP;
     }
 }
-void BalancingLeg::updateStandingUp(uint32_t dt)
+void BalancingLeg::updateStandingUp()
 {
     if (balanceAttemptTimeout.isExpired() || !armed) balancingState = FALLEN_MOVING;
     setLegsRetracted();
@@ -192,6 +193,8 @@ void BalancingLeg::updateStandingUp(uint32_t dt)
         abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
     {
         balancingState = BALANCING;
+        // reset the x setpoint to avoid funniness after standing up
+        chassisPosDesired = chassisPos;
     }
 }
 
@@ -232,11 +235,24 @@ void BalancingLeg::fivebarController(uint32_t dt)
 
 void BalancingLeg::computeState(uint32_t dt)
 {
+    vDesRamper.update(V_RAMP_RATE * dt / 1'000'000);
+    vDesired = vDesRamper.getValue();
+    // increment xDes with vDes
+    if (vDesired == 0 && vDesiredPrev != 0)
+    {
+        chassisPosDesired = chassisPos;
+    }
+    else if (vDesired != 0)
+    {
+        chassisPosDesired += vDesired / WHEEL_RADIUS * dt / 1'000'000;
+    }
+    vDesiredPrev = vDesired;
+
     zCurrent = fivebar->getCurrentPosition().getX() * sin(chassisAngle) +
                fivebar->getCurrentPosition().getY() * cos(chassisAngle);
     float x_l = fivebar->getCurrentPosition().getX() * cos(chassisAngle) +
                 fivebar->getCurrentPosition().getY() * sin(chassisAngle);
-    tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS / 2);  // rad
+    tl = atan2(-x_l, -zCurrent - WHEEL_RADIUS);  // rad
 
     // dt is in us, 1000 to get s
     float tl_dot1 = 1'000'000.0f / static_cast<float>(dt) * (tl - tl_prev);            // rad/s

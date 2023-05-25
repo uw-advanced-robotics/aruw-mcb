@@ -113,30 +113,28 @@ void BalancingChassisAutorotateCommand::execute()
         float turretAngleFromCenter = yawMotor->getAngleFromCenter();
         updateAutorotateState();  // initiate or not autorotation
         float chassisRotationSetpoint = 0;
+        tap::algorithms::rotateVector(
+            &motionDesiredTurretRelative.x,
+            &motionDesiredTurretRelative.y,
+            turretAngleFromCenter);
+        // Angle from chassis front to desired translation vector
+        float angleToTarget =
+            atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX());
+        // mark us as going backwards if the desired motion is in that half of rotation
+        moveBackwards =
+            tap::algorithms::compareFloatClose(angleToTarget, 0, maxAngleFromCenter) ? false : true;
 
         if (chassisMotionPlanning)
         {
-            tap::algorithms::rotateVector(
-                &motionDesiredTurretRelative.x,
-                &motionDesiredTurretRelative.y,
-                turretAngleFromCenter);
-            // Angle from turret forwards to desired translation vector
-            float angleToTarget =
-                atan2(motionDesiredTurretRelative.getY(), motionDesiredTurretRelative.getX());
-
             // If the angle to target is not within +- pi/2
-            if (!tap::algorithms::compareFloatClose(angleToTarget, 0, maxAngleFromCenter))
+            if (moveBackwards)
             {
-                // flip the angle to target by 180 + mark us as going backwards
+                // flip the angle to target by 180
                 angleToTarget = angleToTarget + M_PI;
-                moveBackwards = true;
-            }
-            else
-            {
-                moveBackwards = false;
             }
             // wrap the target angle to the valid range (although it should be already)
             chassisRotationSetpoint = getAutorotationSetpoint(angleToTarget);
+            lazyTimeout.restart(LAZY_ROTATION_TIMEOUT_MS);
         }
         else if (chassisAutorotating)
         {
@@ -153,6 +151,9 @@ void BalancingChassisAutorotateCommand::execute()
         // accordingly.
         float chassisXoutput = motionDesiredTurretRelative.getLength() * (moveBackwards ? -1 : 1);
         float chassisRoutput = DESIRED_ROTATION_SCALAR * desiredRotationAverage;
+        // scale the output so we don't start going places until we are facing mostly in the right
+        // direction.
+        chassisXoutput *= cos(chassisRotationSetpoint);
 
         chassis->setDesiredOutput(chassisXoutput, chassisRoutput);
     }

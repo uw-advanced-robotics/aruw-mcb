@@ -57,7 +57,7 @@ BalancingChassisSubsystem::BalancingChassisSubsystem(
 void BalancingChassisSubsystem::initialize()
 {
     velocityRamper = tap::algorithms::Ramp();
-    desiredX = currentX = 0;
+    currentX = 0;
     desiredV = velocityRamper.getValue();
     desiredR = 0;
     desiredZ = leftLeg.getDefaultPosition().getY();
@@ -80,7 +80,6 @@ void BalancingChassisSubsystem::refresh()
     // 4. run outputs
 
     float rollAdjustment = rollPid.runController(roll, rollRate, dt);
-
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
     rightLeg.setDesiredHeight(
@@ -185,15 +184,6 @@ void BalancingChassisSubsystem::computeState(uint32_t dt)
                    : leftLeg.getCurrentHeight();
 
     currentX = (leftLeg.getWheelPos() + rightLeg.getWheelPos()) / 2;
-    if (desiredV == 0 && prevVdesired != 0)
-    {
-        desiredX = currentX;
-    }
-    else if (desiredV != 0)
-    {
-        desiredX += desiredV / WHEEL_RADIUS * dt / 1'000'000;
-    }
-    prevVdesired = desiredV;
 }
 
 void BalancingChassisSubsystem::runHardwareTests() {}
@@ -242,8 +232,8 @@ void BalancingChassisSubsystem::homeLegs(uint32_t dt)
 
 void BalancingChassisSubsystem::updateLegOdometry()
 {
-    leftLeg.setChassisPos(currentX, desiredX);
-    rightLeg.setChassisPos(currentX, desiredX);
+    leftLeg.setChassisPos(currentX);
+    rightLeg.setChassisPos(currentX);
     leftLeg.setChassisSpeed(currentV);
     rightLeg.setChassisSpeed(currentV);
     leftLeg.setChassisYaw(desiredR, yawRate);
