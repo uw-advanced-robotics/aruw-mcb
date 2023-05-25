@@ -27,7 +27,7 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 
 namespace aruwsrc::sentry
 {
@@ -40,7 +40,7 @@ class SentryBeybladeCommand : public tap::control::Command
 public:
     SentryBeybladeCommand(
         tap::Drivers* drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
+        aruwsrc::chassis::SwerveChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface);
 

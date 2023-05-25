@@ -34,21 +34,29 @@ namespace aruwsrc::chassis
 {
 struct SwerveModuleConfig
 {
+    // @todo not really generic over future swerve designs?
     const float WHEEL_DIAMETER_M = 0.076f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
-    // in encoder clicks
+    // in encoder clicks, defines "forward" direction of the module
+    // @todo why does this default?
     const int64_t azimuthZeroOffset = 0;
 
     tap::motor::MotorId driveMotorId = tap::motor::MOTOR1;
     tap::motor::MotorId azimuthMotorId = tap::motor::MOTOR5;
 
     // in meters, measured from center
+    // @todo why defaullllltttssss T.T
+    // @todo also, currently unused; see other todos in swerve drive and swerve module which suggest how to use them
     float positionWithinChassisX = 0.2f;
     float positionWithinChassisY = 0.2f;
 
+    // @todo defaults and the number of fields makes it hard to make this auto-generated via constructor; resolve in another MR
+    float distanceFromChassisCenter = 0.2f / M_SQRT2;
+
     // Whether any motor is inverted
-    const bool driveMotorInverted = false, azimuthMotorInverted = true;
+    // @todo these should not be specified by default !!!
+    const bool driveMotorInverted = false, azimuthMotorInverted = true;  // @todo doesn't quite work bc the motors are instantiated before the swerve modules
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 

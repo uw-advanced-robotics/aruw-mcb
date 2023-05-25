@@ -39,7 +39,7 @@ namespace sentry
 {
 SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
+    aruwsrc::chassis::SwerveChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface)
     : drivers(drivers),
@@ -94,7 +94,7 @@ void SentryBeybladeCommand::execute()
             chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 
         float rampTarget =
-            rotationDirection *chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
+            rotationDirection * chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless

@@ -130,22 +130,6 @@ aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(driver
 
 /* define swerve motors --------------------------------------------------------*/
 
-VirtualDjiMotor rightFrontDriveMotor(
-    drivers(),
-    MOTOR1,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,
-    "Right Front Swerve Drive Motor");
-
-VirtualDjiMotor rightFrontAzimuthMotor(
-    drivers(),
-    MOTOR5,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
-    "Right Front Swerve Azimuth Motor");
-
 VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR2,
@@ -162,6 +146,22 @@ VirtualDjiMotor leftFrontAzimuthMotor(
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
+
+VirtualDjiMotor rightFrontDriveMotor(
+    drivers(),
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,
+    "Right Front Swerve Drive Motor");
+
+VirtualDjiMotor rightFrontAzimuthMotor(
+    drivers(),
+    MOTOR5,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
+    "Right Front Swerve Azimuth Motor");
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),

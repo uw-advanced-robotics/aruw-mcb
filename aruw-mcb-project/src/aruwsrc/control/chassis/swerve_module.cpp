@@ -32,7 +32,7 @@ SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleC
       config(config),
       drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
-      rotationVectorX(-config.positionWithinChassisY),
+      rotationVectorX(-config.positionWithinChassisY),  // @todo this is super confusing...
       rotationVectorY(config.positionWithinChassisX),
       angularBiasLUTInterpolator(
           config.ANGULAR_POWER_FRAC_LUT,
@@ -55,6 +55,7 @@ bool SwerveModule::allMotorsOnline() const
     return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
+// @todo name could be better
 float SwerveModule::calculate(float x, float y, float r)
 {
     moveVectorX = x + r * rotationVectorX;
@@ -150,6 +151,7 @@ float SwerveModule::getAngularVelocity() const
 void SwerveModule::limitPower(float frac)
 {
     updateMotorOutputs(driveDesiredOutput * (frac * frac), azimuthDesiredOutput * fmin(2.0f * frac , 1.0f));
+    // @todo what is this?
     // driveMotor.setDesiredOutput(
     //     driveDesiredOutput * (frac * frac));// *
         // (1 - angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle()))));

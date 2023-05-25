@@ -68,10 +68,11 @@ Module* SwerveChassisSubsystem::getModule(unsigned int i)
 
 void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
+    // @todo replace with kalman filter/fused wheel data because this is hella unreliable
     x = modules[LF]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
     y = modules[LF]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
     r = modules[LF]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
-    // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
+    // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE (we now have one in the swerve module config)
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
         x,
@@ -84,7 +85,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
-    desiredRotation = modules[LF]->wheel.mpsToRpm(r) * 0.205f;
+    desiredRotation = modules[LF]->wheel.mpsToRpm(r) * 0.205f;  // @todo see above todo
     float maxInitialSpeed = 0;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {

@@ -27,12 +27,11 @@ namespace aruwsrc::sentry::chassis
 
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
-// Distance from center of rotation to a swerve module projected onto a cardinal axis
-static constexpr float WHEELBASE_COORD = CENTER_TO_WHEELBASE_RADIUS / 1.41421356237;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
+// @todo generate this using the position offsets in the swerve module configs
 /**
- * Calculated by solving for the pseudo-inverse of the following matrix
+ * Calculated by solving for the pseudo-inverse of the following kinematics matrix
  * 
  * 1, 0, -LF_Y
  * 0, 1,  LF_X
@@ -43,11 +42,14 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
  * 1, 0, -RB_Y
  * 0, 1,  RB_X
  * 
+ * The above matrix gives the successive x, y components of the LF, RF, LB, and RB
+ * module velocities given a [x, y, r] chassis velocity vector
+ * 
 */
-constexpr float SWERVE_FORWARD_MATRIX[24] {//TODO: UPDATE THIS WITH COORD SYSTEM CHANGE
+constexpr float SWERVE_FORWARD_MATRIX[24] {
     0.25, 0.0, 0.25, 0.0, 0.25, 0., 0.25, 0.0, 
     0.0, 0.25, 0.0, 0.25, 0.0, 0.25, 0.0, 0.25, 
-    -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325
+    -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325
 };
 
 /**
@@ -78,29 +80,28 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 
 // todo: hopefullly these can live as constants here soon :)
-// also todo: these positions use a +y-forward coord system, should use +x-forward
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .azimuthZeroOffset = -3300,
-    .positionWithinChassisX = 0,
-    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS,
+    .azimuthZeroOffset = 3757,
+    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = -5360,
-    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS,
-    .positionWithinChassisY = 0,
+    .azimuthZeroOffset = 5790,
+    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = -2620,
-    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS,
-    .positionWithinChassisY = 0,
+    .azimuthZeroOffset = 330,
+    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .azimuthZeroOffset = -3123,
-    .positionWithinChassisX = 0,
-    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS,
+    .azimuthZeroOffset = 3759,
+    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
 };
 
 } // namespace aruwsrc::control::turret
