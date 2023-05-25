@@ -28,7 +28,7 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
-#else  // by default use engineer constants (for robots that don't use them)
+#else  // by default use engineer constants (for robots that don't use them)  // @todo wth is this
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif
 

@@ -26,7 +26,6 @@
 #include "tap/motor/m3508_constants.hpp"
 
 #include "aruwsrc/algorithms/wheel.hpp"
-#include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
 

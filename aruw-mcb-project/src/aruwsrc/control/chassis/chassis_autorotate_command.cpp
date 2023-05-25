@@ -27,6 +27,7 @@
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp" // @todo i have a whole issue with this, see other todo in chassis_beyblade_command
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;

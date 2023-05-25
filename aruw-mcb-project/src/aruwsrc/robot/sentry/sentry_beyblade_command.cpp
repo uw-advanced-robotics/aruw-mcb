@@ -41,8 +41,10 @@ SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
     aruwsrc::chassis::SwerveChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface)
+    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+    const SentryBeybladeConfig config)
     : drivers(drivers),
+      config(config),
       chassis(chassis),
       yawMotor(yawMotor),
       operatorInterface(operatorInterface)
@@ -80,8 +82,8 @@ void SentryBeybladeCommand::execute()
             0,
             &x,
             &y);
-        x *= chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-        y *= chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
+        x *= config.beybladeTranslationalSpeedMultiplier;
+        y *= config.beybladeTranslationalSpeedMultiplier;
 
         const float maxWheelSpeed = aruwsrc::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
@@ -90,23 +92,23 @@ void SentryBeybladeCommand::execute()
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
         const float translationalSpeedThreshold =
-            chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
-            chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+            config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
         float rampTarget =
-            rotationDirection * chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
+            rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
         // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
         if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
         {
-            rampTarget *= chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
+            rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-        rotateSpeedRamp.update(chassis::BEYBLADE_RAMP_UPDATE_RAMP);
+        rotateSpeedRamp.update(config.beybladeRampRate);
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle

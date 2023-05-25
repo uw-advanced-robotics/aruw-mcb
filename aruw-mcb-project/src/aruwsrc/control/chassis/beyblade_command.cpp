@@ -29,6 +29,7 @@
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"  // @todo I have a whole issue with this but this will have to do for now, lest we go through more massive refactors than we have to
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;

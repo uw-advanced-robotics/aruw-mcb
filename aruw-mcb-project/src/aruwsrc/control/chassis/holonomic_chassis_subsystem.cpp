@@ -19,6 +19,7 @@
 
 #include "holonomic_chassis_subsystem.hpp"
 
+#include "constants/chassis_constants.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
@@ -46,7 +47,27 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
 {
 }
 
+// @todo what in the world is this for
 // HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
+
+float HolonomicChassisSubsystem::getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
+{
+    if (!refSerialOnline)
+    {
+        chassisPower = 0;
+    }
+
+    // only re-interpolate when needed (since this function is called a lot and the chassis
+    // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
+    if (lastComputedMaxWheelSpeed.first != chassisPower)
+    {
+        lastComputedMaxWheelSpeed.first = chassisPower;
+        lastComputedMaxWheelSpeed.second =
+            CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
+    }
+
+    return lastComputedMaxWheelSpeed.second;
+}
 
 float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
@@ -93,6 +114,12 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
+}
+
+modm::Matrix<float, 4, 1> HolonomicChassisSubsystem::convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
+{
+    static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+    return mat * ratio;
 }
 
 }  // namespace chassis

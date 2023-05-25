@@ -571,7 +571,8 @@ aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
     drivers(),
     &sentryDrive,
     &turretMajor.yawMotor,
-    drivers()->controlOperatorInterface
+    drivers()->controlOperatorInterface,
+    aruwsrc::sentry::chassis::beybladeConfig
 );
 
 // Turret major control manual
@@ -777,7 +778,7 @@ HoldCommandMapping leftSwitchMid(
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&chassisDriveCommand},
+    {&beybladeCommand, &turretMajorControlCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // HoldCommandMapping rightSwitchUp(

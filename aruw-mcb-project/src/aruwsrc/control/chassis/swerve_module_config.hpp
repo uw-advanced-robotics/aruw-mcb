@@ -84,6 +84,8 @@ struct SwerveModuleConfig
         {0.0f, 0.2f},
         {M_PI_2, 0.75f},
     };
+
+    const float gearboxRatio = (1.0f / 19.0f);  // @todo no idea if this is right
 };
 
 static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;

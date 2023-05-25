@@ -38,11 +38,38 @@ namespace aruwsrc::sentry
 class SentryBeybladeCommand : public tap::control::Command
 {
 public:
+    struct SentryBeybladeConfig
+    {
+        /**
+         * Fraction of max chassis speed that will be applied to rotation when beyblading
+         */
+        const float beybladeRotationalSpeedFractionOfMax;
+        /**
+         * Fraction between [0, 1], what we multiply user translational input by when beyblading.
+         */
+        const float beybladeTranslationalSpeedMultiplier;
+        /**
+         * The fraction to cut rotation speed while moving and beyblading
+         */
+        const float beybladeRotationalSpeedMultiplierWhenTranslating;
+        /**
+         * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
+         * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
+         */
+        const float translationalSpeedThresholdMultiplierForRotationSpeedDecrease;
+        /**
+         * Rotational speed to update the beyblade ramp target by each iteration until final rotation
+         * setpoint reached, in RPM.
+         */
+        const float beybladeRampRate;
+    };
+
     SentryBeybladeCommand(
         tap::Drivers* drivers,
         aruwsrc::chassis::SwerveChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface);
+        aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+        const SentryBeybladeConfig config);
 
     /**
      * Sets rotational input target on Ramp
@@ -62,6 +89,8 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
+    const SentryBeybladeConfig config;
+
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;

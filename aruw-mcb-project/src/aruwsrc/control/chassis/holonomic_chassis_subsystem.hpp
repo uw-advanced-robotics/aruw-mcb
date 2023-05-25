@@ -31,7 +31,6 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
-#include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
@@ -70,24 +69,7 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
-    {
-        if (!refSerialOnline)
-        {
-            chassisPower = 0;
-        }
-
-        // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != chassisPower)
-        {
-            lastComputedMaxWheelSpeed.first = chassisPower;
-            lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
-        }
-
-        return lastComputedMaxWheelSpeed.second;
-    }
+    static float getMaxWheelSpeed(bool refSerialOnline, int chassisPower);
 
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
@@ -160,11 +142,7 @@ public:
     /**
      * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
      */
-    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
-    {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
-        return mat * ratio;
-    }
+    modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const;
 
 };  // class HolonomicChassisSubsystem
 

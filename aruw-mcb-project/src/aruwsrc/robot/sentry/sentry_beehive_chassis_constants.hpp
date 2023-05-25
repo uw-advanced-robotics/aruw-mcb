@@ -21,6 +21,7 @@
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "sentry_beyblade_command.hpp"
 
 namespace aruwsrc::sentry::chassis
 {
@@ -52,32 +53,14 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {
     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325
 };
 
-/**
- * Fraction of max chassis speed that will be applied to rotation when beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
-
-/**
- * Fraction between [0, 1], what we multiply user translational input by when beyblading.
- */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
-
-/**
- * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
- * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
- */
-static constexpr float
-    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
-
-/**
- * The fraction to cut rotation speed while moving and beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.7f;
-/**
- * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached, in RPM.
- */
-static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
+static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig
+{
+    .beybladeRotationalSpeedFractionOfMax = 0.2f,
+    .beybladeTranslationalSpeedMultiplier = 0.3f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 50,
+};
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
