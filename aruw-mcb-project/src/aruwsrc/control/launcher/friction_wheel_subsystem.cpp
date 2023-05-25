@@ -53,7 +53,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           LAUNCHER_PID_MAX_ERROR_SUM,
           LAUNCHER_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
-      leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
+      leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),  // @todo THIS IS TERRIBLE!!!
       rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
       turretMCB(turretMCB)
 {

@@ -42,7 +42,6 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 // #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 // #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-// #include "aruwsrc/control/chassis/beyblade_command.hpp"
 // #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 // #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 // #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
@@ -66,7 +65,6 @@
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 // #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -90,6 +88,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
 #include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
+#include "aruwsrc/robot/sentry/sentry_beehive_launcher_constants.hpp"
 
 #include "sentry_transform_constants.hpp"
 #include "sentry_transforms.hpp"
@@ -439,8 +438,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheelsGirlboss(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
         girlBoss::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         girlBoss::barrelID);
@@ -449,8 +448,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheelsMalewife(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
         maleWife::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         maleWife::barrelID);  // @todo idk what they actually are
@@ -505,7 +504,7 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     girlBoss::majorToTurretR);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     (OttoBallisticsSolver<TurretMinorFrame>*) &girlbossBallisticsSolver,
     girlBoss::turretID);
@@ -621,7 +620,7 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsGirlboss,
-    1.0f,
+    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
     false,
     girlBoss::barrelID);
 
@@ -657,23 +656,11 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
 ManualFireRateReselectionManager manualFireRateReselectionManagerGirlboss;
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(manualFireRateReselectionManagerGirlboss);
 
-GovernorLimitedCommand<3>
-rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss(
-    {&girlBossAgitator},
-    girlBossRotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss,
-    &fireRateLimitGovernorGirlboss});
-
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorGirlboss(
     *drivers(),
     girlBoss::barrelID,
     constants::HEAT_LIMIT_BUFFER);
-
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
-    {&girlBossAgitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-    {&heatLimitGovernorGirlboss});
 
 // rotates agitator when aiming at target and within heat limit
 SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
@@ -684,15 +671,12 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlBoss::turretID);
 
-// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
-//     {&girlBossAgitator},
-//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-// {&heatLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithCVLimiting(
+GovernorLimitedCommand<3> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
     {&girlBossAgitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlboss,
-    {&cvOnTargetGovernorGirlboss});
+    girlBossRotateAndUnjamAgitator,
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
 // UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
@@ -813,7 +797,7 @@ HoldCommandMapping leftSwitchDown(
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWithCVLimiting},
+    {&girlBossRotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 

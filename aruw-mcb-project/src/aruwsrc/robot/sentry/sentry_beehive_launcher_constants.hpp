@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LAUNCHER_CONSTANTS_HPP_
-#define LAUNCHER_CONSTANTS_HPP_
+#ifndef SENTRY_BEEHIVE_LAUNCHER_CONSTANTS_HPP_
+#define SENTRY_BEEHIVE_LAUNCHER_CONSTANTS_HPP_
 
 #include "tap/motor/dji_motor.hpp"
 
@@ -26,24 +26,16 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-// TODO: Sentry is in its own separate file, recommended to do similar for other robots for readability
-namespace aruwsrc::control::launcher
+// @todo: violates namespace convention but necessary to prevent pollution
+namespace aruwsrc::robot::sentry::launcher
 {
-#if defined(TARGET_HERO_CYCLONE)
-static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
-#else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
-#endif
 
-#if defined(TARGET_HERO_CYCLONE)
-static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
-static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
-#else
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
-#endif
 
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
@@ -58,53 +50,19 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#if defined(TARGET_HERO_CYCLONE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {10, 3700.0f},
-    {16.0f, 6700.0f},
-    {20.0f, 8500.0f},
-};
-#elif defined(TARGET_STANDARD_SPIDER)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4325.0f},
-    {18.0f, 4800.0f},
+    {15.0f, 4400.0f},
+    {18.0f, 4850.0f},
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_STANDARD_WOODY)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4400.0f},
-    {18.0f, 4850.0f},
-    {30.0f, 7100.0f},
-    {32.0f, 8400.0f},
-};
-#elif defined(TARGET_STANDARD_ELSA)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4450.0f},
-    {18.0f, 4900.0f},
-    {30.0f, 7050.0f},
-    {32.0f, 8400.0f},
-};
-#else  // TARGET_DRONE, TARGET_ENGINEER
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4400.0f},
-    {18.0f, 4850.0f},
-    {30.0f, 7100.0f},
-    {32.0f, 8400.0f},
-};
-#endif
 
-#if defined(ALL_STANDARDS)
+// Desired speed of projectile in m/s
+static constexpr float DESIRED_LAUNCH_SPEED = 30.0f;
+
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
-#elif defined(TARGET_HERO_CYCLONE)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
-#endif
 
-}  // namespace aruwsrc::control::launcher
+}  // namespace aruwsrc::robot::sentry
 
-#endif  // LAUNCHER_CONSTANTS_HPP_
+#endif  // SENTRY_BEEHIVE_LAUNCHER_CONSTANTS_HPP_
