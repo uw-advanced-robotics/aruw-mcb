@@ -47,7 +47,7 @@ MainMenu::MainMenu(
       turretStatusMenuBus1(stack, *turretMCBCanCommBus1),
       turretStatusMenuBus2(stack, *turretMCBCanCommBus2),
       aboutMenu(stack),
-      capBankMenu(stack, *capacitorBank),
+      capBankMenu(stack, capacitorBank),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
       turretMCBCanCommBus2(turretMCBCanCommBus2),
@@ -198,7 +198,7 @@ void MainMenu::addAboutMenuCallback()
 
 void MainMenu::addCapacitorBankMenuCallback()
 {
-    CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), *capacitorBank);
+    CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
     getViewStack()->push(cbm);
 }
 }  // namespace display

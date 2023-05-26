@@ -38,7 +38,8 @@ enum MessageType
     START = 0x01,
     STOP = 0x02,
     STATUS = 0x04,
-    SET_CHARGE_SPEED = 0x08
+    SET_CHARGE_SPEED = 0x08,
+    SET_BATTERY_VOLTAGE = 0x10
 };
 
 enum Status
@@ -63,10 +64,12 @@ public:
     void start() const;
     void stop() const;
     void setPowerLimit(uint16_t watts);
+    void setBatteryVoltage(uint16_t milliVolts);
 
     int getAvailableEnergy() const { return this->availableEnergy; };
     float getCurrent() const { return this->current; };
     float getVoltage() const { return this->voltage; };
+    int getPowerLimit() const { return this->powerLimit; };
     Status getStatus() const { return this->status; };
 
 private:

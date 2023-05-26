@@ -25,7 +25,7 @@ namespace aruwsrc::display
 {
 CapacitorBankMenu::CapacitorBankMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    communication::sensors::power::ExternalCapacitorBank &capacitorBank)
+    communication::sensors::power::ExternalCapacitorBank *capacitorBank)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       capacitorBank(capacitorBank)
 {
@@ -40,6 +40,8 @@ void CapacitorBankMenu::draw()
 
     display << "Voltage: " << milliVolts << "mV" << modm::endl;
     display << "Current: " << milliAmps << "mA" << modm::endl;
+    display << "Current Charge Speed: " << milliAmps * milliVolts / 1000 << "mW" << modm::endl;
+    display << "Max Charge Speed: " << powerLimit << "W" << modm::endl;
     display << "Available Energy: " << availableEnergy << "J" << modm::endl;
     display << "Status: ";
 
@@ -70,14 +72,15 @@ void CapacitorBankMenu::draw()
 
 void CapacitorBankMenu::update()
 {
-    if (this->milliAmps != this->capacitorBank.getCurrent() * 1000 ||
-        this->milliVolts != this->capacitorBank.getVoltage() * 1000 ||
-        this->status != this->capacitorBank.getStatus())
+    if (this->milliAmps != this->capacitorBank->getCurrent() * 1000 ||
+        this->milliVolts != this->capacitorBank->getVoltage() * 1000 ||
+        this->status != this->capacitorBank->getStatus())
     {
-        this->milliAmps = this->capacitorBank.getCurrent() * 1000;
-        this->milliVolts = this->capacitorBank.getVoltage() * 1000;
-        this->availableEnergy = this->capacitorBank.getAvailableEnergy();
-        this->status = this->capacitorBank.getStatus();
+        this->milliAmps = this->capacitorBank->getCurrent() * 1000;
+        this->milliVolts = this->capacitorBank->getVoltage() * 1000;
+        this->powerLimit = this->capacitorBank->getPowerLimit();
+        this->availableEnergy = this->capacitorBank->getAvailableEnergy();
+        this->status = this->capacitorBank->getStatus();
         this->changed = true;
     }
 }
