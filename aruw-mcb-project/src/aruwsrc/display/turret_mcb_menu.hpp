@@ -44,7 +44,7 @@ public:
      */
     TurretMCBMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::can::TurretMCBCanComm* turretMCBCanComm);
+        aruwsrc::can::TurretMCBCanComm *turretMCBCanComm);
 
     void draw() override;
 
