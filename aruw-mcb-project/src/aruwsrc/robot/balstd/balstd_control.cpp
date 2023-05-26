@@ -446,7 +446,7 @@ PressCommandMapping gPressedCtrlNotPressed(
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {},
+    {&homeLegCommand},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(

@@ -212,7 +212,7 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = .5;  // m/s/s
+    static constexpr float MAX_ACCELERATION = 1.5;  // m/s/s
 
     void computeState(uint32_t dt);
 

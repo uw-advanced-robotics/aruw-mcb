@@ -80,6 +80,8 @@ void BalancingChassisSubsystem::refresh()
     // 4. run outputs
 
     float rollAdjustment = rollPid.runController(roll, rollRate, dt);
+    if (!armed) rollAdjustment = 0;
+    
     leftLeg.setDesiredHeight(
         tap::algorithms::limitVal<float>(desiredZ + rollAdjustment, -.35, -.15));
     rightLeg.setDesiredHeight(

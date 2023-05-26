@@ -101,7 +101,7 @@ public:
     /**
      * @param[in] speed: (m/s) Setpoint for chassis translational speed.
      */
-    inline void setDesiredTranslationSpeed(float speed) { vDesRamper.setTarget(speed); }
+    inline void setDesiredTranslationSpeed(float speed) { vDesired = speed; }
 
     /**
      * @param[in] yaw: (rad) Setpoint for desired yaw angle, AKA Yaw, relative to where we want to
@@ -181,7 +181,7 @@ private:
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = true;
+    bool standupEnable = false;
     float STANDUP_TORQUE_GAIN = 1.1;
 
     /**
@@ -226,20 +226,13 @@ private:
     static constexpr float Z_RAMP_RATE = .3;
 
     /**
-     * Ramps desired velocity to avoid big step inputs which may cause excessive angle.
-     */
-    tap::algorithms::Ramp vDesRamper;
-    // m/s
-    static constexpr float V_RAMP_RATE = 1.0f;
-
-    /**
      * PID which relates desired x velocity to x positional offset of the wheel which drives x
      * acceleration through the plant. PID loop is essentially used to smoothly move x.
      * output units are m
      */
     SmoothPidConfig xPidConfig{
         .kp = 0.003,
-        .ki = 0,
+        .ki = 2.5e-8,
         .kd = 0,
         .maxICumulative = .01,
         .maxOutput = .04,

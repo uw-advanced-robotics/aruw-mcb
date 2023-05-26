@@ -110,8 +110,8 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     float LQR_K4 = HEIGHT_TO_LQR_K4_INTERPOLATOR.interpolate(-zCurrent);
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired));
-    float lqrVel = LQR_K2 * deadZone(chassisSpeed, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (chassisAngle), .04f);
+    float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
+    float lqrPitch = deadZone(LQR_K3 * (tl), .04f);
     float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
@@ -133,7 +133,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     debug7 = driveWheelOutput;
     if (armed)
     {
-        driveWheel->setDesiredOutput(driveWheelOutput);
+        // driveWheel->setDesiredOutput(driveWheelOutput);
     }
     else
     {
@@ -235,8 +235,6 @@ void BalancingLeg::fivebarController(uint32_t dt)
 
 void BalancingLeg::computeState(uint32_t dt)
 {
-    vDesRamper.update(V_RAMP_RATE * dt / 1'000'000);
-    vDesired = vDesRamper.getValue();
     // increment xDes with vDes
     if (vDesired == 0 && vDesiredPrev != 0)
     {
