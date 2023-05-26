@@ -28,6 +28,9 @@
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+
+
 
 namespace aruwsrc::sentry
 {
@@ -69,6 +72,7 @@ public:
         aruwsrc::chassis::SwerveChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+        const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& worldToChassis,
         const SentryBeybladeConfig config);
 
     /**
@@ -99,7 +103,7 @@ private:
     aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
-
+    const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& worldToChassis;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis

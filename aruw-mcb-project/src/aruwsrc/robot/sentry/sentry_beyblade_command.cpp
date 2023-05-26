@@ -42,12 +42,14 @@ SentryBeybladeCommand::SentryBeybladeCommand(
     aruwsrc::chassis::SwerveChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+    const tap::algorithms::transforms::Transform<WorldFrame, ChassisFrame>& worldToChassis,
     const SentryBeybladeConfig config)
     : drivers(drivers),
       config(config),
       chassis(chassis),
       yawMotor(yawMotor),
-      operatorInterface(operatorInterface)
+      operatorInterface(operatorInterface),
+      worldToChassis(worldToChassis)
 {
     addSubsystemRequirement(chassis);
 }
@@ -69,6 +71,8 @@ void SentryBeybladeCommand::execute()
     {
         // Gets current turret yaw angle
         float turretYawAngle = yawMotor->getAngleFromCenter();
+
+        float worldYawAngle = -worldToChassis.getYaw();
 
         float x = 0.0f;
         float y = 0.0f;
@@ -112,7 +116,7 @@ void SentryBeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, turretYawAngle);
+        tap::algorithms::rotateVector(&x, &y, worldYawAngle);
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);

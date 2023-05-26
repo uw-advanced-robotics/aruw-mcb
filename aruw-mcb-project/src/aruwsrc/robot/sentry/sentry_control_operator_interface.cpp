@@ -73,7 +73,7 @@ static inline void applyAccelerationToRamp(
 
 float SentryControlOperatorInterface::getChassisXVelocity()
 {      
-    if (!isDriveMode()) return DEFAULT_CHASSIS_X_VELOCITY;
+    if (!isDriveMode() && !isAutoDriveMode()) return DEFAULT_CHASSIS_X_VELOCITY;
     
     // Set dt and previous time
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
@@ -108,7 +108,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
 
 float SentryControlOperatorInterface::getChassisYVelocity()
 {
-    if (!isDriveMode()) return DEFAULT_CHASSIS_Y_VELOCITY;
+    if (!isDriveMode() && !isAutoDriveMode()) return DEFAULT_CHASSIS_Y_VELOCITY;
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();

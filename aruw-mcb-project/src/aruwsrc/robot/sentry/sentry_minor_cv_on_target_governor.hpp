@@ -116,15 +116,19 @@ public:
         switch (autoLaunchInclination)
         {
             case SentryAutoAimLaunchTimer::LaunchInclination::NO_TARGET:
+                lastGateVal = false;
                 return false;
             case SentryAutoAimLaunchTimer::LaunchInclination::UNGATED:
+                lastGateVal = true;
                 return true;
             case SentryAutoAimLaunchTimer::LaunchInclination::GATED_ALLOW:
+                lastGateVal = true;
                 return true;
             case SentryAutoAimLaunchTimer::LaunchInclination::GATED_DENY:
                 bool ignoreDenyGates = mode != SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED;
                 return ignoreDenyGates;
         }
+        lastGateVal = false;
 
         return false;
     }
@@ -144,6 +148,9 @@ private:
     const SentryCvOnTargetGovernorMode mode;
     uint8_t turretID;
     bool enabled = true;
+
+
+    bool lastGateVal = false;
 };
 }  // namespace aruwsrc::control::governor
 

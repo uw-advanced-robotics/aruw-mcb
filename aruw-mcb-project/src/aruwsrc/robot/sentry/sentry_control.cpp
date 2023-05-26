@@ -572,6 +572,7 @@ aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
     &sentryDrive,
     &turretMajor.yawMotor,
     drivers()->controlOperatorInterface,
+    sentryTransforms.getWorldToChassis(),
     aruwsrc::sentry::chassis::beybladeConfig
 );
 
@@ -657,6 +658,11 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
 ManualFireRateReselectionManager manualFireRateReselectionManagerGirlboss;
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(manualFireRateReselectionManagerGirlboss);
 
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
+    {&girlBossAgitator},
+    girlBossRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorGirlboss(
     *drivers(),
@@ -672,11 +678,12 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlBoss::turretID);
 
-GovernorLimitedCommand<3> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<4> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
     {&girlBossAgitator},
     girlBossRotateAndUnjamAgitator,
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
 
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -763,8 +770,12 @@ GovernorLimitedCommand<3> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
 
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&sentryTurretCVCommand, &beybladeCommand},
+    {&sentryTurretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&sentryTurretCVCommand, &beybladeCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftSwitchMid(
     drivers(),
