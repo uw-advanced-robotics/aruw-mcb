@@ -37,7 +37,7 @@ void SentryRequestHandler::operator()(
 
     switch (type)
     {
-        case SentryRequestMessageType::NO_STRATEGY:
+        case SentryRequestMessageType::NONE:
             if (noStrategyHandler != nullptr)
             {
                 noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
