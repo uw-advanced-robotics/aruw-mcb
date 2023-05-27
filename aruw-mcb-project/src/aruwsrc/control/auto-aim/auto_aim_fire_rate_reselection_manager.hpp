@@ -53,7 +53,7 @@ public:
         tap::Drivers &drivers,
         serial::VisionCoprocessor &visionCoprocessor,
         tap::control::CommandScheduler &commandScheduler,
-        const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
+        const tap::control::Command &turretCVCommand,
         const uint8_t turretID)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
@@ -109,7 +109,7 @@ private:
     tap::Drivers &drivers;
     serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
-    const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
+    const tap::control::Command &turretCVCommand;
     const uint8_t turretID;
 };
 }  // namespace aruwsrc::control::auto_aim

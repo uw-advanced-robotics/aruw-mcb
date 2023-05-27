@@ -461,10 +461,10 @@ VelocityAgitatorSubsystem girlBossAgitator(
     constants::AGITATOR_PID_CONFIG,
     constants::girlBoss::AGITATOR_CONFIG);
 
-// VelocityAgitatorSubsystem maleWifeAgitator(
-//     drivers(),
-//     constants::AGITATOR_PID_CONFIG,
-//     constants::maleWife::AGITATOR_CONFIG);
+VelocityAgitatorSubsystem maleWifeAgitator(
+    drivers(),
+    constants::AGITATOR_PID_CONFIG,
+    constants::maleWife::AGITATOR_CONFIG);
 
 // Odometry ----------------------------------------------------------------------------------
 
@@ -619,6 +619,148 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
+
+// // male wife shooting ======================
+
+// // spin friction wheels commands
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+//     false,
+//     maleWife::barrelID);
+
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     0.0f,
+//     true,
+//     maleWife::barrelID);
+
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     1.0f,
+//     true,
+//     maleWife::barrelID);
+
+// FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife (frictionWheelsMalewife);
+
+// // Agitator commands (male wife)
+// MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
+// UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
+// MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
+//     *drivers(),
+//     maleWifeAgitator,
+//     maleWifeRotateAgitator,
+//     maleWifeUnjamAgitator);
+
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
+//     drivers()->refSerial,
+//     girlBoss::barrelID);
+
+// AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
+// FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
+
+// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
+//     {&girlBossAgitator},
+//     girlBossRotateAndUnjamAgitator,
+//     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
+
+// // rotates agitator with heat limiting applied
+// HeatLimitGovernor heatLimitGovernorGirlboss(
+//     *drivers(),
+//     girlBoss::barrelID,
+//     constants::HEAT_LIMIT_BUFFER);
+
+// // rotates agitator when aiming at target and within heat limit
+// SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
+//     ((tap::Drivers *)(drivers())),
+//     drivers()->visionCoprocessor,
+//     sentryTurretCVCommand,
+//     autoAimLaunchTimerGirlBoss,
+//     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+//     girlBoss::turretID);
+
+// GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
+//     {&girlBossAgitator},
+//     girlBossRotateAndUnjamAgitator,
+//     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+
+
+
+// // spin friction wheels commands
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+//     false,
+//     maleWife::barrelID);
+
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     0.0f,
+//     true,
+//     maleWife::barrelID);
+
+// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
+//     drivers(),
+//     &frictionWheelsMalewife,
+//     1.0f,
+//     true,
+//     maleWife::barrelID);
+
+// FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife (frictionWheelsMalewife);
+
+// // Agitator commands (male wife)
+// MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
+// UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
+// MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
+//     *drivers(),
+//     girlBossAgitator,
+//     girlBossRotateAgitator,
+//     girlBossUnjamAgitator);
+
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
+//     drivers()->refSerial,
+//     girlBoss::barrelID);
+
+// AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
+// FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
+
+// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
+//     {&girlBossAgitator},
+//     girlBossRotateAndUnjamAgitator,
+//     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
+
+// // rotates agitator with heat limiting applied
+// HeatLimitGovernor heatLimitGovernorGirlboss(
+//     *drivers(),
+//     girlBoss::barrelID,
+//     constants::HEAT_LIMIT_BUFFER);
+
+// // rotates agitator when aiming at target and within heat limit
+// SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
+//     ((tap::Drivers *)(drivers())),
+//     drivers()->visionCoprocessor,
+//     sentryTurretCVCommand,
+//     autoAimLaunchTimerGirlBoss,
+//     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+//     girlBoss::turretID);
+
+// GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
+//     {&girlBossAgitator},
+//     girlBossRotateAndUnjamAgitator,
+//     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+
+
+// girlboss shooting ======================
+
 // spin friction wheels commands
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
     drivers(),
@@ -656,7 +798,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
     drivers()->refSerial,
     girlBoss::barrelID);
 
-AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
+AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss(
+              *drivers(),
+              drivers()->visionCoprocessor,
+              drivers()->commandScheduler,
+              sentryTurretCVCommand,
+              girlBoss::turretID
+);
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
@@ -685,7 +833,6 @@ GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
-
 // // Agitator commands (male wife)
 // MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
 // UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
