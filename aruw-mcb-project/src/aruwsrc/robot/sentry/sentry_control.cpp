@@ -95,6 +95,7 @@
 #include "sentry_auto_aim_launch_timer.hpp"
 #include "sentry_minor_cv_on_target_governor.hpp"
 #include "sentry_beyblade_command.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -655,8 +656,8 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
     drivers()->refSerial,
     girlBoss::barrelID);
 
-ManualFireRateReselectionManager manualFireRateReselectionManagerGirlboss;
-FireRateLimitGovernor fireRateLimitGovernorGirlboss(manualFireRateReselectionManagerGirlboss);
+AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
+FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
     {&girlBossAgitator},
@@ -678,11 +679,11 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlBoss::turretID);
 
-GovernorLimitedCommand<4> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
     {&girlBossAgitator},
     girlBossRotateAndUnjamAgitator,
-    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
 
 // // Agitator commands (male wife)
