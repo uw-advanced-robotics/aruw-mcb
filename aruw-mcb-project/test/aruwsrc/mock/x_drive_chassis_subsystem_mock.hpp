@@ -17,23 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_SUBSYSTEM_MOCK_HPP_
-#define CHASSIS_SUBSYSTEM_MOCK_HPP_
+#ifndef X_DRIVE_CHASSIS_SUBSYSTEM_MOCK_HPP_
+#define X_DRIVE_CHASSIS_SUBSYSTEM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace mock
 {
-class ChassisSubsystemMock : public aruwsrc::chassis::Holonomic4MotorChassisSubsystem
+class XDriveChassisSubsystemMock : public aruwsrc::chassis::XDriveChassisSubsystem
 {
 public:
-    ChassisSubsystemMock(tap::Drivers *drivers);
-    virtual ~ChassisSubsystemMock();
+    XDriveChassisSubsystemMock(
+        tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+    virtual ~XDriveChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredOutput, (float, float, float), (override));
@@ -46,8 +47,8 @@ public:
     MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));
     MOCK_METHOD(int16_t, getRightBackRpmActual, (), (const override));
     MOCK_METHOD(float, getDesiredRotation, (), (const override));
-};  // class ChassisSubsystemMock
+};  // class XDriveChassisSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // CHASSIS_SUBSYSTEM_MOCK_HPP_
+#endif  // X_DRIVE_CHASSIS_SUBSYSTEM_MOCK_HPP_

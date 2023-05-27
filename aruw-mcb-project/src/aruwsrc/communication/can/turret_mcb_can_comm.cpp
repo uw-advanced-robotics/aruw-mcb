@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -34,18 +34,24 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
       lastCompleteImuData{},
       yawRevolutions(0),
       pitchRevolutions(0),
-      yawAngleGyroMessageHandler(
+      xAxisMessageHandler(
           drivers,
-          YAW_RX_CAN_ID,
+          X_AXIS_RX_CAN_ID,
           canBus,
           this,
-          &TurretMCBCanComm::handleYawAngleGyroMessage),
-      pitchAngleGyroMessageHandler(
+          &TurretMCBCanComm::handleXAxisMessage),
+      yAxisMessageHandler(
           drivers,
-          PITCH_RX_CAN_ID,
+          Y_AXIS_RX_CAN_ID,
           canBus,
           this,
-          &TurretMCBCanComm::handlePitchAngleGyroMessage),
+          &TurretMCBCanComm::handleYAxisMessage),
+      zAxisMessageHandler(
+          drivers,
+          Z_AXIS_RX_CAN_ID,
+          canBus,
+          this,
+          &TurretMCBCanComm::handleZAxisMessage),
       turretStatusRxHandler(
           drivers,
           TURRET_STATUS_RX_CAN_ID,
@@ -65,8 +71,9 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
 
 void TurretMCBCanComm::init()
 {
-    yawAngleGyroMessageHandler.attachSelfToRxHandler();
-    pitchAngleGyroMessageHandler.attachSelfToRxHandler();
+    xAxisMessageHandler.attachSelfToRxHandler();
+    yAxisMessageHandler.attachSelfToRxHandler();
+    zAxisMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
     timeSynchronizationRxHandler.attachSelfToRxHandler();
 }
@@ -97,44 +104,74 @@ void TurretMCBCanComm::sendData()
     }
 }
 
-void TurretMCBCanComm::handleYawAngleGyroMessage(const modm::can::Message& message)
+void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
 {
     // Update light to indicate IMU message received and turret controller running.
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
     drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 
-    const AngleMessageData* angleMessage = reinterpret_cast<const AngleMessageData*>(message.data);
+    const AxisMessageData* xAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);
 
-    currProcessingImuData.yaw = modm::toRadian(
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
-    currProcessingImuData.rawYawVelocity = angleMessage->angleAngularVelocityRaw;
-    currProcessingImuData.seq = angleMessage->seq;
-    // clear top 16 bits
-    currProcessingImuData.turretDataTimestamp &= 0xffff;
-    // fill in top 16 bits
-    currProcessingImuData.turretDataTimestamp |= static_cast<uint32_t>(angleMessage->timestamp)
-                                                 << 16;
+    currProcessingImuData.roll = modm::toRadian(
+        static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.rawRollVelocity = xAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.xAcceleration =
+        static_cast<float>(xAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+
+    /**
+     * Since this is the first axis data received for a full IMU message,
+     * set the IMU sequence to the current one to check the other axis
+     * data against.
+     *
+     * Set the timestamp as well since this is the closest we'll get to
+     * when the data was measured on the turret mcb.
+     */
+
+    currProcessingImuData.seq = xAxisMessage->seq;
+    currProcessingImuData.turretDataTimestamp = tap::arch::clock::getTimeMicroseconds();
 }
 
-void TurretMCBCanComm::handlePitchAngleGyroMessage(const modm::can::Message& message)
+void TurretMCBCanComm::handleYAxisMessage(const modm::can::Message& message)
 {
-    const AngleMessageData* angleMessage = reinterpret_cast<const AngleMessageData*>(message.data);
+    const AxisMessageData* yAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);
 
-    // if seq # doesn't match, raise error (means some data was lost)
-    if (angleMessage->seq != currProcessingImuData.seq)
+    if (yAxisMessage->seq != currProcessingImuData.seq)
     {
-        RAISE_ERROR(drivers, "seq # mismatch when handling pitch angle data");
+        RAISE_ERROR(drivers, "seq # mismatch when handling y-axis data");
         return;
     }
 
     currProcessingImuData.pitch = modm::toRadian(
-        static_cast<float>(angleMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
-    currProcessingImuData.rawPitchVelocity = angleMessage->angleAngularVelocityRaw;
-    // clear bottom 16 bits
-    currProcessingImuData.turretDataTimestamp &= 0xffff0000;
-    // fill in bottom 16 bits
-    currProcessingImuData.turretDataTimestamp |= static_cast<uint32_t>(angleMessage->timestamp);
+        static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.rawPitchVelocity = yAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.yAcceleration =
+        static_cast<float>(yAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+}
+
+void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
+{
+    const AxisMessageData* zAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);
+
+    if (zAxisMessage->seq != currProcessingImuData.seq)
+    {
+        RAISE_ERROR(drivers, "seq # mismatch when handling z-axis data");
+        return;
+    }
+
+    currProcessingImuData.yaw = modm::toRadian(
+        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.rawYawVelocity = zAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.zAcceleration =
+        static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
+
+    /**
+     * Since this is the last axis data received for a full IMU data message,
+     * apply post-processing and update the lastCompleteImuData to the processed data.
+     * Also call the callback function if one exists.
+     */
+
+    updateRevolutionCounter(currProcessingImuData.roll, lastCompleteImuData.roll, rollRevolutions);
 
     updateRevolutionCounter(
         currProcessingImuData.pitch,

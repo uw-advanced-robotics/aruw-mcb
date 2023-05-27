@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #ifndef MECANUM_CHASSIS_SUBSYSTEM_HPP_
 #define MECANUM_CHASSIS_SUBSYSTEM_HPP_
 
@@ -44,11 +40,11 @@ class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
 public:
     MecanumChassisSubsystem(
         tap::Drivers* drivers,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID,
-        tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
+        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
 };
 
 }  // namespace chassis

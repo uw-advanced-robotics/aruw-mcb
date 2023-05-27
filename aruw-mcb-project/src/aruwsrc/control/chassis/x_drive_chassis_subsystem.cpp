@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -15,10 +15,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
- */
-
-/*
- * Copyright (c) 2019 Sanger_X
  */
 
 #include "x_drive_chassis_subsystem.hpp"
@@ -39,18 +35,18 @@ namespace chassis
 {
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId,
-    tap::gpio::Analog::Pin currentPin)
+    tap::motor::MotorId rightBackMotorId)
     : Holonomic4MotorChassisSubsystem(
           drivers,
+          currentSensor,
           leftFrontMotorId,
           leftBackMotorId,
           rightFrontMotorId,
-          rightBackMotorId,
-          currentPin)
+          rightBackMotorId)
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;

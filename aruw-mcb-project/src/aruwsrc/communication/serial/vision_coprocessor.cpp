@@ -153,6 +153,10 @@ void VisionCoprocessor::sendMessage()
 {
     sendOdometryData();
     sendRobotTypeData();
+    sendHealthMessage();
+    sendRefereeRealtimeData();
+    sendRefereeCompetitionResult();
+    sendRefereeWarning();
     sendTimeSyncMessage();
 }
 
@@ -247,6 +251,103 @@ void VisionCoprocessor::sendRobotTypeData()
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
+    }
+}
+
+void VisionCoprocessor::sendHealthMessage()
+{
+    if (sendHealthTimeout.execute())
+    {
+        DJISerial::SerialMessage<sizeof(RefSerialData::Rx::RobotHpData::RobotHp) * 2> healthMessage;
+        healthMessage.messageType = CV_MESSAGE_TYPES_HEALTH_DATA;
+        memcpy(
+            &healthMessage.data,
+            &drivers->refSerial.getRobotData().allRobotHp,
+            sizeof(healthMessage.data));
+        healthMessage.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&healthMessage),
+            sizeof(healthMessage));
+    }
+}
+
+void VisionCoprocessor::sendRefereeRealtimeData()
+{
+    if (sendRefRealTimeDataTimeout.execute())
+    {
+        struct RefereeRealtimeData
+        {
+            uint8_t gameType : 4;
+            uint8_t gameProgress : 4;
+            uint16_t stageRemainTime;
+            uint64_t unixTime;
+            uint8_t powerSupplyStatus;
+        } modm_packed;
+
+        DJISerial::SerialMessage<sizeof(RefereeRealtimeData)> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_REALTIME_DATA;
+
+        RefereeRealtimeData* data = reinterpret_cast<RefereeRealtimeData*>(message.data);
+
+        const auto& gameData = drivers->refSerial.getGameData();
+        const auto& robotData = drivers->refSerial.getRobotData();
+
+        data->gameType = static_cast<uint8_t>(gameData.gameType);
+        data->gameProgress = static_cast<uint8_t>(gameData.gameStage);
+        data->stageRemainTime = gameData.stageTimeRemaining;
+        data->unixTime = gameData.unixTime;
+        data->powerSupplyStatus = robotData.robotPower.value;
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+    }
+}
+
+void VisionCoprocessor::sendRefereeCompetitionResult()
+{
+    if (sendCompetitionResultTimeout.execute())
+    {
+        DJISerial::SerialMessage<1> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_COMPETITION_RESULT;
+
+        message.data[0] = static_cast<uint8_t>(drivers->refSerial.getGameData().gameWinner);
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+    }
+}
+
+void VisionCoprocessor::sendRefereeWarning()
+{
+    const auto& refereeWarningData = drivers->refSerial.getRobotData().refereeWarningData;
+
+    // Only send if a new warning has been received
+    if (lastSentRefereeWarningTime != refereeWarningData.lastReceivedWarningRobotTime)
+    {
+        DJISerial::SerialMessage<2> message;
+
+        message.messageType = CV_MESSAGE_TYPE_REFEREE_WARNING;
+
+        message.data[0] = refereeWarningData.level;
+        message.data[1] = static_cast<uint8_t>(refereeWarningData.foulRobotID);
+
+        message.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&message),
+            sizeof(message));
+
+        // New warning sent
+        lastSentRefereeWarningTime = refereeWarningData.lastReceivedWarningRobotTime;
     }
 }
 
