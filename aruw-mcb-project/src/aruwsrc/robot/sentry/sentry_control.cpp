@@ -87,7 +87,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
-#include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
+#include "aruwsrc/robot/sentry/sentry_request_message_types.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_launcher_constants.hpp"
 
 #include "sentry_transform_constants.hpp"
@@ -531,16 +531,16 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 
 /* define commands ----------------------------------------------------------*/
 void sendNoMotionSstrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::NONE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::NONE); 
 }
 void sendGoToFriendlyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_FRIENDLY_BASE); 
 }
 void sendGoToEnemyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_ENEMY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_ENEMY_BASE); 
 }
 void sendGoToSupplierZoneStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_SUPPLIER_ZONE); 
 }
 
 imu::SentryImuCalibrateCommand imuCalibrateCommand(

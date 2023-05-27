@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_MOTION_STRATEGY_MESSAGE_TYPES_HPP_
-#define SENTRY_MOTION_STRATEGY_MESSAGE_TYPES_HPP_
+#ifndef SENTRY_REQUEST_MESSAGE_TYPES_HPP_
+#define SENTRY_REQUEST_MESSAGE_TYPES_HPP_
 
 #include <cinttypes>
 
@@ -30,7 +30,7 @@ static constexpr uint16_t SENTRY_REQUEST_ROBOT_ID = 0x200;
 
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
-enum class SentryMotionStrategyMessages : uint8_t
+enum class SentryRequestMessageType : uint8_t
 {
     NONE = 0,
     GO_TO_FRIENDLY_BASE,
@@ -40,4 +40,4 @@ enum class SentryMotionStrategyMessages : uint8_t
 };
 }  // namespace aruwsrc::communication::serial
 
-#endif  //  SENTRY_MOTION_STRATEGY_MESSAGE_TYPES_HPP_
+#endif  //  SENTRY_REQUEST_MESSAGE_TYPES_HPP_

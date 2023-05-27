@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "sentry_motion_strategy_messages.hpp"
+#include "sentry_request_message_types.hpp"
 
 namespace aruwsrc::communication::serial
 {
@@ -32,30 +32,30 @@ void SentryRequestHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     // The message type we sent came directly after the interactive header
-    SentryMotionStrategyMessages type = static_cast<SentryMotionStrategyMessages>(
+    SentryRequestMessageType type = static_cast<SentryRequestMessageType>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     switch (type)
     {
-        case SentryMotionStrategyMessages::NONE:
+        case SentryRequestMessageType::NONE:
             if (noStrategyHandler != nullptr)
             {
                 noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryMotionStrategyMessages::GO_TO_FRIENDLY_BASE:
+        case SentryRequestMessageType::GO_TO_FRIENDLY_BASE:
             if (goToFriendlyBaseHandler != nullptr)
             {
                 goToFriendlyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryMotionStrategyMessages::GO_TO_ENEMY_BASE:
+        case SentryRequestMessageType::GO_TO_ENEMY_BASE:
             if (goToEnemyBaseHandler != nullptr)
             {
                 goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryMotionStrategyMessages::GO_TO_SUPPLIER_ZONE:
+        case SentryRequestMessageType::GO_TO_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
                 goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types

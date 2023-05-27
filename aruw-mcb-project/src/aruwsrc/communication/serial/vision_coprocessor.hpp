@@ -32,7 +32,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_motion_strategy_messages.hpp"
+#include "aruwsrc/robot/sentry/sentry_request_message_types.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -282,7 +282,7 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
-    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryMotionStrategyMessages strategy);
+    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType strategy);
     // static inline void handleTimeSyncRequest()
     // {
     //     visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
