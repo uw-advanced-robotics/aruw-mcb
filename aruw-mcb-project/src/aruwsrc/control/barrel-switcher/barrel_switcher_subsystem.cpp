@@ -72,7 +72,7 @@ void BarrelSwitcherSubsystem::refresh()
     }
 }
 
-BarrelState BarrelSwitcherSubsystem::getBarrelState() { return barrelState; }
+BarrelState BarrelSwitcherSubsystem::getBarrelState() const { return barrelState; }
 
 void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
 {

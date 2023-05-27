@@ -20,10 +20,9 @@
 #ifndef BARREL_SWITCHER_SUBSYSTEM_HPP
 #define BARREL_SWITCHER_SUBSYSTEM_HPP
 
+#include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
-
-#include "tap/control/subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include <gmock/gmock.h>
@@ -37,16 +36,17 @@ namespace aruwsrc::control
 static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
 static constexpr int16_t MOTOR_POSITION_TOLERANCE = 3000;
 
-struct StallThresholdConfig {
+struct StallThresholdConfig
+{
     /**Maximum rpm value at which to detect a stall*/
     int16_t maxRPM;
-    /**Minimum torque value at which to not detect a stall*/ 
+    /**Minimum torque value at which to not detect a stall*/
     int16_t minTorque;
 };
 
 enum class BarrelState
 {
-    IDLE, //at a position that is neither left nor right barrel
+    IDLE,  // at a position that is neither left nor right barrel
     USING_LEFT_BARREL,
     USING_RIGHT_BARREL
 };
@@ -66,12 +66,12 @@ public:
     void useRight();
     void useLeft();
     void stop();
-    BarrelState getBarrelState();
+    BarrelState getBarrelState() const;
 
 private:
     void setMotorOutput(int32_t velocity);
 
-    //FOR DEBUGGING, to be removed!
+    // FOR DEBUGGING, to be removed!
     int16_t outputDesiredDebug;
     int16_t torqueDebug;
     int16_t shaftRPMDebug;

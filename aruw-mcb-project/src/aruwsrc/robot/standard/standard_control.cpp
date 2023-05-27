@@ -58,7 +58,6 @@
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
-#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
@@ -83,6 +82,10 @@
 #include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 #include "aruwsrc/control/barrel-switcher/motor_homing_command.hpp"
+#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
+#include "aruwsrc/control/governor/ref_system_projectile_launched_dual_barrel_governor.hpp"
+#include "aruwsrc/control/launcher/dual_barrel_referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/dual_barrel_friction_wheel_spin_ref_limited_command.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
@@ -158,6 +161,18 @@ VelocityAgitatorSubsystem agitator(
     constants::AGITATOR_PID_CONFIG,
     constants::AGITATOR_CONFIG);
 
+#ifdef TARGET_STANDARD_SPIDER
+aruwsrc::control::launcher::DualBarrelRefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheels(
+        drivers(),
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+#else
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -167,6 +182,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+#endif
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -326,9 +342,17 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
+#ifdef TARGET_STANDARD_SPIDER
+RefSystemProjectileLaunchedDualBarrelGovernor refSystemProjectileLaunchedGovernor(
+    drivers()->refSerial,
+    barrelSwitcher,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+#else
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+#endif
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
@@ -340,17 +364,6 @@ GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
     rotateAndUnjamAgitator,
     {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor, &fireRateLimitGovernor});
 
-// rotates agitator with heat limiting applied
-HeatLimitGovernor heatLimitGovernor(
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    constants::HEAT_LIMIT_BUFFER);
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
-    {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor});
-
-// rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
     ((tap::Drivers *)(drivers())),
     drivers()->visionCoprocessor,
@@ -358,22 +371,56 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
+#ifdef TARGET_STANDARD_SPIDER
+HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    constants::HEAT_LIMIT_BUFFER,
+    barrelSwitcher);
+// rotates agitator with heat limiting and barrel position checking applied
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimitingDualBarrels(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&heatLimitDualBarrelSwitcherGovernor});
+// rotates agitator when aiming at target and within heat limit
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&heatLimitDualBarrelSwitcherGovernor, &cvOnTargetGovernor});
+
+aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    15.0f,
+    false,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    barrelSwitcher);
+
+aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+    drivers(),
+    &frictionWheels,
+    0.0f,
+    true,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+    barrelSwitcher);
+#else
+HeatLimitGovernor heatLimitGovernor(
+    *drivers(),
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    constants::HEAT_LIMIT_BUFFER);
+// rotates agitator with heat limiting applied
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    {&heatLimitGovernor});
+// rotates agitator when aiming at target and within heat limit
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor, &cvOnTargetGovernor});
-
-// rotate
-HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,  // TODO: what id
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    constants::HEAT_LIMIT_BUFFER,
-    barrelSwitcher);
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimitingDualBarrels(
-    {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -388,6 +435,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+#endif
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
@@ -428,11 +476,17 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
+#ifdef TARGET_STANDARD_SPIDER
+    {&rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels},
+#else
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+#endif
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
+
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -444,7 +498,7 @@ HoldCommandMapping leftSwitchUp(
 
 // Keyboard/Mouse related mappings
 
-// For motor homing
+// For motor homing, remove later!!!
 #ifdef TARGET_STANDARD_SPIDER
 PressCommandMapping rCtrlPressed(
     drivers(),
@@ -476,7 +530,11 @@ ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Rem
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
+#ifdef TARGET_STANDARD_SPIDER
+    rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels,
+#else
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+#endif
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor);

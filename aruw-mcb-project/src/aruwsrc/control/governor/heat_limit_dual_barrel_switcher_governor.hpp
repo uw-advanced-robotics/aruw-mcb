@@ -22,11 +22,11 @@
 
 #include <cassert>
 
-#include "aruwsrc/control/governor/heat_tracker.hpp"
-#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
-
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/governor/heat_tracker.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -42,31 +42,41 @@ class HeatLimitDualBarrelSwitcherGovernor : public tap::control::governor::Comma
 public:
     HeatLimitDualBarrelSwitcherGovernor(
         tap::Drivers &drivers,
-        const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDLeft,
-        const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismIDRight,
+        const tap::communication::serial::RefSerialData::Rx::MechanismID
+            firingSystemMechanismIDLeft,
+        const tap::communication::serial::RefSerialData::Rx::MechanismID
+            firingSystemMechanismIDRight,
         const uint16_t heatLimitBuffer,
         aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher)
         : heatTrackerLeft(drivers, firingSystemMechanismIDLeft, heatLimitBuffer),
-        heatTrackerRight(drivers, firingSystemMechanismIDRight, heatLimitBuffer),
-        barrelSwitcher(barrelSwitcher)
+          heatTrackerRight(drivers, firingSystemMechanismIDRight, heatLimitBuffer),
+          barrelSwitcher(barrelSwitcher)
     {
     }
 
-    bool isReady() final { 
+    bool isReady() final
+    {
         if (!barrelSwitcher.isInPosition()) return false;
-        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
-            return heatTrackerLeft.enoughHeatToLaunchProjectile(); 
-        } else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL) {
+        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL)
+        {
+            return heatTrackerLeft.enoughHeatToLaunchProjectile();
+        }
+        else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL)
+        {
             return heatTrackerRight.enoughHeatToLaunchProjectile();
         }
         return false;
     }
 
-    bool isFinished() final {
+    bool isFinished() final
+    {
         if (!barrelSwitcher.isInPosition()) return true;
-        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL) {
-            return !heatTrackerLeft.enoughHeatToLaunchProjectile(); 
-        } else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL) {
+        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL)
+        {
+            return !heatTrackerLeft.enoughHeatToLaunchProjectile();
+        }
+        else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL)
+        {
             return !heatTrackerRight.enoughHeatToLaunchProjectile();
         }
         return true;
@@ -75,7 +85,7 @@ public:
 private:
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;
     aruwsrc::control::governor::HeatTracker heatTrackerRight;
-    aruwsrc::control::BarrelSwitcherSubsystem& barrelSwitcher;
+    aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
 };
 }  // namespace aruwsrc::control::governor
 
