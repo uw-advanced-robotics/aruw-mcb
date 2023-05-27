@@ -519,6 +519,11 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     maleWife::default_launch_speed,
     maleWife::majorToTurretR);  // defaultLaunchSpeed
 
+SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
+    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    (OttoBallisticsSolver<TurretMinorFrame>*) &malewifeBallisticsSolver,
+    maleWife::turretID);
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a
 // single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and
 // things like that. What if controllers were mix-ins for susbsystems or something?
@@ -619,146 +624,6 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
-
-// // male wife shooting ======================
-
-// // spin friction wheels commands
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
-//     false,
-//     maleWife::barrelID);
-
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     0.0f,
-//     true,
-//     maleWife::barrelID);
-
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     1.0f,
-//     true,
-//     maleWife::barrelID);
-
-// FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife (frictionWheelsMalewife);
-
-// // Agitator commands (male wife)
-// MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
-//     *drivers(),
-//     maleWifeAgitator,
-//     maleWifeRotateAgitator,
-//     maleWifeUnjamAgitator);
-
-// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
-//     drivers()->refSerial,
-//     girlBoss::barrelID);
-
-// AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
-// FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
-
-// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
-//     {&girlBossAgitator},
-//     girlBossRotateAndUnjamAgitator,
-//     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
-
-// // rotates agitator with heat limiting applied
-// HeatLimitGovernor heatLimitGovernorGirlboss(
-//     *drivers(),
-//     girlBoss::barrelID,
-//     constants::HEAT_LIMIT_BUFFER);
-
-// // rotates agitator when aiming at target and within heat limit
-// SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
-//     ((tap::Drivers *)(drivers())),
-//     drivers()->visionCoprocessor,
-//     sentryTurretCVCommand,
-//     autoAimLaunchTimerGirlBoss,
-//     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-//     girlBoss::turretID);
-
-// GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
-//     {&girlBossAgitator},
-//     girlBossRotateAndUnjamAgitator,
-//     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
-
-
-
-// // spin friction wheels commands
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
-//     false,
-//     maleWife::barrelID);
-
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     0.0f,
-//     true,
-//     maleWife::barrelID);
-
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsMalewife,
-//     1.0f,
-//     true,
-//     maleWife::barrelID);
-
-// FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife (frictionWheelsMalewife);
-
-// // Agitator commands (male wife)
-// MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
-//     *drivers(),
-//     girlBossAgitator,
-//     girlBossRotateAgitator,
-//     girlBossUnjamAgitator);
-
-// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
-//     drivers()->refSerial,
-//     girlBoss::barrelID);
-
-// AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss;
-// FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
-
-// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
-//     {&girlBossAgitator},
-//     girlBossRotateAndUnjamAgitator,
-//     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
-
-// // rotates agitator with heat limiting applied
-// HeatLimitGovernor heatLimitGovernorGirlboss(
-//     *drivers(),
-//     girlBoss::barrelID,
-//     constants::HEAT_LIMIT_BUFFER);
-
-// // rotates agitator when aiming at target and within heat limit
-// SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
-//     ((tap::Drivers *)(drivers())),
-//     drivers()->visionCoprocessor,
-//     sentryTurretCVCommand,
-//     autoAimLaunchTimerGirlBoss,
-//     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-//     girlBoss::turretID);
-
-// GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
-//     {&girlBossAgitator},
-//     girlBossRotateAndUnjamAgitator,
-//     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-//     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
-
-
 // girlboss shooting ======================
 
 // spin friction wheels commands
@@ -776,13 +641,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopGirlBossFrict
     true,
     girlBoss::barrelID);
 
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
-    drivers(),
-    &frictionWheelsMalewife,
-    1.0f,
-    true,
-    maleWife::barrelID);
-
 FrictionWheelsOnGovernor frictionWheelsOnGovernorGirlboss(frictionWheelsGirlboss);
 
 // Agitator commands (girl boss)
@@ -799,12 +657,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
     girlBoss::barrelID);
 
 AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss(
-              *drivers(),
-              drivers()->visionCoprocessor,
-              drivers()->commandScheduler,
-              sentryTurretCVCommand,
-              girlBoss::turretID
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    sentryTurretCVCommand,
+    girlBoss::turretID
 );
+
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
@@ -833,37 +692,83 @@ GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
-// // Agitator commands (male wife)
-// MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
-//     *drivers(),
-//     maleWifeAgitator,
-//     maleWifeRotateAgitator,
-//     maleWifeUnjamAgitator);
 
-// aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand
-// turretMinor0ControlCommand(
-//     drivers(),
-//     &turretZero.turretSubsystem,
-//     &turretZero.chassisFrameYawTurretController,
-//     &turretZero.chassisFramePitchTurretController,
-// );
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
+// malewife shooting ======================
 
-// aruwsrc::control::turret::sentry::TurretMinorSentryWorldRelativeCommand
-// turretMinor1ControlCommand(
-//     drivers(),
-//     &turretOne.turretSubsystem,
-//     &turretOne.chassisFrameYawTurretController,
-//     &turretOne.chassisFramePitchTurretController,
-//     USER_YAW_INPUT_SCALAR,
-// );
-// aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-//     drivers(),
-//     &drivers()->controlOperatorInterface,
-//     &sentryDrive,
-//     &turretMajor.yawMotor,
-//     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+// spin friction wheels commands
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsMalewife,
+    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    false,
+    maleWife::barrelID);
+
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsMalewife,
+    0.0f,
+    true,
+    maleWife::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife(frictionWheelsMalewife);
+
+// Agitator commands (girl boss)
+MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
+    *drivers(),
+    maleWifeAgitator,
+    maleWifeRotateAgitator,
+    maleWifeUnjamAgitator);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorMalewife(
+    drivers()->refSerial,
+    maleWife::barrelID);
+
+AutoAimFireRateReselectionManager fireRateReselectionManagerMalewife(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    sentryTurretCVCommand,
+    maleWife::turretID
+);
+
+FireRateLimitGovernor fireRateLimitGovernorMalewife(fireRateReselectionManagerMalewife);
+
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedMalewife(
+    {&maleWifeAgitator},
+    maleWifeRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernorMalewife(
+    *drivers(),
+    maleWife::barrelID,
+    constants::HEAT_LIMIT_BUFFER);
+
+// rotates agitator when aiming at target and within heat limit
+SentryMinorCvOnTargetGovernor cvOnTargetGovernorMalewife(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    sentryTurretCVCommand,
+    autoAimLaunchTimerMalewife,
+    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    maleWife::turretID);
+
+GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
+    {&maleWifeAgitator},
+    maleWifeRotateAndUnjamAgitator,
+    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
 
 // void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage();
 // }
@@ -932,28 +837,11 @@ HoldCommandMapping leftSwitchMid(
      &turretMajorControlCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
-// re-map whenever you wanna recalibrate
-// TODO CHANGE BACK TEMP TO ALLOW SWERVE MANUAL DRIVE
-
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-// HoldCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting, &girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-// HoldCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&rotateAndUnjamAgitatorWithHeatLimiting, &girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-// this works 
-// HoldRepeatCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&girlBossRotateAndUnjamAgitator},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-//     true);
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
@@ -961,20 +849,6 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
-// HoldCommandMapping rightSwitchUpFriction(
-//     drivers(),
-//     {&girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping rightSwitchMid(
-//     drivers(),
-//     {&girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
-
-// HoldCommandMapping rightSwitchMid(
-//     drivers(),
-//     {&girlBossRotateAndUnjamAgitator, &girlBossFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 // HoldCommandMapping rightSwitchDown(
 //     drivers(),
