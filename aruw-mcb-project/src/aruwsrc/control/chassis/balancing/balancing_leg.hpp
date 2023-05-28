@@ -49,6 +49,7 @@ enum BalancingState
     FALLEN_MOVING,
     FALLEN_NOT_MOVING,
     STANDING_UP,
+    JUMPING,
 };
 
 /**
@@ -148,6 +149,12 @@ public:
     inline aruwsrc::control::motion::FiveBarLinkage* getFiveBar() { return fivebar; };
 
     /**
+     * @brief Initiates a jump
+     * Sets the FSM state to the jump state.
+     */
+    inline void setJumping() { balancingState = JUMPING; }
+
+    /**
      * @return The stand-by position of the fivebar.
      */
     inline modm::Vector2f getDefaultPosition() { return fivebar->getDefaultPosition(); }
@@ -178,21 +185,46 @@ private:
      */
     aruwsrc::can::TurretMCBCanComm& chassisMCB;
 
+    // Finite State Machine Parameters
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
     bool standupEnable = false;
     float STANDUP_TORQUE_GAIN = 1.1;
+    float JUMP_GRAV_GAIN = 1.0f;
 
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(28);
+    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
     /**
      * @param[in] dt (us)
      */
     void computeState(uint32_t dt);
 
+    /**
+     * FSM state when the robot is balancing by itself. If the robot disarms, this prevents wheels
+     * from outputting.
+     */
     void updateBalancing(uint32_t dt);
+    /**
+     * FSM state for when the robot is fallen down and moving (has nonzero speed across the floor).
+     * Waits until the chassis stops to continue.
+     */
     void updateFallenMoving();
+    /**
+     * FSM state for when the robot has stopped moving, is fallen, and is ready to get back up.
+     * Automatic getting-up is gated by the `standupEnable` flag. If the chassis is sufficiently up
+     * as defined by the `FALLEN_ANGLE` parameters, we go to the `BALANCING` state
+     */
     void updateFallenNotMoving();
+    /**
+     * FSM state for automatically standing. The system executes a feedforward to the wheels to "kick" the robot up, until it is level enough to automatically balance.
+     */
     void updateStandingUp();
+    /**
+     * FSM state for jumping. It executes `updateBalancing` but overrides the z- setpoint to the high position and bypasses the ramper.  
+     */
+    void updateJumping(uint32_t dt);
 
     void setLegsRetracted();
     /**
@@ -300,10 +332,6 @@ private:
     float xoffset,    // (m) x-offset used to drive linear acceleration
         xoffsetPrev;  // (m)
     float prevOutput;
-
-    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(28);
-    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
 };
 }  // namespace chassis
 }  // namespace aruwsrc

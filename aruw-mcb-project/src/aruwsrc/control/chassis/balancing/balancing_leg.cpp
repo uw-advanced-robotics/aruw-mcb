@@ -82,10 +82,14 @@ void BalancingLeg::update()
         case STANDING_UP:
             updateStandingUp();
             break;
+        case JUMPING:
+            updateJumping(dt);
+            break;
     };
     zDesRamper.setTarget(desiredWheelLocation.getY());
     zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
-    desiredWheelLocation.setY(limitVal(zDesRamper.getValue(), -.35f, -.1f));
+    desiredWheelLocation.setY(
+        limitVal(zDesRamper.getValue(), CHASSIS_HEIGHTS.getSecond(), CHASSIS_HEIGHTS.getFirst()));
 
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
@@ -198,6 +202,35 @@ void BalancingLeg::updateStandingUp()
     }
 }
 
+void BalancingLeg::updateJumping(uint32_t dt)
+{
+    zDesired = CHASSIS_HEIGHTS.getSecond();
+    // This is a little sussy, but we want to keeep balancing while we jump.
+    updateBalancing(dt);
+    // override the ramper and very, very quickly move the wheel down, if we're low to begin with
+    if (compareFloatClose(fivebar->getCurrentPosition().getY(), CHASSIS_HEIGHTS.getFirst(), .03f))
+    {
+
+        zDesRamper.setValue(desiredWheelLocation.getY());
+    }
+    else
+    {
+        // If we're not in the position ready to jump, set the desired Z and exit the attempt
+        zDesired = CHASSIS_HEIGHTS.getFirst();
+        balancingState = BALANCING;
+    }
+
+    if (compareFloatClose(fivebar->getCurrentPosition().getY(), CHASSIS_HEIGHTS.getSecond(), .03f))
+    {
+        float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
+        float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
+
+        desiredWheelLocation.setX(limitVal(desiredx, -.1f, .1f));
+        desiredWheelLocation.setY(limitVal(desiredz, -.35f, -.1f));
+        balancingState = BALANCING;
+    }
+}
+
 void BalancingLeg::setLegsRetracted() { desiredWheelLocation = fivebar->getDefaultPosition(); }
 
 void BalancingLeg::fivebarController(uint32_t dt)
@@ -215,6 +248,11 @@ void BalancingLeg::fivebarController(uint32_t dt)
                    cos(M_PI - fivebar->getMotor2RelativePosition()) *
                    (-(fivebar->getCurrentPosition().getX() - (L * cos(B) / 2)) / L * cos(B)) *
                    (MASS_CHASSIS * 9.81 / 2);
+
+    if (balancingState = JUMPING) {
+        gravT1 *= JUMP_GRAV_GAIN;
+        gravT2 *= JUMP_GRAV_GAIN;
+    }
 
     // Wheel driving force feedforward
     float wheelFF1 = sin(fivebar->getMotor1RelativePosition()) *

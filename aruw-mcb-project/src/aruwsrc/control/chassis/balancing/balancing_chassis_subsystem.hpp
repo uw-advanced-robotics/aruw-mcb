@@ -80,6 +80,12 @@ public:
         legStalled[0] = legStalled[1] = legStalled[2] = legStalled[3] = false;
     };
 
+    void startJumping()
+    {
+        leftLeg.setJumping();
+        rightLeg.setJumping();
+    }
+
     /**
      * @return the number of chassis motors
      */
