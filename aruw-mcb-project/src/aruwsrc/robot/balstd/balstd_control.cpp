@@ -439,7 +439,6 @@ PressCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-PressCommandMapping cPressed(drivers(), {}, RemoteMapState({Remote::Key::C}));
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
     {},
@@ -498,7 +497,17 @@ PressCommandMapping xPressed(
     {&autorotateDriveCommand},
     RemoteMapState({Remote::Key::X}));
 
-extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
+CycleStateCommandMapping<
+    BalancingChassisAutorotateCommand::AutorotationMode,
+    BalancingChassisAutorotateCommand::NUM_AUTOROTATION_STATES,
+    BalancingChassisAutorotateCommand>
+    cPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::C}),
+        BalancingChassisAutorotateCommand::STRICT_PLATE_FORWARD,
+        &autorotateDriveCommand,
+        &BalancingChassisAutorotateCommand::setAutorotationMode);
+
 CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,

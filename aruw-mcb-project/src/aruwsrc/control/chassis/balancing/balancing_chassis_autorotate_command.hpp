@@ -35,26 +35,29 @@ namespace chassis
  * paused until the difference is within this value again. */
 static constexpr float TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION = modm::toRadian(1.0f);
 
-static constexpr uint32_t LAZY_ROTATION_TIMEOUT_MS = 500;
-/**
- * Various modes for autorotation. Strict means autorotation is executed immediately. Lazy means a
- * timeout runs between when desired rotation ends and autorotation begins. Keep chassis angle only
- * rotates the chassis to how it needs to translate, and leaves it there indefinitely.
- *
- */
-enum AutorotationMode : uint8_t
-{
-    STRICT_PLATE_FORWARD = 0,
-    LAZY_PLATE_FORWARD,
-    STRICT_SIDE_FORWARD,
-    LAZY_SIZE_FORWARD,
-    KEEP_CHASSIS_ANGLE,
-    NUM_AUTOROTATION_STATES,  // This automatically is the number of states since we start at 0
-};
-
 class BalancingChassisAutorotateCommand : public tap::control::Command
 {
 public:
+    static constexpr uint32_t LAZY_ROTATION_TIMEOUT_MS = 3000;
+    /**
+     * The minimum velocity desired in order for the motionplanning algorithm to attempt  
+     */
+    static constexpr float MIN_VELOCITY_FOR_MOTIONPLANNING = 1.0f;
+    /**
+     * Various modes for autorotation. Strict means autorotation is executed immediately. Lazy means
+     * a timeout runs between when desired rotation ends and autorotation begins. Keep chassis angle
+     * only rotates the chassis to how it needs to translate, and leaves it there indefinitely.
+     *
+     */
+    enum AutorotationMode : uint8_t
+    {
+        STRICT_PLATE_FORWARD = 0,
+        LAZY_PLATE_FORWARD,
+        STRICT_SIDE_FORWARD,
+        LAZY_SIDE_FORWARD,
+        KEEP_CHASSIS_ANGLE,
+        NUM_AUTOROTATION_STATES,  // This automatically is the number of states since we start at 0
+    };
     BalancingChassisAutorotateCommand(
         tap::Drivers* drivers,
         BalancingChassisSubsystem* chassis,

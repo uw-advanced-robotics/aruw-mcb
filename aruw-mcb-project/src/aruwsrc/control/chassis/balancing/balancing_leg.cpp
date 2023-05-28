@@ -111,8 +111,8 @@ void BalancingLeg::updateBalancing(uint32_t dt)
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired));
     float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = deadZone(LQR_K3 * (tl), .04f);
-    float lqrPitchRate = deadZone(LQR_K4 * chassisAngledot, 1.5f);
+    float lqrPitch = LQR_K3 * deadZone((tl), .04f);
+    float lqrPitchRate = LQR_K4 * deadZone(chassisAngledot, 1.0f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
 
@@ -125,7 +125,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     debug5 = lqrYaw;
     debug6 = lqrYawRate;
 
-    wheelTorque = limitVal(wheelTorque, -3.0f, 3.0f);
+    wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
     // 3. Send New Output Values
     int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;  // convert from Torque to output
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
@@ -133,7 +133,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
     debug7 = driveWheelOutput;
     if (armed)
     {
-        // driveWheel->setDesiredOutput(driveWheelOutput);
+        driveWheel->setDesiredOutput(driveWheelOutput);
     }
     else
     {
@@ -204,6 +204,9 @@ void BalancingLeg::fivebarController(uint32_t dt)
 {
     float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
     float B = chassisAngle;
+    float wheelForce = WHEEL_RADIUS * driveWheel->getOutputDesired() / 16384 / 20 * .3;
+
+    // Gravity compensation feedforward
     float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
                    cos(fivebar->getMotor1RelativePosition()) *
                    ((fivebar->getCurrentPosition().getX() + (L * cos(B) / 2)) / L * cos(B)) *
@@ -212,6 +215,12 @@ void BalancingLeg::fivebarController(uint32_t dt)
                    cos(M_PI - fivebar->getMotor2RelativePosition()) *
                    (-(fivebar->getCurrentPosition().getX() - (L * cos(B) / 2)) / L * cos(B)) *
                    (MASS_CHASSIS * 9.81 / 2);
+
+    // Wheel driving force feedforward
+    float wheelFF1 = sin(fivebar->getMotor1RelativePosition()) *
+                     fivebar->getFiveBarConfig().motor1toJoint1Length * wheelForce / 2;
+    float wheelFF2 = sin(fivebar->getMotor2RelativePosition()) *
+                     fivebar->getFiveBarConfig().motor2toJoint2Length * wheelForce / 2;
 
     float motor1error = fivebar->getMotor1Error();
     float motor2error = fivebar->getMotor2Error();
@@ -226,10 +235,14 @@ void BalancingLeg::fivebarController(uint32_t dt)
         dt);
     if (balancingState == BALANCING && armed)
     {
+        // The 1000 is in there to convert from A to mA
         motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        motor1output -= wheelFF1 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
         // motor direction so minus
         motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        motor2output += wheelFF2 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
     }
+
     fivebar->moveMotors(motor1output, motor2output);
 }
 
