@@ -35,10 +35,10 @@ class HolonomicChassisSubsystem;
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
-class AutoNavCommand : public tap::control::Command
+class AutoNavJukeCommand : public tap::control::Command
 {
 public:
-    AutoNavCommand(
+    AutoNavJukeCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
@@ -54,7 +54,7 @@ public:
 
     bool isFinished() const override { return false; }
 
-    const char* getName() const override { return "auto nav"; }
+    const char* getName() const override { return "chassis beyblade"; }
 
 private:
     tap::Drivers& drivers;
@@ -68,7 +68,7 @@ private:
     float lastY = 0;
     float desiredX = 0;
     float desiredY = 0;
-};  // class AutoNavCommand
+};  // class AutoNavJukeCommand
 
 }  // namespace aruwsrc::chassis
 

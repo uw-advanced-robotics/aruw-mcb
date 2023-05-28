@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "auto_nav_command.hpp"
+#include "auto_nav_juke_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
@@ -36,7 +36,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-AutoNavCommand::AutoNavCommand(
+AutoNavJukeCommand::AutoNavJukeCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretMotor& yawMotor,
@@ -55,9 +55,9 @@ AutoNavCommand::AutoNavCommand(
     addSubsystemRequirement(&chassis);
 }
 
-void AutoNavCommand::initialize() {}
+void AutoNavJukeCommand::initialize() {}
 
-void AutoNavCommand::execute()
+void AutoNavJukeCommand::execute()
 {
     // if (yawMotor.isOnline())
     if (true)
@@ -78,7 +78,7 @@ void AutoNavCommand::execute()
         float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
         float x = 0.0;
         float y = 0.0;
-        if (mag > 0.1) {
+        if (mag > 0.05) {
             x = desiredVelocityX / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
             y = desiredVelocityY / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         }
@@ -97,7 +97,7 @@ void AutoNavCommand::execute()
     }
 }
 
-void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }
+void AutoNavJukeCommand::end(bool) { chassis.setZeroRPM(); }
 }  // namespace chassis
 
 }  // namespace aruwsrc

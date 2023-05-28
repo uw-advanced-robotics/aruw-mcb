@@ -172,7 +172,7 @@ public:
     {
         float x;
         float y;
-        int timestamp;
+        long long timestamp;
     } modm_packed;
 
     struct OdometryData
@@ -222,7 +222,7 @@ public:
         return lastAimData[turretID];
     }
     
-    mockable inline AutoNavSetpointData getLastSetpointData() const { return lastSetpointData; }
+    mockable inline const AutoNavSetpointData& getLastSetpointData() const { return lastSetpointData; }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
