@@ -83,7 +83,10 @@ void AutoNavCommand::execute()
         }
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
+        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle); // @todo: we shouldn't need to negate this just for the sentry
+        // we should debug in ozone to see which implementation is correct, and, if necessary
+        // negate the yaw in the sentry kf odometry or negate the yaw in the chassiskf odometry
+        // this negation has the potential to mess some things up!
 
         // set outputs
         // TODO: i THINK this is positional offset
