@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEAT_LIMIT_DUAL_BARREL_GOVERNOR_HPP_
-#define HEAT_LIMIT_DUAL_BARREL_GOVERNOR_HPP_
+#ifndef HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_
+#define HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_
 
 #include <cassert>
 
@@ -89,4 +89,4 @@ private:
 };
 }  // namespace aruwsrc::control::governor
 
-#endif  //  HEAT_LIMIT_GOVERNOR_HPP_
+#endif  // HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BARREL_SWITCHER_SUBSYSTEM_HPP
-#define BARREL_SWITCHER_SUBSYSTEM_HPP
+#ifndef BARREL_SWITCHER_SUBSYSTEM_HPP_
+#define BARREL_SWITCHER_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
@@ -33,7 +33,6 @@
 namespace aruwsrc::control
 {
 static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
-static constexpr int16_t MOTOR_POSITION_TOLERANCE = 3000;
 
 struct StallThresholdConfig
 {
@@ -100,6 +99,6 @@ private:
      */
     tap::motor::DjiMotor motor;
 #endif
-};
+}; // class BarrelSwitcherSubsystem
 }  // namespace aruwsrc::control
-#endif
+#endif // BARREL_SWITCHER_SUBSYSTEM_HPP_
