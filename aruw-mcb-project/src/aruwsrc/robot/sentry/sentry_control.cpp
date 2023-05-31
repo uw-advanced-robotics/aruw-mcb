@@ -829,10 +829,16 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 //     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&sentryTurretCVCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&sentryTurretCVCommand},
+    {&autoNavCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 // HoldCommandMapping leftSwitchUp(
 //     drivers(),
 //     {&sentryTurretCVCommand, &beybladeCommand},

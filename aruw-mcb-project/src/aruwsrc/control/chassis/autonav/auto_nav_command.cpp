@@ -83,7 +83,7 @@ void AutoNavCommand::execute()
         }
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, chassisYawAngle);
+        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
         // set outputs
         // TODO: i THINK this is positional offset
