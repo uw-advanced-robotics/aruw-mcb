@@ -274,7 +274,7 @@ void CommandScheduler::addCommand(Command *commandToAdd)
         return;
     }
 
-    subsystem_scheduler_bitmap_t requirementsBitwise = commandToAdd->getRequirementsBitwise();
+    requirementsBitwise = commandToAdd->getRequirementsBitwise();
 
     // Check to see if all the requirements are in the subsytemToCommandMap
     if ((requirementsBitwise & registeredSubsystemBitmap) != requirementsBitwise ||
