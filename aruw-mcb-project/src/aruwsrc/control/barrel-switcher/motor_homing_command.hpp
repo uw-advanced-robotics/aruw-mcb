@@ -19,12 +19,11 @@
 #ifndef MOTOR_HOMING_COMMAND_HPP_
 #define MOTOR_HOMING_COMMAND_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/barrel-switcher/homeable_subsystem_interface.hpp"
-#include "tap/architecture/timeout.hpp"
-
 
 namespace aruwsrc::control
 {

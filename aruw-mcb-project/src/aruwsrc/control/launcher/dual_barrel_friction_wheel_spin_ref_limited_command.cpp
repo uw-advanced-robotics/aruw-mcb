@@ -67,7 +67,8 @@ void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
         }
         else
         {
-            frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
+            frictionWheels->setDesiredLaunchSpeed(0);
+            return;
         }
 
         if (barrelSwitcher.getBarrelState() != aruwsrc::control::BarrelState::IDLE)
@@ -84,7 +85,6 @@ void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
                     maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
                     break;
             }
-
             frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
         }
     }

@@ -36,16 +36,18 @@ namespace aruwsrc::control::governor
  *
  * @note Does not govern whether or not the governed Command can start execution.
  */
-class RefSystemProjectileLaunchedDualBarrelGovernor : public tap::control::governor::CommandGovernorInterface
+class RefSystemProjectileLaunchedDualBarrelGovernor
+    : public tap::control::governor::CommandGovernorInterface
 {
 public:
     /**
      * @param[in] refSerial Global RefSerial object.
-     * @param[in] barrelSwitcher Identifies the barrel (left or right) currently being used to launch projectiles.
-     * @param[in] barrelMechanismIdLeft The ref system barrel ID of the left barrel in the dual barrel subsystem
-     *  to check if a projectile has been fired.
-     * @param[in] barrelMechanismIdRight The ref system barrel ID of the right barrel in the dual barrel subsystem
-     *  to check if a projectile has been fired.
+     * @param[in] barrelSwitcher Identifies the barrel (left or right) currently being used to
+     * launch projectiles.
+     * @param[in] barrelMechanismIdLeft The ref system barrel ID of the left barrel in the dual
+     * barrel subsystem to check if a projectile has been fired.
+     * @param[in] barrelMechanismIdRight The ref system barrel ID of the right barrel in the dual
+     * barrel subsystem to check if a projectile has been fired.
      */
     RefSystemProjectileLaunchedDualBarrelGovernor(
         tap::communication::serial::RefSerial &refSerial,
@@ -84,7 +86,7 @@ private:
         {
             return std::nullopt;
         }
-        
+
         if ((barrelSwitcher.getBarrelState() != BarrelState::USING_LEFT_BARREL ||
              refSerial.getRobotData().turret.launchMechanismID != barrelMechanismIdLeft) &&
             (barrelSwitcher.getBarrelState() != BarrelState::USING_RIGHT_BARREL ||
@@ -93,7 +95,7 @@ private:
             return lastProjectileLaunchTime;
         }
 
-        //if using left and recieving left, or using right and recieving right
+        // if using left and recieving left, or using right and recieving right
         return refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
     }
 };

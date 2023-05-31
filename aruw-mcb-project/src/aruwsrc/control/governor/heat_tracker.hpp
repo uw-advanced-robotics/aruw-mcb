@@ -24,11 +24,10 @@
 
 namespace aruwsrc::control::governor
 {
-
 /**
  * Member of governors that keep track of a barrel's referee-reported heat and whether it can fire
  * another projectile within the heat limit.
-*/
+ */
 class HeatTracker
 {
 public:
@@ -85,9 +84,7 @@ private:
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
 
     const uint16_t heatLimitBuffer;
-
 };
-} // namespace aruwsrc::control::governor
+}  // namespace aruwsrc::control::governor
 
-
-#endif // HEAT_TRACKER_HPP_
+#endif  // HEAT_TRACKER_HPP_

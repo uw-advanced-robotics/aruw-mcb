@@ -32,7 +32,6 @@
 
 namespace aruwsrc::control
 {
-
 static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
 static constexpr int16_t MOTOR_POSITION_TOLERANCE = 3000;
 

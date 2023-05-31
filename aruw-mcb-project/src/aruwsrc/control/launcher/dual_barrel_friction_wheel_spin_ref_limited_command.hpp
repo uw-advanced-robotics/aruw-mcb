@@ -23,8 +23,9 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/control/command.hpp"
 
-#include "friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
+
+#include "friction_wheel_subsystem.hpp"
 
 namespace aruwsrc
 {

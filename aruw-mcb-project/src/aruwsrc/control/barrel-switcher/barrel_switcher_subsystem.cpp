@@ -19,9 +19,9 @@
 
 #include "barrel_switcher_subsystem.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "tap/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc::control
 {
@@ -47,21 +47,27 @@ void BarrelSwitcherSubsystem::refresh()
     torqueDebug = motor.getTorque();
     shaftRPMDebug = motor.getShaftRPM();
     stalled = this->isStalled();
-    
+
     switch (barrelState)
     {
         case BarrelState::USING_LEFT_BARREL:
-            if (!isStalled() && !inPosition) {
+            if (!isStalled() && !inPosition)
+            {
                 setMotorOutput(-MOTOR_OUTPUT);
-            } else {
+            }
+            else
+            {
                 inPosition = true;
                 setMotorOutput(0);
             }
             break;
         case BarrelState::USING_RIGHT_BARREL:
-            if (!isStalled() && !inPosition) {
+            if (!isStalled() && !inPosition)
+            {
                 setMotorOutput(MOTOR_OUTPUT);
-            } else {
+            }
+            else
+            {
                 inPosition = true;
                 setMotorOutput(0);
             }
@@ -86,9 +92,7 @@ bool BarrelSwitcherSubsystem::isStalled() const
         (fabsl(motor.getTorque()) > config.minTorque));
 }
 
-bool BarrelSwitcherSubsystem::isInPosition() const {
-    return inPosition;
-}
+bool BarrelSwitcherSubsystem::isInPosition() const { return inPosition; }
 
 void BarrelSwitcherSubsystem::useRight()
 {

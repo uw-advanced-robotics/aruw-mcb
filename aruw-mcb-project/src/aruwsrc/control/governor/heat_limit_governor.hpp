@@ -22,10 +22,10 @@
 
 #include <cassert>
 
-#include "aruwsrc/control/governor/heat_tracker.hpp"
-
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/governor/heat_tracker.hpp"
 
 namespace aruwsrc::control::governor
 {

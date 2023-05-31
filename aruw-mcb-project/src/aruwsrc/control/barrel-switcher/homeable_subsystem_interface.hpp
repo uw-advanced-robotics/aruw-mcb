@@ -24,15 +24,15 @@
 
 namespace aruwsrc::control
 {
-
-struct HomingConfig {
+struct HomingConfig
+{
     /**Mininum rpm value at which to detect a stall (should be negative)*/
     int16_t minRPM;
     /**Maximum rpm value at which to detect a stall (should be positive)*/
     int16_t maxRPM;
     /**Minimum torque at which to not detect a stall (should be negative)*/
     int16_t minTorque;
-    /**Maximum torque value at which to not detect a stall (should be positive)*/ 
+    /**Maximum torque value at which to not detect a stall (should be positive)*/
     int16_t maxTorque;
 };
 
@@ -49,17 +49,17 @@ public:
 
     /**
      * Moves the motor on the homeeable axis towards its upper mechanical limit.
-    */
+     */
     virtual void moveTowardUpperBound() = 0;
 
     /**
      * Moves the motor on the homeable axis towards its lower mechanical limit.
-    */
+     */
     virtual void moveTowardLowerBound() = 0;
-    
+
     /**
      * Stops the motor on the homeable axis.
-    */
+     */
     virtual void stop() = 0;
 
     /**

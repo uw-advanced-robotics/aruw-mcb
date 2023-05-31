@@ -21,7 +21,6 @@
 
 namespace aruwsrc::control
 {
-
 void MotorHomingCommand::initialize()
 {
     subsystem.moveTowardLowerBound();
@@ -44,7 +43,8 @@ void MotorHomingCommand::execute()
         case (HomingState::SETTING_LOWER_BOUND):
         {
             subsystem.stop();
-            if (calibrationTimer.isExpired()) {
+            if (calibrationTimer.isExpired())
+            {
                 subsystem.setLowerBound();
                 subsystem.moveTowardUpperBound();
                 homingState = HomingState::MOVING_TOWARD_UPPER_BOUND;
@@ -63,7 +63,8 @@ void MotorHomingCommand::execute()
         case (HomingState::SETTING_UPPER_BOUND):
         {
             subsystem.stop();
-            if (calibrationTimer.isExpired()) {
+            if (calibrationTimer.isExpired())
+            {
                 subsystem.setUpperBound();
                 homingState = HomingState::HOMING_COMPLETE;
             }
@@ -82,6 +83,5 @@ bool MotorHomingCommand::isFinished() const
 }
 
 void MotorHomingCommand::end(bool) { subsystem.stop(); }
-
 
 }  // namespace aruwsrc::control
