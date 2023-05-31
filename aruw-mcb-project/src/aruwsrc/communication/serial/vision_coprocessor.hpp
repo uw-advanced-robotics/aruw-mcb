@@ -184,6 +184,13 @@ public:
 
     } modm_packed;
 
+    struct AutoNavSetpointData
+    {
+        float x;
+        float y;
+        long long timestamp;
+    } modm_packed;
+
     // TODO: sentry only, refactor, comment
     struct TurretMajorOrientationData
     {
@@ -251,6 +258,8 @@ public:
         assert(turretID < control::turret::NUM_TURRETS);
         return lastAimData[turretID];
     }
+    
+    mockable inline const AutoNavSetpointData& getLastSetpointData() const { return lastSetpointData; }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -309,6 +318,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -339,6 +349,8 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
+
+    AutoNavSetpointData lastSetpointData{0.0f, 0.0f, 0};
 
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 
@@ -372,6 +384,7 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 #ifdef ENV_UNIT_TESTS
 public:
 #endif

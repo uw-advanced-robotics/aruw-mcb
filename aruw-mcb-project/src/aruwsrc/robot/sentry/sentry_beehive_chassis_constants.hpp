@@ -23,6 +23,10 @@
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "sentry_beyblade_command.hpp"
 
+namespace aruwsrc::chassis {
+    static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
+}
+
 namespace aruwsrc::sentry::chassis
 {
 
@@ -86,6 +90,7 @@ aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
 };
+
 
 } // namespace aruwsrc::control::turret
 #endif // SENTRY_CHASSIS_CONSTANTS_HPP_

@@ -96,6 +96,7 @@
 #include "sentry_minor_cv_on_target_governor.hpp"
 #include "sentry_beyblade_command.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/chassis/autonav/auto_nav_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -623,6 +624,13 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     girlbossBallisticsSolver,
     malewifeBallisticsSolver,
     sentryTransforms);
+
+aruwsrc::chassis::AutoNavCommand autoNavCommand(
+    *drivers(),
+    sentryDrive,
+    turretMajor.yawMotor,
+    drivers()->visionCoprocessor,
+    odometrySubsystem);
 
 // girlboss shooting ======================
 
