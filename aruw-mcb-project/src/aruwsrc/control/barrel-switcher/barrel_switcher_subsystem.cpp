@@ -53,7 +53,7 @@ void BarrelSwitcherSubsystem::refresh()
         case BarrelState::USING_LEFT_BARREL:
             if (!isStalled() && !inPosition)
             {
-                setMotorOutput(-MOTOR_OUTPUT);
+                setMotorOutput(MOTOR_OUTPUT);
             }
             else
             {
@@ -64,7 +64,7 @@ void BarrelSwitcherSubsystem::refresh()
         case BarrelState::USING_RIGHT_BARREL:
             if (!isStalled() && !inPosition)
             {
-                setMotorOutput(MOTOR_OUTPUT);
+                setMotorOutput(-MOTOR_OUTPUT);
             }
             else
             {
