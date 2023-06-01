@@ -56,7 +56,7 @@ void BalancingChassisHomeCommand::end(bool interrupted)
 
 bool BalancingChassisHomeCommand::isFinished() const
 {
-    return chassis->homingState == HOMED && calibrationLongTimeout.isExpired();
+    return chassis->homingState == HOMED;
 }
 }  // namespace chassis
 }  // namespace aruwsrc

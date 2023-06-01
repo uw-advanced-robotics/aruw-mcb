@@ -46,6 +46,7 @@
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_home_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_jump_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -404,6 +405,8 @@ BalancingChassisBeybladeCommand beybladeDriveCommand(
     drivers()->controlOperatorInterface,
     &turret.yawMotor);
 
+BalancingChassisJumpCommand jumpCommand(drivers(), &chassis);
+
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -491,7 +494,11 @@ PressCommandMapping bCtrlPressed(
 // automatically once a different drive mode is chosen.
 PressCommandMapping qEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q, Remote::Key::E}));
 PressCommandMapping qNotEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q}, {Remote::Key::E}));
-PressCommandMapping eNotQPressed(drivers(), {}, RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
+HoldRepeatCommandMapping eNotQPressed(
+    drivers(),
+    {&jumpCommand},
+    RemoteMapState({Remote::Key::E}, {Remote::Key::Q}),
+    false);
 PressCommandMapping xPressed(
     drivers(),
     {&autorotateDriveCommand},

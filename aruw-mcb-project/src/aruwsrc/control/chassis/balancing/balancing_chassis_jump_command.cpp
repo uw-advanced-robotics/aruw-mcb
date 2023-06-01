@@ -49,7 +49,10 @@ void BalancingChassisJumpCommand::initialize()
 
 void BalancingChassisJumpCommand::execute() { end(false); }
 
-void BalancingChassisJumpCommand::end(bool interrupted) {}
+void BalancingChassisJumpCommand::end(bool interrupted)
+{
+    chassis->setDesiredOutput(0, 0);
+}
 
 bool BalancingChassisJumpCommand::isFinished() const { return true; }
 }  // namespace chassis

@@ -87,6 +87,9 @@ float FiveBarLinkage::getMotor2Error()
            motor2RelativePosition;
 };
 
+/**
+ * Assigns the direct outputs to the motors using the `setDesiredOutput` method
+ */
 void FiveBarLinkage::moveMotors(float motor1Output, float motor2Output)
 {
     motor1->setDesiredOutput(motor1Output);
@@ -97,40 +100,41 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
 {
     // Move the computation point from the center of the motors to motor 1
 
-    float xp = desiredPosition.getX() +
-               fiveBarConfig.motor1toMotor2Length / 2;
-    
+    float xp = desiredPosition.getX() + fiveBarConfig.motor1toMotor2Length / 2;
+
     /**
      * Define the following:
      * C1 := The vector from motor 1 to the end-effector setpoint
      * C2 := The vector from motor 2 to the end-effector setpoint
      * L  := The vector from motor 1 to motor 2 = len*x + 0*y
      * yp := y-component of C1
-     * 
+     *
      * From the definitions, we know that
      * C2 = -C1 + L
-     * 
+     *
      * Therefore,
      * ||C2|| = ||-C1 + L||
      * and
      * ||C2||^2 = ||-C1 + L||
-     * 
+     *
      * In linkage coordinates, this turns into the following
-     * 
+     *
      * ||C1||^2 = xp^2 + yp^2
      * ||C2||^2 = (-xp + len)^2 + (-yp + 0)^2
      *          = xp^2 - 2*len*xp + len^2 + yp^2
      *          = (xp^2 + yp^2) - 2*len*xp + len^2
      *          = ||C1||^2 - 2*len*xp + len^2
-     * 
+     *
      * We can compute these values and then use tap::algorithms::fastInvSqrt to obtain
      * the inverse of the vector magnitudes, which will be needed in the next step for computing
      * the motor setpoints.
-    */
+     */
 
     float magC1Squared = powf(xp, 2) + powf(desiredPosition.getY(), 2);
-    float magC2Squared = magC1Squared - 2*xp*fiveBarConfig.motor1toMotor2Length + powf(fiveBarConfig.motor1toMotor2Length, 2);
-    float magC1Inv = tap::algorithms::fastInvSqrt(magC1Squared), magC2Inv = tap::algorithms::fastInvSqrt(magC2Squared);
+    float magC2Squared = magC1Squared - 2 * xp * fiveBarConfig.motor1toMotor2Length +
+                         powf(fiveBarConfig.motor1toMotor2Length, 2);
+    float magC1Inv = tap::algorithms::fastInvSqrt(magC1Squared),
+          magC2Inv = tap::algorithms::fastInvSqrt(magC2Squared);
 
     /**
      * Define the following:
@@ -138,20 +142,24 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
      * alpha_2 := (CW+) angle from L to C2
      * beta_1  := (CCW+) angle from C1 to motor 1 link
      * beta_2  := (CW+) angle from C2 to motor 2 link
-     * 
+     *
      * This results in:
      * motor1Setpoint = pi + alpha_1 + beta_1
      * motor2Setpoint = 2*pi - alpha_2 - beta_2
-     * 
+     *
      * Alpha and Beta values can be computed using the motor link lengths as shown below.
-    */
+     */
 
     float alpha_1 = acosf(xp * magC1Inv);
-    float beta_1  = acosf((powf(fiveBarConfig.joint1toTipLength, 2) - powf(fiveBarConfig.motor1toJoint1Length, 2) - magC1Squared)
-                        * magC1Inv / (-2 * fiveBarConfig.motor1toJoint1Length));
+    float beta_1 = acosf(
+        (powf(fiveBarConfig.joint1toTipLength, 2) - powf(fiveBarConfig.motor1toJoint1Length, 2) -
+         magC1Squared) *
+        magC1Inv / (-2 * fiveBarConfig.motor1toJoint1Length));
     float alpha_2 = acosf((-xp + fiveBarConfig.motor1toMotor2Length) * magC2Inv);
-    float beta_2  = acosf((powf(fiveBarConfig.joint2toTipLength, 2) - powf(fiveBarConfig.motor2toJoint2Length, 2) - magC2Squared)
-                        * magC2Inv / (-2 * fiveBarConfig.motor2toJoint2Length));
+    float beta_2 = acosf(
+        (powf(fiveBarConfig.joint2toTipLength, 2) - powf(fiveBarConfig.motor2toJoint2Length, 2) -
+         magC2Squared) *
+        magC2Inv / (-2 * fiveBarConfig.motor2toJoint2Length));
 
     motor1Setpoint = M_PI + alpha_1 + beta_1;
     motor2Setpoint = M_TWOPI - alpha_2 - beta_2;
@@ -161,7 +169,7 @@ void FiveBarLinkage::computePositionFromAngles()
 {
     /** Use bilinear interpolation to compute xy-values from lookup table.
      *  See tap::algorithms for further docs.
-    */
+     */
     // TODO: Replace this with bilinear interpolator when it's merged into taproot
 
     float currentX = tap::algorithms::interpolateLinear2D(
@@ -174,10 +182,10 @@ void FiveBarLinkage::computePositionFromAngles()
                          chassis::FIVE_BAR_T2_DELTA,
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
-                     1000;                           // check units with LUT
+                     1000;  // check units with LUT
 
     // TODO: Unfuck the table (yes Derek, I will do it for you - Manoli)
-    
+
     currentX += fiveBarConfig.motor1toMotor2Length;  // I fucked up the table so fix it here
     currentX = -currentX;
 
@@ -192,10 +200,10 @@ void FiveBarLinkage::computePositionFromAngles()
                          (motor1RelativePosition)*360 / M_TWOPI,
                          (motor2RelativePosition)*360 / M_TWOPI) /
                      1000;
-    
+
     // Set current position to computed values
     currentPosition.setPosition(modm::Vector2f(currentX, currentY));
-    
+
     // finds the angle of the joint1-tip link relative to the refernce 0 (+x ax) using trig
     float psi = motor1RelativePosition -
                 atan2f(currentY, currentX + fiveBarConfig.motor1toMotor2Length / 2);

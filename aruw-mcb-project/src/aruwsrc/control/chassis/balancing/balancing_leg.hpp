@@ -90,7 +90,7 @@ public:
     inline BalancingState getBalancingState() { return balancingState; }
 
     /**
-     * @param[in] height: (mm) Setpoint for chassis height.
+     * @param[in] height: (m) Setpoint for chassis height (negative).
      */
     inline void setDesiredHeight(float height) { zDesired = height; };
 
@@ -178,6 +178,10 @@ public:
     inline void toggleArm() { armed ? disarmLeg() : armLeg(); };
     inline bool getArmState() { return armed; };
 
+    inline void enableStand() {standupEnable = true;}
+    inline void disableStand() {standupEnable = false;}
+    inline bool getStand() {return standupEnable;}
+
 private:
     tap::Drivers* drivers;
     /**
@@ -188,14 +192,14 @@ private:
     // Finite State Machine Parameters
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
-    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = false;
+    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 400;
+    bool standupEnable = true;
     float STANDUP_TORQUE_GAIN = 1.1;
     float JUMP_GRAV_GAIN = 1.0f;
 
-    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(28);
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
     /**
      * @param[in] dt (us)
      */
@@ -263,10 +267,10 @@ private:
      * output units are m
      */
     SmoothPidConfig xPidConfig{
-        .kp = 0.003,
-        .ki = 2.5e-8,
+        .kp = 0.005,
+        .ki = 0,
         .kd = 0,
-        .maxICumulative = .01,
+        .maxICumulative = .0,
         .maxOutput = .04,
     };
     SmoothPid xPid = SmoothPid(xPidConfig);
@@ -298,6 +302,7 @@ private:
 
     float chassisPos;  // (m) Position of chassis (avg of both legs)
     float chassisPosDesired;
+    float chassisPosDesiredPrev;
     float chassisSpeed;  // (m/s) Total speed of chassis (avg of both legs)
     float chassisYaw;
     float chassisYawRate;

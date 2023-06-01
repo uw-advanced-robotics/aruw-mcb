@@ -207,6 +207,18 @@ public:
     inline void toggleArm() { armed ? disarmChassis() : armChassis(); };
     inline bool getArmState() { return armed; };
 
+    inline bool getStandEnabled() { return leftLeg.getStand() && rightLeg.getStand(); }
+    inline void enableStand()
+    {
+        leftLeg.enableStand();
+        rightLeg.enableStand();
+    }
+    inline void disableStand()
+    {
+        rightLeg.disableStand();
+        leftLeg.disableStand();
+    }
+
     tap::algorithms::SmoothPid rotationPid;
 
     LegHomingState homingState = HOMED;
@@ -218,7 +230,7 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = 1.5;  // m/s/s
+    static constexpr float MAX_ACCELERATION = .5;  // m/s/s
 
     void computeState(uint32_t dt);
 

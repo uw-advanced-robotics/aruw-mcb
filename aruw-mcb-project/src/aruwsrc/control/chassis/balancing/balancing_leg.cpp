@@ -88,8 +88,10 @@ void BalancingLeg::update()
     };
     zDesRamper.setTarget(desiredWheelLocation.getY());
     zDesRamper.update(Z_RAMP_RATE * dt / 1'000'000);
-    desiredWheelLocation.setY(
-        limitVal(zDesRamper.getValue(), CHASSIS_HEIGHTS.getSecond(), CHASSIS_HEIGHTS.getFirst()));
+    desiredWheelLocation.setY(limitVal(
+        zDesRamper.getValue(),
+        CHASSIS_HEIGHTS.getSecond(),
+        fivebar->getDefaultPosition().getY()));
 
     fivebar->setDesiredPosition(desiredWheelLocation);
     fivebar->refresh();
@@ -100,7 +102,7 @@ void BalancingLeg::updateBalancing(uint32_t dt)
 {
     desiredWheelLocation = fivebar->getDefaultPosition();
     xoffset = xPid.runControllerDerivateError(vDesired - vCurrent, dt);
-    xoffset = .00;
+    // xoffset = .00;
     // float tl_des = atan2(-xoffset, -zDesired - WHEEL_RADIUS);
 
     float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
@@ -115,23 +117,23 @@ void BalancingLeg::updateBalancing(uint32_t dt)
 
     float lqrPos = LQR_K1 * ((chassisPos - chassisPosDesired));
     float lqrVel = LQR_K2 * deadZone(chassisSpeed - vDesired, .0f);
-    float lqrPitch = LQR_K3 * deadZone((tl), .04f);
-    float lqrPitchRate = LQR_K4 * deadZone(chassisAngledot, 1.0f);
+    float lqrPitch = LQR_K3 * deadZone((tl), .0f);
+    float lqrPitchRate = LQR_K4 * deadZone(chassisAngledot, .0f);
     float lqrYaw = LQR_K5 * chassisYaw;
     float lqrYawRate = LQR_K6 * chassisYawRate;
 
-    float wheelTorque = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
+    float wheelCurrent = -(lqrPos + lqrVel + lqrPitch + lqrPitchRate + lqrYaw + lqrYawRate);
 
     debug1 = lqrPos;
     debug2 = lqrVel;
     debug3 = lqrPitch;
     debug4 = lqrPitchRate;
-    debug5 = lqrYaw;
-    debug6 = lqrYawRate;
+    // debug5 = lqrYaw;
+    // debug6 = lqrYawRate;
 
-    wheelTorque = limitVal(wheelTorque, -2.0f, 2.0f);
+    wheelCurrent = limitVal(wheelCurrent, -10.0f, 10.0f);
     // 3. Send New Output Values
-    int32_t driveWheelOutput = wheelTorque / .3 * 16384 / 20;  // convert from Torque to output
+    int32_t driveWheelOutput = wheelCurrent * 16384 / 20;  // convert from Current to output
     driveWheelOutput = lowPassFilter(prevOutput, driveWheelOutput, 1);
     prevOutput = driveWheelOutput;
     debug7 = driveWheelOutput;
@@ -175,6 +177,8 @@ void BalancingLeg::updateFallenNotMoving()
     if (armed && abs(chassisAngle) < abs(FALLEN_ANGLE_RETURN) &&
         abs(chassisAngledot) < abs(FALLEN_ANGLE_RATE_THRESHOLD))
     {
+        // reset the x setpoint to avoid funniness after standing up
+        chassisPosDesired = chassisPos;
         balancingState = BALANCING;
     }
     else if (standupEnable && armed)
@@ -205,12 +209,13 @@ void BalancingLeg::updateStandingUp()
 void BalancingLeg::updateJumping(uint32_t dt)
 {
     zDesired = CHASSIS_HEIGHTS.getSecond();
-    // This is a little sussy, but we want to keeep balancing while we jump.
+    // This is a little sussy, but we want to keep balancing while we jump.
     updateBalancing(dt);
+    debug5 = -1;
     // override the ramper and very, very quickly move the wheel down, if we're low to begin with
     if (compareFloatClose(fivebar->getCurrentPosition().getY(), CHASSIS_HEIGHTS.getFirst(), .03f))
     {
-
+        debug5 = 1;
         zDesRamper.setValue(desiredWheelLocation.getY());
     }
     else
@@ -218,10 +223,12 @@ void BalancingLeg::updateJumping(uint32_t dt)
         // If we're not in the position ready to jump, set the desired Z and exit the attempt
         zDesired = CHASSIS_HEIGHTS.getFirst();
         balancingState = BALANCING;
+        debug5 = 3;
     }
 
     if (compareFloatClose(fivebar->getCurrentPosition().getY(), CHASSIS_HEIGHTS.getSecond(), .03f))
     {
+        debug5 = 2;
         float desiredx = cos(-chassisAngle) * xoffset + sin(-chassisAngle) * zDesired;
         float desiredz = -sin(-chassisAngle) * xoffset + cos(-chassisAngle) * zDesired;
 
@@ -237,7 +244,6 @@ void BalancingLeg::fivebarController(uint32_t dt)
 {
     float L = fivebar->getFiveBarConfig().motor1toMotor2Length;
     float B = chassisAngle;
-    float wheelForce = WHEEL_RADIUS * driveWheel->getOutputDesired() / 16384 / 20 * .3;
 
     // Gravity compensation feedforward
     float gravT1 = fivebar->getFiveBarConfig().motor1toJoint1Length *
@@ -249,10 +255,13 @@ void BalancingLeg::fivebarController(uint32_t dt)
                    (-(fivebar->getCurrentPosition().getX() - (L * cos(B) / 2)) / L * cos(B)) *
                    (MASS_CHASSIS * 9.81 / 2);
 
-    if (balancingState = JUMPING) {
+    if (balancingState == JUMPING)
+    {
         gravT1 *= JUMP_GRAV_GAIN;
         gravT2 *= JUMP_GRAV_GAIN;
     }
+
+    float wheelForce = WHEEL_RADIUS * driveWheel->getOutputDesired() / 16384 * 20 * .3;
 
     // Wheel driving force feedforward
     float wheelFF1 = sin(fivebar->getMotor1RelativePosition()) *
@@ -275,10 +284,10 @@ void BalancingLeg::fivebarController(uint32_t dt)
     {
         // The 1000 is in there to convert from A to mA
         motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-        motor1output -= wheelFF1 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        // motor1output += wheelFF1 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
         // motor direction so minus
         motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-        motor2output += wheelFF2 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        // motor2output += wheelFF2 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
     }
 
     fivebar->moveMotors(motor1output, motor2output);
@@ -293,7 +302,7 @@ void BalancingLeg::computeState(uint32_t dt)
     }
     else if (vDesired != 0)
     {
-        chassisPosDesired += vDesired / WHEEL_RADIUS * dt / 1'000'000;
+        chassisPosDesired += vDesired * dt / 1'000'000;
     }
     vDesiredPrev = vDesired;
 
