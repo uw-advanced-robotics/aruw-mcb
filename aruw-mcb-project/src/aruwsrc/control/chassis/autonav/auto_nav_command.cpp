@@ -77,7 +77,7 @@ void AutoNavCommand::execute()
         float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
         float x = 0.0;
         float y = 0.0;
-        if (mag > 0.1) {
+        if (mag > 0.01) {
             x = desiredVelocityX / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
             y = desiredVelocityY / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         }
