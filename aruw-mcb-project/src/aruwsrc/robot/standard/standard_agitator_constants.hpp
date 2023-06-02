@@ -47,7 +47,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 static constexpr int AGITATOR_NUM_POCKETS = 10;   // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 20.0f;  // balls per second
+static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -71,7 +71,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetUnjamIntegralChange = 0.25f * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .unjamSetpoint = 0.25f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds.Convert to ms, Add 100 ms extra tolerance.
