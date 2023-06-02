@@ -481,7 +481,7 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     sentryDrive,
     sentryChassisWorldYawObserver,
-    drivers()->mcbLite.imu,
+    drivers()->mcbLite.imu, // TODO: this is sussy
     modm::Location2D<float>(0., 0., 0.));  // TODO: this
 
 // Transforms --------------------------------------------------------------------------------
@@ -942,7 +942,7 @@ void setDefaultSentryCommands(Drivers *)
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
-    frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
+    // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
     // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
 }
 

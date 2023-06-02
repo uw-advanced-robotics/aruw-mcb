@@ -84,7 +84,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
     if (prevUpdateCounterChassisXInput != updateCounter)
     {
         // coord system shift (-)
-        chassisXInput.update(-drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), currTime);
+        chassisXInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), currTime);
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
@@ -117,7 +117,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     if (prevUpdateCounterChassisYInput != updateCounter)
     {
-        chassisYInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
+        chassisYInput.update(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
@@ -149,7 +149,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity() {
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
         chassisYawInput.update(
-            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterChassisYawInput = updateCounter;
     }
