@@ -869,6 +869,11 @@ HoldRepeatCommandMapping rightSwitchUp(
 //     {&imuCalibrateCommand},
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
+HoldCommandMapping rightSwitchMid(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
 HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopGirlBossFrictionWheelSpinCommand},
@@ -960,7 +965,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchMid);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&rightSwitchMid);
+    drivers->commandMapper.addMap(&rightSwitchMid);
     drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchUpFriction);
     drivers->commandMapper.addMap(&leftSwitchUp);
