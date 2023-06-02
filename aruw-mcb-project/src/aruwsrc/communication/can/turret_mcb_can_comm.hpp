@@ -86,7 +86,7 @@ public:
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
-    mockable inline float getRoll() const { return lastCompleteImuData.roll; }
+    mockable inline float getRoll() const { return -lastCompleteImuData.roll; }
 
     /**
      * @return turret yaw angular velocity in rad/sec
@@ -111,7 +111,7 @@ public:
     /**
      * @return turret pitch angle in rad, a value normalized between [-pi, pi]
      */
-    mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
+    mockable inline float getPitch() const { return -lastCompleteImuData.pitch; }
 
     /**
      * @return turret pitch angular velocity in rad/sec

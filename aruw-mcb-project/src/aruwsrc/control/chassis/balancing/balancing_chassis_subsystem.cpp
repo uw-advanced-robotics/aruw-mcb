@@ -131,10 +131,8 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
     float currentTurretYaw = yawMotor.getChassisFrameMeasuredAngle().getValue();
     if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
 
-    float worldRelativeTurretPitch = -turretMCB.getPitch() + M_PI;
-    if (worldRelativeTurretPitch > M_PI) worldRelativeTurretPitch -= M_TWOPI;
-    float worldRelativeTurretRoll = -turretMCB.getRoll() + M_PI;
-    if (worldRelativeTurretRoll > M_PI) worldRelativeTurretRoll -= M_TWOPI;
+    float worldRelativeTurretPitch = turretMCB.getPitch();
+    float worldRelativeTurretRoll = turretMCB.getRoll();
     float worldRelativeTurretYaw = turretMCB.getYaw();
 
     tap::algorithms::transforms::Transform<World, Turret> worldToTurret =
@@ -157,18 +155,18 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
 
     float rollRateNew = (roll - rollPrev) * 1'000 / dt;
     rollPrev = roll;
-    rollRate = lowPassFilter(rollRate, rollRateNew, .05);
+    rollRate = lowPassFilter(rollRate, rollRateNew, .1);
 
     float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
     pitchPrev = pitch;
-    pitchRate = lowPassFilter(pitchRate, pitchRateNew, .05);
+    pitchRate = lowPassFilter(pitchRate, pitchRateNew, .1);
 
     // Unwrap the yaw. We can safely assume that yaw won't change by half a rotation in 2ms.
     if (yaw - yawPrev > M_PI) yawPrev += M_TWOPI;
     if (yawPrev - yaw > M_PI) yawPrev -= M_TWOPI;
-    float yawRateNew = (yaw - yawPrev) * 1000.0f / static_cast<float>(dt);
+    float yawRateNew = (yaw - yawPrev) * 1000.0f / dt;
     yawPrev = yaw;
-    yawRate = lowPassFilter(yawRate, yawRateNew, .05);
+    yawRate = lowPassFilter(yawRate, yawRateNew, .1);
 }
 
 void BalancingChassisSubsystem::computeState(uint32_t dt)

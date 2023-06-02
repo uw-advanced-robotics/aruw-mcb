@@ -192,14 +192,14 @@ private:
     // Finite State Machine Parameters
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
-    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 400;
+    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
     bool standupEnable = true;
     float STANDUP_TORQUE_GAIN = 1.1;
     float JUMP_GRAV_GAIN = 1.0f;
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
-    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(3);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
+    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
     /**
      * @param[in] dt (us)
      */

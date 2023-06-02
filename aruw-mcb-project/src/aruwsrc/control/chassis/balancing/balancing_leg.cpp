@@ -284,10 +284,10 @@ void BalancingLeg::fivebarController(uint32_t dt)
     {
         // The 1000 is in there to convert from A to mA
         motor1output -= 1000 * gravT1 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-        // motor1output += wheelFF1 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        motor1output += wheelFF1 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
         // motor direction so minus
         motor2output += 1000 * gravT2 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
-        // motor2output += wheelFF2 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
+        motor2output += wheelFF2 * 1000 / aruwsrc::motor::AK809_TORQUE_CONSTANT;
     }
 
     fivebar->moveMotors(motor1output, motor2output);

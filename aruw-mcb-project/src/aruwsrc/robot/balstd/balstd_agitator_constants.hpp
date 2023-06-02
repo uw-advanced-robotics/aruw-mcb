@@ -65,13 +65,13 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = 1.05f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetIntegralChange = 1.00f * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetUnjamIntegralChange = 0.25f * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .unjamSetpoint = 0.25f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds.Convert to ms, Add 100 ms extra tolerance.
