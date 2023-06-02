@@ -66,6 +66,8 @@ private:
     float lastY = 0;
     float desiredX = 0;
     float desiredY = 0;
+
+    static constexpr float SPEED_FACTOR = 0.2f;
 };  // class AutoNavCommand
 
 }  // namespace aruwsrc::chassis

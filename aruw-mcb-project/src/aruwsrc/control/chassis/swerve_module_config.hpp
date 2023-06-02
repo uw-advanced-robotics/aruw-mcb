@@ -56,7 +56,7 @@ struct SwerveModuleConfig
 
     // Whether any motor is inverted
     // @todo these should not be specified by default !!!
-    const bool driveMotorInverted = false, azimuthMotorInverted = true;  // @todo doesn't quite work bc the motors are instantiated before the swerve modules
+    const bool driveMotorInverted = true, azimuthMotorInverted = true;  // @todo doesn't quite work bc the motors are instantiated before the swerve modules
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 

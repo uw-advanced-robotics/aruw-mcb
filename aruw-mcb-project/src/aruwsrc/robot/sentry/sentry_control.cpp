@@ -481,7 +481,7 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     sentryDrive,
     sentryChassisWorldYawObserver,
-    drivers()->mcbLite.imu,
+    drivers()->mcbLite.imu, // TODO: this is sussy
     modm::Location2D<float>(0., 0., 0.));  // TODO: this
 
 // Transforms --------------------------------------------------------------------------------
@@ -869,6 +869,11 @@ HoldRepeatCommandMapping rightSwitchUp(
 //     {&imuCalibrateCommand},
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
+HoldCommandMapping rightSwitchMid(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
 HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopGirlBossFrictionWheelSpinCommand},
@@ -937,7 +942,7 @@ void setDefaultSentryCommands(Drivers *)
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
-    frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
+    // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
     // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
 }
 
@@ -960,7 +965,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchMid);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&rightSwitchMid);
+    drivers->commandMapper.addMap(&rightSwitchMid);
     drivers->commandMapper.addMap(&rightSwitchDown);
     // drivers->commandMapper.addMap(&rightSwitchUpFriction);
     drivers->commandMapper.addMap(&leftSwitchUp);
