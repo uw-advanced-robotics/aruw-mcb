@@ -35,7 +35,7 @@ namespace aruwsrc::chassis
 struct SwerveModuleConfig
 {
     // @todo not really generic over future swerve designs?
-    const float WHEEL_DIAMETER_M = 0.076f;
+    const float WHEEL_DIAMETER_M = 0.102f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
     // in encoder clicks, defines "forward" direction of the module
@@ -58,7 +58,8 @@ struct SwerveModuleConfig
     // @todo these should not be specified by default !!!
     const bool driveMotorInverted = true, azimuthMotorInverted = true;  // @todo doesn't quite work bc the motors are instantiated before the swerve modules
     // Gear ratios for motors
-    const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
+    const float driveMotorGearing = 23.0f / 12.0f;
+    const float azimuthMotorGearing = 1;
 
     tap::algorithms::SmoothPidConfig drivePidConfig = {
         .kp = 8.0f,
