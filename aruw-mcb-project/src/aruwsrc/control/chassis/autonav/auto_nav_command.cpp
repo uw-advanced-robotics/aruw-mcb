@@ -82,6 +82,9 @@ void AutoNavCommand::execute()
             y = desiredVelocityY / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
         }
 
+        x *= SPEED_FACTOR;
+        y *= SPEED_FACTOR;
+
         // Rotate X and Y depending on turret angle
         tap::algorithms::rotateVector(&x, &y, -chassisYawAngle); // @todo: we shouldn't need to negate this just for the sentry
         // we should debug in ozone to see which implementation is correct, and, if necessary
