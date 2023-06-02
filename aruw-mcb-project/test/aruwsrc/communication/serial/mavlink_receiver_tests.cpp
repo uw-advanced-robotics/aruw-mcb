@@ -22,6 +22,7 @@
 #include "tap/algorithms/crc.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/communication/serial/mavlink_receiver.hpp"
 
 using namespace tap::communication::serial;
@@ -34,10 +35,7 @@ using namespace aruwsrc::communication::serial;
 class MavlinkReceiverTester : public MavlinkReceiver
 {
 public:
-    MavlinkReceiverTester(Drivers *drivers, Uart::UartPort port)
-        : MavlinkReceiver(drivers, port)
-    {
-    }
+    MavlinkReceiverTester(Drivers *drivers, Uart::UartPort port) : MavlinkReceiver(drivers, port) {}
 
     void messageReceiveCallback(const ReceivedMavlinkMessage &completeMessage) override
     {
@@ -47,52 +45,55 @@ public:
     ReceivedMavlinkMessage lastMsg;
 };
 
-TEST(MavlinkReceiver, updateSerial_parseMessage_single_byte){
-	Drivers drivers;
-	MavlinkReceiverTester serial(&drivers, Uart::Uart7);
+TEST(MavlinkReceiver, updateSerial_parseMessage_single_byte)
+{
+    Drivers drivers;
+    MavlinkReceiverTester serial(&drivers, Uart::Uart7);
 
-	uint8_t rawMessage[8];
-	uint16_t currByte = 0;
+    uint8_t rawMessage[8];
+    uint16_t currByte = 0;
 
-	rawMessage[0] = 0xFE;
-	rawMessage[1] = 0;
-	rawMessage[2] = 1;
-	rawMessage[3] = 2;
-	rawMessage[4] = 3;
-	rawMessage[5] = 33;
-	// 6 and 7 are CRC bytes, ignore the head byte
-	rawMessage[6] = calculateCRC16(&rawMessage[1], 5);
-	rawMessage[7] = calculateCRC16(&rawMessage[1], 5) >> 8;
-	
-	ON_CALL(drivers.uart, read(Uart::Uart7, _, _))
-        .WillByDefault([&](Uart::UartPort, uint8_t *data, std::size_t length) {
-            if (length == 0)
+    rawMessage[0] = 0xFE;
+    rawMessage[1] = 0;
+    rawMessage[2] = 1;
+    rawMessage[3] = 2;
+    rawMessage[4] = 3;
+    rawMessage[5] = 32;
+
+    // 6 and 7 are CRC bytes, ignore the head byte
+	uint16_t crc = calculateCRC16(reinterpret_cast<uint8_t*>(rawMessage) + 1, 5);
+
+    rawMessage[6] = crc & 0xFF; //Rightmost byte
+    rawMessage[7] = crc >> 8; //Leftmost byte
+
+    ON_CALL(drivers.uart, read(Uart::Uart7, _, _))
+        .WillByDefault(
+            [&](Uart::UartPort, uint8_t *data, std::size_t length)
             {
-                return 0;
-            }
+                if (length == 0)
+                {
+                    return 0;
+                }
 
-            if (currByte >= sizeof(rawMessage))
-            {
-                return 0;
-            }
-            *data = rawMessage[currByte];
-            currByte++;
-            return 1;
-        });
+                if (currByte >= sizeof(rawMessage))
+                {
+                    return 0;
+                }
+                *data = rawMessage[currByte];
+                currByte++;
+                return 1;
+            });
 
 	for(int i = 0; i < 8; i++){
 		serial.updateSerial();
 	}
 
-	EXPECT_EQ(serial.lastMsg.header.headByte, 0xFE);
-	EXPECT_EQ(serial.lastMsg.header.dataLength, 0);
-	EXPECT_EQ(serial.lastMsg.header.seq, 1);
-	EXPECT_EQ(serial.lastMsg.header.systemId, 2);
-	EXPECT_EQ(serial.lastMsg.header.componentId, 3);
-	EXPECT_EQ(serial.lastMsg.header.messageId, 33);
 
-
-
+    EXPECT_EQ(serial.lastMsg.header.headByte, 0xFE);
+    EXPECT_EQ(serial.lastMsg.header.dataLength, 0);
+    EXPECT_EQ(serial.lastMsg.header.seq, 1);
+    EXPECT_EQ(serial.lastMsg.header.systemId, 2);
+    EXPECT_EQ(serial.lastMsg.header.componentId, 3);
+    EXPECT_EQ(serial.lastMsg.header.messageId, 32);
+	EXPECT_EQ(serial.lastMsg.CRC16, crc);
 }
-
-

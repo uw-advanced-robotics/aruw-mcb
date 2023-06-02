@@ -171,7 +171,9 @@ public:
      */
     virtual void messageReceiveCallback(const ReceivedMavlinkMessage &completeMessage) = 0;
 
-private:
+#ifndef ENV_UNIT_TESTS
+protected:
+#endif
     enum SerialRxState
     {
         SERIAL_HEADER_SEARCH,  /// A header byte has not yet been received.
@@ -201,7 +203,6 @@ private:
     // https://docs.cubepilot.org/user-guides/autopilot/the-cube-user-manual
     constexpr static int UART_BAUDRATE = 115'200;
 
-protected:
     tap::Drivers *drivers;
     
     /// The serial port you are connected to.
@@ -213,7 +214,7 @@ protected:
     uint16_t readHeaderAndDataLengthToLong = 0;
     uint16_t failedCRC = 0;
     uint16_t readTooMuch = 0;
-    uint16_t gotaThirtyTwoMEssageID = 0;
+    uint16_t gotaThirtyTwoMessageID = 0;
 };
 
 }  // namespace aruwsrc::communication::serial

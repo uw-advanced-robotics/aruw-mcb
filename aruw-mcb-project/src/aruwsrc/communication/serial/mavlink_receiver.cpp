@@ -111,7 +111,7 @@ void MavlinkReceiver::updateSerial()
                 }
 
                 if(newMessage.header.messageId == 32){
-                    gotaThirtyTwoMEssageID++;
+                    gotaThirtyTwoMessageID++;
                 }
 
                 // move on to processing message body
@@ -120,7 +120,7 @@ void MavlinkReceiver::updateSerial()
             break;
             case PROCESS_FRAME_DATA:  // READ bulk of message
             {
-                bytesToRead = newMessage.header.dataLength;
+                bytesToRead = sizeof(newMessage.CRC16) + newMessage.header.dataLength;
 
                 frameCurrReadByte += READ(
                     reinterpret_cast<uint8_t *>(&newMessage) + sizeof(newMessage.header) +
@@ -129,6 +129,13 @@ void MavlinkReceiver::updateSerial()
 
                 if (frameCurrReadByte == bytesToRead)
                 {
+                    // move crc16 to `CRC16` position (currently in the data section if <
+                    // SERIAL_RX_BUFF_SIZE length sent)
+                    memcpy(
+                        &newMessage.CRC16,
+                        newMessage.data + newMessage.header.dataLength,
+                        sizeof(newMessage.CRC16));
+
                     if (newMessage.CRC16 !=
                         tap::algorithms::calculateCRC16(
                             reinterpret_cast<uint8_t *>(&newMessage) +
