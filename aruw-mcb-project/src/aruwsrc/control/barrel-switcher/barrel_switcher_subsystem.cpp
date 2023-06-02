@@ -43,11 +43,6 @@ void BarrelSwitcherSubsystem::initialize()
 
 void BarrelSwitcherSubsystem::refresh()
 {
-    outputDesiredDebug = motor.getOutputDesired();
-    torqueDebug = motor.getTorque();
-    shaftRPMDebug = motor.getShaftRPM();
-    stalled = this->isStalled();
-
     switch (barrelState)
     {
         case BarrelState::USING_LEFT_BARREL:

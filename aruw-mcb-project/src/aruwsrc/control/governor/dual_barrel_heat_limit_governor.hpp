@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_
-#define HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_
+#ifndef DUAL_BARREL_HEAT_LIMIT_GOVERNOR_HPP_
+#define DUAL_BARREL_HEAT_LIMIT_GOVERNOR_HPP_
 
 #include <cassert>
 
@@ -34,7 +34,7 @@ namespace aruwsrc::control::governor
  * Governor for turrets with two barrels for a BarrelSwitcherSubsystem
  * that blocks Commands from running if the referee-reported heat limit for the currently
  * used barrel is too high or neither of the barrels are in position to fire. Use to
- * avoid running commands that cause ref-system overheating and to avoid commands
+ * avoid running commands that cause ref-system overheating and properly schedule commands
  * that require the barrels to be in position.
  */
 class HeatLimitDualBarrelSwitcherGovernor : public tap::control::governor::CommandGovernorInterface
@@ -86,7 +86,7 @@ private:
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;
     aruwsrc::control::governor::HeatTracker heatTrackerRight;
     aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
-};
+}; 
 }  // namespace aruwsrc::control::governor
 
-#endif  // HEAT_LIMIT_DUAL_BARREL_SWITCHER_GOVERNOR_HPP_
+#endif //DUAL_BARREL_HEAT_LIMIT_GOVERNOR_HPP_

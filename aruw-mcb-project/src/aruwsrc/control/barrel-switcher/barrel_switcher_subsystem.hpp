@@ -44,7 +44,7 @@ struct StallThresholdConfig
 
 enum class BarrelState
 {
-    IDLE,  // at a position that is neither left nor right barrel
+    IDLE,
     USING_LEFT_BARREL,
     USING_RIGHT_BARREL
 };
@@ -69,17 +69,14 @@ public:
 private:
     void setMotorOutput(int32_t velocity);
 
-    // FOR DEBUGGING, to be removed!
-    int16_t outputDesiredDebug;
-    int16_t torqueDebug;
-    int16_t shaftRPMDebug;
-    bool stalled;
-
+    /**
+     * true if there is a barrel in position to shoot, false otherwise 
+    */
     bool inPosition;
 
     /**
-     * Stores the state of this barrel switcher's state,
-     * including homing states and which barrel (left or right) is in use
+     * Stores the state of this barrel switcher's state, mainly which barrel (left or right) 
+     * is currently being used
      */
     BarrelState barrelState;
 

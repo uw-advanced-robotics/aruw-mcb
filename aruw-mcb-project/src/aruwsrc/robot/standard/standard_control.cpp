@@ -81,9 +81,8 @@
 #ifdef TARGET_STANDARD_SPIDER
 #include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
-#include "aruwsrc/control/barrel-switcher/motor_homing_command.hpp"
-#include "aruwsrc/control/governor/heat_limit_dual_barrel_switcher_governor.hpp"
-#include "aruwsrc/control/governor/ref_system_projectile_launched_dual_barrel_governor.hpp"
+#include "aruwsrc/control/governor/dual_barrel_heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/dual_barrel_ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/dual_barrel_referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/dual_barrel_friction_wheel_spin_ref_limited_command.hpp"
 #endif
@@ -301,8 +300,7 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 BarrelSwitchCommand barrelSwitchCommand(
     &barrelSwitcher,
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,  // TODO: figure
-                                                                                // these out
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     constants::HEAT_LIMIT_BUFFER);
 #endif
@@ -476,7 +474,6 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
 #ifdef TARGET_STANDARD_SPIDER
@@ -486,7 +483,6 @@ HoldRepeatCommandMapping rightSwitchUp(
 #endif
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
-
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -497,15 +493,6 @@ HoldCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-
-// For motor homing, remove later!!!
-#ifdef TARGET_STANDARD_SPIDER
-PressCommandMapping rCtrlPressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState({Remote::Key::R, Remote::Key::CTRL}));
-#endif
-
 PressCommandMapping cPressed(
     drivers(),
     {&sentryToggleDriveMovementCommand},
@@ -539,14 +526,15 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     &manualFireRateReselectionManager,
     cvOnTargetGovernor);
 
-PressCommandMapping leftMousePressedBPressed(
+HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}));
+    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
 
 PressCommandMapping rightMousePressed(
     drivers(),
-    {},
+    {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
@@ -582,10 +570,6 @@ PressCommandMapping eNotQPressed(
     drivers(),
     {&chassisImuDriveCommand},
     RemoteMapState({Remote::Key::E}, {Remote::Key::Q}));
-// PressCommandMapping xPressed(
-//     drivers(),
-//     {&barrelSwitchCommand},
-//     RemoteMapState({Remote::Key::X}));
 
 CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
@@ -693,7 +677,6 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&rCtrlPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);

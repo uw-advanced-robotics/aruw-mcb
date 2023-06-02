@@ -35,6 +35,9 @@ class Drivers;
 namespace aruwsrc::control::launcher
 {
 /**
+ * An extension of the FrictionWheelSpinRefLimitedCommand for a turret with
+ * two barrels and a BarrelSwitcherSubystem.
+ * 
  * Commands some associated friction wheel subsystem to spin such that the subsystem launches
  * projectiles at either the maximum speed allowed by the referee system or a default
  * speed specified in the constructor.
@@ -54,8 +57,12 @@ public:
      *      system is not connected.
      * @param[in] alwaysUseDefaultLaunchSpeed If true, uses `defaultLaunchSpeed`
      *      independent of the state of the referee system.
-     * @param[in] barrel The barrel whose associated referee system barrel speed
+     * @param[in] leftBarrel The turret's left barrel whose associated referee system barrel speed
      *      limit will be used to determine the projectile launch speed.
+     * @param[in] rightBarrel The turret's right barrel whose associated referee system barrel speed
+     *      limit will be used to determine the projectile launch speed.
+     * @param[in] barrelSwitcher the BarrelSwitcherSubystem associated with the two barrels
+     *      used to determine the current position of the barrels
      */
     DualBarrelFrictionWheelSpinRefLimitedCommand(
         tap::Drivers *drivers,
@@ -92,4 +99,4 @@ private:
 };
 }  // namespace aruwsrc::control::launcher
 
-#endif  // FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
+#endif  // DUAL_BARREL_FRICTION_WHEEL_SPIN_REF_LIMITED_COMMAND_HPP_
