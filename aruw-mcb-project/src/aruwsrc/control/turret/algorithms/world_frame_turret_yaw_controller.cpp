@@ -89,11 +89,11 @@ void WorldFrameTurretYawCascadePIDController::runController(
         worldFrameSetpoint.getValue() - worldToBaseTransform.getYaw(),
         yawMotor.getChassisFrameMeasuredAngle().getValue());
 
-    // const float positionPidOutput =
-    //     positionPid.runController(positionControllerError, -chassisVelocity, dt);
-    // @todo test this out
     const float positionPidOutput =
-        positionPid.runControllerDerivateError(positionControllerError, dt);
+        positionPid.runController(positionControllerError, -chassisVelocity, dt);
+    // @todo test this out
+    // const float positionPidOutput =
+    //     positionPid.runControllerDerivateError(positionControllerError, dt);
 
     const float velocityControllerError = positionPidOutput - chassisVelocity;
 

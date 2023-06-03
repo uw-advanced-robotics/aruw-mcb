@@ -317,115 +317,17 @@ SentryTurretMinorSubsystem turretMinorMalewife(
 // EDIT: Apparently Derek tells me that there's a plan to move the controller into the subsystem as
 // a field
 
-// Pitch
-// CV
-// tap::algorithms::SmoothPid
-// girlbossPitchPosPidCv(world_rel_turret_imu::turretMinor1::PITCH_POS_PID_AUTO_AIM_CONFIG);
-// tap::algorithms::SmoothPid
-// girlbossPitchVelPidCv(world_rel_turret_imu::turretMinor1::PITCH_VEL_PID_CONFIG);
-
-// algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossPitchControllerCv(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.pitchMotor,
-//     girlbossPitchPosPidCv,
-//     girlbossPitchVelPidCv);
-
-// tap::algorithms::SmoothPid
-// malewifePitchPosPidCv(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_AUTO_AIM_CONFIG);
-// tap::algorithms::SmoothPid
-// malewifePitchVelPidCv(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
-
-// algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchControllerCv(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.pitchMotor,
-//     malewifePitchPosPidCv,
-//     malewifePitchVelPidCv);
-
-// Manual
-// tap::algorithms::SmoothPid
-// girlbossPitchPosPid(world_rel_turret_imu::turretMinor1::PITCH_POS_PID_CONFIG);
-// tap::algorithms::SmoothPid
-// girlbossPitchVelPid(world_rel_turret_imu::turretMinor1::PITCH_VEL_PID_CONFIG);
-
-// algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossPitchController(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.pitchMotor,
-//     girlbossPitchPosPid,
-//     girlbossPitchVelPid);
-
 algorithms::ChassisFramePitchTurretController girlbossPitchController(
     turretMinorGirlboss.pitchMotor,
     major_rel::girlBoss::PITCH_PID_CONFIG);
-
-// tap::algorithms::SmoothPid
-// malewifePitchPosPid(world_rel_turret_imu::turretMinor0::PITCH_POS_PID_CONFIG);
-// tap::algorithms::SmoothPid
-// malewifePitchVelPid(world_rel_turret_imu::turretMinor0::PITCH_VEL_PID_CONFIG);
-
-// algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifePitchController(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.pitchMotor,
-//     malewifePitchPosPid,
-//     malewifePitchVelPid);
 
 algorithms::ChassisFramePitchTurretController malewifePitchController(
     turretMinorMalewife.pitchMotor,
     major_rel::maleWife::PITCH_PID_CONFIG);
 
-// Yaw
-// CV
-// tap::algorithms::SmoothPid
-// girlbossYawPosPidCv(world_rel_turret_imu::turretMinor1::YAW_POS_PID_AUTO_AIM_CONFIG);
-// tap::algorithms::SmoothPid
-// girlbossYawVelPidCv(world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG);
-
-// algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawControllerCv(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.yawMotor,
-//     turretMajor.yawMotor,
-//     girlbossYawPosPidCv,
-//     girlbossYawVelPidCv);
-
-// tap::algorithms::SmoothPid
-// malewifeYawPosPidCv(world_rel_turret_imu::turretMinor0::YAW_POS_PID_AUTO_AIM_CONFIG);
-// tap::algorithms::SmoothPid
-// malewifeYawVelPidCv(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
-
-// algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawControllerCv(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.yawMotor,
-//     turretMajor.yawMotor,
-//     malewifeYawPosPidCv,
-//     malewifeYawVelPidCv);
-
-// Manual
-// tap::algorithms::SmoothPid
-// girlbossYawPosPid(world_rel_turret_imu::turretMinor1::YAW_POS_PID_CONFIG);
-// tap::algorithms::SmoothPid
-// girlbossYawVelPid(world_rel_turret_imu::turretMinor1::YAW_VEL_PID_CONFIG);
-
-// algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossYawController(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.yawMotor,
-//     turretMajor.yawMotor,
-//     girlbossYawPosPid,
-//     girlbossYawVelPid);
-
 algorithms::ChassisFrameYawTurretController girlbossYawController(
     turretMinorGirlboss.yawMotor,
     major_rel::girlBoss::YAW_PID_CONFIG);
-
-// tap::algorithms::SmoothPid
-// malewifeYawPosPid(world_rel_turret_imu::turretMinor0::YAW_POS_PID_CONFIG);
-// tap::algorithms::SmoothPid
-// malewifeYawVelPid(world_rel_turret_imu::turretMinor0::YAW_VEL_PID_CONFIG);
-
-// algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeYawController(
-//     getTurretMCBCanComm(),
-//     turretMinorGirlboss.yawMotor,
-//     turretMajor.yawMotor,
-//     malewifeYawPosPid,
-//     malewifeYawVelPid);
 
 algorithms::ChassisFrameYawTurretController malewifeYawController(
     turretMinorMalewife.yawMotor,
@@ -498,7 +400,7 @@ tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG)
 tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG);
 algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     sentryTransforms.getWorldToChassis(),
-    turretMinorGirlboss.pitchMotor,
+    turretMajor.yawMotor,
     turretMajorYawPosPid,
     turretMajorYawVelPid);
 
@@ -842,16 +744,20 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 //     {&sentryTurretCVCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&autoNavCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&autoNavCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // HoldCommandMapping leftSwitchUp(
 //     drivers(),
 //     {&sentryTurretCVCommand, &beybladeCommand},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&beybladeCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchMid(
     drivers(),
     {&turretMinorGirlbossControlCommand,
