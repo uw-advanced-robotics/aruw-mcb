@@ -491,6 +491,7 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
 
+// @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate
 // a yaw controller for the turret major ourselves
 tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG);
