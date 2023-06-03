@@ -96,13 +96,13 @@ public:
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const  // @todo rename to getLocal
     {
         return chassisFrameMeasuredAngle;
     }
 
     /// @return turret motor angle measurement in chassis frame, unwrapped (not normalized).
-    mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
+    mockable inline float getChassisFrameUnwrappedMeasuredAngle() const  // @todo rename to getLocal...
     {
         return chassisFrameUnwrappedMeasurement;
     }
@@ -112,7 +112,7 @@ public:
      * motor.
      */
     // Terrible name but ok
-    mockable inline float getChassisFrameVelocity() const
+    mockable inline float getChassisFrameVelocity() const  // @todo rename to getLocalFrameVelocity
     {
         return (M_TWOPI / 60) * motor->getShaftRPM();
     }

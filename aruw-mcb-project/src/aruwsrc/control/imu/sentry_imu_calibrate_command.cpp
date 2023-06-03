@@ -35,7 +35,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController,
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
     chassis::HolonomicChassisSubsystem *chassis)
     : tap::control::Command(),
       drivers(drivers),

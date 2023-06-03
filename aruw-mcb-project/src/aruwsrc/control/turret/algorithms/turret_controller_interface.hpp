@@ -88,6 +88,7 @@ public:
      */
     virtual bool isOnline() const = 0;
 
+    // @todo are these really necessary as interface functions?
     /**
      * Converts the passed in controllerFrameAngle from the controller frame to the chassis frame of
      * reference.

@@ -66,7 +66,19 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .limitMotorAngles = false,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
+    .kp = 200'000.0f,
+    .ki = 8'000.0f,
+    .kd = 100.0f,
+    .maxICumulative = 3'000.0f,
+    .maxOutput = 25'000.0f,
+    .tRDerivativeKalman = 40.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kp = 200'000.0f,
     .ki = 8'000.0f,
     .kd = 100.0f,

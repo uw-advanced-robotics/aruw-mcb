@@ -113,7 +113,7 @@ public:
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
-        aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
         chassis::HolonomicChassisSubsystem *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -154,7 +154,7 @@ private:
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor;
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController* turretMajorController;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController;
     chassis::HolonomicChassisSubsystem *chassis;
 
     CalibrationState calibrationState;

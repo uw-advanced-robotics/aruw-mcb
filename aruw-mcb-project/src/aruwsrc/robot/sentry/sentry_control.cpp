@@ -18,6 +18,9 @@
  */
 
 #if defined(TARGET_SENTRY_BEEHIVE)
+
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
+
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
@@ -73,7 +76,7 @@
 // #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+// #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 // #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
@@ -285,12 +288,6 @@ SentryTurretMajorSubsystem turretMajor(
     &turretMajorYawMotor,
     aruwsrc::control::turret::turretMajor::YAW_MOTOR_CONFIG);
 
-// Because there is no thing for the turret major, we need to instantiate
-// a yaw controller for the turret major ourselves
-algorithms::ChassisFrameYawTurretController turretMajorYawController(
-    turretMajor.yawMotor,
-    turretMajor::YAW_PID_CONFIG);
-
 // Turret Minors ---------------------------------------------------------
 SentryTurretMinorSubsystem turretMinorGirlboss(
     drivers(),
@@ -493,6 +490,16 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorGirlboss,
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
+
+// Because there is no thing for the turret major, we need to instantiate
+// a yaw controller for the turret major ourselves
+tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG);
+algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
+    sentryTransforms.getWorldToChassis(),
+    turretMinorGirlboss.pitchMotor,
+    turretMajorYawPosPid,
+    turretMajorYawVelPid);
 
 // Otto ballistics solver --------------------------------------------------------------------
 

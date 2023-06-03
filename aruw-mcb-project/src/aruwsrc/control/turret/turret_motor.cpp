@@ -135,6 +135,7 @@ float TurretMotor::getValidChassisMeasurementErrorWrapped() const
         .difference(chassisFrameSetpoint);
 }
 
+// @todo implement elsewhere
 float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
 {
     if (config.limitMotorAngles)
