@@ -67,7 +67,7 @@ struct SwerveModuleConfig
         .kd = 0.0f,
         .maxICumulative = 0.0f,
         .maxOutput = 16'000.0f,
-        .errDeadzone = 50.0f,
+        .errDeadzone = 0.0f,
         .errorDerivativeFloor = 0.0f,
     };
 

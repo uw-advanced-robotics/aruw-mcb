@@ -307,32 +307,6 @@ SentryTurretMinorSubsystem turretMinorMalewife(
     &drivers()->turretMCBCanCommBus1,
     maleWife::turretID);
 
-// Turret controllers -------------------------------------------------------
-
-// Benjamin aneurysm: feels like turret controllers violate my very limited understanding of
-// subsystem-based design in some way Like the controller shouldn't be dissecting the subsystem to
-// add control for a specific part of it And then the controller accessed by a command Seems to be
-// kinda bypassing the command-subsystem hierarchy
-
-// EDIT: Apparently Derek tells me that there's a plan to move the controller into the subsystem as
-// a field
-
-algorithms::ChassisFramePitchTurretController girlbossPitchController(
-    turretMinorGirlboss.pitchMotor,
-    major_rel::girlBoss::PITCH_PID_CONFIG);
-
-algorithms::ChassisFramePitchTurretController malewifePitchController(
-    turretMinorMalewife.pitchMotor,
-    major_rel::maleWife::PITCH_PID_CONFIG);
-
-algorithms::ChassisFrameYawTurretController girlbossYawController(
-    turretMinorGirlboss.yawMotor,
-    major_rel::girlBoss::YAW_PID_CONFIG);
-
-algorithms::ChassisFrameYawTurretController malewifeYawController(
-    turretMinorMalewife.yawMotor,
-    major_rel::maleWife::YAW_PID_CONFIG);
-
 // Friction wheels ---------------------------------------------------------------------------
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -392,6 +366,25 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorGirlboss,
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
+
+// Turret controllers -------------------------------------------------------
+
+// @todo make controllers part of subsystem
+algorithms::ChassisFramePitchTurretController girlbossPitchController(
+    turretMinorGirlboss.pitchMotor,
+    major_rel::girlBoss::PITCH_PID_CONFIG);
+
+algorithms::ChassisFramePitchTurretController malewifePitchController(
+    turretMinorMalewife.pitchMotor,
+    major_rel::maleWife::PITCH_PID_CONFIG);
+
+algorithms::ChassisFrameYawTurretController girlbossYawController(
+    turretMinorGirlboss.yawMotor,
+    major_rel::girlBoss::YAW_PID_CONFIG);
+
+algorithms::ChassisFrameYawTurretController malewifeYawController(
+    turretMinorMalewife.yawMotor,
+    major_rel::maleWife::YAW_PID_CONFIG);
 
 // @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate

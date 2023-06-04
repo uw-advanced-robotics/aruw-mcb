@@ -117,7 +117,6 @@ void SwerveModule::refresh()
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
 
-    // updateMotorOutputs(drivePid.getOutput(), azimuthPid.getOutput());
     driveDesiredOutput = drivePid.getOutput();
     azimuthDesiredOutput = azimuthPid.getOutput();
 }

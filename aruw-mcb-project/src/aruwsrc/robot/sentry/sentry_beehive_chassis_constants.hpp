@@ -71,24 +71,56 @@ aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
     .azimuthZeroOffset = 3757,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    // .drivePidConfig = {
+    //     .kp = 16.0f,
+    //     .ki = 0.0f,
+    //     .kd = 0.0f,
+    //     .maxICumulative = 0.0f,
+    //     .maxOutput = 1'000.0f,
+    //     .errDeadzone = 20.0f,
+    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     .azimuthZeroOffset = 5790,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    // .drivePidConfig = {
+    //     .kp = 16.0f,
+    //     .ki = 0.0f,
+    //     .kd = 0.0f,
+    //     .maxICumulative = 0.0f,
+    //     .maxOutput = 1'000.0f,
+    //     .errDeadzone = 20.0f,
+    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     .azimuthZeroOffset = 330,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    // .drivePidConfig = {
+    //     .kp = 16.0f,
+    //     .ki = 0.0f,
+    //     .kd = 0.0f,
+    //     .maxICumulative = 0.0f,
+    //     .maxOutput = 1'000.0f,
+    //     .errDeadzone = 20.0f,
+    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
     .azimuthZeroOffset = 3759,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    // .drivePidConfig = {
+    //     .kp = 16.0f,
+    //     .ki = 0.0f,
+    //     .kd = 0.0f,
+    //     .maxICumulative = 0.0f,
+    //     .maxOutput = 1'000.0f,
+    //     .errDeadzone = 20.0f,
+    //     .errorDerivativeFloor = 0.0f},
 };
 
 

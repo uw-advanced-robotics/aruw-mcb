@@ -39,7 +39,7 @@ namespace aruwsrc::control::turret
 
 static constexpr uint8_t NUM_TURRETS = 2;
 
-static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
@@ -67,9 +67,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 100.0f,
+    .kp = 250.0f,
     .ki = 000.0f,
-    .kd = -15.0f,
+    .kd = -700.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 40.0f,
@@ -79,10 +79,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 700.0f,
+    .kp = 500.0f,
     .ki = 000.0f,
-    .kd = 100.0f,
-    .maxICumulative = 3'000.0f,
+    .kd = -700.0f,
+    .maxICumulative = 100.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -156,11 +156,11 @@ namespace major_rel
 namespace maleWife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 70'000.0f,
-    .ki = 0.0f,
-    .kd = 3'000.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 5000.f,
+    .kp = 38'000.0f,
+    .ki = 370.0f,
+    .kd = 3'600.0f,
+    .maxICumulative = 2'000.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -169,11 +169,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 100'000.0f,
+    .kp = 50'000.0f,
     .ki = 75.0f,
     .kd = 4'000.0f,
     .maxICumulative = 3'000.0f,
-    .maxOutput = 5000.f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
@@ -185,12 +185,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace girlBoss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 70'000.0f,
-    .ki = 0.0f,
-    .kd = 3'000.0f,
-    .maxICumulative = 0.0f,
-    // .maxOutput = 25'000.0f,
-    .maxOutput = 5'000.0f,
+    .kp = 38'000.0f,
+    .ki = 370.0f,
+    .kd = 3'600.0f,
+    .maxICumulative = 2'000.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -199,12 +198,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 100'000.0f,
+    .kp = 50'000.0f,
     .ki = 75.0f,
     .kd = 4'000.0f,
     .maxICumulative = 3'000.0f,
-    .maxOutput = 5000.f,
-    // .maxOutput = 25'000.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
