@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,17 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2019 Sanger_X
- */
-
 #include "holonomic_chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
-
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 
 using namespace tap::algorithms;
 
@@ -40,22 +34,19 @@ modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
-    tap::gpio::Analog::Pin currentPin)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
-      currentSensor(
-          {&drivers->analog,
-           currentPin,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-           aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+      currentSensor(currentSensor),
       chassisPowerLimiter(
           drivers,
-          &currentSensor,
+          currentSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
 }
+
+// HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
 
 float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
@@ -102,11 +93,6 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
         rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
     }
     return rTranslationalGain;
-}
-
-modm::Matrix<float, 3, 1> HolonomicChassisSubsystem::getDesiredVelocityChassisRelative() const
-{
-    return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
 }  // namespace chassis
