@@ -167,49 +167,31 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
 
 void FiveBarLinkage::computePositionFromAngles()
 {
-    /** Use bilinear interpolation to compute xy-values from lookup table.
-     *  See tap::algorithms for further docs.
-     */
-    // TODO: Replace this with bilinear interpolator when it's merged into taproot
+    float l0 = fiveBarConfig.motor1toMotor2Length;
+    float l1 = fiveBarConfig.motor1toJoint1Length;
+    float l2 = fiveBarConfig.joint1toTipLength;
+    float l3 = fiveBarConfig.joint2toTipLength;
+    float l4 = fiveBarConfig.motor2toJoint2Length;
 
-    float currentX = tap::algorithms::interpolateLinear2D(
-                         chassis::FIVE_BAR_LUT_X,
-                         chassis::FIVE_BAR_T1_MIN,
-                         chassis::FIVE_BAR_T1_MAX,
-                         chassis::FIVE_BAR_T1_DELTA,
-                         chassis::FIVE_BAR_T2_MIN,
-                         chassis::FIVE_BAR_T2_MAX,
-                         chassis::FIVE_BAR_T2_DELTA,
-                         (motor1RelativePosition)*360 / M_TWOPI,
-                         (motor2RelativePosition)*360 / M_TWOPI) /
-                     1000;  // check units with LUT
+    float t1 = motor1->getPositionUnwrapped();
+    float t4 = motor2->getPositionUnwrapped();
 
-    // TODO: Unfuck the table (yes Derek, I will do it for you - Manoli)
+    // Coordinate system centered around midpoint between motors
+    float xd = l4 * cos(t4) + l0 / 2;
+    float yd = l4 * sin(t4);
+    float xb = l2 * cos(t1) - l0 / 2;
+    float yb = l2 * sin(t1);
 
-    currentX += fiveBarConfig.motor1toMotor2Length;  // I fucked up the table so fix it here
-    currentX = -currentX;
+    float lbd_sqr = (xd - xb) * (xd - xb) + (yd - yb) * (yd - yb);
+    float A = 2 * l1 * (xd - xb);
+    float B = 2 * l2 * (yd - yb);
+    float C = l2 * l2 + lbd_sqr - l3 * l3;
 
-    float currentY = tap::algorithms::interpolateLinear2D(
-                         chassis::FIVE_BAR_LUT_Y,
-                         chassis::FIVE_BAR_T1_MIN,
-                         chassis::FIVE_BAR_T1_MAX,
-                         chassis::FIVE_BAR_T1_DELTA,
-                         chassis::FIVE_BAR_T2_MIN,
-                         chassis::FIVE_BAR_T2_MAX,
-                         chassis::FIVE_BAR_T2_DELTA,
-                         (motor1RelativePosition)*360 / M_TWOPI,
-                         (motor2RelativePosition)*360 / M_TWOPI) /
-                     1000;
-
-    // Set current position to computed values
-    currentPosition.setPosition(modm::Vector2f(currentX, currentY));
-
-    // finds the angle of the joint1-tip link relative to the refernce 0 (+x ax) using trig
-    float psi = motor1RelativePosition -
-                atan2f(currentY, currentX + fiveBarConfig.motor1toMotor2Length / 2);
-    float phi = asinf(
-        sqrtf(powf(currentX + fiveBarConfig.motor1toMotor2Length / 2, 2) + powf(currentY, 2)) /
-        fiveBarConfig.joint1toTipLength * sin(psi));
-    currentPosition.setOrientation(motor1RelativePosition - phi);
+    float t2 = 2 * atan2(B + sqrt(A * A + B * B - C * C), A + C);
+    float xc = xb + l2 * cos(t2);
+    float yc = yb + l2 * sin(t2);
+    currentPosition.setPosition(xc, yc);
+    currentL = currentPosition.getPosition().getLength();
+    currentTheta = currentPosition.getPosition().getAngle();
 }
 }  // namespace aruwsrc::control::motion

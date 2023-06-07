@@ -44,7 +44,7 @@ void BalancingChassisHomeCommand::initialize()
 
 void BalancingChassisHomeCommand::execute()
 {
-    if (chassis->homingState == HOMED) end(false);
+    if (chassis->getBalancingState() != HOMING) end(false);
 }
 
 void BalancingChassisHomeCommand::end(bool interrupted)
@@ -56,7 +56,7 @@ void BalancingChassisHomeCommand::end(bool interrupted)
 
 bool BalancingChassisHomeCommand::isFinished() const
 {
-    return chassis->homingState == HOMED;
+    return false;
 }
 }  // namespace chassis
 }  // namespace aruwsrc

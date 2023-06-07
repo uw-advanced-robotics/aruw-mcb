@@ -125,6 +125,9 @@ public:
 
 private:
     modm::Location2D<float> currentPosition;    // (m) for position, (rad) for orientation
+    // represent end effector position in polar, updated from currenposition
+    float currentTheta;
+    float currentL;
     modm::Vector2f desiredPosition;             // (m)
 
     tap::motor::MotorInterface* motor1;

@@ -172,28 +172,6 @@ FiveBarLinkage fiveBarLeft(&legmotorLF, &legmotorLR, FIVE_BAR_CONFIG);
 
 FiveBarLinkage fiveBarRight(&legmotorRF, &legmotorRR, FIVE_BAR_CONFIG);
 
-BalancingLeg legLeft(
-    drivers(),
-    getTurretMCBCanComm(),
-    &fiveBarLeft,
-    LF_LEG_MOTOR_PID_CONFIG,
-    LF_LEG_MOTOR_FUZZY_PID_CONFIG,
-    LR_LEG_MOTOR_PID_CONFIG,
-    LR_LEG_MOTOR_FUZZY_PID_CONFIG,
-    &leftWheel,
-    LEFT_WHEEL_MOTOR_PID_CONFIG);
-
-BalancingLeg legRight(
-    drivers(),
-    getTurretMCBCanComm(),
-    &fiveBarRight,
-    RF_LEG_MOTOR_PID_CONFIG,
-    RF_LEG_MOTOR_FUZZY_PID_CONFIG,
-    RR_LEG_MOTOR_PID_CONFIG,
-    RR_LEG_MOTOR_FUZZY_PID_CONFIG,
-    &rightWheel,
-    RIGHT_WHEEL_MOTOR_PID_CONFIG);
-
 // BEGIN SUBSYSTEMS
 aruwsrc::control::turret::StandardTurretSubsystem turret(
     drivers(),
@@ -223,8 +201,10 @@ aruwsrc::chassis::BalancingChassisSubsystem chassis(
     getTurretMCBCanComm(),
     turret.pitchMotor,
     turret.yawMotor,
-    legLeft,
-    legRight);
+    &fiveBarLeft,
+    &fiveBarRight,
+    &leftWheel,
+    &rightWheel);
 
 aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),

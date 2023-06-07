@@ -21,6 +21,7 @@
 #define BALANCING_CHASSIS_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
@@ -30,20 +31,32 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
+#include "aruwsrc/motor/tmotor_ak80-9.hpp"
 #include "aruwsrc/robot/balstd/balstd_frames.hpp"
 
-#include "balancing_leg.hpp"
-
 using namespace aruwsrc::balstd::transforms;
+using namespace tap::algorithms;
 
 namespace aruwsrc::chassis
 {
 
-enum LegHomingState
+/**
+ * if BALANCING -> run LQR controller for wheel outputs, if it falls, go to FALLEN_MOVING
+ * if FALLEN_MOVING -> tell it to stop, if stopped, go to FALLEN_NOT_MOVING
+ * if FALLEN_NOT_MOVING && GETUP ENABLE -> go to STANDING UP
+ * if STANDING_UP, run feedforward getupper, if it's within unfalling, goto BALANCING
+ *
+ */
+enum BalancingState
 {
-    UNHOMED = 0,
+    BALANCING = 0,
+    FALLEN_MOVING,
+    FALLEN_NOT_MOVING,
+    STANDING_UP,
+    JUMPING,
+    FALLING,
     HOMING,
-    HOMED
+    RECOVERY
 };
 
 class BalancingChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
@@ -54,8 +67,10 @@ public:
         aruwsrc::can::TurretMCBCanComm& turretMCB,
         const aruwsrc::control::turret::TurretMotor& pitchMotor,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
-        BalancingLeg& leftLeg,
-        BalancingLeg& rightLeg,
+        aruwsrc::control::motion::FiveBarLinkage* fivebarLeft,
+        aruwsrc::control::motion::FiveBarLinkage* fivebarRight,
+        tap::motor::MotorInterface* driveWheelLeft,
+        tap::motor::MotorInterface* driveWheelRight,
         tap::gpio::Analog::Pin currentPin = CURRENT_SENSOR_PIN);
 
     void initialize() override;
@@ -72,7 +87,7 @@ public:
      */
     void startHoming()
     {
-        homingState = HOMING;
+        balancingState = HOMING;
         legHomingPid[0].reset();
         legHomingPid[1].reset();
         legHomingPid[2].reset();
@@ -80,11 +95,7 @@ public:
         legStalled[0] = legStalled[1] = legStalled[2] = legStalled[3] = false;
     };
 
-    void startJumping()
-    {
-        leftLeg.setJumping();
-        rightLeg.setJumping();
-    }
+    void startJumping() {}
 
     /**
      * @return the number of chassis motors
@@ -96,7 +107,7 @@ public:
      */
     inline bool allMotorsOnline() const override
     {
-        return leftLeg.wheelMotorOnline() && rightLeg.wheelMotorOnline();
+        return driveWheelLeft->isMotorOnline() && driveWheelRight->isMotorOnline();
     };
 
     /**
@@ -105,17 +116,17 @@ public:
      */
     void stopChassis()
     {
-        leftLeg.getFiveBar()->setDesiredPosition(leftLeg.getDefaultPosition());
-        rightLeg.getFiveBar()->setDesiredPosition(rightLeg.getDefaultPosition());
+        setSafeBehavior();
         setDesiredOutput(0, 0);
         disarmChassis();
     };
 
-    inline void setFallen()
-    {
-        leftLeg.setBalancingState(FALLEN_MOVING);
-        rightLeg.setBalancingState(FALLEN_MOVING);
-    }
+    /**
+     * Changes setpoints to safe behavior,
+     */
+    void setSafeBehavior();
+
+    inline void setFallen() { balancingState = FALLEN_MOVING; }
 
     /**
      * @return The actual chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -155,9 +166,6 @@ public:
         desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.1);
     };
 
-    BalancingLeg& getLeftLeg() { return leftLeg; };
-    BalancingLeg& getRightLeg() { return rightLeg; };
-
     /**
      * @brief Defines x position and r rotation angle that we want the chassis to be in
      *
@@ -192,36 +200,18 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
-    inline void armChassis()
-    {
-        armed = true;
-        if (!rightLeg.getArmState()) rightLeg.armLeg();
-        if (!leftLeg.getArmState()) leftLeg.armLeg();
-    };
-    inline void disarmChassis()
-    {
-        armed = false;
-        if (rightLeg.getArmState()) rightLeg.disarmLeg();
-        if (leftLeg.getArmState()) leftLeg.disarmLeg();
-    };
+    inline void armChassis() { armed = true; };
+    inline void disarmChassis() { armed = false; };
     inline void toggleArm() { armed ? disarmChassis() : armChassis(); };
     inline bool getArmState() { return armed; };
 
-    inline bool getStandEnabled() { return leftLeg.getStand() && rightLeg.getStand(); }
-    inline void enableStand()
-    {
-        leftLeg.enableStand();
-        rightLeg.enableStand();
-    }
-    inline void disableStand()
-    {
-        rightLeg.disableStand();
-        leftLeg.disableStand();
-    }
+    inline bool getStandEnabled() { return standupEnable; }
+    inline void enableStand() { standupEnable = true; }
+    inline void disableStand() { standupEnable = false; }
+
+    inline BalancingState getBalancingState() { return balancingState; }
 
     tap::algorithms::SmoothPid rotationPid;
-
-    LegHomingState homingState = HOMED;
 
 private:
     tap::algorithms::transforms::Transform<Chassis, Turret> chassisToTurret =
@@ -232,13 +222,87 @@ private:
     tap::algorithms::Ramp velocityRamper;
     static constexpr float MAX_ACCELERATION = .5;  // m/s/s
 
+    // Tunable constants related to the state transitions
+    BalancingState balancingState = FALLEN_NOT_MOVING;
+    tap::arch::MilliTimeout balanceAttemptTimeout;
+    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
+    bool standupEnable = true;
+    float STANDUP_TORQUE_GAIN = 1.1;
+
+    float FALLING_FORCE_THRESHOLD = 40.0;  // Newtons
+    float JUMP_GRAV_GAIN = 1.0f;
+    tap::arch::MilliTimeout jumpTimeout;
+    uint32_t JUMP_TIMEOUT_DURATION = 200;
+
+    static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
+    static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
+
+    /**
+     * Estimates the current state variables of the robot.
+     *
+     * @param dt, delta time between previous and current cycles in ms
+     */
     void computeState(uint32_t dt);
 
+    /**
+     * Estimates leg link force based on feedback, and decides if the robot is freefalling
+     *
+     */
+    void airborneDetector();
+
+    /**
+     * Conducts rotational transforms between turret/turretMCB to get chassis angles
+     *
+     * @param dt, delta time between previous and current cycles in ms
+     */
     void getAngles(uint32_t dt);
 
+    /**
+     * FSM state when the robot is balancing by itself. If the robot disarms, this prevents wheels
+     * from outputting.
+     */
+    void updateBalancing(uint32_t dt);
+    /**
+     * FSM state for when the robot is fallen down and moving (has nonzero speed across the floor).
+     * Waits until the chassis stops to continue.
+     */
+    void updateFallenMoving(uint32_t dt);
+    /**
+     * FSM state for when the robot has stopped moving, is fallen, and is ready to get back up.
+     * Automatic getting-up is gated by the `standupEnable` flag. If the chassis is sufficiently up
+     * as defined by the `FALLEN_ANGLE` parameters, we go to the `BALANCING` state
+     */
+    void updateFallenNotMoving(uint32_t dt);
+    /**
+     * FSM state for automatically standing. The system executes a feedforward to the wheels to
+     * "kick" the robot up, until it is level enough to automatically balance.
+     */
+    void updateStandingUp(uint32_t dt);
+    /**
+     * FSM state for jumping. It executes `updateBalancing` but overrides the z- setpoint to the
+     * high position and bypasses the ramper.
+     */
+    void updateJumping(uint32_t dt);
+    /**
+     * FSM state for homing the legs. It runs the legs into the upper hardstops until they stop.
+     */
     void homeLegs(uint32_t dt);
+    /**
+     * FSM state for recovery mode. Retracts legs and lets the user manually drive the robot in the
+     * unbalanced state to recover the robot if it gets stuck.
+     */
+    void updateRecovery(uint32_t dt);
+    /**
+     * FSM state for when the robot is in freefall. It extends the legs straight down in
+     * world-frame.
+     */
+    void updateFalling();
 
-    void updateLegOdometry();
+    void setLegsRetracted(uint32_t dt);
+
+    /// Runs control logic with gravity compensation for the five-bar linkage
+    void fivebarController(uint32_t dt);
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
@@ -247,18 +311,51 @@ private:
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
-    BalancingLeg &leftLeg, rightLeg;
+
+    /* Pointers to required actuators */
+
+    aruwsrc::control::motion::FiveBarLinkage* fivebarLeft;
+    aruwsrc::control::motion::FiveBarLinkage* fivebarRight;
+    tap::motor::MotorInterface* driveWheelLeft;
+    tap::motor::MotorInterface* driveWheelRight;
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
-    SmoothPidConfig rollPidConfig{
+    SmoothPid rollPid = SmoothPid(SmoothPidConfig{
         .kp = .01,
-        .ki = .00002,
+        .kd = .001,
+        .maxICumulative = .1,
+        .maxOutput = .1,
+    });
+
+    SmoothPid heightPid = SmoothPid(SmoothPidConfig{
+        .kp = .01,
+        .kd = .001,
+        .maxICumulative = .1,
+        .maxOutput = .1,
+    });
+
+    SmoothPidConfig retractionPidConfig = {
+        .kp = 1,
         .kd = .001,
         .maxICumulative = .1,
         .maxOutput = .1,
     };
-    SmoothPid rollPid = SmoothPid(rollPidConfig);
+    SmoothPid retractionPid[2] = {SmoothPid(retractionPidConfig), SmoothPid(retractionPidConfig)};
+
+    SmoothPid linkAngleMismatchPid = SmoothPid(SmoothPidConfig{
+        .kp = .01,
+        .kd = .001,
+        .maxICumulative = .1,
+        .maxOutput = .1,
+    });
+
+    SmoothPid yawPid = SmoothPid(SmoothPidConfig{
+        .kp = .01,
+        .kd = .001,
+        .maxICumulative = .1,
+        .maxOutput = .1,
+    });
 
     SmoothPidConfig legHomingPidConfig{
         .kp = 10000,
@@ -278,37 +375,49 @@ private:
     uint32_t STALL_CURRENT = 20000;
     uint32_t STALL_TIMEOUT = 1000;
 
+    /**
+     * Ramps desired height to avoid big step inputs which may cause cringe such as undesired
+     * airborneness. To get desired airborneness, override the value.
+     *
+     */
+    tap::algorithms::Ramp desiredZRamper;
+    // m/s
+    static constexpr float Z_RAMP_RATE = .3;
+
     float debug1;
     float debug2;
     float debug3;
     float debug4;
 
-    float pitchAdjustment = 0;
-    float pitchAdjustmentPrev = 0;
-    float velocityAdjustment = 0;
-    float velocityAdjustmentPrev = 0;
-    float targetPitch;
-
     /**
-     * @brief Floating point world-relative orientation information. Angles are in rad, Angular Rate
+     * Floating point world-relative orientation information. Angles are in rad, Angular Rate
      * in rad/s. Prev values are used for finite-differencing and low-pass-filtering.
-     *
      */
-    float pitch;
-    float pitchPrev;
-    float pitchRate;
-    float roll;
-    float rollPrev;
-    float rollRate;
-    float yaw;
-    float yawPrev;
-    float yawRate;
+    float pitch, pitchPrev, pitchRate;
+    float tl, tlPrev, tlRate;
+    float roll, rollPrev, rollRate;
+    float yaw, yawPrev, yawRate;
 
     float desiredX, desiredV, desiredR, desiredZ;
     float currentX, currentV, currentR, currentZ;
     float prevX, prevV, prevR, prevZ;
     float prevXdesired, prevVdesired;
     uint32_t prevTime;
+
+    // Wheel Position/Velocity in m, m/s
+    float wheelPosLeft, wheelPosRight;
+    float wheelPosPrevLeft, wheelPosPrevRight;
+    float wheelVelLeft, wheelVelRight;
+
+    // States of the individual sides
+    float currentZLeft, currentZRight;
+    float tlLeft, tlRight;
+
+    // State Variables related to the control system
+    float wheelTorqueLeft, wheelTorqueRight;
+    float desiredLinkTorqueLeft, desiredLinkTorqueRight;
+    float currentLinkForceLeft, currentLinkForceRight;
+    float desiredLinkForceLeft, desiredLinkForceRight;
 };
 }  // namespace aruwsrc::chassis
 

@@ -166,25 +166,6 @@ static constexpr float MASS_CHASSIS = 18.5f;  // kg
 
 static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {-0.15, -0.35};
 
-static const tap::algorithms::SmoothPidConfig LEFT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 400,
-    .ki = 0,
-    .kd = 1000,
-    .maxOutput = 3000,
-    .errDeadzone = 0,
-    .errorDerivativeFloor = 1,
-};
-
-static const tap::algorithms::SmoothPidConfig RIGHT_WHEEL_MOTOR_PID_CONFIG{
-    .kp = 400,
-    .ki = 0,
-    .kd = 1000,
-    .maxOutput = 5000,
-    .errDeadzone = 0,
-
-    .errorDerivativeFloor = 1,
-};
-
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 4500,
     .ki = 100,
