@@ -20,6 +20,7 @@
 #ifndef FIVE_BAR_LOOKUP_HPP_
 #define FIVE_BAR_LOOKUP_HPP_
 #include <array>
+
 #include "tap/algorithms/cmsis_mat.hpp"
 
 using namespace tap::algorithms;
@@ -57,27 +58,29 @@ static modm::interpolation::Linear<modm::Pair<float, float>> HEIGHT_TO_LQR_K4_IN
 
 static const float VMC_JACOBIAN_DATA[4] = {
     -0.0905158857883341,
-    0.0905158857883341,
     0.385086352953914,
+    0.0905158857883341,
     0.385086352953913};
+static const float VMC_JACOBIAN_INV_DATA[4] = {-5.5239, 5.5239, 1.2984, 1.2984};
 
-static CMSISMat<2, 2> VMC_JACOBIAN(VMC_JACOBIAN_DATA);
+static const CMSISMat<2, 2> VMC_JACOBIAN(VMC_JACOBIAN_DATA);
 
-static CMSISMat<2,2> VMC_JACOBIAN_INV = VMC_JACOBIAN.inverse();
+static const CMSISMat<2, 2> VMC_JACOBIAN_INV(VMC_JACOBIAN_INV_DATA);
 
 static const float LQR_DATA[12] = {
-    -15.5411505489800,
-    -1.13108407012036,
-    -22.2436825113205,
-    -13.8743463018913,
-    12.3824513265125,
-    1.60076197194329,
-    7.39658901616003,
-    0.334843566760376,
-    4.56884595299939,
-    2.35829075238822,
-    145.821610329554,
-    8.61077880105639};
+    -10.1380,
+    -1.1085,
+    -7.0657,
+    -5.3725,
+    4.2402,
+    0.6392,
+    7.0077,
+    0.4335,
+    0.5501,
+    0.3151,
+    50.3747,
+    5.3357};
+
 static const CMSISMat<2, 6> LQR_K(LQR_DATA);
 
 }  // namespace aruwsrc::chassis

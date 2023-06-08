@@ -31,35 +31,35 @@ namespace aruwsrc::control::motion
 
 /**
  * Sign convention for angles is z+ with 0 at the x-axis.
- * 
+ *
  * See FiveBarLinkage class for diagram and further details.
-*/
+ */
 struct FiveBarConfig
 {
     modm::Vector2f defaultPosition;
 
-    float motor1toMotor2Length;     // (m)
-    float motor1toJoint1Length;     // (m)
-    float motor2toJoint2Length;     // (m)
-    float joint1toTipLength;        // (m)
-    float joint2toTipLength;        // (m)
+    float motor1toMotor2Length;  // (m)
+    float motor1toJoint1Length;  // (m)
+    float motor2toJoint2Length;  // (m)
+    float joint1toTipLength;     // (m)
+    float joint2toTipLength;     // (m)
 
-    float motor1MinAngle;           // (rad)
-    float motor1MaxAngle;           // (rad)
-    float motor2MinAngle;           // (rad)
-    float motor2MaxAngle;           // (rad)
+    float motor1MinAngle;  // (rad)
+    float motor1MaxAngle;  // (rad)
+    float motor2MinAngle;  // (rad)
+    float motor2MaxAngle;  // (rad)
 };
 
 /**
  * Wrapper class for a five-bar linkage object.
- * 
+ *
  * COORDINATE SYSTEM CONVENTION
- * 
- * X+ = from motor 2 to motor 1
- * Y+ = to the left of x+
+ *
+ * X+ = from motor 1 to motor 2
+ * Y+ = to the right of x+
  * orientation = angle of motor link (x+ side)
- *      (M2)  y+ ^  (M1)
- *          ____|____         x+ ->
+ *      (M2)  y- ^  (M1)
+ *          ____|____         x- ->
  *         /         \
  *        /           \
  *       /             \
@@ -92,15 +92,16 @@ public:
         this->desiredPosition = modm::Vector2f(x, y);
     };
 
-    inline void setHomePosition() {
-        
-    }
+    inline void setHomePosition() {}
 
     modm::Vector2f getDesiredPosition() { return desiredPosition; };
 
     modm::Vector2f getDefaultPosition() { return fiveBarConfig.defaultPosition; };
 
     modm::Location2D<float> getCurrentPosition() { return currentPosition; };
+
+    float getCurrentLength() { return currentL; };
+    float getCurrentAngle() { return currentTheta; };
 
     /**
      * Gets the difference between the current position and the desired position of the motor (rad).
@@ -124,29 +125,29 @@ public:
     void moveMotors(float motor1output, float motor2output);
 
 private:
-    modm::Location2D<float> currentPosition;    // (m) for position, (rad) for orientation
+    modm::Location2D<float> currentPosition;  // (m) for position, (rad) for orientation
     // represent end effector position in polar, updated from currenposition
     float currentTheta;
     float currentL;
-    modm::Vector2f desiredPosition;             // (m)
+    modm::Vector2f desiredPosition;  // (m)
 
     tap::motor::MotorInterface* motor1;
     tap::motor::MotorInterface* motor2;
 
-    float motor1Home;   // (rad)
-    float motor2Home;   // (rad)
+    float motor1Home;  // (rad)
+    float motor2Home;  // (rad)
     bool motor1IsHomed = false;
     bool motor2IsHomed = false;
 
-    float motor1RelativePosition;   // (rad)
-    float motor2RelativePosition;   // (rad)
+    float motor1RelativePosition;  // (rad)
+    float motor2RelativePosition;  // (rad)
 
     FiveBarConfig fiveBarConfig;
 
     uint32_t prevTime = 0;
 
-    float motor1Setpoint;   // (rad)
-    float motor2Setpoint;   // (rad)
+    float motor1Setpoint;  // (rad)
+    float motor2Setpoint;  // (rad)
 
     /***
      * Converts setpoints from XY-coordinates to motor angles using inverse kinematics.
@@ -158,6 +159,11 @@ private:
      * Updates currentPosition based on actual motor1 and motor2 angles using a look-up table.
      */
     void computePositionFromAngles();
+
+    float debug1;
+    float debug2;
+    float debug3;
+    float debug4;
 
 };  // class FiveBarLinkageSubsystem
 }  // namespace aruwsrc::control::motion

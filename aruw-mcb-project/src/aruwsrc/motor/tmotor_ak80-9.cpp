@@ -70,7 +70,7 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
      */
     shaftRPM = static_cast<int16_t>(message.data[2] << 8 | message.data[3]);  // rpm
     shaftRPM = motorInverted ? -shaftRPM : shaftRPM;
-    torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
+    torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // current in mA
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature
 

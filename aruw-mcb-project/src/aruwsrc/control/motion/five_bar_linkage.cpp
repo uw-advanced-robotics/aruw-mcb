@@ -45,10 +45,11 @@ void FiveBarLinkage::initialize()
     desiredPosition = fiveBarConfig.defaultPosition;
     computeMotorAngleSetpoints();
 
-    // Zero the motors. This assumes you boot at default postion
+    // Zero the motors. This assumes you boot at default postion, AKA the 0 encoder value on the
+    // motor corresponds with the upper hardstop.
 
-    motor1Home = motor1Setpoint;
-    motor2Home = motor2Setpoint;
+    motor1Home = fiveBarConfig.motor1MinAngle;
+    motor2Home = fiveBarConfig.motor2MaxAngle;
 
     motor1->initialize();
     motor2->initialize();
@@ -161,8 +162,8 @@ void FiveBarLinkage::computeMotorAngleSetpoints()
          magC2Squared) *
         magC2Inv / (-2 * fiveBarConfig.motor2toJoint2Length));
 
-    motor1Setpoint = M_PI + alpha_1 + beta_1;
-    motor2Setpoint = M_TWOPI - alpha_2 - beta_2;
+    motor1Setpoint = alpha_1 + beta_1;
+    motor2Setpoint = M_PI - alpha_2 - beta_2;
 }
 
 void FiveBarLinkage::computePositionFromAngles()
@@ -173,17 +174,21 @@ void FiveBarLinkage::computePositionFromAngles()
     float l3 = fiveBarConfig.joint2toTipLength;
     float l4 = fiveBarConfig.motor2toJoint2Length;
 
-    float t1 = motor1->getPositionUnwrapped();
-    float t4 = motor2->getPositionUnwrapped();
+    float t1 = motor1RelativePosition;
+    float t4 = motor2RelativePosition;
 
     // Coordinate system centered around midpoint between motors
     float xd = l4 * cos(t4) + l0 / 2;
     float yd = l4 * sin(t4);
-    float xb = l2 * cos(t1) - l0 / 2;
-    float yb = l2 * sin(t1);
+    float xb = l1 * cos(t1) - l0 / 2;
+    float yb = l1 * sin(t1);
+    debug1 = xd;
+    debug2 = yd;
+    debug3 = xb;
+    debug4 = yb;
 
     float lbd_sqr = (xd - xb) * (xd - xb) + (yd - yb) * (yd - yb);
-    float A = 2 * l1 * (xd - xb);
+    float A = 2 * l2 * (xd - xb);
     float B = 2 * l2 * (yd - yb);
     float C = l2 * l2 + lbd_sqr - l3 * l3;
 

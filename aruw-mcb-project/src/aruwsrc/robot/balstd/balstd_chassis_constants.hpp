@@ -162,9 +162,9 @@ static constexpr float ROTATION_REMOTE_SCALAR = .001;
 static constexpr float TRANSLATION_REMOTE_SCALAR = .001;
 static constexpr float HEIGHT_REMOTE_SCALAR = .001;
 
-static constexpr float MASS_CHASSIS = 18.5f;  // kg
+static constexpr float MASS_CHASSIS = 13.0f;  // kg
 
-static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {-0.15, -0.35};
+static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.125, 0.35};
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 4500,
@@ -224,16 +224,16 @@ static const tap::algorithms::FuzzyPDConfig RR_LEG_MOTOR_FUZZY_PID_CONFIG =
 // };
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
-    .defaultPosition = modm::Vector2f(0.0f, -0.100f),
+    .defaultPosition = modm::Vector2f(0.0f, 0.100f),
     .motor1toMotor2Length = .108f,
     .motor1toJoint1Length = .150f,
     .motor2toJoint2Length = .150f,
     .joint1toTipLength = .250f,
     .joint2toTipLength = .250f,
-    .motor1MinAngle = modm::toRadian(285),
-    .motor1MaxAngle = modm::toRadian(20) + M_TWOPI,
-    .motor2MinAngle = modm::toRadian(160),
-    .motor2MaxAngle = modm::toRadian(255),
+    .motor1MinAngle = modm::toRadian(200),
+    .motor1MaxAngle = modm::toRadian(105),
+    .motor2MinAngle = modm::toRadian(75),
+    .motor2MaxAngle = modm::toRadian(-20),
 };
 
 }  // namespace aruwsrc::chassis

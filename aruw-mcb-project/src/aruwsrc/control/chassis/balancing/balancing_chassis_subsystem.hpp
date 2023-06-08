@@ -163,7 +163,10 @@ public:
 
     void setDesiredHeight(float z)
     {
-        desiredZ = tap::algorithms::limitVal<float>(desiredZ + z, -.35, -.1);
+        desiredZRamper.setTarget(tap::algorithms::limitVal<float>(
+            desiredZRamper.getTarget() - z,
+            CHASSIS_HEIGHTS.first,
+            CHASSIS_HEIGHTS.second));
     };
 
     /**
@@ -226,7 +229,7 @@ private:
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = true;
+    bool standupEnable = false;
     float STANDUP_TORQUE_GAIN = 1.1;
 
     float FALLING_FORCE_THRESHOLD = 40.0;  // Newtons
@@ -302,7 +305,7 @@ private:
     void setLegsRetracted(uint32_t dt);
 
     /// Runs control logic with gravity compensation for the five-bar linkage
-    void fivebarController(uint32_t dt);
+    void fivebarController();
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
@@ -329,25 +332,40 @@ private:
     });
 
     SmoothPid heightPid = SmoothPid(SmoothPidConfig{
-        .kp = .01,
-        .kd = .001,
-        .maxICumulative = .1,
-        .maxOutput = .1,
+        .kp = 800,
+        .ki = .5,
+        .kd = -10000,
+        .maxICumulative = 100,
+        .maxOutput = 400,
     });
 
     SmoothPidConfig retractionPidConfig = {
-        .kp = 1,
-        .kd = .001,
-        .maxICumulative = .1,
-        .maxOutput = .1,
+        .kp = 500,
+        .ki = .0,
+        .kd = .0,
+        .maxICumulative = 2,
+        .maxOutput = 20,
+        .errDeadzone = .01,
     };
     SmoothPid retractionPid[2] = {SmoothPid(retractionPidConfig), SmoothPid(retractionPidConfig)};
 
+    SmoothPidConfig retractionAnglePidConfig = {
+        .kp = 5,
+        .ki = 0,
+        .kd = 0,
+        .maxICumulative = 1,
+        .maxOutput = 5,
+        .errDeadzone = .01,
+    };
+    SmoothPid retractionAnglePid[2] = {
+        SmoothPid(retractionAnglePidConfig),
+        SmoothPid(retractionAnglePidConfig)};
+
     SmoothPid linkAngleMismatchPid = SmoothPid(SmoothPidConfig{
-        .kp = .01,
-        .kd = .001,
+        .kp = 50,
+        .kd = 100,
         .maxICumulative = .1,
-        .maxOutput = .1,
+        .maxOutput = 5,
     });
 
     SmoothPid yawPid = SmoothPid(SmoothPidConfig{
@@ -388,6 +406,8 @@ private:
     float debug2;
     float debug3;
     float debug4;
+    float* debugMat1;
+    float debugMat2[2];
 
     /**
      * Floating point world-relative orientation information. Angles are in rad, Angular Rate

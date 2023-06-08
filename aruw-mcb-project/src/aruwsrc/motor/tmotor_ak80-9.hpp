@@ -197,6 +197,11 @@ public:
      */
     int8_t getTemperature() const override;
 
+    /**
+     * @warning THIS DOES NOT RETURN TORQUE. IT RETURNS CURRENT DRAW IN mA 
+     *
+     * @return int16_t mA
+     */
     int16_t getTorque() const override;
 
     /// For interpreting the sign of return value see class comment
