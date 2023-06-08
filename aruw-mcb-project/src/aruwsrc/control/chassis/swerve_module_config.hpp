@@ -56,7 +56,8 @@ struct SwerveModuleConfig
 
     // Whether any motor is inverted
     // @todo these should not be specified by default !!!
-    const bool driveMotorInverted = true, azimuthMotorInverted = true;  // @todo doesn't quite work bc the motors are instantiated before the swerve modules
+    const bool driveMotorInverted;
+    const bool azimuthMotorInverted = true;  // @todo doesn't quite make sense to put here bc the motors are instantiated before the swerve modules (see main sentry control)
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f;
     const float azimuthMotorGearing = 1;
@@ -88,8 +89,6 @@ struct SwerveModuleConfig
 
     const float gearboxRatio = (1.0f / 19.0f);  // @todo no idea if this is right
 };
-
-static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;
 
 }  // namespace aruwsrc::chassis
 #endif  // SWERVE_MODULE_CONFIG_HPP_

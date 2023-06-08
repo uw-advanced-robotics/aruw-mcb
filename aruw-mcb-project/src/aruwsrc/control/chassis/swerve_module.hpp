@@ -61,7 +61,7 @@ public:
     SwerveModule(
         Motor& driveMotor,
         Motor& azimuthMotor,
-        SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
+        SwerveModuleConfig& swerveModuleConfig);
 
     /**
      * uses the internally stored values from calculate() to update
