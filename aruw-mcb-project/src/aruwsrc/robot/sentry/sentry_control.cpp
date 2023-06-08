@@ -157,7 +157,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     MOTOR1,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,  // TODO: BRUHHH
     "Right Front Swerve Drive Motor");
 
 VirtualDjiMotor rightFrontAzimuthMotor(
