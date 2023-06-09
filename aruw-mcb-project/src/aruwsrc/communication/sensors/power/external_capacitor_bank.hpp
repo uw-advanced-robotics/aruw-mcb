@@ -59,7 +59,7 @@ public:
 
     void processMessage(const modm::can::Message& message) override;
 
-    void initialize(tap::control::chassis::PowerLimiter& powerLimiter);
+    void initialize(tap::control::chassis::PowerLimiter& powerLimiter, tap::communication::sensors::current::CurrentSensorInterface& currentSensor);
 
     void start() const;
     void stop() const;
@@ -74,6 +74,8 @@ public:
 
 private:
     tap::control::chassis::PowerLimiter* powerLimiter = nullptr;
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor = nullptr;
+    
     const float capacitance;
 
     uint16_t powerLimit = 0;

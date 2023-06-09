@@ -47,7 +47,8 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -75,7 +76,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
+      capBankIndicator(drivers, refSerialTransmitter, capBank)
 {
     addSubsystemRequirement(&clientDisplay);
 }
@@ -89,6 +91,7 @@ void ClientDisplayCommand::initialize()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+    capBankIndicator.initialize();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -104,6 +107,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
+    PT_CALL(capBankIndicator.sendInitialGraphics());
 
     while (true)
     {
@@ -112,6 +116,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
+        PT_CALL(capBankIndicator.update());
         PT_YIELD();
     }
     PT_END();

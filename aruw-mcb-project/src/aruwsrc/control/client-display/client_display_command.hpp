@@ -38,6 +38,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
+#include "cap_bank_indicator.hpp"
 
 namespace tap::control
 {
@@ -113,7 +114,8 @@ public:
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+        const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
 
@@ -135,6 +137,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    CapBankIndicator capBankIndicator;
 
     bool run();
 };

@@ -19,6 +19,8 @@
 
 #include "external_capacitor_bank.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 namespace aruwsrc::communication::sensors::power
 {
 ExternalCapacitorBank::ExternalCapacitorBank(
@@ -39,11 +41,17 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->current =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
-            this->availableEnergy = 1.0 / 2.0 * this->capacitance * powf(this->voltage, 2);
+            this->availableEnergy = tap::algorithms::limitVal(1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(9, 2)), 0.0, 2000.0);
 
             if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT))
             {
-                this->powerLimiter->setExternalEnergyBuffer(this->availableEnergy);
+                float inputPower = (this->voltage * this->current);
+                float outputPower = 24.0 * this->currentSensor->getCurrentMa() / 1000;
+
+                float capPower = outputPower - inputPower;
+                float capAmps = capPower / ((float) this->voltage);
+
+                this->powerLimiter->setExternalEnergyBuffer(capAmps < 10.0 ? this->availableEnergy : 0);
             }
             else
             {
@@ -65,7 +73,8 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
 
         this->setBatteryVoltage(drivers->refSerial.getRobotData().chassis.volt);
 
-        if (drivers->refSerial.getRobotData().currentHp == 0)
+        if (drivers->refSerial.getRobotData().currentHp == 0 || 
+            (drivers->refSerial.getRobotData().robotPower.value & static_cast<uint8_t>(tap::communication::serial::RefSerialData::Rx::RobotPower::CHASSIS_HAS_POWER)) == 0)
         {
             this->stop();
         } 
@@ -88,11 +97,12 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
     }
 }
 
-void ExternalCapacitorBank::initialize(tap::control::chassis::PowerLimiter& powerLimiter)
+void ExternalCapacitorBank::initialize(tap::control::chassis::PowerLimiter& powerLimiter, tap::communication::sensors::current::CurrentSensorInterface& currentSensor)
 {
     this->attachSelfToRxHandler();
     this->started = false;
     this->powerLimiter = &powerLimiter;
+    this->currentSensor = &currentSensor;
 }
 
 void ExternalCapacitorBank::start() const

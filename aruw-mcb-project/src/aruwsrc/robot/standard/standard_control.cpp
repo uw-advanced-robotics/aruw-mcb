@@ -383,7 +383,8 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand,
-    sentryResponseHandler);
+    sentryResponseHandler,
+    &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -512,7 +513,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
 
-    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter);
+    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter, currentSensor);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
