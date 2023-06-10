@@ -33,6 +33,7 @@
 // @todo primarily here to avoid namespace pain
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -64,6 +65,7 @@ public:
      */
     WorldFrameTurretYawCascadePIDController(
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
+        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid,
@@ -96,6 +98,8 @@ public:
 
 private:
     const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform;
+
+    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;

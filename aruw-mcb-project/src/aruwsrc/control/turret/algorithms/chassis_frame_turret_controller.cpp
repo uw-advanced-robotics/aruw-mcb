@@ -108,7 +108,7 @@ void ChassisFramePitchTurretController::runController(
     float pidOutput =
         pid.runController(positionControllerError, turretMotor.getChassisFrameVelocity(), dt);
 
-    pidOutput += computeGravitationalForceOffset(
+    pidOutput -= computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
         -turretMotor.getAngleFromCenter(),

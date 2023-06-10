@@ -393,6 +393,7 @@ tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG)
 tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG);
 algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     sentryTransforms.getWorldToChassis(),
+    sentryDrive,
     turretMajor.yawMotor,
     turretMajorYawPosPid,
     turretMajorYawVelPid,

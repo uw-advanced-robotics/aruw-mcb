@@ -48,12 +48,14 @@ namespace aruwsrc::control::turret::algorithms
 
 WorldFrameTurretYawCascadePIDController::WorldFrameTurretYawCascadePIDController(
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
+        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid,
         float maxVelErrorInput)
     : TurretYawControllerInterface(yawMotor),
       worldToBaseTransform(worldToBaseTransform),
+      chassis(chassis),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
@@ -82,9 +84,11 @@ void WorldFrameTurretYawCascadePIDController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    ContiguousFloat chassisAngle = yawMotor.getChassisFrameMeasuredAngle();
+    ContiguousFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
 
-    const float chassisVelocity = yawMotor.getChassisFrameVelocity();
+    const float localVelocity = yawMotor.getChassisFrameVelocity();
+
+    const float chassisVelocity = *chassis.getActualVelocityChassisRelative()[2];
 
     worldFrameSetpoint.setValue(desiredSetpoint);
 
@@ -92,13 +96,10 @@ void WorldFrameTurretYawCascadePIDController::runController(
         worldFrameSetpoint.getValue() - worldToBaseTransform.getYaw(),
         yawMotor.getChassisFrameMeasuredAngle().getValue());
 
-    // const float positionPidOutput =
-    //     positionPid.runController(positionControllerError, -chassisVelocity, dt);
-    // @todo test this out
     const float positionPidOutput =
         positionPid.runControllerDerivateError(positionControllerError, dt);
 
-    const float velocityControllerError = limitVal(positionPidOutput - chassisVelocity, -maxVelErrorInput, maxVelErrorInput);
+    const float velocityControllerError = limitVal(positionPidOutput - localVelocity - chassisVelocity, -maxVelErrorInput, maxVelErrorInput);
 
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);

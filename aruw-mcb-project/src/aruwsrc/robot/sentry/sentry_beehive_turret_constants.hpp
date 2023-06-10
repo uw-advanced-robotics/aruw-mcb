@@ -47,7 +47,7 @@ static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float TURRET_CG_X = -48.14f;
+static constexpr float TURRET_CG_X = 9.14f;
 static constexpr float TURRET_CG_Z = 9.45f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 
