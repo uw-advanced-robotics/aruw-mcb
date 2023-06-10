@@ -695,62 +695,10 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 
 /* define command mappings --------------------------------------------------*/
 
-// We're currently going to ignore right switch inputs.  TODO: Change this back.
-// HoldCommandMapping rightSwitchDown(
-//     drivers(),
-//     {&turretZero.stopFrictionWheels, &turretOne.stopFrictionWheels},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-// HoldRepeatCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimiting,
-//      &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimiting},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-//     true);
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping leftSwitchDown(
-//     drivers(),
-//     {&turretMajorControlCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-
-// for controlling turret major
-// HoldCommandMapping rightSwitchDown(
-//     drivers(),
-//     {&turretMajorControlCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-// HoldCommandMapping leftSwitchMid(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
-
-// HoldCommandMapping leftSwitchMid(
-//     drivers(),
-//     {&turretMinorGirlbossControlCommand, &turretMinorMalewifeControlCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&sentryTurretCVCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&autoNavCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&sentryTurretCVCommand, &beybladeCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&beybladeCommand, &turretMajorControlCommand},
+    // {&sentryTurretCVCommand},
+    {&beybladeCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchMid(
     drivers(),

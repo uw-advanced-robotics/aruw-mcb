@@ -208,7 +208,7 @@ void SentryTurretCVCommand::execute()
             if (!scanning) { enterScanMode(majorSetpoint); }
             majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE, 0.0f, M_TWOPI);
             // lowPassFilter(majorSetpoint, majorScanValue, SCAN_LOW_PASS_ALPHA);
-            majorSetpoint = majorScanValue.getValue() - sentryTransforms.getWorldToChassis().getYaw();
+            majorSetpoint = majorScanValue.getValue();
             girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             malewifePitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             girlbossYawSetpoint = SCAN_GIRLBOSS_YAW;
@@ -236,7 +236,6 @@ if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std
         majorYawWrapped += maleWifeYawWrapped;
         // majorYawWrapped = maleWifeYawWrapped - majorYawWrapped;
 
-        majorYawWrapped.shiftDownInPlace(worldToChassisTransform.getYaw());
         majorSetpoint = majorYawWrapped.getValue();
 
         // // majorYawWrapped -= worldToChassisTransform.getYaw();
@@ -281,6 +280,7 @@ void SentryTurretCVCommand::end(bool)
     turretMinorMalewifeSubsystem.pitchMotor.setMotorOutput(0);
     withinAimingToleranceGirlboss = false;
     withinAimingToleranceMalewife = false;
+    exitScanMode();
 }
 
 void SentryTurretCVCommand::requestNewTarget()
