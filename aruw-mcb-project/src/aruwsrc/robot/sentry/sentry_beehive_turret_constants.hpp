@@ -96,38 +96,11 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 // static constexpr boolean majorInverted = true;
 }  // namespace turretMajor
 
-namespace girlBoss
+namespace girlboss
 {
 
 static constexpr uint8_t turretID = 0;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = 0,
-    .startEncoderValue = 6842,
-    .minAngle = modm::toRadian(-210),
-    .maxAngle = modm::toRadian(30),
-    .limitMotorAngles = true,
-};
-
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = 0,
-    .startEncoderValue = 3285,
-    .minAngle = modm::toRadian(-9),
-    .maxAngle = modm::toRadian(42),
-    .limitMotorAngles = true,
-};
-
-static constexpr float majorToTurretR = 0.145;
-static constexpr float default_launch_speed = 14.0f;
-static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
-}  // namespace girlBoss
-
-namespace maleWife
-{
-static constexpr uint8_t turretID = 1;
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -144,16 +117,43 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(42),
     .limitMotorAngles = true,
 };
+
+static constexpr float majorToTurretR = 0.145;
+static constexpr float default_launch_speed = 14.0f;
+static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+}  // namespace girlboss
+
+namespace malewife
+{
+static constexpr uint8_t turretID = 1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = 0,
+    .startEncoderValue = 6842,
+    .minAngle = modm::toRadian(-210),
+    .maxAngle = modm::toRadian(30),
+    .limitMotorAngles = true,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = 0,
+    .startEncoderValue = 3285,
+    .minAngle = modm::toRadian(-9),
+    .maxAngle = modm::toRadian(42),
+    .limitMotorAngles = true,
+};
 static constexpr float majorToTurretR = -0.145;
 static constexpr float default_launch_speed = 14.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
-}  // namespace maleWife
+}  // namespace malewife
 
 namespace major_rel
 {
 
-namespace maleWife
+namespace malewife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 38'000.0f,
@@ -180,9 +180,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace maleWife
+}  // namespace malewife
 
-namespace girlBoss
+namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 38'000.0f,
@@ -209,7 +209,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace girlBoss
+}  // namespace girlboss
 }  // namespace major_rel
 
 }  // namespace  aruwsrc::control::turret

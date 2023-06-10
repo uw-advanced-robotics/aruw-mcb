@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
@@ -43,6 +44,8 @@ public:
         HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>& girlbossBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>& malewifeBallisticsSolver,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface);
 
     void initialize() override;
@@ -60,6 +63,8 @@ private:
     HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>& girlbossBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>& malewifeBallisticsSolver;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
 
     float lastX = 0;

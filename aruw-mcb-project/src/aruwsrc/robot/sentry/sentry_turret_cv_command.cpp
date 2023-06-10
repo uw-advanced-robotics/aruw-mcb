@@ -64,23 +64,11 @@ SentryTurretCVCommand::SentryTurretCVCommand(
       girlbossBallisticsSolver(girlbossBallisticsSolver),
       malewifeBallisticsSolver(malewifeBallisticsSolver),
       sentryTransforms(sentryTransforms)
-    //   yawGirlbossScanner(
-    //       {turretMinorGirlbossSubsystem.yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-    //        turretMinorGirlbossSubsystem.yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-    //        YAW_SCAN_DELTA_ANGLE}),
-    //   yawMalewifeScanner(
-    //       {turretMinorMalewifeSubsystem.yawMotor.getConfig().minAngle + YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-    //        turretMinorMalewifeSubsystem.yawMotor.getConfig().maxAngle - YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX,
-    //        YAW_SCAN_DELTA_ANGLE})
 {
 
     this->addSubsystemRequirement(&turretMajorSubsystem);
     this->addSubsystemRequirement(&turretMinorGirlbossSubsystem);
     this->addSubsystemRequirement(&turretMinorMalewifeSubsystem);
-
-
-    girlbossIgnoreTargetTimeout.restart(0);
-    malewifeIgnoreTargetTimeout.restart(0);
 }
 
 bool SentryTurretCVCommand::isReady() { return !isFinished(); }
@@ -106,11 +94,6 @@ void SentryTurretCVCommand::execute()
     float girlbossPitchSetpoint = pitchControllerGirlboss.getSetpoint();
     float malewifePitchSetpoint = pitchControllerMalewife.getSetpoint();
 
-    bool targetFound = true;
-    if (!visionCoprocessor.isCvOnline())
-    {
-        targetFound = false;
-    }
     // world angles
     auto girlbossAimData = visionCoprocessor.getLastAimData(0);
     auto girlbossBallisticsSolution = girlbossBallisticsSolver.computeTurretAimAngles(girlbossAimData);
@@ -118,13 +101,11 @@ void SentryTurretCVCommand::execute()
     auto malewifeAimData = visionCoprocessor.getLastAimData(1);
     auto malewifeBallisticsSolution = malewifeBallisticsSolver.computeTurretAimAngles(malewifeAimData);
 
-    if (girlbossBallisticsSolution == std::nullopt && malewifeBallisticsSolution == std::nullopt) {
-        targetFound = false;
-    }
+    bool targetFound = visionCoprocessor.isCvOnline() && !(girlbossBallisticsSolution == std::nullopt && malewifeBallisticsSolution == std::nullopt);
 
     // Turret minor control
     // If target spotted
-    if (girlbossIgnoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt)
+    if (targetFound)
     {
         exitScanMode();
 
@@ -145,19 +126,14 @@ void SentryTurretCVCommand::execute()
         girlbossYawSetpoint = turretMinorGirlbossSubsystem.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
         girlbossPitchSetpoint = turretMinorGirlbossSubsystem.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
 
-        auto differenceWrapped = [](float measurement, float setpoint) {
+        auto differenceWrappedGirlboss = [](float measurement, float setpoint) {
             return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
         };
 
         withinAimingToleranceGirlboss = girlbossBallisticsSolver.withinAimingTolerance(
-            differenceWrapped(yawControllerGirlboss.getMeasurement(), girlbossYawSetpoint),
-            differenceWrapped(pitchControllerGirlboss.getMeasurement(), girlbossPitchSetpoint),
+            differenceWrappedGirlboss(yawControllerGirlboss.getMeasurement(), girlbossYawSetpoint),
+            differenceWrappedGirlboss(pitchControllerGirlboss.getMeasurement(), girlbossPitchSetpoint),
             girlbossBallisticsSolution->distance);
-    }
-
-    if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std::nullopt)
-    {
-        exitScanMode();
 
         // Get world-relative setpoints
         malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
@@ -178,18 +154,34 @@ void SentryTurretCVCommand::execute()
         malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
         malewifePitchSetpoint = turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
 
-        auto differenceWrapped = [](float measurement, float setpoint) {
+        auto differenceWrappedMalewife = [](float measurement, float setpoint) {
             return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
         };
 
         withinAimingToleranceMalewife = malewifeBallisticsSolver.withinAimingTolerance(
-            differenceWrapped(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
-            differenceWrapped(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
+            differenceWrappedMalewife(yawControllerMalewife.getMeasurement(), malewifeYawSetpoint),
+            differenceWrappedMalewife(pitchControllerMalewife.getMeasurement(), malewifePitchSetpoint),
             malewifeBallisticsSolution->distance);
-    }
 
-    // Turret major setpoint
-    if (!targetFound)
+        WrappedFloat girlbossYawWrapped(girlbossBallisticsSolution->yawAngle, 0, M_TWOPI);
+        WrappedFloat malewifeYawWrapped(malewifeBallisticsSolution->yawAngle, 0, M_TWOPI);
+
+        // major averaging
+        // majorSetpoint = ((girlbossBallisticsSolution->yawAngle + malewifeBallisticsSolution->yawAngle) / 2.0f);
+
+        auto& worldToChassisTransform = sentryTransforms.getWorldToChassis();
+        WrappedFloat majorYawWrapped = girlbossYawWrapped.minDifference(malewifeYawWrapped);
+
+        debug1 = majorYawWrapped;
+        debug2 = girlbossYawWrapped;
+        debug3 = malewifeYawWrapped;
+
+        majorYawWrapped /= -2.0f;
+        majorYawWrapped += malewifeYawWrapped;
+
+        majorSetpoint = majorYawWrapped.getValue();
+    }
+    else
     {
         withinAimingToleranceGirlboss = false;
         withinAimingToleranceMalewife = false;
@@ -202,9 +194,9 @@ void SentryTurretCVCommand::execute()
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
         }
-        // Scan
         else
         {
+            // Scan
             if (!scanning) { enterScanMode(majorSetpoint); }
             majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE, 0.0f, M_TWOPI);
             // lowPassFilter(majorSetpoint, majorScanValue, SCAN_LOW_PASS_ALPHA);
@@ -215,40 +207,7 @@ void SentryTurretCVCommand::execute()
             malewifeYawSetpoint = SCAN_MALEWIFE_YAW;
         }
     }
-    
-    // major averaging
-if (malewifeIgnoreTargetTimeout.isExpired() && malewifeBallisticsSolution != std::nullopt &&
-    girlbossIgnoreTargetTimeout.isExpired() && girlbossBallisticsSolution != std::nullopt) {
-        WrappedFloat girlBossYawWrapped(girlbossBallisticsSolution->yawAngle, 0, M_TWOPI);
-        WrappedFloat maleWifeYawWrapped(malewifeBallisticsSolution->yawAngle, 0, M_TWOPI);
 
-
-        // majorSetpoint = ((girlbossBallisticsSolution->yawAngle + malewifeBallisticsSolution->yawAngle) / 2.0f);
-
-        auto& worldToChassisTransform = sentryTransforms.getWorldToChassis();
-        WrappedFloat majorYawWrapped = girlBossYawWrapped.minDifference(maleWifeYawWrapped);
-
-        debug1 = majorYawWrapped;
-        debug2 = girlBossYawWrapped;
-        debug3 = maleWifeYawWrapped;
-
-        majorYawWrapped /= -2.0f;
-        majorYawWrapped += maleWifeYawWrapped;
-        // majorYawWrapped = maleWifeYawWrapped - majorYawWrapped;
-
-        majorSetpoint = majorYawWrapped.getValue();
-
-        // // majorYawWrapped -= worldToChassisTransform.getYaw();
-        // majorYawWrapped.shiftDown(worldToChassisTransform.getYaw());
-        // WrappedFloat majorChassisFrameSetpoint = 
-        
-
-        // transform to major frame
-        // majorSetpoint -= worldToChassisTransform.getYaw();
-        // majorSetpoint = turretMajorSubsystem.yawMotor.unwrapTargetAngle(majorSetpoint);
-
-        // malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
-    }
     uint32_t currTime = getTimeMilliseconds();
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;

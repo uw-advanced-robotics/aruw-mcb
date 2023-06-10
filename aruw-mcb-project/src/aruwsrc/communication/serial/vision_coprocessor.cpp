@@ -161,7 +161,7 @@ void VisionCoprocessor::sendMessage()
     // sendTimeSyncMessage();
 }
 
-bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
+bool VisionCoprocessor::isCvOnline() const { return !(cvOfflineTimeout.isExpired() || cvOfflineTimeout.isStopped()); }
 
 void VisionCoprocessor::sendShutdownMessage()
 {

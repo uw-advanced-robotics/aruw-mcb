@@ -150,7 +150,7 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-        return turretID == girlBoss::turretID ? withinAimingToleranceGirlboss
+        return turretID == girlboss::turretID ? withinAimingToleranceGirlboss
                                               : withinAimingToleranceMalewife;
     }
 
@@ -190,9 +190,6 @@ private:
 
     bool withinAimingToleranceGirlboss = false;
     bool withinAimingToleranceMalewife = false;
-
-    tap::arch::MilliTimeout girlbossIgnoreTargetTimeout;
-    tap::arch::MilliTimeout malewifeIgnoreTargetTimeout;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target

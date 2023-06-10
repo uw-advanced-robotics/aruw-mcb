@@ -42,11 +42,15 @@ AutoNavCommand::AutoNavCommand(
     HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretMotor& yawMotor,
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>& girlbossBallisticsSolver,
+    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>& malewifeBallisticsSolver,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
+      girlbossBallisticsSolver(girlbossBallisticsSolver),
+      malewifeBallisticsSolver(malewifeBallisticsSolver),
       odometryInterface(odometryInterface)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
@@ -58,8 +62,16 @@ void AutoNavCommand::initialize() {}
 
 void AutoNavCommand::execute()
 {
-    // if (yawMotor.isOnline())
-    if (true)
+    // @todo recycled code from turretCVCommand
+    auto girlbossAimData = visionCoprocessor.getLastAimData(0);
+    auto girlbossBallisticsSolution = girlbossBallisticsSolver.computeTurretAimAngles(girlbossAimData);
+
+    auto malewifeAimData = visionCoprocessor.getLastAimData(1);
+    auto malewifeBallisticsSolution = malewifeBallisticsSolver.computeTurretAimAngles(malewifeAimData);
+
+    bool targetFound = visionCoprocessor.isCvOnline() && !(girlbossBallisticsSolution == std::nullopt && malewifeBallisticsSolution == std::nullopt);
+
+    if (yawMotor.isOnline() && !targetFound)
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
@@ -92,7 +104,6 @@ void AutoNavCommand::execute()
         // this negation has the potential to mess some things up!
 
         // set outputs
-        // TODO: i THINK this is positional offset
         chassis.setDesiredOutput(x, y, 0);
 
         lastX = currentX;

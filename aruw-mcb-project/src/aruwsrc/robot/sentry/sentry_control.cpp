@@ -237,28 +237,28 @@ tap::motor::DoubleDjiMotor turretMajorYawMotor(
 tap::motor::DjiMotor turretMinorGirlbossYawMotor(
     drivers(),
     MOTOR6,
-    girlBoss::CAN_BUS_MOTORS,
+    girlboss::CAN_BUS_MOTORS,
     false,
     "Minor girlboss Yaw Turret");
 
 tap::motor::DjiMotor turretMinorGirlbossPitchMotor(
     drivers(),
     MOTOR5,
-    girlBoss::CAN_BUS_MOTORS,
+    girlboss::CAN_BUS_MOTORS,
     true,
     "Minor girlboss Pitch Turret");
 
 tap::motor::DjiMotor turretMinorMalewifeYawMotor(
     drivers(),
     MOTOR6,
-    maleWife::CAN_BUS_MOTORS,
+    malewife::CAN_BUS_MOTORS,
     false,
     "Minor malewife Yaw Turret");
 
 tap::motor::DjiMotor turretMinorMalewifePitchMotor(
     drivers(),
     MOTOR5,
-    maleWife::CAN_BUS_MOTORS,
+    malewife::CAN_BUS_MOTORS,
     false,
     "Minor malewife Pitch Turret");
 
@@ -293,19 +293,19 @@ SentryTurretMinorSubsystem turretMinorGirlboss(
     drivers(),
     &turretMinorGirlbossPitchMotor,
     &turretMinorGirlbossYawMotor,
-    aruwsrc::control::turret::maleWife::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::maleWife::YAW_MOTOR_CONFIG,
+    aruwsrc::control::turret::girlboss::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::girlboss::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus2,
-    girlBoss::turretID);
+    girlboss::turretID);
 
 SentryTurretMinorSubsystem turretMinorMalewife(
     drivers(),
     &turretMinorMalewifePitchMotor,
     &turretMinorMalewifeYawMotor,
-    aruwsrc::control::turret::girlBoss::PITCH_MOTOR_CONFIG,
-    aruwsrc::control::turret::girlBoss::YAW_MOTOR_CONFIG,
+    aruwsrc::control::turret::malewife::PITCH_MOTOR_CONFIG,
+    aruwsrc::control::turret::malewife::YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus1,
-    maleWife::turretID);
+    malewife::turretID);
 
 // Friction wheels ---------------------------------------------------------------------------
 
@@ -315,9 +315,9 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
-        girlBoss::CAN_BUS_MOTORS,
+        girlboss::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
-        girlBoss::barrelID);
+        girlboss::barrelID);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -325,20 +325,20 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
-        maleWife::CAN_BUS_MOTORS,
+        malewife::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
-        maleWife::barrelID);  // @todo idk what they actually are
+        malewife::barrelID);  // @todo idk what they actually are
 
 // Agitators
-VelocityAgitatorSubsystem girlBossAgitator(
+VelocityAgitatorSubsystem girlbossAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
-    constants::girlBoss::AGITATOR_CONFIG);
+    constants::girlboss::AGITATOR_CONFIG);
 
-VelocityAgitatorSubsystem maleWifeAgitator(
+VelocityAgitatorSubsystem malewifeAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
-    constants::maleWife::AGITATOR_CONFIG);
+    constants::malewife::AGITATOR_CONFIG);
 
 // Odometry ----------------------------------------------------------------------------------
 
@@ -372,19 +372,19 @@ SentryTransformsSubsystem sentryTransforms(
 // @todo make controllers part of subsystem
 algorithms::ChassisFramePitchTurretController girlbossPitchController(
     turretMinorGirlboss.pitchMotor,
-    major_rel::girlBoss::PITCH_PID_CONFIG);
+    major_rel::girlboss::PITCH_PID_CONFIG);
 
 algorithms::ChassisFramePitchTurretController malewifePitchController(
     turretMinorMalewife.pitchMotor,
-    major_rel::maleWife::PITCH_PID_CONFIG);
+    major_rel::malewife::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController girlbossYawController(
     turretMinorGirlboss.yawMotor,
-    major_rel::girlBoss::YAW_PID_CONFIG);
+    major_rel::girlboss::YAW_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController malewifeYawController(
     turretMinorMalewife.yawMotor,
-    major_rel::maleWife::YAW_PID_CONFIG);
+    major_rel::malewife::YAW_PID_CONFIG);
 
 // @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate
@@ -406,14 +406,14 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     sentryTransforms.getWorldToTurretGirlboss(),
     sentryTransforms,
     frictionWheelsGirlboss,
-    girlBoss::default_launch_speed,
-    girlBoss::majorToTurretR);
+    girlboss::default_launch_speed,
+    girlboss::majorToTurretR);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
     aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     (OttoBallisticsSolver<TurretMinorFrame>*) &girlbossBallisticsSolver,
-    girlBoss::turretID);
+    girlboss::turretID);
 
 OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     odometrySubsystem,
@@ -421,14 +421,14 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     sentryTransforms.getWorldToTurretMalewife(),
     sentryTransforms,
     frictionWheelsMalewife,
-    maleWife::default_launch_speed,
-    maleWife::majorToTurretR);  // defaultLaunchSpeed
+    malewife::default_launch_speed,
+    malewife::majorToTurretR);  // defaultLaunchSpeed
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
     aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     (OttoBallisticsSolver<TurretMinorFrame>*) &malewifeBallisticsSolver,
-    maleWife::turretID);
+    malewife::turretID);
 // Benjamin rant: what we combined the flywheels, agitator, and turret pitch/yaw motors into a
 // single subsystem called Turret? It would have functions like prep-to-shoot, shoot, turn, and
 // things like that. What if controllers were mix-ins for susbsystems or something?
@@ -534,59 +534,61 @@ aruwsrc::chassis::AutoNavCommand autoNavCommand(
     sentryDrive,
     turretMajor.yawMotor,
     drivers()->visionCoprocessor,
+    girlbossBallisticsSolver,
+    malewifeBallisticsSolver,
     odometrySubsystem);
 
 // girlboss shooting ======================
 
 // spin friction wheels commands
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlBossFrictionWheelSpinCommand(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlbossFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsGirlboss,
     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
     false,
-    girlBoss::barrelID);
+    girlboss::barrelID);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopGirlBossFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsGirlboss,
     0.0f,
     true,
-    girlBoss::barrelID);
+    girlboss::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorGirlboss(frictionWheelsGirlboss);
 
 // Agitator commands (girl boss)
-MoveIntegralCommand girlBossRotateAgitator(girlBossAgitator, constants::AGITATOR_ROTATE_CONFIG);
-UnjamIntegralCommand girlBossUnjamAgitator(girlBossAgitator, constants::AGITATOR_UNJAM_CONFIG);
-MoveUnjamIntegralComprisedCommand girlBossRotateAndUnjamAgitator(
+MoveIntegralCommand girlbossRotateAgitator(girlbossAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand girlbossUnjamAgitator(girlbossAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand girlbossRotateAndUnjamAgitator(
     *drivers(),
-    girlBossAgitator,
-    girlBossRotateAgitator,
-    girlBossUnjamAgitator);
+    girlbossAgitator,
+    girlbossRotateAgitator,
+    girlbossUnjamAgitator);
 
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorGirlboss(
     drivers()->refSerial,
-    girlBoss::barrelID);
+    girlboss::barrelID);
 
 AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss(
     *drivers(),
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
     sentryTurretCVCommand,
-    girlBoss::turretID
+    girlboss::turretID
 );
 
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
-    {&girlBossAgitator},
-    girlBossRotateAndUnjamAgitator,
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitator,
     {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorGirlboss(
     *drivers(),
-    girlBoss::barrelID,
+    girlboss::barrelID,
     constants::HEAT_LIMIT_BUFFER);
 
 // rotates agitator when aiming at target and within heat limit
@@ -596,11 +598,11 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     sentryTurretCVCommand,
     autoAimLaunchTimerGirlBoss,
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    girlBoss::turretID);
+    girlboss::turretID);
 
-GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
-    {&girlBossAgitator},
-    girlBossRotateAndUnjamAgitator,
+GovernorLimitedCommand<5> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitator,
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
@@ -616,54 +618,54 @@ GovernorLimitedCommand<5> girlBossRotateAndUnjamAgitatorWithHeatLimiting(
 // malewife shooting ======================
 
 // spin friction wheels commands
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand maleWifeFrictionWheelSpinCommand(
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand malewifeFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsMalewife,
     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
     false,
-    maleWife::barrelID);
+    malewife::barrelID);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrictionWheelSpinCommand(
     drivers(),
     &frictionWheelsMalewife,
     0.0f,
     true,
-    maleWife::barrelID);
+    malewife::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife(frictionWheelsMalewife);
 
 // Agitator commands (girl boss)
-MoveIntegralCommand maleWifeRotateAgitator(maleWifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
-UnjamIntegralCommand maleWifeUnjamAgitator(maleWifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
-MoveUnjamIntegralComprisedCommand maleWifeRotateAndUnjamAgitator(
+MoveIntegralCommand malewifeRotateAgitator(malewifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand malewifeUnjamAgitator(malewifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand malewifeRotateAndUnjamAgitator(
     *drivers(),
-    maleWifeAgitator,
-    maleWifeRotateAgitator,
-    maleWifeUnjamAgitator);
+    malewifeAgitator,
+    malewifeRotateAgitator,
+    malewifeUnjamAgitator);
 
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorMalewife(
     drivers()->refSerial,
-    maleWife::barrelID);
+    malewife::barrelID);
 
 AutoAimFireRateReselectionManager fireRateReselectionManagerMalewife(
     *drivers(),
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
     sentryTurretCVCommand,
-    maleWife::turretID
+    malewife::turretID
 );
 
 FireRateLimitGovernor fireRateLimitGovernorMalewife(fireRateReselectionManagerMalewife);
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedMalewife(
-    {&maleWifeAgitator},
-    maleWifeRotateAndUnjamAgitator,
+    {&malewifeAgitator},
+    malewifeRotateAndUnjamAgitator,
     {&refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorMalewife(
     *drivers(),
-    maleWife::barrelID,
+    malewife::barrelID,
     constants::HEAT_LIMIT_BUFFER);
 
 // rotates agitator when aiming at target and within heat limit
@@ -673,11 +675,11 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorMalewife(
     sentryTurretCVCommand,
     autoAimLaunchTimerMalewife,
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    maleWife::turretID);
+    malewife::turretID);
 
 GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
-    {&maleWifeAgitator},
-    maleWifeRotateAndUnjamAgitator,
+    {&malewifeAgitator},
+    malewifeRotateAndUnjamAgitator,
     {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
@@ -715,7 +717,7 @@ HoldCommandMapping leftSwitchDown(
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&girlBossRotateAndUnjamAgitatorWithHeatLimiting},
+    {&girlbossRotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
@@ -748,7 +750,7 @@ void initializeSubsystems()
     sentryTransforms.initialize();
     // turret
     frictionWheelsGirlboss.initialize();
-    girlBossAgitator.initialize();
+    girlbossAgitator.initialize();
     frictionWheelsMalewife.initialize();
 
     isInitialized = true;
@@ -768,7 +770,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
 
-    drivers->commandScheduler.registerSubsystem(&girlBossAgitator);
+    drivers->commandScheduler.registerSubsystem(&girlbossAgitator);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
 
     // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
@@ -798,8 +800,8 @@ void setDefaultSentryCommands(Drivers *)
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
-    // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
-    // frictionWheelsGirlboss.setDefaultCommand(&girlBossFrictionWheelSpinCommand);
+    // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
+    // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
