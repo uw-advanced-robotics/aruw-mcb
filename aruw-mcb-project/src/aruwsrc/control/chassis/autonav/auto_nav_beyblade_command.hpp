@@ -27,6 +27,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -44,7 +45,7 @@ public:
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-        aruwsrc::control::ControlOperatorInterface& operatorInterface);
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config);
 
     void initialize() override;
 
@@ -57,6 +58,8 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config;
+
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;
@@ -66,7 +69,6 @@ private:
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
-    aruwsrc::control::ControlOperatorInterface& operatorInterface;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

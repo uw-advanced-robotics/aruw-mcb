@@ -100,6 +100,7 @@
 #include "sentry_beyblade_command.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_command.hpp"
+#include "aruwsrc/control/chassis/autonav/auto_nav_beyblade_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -411,7 +412,7 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     sentryTransforms,
     frictionWheelsGirlboss,
     girlboss::default_launch_speed,
-    -girlboss::majorToTurretR);
+    -girlboss::majorToTurretR);  // girlboss is on the left
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
     aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
@@ -426,7 +427,7 @@ OttoBallisticsSolver<TurretMinorMalewifeFrame> malewifeBallisticsSolver(
     sentryTransforms,
     frictionWheelsMalewife,
     malewife::default_launch_speed,
-    malewife::majorToTurretR);  // defaultLaunchSpeed
+    malewife::majorToTurretR);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
     aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
@@ -439,7 +440,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
 /* define commands ----------------------------------------------------------*/
-void sendNoMotionSstrategy() { 
+void sendNoMotionStrategy() { 
     drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::NONE); 
 }
 void sendGoToFriendlyBaseStrategy() { 
@@ -541,6 +542,14 @@ aruwsrc::chassis::AutoNavCommand autoNavCommand(
     girlbossBallisticsSolver,
     malewifeBallisticsSolver,
     odometrySubsystem);
+
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    sentryDrive,
+    turretMajor.yawMotor,
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    aruwsrc::sentry::chassis::beybladeConfig);
 
 // girlboss shooting ======================
 
@@ -695,8 +704,8 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 
 // void pauseProjectileLaunchMessageHandler()
 // {
-// turretZero.pauseCommandGovernor.initiatePause();
-// turretOne.pauseCommandGovernor.initiatePause();
+// turretMinorGirlboss.pauseCommandGovernor.initiatePause();
+// turretMinorMalewife.pauseCommandGovernor.initiatePause();
 // }
 
 /* define command mappings --------------------------------------------------*/
@@ -704,7 +713,7 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 HoldCommandMapping leftSwitchUp(
     drivers(),
     // {&sentryTurretCVCommand},
-    {&beybladeCommand, &sentryTurretCVCommand},
+    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchMid(
     drivers(),
@@ -776,31 +785,11 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&girlbossAgitator);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
-
-    // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface()
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    // sentryDrive.setDefaultCommand(&chassisAutorotateCommand);
-    // TEMP: Setting default command to manual drive
-    // sentryDrive.setDefaultCommand(&chassisDriveCommand);
-    // turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
-    // turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
-    // turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
-    // turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
-    // turretZero.agitator.setDefaultCommand(
-    //     &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
-    // turretOne.agitator.setDefaultCommand(
-    //     &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
@@ -812,7 +801,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionSstrategy);
+    sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionStrategy);
     sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
     sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
     sentryRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
