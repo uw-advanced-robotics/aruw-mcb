@@ -50,9 +50,12 @@ WorldFrameTurretYawCascadePIDController::WorldFrameTurretYawCascadePIDController
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor &yawMotor,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& girlboss,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& malewife,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid,
-        float maxVelErrorInput)
+        float maxVelErrorInput,
+        float minorMajorTorqueRatio)
     : TurretYawControllerInterface(yawMotor),
       worldToBaseTransform(worldToBaseTransform),
       chassis(chassis),
@@ -60,7 +63,10 @@ WorldFrameTurretYawCascadePIDController::WorldFrameTurretYawCascadePIDController
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
       yawMotor(yawMotor),
-      maxVelErrorInput(maxVelErrorInput)
+      girlboss(girlboss),
+      malewife(malewife),
+      maxVelErrorInput(maxVelErrorInput),
+      minorMajorTorqueRatio(minorMajorTorqueRatio)
 {
     assert(maxVelErrorInput >= 0);
 }
@@ -94,7 +100,7 @@ void WorldFrameTurretYawCascadePIDController::runController(
 
     const float positionControllerError = turretMotor.getValidMinError(
         worldFrameSetpoint.getValue() - worldToBaseTransform.getYaw(),
-        yawMotor.getChassisFrameMeasuredAngle().getValue());
+        localAngle.getValue());
 
     const float positionPidOutput =
         positionPid.runControllerDerivateError(positionControllerError, dt);
@@ -104,7 +110,7 @@ void WorldFrameTurretYawCascadePIDController::runController(
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    turretMotor.setMotorOutput(velocityPidOutput);
+    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * girlboss.yawMotor.getMotorOutput() + minorMajorTorqueRatio * malewife.yawMotor.getMotorOutput());
 }
 
 // @todo what's the point of this; overridden by runController anyways?

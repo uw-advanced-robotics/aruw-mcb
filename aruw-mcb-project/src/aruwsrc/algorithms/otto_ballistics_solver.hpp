@@ -136,7 +136,7 @@ public:
         const aruwsrc::sentry::SentryTransforms &transforms,  // @todo only used for getting timestamp, which is bad
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const float turretToMajorRadius);
+        const float majorRelTurretMinorY);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -167,7 +167,7 @@ private:
 
 public:
     // const uint8_t turretID;
-    const float turretToMajorRadius;
+    const float majorRelTurretMinorY;
 }; // ottoballisticssolver
 
 
@@ -180,14 +180,14 @@ OttoBallisticsSolver<TurretFrame>::OttoBallisticsSolver(
     const aruwsrc::sentry::SentryTransforms &transforms,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const float turretToMajorRadius)
+    const float majorRelTurretMinorY)
     : odometryInterface(odometryInterface),
       turretMajor(turretMajor),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       worldToTurret(worldToTurret),
       transforms(transforms),
-    turretToMajorRadius(turretToMajorRadius)
+    majorRelTurretMinorY(majorRelTurretMinorY)
 {
 }
 
@@ -229,11 +229,9 @@ std::optional<typename OttoBallisticsSolver<TurretFrame>::BallisticsSolution> Ot
                  aimData.pva.yPos - turretPosition.y,
                  aimData.pva.zPos - turretPosition.z},
             .velocity =
-                // chassis-forward is +x
-                // someone needs to check my math on the below two calculations
                 // @todo incorporate velocity into the transforms
-                {aimData.pva.xVel - (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * turretToMajorRadius), // need to subtract out rotational velocity of major
-                 aimData.pva.yVel - (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * turretToMajorRadius),
+                {aimData.pva.xVel - (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() * std::cos(worldToMajor.getYaw()) * majorRelTurretMinorY), // need to subtract out rotational velocity of major
+                 aimData.pva.yVel - (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() * std::sin(worldToMajor.getYaw()) * majorRelTurretMinorY),
                  aimData.pva.zVel},
             .acceleration =
                 {aimData.pva.xAcc,

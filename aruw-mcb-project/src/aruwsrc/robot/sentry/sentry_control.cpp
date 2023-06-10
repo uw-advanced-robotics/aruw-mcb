@@ -395,9 +395,12 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     sentryTransforms.getWorldToChassis(),
     sentryDrive,
     turretMajor.yawMotor,
+    turretMinorGirlboss,
+    turretMinorMalewife,
     turretMajorYawPosPid,
     turretMajorYawVelPid,
-    20.0f);  // @todo move magic number :p
+    20.0f,
+    0.4f);  // @todo move magic number :p
 
 // Otto ballistics solver --------------------------------------------------------------------
 
@@ -408,7 +411,7 @@ OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
     sentryTransforms,
     frictionWheelsGirlboss,
     girlboss::default_launch_speed,
-    girlboss::majorToTurretR);
+    -girlboss::majorToTurretR);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerGirlBoss(
     aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

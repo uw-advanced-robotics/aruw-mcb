@@ -79,9 +79,9 @@ float ChassisFrameYawTurretController::getMeasurement() const
 bool ChassisFrameYawTurretController::isOnline() const { return turretMotor.isOnline(); }
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
-    TurretMotor &pitchMotorp,
+    TurretMotor &pitchMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretPitchControllerInterface(pitchMotorp),
+    : TurretPitchControllerInterface(pitchMotor),
       pid(pidConfig)
 {
 }

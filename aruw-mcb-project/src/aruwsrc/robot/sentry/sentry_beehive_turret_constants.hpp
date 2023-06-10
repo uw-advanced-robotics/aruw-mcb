@@ -47,8 +47,8 @@ static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float TURRET_CG_X = 9.14f;
-static constexpr float TURRET_CG_Z = 9.45f;
+static constexpr float TURRET_CG_X = 18.14f;
+static constexpr float TURRET_CG_Z = 14.45f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 
 // The distance from turret 0 to turret 1 in meters
@@ -69,7 +69,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 20.0f,
     .ki = 000.0f,
-    .kd = -1500.0f,
+    .kd = -1'500.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 500.0f,
     .tRDerivativeKalman = 40.0f,
@@ -79,9 +79,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 3000.0f,
+    .kp = 3'000.0f,
     .ki = 1.0f,
-    .kd = -37000.0f,
+    .kd = -37'000.0f,
     .maxICumulative = 500.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 40.0f,
@@ -156,9 +156,9 @@ namespace major_rel
 namespace malewife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 38'000.0f,
+    .kp = 50'000.0f,
     .ki = 370.0f,
-    .kd = 3'600.0f,
+    .kd = 5'400.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -169,9 +169,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 50'000.0f,
+    .kp = 154'000.0f,
     .ki = 75.0f,
-    .kd = 4'000.0f,
+    .kd = 9'000.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -185,9 +185,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 38'000.0f,
+    .kp = 50'000.0f,
     .ki = 370.0f,
-    .kd = 3'600.0f,
+    .kd = 5'400.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -198,9 +198,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 50'000.0f,
+    .kp = 154'000.0f,
     .ki = 75.0f,
-    .kd = 4'000.0f,
+    .kd = 9'000.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,

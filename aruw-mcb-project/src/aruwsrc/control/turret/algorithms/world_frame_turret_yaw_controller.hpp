@@ -34,6 +34,7 @@
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -67,9 +68,12 @@ public:
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor &yawMotor,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& girlboss,
+        const aruwsrc::control::turret::SentryTurretMinorSubsystem& malewife,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid,
-        float maxVelErrorInput);
+        float maxVelErrorInput,
+        float minorMajorTorqueRatio);
 
     void initialize() final;
 
@@ -101,6 +105,9 @@ private:
 
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& girlboss;
+    const aruwsrc::control::turret::SentryTurretMinorSubsystem& malewife;
+
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
@@ -109,6 +116,8 @@ private:
     TurretMotor& yawMotor;
 
     float maxVelErrorInput;
+
+    float minorMajorTorqueRatio;
 };
 
 }  // namespace aruwsrc::control::turret::algorithms
