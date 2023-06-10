@@ -51,6 +51,10 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.0,       0.25,      0.,        0.25,     0.,       0.25,      0.,       0.25,
     -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325};
 
+const SwerveModuleConfig DEFAULT_SWERVE_CONFIG{
+    .driveMotorInverted = true,
+};
+
 class SwerveChassisSubsystemTest : public Test
 {
 protected:

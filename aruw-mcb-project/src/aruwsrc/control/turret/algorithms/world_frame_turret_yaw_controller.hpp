@@ -66,7 +66,8 @@ public:
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
         TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        tap::algorithms::SmoothPid &velocityPid,
+        float maxVelErrorInput);
 
     void initialize() final;
 
@@ -102,6 +103,8 @@ private:
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
 
     TurretMotor& yawMotor;
+
+    float maxVelErrorInput;
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

@@ -395,7 +395,8 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     sentryTransforms.getWorldToChassis(),
     turretMajor.yawMotor,
     turretMajorYawPosPid,
-    turretMajorYawVelPid);
+    turretMajorYawVelPid,
+    20.0f);  // @todo move magic number :p
 
 // Otto ballistics solver --------------------------------------------------------------------
 

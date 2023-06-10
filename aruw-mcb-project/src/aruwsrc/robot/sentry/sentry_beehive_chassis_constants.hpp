@@ -72,14 +72,6 @@ aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
-    // .drivePidConfig = {
-    //     .kp = 16.0f,
-    //     .ki = 0.0f,
-    //     .kd = 0.0f,
-    //     .maxICumulative = 0.0f,
-    //     .maxOutput = 1'000.0f,
-    //     .errDeadzone = 20.0f,
-    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
@@ -87,14 +79,6 @@ aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
-    // .drivePidConfig = {
-    //     .kp = 16.0f,
-    //     .ki = 0.0f,
-    //     .kd = 0.0f,
-    //     .maxICumulative = 0.0f,
-    //     .maxOutput = 1'000.0f,
-    //     .errDeadzone = 20.0f,
-    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
@@ -102,14 +86,6 @@ aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
-    // .drivePidConfig = {
-    //     .kp = 16.0f,
-    //     .ki = 0.0f,
-    //     .kd = 0.0f,
-    //     .maxICumulative = 0.0f,
-    //     .maxOutput = 1'000.0f,
-    //     .errDeadzone = 20.0f,
-    //     .errorDerivativeFloor = 0.0f},
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
@@ -117,14 +93,6 @@ aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
-    // .drivePidConfig = {
-    //     .kp = 16.0f,
-    //     .ki = 0.0f,
-    //     .kd = 0.0f,
-    //     .maxICumulative = 0.0f,
-    //     .maxOutput = 1'000.0f,
-    //     .errDeadzone = 20.0f,
-    //     .errorDerivativeFloor = 0.0f},
 };
 
 

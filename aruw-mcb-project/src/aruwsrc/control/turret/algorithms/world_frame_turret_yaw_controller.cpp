@@ -50,14 +50,17 @@ WorldFrameTurretYawCascadePIDController::WorldFrameTurretYawCascadePIDController
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::ChassisFrame>& worldToBaseTransform,
         TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid)
+        tap::algorithms::SmoothPid &velocityPid,
+        float maxVelErrorInput)
     : TurretYawControllerInterface(yawMotor),
       worldToBaseTransform(worldToBaseTransform),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
-      yawMotor(yawMotor)
+      yawMotor(yawMotor),
+      maxVelErrorInput(maxVelErrorInput)
 {
+    assert(maxVelErrorInput >= 0);
 }
 
 void WorldFrameTurretYawCascadePIDController::initialize()
@@ -95,7 +98,7 @@ void WorldFrameTurretYawCascadePIDController::runController(
     const float positionPidOutput =
         positionPid.runControllerDerivateError(positionControllerError, dt);
 
-    const float velocityControllerError = positionPidOutput - chassisVelocity;
+    const float velocityControllerError = limitVal(positionPidOutput - chassisVelocity, -maxVelErrorInput, maxVelErrorInput);
 
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
