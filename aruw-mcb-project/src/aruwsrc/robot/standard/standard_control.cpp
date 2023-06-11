@@ -143,7 +143,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
@@ -513,7 +513,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
 
-    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter, currentSensor);
+    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter.fallbackLimiter, currentSensor);
 }
 
 /* initialize subsystems ----------------------------------------------------*/

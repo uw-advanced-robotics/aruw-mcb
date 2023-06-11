@@ -17,40 +17,45 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MECANUM_CHASSIS_SUBSYSTEM_HPP_
-#define MECANUM_CHASSIS_SUBSYSTEM_HPP_
+#ifndef ARUWSRC_POWER_LIMITER_HPP_
+#define ARUWSRC_POWER_LIMITER_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
-#include "tap/communication/sensors/current/analog_current_sensor.hpp"
-#include "tap/drivers.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
+#include "tap/communication/sensors/current/current_sensor_interface.hpp"
 
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 
-#include "constants/chassis_constants.hpp"
+extern float currentLimit, capVoltageLimit;
 
-#include "holonomic_4_motor_chassis_subsystem.hpp"
+namespace tap
+{
+class Drivers;
+}
 
-namespace aruwsrc
+namespace aruwsrc::chassis
 {
-namespace chassis
-{
-/**
- * Encapsulates a chassis with mecanum wheels in standard layout
- */
-class MecanumChassisSubsystem : public Holonomic4MotorChassisSubsystem
+
+class CapBankPowerLimiter
 {
 public:
-    MecanumChassisSubsystem(
-        tap::Drivers* drivers,
+    CapBankPowerLimiter(
+        const tap::Drivers *drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        float startingEnergyBuffer,
+        float energyBufferLimitThreshold,
+        float energyBufferCritThreshold);
+
+    float getPowerLimitRatio(float desiredCurrent = 0);
+
+public:
+    tap::control::chassis::PowerLimiter fallbackLimiter;
+
+private:
+    const tap::Drivers *drivers;
+    const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank;
 };
+}  // namespace aruwsrc::chassis
 
-}  // namespace chassis
-}  // namespace aruwsrc
-
-#endif
+#endif  // ARUWSRC_POWER_LIMITER_HPP_

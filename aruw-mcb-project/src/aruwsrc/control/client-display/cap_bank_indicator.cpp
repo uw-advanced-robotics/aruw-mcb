@@ -85,6 +85,12 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 voltage < 15.0 ? Tx::GraphicColor::YELLOW : 
                 Tx::GraphicColor::GREEN);
 
+            
+            capBankGraphics.graphicData[0].color = static_cast<uint8_t>(
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::RESET ? Tx::GraphicColor::YELLOW :
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE ? Tx::GraphicColor::WHITE : 
+                Tx::GraphicColor::ORANGE); 
+
             RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
         }
     }
