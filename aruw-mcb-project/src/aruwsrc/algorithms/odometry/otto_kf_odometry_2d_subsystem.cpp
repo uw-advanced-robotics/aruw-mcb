@@ -29,7 +29,7 @@ OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
     tap::control::chassis::ChassisSubsystemInterface &chassis,
     modm::Location2D<float> imuToChassisCenter)
     : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500, imuToChassisCenter),
+      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500, imuToChassisCenter, 0.0f, 0.0f),
       orientationObserver(turret)
 {
 }

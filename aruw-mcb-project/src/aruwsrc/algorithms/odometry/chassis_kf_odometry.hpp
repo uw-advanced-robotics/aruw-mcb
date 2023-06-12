@@ -48,7 +48,9 @@ public:
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        modm::Location2D<float> imuToChassisCenter);
+        modm::Location2D<float> imuToChassisCenter,
+        float initialXPos,
+        float initialYPos);
 
     // TODO: reimplement this with transforms
     inline modm::Location2D<float> getCurrentLocation2D() const final { 

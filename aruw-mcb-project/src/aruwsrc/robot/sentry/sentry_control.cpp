@@ -355,8 +355,9 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     sentryDrive,
     sentryChassisWorldYawObserver,
-    drivers()->mcbLite.imu, // TODO: this is sussy
-    modm::Location2D<float>(0., 0., 0.));  // TODO: this
+    drivers()->mcbLite.imu,
+    modm::Location2D<float>(0., 0., M_PI * 0.75),
+    0.5f, 0.5f);  // TODO: this
 
 // Transforms --------------------------------------------------------------------------------
 
@@ -473,7 +474,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     },
     &turretMajor,
     &turretMajorYawController,
-    &sentryDrive);
+    &sentryDrive,
+    odometrySubsystem);
 
 // Chassis drive manual
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
@@ -539,8 +541,6 @@ aruwsrc::chassis::AutoNavCommand autoNavCommand(
     sentryDrive,
     turretMajor.yawMotor,
     drivers()->visionCoprocessor,
-    girlbossBallisticsSolver,
-    malewifeBallisticsSolver,
     odometrySubsystem);
 
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
@@ -713,7 +713,7 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 HoldCommandMapping leftSwitchUp(
     drivers(),
     // {&sentryTurretCVCommand},
-    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
+    {&autoNavCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchMid(
     drivers(),

@@ -29,9 +29,11 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::control::chassis::ChassisSubsystemInterface &chassis,
     SentryChassisWorldYawObserver &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
-    modm::Location2D<float> imuToChassisCenter)
+    modm::Location2D<float> imuToChassisCenter,
+    float initialXPos,
+    float initialYPos)
     : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, yawObserver, imu, imuToChassisCenter)
+      ChassisKFOdometry(chassis, yawObserver, imu, imuToChassisCenter, initialXPos, initialYPos)
 {
 }
 

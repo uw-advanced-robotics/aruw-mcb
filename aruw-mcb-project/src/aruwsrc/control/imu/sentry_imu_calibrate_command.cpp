@@ -36,13 +36,15 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
-    chassis::HolonomicChassisSubsystem *chassis)
+    chassis::HolonomicChassisSubsystem *chassis,
+    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
       turretMajor(turretMajor),
       turretMajorController(turretMajorController),
-      chassis(chassis)
+      chassis(chassis),
+      odometryInterface(odometryInterface)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -227,7 +229,7 @@ void SentryImuCalibrateCommand::execute()
         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 
-    turretMajorController->runController(dt, turretMajor->yawMotor.getChassisFrameSetpoint());
+    turretMajorController->runController(dt, turretMajor->yawMotor.getChassisFrameSetpoint() + odometryInterface.getYaw());
 }
 
 void SentryImuCalibrateCommand::end(bool)

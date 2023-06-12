@@ -27,7 +27,9 @@ ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,  // @todo everything const
     tap::communication::sensors::imu::ImuInterface& imu,
-    modm::Location2D<float> imuToChassisCenter)
+    modm::Location2D<float> imuToChassisCenter,
+    float initialXPos,
+    float initialYPos)
     : chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
@@ -37,7 +39,7 @@ ChassisKFOdometry::ChassisKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[int(OdomState::NUM_STATES)] = {};
+    float initialX[int(OdomState::NUM_STATES)] = { initialXPos, 0.0f, 0.0f, initialYPos, 0.0f, 0.0f };
     kf.init(initialX);
 }
 
@@ -69,7 +71,7 @@ void ChassisKFOdometry::update()
     tap::algorithms::rotateVector(
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+        -imuToChassisCenter.getOrientation() + chassisYaw);  // @todo ignores acceleration due to rotation
 
     // perform the update, after this update a new state matrix is now available
     kf.performUpdate(y);
