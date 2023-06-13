@@ -713,7 +713,7 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
 HoldCommandMapping leftSwitchUp(
     drivers(),
     // {&sentryTurretCVCommand},
-    {&autoNavCommand, &sentryTurretCVCommand},
+    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchMid(
     drivers(),

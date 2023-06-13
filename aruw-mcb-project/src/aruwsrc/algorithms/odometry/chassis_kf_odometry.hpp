@@ -56,14 +56,14 @@ public:
     inline modm::Location2D<float> getCurrentLocation2D() const final { 
         modm::Vector2f offset = imuToChassisCenter.getPosition();
         tap::algorithms::rotateVector(&offset[0], &offset[1], imuToChassisCenter.getOrientation());
-        return modm::Location2D<float>(location.getPosition() + offset, location.getOrientation() + imuToChassisCenter.getOrientation()); // TODO: where's that transformer when you need it?
+        return modm::Location2D<float>(location.getPosition() + offset, location.getOrientation()); // TODO: where's that transformer when you need it?
     }
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
-    inline float getYaw() const override { return location.getOrientation() + imuToChassisCenter.getOrientation(); }
+    inline float getYaw() const override { return location.getOrientation(); }
 
     void update();
 

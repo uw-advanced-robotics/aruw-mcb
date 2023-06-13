@@ -78,8 +78,8 @@ void AutoNavCommand::execute()
         float y = 0.0;
         if (mag > 0.01)
         {
-            x = desiredVelocityX / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
-            y = desiredVelocityY / mag * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+            x = desiredVelocityX / mag * maxWheelSpeed;
+            y = desiredVelocityY / mag * maxWheelSpeed;
         }
 
         x *= SPEED_FACTOR;

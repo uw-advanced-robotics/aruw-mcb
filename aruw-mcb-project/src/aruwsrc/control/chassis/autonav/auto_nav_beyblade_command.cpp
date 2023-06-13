@@ -68,7 +68,7 @@ void AutoNavBeybladeCommand::initialize()
 
 void AutoNavBeybladeCommand::execute()
 {
-    if (yawMotor.isOnline() || visionCoprocessor.isCvOnline())
+    if (yawMotor.isOnline() && visionCoprocessor.isCvOnline())
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
@@ -81,9 +81,16 @@ void AutoNavBeybladeCommand::execute()
 
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
-
-        float x = (setpointData.x - currentX) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-        float y = (setpointData.y - currentY) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        float desiredVelocityX = setpointData.x - currentX;
+        float desiredVelocityY = setpointData.y - currentY;
+        float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+        float x = 0.0;
+        float y = 0.0;
+        if (mag > 0.01)
+        {
+            x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        }
 
         // Gets current turret yaw angle
         float turretYawAngle = yawMotor.getAngleFromCenter();
@@ -111,7 +118,7 @@ void AutoNavBeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, chassisYawAngle);
+        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
         // set outputs
         chassis.setDesiredOutput(x, y, r);

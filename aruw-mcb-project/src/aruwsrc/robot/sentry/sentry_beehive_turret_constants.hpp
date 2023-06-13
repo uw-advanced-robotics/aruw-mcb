@@ -169,9 +169,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 154'000.0f,
+    .kp = 104'000.0f,
     .ki = 75.0f,
-    .kd = 9'000.0f,
+    .kd = 7'000.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -198,9 +198,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 154'000.0f,
+    .kp = 104'000.0f,
     .ki = 75.0f,
-    .kd = 9'000.0f,
+    .kd = 7'000.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
