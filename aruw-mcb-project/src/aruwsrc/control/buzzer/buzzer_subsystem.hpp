@@ -36,7 +36,7 @@ public:
 
     void playNoise();
 
-    void refreshSafeDisconnect() override;
+    void refreshSafeDisconnect() override { stop(); }
 
     void stop();
 };

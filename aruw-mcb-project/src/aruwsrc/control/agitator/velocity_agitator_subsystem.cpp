@@ -81,11 +81,6 @@ void VelocityAgitatorSubsystem::refresh()
     }
 }
 
-void VelocityAgitatorSubsystem::refreshSafeDisconnect()
-{
-    agitatorMotor.setDesiredOutput(0);
-}
-
 bool VelocityAgitatorSubsystem::calibrateHere()
 {
     if (!isOnline())

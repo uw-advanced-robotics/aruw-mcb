@@ -81,7 +81,14 @@ public:
         LB = 2,
         RB = 3,
     };
-    void refreshSafeDisconnect() override;
+
+    void refreshSafeDisconnect() override
+    {
+        for (int i = 0; i < getNumChassisMotors(); i++)
+        {
+            motors[i]->setDesiredOutput(0);
+        }
+    }
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 

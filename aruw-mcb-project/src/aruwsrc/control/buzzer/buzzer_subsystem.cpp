@@ -27,8 +27,6 @@ BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
 
 void BuzzerSubsystem::playNoise() { tap::buzzer::playNote(&(drivers->pwm), 440); }
 
-void BuzzerSubsystem::refreshSafeDisconnect() { stop(); }
-
 void BuzzerSubsystem::stop() { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
 
 }  // namespace aruwsrc::control::buzzer

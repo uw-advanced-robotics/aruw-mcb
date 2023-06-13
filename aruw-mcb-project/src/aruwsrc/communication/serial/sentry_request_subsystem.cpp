@@ -29,7 +29,6 @@ SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
 {
 }
 
-void SentryRequestSubsystem::refreshSafeDisconnect() { sentryRequestTransmitter.stop(); }
-
 void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.send(); }
+
 }  // namespace aruwsrc::communication::serial

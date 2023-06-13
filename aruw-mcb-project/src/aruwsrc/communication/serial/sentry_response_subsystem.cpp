@@ -37,8 +37,6 @@ SentryResponseSubsystem::SentryResponseSubsystem(
 
 void SentryResponseSubsystem::refresh() { this->run(); }
 
-void SentryResponseSubsystem::refreshSafeDisconnect() { stop(); }
-
 bool SentryResponseSubsystem::run()
 {
     PT_BEGIN();

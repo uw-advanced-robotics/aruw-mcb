@@ -39,7 +39,7 @@ public:
     ClientDisplaySubsystem(tap::Drivers* drivers);
     virtual ~ClientDisplaySubsystem() {}
 
-    void refreshSafeDisconnect() override;
+    void refreshSafeDisconnect() override {}
 
     const char* getName() override { return "client display"; }
 };

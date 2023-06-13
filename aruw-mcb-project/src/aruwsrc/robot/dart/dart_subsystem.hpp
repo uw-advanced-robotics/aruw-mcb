@@ -38,7 +38,7 @@ public:
 
     void windUp();
 
-    void refreshSafeDisconnect() override;
+    void refreshSafeDisconnect() override { stop(); }
 
     void stop();
 

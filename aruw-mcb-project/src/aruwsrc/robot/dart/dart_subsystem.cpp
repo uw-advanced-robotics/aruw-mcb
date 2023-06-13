@@ -31,8 +31,6 @@ DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
 
 void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
 
-void DartSubsystem::refreshSafeDisconnect() { stop(); }
-
 void DartSubsystem::stop() { motor->setDesiredOutput(0); }
 
 }  // namespace aruwsrc::dart

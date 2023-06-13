@@ -66,12 +66,6 @@ void FrictionWheelSubsystem::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-void FrictionWheelSubsystem::refreshSafeDisconnect()
-{
-    leftWheel.setDesiredOutput(0);
-    rightWheel.setDesiredOutput(0);
-}
-
 void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
