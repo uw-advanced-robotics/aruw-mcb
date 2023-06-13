@@ -374,6 +374,7 @@ void VisionCoprocessor::sendRefereeWarning()
     }
 }
 
+// @todo deprecated; remove
 // void VisionCoprocessor::sendTimeSyncMessage()
 // {
 //     uint32_t newRisingEdgeTime = risingEdgeTime;

@@ -60,10 +60,10 @@ constexpr float SWERVE_FORWARD_MATRIX[24] {
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig
 {
     .beybladeRotationalSpeedFractionOfMax = 0.2f,
-    .beybladeTranslationalSpeedMultiplier = 0.3f,
+    .beybladeTranslationalSpeedMultiplier = 0.1f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
-    .beybladeRampRate = 50,
+    .beybladeRampRate = 30,
 };
 
 // todo: hopefullly these can live as constants here soon :)

@@ -58,7 +58,7 @@ void AutoNavCommand::initialize() {}
 
 void AutoNavCommand::execute()
 {
-    if (yawMotor.isOnline())
+    if (yawMotor.isOnline() && visionCoprocessor.isCvOnline())
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
@@ -71,19 +71,25 @@ void AutoNavCommand::execute()
 
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
-        float desiredVelocityX = setpointData.x - currentX;
-        float desiredVelocityY = setpointData.y - currentY;
-        float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+
+        // default don't move
         float x = 0.0;
         float y = 0.0;
-        if (mag > 0.01)
-        {
-            x = desiredVelocityX / mag * maxWheelSpeed;
-            y = desiredVelocityY / mag * maxWheelSpeed;
-        }
 
-        x *= SPEED_FACTOR;
-        y *= SPEED_FACTOR;
+        if (setpointData.pathFound)
+        {
+            float desiredVelocityX = setpointData.x - currentX;
+            float desiredVelocityY = setpointData.y - currentY;
+            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+            if (mag > 0.01)
+            {
+                x = desiredVelocityX / mag * maxWheelSpeed;
+                y = desiredVelocityY / mag * maxWheelSpeed;
+            }
+
+            x *= SPEED_FACTOR;
+            y *= SPEED_FACTOR;
+        }
 
         // Rotate X and Y depending on turret angle
         tap::algorithms::rotateVector(&x, &y, -chassisYawAngle); // @todo: we shouldn't need to negate this just for the sentry

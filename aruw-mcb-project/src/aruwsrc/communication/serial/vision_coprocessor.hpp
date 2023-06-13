@@ -186,6 +186,7 @@ public:
 
     struct AutoNavSetpointData
     {
+        bool pathFound;
         float x;
         float y;
         long long timestamp;
@@ -350,7 +351,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{0.0f, 0.0f, 0};
+    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 

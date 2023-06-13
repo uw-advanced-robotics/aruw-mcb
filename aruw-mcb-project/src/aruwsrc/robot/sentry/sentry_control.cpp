@@ -357,7 +357,7 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
     modm::Location2D<float>(0., 0., M_PI * 0.75),
-    0.5f, 0.5f);  // TODO: this
+    0.8f, 0.8f);  // TODO: this
 
 // Transforms --------------------------------------------------------------------------------
 
@@ -393,6 +393,7 @@ algorithms::ChassisFrameYawTurretController malewifeYawController(
 // a yaw controller for the turret major ourselves
 tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG);
+
 algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     sentryTransforms.getWorldToChassis(),
     sentryDrive,
@@ -401,8 +402,8 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     turretMinorMalewife,
     turretMajorYawPosPid,
     turretMajorYawVelPid,
-    20.0f,
-    0.4f);  // @todo move magic number :p
+    aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
+    aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
 
 // Otto ballistics solver --------------------------------------------------------------------
 

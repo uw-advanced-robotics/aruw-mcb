@@ -47,7 +47,7 @@ static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float TURRET_CG_X = 18.14f;
+static constexpr float TURRET_CG_X = 8.14f;  // @todo this
 static constexpr float TURRET_CG_Z = 14.45f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 
@@ -94,6 +94,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 // static constexpr boolean majorInverted = true;
+
+static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
+static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.6f;
 }  // namespace turretMajor
 
 namespace girlboss
@@ -156,7 +159,7 @@ namespace major_rel
 namespace malewife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 50'000.0f,
+    .kp = 40'000.0f,
     .ki = 370.0f,
     .kd = 5'400.0f,
     .maxICumulative = 2'000.0f,
@@ -185,7 +188,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 50'000.0f,
+    .kp = 40'000.0f,
     .ki = 370.0f,
     .kd = 5'400.0f,
     .maxICumulative = 2'000.0f,

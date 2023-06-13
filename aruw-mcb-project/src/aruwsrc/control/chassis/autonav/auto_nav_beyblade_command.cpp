@@ -68,7 +68,7 @@ void AutoNavBeybladeCommand::initialize()
 
 void AutoNavBeybladeCommand::execute()
 {
-    if (yawMotor.isOnline() && visionCoprocessor.isCvOnline())
+    if (yawMotor.isOnline())
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
@@ -79,17 +79,22 @@ void AutoNavBeybladeCommand::execute()
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
-            visionCoprocessor.getLastSetpointData();
-        float desiredVelocityX = setpointData.x - currentX;
-        float desiredVelocityY = setpointData.y - currentY;
-        float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
         float x = 0.0;
         float y = 0.0;
-        if (mag > 0.01)
+
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
+            visionCoprocessor.getLastSetpointData();
+        
+        if (setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
-            x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-            y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            float desiredVelocityX = setpointData.x - currentX;
+            float desiredVelocityY = setpointData.y - currentY;
+            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+            if (mag > 0.01)
+            {
+                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            }
         }
 
         // Gets current turret yaw angle
