@@ -62,7 +62,7 @@ static void updateIo(tap::Drivers *drivers);
 using namespace aruwsrc::standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
-#elif defined(TARGET_HERO_CYCLONE)
+#elif defined(TARGET_HERO)
 using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
@@ -101,11 +101,11 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
@@ -113,7 +113,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
@@ -137,7 +137,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->schedulerTerminalHandler.init();
     drivers->djiMotorTerminalSerialHandler.init();
 
-#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_HERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
@@ -156,7 +156,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
-#ifdef TARGET_HERO_CYCLONE
+#ifdef TARGET_HERO
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
