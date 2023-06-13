@@ -82,7 +82,7 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_U
     .targetCycleCount = 3,
 };
 
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 40;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // STANDARD_AGITATOR_CONSTANTS_HPP_
