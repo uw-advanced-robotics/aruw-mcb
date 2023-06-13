@@ -423,10 +423,9 @@ PressCommandMapping gCtrlPressed(
     drivers(),
     {&sentrySendGoToEnemyBase},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-
 PressCommandMapping vCtrlPressed(
     drivers(),
-    {&sentrySendGoToEnemyBase},
+    {&sentrySendGoToSupplierZone},
     RemoteMapState({Remote::Key::V, Remote::Key::CTRL}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
