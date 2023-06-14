@@ -65,10 +65,6 @@ public:
 
     void limitChassisPower() override;
 
-    void refresh() override;
-
-    void refreshSafeDisconnect() override;
-
     inline void setZeroRPM() override { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
     /**
@@ -81,6 +77,8 @@ public:
         LB = 2,
         RB = 3,
     };
+
+    void refresh() override;
 
     void refreshSafeDisconnect() override
     {
