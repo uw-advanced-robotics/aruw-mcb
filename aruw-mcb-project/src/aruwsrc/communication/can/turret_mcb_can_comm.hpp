@@ -20,6 +20,8 @@
 #ifndef TURRET_MCB_CAN_COMM_HPP_
 #define TURRET_MCB_CAN_COMM_HPP_
 
+#include "tap/algorithms/transforms/frame.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
@@ -200,6 +202,22 @@ private:
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
+
+    static const tap::algorithms::transforms::Frame turretMCB, turret;
+    tap::algorithms::transforms::Transform<turretMCB, turret> mcbToTurret(
+        0.0,
+        0.0,
+        0.0,
+#if defined(TARGET_HERO)
+        M_PI_2,
+        M_PI,
+        0.0
+#else
+        0,
+        0,
+        0
+#endif
+    );
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
     {
