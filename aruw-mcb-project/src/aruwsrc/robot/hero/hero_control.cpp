@@ -51,8 +51,8 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
-#include "aruwsrc/control/client-display/client_display_command.hpp"
-#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/display/client/client_display_command.hpp"
+#include "aruwsrc/display/client/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
@@ -81,7 +81,7 @@ using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
-using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::display::client;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::agitator;

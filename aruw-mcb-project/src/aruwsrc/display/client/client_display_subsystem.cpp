@@ -17,33 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OLED_DISPLAY_MOCK_HPP_
-#define OLED_DISPLAY_MOCK_HPP_
-
-#include <gmock/gmock.h>
+#include "client_display_subsystem.hpp"
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/display/oled/oled/oled_display.hpp"
-
-namespace aruwsrc
+namespace aruwsrc::display::client
 {
-namespace mock
-{
-class OledDisplayMock : public display::oled::OledDisplay
-{
-public:
-    explicit OledDisplayMock(
-        tap::Drivers *drivers,
-        aruwsrc::serial::VisionCoprocessor *vc,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
-    virtual ~OledDisplayMock();
-    MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(bool, updateDisplay, (), (override));
-    MOCK_METHOD(void, updateMenu, (), (override));
-};  // class OledDisplayMock
-}  // namespace mock
-}  // namespace aruwsrc
-
-#endif  // OLED_DISPLAY_MOCK_HPP_
+ClientDisplaySubsystem::ClientDisplaySubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
+}  // namespace aruwsrc::display::client

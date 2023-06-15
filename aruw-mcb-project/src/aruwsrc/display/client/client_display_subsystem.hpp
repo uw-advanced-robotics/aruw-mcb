@@ -17,33 +17,32 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OLED_DISPLAY_MOCK_HPP_
-#define OLED_DISPLAY_MOCK_HPP_
+#ifndef CLIENT_DISPLAY_SUBSYSTEM_HPP_
+#define CLIENT_DISPLAY_SUBSYSTEM_HPP_
 
-#include <gmock/gmock.h>
+#include "tap/control/command.hpp"
+#include "tap/control/subsystem.hpp"
 
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/display/oled/oled/oled_display.hpp"
-
-namespace aruwsrc
+namespace tap
 {
-namespace mock
+class Drivers;
+}
+
+namespace aruwsrc::display::client
 {
-class OledDisplayMock : public display::oled::OledDisplay
+/**
+ * A placeholder subsystem for running the client display command
+ */
+class ClientDisplaySubsystem : public tap::control::Subsystem
 {
 public:
-    explicit OledDisplayMock(
-        tap::Drivers *drivers,
-        aruwsrc::serial::VisionCoprocessor *vc,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
-    virtual ~OledDisplayMock();
-    MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(bool, updateDisplay, (), (override));
-    MOCK_METHOD(void, updateMenu, (), (override));
-};  // class OledDisplayMock
-}  // namespace mock
-}  // namespace aruwsrc
+    ClientDisplaySubsystem(tap::Drivers* drivers);
+    virtual ~ClientDisplaySubsystem() {}
 
-#endif  // OLED_DISPLAY_MOCK_HPP_
+    void refreshSafeDisconnect() override {}
+
+    const char* getName() override { return "client display"; }
+};
+}  // namespace aruwsrc::display::client
+
+#endif  // CLIENT_DISPLAY_SUBSYSTEM_HPP_

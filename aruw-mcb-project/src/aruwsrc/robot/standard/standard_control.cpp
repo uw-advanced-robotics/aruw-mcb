@@ -52,8 +52,8 @@
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/control/client-display/client_display_command.hpp"
-#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/display/client/client_display_command.hpp"
+#include "aruwsrc/display/client/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -73,7 +73,7 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-#include "aruwsrc/display/imu_calibrate_menu.hpp"
+#include "aruwsrc/display/oled/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
@@ -92,7 +92,7 @@ using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::standard;
 using namespace tap::control;
-using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::display::client;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::agitator;
