@@ -42,21 +42,6 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
             this->current =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
             this->availableEnergy = tap::algorithms::limitVal(1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(9, 2)), 0.0, 2000.0);
-
-            if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT))
-            {
-                float inputPower = (this->voltage * this->current);
-                float outputPower = 24.0 * this->currentSensor->getCurrentMa() / 1000;
-
-                float capPower = outputPower - inputPower;
-                float capAmps = capPower / ((float) this->voltage);
-
-                this->powerLimiter->setExternalEnergyBuffer(capAmps < 10.0 ? this->availableEnergy : 0);
-            }
-            else
-            {
-                this->powerLimiter->setExternalEnergyBuffer(0);
-            }
             break;
         default:
             // Ignore unknown message IDs
@@ -85,24 +70,20 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
                 this->start();
                 this->started = true;
             }
+            else if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT) &&
+                this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::C) &&
+                this->status == Status::DISCHARGE)
+            {
+                this->start();
+            }
         }
-    } 
-    else
-    {
-        // if (!this->started || this->status == Status::RESET)
-        // {
-        //     this->start();
-        //     this->started = true;
-        // }
     }
 }
 
-void ExternalCapacitorBank::initialize(tap::control::chassis::PowerLimiter& powerLimiter, tap::communication::sensors::current::CurrentSensorInterface& currentSensor)
+void ExternalCapacitorBank::initialize()
 {
     this->attachSelfToRxHandler();
     this->started = false;
-    this->powerLimiter = &powerLimiter;
-    this->currentSensor = &currentSensor;
 }
 
 void ExternalCapacitorBank::start() const

@@ -42,18 +42,23 @@ CapBankPowerLimiter::CapBankPowerLimiter(
 {
 }
 
-float currentLimit, capVoltageLimit;
-
 float CapBankPowerLimiter::getPowerLimitRatio(float desiredCurrent)
 {
+    if (drivers->refSerial.getRefSerialReceivingData() &&
+        (drivers->refSerial.getRobotData().currentHp == 0 || 
+         (drivers->refSerial.getRobotData().robotPower.value & 0b010) == 0))
+    {
+        return 0;
+    }
+
     float fallbackLimit = fallbackLimiter.getPowerLimitRatio();
 
     if (this->capacitorBank == nullptr || this->capacitorBank->getStatus() != aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE) {
         return fallbackLimit;
     }
 
-    currentLimit = desiredCurrent != 0 ? tap::algorithms::limitVal(15'000.0f / desiredCurrent, 0.0f, 1.0f) : 1.0;
-    capVoltageLimit = tap::algorithms::limitVal((this->capacitorBank->getVoltage() - 10) / 5, 0.0f, 1.0f);
+    float currentLimit = desiredCurrent != 0 ? tap::algorithms::limitVal(15'000.0f / desiredCurrent, 0.0f, 1.0f) : 1.0;
+    float capVoltageLimit = tap::algorithms::limitVal((this->capacitorBank->getVoltage() - 10) / 5, 0.0f, 1.0f);
 
     return std::min(std::min(fallbackLimit, currentLimit), capVoltageLimit);
 }

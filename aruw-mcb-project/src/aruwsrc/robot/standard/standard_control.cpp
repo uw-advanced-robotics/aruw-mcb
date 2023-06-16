@@ -513,7 +513,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
 
-    drivers->capacitorBank.initialize(chassis.chassisPowerLimiter.fallbackLimiter, currentSensor);
+    drivers->capacitorBank.initialize();
 }
 
 /* initialize subsystems ----------------------------------------------------*/

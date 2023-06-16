@@ -26,8 +26,6 @@
 
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 
-extern float currentLimit, capVoltageLimit;
-
 namespace tap
 {
 class Drivers;
