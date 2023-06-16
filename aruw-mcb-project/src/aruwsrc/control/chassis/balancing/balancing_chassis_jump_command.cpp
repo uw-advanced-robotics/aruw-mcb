@@ -35,9 +35,11 @@ BalancingChassisJumpCommand::BalancingChassisJumpCommand(
     addSubsystemRequirement(chassis);
 }
 
-void BalancingChassisJumpCommand::initialize()
+void BalancingChassisJumpCommand::initialize() {}
+
+void BalancingChassisJumpCommand::execute()
 {
-    if (chassis->getArmState())
+    if (chassis->getBalancingState() != JUMPING)
     {
         chassis->startJumping();
     }
@@ -47,13 +49,11 @@ void BalancingChassisJumpCommand::initialize()
     }
 }
 
-void BalancingChassisJumpCommand::execute() { end(false); }
+void BalancingChassisJumpCommand::end(bool interrupted) {}
 
-void BalancingChassisJumpCommand::end(bool interrupted)
+bool BalancingChassisJumpCommand::isFinished() const
 {
-    chassis->setDesiredOutput(0, 0);
+    return true;
 }
-
-bool BalancingChassisJumpCommand::isFinished() const { return true; }
 }  // namespace chassis
 }  // namespace aruwsrc

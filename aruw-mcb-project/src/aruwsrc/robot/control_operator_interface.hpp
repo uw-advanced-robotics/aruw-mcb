@@ -58,6 +58,18 @@ public:
      */
     static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
     static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+#elif defined(TARGET_BALSTD)
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 1'000.0f;
+    static constexpr float MAX_DECELERATION_X = 10'000.0f;
+
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+    static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
 #else  // TARGET_STANDARD, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction

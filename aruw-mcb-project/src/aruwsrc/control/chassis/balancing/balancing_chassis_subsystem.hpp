@@ -95,7 +95,12 @@ public:
         legStalled[0] = legStalled[1] = legStalled[2] = legStalled[3] = false;
     };
 
-    void startJumping() {}
+    void startJumping()
+    {
+        balancingState = JUMPING;
+        jumpTimeout.restart(JUMP_TIMEOUT_DURATION);
+        debug1 += 1;
+    }
 
     /**
      * @return the number of chassis motors
@@ -223,23 +228,25 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = .5;  // m/s/s
+    static constexpr float MAX_ACCELERATION = 2.0;  // m/s/s
 
     // Tunable constants related to the state transitions
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
-    bool standupEnable = false;
-    float STANDUP_TORQUE_GAIN = 1.1;
+    tap::arch::MilliTimeout balanceAttemptCooldown;
+    uint32_t BALANCE_ATTEMPT_COOLDOWN_DURATION = 1000;
+    bool standupEnable = true;
+    float STANDUP_TORQUE_GAIN = .4;
 
     float FALLING_FORCE_THRESHOLD = 40.0;  // Newtons
-    float JUMP_GRAV_GAIN = 1.0f;
+    float JUMP_GRAV_GAIN = 3.5f;
     tap::arch::MilliTimeout jumpTimeout;
     uint32_t JUMP_TIMEOUT_DURATION = 200;
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 4;
 
     /**
      * Estimates the current state variables of the robot.
@@ -300,7 +307,7 @@ private:
      * FSM state for when the robot is in freefall. It extends the legs straight down in
      * world-frame.
      */
-    void updateFalling();
+    void updateFalling(uint32_t dt);
 
     void setLegsRetracted(uint32_t dt);
 
@@ -325,16 +332,16 @@ private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     SmoothPid rollPid = SmoothPid(SmoothPidConfig{
-        .kp = .01,
-        .kd = .001,
-        .maxICumulative = .1,
-        .maxOutput = .1,
+        .kp = 1000.0,
+        .kd = .0,
+        .maxICumulative = 0.0,
+        .maxOutput = 50,
     });
 
     SmoothPid heightPid = SmoothPid(SmoothPidConfig{
-        .kp = 800,
-        .ki = .5,
-        .kd = -10000,
+        .kp = 700,
+        .ki = 1,
+        .kd = -20000,
         .maxICumulative = 100,
         .maxOutput = 400,
     });
@@ -345,16 +352,16 @@ private:
         .kd = .0,
         .maxICumulative = 2,
         .maxOutput = 20,
-        .errDeadzone = .01,
+        .errDeadzone = .1,
     };
     SmoothPid retractionPid[2] = {SmoothPid(retractionPidConfig), SmoothPid(retractionPidConfig)};
 
     SmoothPidConfig retractionAnglePidConfig = {
-        .kp = 5,
+        .kp = 20,
         .ki = 0,
         .kd = 0,
         .maxICumulative = 1,
-        .maxOutput = 5,
+        .maxOutput = 10,
         .errDeadzone = .01,
     };
     SmoothPid retractionAnglePid[2] = {
@@ -362,17 +369,17 @@ private:
         SmoothPid(retractionAnglePidConfig)};
 
     SmoothPid linkAngleMismatchPid = SmoothPid(SmoothPidConfig{
-        .kp = 50,
-        .kd = 100,
+        .kp = 175,
+        .kd = -5000,
         .maxICumulative = .1,
-        .maxOutput = 5,
+        .maxOutput = 20,
     });
 
     SmoothPid yawPid = SmoothPid(SmoothPidConfig{
-        .kp = .01,
-        .kd = .001,
-        .maxICumulative = .1,
-        .maxOutput = .1,
+        .kp = -.8,
+        .kd = .7,
+        .maxICumulative = 1,
+        .maxOutput = 2,
     });
 
     SmoothPidConfig legHomingPidConfig{

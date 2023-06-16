@@ -104,7 +104,6 @@ void BalancingChassisBeybladeCommand::execute()
 void BalancingChassisBeybladeCommand::end(bool interrupted)
 {
     chassis->setDesiredOutput(0, 0);
-    chassis->setDesiredHeight(DELTA_H);
     chassis->disarmChassis();
 }
 

@@ -70,6 +70,7 @@ void BalancingChassisSubsystem::initialize()
     driveWheelLeft->initialize();
     fivebarRight->initialize();
     driveWheelRight->initialize();
+    balanceAttemptCooldown.restart(BALANCE_ATTEMPT_COOLDOWN_DURATION);
 }
 
 void BalancingChassisSubsystem::refresh()
@@ -107,7 +108,7 @@ void BalancingChassisSubsystem::refresh()
             updateRecovery(dt);
             break;
         case FALLING:
-            updateFalling();
+            updateFalling(dt);
             break;
     };
 
@@ -199,7 +200,10 @@ void BalancingChassisSubsystem::computeState(uint32_t dt)
     velocityRamper.update(dt * MAX_ACCELERATION / 1000);
     desiredV = velocityRamper.getValue();
     desiredZRamper.update(dt * Z_RAMP_RATE / 1000);
-    desiredZ = limitVal(desiredZRamper.getValue(), CHASSIS_HEIGHTS.first, CHASSIS_HEIGHTS.second);
+    desiredZ = limitVal(
+        desiredZRamper.getValue(),
+        fivebarLeft->getDefaultPosition().getY(),
+        CHASSIS_HEIGHTS.second);
 
     /**
      * Increment our desired X position based on the desired velocity, if our desired velocity
@@ -225,12 +229,12 @@ void BalancingChassisSubsystem::computeState(uint32_t dt)
     float xRight = fivebarRight->getCurrentPosition().getX() * cos(pitch) +
                    fivebarRight->getCurrentPosition().getY() * sin(pitch);
     // link angle in world-frame
-    tlLeft = lowPassFilter(tlLeft, atan2(xLeft, currentZLeft), .1);
-    tlRight = lowPassFilter(tlRight, atan2(xRight, currentZRight), .1);
+    tlLeft = lowPassFilter(tlLeft, atan2(xLeft, currentZLeft), .4);
+    tlRight = lowPassFilter(tlRight, atan2(xRight, currentZRight), .4);
     tl = (tlLeft + tlRight) / 2;
 
     float tlRateNew = (tl - tlPrev) * 1000 / dt;
-    tlRate = lowPassFilter(tlRate, tlRateNew, .3);
+    tlRate = lowPassFilter(tlRate, tlRateNew, .6);
     tlPrev = tl;
 
     desiredV = velocityRamper.getValue();
@@ -317,19 +321,17 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     // 1. Run LQR controller
     float stateData[6] = {
         tl,
-        tlRate,
-        currentX - desiredX,
-        currentV,
+        deadZone(tlRate, .1f),
+        limitVal(currentX - desiredX, -2.0f, 2.0f),
+        currentV - desiredV,
         -pitch,
         -pitchRate,
     };
     CMSISMat<6, 1> stateVector(stateData);
+    CMSISMat<2, 6> LQR_K = LQR_K_SLOPE * currentZ + LQR_K_YINT;
     CMSISMat<2, 1> torques = -LQR_K * stateVector;
     wheelTorqueLeft = wheelTorqueRight = limitVal(torques.data[0] / 2, -2.0f, 2.0f);
     desiredLinkTorqueLeft = desiredLinkTorqueRight = limitVal(-torques.data[1] / 2, -10.0f, 10.0f);
-
-    debug1 = torques.data[0];
-    debug2 = torques.data[1];
 
     // 2. run PID Superimposers
     float yawAdjustment = yawPid.runController(desiredR, yawRate, dt);
@@ -338,10 +340,9 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     float legForce = heightPid.runControllerDerivateError(desiredZ - currentZ, dt);
     float rollAdjustment = rollPid.runController(-roll, rollRate, dt);
     // 3. Superimpose
-    float gravityFeedForward = ACCELERATION_GRAVITY * MASS_CHASSIS * cos(tl);
+    float gravityFeedForward = ACCELERATION_GRAVITY * MASS_CHASSIS / 2 * cos(tl);
 
     // gravityFeedForward = 0;
-    rollAdjustment = 0;
 
     desiredLinkTorqueRight += linkAngleAdjustment;
     desiredLinkTorqueLeft -= linkAngleAdjustment;
@@ -392,20 +393,26 @@ void BalancingChassisSubsystem::updateFallenNotMoving(uint32_t dt)
     {
         // reset the x setpoint to avoid funniness after standing up
         desiredX = currentX;
+        desiredZRamper.setTarget(CHASSIS_HEIGHTS.getFirst());
+        desiredZRamper.setValue(CHASSIS_HEIGHTS.getFirst());
         balancingState = BALANCING;
     }
-    else if (standupEnable && armed)
+    else if (standupEnable && armed && balanceAttemptCooldown.isExpired())
     {
         balanceAttemptTimeout.restart(BALANCE_ATTEMPT_TIMEOUT_DURATION);
+        balanceAttemptCooldown.restart(BALANCE_ATTEMPT_COOLDOWN_DURATION);
         balancingState = STANDING_UP;
     }
 }
 void BalancingChassisSubsystem::updateStandingUp(uint32_t dt)
 {
-    if (balanceAttemptTimeout.isExpired() || !armed) balancingState = FALLEN_MOVING;
+    if (balanceAttemptTimeout.isExpired() || !armed)
+    {
+        balancingState = FALLEN_MOVING;
+    }
     setLegsRetracted(dt);
-    // Use a P-controller to apply big torque until we get up
-    float standupTorque = sin(pitch) * .347 * MASS_CHASSIS * 9.81 * STANDUP_TORQUE_GAIN;
+    // Use nonlinear feedforward torque application
+    float standupTorque = sin(pitch) * .347 * MASS_CHASSIS / 2 * 9.81 * STANDUP_TORQUE_GAIN;
     standupTorque = limitVal(standupTorque, -3.0f, 3.0f);
     wheelTorqueLeft = wheelTorqueRight = standupTorque;
 
@@ -414,6 +421,8 @@ void BalancingChassisSubsystem::updateStandingUp(uint32_t dt)
         balancingState = BALANCING;
         // reset the x setpoint to avoid funniness after standing up
         desiredX = currentX;
+        desiredZRamper.setTarget(CHASSIS_HEIGHTS.getFirst());
+        desiredZRamper.setValue(CHASSIS_HEIGHTS.getFirst());
     }
 }
 void BalancingChassisSubsystem::updateJumping(uint32_t dt)
@@ -422,20 +431,35 @@ void BalancingChassisSubsystem::updateJumping(uint32_t dt)
     // This is a little sussy, but we want to keep balancing while we jump.
     updateBalancing(dt);
     // override the force PID and yeet
+    heightPid.reset();
     desiredLinkForceLeft = MASS_CHASSIS / 2 * ACCELERATION_GRAVITY * JUMP_GRAV_GAIN;
     desiredLinkForceRight = MASS_CHASSIS / 2 * ACCELERATION_GRAVITY * JUMP_GRAV_GAIN;
     if (jumpTimeout.isExpired())
     {
         balancingState = FALLING;
+        heightPid.reset();
+    }
+    else
+    {
+        balancingState = JUMPING;
     }
 }
-void BalancingChassisSubsystem::updateFalling()
+void BalancingChassisSubsystem::updateFalling(uint32_t dt)
 {
-    // if (currentLinkForceLeft > FALLING_FORCE_THRESHOLD ||
-    //     currentLinkForceRight > FALLING_FORCE_THRESHOLD)
-    // {
-    balancingState = BALANCING;
-    // }
+    wheelTorqueRight = wheelTorqueLeft = 0;
+
+    desiredZRamper.setTarget((CHASSIS_HEIGHTS.getFirst() + CHASSIS_HEIGHTS.getSecond()) / 2);
+    float legForce = heightPid.runControllerDerivateError(desiredZ - currentZ, dt);
+    desiredLinkForceLeft = desiredLinkForceRight = legForce;
+
+    desiredLinkTorqueLeft = retractionAnglePid[0].runControllerDerivateError(0 - tlLeft, dt);
+    desiredLinkTorqueRight = retractionAnglePid[1].runControllerDerivateError(0 - tlRight, dt);
+
+    if (compareFloatClose(legForce, 0, 20.0f))
+    {
+        desiredZRamper.setTarget(CHASSIS_HEIGHTS.getFirst());
+        balancingState = BALANCING;
+    }
 }
 
 void BalancingChassisSubsystem::updateRecovery(uint32_t dt) {}
@@ -469,8 +493,6 @@ void BalancingChassisSubsystem::airborneDetector()
         fivebarRight->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT,
         fivebarRight->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT};
     CMSISMat<2, 1> rightMotorTorques(dataRight);
-    debugMat2[0] = rightMotorTorques.data[0];
-    debugMat2[1] = rightMotorTorques.data[1];
 
     CMSISMat<2, 1> rightLinkForces = VMC_JACOBIAN_INV * rightMotorTorques;
     currentLinkForceLeft = leftLinkForces.data[0];

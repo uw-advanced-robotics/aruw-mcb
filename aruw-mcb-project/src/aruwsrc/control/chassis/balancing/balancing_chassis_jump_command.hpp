@@ -48,6 +48,9 @@ private:
     tap::Drivers* drivers;
     BalancingChassisSubsystem* chassis;
 
+    float debug1;
+    float debug2;
+
     static constexpr uint32_t RESET_TIMEOUT = 5'000;
     tap::arch::MilliTimeout calibrationLongTimeout;
 

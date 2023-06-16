@@ -67,21 +67,39 @@ static const CMSISMat<2, 2> VMC_JACOBIAN(VMC_JACOBIAN_DATA);
 
 static const CMSISMat<2, 2> VMC_JACOBIAN_INV(VMC_JACOBIAN_INV_DATA);
 
-static const float LQR_DATA[12] = {
-    -10.1380,
-    -1.1085,
-    -7.0657,
-    -5.3725,
-    4.2402,
-    0.6392,
-    7.0077,
-    0.4335,
-    0.5501,
-    0.3151,
-    50.3747,
-    5.3357};
+static const float LQR_DATA_SLOPE[12] = {
+    -99.27324,
+    -21.87294,
+    -3.30078,
+    -8.15020,
+    -67.95185,
+    -6.56304,
+    9.61597,
+    4.24791,
+    -15.19573,
+    -25.60578,
+    72.76464,
+    8.94952,
+};
 
-static const CMSISMat<2, 6> LQR_K(LQR_DATA);
+static const CMSISMat<2, 6> LQR_K_SLOPE(LQR_DATA_SLOPE);
+
+static const float LQR_DATA_YINT[12] = {
+    -12.74785,
+    -0.47628,
+    -5.71773,
+    -10.08875,
+    43.29004,
+    4.86263,
+    23.51436,
+    2.97989,
+    9.03230,
+    15.91147,
+    76.31916,
+    4.22845,
+};
+
+static const CMSISMat<2, 6> LQR_K_YINT(LQR_DATA_YINT);
 
 }  // namespace aruwsrc::chassis
 

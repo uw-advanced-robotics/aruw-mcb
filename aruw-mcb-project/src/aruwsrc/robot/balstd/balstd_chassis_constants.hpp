@@ -84,8 +84,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 1500.0f;
-static constexpr float AUTOROTATION_PID_KD = 40.0f;
+static constexpr float AUTOROTATION_PID_KP = 5000.0f;
+static constexpr float AUTOROTATION_PID_KD = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
@@ -162,9 +162,9 @@ static constexpr float ROTATION_REMOTE_SCALAR = .001;
 static constexpr float TRANSLATION_REMOTE_SCALAR = .001;
 static constexpr float HEIGHT_REMOTE_SCALAR = .001;
 
-static constexpr float MASS_CHASSIS = 13.0f;  // kg
+static constexpr float MASS_CHASSIS = 13.5f;  // kg
 
-static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.125, 0.35};
+static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.125, 0.325};
 
 static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
     .kp = 4500,

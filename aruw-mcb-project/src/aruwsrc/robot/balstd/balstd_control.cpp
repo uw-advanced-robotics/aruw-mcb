@@ -469,16 +469,12 @@ PressCommandMapping bCtrlPressed(
     drivers(),
     {},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
-// The user can press q or e to manually rotate the chassis left or right.
-// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
-// automatically once a different drive mode is chosen.
-PressCommandMapping qEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q, Remote::Key::E}));
-PressCommandMapping qNotEPressed(drivers(), {}, RemoteMapState({Remote::Key::Q}, {Remote::Key::E}));
-HoldRepeatCommandMapping eNotQPressed(
+
+PressCommandMapping qPressed(drivers(), {}, RemoteMapState({Remote::Key::Q}));
+PressCommandMapping ePressed(
     drivers(),
     {&jumpCommand},
-    RemoteMapState({Remote::Key::E}, {Remote::Key::Q}),
-    false);
+    RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
     {&autorotateDriveCommand},
@@ -562,9 +558,8 @@ void registerBalstdIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qEPressed);
-    drivers->commandMapper.addMap(&qNotEPressed);
-    drivers->commandMapper.addMap(&eNotQPressed);
+    drivers->commandMapper.addMap(&qPressed);
+    drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);

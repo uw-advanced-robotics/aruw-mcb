@@ -48,7 +48,7 @@ void BalancingChassisAutorotateCommand::initialize()
 void BalancingChassisAutorotateCommand::updateAutorotateState()
 {
     float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
-    if (!tap::algorithms::compareFloatClose(motionDesiredTurretRelative.getLength(), 0, 1))
+    if (!tap::algorithms::compareFloatClose(motionDesiredTurretRelative.getLength(), 0, 0.5))
     {
         chassisMotionPlanning = true;
         return;
