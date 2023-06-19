@@ -33,6 +33,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 namespace aruwsrc::control::imu
 {
 /**
@@ -116,7 +117,7 @@ public:
         aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
         chassis::HolonomicChassisSubsystem *chassis,
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface);
+        aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -177,7 +178,7 @@ private:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
+    aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface;
 };
 }  // namespace aruwsrc::control::imu
 

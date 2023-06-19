@@ -31,7 +31,7 @@ namespace algorithms
 Wheel::Wheel(float diameter, float gearRatio, float motorGearRatio)
     : circumference(diameter * M_PI),
       gearRatio(gearRatio),
-      motorGearRatio(motorGearRatio)
+      motorGearRatio(motorGearRatio)  // @todo bad naming scheme
 {
 }
 

@@ -37,7 +37,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
     chassis::HolonomicChassisSubsystem *chassis,
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface)
+    aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface)  // @todo tried to create separate command for resetting kf; for some reason it never got fucking scheduled; so we're resorting to this instead
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
@@ -64,6 +64,9 @@ bool SentryImuCalibrateCommand::isReady() { return true; }
 
 void SentryImuCalibrateCommand::initialize()
 {
+    // reset odometry
+    odometryInterface.reset();
+
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
 
     // for (auto &config : turretsAndControllers)

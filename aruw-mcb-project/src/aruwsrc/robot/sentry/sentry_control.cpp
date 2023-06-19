@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
+#include "aruwsrc/robot/sentry/sentry_reset_odometry_command.hpp"
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -357,7 +358,7 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
     modm::Location2D<float>(0., 0., M_PI * 0.75),
-    0.8f, 0.8f);  // TODO: this
+    0.5f, 0.5f);  // TODO: this
 
 // Transforms --------------------------------------------------------------------------------
 
@@ -736,12 +737,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 
 
-// HoldCommandMapping rightSwitchDown(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-HoldCommandMapping rightSwitchMid(
+PressCommandMapping rightSwitchMid(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
@@ -802,6 +798,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    // @todo does not belong here
     sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionStrategy);
     sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
     sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);

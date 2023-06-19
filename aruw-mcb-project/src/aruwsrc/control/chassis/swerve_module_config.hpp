@@ -35,7 +35,7 @@ namespace aruwsrc::chassis
 struct SwerveModuleConfig
 {
     // @todo not really generic over future swerve designs?
-    const float WHEEL_DIAMETER_M = 0.102f;
+    const float WHEEL_DIAMETER_M = 0.1016f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
     // in encoder clicks, defines "forward" direction of the module
@@ -87,7 +87,7 @@ struct SwerveModuleConfig
         {M_PI_2, 0.75f},
     };
 
-    const float gearboxRatio = (1.0f / 19.0f);  // @todo no idea if this is right
+    const float gearboxRatio = (1.0f / 19.0f);
 };
 
 }  // namespace aruwsrc::chassis

@@ -67,7 +67,12 @@ public:
 
     void update();
 
+    void reset();
+
 private:
+    float initialXPos;
+    float initialYPos;
+
     enum class OdomState
     {
         POS_X = 0,
