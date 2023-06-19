@@ -72,6 +72,8 @@ public:
     int getPowerLimit() const { return this->powerLimit; };
     Status getStatus() const { return this->status; };
 
+    bool systemsChanged = false; // debounce for the shift c input to change between cap and battery
+
 private:
     const float capacitance;
 

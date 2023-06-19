@@ -73,11 +73,17 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
             else if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT) &&
                 this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::C) )
             {
-                if (this->status == Status::CHARGE_DISCHARGE) {
-                    this->status == Status::DISCHARGE;
-                } else {
-                    this->start();
+                if (!this->systemsChanged) {
+                    this->systemsChanged = true;
+
+                    if (this->status == Status::CHARGE_DISCHARGE) {
+                        this->stop();
+                    } else {
+                        this->start();
+                    }
                 }
+            } else {
+                this->systemsChanged = false;
             }
         }
     }
