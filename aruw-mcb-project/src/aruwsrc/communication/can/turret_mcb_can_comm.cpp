@@ -170,6 +170,7 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
      * apply post-processing and update the lastCompleteImuData to the processed data.
      * Also call the callback function if one exists.
      */
+    transformImuData();
 
     updateRevolutionCounter(currProcessingImuData.roll, lastCompleteImuData.roll, rollRevolutions);
 
@@ -186,6 +187,42 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     {
         imuDataReceivedCallbackFunc();
     }
+}
+
+void TurretMCBCanComm::transformImuData() {
+    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turretMCB> turretMCBAngles(
+        currProcessingImuData.roll,
+        currProcessingImuData.pitch,
+        currProcessingImuData.yaw);
+
+    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turret> turretAngles =
+        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAngles);
+
+    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turretMCB> turretMCBAngleRates(
+        currProcessingImuData.rawRollVelocity,
+        currProcessingImuData.rawPitchVelocity,
+        currProcessingImuData.rawYawVelocity);
+
+    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turret> turretAngleRates =
+        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAngleRates);
+
+    tap::algorithms::transforms::Position<aruwsrc::transforms::turretMCB> turretMCBAccel(
+        currProcessingImuData.xAcceleration,
+        currProcessingImuData.yAcceleration,
+        currProcessingImuData.zAcceleration);
+
+    tap::algorithms::transforms::Position<aruwsrc::transforms::turret> turretAccel =
+        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAccel);
+
+    currProcessingImuData.roll = turretAngles.roll();
+    currProcessingImuData.pitch = turretAngles.pitch();
+    currProcessingImuData.yaw = turretAngles.yaw();
+    currProcessingImuData.rawRollVelocity = turretAngleRates.roll();
+    currProcessingImuData.rawPitchVelocity = turretAngleRates.pitch();
+    currProcessingImuData.rawYawVelocity = turretAngleRates.yaw();
+    currProcessingImuData.xAcceleration = turretAccel.x();
+    currProcessingImuData.yAcceleration = turretAccel.y();
+    currProcessingImuData.zAcceleration = turretAccel.z();
 }
 
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)

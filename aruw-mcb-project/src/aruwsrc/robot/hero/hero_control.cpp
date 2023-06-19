@@ -467,7 +467,7 @@ PressCommandMapping ePressed(
     RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
-    {&chassisDiagonalDriveCommand},
+    {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),

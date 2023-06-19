@@ -72,9 +72,9 @@ public:
      * @param x: Initial x-component of the translation.
      * @param y: Initial y-component of the translation.
      * @param z: Initial z-component of the translation.
-     * @param A: Initial rotation angle about the x-axis.
-     * @param B: Initial rotation angle about the y-axis.
-     * @param C: Initial rotation angle about the z-axis.
+     * @param roll: Initial rotation angle about the x-axis.
+     * @param pitch: Initial rotation angle about the y-axis.
+     * @param yaw: Initial rotation angle about the z-axis.
      */
     Transform(float x, float y, float z, float roll, float pitch, float yaw);
 
@@ -233,13 +233,13 @@ Position<TARGET> Transform<SOURCE, TARGET>::apply(const Position<SOURCE>& positi
 template <const Frame& SOURCE, const Frame& TARGET>
 Vector<TARGET> Transform<SOURCE, TARGET>::apply(const Vector<SOURCE>& vector) const
 {
-    return Vector<TARGET>(tRotation * vector.coordinates_);
+    return Vector<TARGET>(tRotation * vector.matrix_);
 }
 
 template <const Frame& SOURCE, const Frame& TARGET>
 Orientation<TARGET> Transform<SOURCE, TARGET>::apply(const Orientation<SOURCE>& orientation) const
 {
-    return Orientation<TARGET>(tRotation * orientation.coordinates_);
+    return Orientation<TARGET>(tRotation * orientation.matrix_);
 }
 
 template <const Frame& SOURCE, const Frame& TARGET>

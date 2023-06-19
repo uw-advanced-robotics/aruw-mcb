@@ -27,6 +27,7 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
+#include "aruwsrc/robot/robot_frames.hpp"
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -203,22 +204,6 @@ private:
     static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
-    static const tap::algorithms::transforms::Frame turretMCB, turret;
-    tap::algorithms::transforms::Transform<turretMCB, turret> mcbToTurret(
-        0.0,
-        0.0,
-        0.0,
-#if defined(TARGET_HERO)
-        M_PI_2,
-        M_PI,
-        0.0
-#else
-        0,
-        0,
-        0
-#endif
-    );
-
     class TurretMcbRxHandler : public tap::can::CanRxListener
     {
     public:
@@ -262,8 +247,20 @@ private:
 
     tap::Drivers* drivers;
 
+    /**
+     * The Imu data struct as it is being filled out by incoming packets
+     */
     ImuData currProcessingImuData;
+    /**
+     * The most recent fully-populated data struct, comprised of 3 incoming data packets
+     */
     ImuData lastCompleteImuData;
+
+    /**
+     * The incoming IMU data is relative to the Type C (with the xt30s being +x, and the top being
+     * +z). We transform the data into the turret frame using a transform defined in robot_frames.
+     */
+    ImuData transformedImuData;
 
     int yawRevolutions;
     int pitchRevolutions;
@@ -298,6 +295,8 @@ private:
     void handleTurretMessage(const modm::can::Message& message);
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
+
+    void transformImuData();
 
     /**
      * Updates the passed in revolutionCounter if a revolution increment or decrement has been

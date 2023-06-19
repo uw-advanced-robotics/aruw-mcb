@@ -68,7 +68,6 @@ public:
         return Position<FRAME>(this->coordinates_ + vector.coordinates_);
     }
 
-private:
     CMSISMat<3, 1> coordinates_;
 };  // class Position
 }   // namespace tap::algorithms::transforms

@@ -79,7 +79,6 @@ public:
         return atan2(matrix_.data[3], matrix_.data[0]);
     }
 
-private:
     CMSISMat<3, 3> matrix_;
 };  // class Orientation
 }   // namespace tap::algorithms::transforms
