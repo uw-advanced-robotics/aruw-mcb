@@ -190,6 +190,7 @@ public:
         float x;
         float y;
         long long timestamp;
+        bool shouldBeyblade;
     } modm_packed;
 
     // TODO: sentry only, refactor, comment
