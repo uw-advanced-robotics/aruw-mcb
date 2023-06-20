@@ -264,6 +264,8 @@ public:
         uint16_t msgLen);
 
 private:
+    bool hah = false;
+    float heh = 0;
     tap::Drivers* drivers;
     tap::arch::MilliTimeout delayTimer;
     Tx::DeleteGraphicLayerMessage deleteGraphicLayerMessage;

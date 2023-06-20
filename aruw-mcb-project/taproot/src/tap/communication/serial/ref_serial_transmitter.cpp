@@ -380,6 +380,7 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     RobotId receiverId,
     uint16_t msgLen)
 {
+    hah = true;
     RF_BEGIN(6);
 
     if (msgId < 0x0200 || msgId >= 0x02ff)
