@@ -432,7 +432,8 @@ public:
             DJISerial::FrameHeader frameHeader;
             uint16_t cmdId;
             InteractiveHeader interactiveHeader;
-            uint8_t dataAndCRC16[115];
+            uint8_t data;  // @todo see method that works with this
+            uint16_t crc16;
         } modm_packed;
 
         struct Graphic2Message

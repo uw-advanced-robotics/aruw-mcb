@@ -260,8 +260,7 @@ public:
     mockable modm::ResumableResult<void> sendRobotToRobotMsg(
         Tx::RobotToRobotMessage* robotToRobotMsg,
         uint16_t msgId,
-        RobotId receiverId,
-        uint16_t msgLen);
+        RobotId receiverId);
 
 private:
     bool hah = false;

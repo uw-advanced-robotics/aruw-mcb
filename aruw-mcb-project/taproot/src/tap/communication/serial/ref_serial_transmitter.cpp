@@ -374,11 +374,11 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
     RF_END();
 }
 
+// @todo create uart send method to reduce massive amounts of boilerplate and complexity
 modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     Tx::RobotToRobotMessage* robotToRobotMsg,
     uint16_t msgId,
-    RobotId receiverId,
-    uint16_t msgLen)
+    RobotId receiverId)
 {
     hah = true;
     RF_BEGIN(6);
@@ -389,47 +389,36 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         RF_RETURN_1();
     }
 
-    if (msgLen > 113)
-    {
-        RAISE_ERROR(drivers, "message length > 113-char maximum");
-        RF_RETURN_1();
-    }
-
     if (drivers->refSerial.getRobotData().robotId == RobotId::INVALID)
     {
         RF_RETURN_1();
     }
 
-    configFrameHeader(
-        &robotToRobotMsg->frameHeader,
-        sizeof(robotToRobotMsg->interactiveHeader) + msgLen);
+    RefSerialTransmitter::configFrameHeader(                                      
+        &robotToRobotMsg->frameHeader,                                                 
+        sizeof(robotToRobotMsg->data) + sizeof(robotToRobotMsg->interactiveHeader));    
+                                                 
+    robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;     
 
-    robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;
+    RefSerialTransmitter::configInteractiveHeader(                                
+        &robotToRobotMsg->interactiveHeader,                                           
+        msgId,                                                                
+        drivers->refSerial.getRobotData().robotId,             
+        static_cast<uint16_t>(RefSerialData::RobotId::BLUE_SENTINEL));     
 
-    configInteractiveHeader(
-        &robotToRobotMsg->interactiveHeader,
-        msgId,
-        drivers->refSerial.getRobotData().robotId,
-        static_cast<uint16_t>(receiverId));
+    robotToRobotMsg->crc16 = algorithms::calculateCRC16(                               
+        reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
+        sizeof(robotToRobotMsg->frameHeader) + sizeof(robotToRobotMsg->cmdId) + sizeof(robotToRobotMsg->interactiveHeader) + sizeof(robotToRobotMsg->data));
+                                                                        
+    drivers->refSerial.acquireTransmissionSemaphore();   
 
-    static constexpr int FULL_MSG_SIZE_LESS_MSGLEN = sizeof(robotToRobotMsg->frameHeader) +
-                                                     sizeof(robotToRobotMsg->cmdId) +
-                                                     sizeof(robotToRobotMsg->interactiveHeader);
-
-    *reinterpret_cast<uint16_t*>(robotToRobotMsg->dataAndCRC16 + msgLen) =
-        algorithms::calculateCRC16(
-            reinterpret_cast<uint8_t*>(robotToRobotMsg),
-            FULL_MSG_SIZE_LESS_MSGLEN + msgLen);
-
-    drivers->refSerial.acquireTransmissionSemaphore();
-
-    drivers->uart.write(
-        bound_ports::REF_SERIAL_UART_PORT,
-        reinterpret_cast<uint8_t*>(robotToRobotMsg),
-        FULL_MSG_SIZE_LESS_MSGLEN + msgLen + sizeof(uint16_t));
-
-    DELAY_REF_GRAPHIC(robotToRobotMsg);
-
+    drivers->uart.write(                                                          
+        bound_ports::REF_SERIAL_UART_PORT,                                        
+        reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
+        sizeof(*robotToRobotMsg));      
+                                               
+    DELAY_REF_GRAPHIC(robotToRobotMsg);                 
+                              
     drivers->refSerial.releaseTransmissionSemaphore();
 
     RF_END();

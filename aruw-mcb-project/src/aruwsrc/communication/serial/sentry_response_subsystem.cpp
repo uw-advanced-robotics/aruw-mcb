@@ -49,21 +49,19 @@ bool SentryResponseSubsystem::run()
         {
             this->sentryMoving = this->getDriveStatus();
 
-            this->robotToRobotMessage.dataAndCRC16[0] = static_cast<uint8_t>(this->sentryMoving);
+            this->robotToRobotMessage.data = static_cast<uint8_t>(this->sentryMoving);
 
             PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
                 &this->robotToRobotMessage,
                 SENTRY_RESPONSE_MESSAGE_ID,
                 drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
-                    tap::communication::serial::RefSerialData::RobotId::BLUE_HERO),
-                1));
+                    tap::communication::serial::RefSerialData::RobotId::BLUE_HERO)));
 
             PT_CALL(this->refSerialTransmitter.sendRobotToRobotMsg(
                 &this->robotToRobotMessage,
                 SENTRY_RESPONSE_MESSAGE_ID,
                 drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
-                    tap::communication::serial::RefSerialData::RobotId::BLUE_SOLDIER_1),
-                1));
+                    tap::communication::serial::RefSerialData::RobotId::BLUE_SOLDIER_1)));
         }
 
         PT_YIELD();
