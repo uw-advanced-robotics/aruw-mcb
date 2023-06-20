@@ -396,7 +396,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerHeatAndCVLimited},
+    {&waterwheel::rotateAndUnjamWaterwheel},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(

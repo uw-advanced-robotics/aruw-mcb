@@ -26,14 +26,21 @@
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/euler_angles.hpp"
+
 #include "frame.hpp"
 
 namespace tap::algorithms::transforms
 {
+// Forward declaration for transform.hpp
+template <const Frame& SOURCE, const Frame& TARGET>
+class Transform;
 
 template <const Frame& FRAME>
 class Orientation
 {
+    template <const Frame& SOURCE, const Frame& TARGET>
+    friend class Transform;
+
 public:
     inline Orientation(const float roll, const float pitch, const float yaw)
         : matrix_(fromEulerAngles(roll, pitch, yaw))
@@ -41,21 +48,12 @@ public:
     }
 
     // Move semantics
-    inline Orientation(Orientation&& other)
-        : matrix_(std::move(other.matrix_))
-    {
-    }
+    inline Orientation(Orientation&& other) : matrix_(std::move(other.matrix_)) {}
 
     /* Costly; use rvalue reference whenever possible */
-    inline Orientation(const CMSISMat<3, 3>& matrix)
-        : matrix_(matrix)
-    {
-    }
+    inline Orientation(const CMSISMat<3, 3>& matrix) : matrix_(matrix) {}
 
-    inline Orientation(CMSISMat<3, 3>&& matrix)
-        : matrix_(std::move(matrix))
-    {
-    }
+    inline Orientation(CMSISMat<3, 3>&& matrix) : matrix_(std::move(matrix)) {}
 
     // TODO: sort out copy constructor and copy assignment because default directly copies cmsismat
 
@@ -63,24 +61,19 @@ public:
     // TODO: return angle objects
     /**
      * Returns roll as values between [-pi, +pi].
-     * 
-     * If pitch is completely vertical (-pi / 2 or pi / 2) then roll and yaw are gimbal-locked. In this case, roll is taken to be 0.
+     *
+     * If pitch is completely vertical (-pi / 2 or pi / 2) then roll and yaw are gimbal-locked. In
+     * this case, roll is taken to be 0.
      */
-    inline float roll() const
-    {
-        return atan2(matrix_.data[7], matrix_.data[8]);
-    }
+    inline float roll() const { return atan2(matrix_.data[7], matrix_.data[8]); }
 
-    inline float pitch() const {
-        return asinf(-matrix_.data[6]);
-    }
+    inline float pitch() const { return asinf(-matrix_.data[6]); }
 
-    inline float yaw() const {
-        return atan2(matrix_.data[3], matrix_.data[0]);
-    }
+    inline float yaw() const { return atan2(matrix_.data[3], matrix_.data[0]); }
 
+protected:
     CMSISMat<3, 3> matrix_;
 };  // class Orientation
-}   // namespace tap::algorithms::transforms
+}  // namespace tap::algorithms::transforms
 
 #endif  // TAPROOT_ORIENTATION_HPP_

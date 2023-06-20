@@ -23,7 +23,6 @@
 
 #include "frame.hpp"
 
-
 /**
  * Represents a stationary frame from the world perspective.
  */
