@@ -264,7 +264,8 @@ public:
 
 private:
     bool hah = false;
-    float heh = 0;
+    // Tx::Graphic2Message graphicMsg;
+    // Tx::RobotToRobotMessage robotToRobotMsg;
     tap::Drivers* drivers;
     tap::arch::MilliTimeout delayTimer;
     Tx::DeleteGraphicLayerMessage deleteGraphicLayerMessage;

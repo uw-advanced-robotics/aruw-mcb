@@ -496,9 +496,9 @@ CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
     MultiShotCvCommandMapping>
-    vPressed(
+    vNotCtrlPressed(
         drivers(),
-        RemoteMapState({Remote::Key::V}),
+        RemoteMapState({Remote::Key::V}, {Remote::Key::CTRL}),
         MultiShotCvCommandMapping::SINGLE,
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
@@ -578,7 +578,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vCtrlPressed);
-    drivers->commandMapper.addMap(&vPressed);
+    drivers->commandMapper.addMap(&vNotCtrlPressed);
 }
 }  // namespace standard_control
 

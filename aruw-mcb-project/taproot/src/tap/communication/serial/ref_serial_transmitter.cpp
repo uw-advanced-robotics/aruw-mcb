@@ -274,8 +274,7 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
             &graphicMsg->interactiveHeader,                                           \
             messageId,                                                                \
             robotId,                                                                  \
-            /*getRobotClientID(robotId));*/                                               \
-            107); \
+            getRobotClientID(robotId));                                               \
         graphicMsg->crc16 = algorithms::calculateCRC16(                               \
             reinterpret_cast<uint8_t*>(graphicMsg),                                   \
             sizeof(*graphicMsg) - sizeof(graphicMsg->crc16));                         \
@@ -322,6 +321,7 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
         drivers->refSerial.getRobotData().robotId,
         drivers,
         0);
+    // this->graphicMsg = *graphicMsg;
     RF_END();
 }
 
@@ -396,6 +396,15 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         RF_RETURN_1();
     }
 
+    // SEND_GRAPHIC_HELPER(
+    //     robotToRobotMsg,
+    //     contentId,
+    //     true,
+    //     true,
+    //     drivers->refSerial.getRobotData().robotId,
+    //     drivers,
+    //     0);
+
     RefSerialTransmitter::configFrameHeader(                                      
         &robotToRobotMsg->frameHeader,                                                 
         sizeof(robotToRobotMsg->graphicData) + sizeof(robotToRobotMsg->interactiveHeader));
@@ -407,7 +416,7 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         contentId,
         drivers->refSerial.getRobotData().robotId,
         static_cast<uint16_t>(receiverId));  
-        // 107);   
+        // receiverId);   
 
     robotToRobotMsg->crc16 = algorithms::calculateCRC16(
         reinterpret_cast<uint8_t*>(robotToRobotMsg),
@@ -419,10 +428,12 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         bound_ports::REF_SERIAL_UART_PORT,                                        
         reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
         sizeof(*robotToRobotMsg));      
-                                               
+
     DELAY_REF_GRAPHIC(robotToRobotMsg);                 
                               
     drivers->refSerial.releaseTransmissionSemaphore();
+
+    // this->robotToRobotMsg = *robotToRobotMsg;
 
     RF_END();
 }

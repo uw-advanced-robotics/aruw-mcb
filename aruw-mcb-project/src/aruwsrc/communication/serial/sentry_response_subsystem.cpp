@@ -57,7 +57,7 @@ bool SentryResponseSubsystem::run()
                 drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
                     tap::communication::serial::RefSerialData::RobotId::BLUE_HERO)));
 
-            PT_CALL(this->refSerialTransmitter.sendRobotToRobotMsg(
+            PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
                 &this->robotToRobotMessage,
                 SENTRY_RESPONSE_MESSAGE_ID,
                 drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
