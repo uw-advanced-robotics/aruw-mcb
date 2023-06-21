@@ -244,6 +244,7 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
     RF_END();
 }
 
+// @todo understandable but impossible to maintain
 /**
  * A helper function used by the RefSerialTransmitter's sendGraphic functions to send some
  * GraphicType to the referee system. The user may specify whether or not to configure the message
@@ -273,7 +274,8 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
             &graphicMsg->interactiveHeader,                                           \
             messageId,                                                                \
             robotId,                                                                  \
-            getRobotClientID(robotId));                                               \
+            /*getRobotClientID(robotId));*/                                               \
+            107); \
         graphicMsg->crc16 = algorithms::calculateCRC16(                               \
             reinterpret_cast<uint8_t*>(graphicMsg),                                   \
             sizeof(*graphicMsg) - sizeof(graphicMsg->crc16));                         \
@@ -377,15 +379,15 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
 // @todo create uart send method to reduce massive amounts of boilerplate and complexity
 modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     Tx::RobotToRobotMessage* robotToRobotMsg,
-    uint16_t msgId,
+    uint16_t contentId,
     RobotId receiverId)
 {
     hah = true;
     RF_BEGIN(6);
 
-    if (msgId < 0x0200 || msgId >= 0x02ff)
+    if (contentId < 0x0200 || contentId >= 0x02ff)
     {
-        RAISE_ERROR(drivers, "invalid msgId not betweene [0x200, 0x2ff)");
+        RAISE_ERROR(drivers, "invalid contentId not betweene [0x200, 0x2ff)");
         RF_RETURN_1();
     }
 
@@ -396,19 +398,20 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
 
     RefSerialTransmitter::configFrameHeader(                                      
         &robotToRobotMsg->frameHeader,                                                 
-        sizeof(robotToRobotMsg->data) + sizeof(robotToRobotMsg->interactiveHeader));    
-                                                 
+        sizeof(robotToRobotMsg->graphicData) + sizeof(robotToRobotMsg->interactiveHeader));
+
     robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;     
 
     RefSerialTransmitter::configInteractiveHeader(                                
         &robotToRobotMsg->interactiveHeader,                                           
-        msgId,                                                                
-        drivers->refSerial.getRobotData().robotId,             
-        static_cast<uint16_t>(RefSerialData::RobotId::BLUE_SENTINEL));     
+        contentId,
+        drivers->refSerial.getRobotData().robotId,
+        static_cast<uint16_t>(receiverId));  
+        // 107);   
 
-    robotToRobotMsg->crc16 = algorithms::calculateCRC16(                               
-        reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
-        sizeof(robotToRobotMsg->frameHeader) + sizeof(robotToRobotMsg->cmdId) + sizeof(robotToRobotMsg->interactiveHeader) + sizeof(robotToRobotMsg->data));
+    robotToRobotMsg->crc16 = algorithms::calculateCRC16(
+        reinterpret_cast<uint8_t*>(robotToRobotMsg),
+        sizeof(*robotToRobotMsg) - sizeof(robotToRobotMsg->crc16));
                                                                         
     drivers->refSerial.acquireTransmissionSemaphore();   
 
