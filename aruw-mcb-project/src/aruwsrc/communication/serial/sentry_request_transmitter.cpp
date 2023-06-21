@@ -41,7 +41,7 @@ bool SentryRequestTransmitter::send()
 
         if ((queuedMessageType & (1 << static_cast<uint8_t>(lastSentMessage))) != 0)
         {
-            robotToRobotMessage.graphicData = static_cast<uint8_t>(lastSentMessage);
+            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCrc16) = static_cast<uint8_t>(lastSentMessage);
 
             // TODO configure rest of message if required by message type, currently this is not
             // necessary
@@ -50,7 +50,8 @@ bool SentryRequestTransmitter::send()
                 &robotToRobotMessage,
                 SENTRY_REQUEST_ROBOT_ID,
                 drivers->refSerial.getRobotIdBasedOnCurrentRobotTeam(
-                    RefSerialData::RobotId::BLUE_SENTINEL)));
+                    RefSerialData::RobotId::BLUE_SENTINEL),
+                2));
 
             queuedMessageType &= ~(1 << static_cast<uint8_t>(lastSentMessage));
         }

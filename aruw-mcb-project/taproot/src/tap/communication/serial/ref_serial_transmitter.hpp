@@ -257,15 +257,16 @@ public:
         bool sendMsg = true);
     ///@}
 
+    /**
+     * @todo doc
+     */
     mockable modm::ResumableResult<void> sendRobotToRobotMsg(
         Tx::RobotToRobotMessage* robotToRobotMsg,
         uint16_t msgId,
-        RobotId receiverId);
+        RobotId receiverId,
+        uint16_t dataLen);
 
 private:
-    bool hah = false;
-    // Tx::Graphic2Message graphicMsg;
-    // Tx::RobotToRobotMessage robotToRobotMsg;
     tap::Drivers* drivers;
     tap::arch::MilliTimeout delayTimer;
     Tx::DeleteGraphicLayerMessage deleteGraphicLayerMessage;
