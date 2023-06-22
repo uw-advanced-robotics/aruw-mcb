@@ -17,10 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_REQUEST_HANDLER_HPP_
-#define SENTRY_REQUEST_HANDLER_HPP_
+#ifndef SENTRY_STRATEGY_REQUEST_HANDLER_HPP_
+#define SENTRY_STRATEGY_REQUEST_HANDLER_HPP_
 
 #include "tap/communication/serial/ref_serial.hpp"
+#include "aruwsrc/control/governor/pause_command_governor.hpp"
 
 namespace aruwsrc
 {
@@ -29,6 +30,7 @@ class Drivers;
 
 namespace aruwsrc::communication::serial
 {
+// @todo docs
 /**
  * Handler that decodes requests made from other robots to the sentry robot. Various robot
  * commands may be sent via the handler. These include the following:
@@ -43,13 +45,13 @@ namespace aruwsrc::communication::serial
  * - byte 1: message type
  * - byte 2-n: message if the message type requires a message
  */
-class SentryRequestHandler
+class SentryStrategyRequestHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
 public:
     using MessageReceivedCallback = void (*)();
 
-    SentryRequestHandler(tap::Drivers *drivers);
+    SentryStrategyRequestHandler(tap::Drivers *drivers);
 
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
@@ -81,6 +83,22 @@ private:
     MessageReceivedCallback goToEnemyBaseHandler = nullptr;
     MessageReceivedCallback goToSupplierZoneHandler = nullptr;
 };
+
+// @todo move
+// @todo ad hoc
+class SentryHoldFireRequestHandler
+    : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
+{
+public:
+    using MessageReceivedCallback = void (*)();
+
+    SentryHoldFireRequestHandler(PauseCommandGovernor &agitatorPauseGovernor);
+
+    void operator()(
+        const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
+private:
+    PauseCommandGovernor &agitatorPauseGovernor;
+};
 }  // namespace aruwsrc::communication::serial
 
-#endif  // SENTRY_REQUEST_HANDLER_HPP_
+#endif  // SENTRY_STRATEGY_REQUEST_HANDLER_HPP_

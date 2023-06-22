@@ -374,7 +374,7 @@ void VisionCoprocessor::sendRefereeWarning()
     }
 }
 
-void VisionCoprocessor::sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType strategy) {
+void VisionCoprocessor::sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest strategy) {
     DJISerial::SerialMessage<1> motionStrategyMessage;
     motionStrategyMessage.messageType = CV_MESSAGE_TYPES_MOTION_STRATEGY;
     motionStrategyMessage.data[0] = static_cast<uint8_t>(strategy);

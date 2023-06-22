@@ -51,12 +51,14 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
-        CvOnTargetGovernorMode mode)
+        CvOnTargetGovernorMode mode,
+        uint8_t turretId)  // @todo enummmm
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand),
           launchTimer(launchTimer),
-          mode(mode)
+          mode(mode),
+          turretId(turretId)
     {
     }
 
@@ -85,8 +87,8 @@ public:
      */
     mockable bool inShotTimingMode() const
     {
-        bool gating = launchTimer.getCurrentLaunchInclination(0) ==  // @todo BADBADBADBADBADBADBAD
-                      AutoAimLaunchTimer::LaunchInclination::UNGATED;
+        bool gating = (launchTimer.getCurrentLaunchInclination(turretId) ==  // @todo BADBADBADBADBADBADBAD
+                      AutoAimLaunchTimer::LaunchInclination::UNGATED);
         return isGovernorGating() && !gating;
     }
 
@@ -140,6 +142,7 @@ private:
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
     bool enabled = true;
+    uint8_t turretId;
 };
 }  // namespace aruwsrc::control::governor
 

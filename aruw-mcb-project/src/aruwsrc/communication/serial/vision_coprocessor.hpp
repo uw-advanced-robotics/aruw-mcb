@@ -76,6 +76,7 @@ public:
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
 #endif
 
+    // @todo move elsewhere
     enum class FireRate : uint8_t
     {
         ZERO = 0,
@@ -293,7 +294,7 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
-    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType strategy);
+    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest strategy);
     // static inline void handleTimeSyncRequest()
     // {
     //     visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();

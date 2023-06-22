@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_request_handler.hpp"
+#include "sentry_strategy_request_handler.hpp"
 
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -26,36 +26,36 @@
 
 namespace aruwsrc::communication::serial
 {
-SentryRequestHandler::SentryRequestHandler(tap::Drivers *drivers) : drivers(drivers) {}
+SentryStrategyRequestHandler::SentryStrategyRequestHandler(tap::Drivers *drivers) : drivers(drivers) {}
 
-void SentryRequestHandler::operator()(
+void SentryStrategyRequestHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     // The message type we sent came directly after the interactive header
-    SentryRequestMessageType type = static_cast<SentryRequestMessageType>(
+    SentryStrategyRequest type = static_cast<SentryStrategyRequest>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     switch (type)
     {
-        case SentryRequestMessageType::NONE:
+        case SentryStrategyRequest::NONE:
             if (noStrategyHandler != nullptr)
             {
                 noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::GO_TO_FRIENDLY_BASE:
+        case SentryStrategyRequest::GO_TO_FRIENDLY_BASE:
             if (goToFriendlyBaseHandler != nullptr)
             {
                 goToFriendlyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::GO_TO_ENEMY_BASE:
+        case SentryStrategyRequest::GO_TO_ENEMY_BASE:
             if (goToEnemyBaseHandler != nullptr)
             {
                 goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::GO_TO_SUPPLIER_ZONE:
+        case SentryStrategyRequest::GO_TO_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
                 goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
@@ -65,5 +65,14 @@ void SentryRequestHandler::operator()(
             RAISE_ERROR(drivers, "invalid message sentry request message type");
             break;
     }
+}
+
+SentryHoldFireRequestHandler::SentryHoldFireRequestHandler(PauseCommandGovernor& agitatorPauseGovernor)
+    : agitatorPauseGovernor(agitatorPauseGovernor) {}
+
+void SentryHoldFireRequestHandler::operator()(
+    const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
+{
+    agitatorPauseGovernor.initiatePause();
 }
 }  // namespace aruwsrc::communication::serial

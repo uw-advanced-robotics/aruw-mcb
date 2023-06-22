@@ -25,12 +25,11 @@
 namespace aruwsrc::communication::serial
 {
 
-// @todo: check
-static constexpr uint16_t SENTRY_REQUEST_ROBOT_ID = 0x200;
+static constexpr uint16_t SENTRY_STRATEGY_REQUEST_ID = 0x200;
 
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
-enum class SentryRequestMessageType : uint8_t
+enum class SentryStrategyRequest : uint8_t
 {
     NONE = 0,
     GO_TO_FRIENDLY_BASE,
@@ -39,6 +38,9 @@ enum class SentryRequestMessageType : uint8_t
     HOLD_FIRE,
     NUM_MESSAGE_TYPES,
 };
+
+static constexpr uint16_t SENTRY_HOLD_FIRE_REQUEST_ID = 0x202;
+
 }  // namespace aruwsrc::communication::serial
 
 #endif  //  SENTRY_REQUEST_MESSAGE_TYPES_HPP_

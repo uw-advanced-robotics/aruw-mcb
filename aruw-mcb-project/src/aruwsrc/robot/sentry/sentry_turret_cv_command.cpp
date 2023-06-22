@@ -30,6 +30,7 @@
 
 #include "sentry_turret_cv_command.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
 
@@ -212,8 +213,8 @@ void SentryTurretCVCommand::execute()
                 scanDir =  SCAN_COUNTER_CLOCKWISE; // increases angle
 
             majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE * scanDir, 0.0f, M_TWOPI);
-            // lowPassFilter(majorSetpoint, majorScanValue, SCAN_LOW_PASS_ALPHA);
-            majorSetpoint = majorScanValue.getValue();
+            majorSetpoint = lowPassFilter(majorSetpoint, majorScanValue.getValue(), SCAN_LOW_PASS_ALPHA);
+            // majorSetpoint = majorScanValue.getValue();
             girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             malewifePitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             girlbossYawSetpoint = SCAN_GIRLBOSS_YAW;

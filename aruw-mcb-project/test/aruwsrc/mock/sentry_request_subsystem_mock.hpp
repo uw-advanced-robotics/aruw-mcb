@@ -32,7 +32,7 @@ public:
     SentryRequestSubsystemMock(tap::Drivers *drivers);
     ~SentryRequestSubsystemMock();
 
-    MOCK_METHOD(void, queueRequest, (communication::serial::SentryRequestMessageType), (override));
+    MOCK_METHOD(void, queueRequest, (communication::serial::SentryStrategyRequest), (override));
 };
 }  // namespace aruwsrc::mock
 

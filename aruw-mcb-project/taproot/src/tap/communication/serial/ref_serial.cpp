@@ -124,12 +124,9 @@ void RefSerial::messageReceiveCallback(const ReceivedSerialMessage& completeMess
         case REF_MESSAGE_TYPE_CUSTOM_DATA:
         {
             handleRobotToRobotCommunication(completeMessage);
-            hey = true;
             break;
         }
         default:
-            hai = true;
-            har = completeMessage.messageType;
             break;
     }
 }

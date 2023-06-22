@@ -78,6 +78,7 @@
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 // #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 // #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
@@ -90,7 +91,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_request_handler.hpp"
+#include "aruwsrc/robot/sentry/sentry_strategy_request_handler.hpp"
 #include "aruwsrc/robot/sentry/sentry_request_message_types.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_launcher_constants.hpp"
 
@@ -133,7 +134,7 @@ namespace sentry_control
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
+aruwsrc::communication::serial::SentryStrategyRequestHandler sentryStrategyRequestHandler(drivers());
 
 /* define swerve motors --------------------------------------------------------*/
 
@@ -450,21 +451,16 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 
 // callbacks the sentry runs when receiving a message
 void sendNoMotionStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::NONE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::NONE); 
 }
 void sendGoToFriendlyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_FRIENDLY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_FRIENDLY_BASE); 
 }
 void sendGoToEnemyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_ENEMY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_BASE); 
 }
 void sendGoToSupplierZoneStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_SUPPLIER_ZONE); 
-}
-
-// callback for when sentry receives a hold fire message from another robot
-void holdFire() {
-
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_SUPPLIER_ZONE); 
 }
 
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
@@ -564,6 +560,12 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     odometrySubsystem,
     aruwsrc::sentry::chassis::beybladeConfig);
 
+// general shooting ===================================
+
+PauseCommandGovernor holdFireGovernor(10000);
+
+aruwsrc::communication::serial::SentryHoldFireRequestHandler sentryHoldFireRequestHandler(holdFireGovernor);
+
 // girlboss shooting ======================
 
 // spin friction wheels commands
@@ -626,7 +628,7 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlboss::turretID);
 
-GovernorLimitedCommand<5> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<5> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&girlbossAgitator},
     girlbossRotateAndUnjamAgitator,
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
@@ -703,7 +705,7 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorMalewife(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     malewife::turretID);
 
-GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&malewifeAgitator},
     malewifeRotateAndUnjamAgitator,
     {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
@@ -743,7 +745,7 @@ HoldCommandMapping leftSwitchDown(
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&girlbossRotateAndUnjamAgitatorWithHeatLimiting},
+    {&girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting, &malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
@@ -813,13 +815,16 @@ void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     // @todo does not belong here
-    sentryRequestHandler.attachNoStrategyHandler(&sendNoMotionStrategy);
-    sentryRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
-    sentryRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
-    sentryRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
+    sentryStrategyRequestHandler.attachNoStrategyHandler(&sendNoMotionStrategy);
+    sentryStrategyRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
+    sentryStrategyRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
+    sentryStrategyRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
     drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
-        &sentryRequestHandler);
+        aruwsrc::communication::serial::SENTRY_STRATEGY_REQUEST_ID,
+        &sentryStrategyRequestHandler);
+    drivers->refSerial.attachRobotToRobotMessageHandler(
+        aruwsrc::communication::serial::SENTRY_HOLD_FIRE_REQUEST_ID,
+        &sentryHoldFireRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
