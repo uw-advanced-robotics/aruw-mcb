@@ -169,6 +169,9 @@ public:
     }
 
 private:
+    bool hey = false;
+    bool hai = false;
+    uint16_t har = 0;
     Rx::RobotData robotData;
     Rx::GameData gameData;
     modm::BoundedDeque<Rx::DamageEvent, DPS_TRACKER_DEQUE_SIZE> receivedDpsTracker;

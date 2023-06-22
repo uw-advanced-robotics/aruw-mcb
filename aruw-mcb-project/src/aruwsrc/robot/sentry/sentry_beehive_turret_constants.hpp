@@ -79,9 +79,21 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 3'000.0f,
+    .kp = 2'500.0f,
     .ki = 1.0f,
     .kd = -37'000.0f,
+    .maxICumulative = 500.0f,
+    .maxOutput = 25'000.0f,
+    .tRDerivativeKalman = 40.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_YAW_PID_CONFIG = {
+    .kp = 70.0f,
+    .ki = 0.3f,
+    .kd = -1'000.0f,
     .maxICumulative = 500.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 40.0f,

@@ -95,7 +95,7 @@ void SentryImuCalibrateCommand::initialize()
     // initialize major
     if (turretMajor != nullptr) {
         turretMajor->yawMotor.setChassisFrameSetpoint(
-            turretMajor->yawMotor.getConfig().startAngle);
+            turretMajor->yawMotor.getConfig().startAngle);  // @todo really sus interdependency with imu drift because assumes world controller
             // also need to take in major yaw controller
             turretMajorController->initialize();
     }
@@ -109,7 +109,6 @@ static inline bool turretReachedCenterAndNotMoving(
     turret::TurretSubsystem *turret,
     bool ignorePitch)
 {
-    return true;
     return compareFloatClose(
                0.0f,
                turret->yawMotor.getChassisFrameVelocity(),

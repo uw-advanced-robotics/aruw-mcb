@@ -374,29 +374,6 @@ void VisionCoprocessor::sendRefereeWarning()
     }
 }
 
-// @todo deprecated; remove
-// void VisionCoprocessor::sendTimeSyncMessage()
-// {
-//     uint32_t newRisingEdgeTime = risingEdgeTime;
-
-//     if (prevRisingEdgeTime != newRisingEdgeTime)
-//     {
-//         prevRisingEdgeTime = newRisingEdgeTime;
-
-//         DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
-
-//         timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
-
-//         *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
-//         *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
-//         timeSyncResponseMessage.setCRC16();
-
-//         drivers->uart.write(
-//             VISION_COPROCESSOR_TX_UART_PORT,
-//             reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-//             sizeof(timeSyncResponseMessage));
-//     }
-// }
 void VisionCoprocessor::sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType strategy) {
     DJISerial::SerialMessage<1> motionStrategyMessage;
     motionStrategyMessage.messageType = CV_MESSAGE_TYPES_MOTION_STRATEGY;

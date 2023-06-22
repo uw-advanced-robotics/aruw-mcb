@@ -395,7 +395,7 @@ algorithms::ChassisFrameYawTurretController malewifeYawController(
 tap::algorithms::SmoothPid turretMajorYawPosPid(turretMajor::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
+algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  // @todo rename
     sentryTransforms.getWorldToChassis(),
     sentryDrive,
     turretMajor.yawMotor,
@@ -405,6 +405,10 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(
     turretMajorYawVelPid,
     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+
+algorithms::ChassisFrameYawTurretController chassisFrameTurretMajorYawController(
+    turretMajor.yawMotor,
+    turretMajor::CHASSIS_REL_YAW_PID_CONFIG);
 
 // Otto ballistics solver --------------------------------------------------------------------
 
@@ -737,7 +741,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 
 
-PressCommandMapping rightSwitchMid(
+HoldCommandMapping rightSwitchMid(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
