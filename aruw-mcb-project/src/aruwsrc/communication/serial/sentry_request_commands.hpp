@@ -133,6 +133,34 @@ public:
 private:
     SentryRequestSubsystem &sub;
 };
+
+/**
+ * Tells the sentry to go to the supplier zone
+ * This command executes once when schedule
+ */
+class HoldFireCommand : public tap::control::Command
+{
+public:
+    HoldFireCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry hold fire command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::HOLD_FIRE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
 }  // namespace aruwsrc::communication::serial
+
 
 #endif  //  SENTRY_REQUEST_COMMANDS_HPP_

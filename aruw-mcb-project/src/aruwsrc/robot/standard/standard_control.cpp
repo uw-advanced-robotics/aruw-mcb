@@ -187,6 +187,8 @@ aruwsrc::communication::serial::GoToEnemyBaseCommand sentrySendGoToEnemyBase(
     sentryRequestSubsystem);
 aruwsrc::communication::serial::GoToSupplierZoneCommand sentrySendGoToSupplierZone(
     sentryRequestSubsystem);
+aruwsrc::communication::serial::HoldFireCommand sentryHoldFireCommand(
+    sentryRequestSubsystem); // TODO: this is unmapped rn
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
