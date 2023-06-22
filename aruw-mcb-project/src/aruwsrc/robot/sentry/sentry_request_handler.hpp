@@ -48,7 +48,6 @@ class SentryRequestHandler
 {
 public:
     using MessageReceivedCallback = void (*)();
-    // using MessageReceivedCallback = void (*)(SentryMotionStrategyMessages);
 
     SentryRequestHandler(tap::Drivers *drivers);
 

@@ -198,7 +198,20 @@ void SentryTurretCVCommand::execute()
         {
             // Scan
             if (!scanning) { enterScanMode(majorSetpoint); }
-            majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE, 0.0f, M_TWOPI);
+
+            // scan logic: start at some default, scan 180deg clockwise, change direction
+            // scan 180 ccw, change, etc.
+
+
+            // possibly use some ramping when switching directions,
+            // but we're pretty slow so who cares
+            float v = majorScanValue.getValue();
+            if (v >= CCW_TO_CW_WRAP_VALUE)
+                scanDir = SCAN_CLOCKWISE; // decreases angle
+            else if (v <= CW_TO_CCW_WRAP_VALUE)
+                scanDir =  SCAN_COUNTER_CLOCKWISE; // increases angle
+
+            majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE * scanDir, 0.0f, M_TWOPI);
             // lowPassFilter(majorSetpoint, majorScanValue, SCAN_LOW_PASS_ALPHA);
             majorSetpoint = majorScanValue.getValue();
             girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;

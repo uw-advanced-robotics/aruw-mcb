@@ -447,6 +447,8 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 // FIXME: Quote Derek: there's an issue to refactor the controller into the subsystem!!
 
 /* define commands ----------------------------------------------------------*/
+
+// callbacks the sentry runs when receiving a message
 void sendNoMotionStrategy() { 
     drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::NONE); 
 }
@@ -458,6 +460,11 @@ void sendGoToEnemyBaseStrategy() {
 }
 void sendGoToSupplierZoneStrategy() { 
     drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestMessageType::GO_TO_SUPPLIER_ZONE); 
+}
+
+// callback for when sentry receives a hold fire message from another robot
+void holdFire() {
+
 }
 
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
@@ -794,6 +801,9 @@ void setDefaultSentryCommands(Drivers *)
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
+
+
+    // todo: re-enable to have them spin!!!
     // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
     // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
 }
