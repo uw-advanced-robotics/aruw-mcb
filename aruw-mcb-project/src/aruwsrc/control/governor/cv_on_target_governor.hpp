@@ -87,7 +87,7 @@ public:
      */
     mockable bool inShotTimingMode() const
     {
-        bool gating = (launchTimer.getCurrentLaunchInclination(turretId) ==  // @todo BADBADBADBADBADBADBAD
+        bool gating = (launchTimer.getCurrentLaunchInclination(turretId) ==
                       AutoAimLaunchTimer::LaunchInclination::UNGATED);
         return isGovernorGating() && !gating;
     }
@@ -111,7 +111,7 @@ public:
     mockable bool isGateSatisfied()
     {
         auto autoLaunchInclination =
-            launchTimer.getCurrentLaunchInclination(0);  // @todo BADBADBADBADBADBAD
+            launchTimer.getCurrentLaunchInclination(turretId);
         switch (autoLaunchInclination)
         {
             case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:

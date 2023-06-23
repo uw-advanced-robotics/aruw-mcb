@@ -316,8 +316,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheelsGirlboss(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_GIRLBOSS,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_GIRLBOSS,
         girlboss::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         girlboss::barrelID);
@@ -326,8 +326,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheelsMalewife(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID,
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_MALEWIFE,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_MALEWIFE,
         malewife::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         malewife::barrelID);  // @todo idk what they actually are
@@ -567,6 +567,13 @@ PauseCommandGovernor holdFireGovernor(10000);
 aruwsrc::communication::serial::SentryHoldFireRequestHandler sentryHoldFireRequestHandler(holdFireGovernor);
 
 // girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
+// girlboss shooting ======================
 
 // spin friction wheels commands
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand girlbossFrictionWheelSpinCommand(
@@ -628,12 +635,15 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlboss::turretID);
 
+GovernorLimitedCommand<2> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+
 GovernorLimitedCommand<5> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&girlbossAgitator},
     girlbossRotateAndUnjamAgitator,
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
 
 // malewife shooting ======================
 // malewife shooting ======================
@@ -705,60 +715,83 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorMalewife(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     malewife::turretID);
 
+GovernorLimitedCommand<4> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
+    {&malewifeAgitator},
+    malewifeRotateAndUnjamAgitator,
+    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
+
 GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&malewifeAgitator},
     malewifeRotateAndUnjamAgitator,
     {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
-    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
-
-// void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage();
-// }
 
 // void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
 
-// void pauseProjectileLaunchMessageHandler()
-// {
-// turretMinorGirlboss.pauseCommandGovernor.initiatePause();
-// turretMinorMalewife.pauseCommandGovernor.initiatePause();
-// }
-
 /* define command mappings --------------------------------------------------*/
 
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    // {&sentryTurretCVCommand},
-    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&turretMinorGirlbossControlCommand,
-     &turretMinorMalewifeControlCommand,
-     &turretMajorControlCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+// @todo this whole thing looks scuffed but that's because there are a lot of workarounds for taproot's command mapping system
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+// Manual Mode (left down)
 
-
-HoldRepeatCommandMapping rightSwitchUp(
-    drivers(),
-    {&girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting, &malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
-
-
-HoldCommandMapping rightSwitchMid(
+HoldCommandMapping manualRightSwitchUp(
     drivers(),
     {&imuCalibrateCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
-HoldCommandMapping rightSwitchDown(
+// Auto Mode (left mid)
+
+HoldCommandMapping autoRightSwitchDown(
     drivers(),
-    {&stopGirlBossFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&autoNavBeybladeCommand,
+     &turretMajorControlCommand,
+     &turretMinorGirlbossControlCommand,
+     &turretMinorMalewifeControlCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+HoldCommandMapping autoRightSwitchMid(
+    drivers(),
+    {&sentryTurretCVCommand, &chassisDriveCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+HoldCommandMapping autoRightSwitchUp(
+    drivers(),
+    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+// Shoot Mode (left up)
+
+HoldCommandMapping shoot(
+    drivers(),
+    {&girlbossFrictionWheelSpinCommand, &malewifeFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+HoldRepeatCommandMapping shootRightSwitchDownAgitator(
+    drivers(),
+    {&girlbossRotateAndUnjamAgitatorWithHeatLimiting, &malewifeRotateAndUnjamAgitatorWithHeatLimiting},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
+    true);
+
+HoldCommandMapping shootRightSwitchMid(
+    drivers(),
+    {&sentryTurretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+
+HoldCommandMapping shootRightSwitchUp(
+    drivers(),
+    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+HoldRepeatCommandMapping shootRightSwitchMidAgitator(
+    drivers(),
+    {&girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting, &malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID),
+    true);
+
+HoldRepeatCommandMapping shootRightSwitchUpAgitator(
+    drivers(),
+    {&girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting, &malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
 bool isInitialized = false;
 
@@ -800,14 +833,13 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
+    sentryDrive.setDefaultCommand(&chassisDriveCommand);
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
-    turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);
+    turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);  // @todo https://gitlab.com/aruw/controls/taproot/-/issues/215
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);
 
-
-    // todo: re-enable to have them spin!!!
-    // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
-    // frictionWheelsGirlboss.setDefaultCommand(&girlbossFrictionWheelSpinCommand);
+    frictionWheelsGirlboss.setDefaultCommand(&stopGirlBossFrictionWheelSpinCommand);
+    frictionWheelsMalewife.setDefaultCommand(&stopMaleWifeFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -830,15 +862,16 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    // drivers->commandMapper.addMap(&rightSwitchDown);
-    // drivers->commandMapper.addMap(&rightSwitchMid);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchMid);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    // drivers->commandMapper.addMap(&rightSwitchUpFriction);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchMid);
+    drivers->commandMapper.addMap(&manualRightSwitchUp);
+    drivers->commandMapper.addMap(&autoRightSwitchMid);  // @todo: https://gitlab.com/aruw/controls/taproot/-/issues/219
+    drivers->commandMapper.addMap(&autoRightSwitchUp);
+    drivers->commandMapper.addMap(&autoRightSwitchDown);
+    drivers->commandMapper.addMap(&shootRightSwitchUpAgitator);
+    drivers->commandMapper.addMap(&shootRightSwitchUp);
+    drivers->commandMapper.addMap(&shootRightSwitchMidAgitator);
+    drivers->commandMapper.addMap(&shootRightSwitchMid);
+    drivers->commandMapper.addMap(&shootRightSwitchDownAgitator);
+    drivers->commandMapper.addMap(&shoot);
 }
 }  // namespace sentry_control
 

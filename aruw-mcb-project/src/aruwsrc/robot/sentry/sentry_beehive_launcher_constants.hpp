@@ -31,11 +31,11 @@ namespace aruwsrc::robot::sentry::launcher
 {
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
-static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
-
-static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+// @todo this is not the greatest
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID_GIRLBOSS = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID_GIRLBOSS = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID_MALEWIFE = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID_MALEWIFE = tap::motor::MOTOR1;
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;

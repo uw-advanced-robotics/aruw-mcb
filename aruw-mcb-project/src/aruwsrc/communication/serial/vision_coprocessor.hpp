@@ -353,7 +353,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0, false};
 
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 

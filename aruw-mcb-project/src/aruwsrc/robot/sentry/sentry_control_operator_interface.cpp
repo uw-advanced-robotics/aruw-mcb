@@ -30,19 +30,14 @@ namespace aruwsrc
 namespace control::sentry
 {
 
- bool SentryControlOperatorInterface::isAutoDriveMode() 
- {
-    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP;
- }
-
 bool SentryControlOperatorInterface::isTurretControlMode() 
  {
-    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID;
+    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN && drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID) || (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID && drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN);
  }
 
 bool SentryControlOperatorInterface::isDriveMode() 
  {
-    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN;
+    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN && drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN) || (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID && drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID);
  }
 
  /**
@@ -73,7 +68,7 @@ static inline void applyAccelerationToRamp(
 
 float SentryControlOperatorInterface::getChassisXVelocity()
 {      
-    if (!isDriveMode() && !isAutoDriveMode()) return DEFAULT_CHASSIS_X_VELOCITY;
+    if (!isDriveMode()) return DEFAULT_CHASSIS_X_VELOCITY;
     
     // Set dt and previous time
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
@@ -108,7 +103,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
 
 float SentryControlOperatorInterface::getChassisYVelocity()
 {
-    if (!isDriveMode() && !isAutoDriveMode()) return DEFAULT_CHASSIS_Y_VELOCITY;
+    if (!isDriveMode()) return DEFAULT_CHASSIS_Y_VELOCITY;
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
