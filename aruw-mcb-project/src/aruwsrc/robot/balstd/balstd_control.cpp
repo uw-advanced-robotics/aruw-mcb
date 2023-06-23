@@ -102,9 +102,13 @@ using namespace tap::communication::serial;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
 {
     return drivers()->turretMCBCanCommBus1;
+}
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
+{
+    return drivers()->turretMCBCanCommBus2;
 }
 
 namespace balstd_control
@@ -179,7 +183,7 @@ aruwsrc::control::turret::StandardTurretSubsystem turret(
     &yawMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    &getTurretMCBCanComm1());
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -188,7 +192,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm1(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 VelocityAgitatorSubsystem agitator(
@@ -198,7 +202,7 @@ VelocityAgitatorSubsystem agitator(
 
 aruwsrc::chassis::BalancingChassisSubsystem chassis(
     drivers(),
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm2(),
     turret.pitchMotor,
     turret.yawMotor,
     &fiveBarLeft,
@@ -250,13 +254,13 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidVc(
     world_rel_turret_imu::PITCH_VEL_PID_AUTO_AIM_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm1(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm1(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
     worldFramePitchTurretImuVelPid);
@@ -265,7 +269,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm1(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
@@ -275,7 +279,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm1(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
@@ -356,7 +360,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
 aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm1(),
         &turret,
         &chassisFrameYawTurretController,
         &chassisFramePitchTurretController,

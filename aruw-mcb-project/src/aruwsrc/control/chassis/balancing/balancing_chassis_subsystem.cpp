@@ -148,49 +148,57 @@ void BalancingChassisSubsystem::setSafeBehavior()
 void BalancingChassisSubsystem::getAngles(uint32_t dt)
 {
     // Value from [0, 2Pi]
-    float currentTurretPitch = pitchMotor.getChassisFrameMeasuredAngle().getValue() -
-                               aruwsrc::control::turret::PITCH_MOTOR_CONFIG.startAngle -
-                               aruwsrc::control::turret::CHASSIS_FALL_OVER_OFFSET;
-    if (currentTurretPitch > M_PI) currentTurretPitch -= M_TWOPI;
-    float currentTurretYaw = yawMotor.getChassisFrameMeasuredAngle().getValue();
-    if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
+    // float currentTurretPitch = pitchMotor.getChassisFrameMeasuredAngle().getValue() -
+    //                            aruwsrc::control::turret::PITCH_MOTOR_CONFIG.startAngle -
+    //                            aruwsrc::control::turret::CHASSIS_FALL_OVER_OFFSET;
+    // if (currentTurretPitch > M_PI) currentTurretPitch -= M_TWOPI;
+    // float currentTurretYaw = yawMotor.getChassisFrameMeasuredAngle().getValue();
+    // if (currentTurretYaw > M_PI) currentTurretYaw -= M_TWOPI;
 
-    float worldRelativeTurretPitch = turretMCB.getPitch();
-    float worldRelativeTurretRoll = turretMCB.getRoll();
-    float worldRelativeTurretYaw = turretMCB.getYaw();
+    // float worldRelativeTurretPitch = turretMCB.getPitch();
+    // float worldRelativeTurretRoll = turretMCB.getRoll();
+    // float worldRelativeTurretYaw = turretMCB.getYaw();
 
-    tap::algorithms::transforms::Transform<World, Turret> worldToTurret =
-        tap::algorithms::transforms::Transform<World, Turret>(
-            0,
-            0,
-            0,
-            worldRelativeTurretRoll,
-            worldRelativeTurretPitch,
-            worldRelativeTurretYaw);
+    // tap::algorithms::transforms::Transform<World, Turret> worldToTurret =
+    //     tap::algorithms::transforms::Transform<World, Turret>(
+    //         0,
+    //         0,
+    //         0,
+    //         worldRelativeTurretRoll,
+    //         worldRelativeTurretPitch,
+    //         worldRelativeTurretYaw);
 
-    // Define the transformation from Turret to Chassis based on turret encoders
-    chassisToTurret.updateRotation(0, currentTurretPitch, currentTurretYaw);
-    tap::algorithms::transforms::Transform<World, Chassis> worldToChassis =
-        tap::algorithms::transforms::compose(worldToTurret, chassisToTurret.getInverse());
+    // // Define the transformation from Turret to Chassis based on turret encoders
+    // chassisToTurret.updateRotation(0, currentTurretPitch, currentTurretYaw);
+    // tap::algorithms::transforms::Transform<World, Chassis> worldToChassis =
+    //     tap::algorithms::transforms::compose(worldToTurret, chassisToTurret.getInverse());
 
-    roll = worldToChassis.getRoll();
-    pitch = worldToChassis.getPitch();
-    yaw = worldToChassis.getYaw();
+    // roll = worldToChassis.getRoll();
+    // pitch = worldToChassis.getPitch();
+    // yaw = worldToChassis.getYaw();
 
-    float rollRateNew = (roll - rollPrev) * 1'000 / dt;
-    rollPrev = roll;
-    rollRate = lowPassFilter(rollRate, rollRateNew, .1);
+    // float rollRateNew = (roll - rollPrev) * 1'000 / dt;
+    // rollPrev = roll;
+    // rollRate = lowPassFilter(rollRate, rollRateNew, .1);
 
-    float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
-    pitchPrev = pitch;
-    pitchRate = lowPassFilter(pitchRate, pitchRateNew, .1);
+    // float pitchRateNew = (pitch - pitchPrev) * 1'000 / dt;
+    // pitchPrev = pitch;
+    // pitchRate = lowPassFilter(pitchRate, pitchRateNew, .1);
 
-    // Unwrap the yaw. We can safely assume that yaw won't change by half a rotation in 2ms.
-    if (yaw - yawPrev > M_PI) yawPrev += M_TWOPI;
-    if (yawPrev - yaw > M_PI) yawPrev -= M_TWOPI;
-    float yawRateNew = (yaw - yawPrev) * 1000.0f / dt;
-    yawPrev = yaw;
-    yawRate = lowPassFilter(yawRate, yawRateNew, .1);
+    // // Unwrap the yaw. We can safely assume that yaw won't change by half a rotation in 2ms.
+    // if (yaw - yawPrev > M_PI) yawPrev += M_TWOPI;
+    // if (yawPrev - yaw > M_PI) yawPrev -= M_TWOPI;
+    // float yawRateNew = (yaw - yawPrev) * 1000.0f / dt;
+    // yawPrev = yaw;
+    // yawRate = lowPassFilter(yawRate, yawRateNew, .1);
+
+    // The mcb is upside-down
+    yaw = -turretMCB.getYaw();
+    yawRate = lowPassFilter(yawRate, -turretMCB.getYawVelocity(), .5);
+    pitch = -turretMCB.getPitch();
+    pitchRate = lowPassFilter(pitchRate, -turretMCB.getPitchVelocity(), .5);
+    roll = ContiguousFloat(M_PI - turretMCB.getRoll(), -M_PI, M_PI).getValue();
+    rollRate = lowPassFilter(rollRate, -turretMCB.getRollVelocity(), .5);
 }
 
 void BalancingChassisSubsystem::computeState(uint32_t dt)
@@ -229,12 +237,12 @@ void BalancingChassisSubsystem::computeState(uint32_t dt)
     float xRight = fivebarRight->getCurrentPosition().getX() * cos(pitch) +
                    fivebarRight->getCurrentPosition().getY() * sin(pitch);
     // link angle in world-frame
-    tlLeft = lowPassFilter(tlLeft, atan2(xLeft, currentZLeft), .4);
-    tlRight = lowPassFilter(tlRight, atan2(xRight, currentZRight), .4);
+    tlLeft = lowPassFilter(tlLeft, atan2(xLeft, currentZLeft), .6);
+    tlRight = lowPassFilter(tlRight, atan2(xRight, currentZRight), .6);
     tl = (tlLeft + tlRight) / 2;
 
     float tlRateNew = (tl - tlPrev) * 1000 / dt;
-    tlRate = lowPassFilter(tlRate, tlRateNew, .6);
+    tlRate = lowPassFilter(tlRate, tlRateNew, .1);
     tlPrev = tl;
 
     desiredV = velocityRamper.getValue();
@@ -320,15 +328,22 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
 {
     // 1. Run LQR controller
     float stateData[6] = {
-        tl,
+        deadZone(tl, .0f),
         deadZone(tlRate, .1f),
         limitVal(currentX - desiredX, -2.0f, 2.0f),
-        currentV - desiredV,
+        limitVal(currentV - desiredV, -4.0f, 4.0f),
         -pitch,
-        -pitchRate,
+        deadZone(-pitchRate, .1f),
     };
     CMSISMat<6, 1> stateVector(stateData);
     CMSISMat<2, 6> LQR_K = LQR_K_SLOPE * currentZ + LQR_K_YINT;
+
+    int i = 0;
+    for (i = 0; i < 6; i++)
+    {
+        debug[i] = LQR_K.data[i+6] * stateVector.data[i];
+    }
+
     CMSISMat<2, 1> torques = -LQR_K * stateVector;
     wheelTorqueLeft = wheelTorqueRight = limitVal(torques.data[0] / 2, -2.0f, 2.0f);
     desiredLinkTorqueLeft = desiredLinkTorqueRight = limitVal(-torques.data[1] / 2, -10.0f, 10.0f);
@@ -337,8 +352,22 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     float yawAdjustment = yawPid.runController(desiredR, yawRate, dt);
     float linkAngleAdjustment =
         linkAngleMismatchPid.runControllerDerivateError(tlRight - tlLeft, dt);
-    float legForce = heightPid.runControllerDerivateError(desiredZ - currentZ, dt);
     float rollAdjustment = rollPid.runController(-roll, rollRate, dt);
+
+    float legForceLeft = heightPidLeft.runControllerDerivateError(
+        limitVal(
+            desiredZ + rollAdjustment,
+            fivebarLeft->getDefaultPosition().getY(),
+            CHASSIS_HEIGHTS.second) -
+            currentZLeft,
+        dt);
+    float legForceRight = heightPidRight.runControllerDerivateError(
+        limitVal(
+            desiredZ - rollAdjustment,
+            fivebarLeft->getDefaultPosition().getY(),
+            CHASSIS_HEIGHTS.second) -
+            currentZRight,
+        dt);
     // 3. Superimpose
     float gravityFeedForward = ACCELERATION_GRAVITY * MASS_CHASSIS / 2 * cos(tl);
 
@@ -347,8 +376,8 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     desiredLinkTorqueRight += linkAngleAdjustment;
     desiredLinkTorqueLeft -= linkAngleAdjustment;
 
-    desiredLinkForceLeft = legForce + rollAdjustment + gravityFeedForward;
-    desiredLinkForceRight = legForce - rollAdjustment + gravityFeedForward;
+    desiredLinkForceLeft = legForceLeft + gravityFeedForward;
+    desiredLinkForceRight = legForceRight + gravityFeedForward;
 
     wheelTorqueRight += yawAdjustment;
     wheelTorqueLeft -= yawAdjustment;
@@ -357,6 +386,9 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     if (abs(pitch) > abs(FALLEN_ANGLE_THRESHOLD))
     {
         balancingState = FALLEN_MOVING;
+        desiredZRamper.setTarget(CHASSIS_HEIGHTS.first);
+        heightPidLeft.reset();
+        heightPidRight.reset();
     }
     // if (currentLinkForceLeft < FALLING_FORCE_THRESHOLD ||
     //     currentLinkForceRight < FALLING_FORCE_THRESHOLD)
@@ -431,13 +463,15 @@ void BalancingChassisSubsystem::updateJumping(uint32_t dt)
     // This is a little sussy, but we want to keep balancing while we jump.
     updateBalancing(dt);
     // override the force PID and yeet
-    heightPid.reset();
+    heightPidLeft.reset();
+    heightPidRight.reset();
     desiredLinkForceLeft = MASS_CHASSIS / 2 * ACCELERATION_GRAVITY * JUMP_GRAV_GAIN;
     desiredLinkForceRight = MASS_CHASSIS / 2 * ACCELERATION_GRAVITY * JUMP_GRAV_GAIN;
     if (jumpTimeout.isExpired())
     {
         balancingState = FALLING;
-        heightPid.reset();
+        heightPidLeft.reset();
+        heightPidRight.reset();
     }
     else
     {
@@ -449,13 +483,15 @@ void BalancingChassisSubsystem::updateFalling(uint32_t dt)
     wheelTorqueRight = wheelTorqueLeft = 0;
 
     desiredZRamper.setTarget((CHASSIS_HEIGHTS.getFirst() + CHASSIS_HEIGHTS.getSecond()) / 2);
-    float legForce = heightPid.runControllerDerivateError(desiredZ - currentZ, dt);
-    desiredLinkForceLeft = desiredLinkForceRight = legForce;
+    float legForceLeft = heightPidLeft.runControllerDerivateError(desiredZ - currentZLeft, dt);
+    desiredLinkForceLeft = legForceLeft;
+    float legForceRight = heightPidRight.runControllerDerivateError(desiredZ - currentZRight, dt);
+    desiredLinkForceRight = legForceRight;
 
     desiredLinkTorqueLeft = retractionAnglePid[0].runControllerDerivateError(0 - tlLeft, dt);
     desiredLinkTorqueRight = retractionAnglePid[1].runControllerDerivateError(0 - tlRight, dt);
 
-    if (compareFloatClose(legForce, 0, 20.0f))
+    if (compareFloatClose(legForceLeft, 0, 20.0f) || compareFloatClose(legForceRight, 0, 20.0f))
     {
         desiredZRamper.setTarget(CHASSIS_HEIGHTS.getFirst());
         balancingState = BALANCING;
@@ -472,13 +508,71 @@ void BalancingChassisSubsystem::fivebarController()
     CMSISMat<2, 1> leftF(leftFData);
     CMSISMat<2, 1> rightF(rightFData);
 
-    CMSISMat<2, 1> leftMotorTorque = VMC_JACOBIAN * leftF;
-    CMSISMat<2, 1> rightMotorTorque = VMC_JACOBIAN * rightF;
+    CMSISMat<2, 1> leftMotorTorque = getVMCJacobian(
+                                         fivebarLeft->getMotor1RelativePosition(),
+                                         fivebarLeft->getMotor2RelativePosition()) *
+                                     leftF;
+    CMSISMat<2, 1> rightMotorTorque = getVMCJacobian(
+                                          fivebarRight->getMotor1RelativePosition(),
+                                          fivebarRight->getMotor2RelativePosition()) *
+                                      rightF;
 
     fivebarLeft->getMotor1()->setDesiredOutput(1000 * leftMotorTorque.data[0]);
     fivebarLeft->getMotor2()->setDesiredOutput(1000 * leftMotorTorque.data[1]);
     fivebarRight->getMotor1()->setDesiredOutput(1000 * rightMotorTorque.data[0]);
     fivebarRight->getMotor2()->setDesiredOutput(1000 * rightMotorTorque.data[1]);
+}
+
+CMSISMat<2, 2> BalancingChassisSubsystem::getVMCJacobian(float t1, float t4)
+{
+    float j11Val = interpolateLinear2D(
+                       VMC_J11,
+                       FIVE_BAR_T1_MIN,
+                       FIVE_BAR_T1_MAX,
+                       FIVE_BAR_T1_DELTA,
+                       FIVE_BAR_T4_MIN,
+                       FIVE_BAR_T4_MAX,
+                       FIVE_BAR_T4_DELTA,
+                       t1,
+                       t4) /
+                   10000;
+    float j12Val = interpolateLinear2D(
+                       VMC_J21,
+                       FIVE_BAR_T1_MIN,
+                       FIVE_BAR_T1_MAX,
+                       FIVE_BAR_T1_DELTA,
+                       FIVE_BAR_T4_MIN,
+                       FIVE_BAR_T4_MAX,
+                       FIVE_BAR_T4_DELTA,
+                       t1,
+                       t4) /
+                   10000;
+    float j21Val = interpolateLinear2D(
+                       VMC_J12,
+                       FIVE_BAR_T1_MIN,
+                       FIVE_BAR_T1_MAX,
+                       FIVE_BAR_T1_DELTA,
+                       FIVE_BAR_T4_MIN,
+                       FIVE_BAR_T4_MAX,
+                       FIVE_BAR_T4_DELTA,
+                       t1,
+                       t4) /
+                   10000;
+    float j22Val = interpolateLinear2D(
+                       VMC_J22,
+                       FIVE_BAR_T1_MIN,
+                       FIVE_BAR_T1_MAX,
+                       FIVE_BAR_T1_DELTA,
+                       FIVE_BAR_T4_MIN,
+                       FIVE_BAR_T4_MAX,
+                       FIVE_BAR_T4_DELTA,
+                       t1,
+                       t4) /
+                   10000;
+
+    float data[4] = {j11Val, j12Val, j21Val, j22Val};
+
+    return CMSISMat<2, 2>(data);
 }
 
 void BalancingChassisSubsystem::airborneDetector()
@@ -487,14 +581,22 @@ void BalancingChassisSubsystem::airborneDetector()
         fivebarLeft->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT,
         fivebarLeft->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT};
     CMSISMat<2, 1> leftMotorTorques(dataLeft);
-    CMSISMat<2, 1> leftLinkForces = VMC_JACOBIAN_INV * leftMotorTorques;
+    CMSISMat<2, 1> leftLinkForces = getVMCJacobian(
+                                        fivebarLeft->getMotor1RelativePosition(),
+                                        fivebarLeft->getMotor2RelativePosition())
+                                        .inverse() *
+                                    leftMotorTorques;
 
     float dataRight[2] = {
         fivebarRight->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT,
         fivebarRight->getMotor1()->getTorque() / 100 * aruwsrc::motor::AK809_TORQUE_CONSTANT};
     CMSISMat<2, 1> rightMotorTorques(dataRight);
 
-    CMSISMat<2, 1> rightLinkForces = VMC_JACOBIAN_INV * rightMotorTorques;
+    CMSISMat<2, 1> rightLinkForces = getVMCJacobian(
+                                         fivebarRight->getMotor1RelativePosition(),
+                                         fivebarRight->getMotor2RelativePosition())
+                                         .inverse() *
+                                     rightMotorTorques;
     currentLinkForceLeft = leftLinkForces.data[0];
     currentLinkForceRight = rightLinkForces.data[0];
 }

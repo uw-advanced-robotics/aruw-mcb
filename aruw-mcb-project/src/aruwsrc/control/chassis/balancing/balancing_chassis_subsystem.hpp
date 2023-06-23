@@ -228,16 +228,16 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = 2.0;  // m/s/s
+    static constexpr float MAX_ACCELERATION = 1.5;  // m/s/s
 
     // Tunable constants related to the state transitions
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
     uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
     tap::arch::MilliTimeout balanceAttemptCooldown;
-    uint32_t BALANCE_ATTEMPT_COOLDOWN_DURATION = 1000;
+    uint32_t BALANCE_ATTEMPT_COOLDOWN_DURATION = 2000;
     bool standupEnable = true;
-    float STANDUP_TORQUE_GAIN = .4;
+    float STANDUP_TORQUE_GAIN = .3;
 
     float FALLING_FORCE_THRESHOLD = 40.0;  // Newtons
     float JUMP_GRAV_GAIN = 3.5f;
@@ -246,7 +246,7 @@ private:
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 4;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
 
     /**
      * Estimates the current state variables of the robot.
@@ -314,6 +314,9 @@ private:
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController();
 
+    // Uses lookup tables to get 
+    CMSISMat<2,2> getVMCJacobian(float t1, float t4);
+
     aruwsrc::can::TurretMCBCanComm& turretMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
@@ -332,13 +335,21 @@ private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     SmoothPid rollPid = SmoothPid(SmoothPidConfig{
-        .kp = 1000.0,
-        .kd = .0,
+        .kp = 1.5,
+        .kd = 0,
         .maxICumulative = 0.0,
-        .maxOutput = 50,
+        .maxOutput = .2,
     });
 
-    SmoothPid heightPid = SmoothPid(SmoothPidConfig{
+    SmoothPid heightPidLeft = SmoothPid(SmoothPidConfig{
+        .kp = 700,
+        .ki = 1,
+        .kd = -20000,
+        .maxICumulative = 100,
+        .maxOutput = 400,
+    });
+
+    SmoothPid heightPidRight = SmoothPid(SmoothPidConfig{
         .kp = 700,
         .ki = 1,
         .kd = -20000,
@@ -350,9 +361,9 @@ private:
         .kp = 500,
         .ki = .0,
         .kd = .0,
-        .maxICumulative = 2,
+        .maxICumulative = 0,
         .maxOutput = 20,
-        .errDeadzone = .1,
+        .errDeadzone = .03,
     };
     SmoothPid retractionPid[2] = {SmoothPid(retractionPidConfig), SmoothPid(retractionPidConfig)};
 
@@ -360,7 +371,7 @@ private:
         .kp = 20,
         .ki = 0,
         .kd = 0,
-        .maxICumulative = 1,
+        .maxICumulative = 0,
         .maxOutput = 10,
         .errDeadzone = .01,
     };
@@ -371,14 +382,14 @@ private:
     SmoothPid linkAngleMismatchPid = SmoothPid(SmoothPidConfig{
         .kp = 175,
         .kd = -5000,
-        .maxICumulative = .1,
+        .maxICumulative = .0,
         .maxOutput = 20,
     });
 
     SmoothPid yawPid = SmoothPid(SmoothPidConfig{
         .kp = -.8,
-        .kd = .7,
-        .maxICumulative = 1,
+        .kd = .8,
+        .maxICumulative = 0,
         .maxOutput = 2,
     });
 
@@ -413,8 +424,9 @@ private:
     float debug2;
     float debug3;
     float debug4;
-    float* debugMat1;
-    float debugMat2[2];
+    float debug5;
+    float debug6;
+    float debug[6];
 
     /**
      * Floating point world-relative orientation information. Angles are in rad, Angular Rate

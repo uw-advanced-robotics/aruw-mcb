@@ -109,7 +109,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_BEEHIVE) || defined(TARGET_BALSTD)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
 #endif
 
@@ -138,6 +138,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->djiMotorTerminalSerialHandler.init();
 #if defined(TARGET_BALSTD)
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
 #endif
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
