@@ -102,14 +102,6 @@ void MavlinkReceiver::updateSerial()
             {
                 frameCurrReadByte = 0;
 
-                if (newMessage.header.dataLength >= SERIAL_RX_BUFF_SIZE)
-                {
-                    mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
-                    RAISE_ERROR(drivers, "received message length longer than allowed max");
-                    readHeaderAndDataLengthToLong++;
-                    return;
-                }
-
                 if(newMessage.header.messageId == 32){
                     gotaThirtyTwoMessageID++;
                 }

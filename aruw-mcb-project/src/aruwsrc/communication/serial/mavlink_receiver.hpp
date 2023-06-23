@@ -211,7 +211,6 @@ protected:
     int bytesToRead;
     uint16_t headBytesCorrect = 0;
     uint16_t settingHeader = 0;
-    uint16_t readHeaderAndDataLengthToLong = 0;
     uint16_t failedCRC = 0;
     uint16_t readTooMuch = 0;
     uint16_t gotaThirtyTwoMessageID = 0;
