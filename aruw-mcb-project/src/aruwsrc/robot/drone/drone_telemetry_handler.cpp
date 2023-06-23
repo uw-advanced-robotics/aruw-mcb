@@ -25,12 +25,14 @@ DroneTelemetryHandler::DroneTelemetryHandler(
     tap::Drivers* drivers,
     tap::communication::serial::Uart::UartPort port)
     : MavlinkReceiver(drivers, port),
-      setHomeCommand()
+      setHomeCommand(),
+      localPositionNed()
 {
 }
 
 void DroneTelemetryHandler::messageReceiveCallback(const ReceivedMavlinkMessage& completeMessage)
 {
+    gotAMessage = true;
     if (completeMessage.header.messageId == LOCAL_POSITION_NED_MSG_ID)
     {
         memcpy(&localPositionNed, &completeMessage.data, sizeof(localPositionNed));

@@ -145,6 +145,8 @@ void MavlinkReceiver::updateSerial()
                     messageReceiveCallback(mostRecentMessage);
 
                     mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
+
+                    readAFullMessage++;
                 }
                 else if (frameCurrReadByte > bytesToRead)
                 {

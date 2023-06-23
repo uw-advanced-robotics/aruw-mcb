@@ -214,6 +214,7 @@ protected:
     uint16_t failedCRC = 0;
     uint16_t readTooMuch = 0;
     uint16_t gotaThirtyTwoMessageID = 0;
+    uint16_t readAFullMessage = 0;
 };
 
 }  // namespace aruwsrc::communication::serial

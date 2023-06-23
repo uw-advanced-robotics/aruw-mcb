@@ -27,6 +27,7 @@
 
 namespace aruwsrc::drone
 {
+#define LOCAL_POSITION_NED_LEN 28
 #define LOCAL_POSITION_NED_MSG_ID 32
 #define COMMAND_INT_MSG_ID 32
 #define COMMAND_SET_HOME_MSG_ID 32
@@ -75,10 +76,13 @@ public:
     LocalPositionNed* getLocalPositionNed();
     void setHomePosition();
 
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     LocalPositionNed localPositionNed;
     MavlinkMessage<sizeof(DoSetHomeCommandDefault)> setHomeCommand;
     DoSetHomeCommandDefault cmd;
+    bool gotAMessage = false;
 };
 
 }  // namespace aruwsrc::drone
