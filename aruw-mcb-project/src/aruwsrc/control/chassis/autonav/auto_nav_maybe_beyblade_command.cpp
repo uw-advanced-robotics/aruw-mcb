@@ -58,7 +58,7 @@ void AutoNavMaybeBeybladeCommand::initialize() {}
 
 void AutoNavMaybeBeybladeCommand::execute()
 {
-    if (yawMotor.isOnline() && visionCoprocessor.isCvOnline())
+    if (yawMotor.isOnline())
     {
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
@@ -69,26 +69,30 @@ void AutoNavMaybeBeybladeCommand::execute()
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
-            visionCoprocessor.getLastSetpointData();
-
         // default don't move
         float x = 0.0;
         float y = 0.0;
 
-        if (setpointData.pathFound)
+        if (visionCoprocessor.isCvOnline())
         {
-            float desiredVelocityX = setpointData.x - currentX;
-            float desiredVelocityY = setpointData.y - currentY;
-            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
-            if (mag > 0.01)
-            {
-                x = desiredVelocityX / mag * maxWheelSpeed;
-                y = desiredVelocityY / mag * maxWheelSpeed;
-            }
 
-            x *= SPEED_FACTOR;
-            y *= SPEED_FACTOR;
+            aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
+                visionCoprocessor.getLastSetpointData();
+
+            if (setpointData.pathFound)
+            {
+                float desiredVelocityX = setpointData.x - currentX;
+                float desiredVelocityY = setpointData.y - currentY;
+                float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+                if (mag > 0.01)
+                {
+                    x = desiredVelocityX / mag * maxWheelSpeed;
+                    y = desiredVelocityY / mag * maxWheelSpeed;
+                }
+
+                x *= SPEED_FACTOR;
+                y *= SPEED_FACTOR;
+            }
         }
 
         // Rotate X and Y depending on turret angle
@@ -101,12 +105,7 @@ void AutoNavMaybeBeybladeCommand::execute()
         float beybladeV = beybladeVelocity(maxWheelSpeed, x, y, setpointData);
 
         // set outputs
-        chassis.setDesiredOutput(x, y, 0);
-
-        lastX = currentX;
-        lastY = currentY;
-        desiredX = setpointData.x;
-        desiredY = setpointData.y;
+        chassis.setDesiredOutput(x, y, beybladeV);
     }
 }
 
@@ -116,10 +115,7 @@ float AutoNavMaybeBeybladeCommand::beybladeVelocity(
     float vy,
     aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setPointData)
 {
-    if (!setPointData.shouldBeyblade){
-        rotateSpeedRamp.setTarget(0.0f);
-        rotateSpeedRamp.update(config.beybladeRampRate);
-    } else {
+    if (setPointData.shouldBeyblade){
         const float translationalSpeedThreshold =
             config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
             config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
@@ -131,6 +127,9 @@ float AutoNavMaybeBeybladeCommand::beybladeVelocity(
             rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
         }
         rotateSpeedRamp.setTarget(rampTarget);
+        rotateSpeedRamp.update(config.beybladeRampRate);
+    } else {
+        rotateSpeedRamp.setTarget(0.0f);
         rotateSpeedRamp.update(config.beybladeRampRate);
     }
 
