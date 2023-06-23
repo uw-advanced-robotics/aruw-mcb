@@ -93,16 +93,16 @@ void AutoNavMaybeBeybladeCommand::execute()
                 x *= SPEED_FACTOR;
                 y *= SPEED_FACTOR;
             }
+
+            // @todo incorrect
+            float beybladeV = beybladeVelocity(maxWheelSpeed, x, y, setpointData);
         }
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle); // @todo: we shouldn't need to negate this just for the sentry
+        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle); // @todo: this should be correct, but the other robots are incorrect it seems
         // we should debug in ozone to see which implementation is correct, and, if necessary
         // negate the yaw in the sentry kf odometry or negate the yaw in the chassiskf odometry
         // this negation has the potential to mess some things up!
-
-
-        float beybladeV = beybladeVelocity(maxWheelSpeed, x, y, setpointData);
 
         // set outputs
         chassis.setDesiredOutput(x, y, beybladeV);
