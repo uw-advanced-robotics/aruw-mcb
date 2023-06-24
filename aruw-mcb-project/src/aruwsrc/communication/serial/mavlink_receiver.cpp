@@ -104,7 +104,8 @@ void MavlinkReceiver::updateSerial()
             {
                 frameCurrReadByte = 0;
 
-                if(newMessage.header.messageId == 32){
+                if (newMessage.header.messageId == 32)
+                {
                     gotaThirtyTwoMessageID++;
                 }
 
@@ -151,7 +152,6 @@ void MavlinkReceiver::updateSerial()
                     messageReceiveCallback(mostRecentMessage);
 
                     mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
-
                 }
                 else if (frameCurrReadByte > bytesToRead)
                 {

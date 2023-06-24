@@ -116,15 +116,17 @@ public:
          * Sets the CRC16 value in the struct. This should be called after writing data to the
          * message struct.
          */
-        void setCRC16(uint8_t crc_extra)
+        void setCRC16()
         {
             CRC16 = tap::algorithms::calculateCRC16(
                 reinterpret_cast<uint8_t *>(this)[1],  // We don't want to include the head byte
                 sizeof(*this) - 3);
 
-            CRC16 = crc_calculate(reinterpret_cast<uint8_t *>(this) + 1, 5); // Calculate for header first
-            crc_accumulate_buffer(&CRC16, data, header.dataLength); // Then calculate for data
-            crc_accumulate(crc_extra, &CRC16); // Then calculate for crc_extra
+            CRC16 = crc_calculate(
+                reinterpret_cast<uint8_t *>(this) + 1,
+                5);                                                  // Calculate for header first
+            crc_accumulate_buffer(&CRC16, data, header.dataLength);  // Then calculate for data
+            crc_accumulate(crc_extra, &CRC16);                       // Then calculate for crc_extra
         }
 
         FrameHeader header;
@@ -228,6 +230,24 @@ protected:
      */
 
 #define X25_INIT_CRC 0xffff
+
+#ifndef MAVLINK_MESSAGE_CRCS
+#define MAVLINK_MESSAGE_CRCS                                                                       \
+    {                                                                                              \
+        50, 124, 137, 0, 237, 217, 104, 119, 117, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 214, 159, 220, \
+            168, 24, 23, 170, 144, 67, 115, 39, 246, 185, 104, 237, 244, 222, 212, 9, 254, 230,    \
+            28, 28, 132, 221, 232, 11, 153, 41, 39, 78, 196, 0, 0, 15, 3, 0, 0, 0, 0, 0, 167, 183, \
+            119, 191, 118, 148, 21, 0, 243, 124, 0, 0, 38, 20, 158, 152, 143, 0, 0, 14, 106, 49,   \
+            22, 143, 140, 5, 150, 0, 231, 183, 63, 54, 47, 0, 0, 0, 0, 0, 0, 175, 102, 158, 208,   \
+            56, 93, 138, 108, 32, 185, 84, 34, 174, 124, 237, 4, 76, 128, 56, 116, 134, 237, 203,  \
+            250, 87, 203, 220, 25, 226, 46, 29, 223, 85, 6, 229, 203, 1, 195, 109, 168, 181, 47,   \
+            72, 131, 127, 0, 103, 154, 178, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 189, 0, 0, 0, \
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0,   \
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
+            0, 0, 208, 0, 0, 0, 0, 163, 105, 151, 35, 150, 179, 0, 0, 0, 0, 0, 90, 104, 85, 95,    \
+            130, 184, 81, 8, 204, 49, 170, 44, 83, 46, 0                                           \
+    }
+#endif
 
     /**
      * @brief Accumulate the MCRF4XX CRC16 by adding one char at a time.
