@@ -55,7 +55,7 @@ struct DoSetHomeCommandDefault
     float useCurrent = 1;  // Use the current location, 1 is yes, 0 is the specified location
     float param2;          // Unused
     float param3;          // Unused
-    float yaw = NAN;       // Heading, NAN makes it used it's heading
+    float yaw = 0;       // Heading, NAN makes it used it's heading
     int32_t x = 0;         // local: x position
     int32_t y = 0;         // local: y position
     float z = 0;           // local: z position
