@@ -103,7 +103,6 @@
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_beyblade_command.hpp"
-#include "aruwsrc/control/chassis/autonav/auto_nav_maybe_beyblade_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
