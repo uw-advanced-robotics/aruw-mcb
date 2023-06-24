@@ -116,11 +116,15 @@ public:
          * Sets the CRC16 value in the struct. This should be called after writing data to the
          * message struct.
          */
-        void setCRC16()
+        void setCRC16(uint8_t crc_extra)
         {
             CRC16 = tap::algorithms::calculateCRC16(
                 reinterpret_cast<uint8_t *>(this)[1],  // We don't want to include the head byte
                 sizeof(*this) - 3);
+
+            CRC16 = crc_calculate(reinterpret_cast<uint8_t *>(this) + 1, 5); // Calculate for header first
+            crc_accumulate_buffer(&CRC16, data, header.dataLength); // Then calculate for data
+            crc_accumulate(crc_extra, &CRC16); // Then calculate for crc_extra
         }
 
         FrameHeader header;
@@ -181,8 +185,6 @@ protected:
         PROCESS_FRAME_DATA     /// The data is being processed.
     };
 
-    
-
     /// stuff for RX, buffers to store parts of the header, state machine.
     SerialRxState mavlinkSerialRxState;
 
@@ -204,7 +206,7 @@ protected:
     constexpr static int UART_BAUDRATE = 115'200;
 
     tap::Drivers *drivers;
-    
+
     /// The serial port you are connected to.
     Uart::UartPort port;
 
@@ -219,6 +221,78 @@ protected:
     uint16_t readFromUart = 0;
 
     uint32_t datathingy[512];
+
+    /**
+     * Here's a bunch of code blatantly copied over from the mavlink page
+     * https://github.com/mavlink/c_library_v1/blob/master/checksum.h to calculate the checksum
+     */
+
+#define X25_INIT_CRC 0xffff
+
+    /**
+     * @brief Accumulate the MCRF4XX CRC16 by adding one char at a time.
+     *
+     * The checksum function adds the hash of one char at a time to the
+     * 16 bit checksum (uint16_t).
+     *
+     * @param data new char to hash
+     * @param crcAccum the already accumulated checksum
+     **/
+    static inline void crc_accumulate(uint8_t data, uint16_t *crcAccum)
+    {
+        /*Accumulate one byte of data into the CRC*/
+        uint8_t tmp;
+
+        tmp = data ^ (uint8_t)(*crcAccum & 0xff);
+        tmp ^= (tmp << 4);
+        *crcAccum = (*crcAccum >> 8) ^ (tmp << 8) ^ (tmp << 3) ^ (tmp >> 4);
+    }
+
+    /**
+     * @brief Initialize the buffer for the MCRF4XX CRC16
+     *
+     * @param crcAccum the 16 bit MCRF4XX CRC16
+     */
+    static inline void crc_init(uint16_t *crcAccum) { *crcAccum = X25_INIT_CRC; }
+
+    /**
+     * @brief Calculates the MCRF4XX CRC16 checksum on a byte buffer
+     *
+     * @param  pBuffer buffer containing the byte array to hash
+     * @param  length  length of the byte array
+     * @return the checksum over the buffer bytes
+     **/
+    static inline uint16_t crc_calculate(const uint8_t *pBuffer, uint16_t length)
+    {
+        uint16_t crcTmp;
+        crc_init(&crcTmp);
+        while (length--)
+        {
+            crc_accumulate(*pBuffer++, &crcTmp);
+        }
+        return crcTmp;
+    }
+
+    /**
+     * @brief Accumulate the MCRF4XX CRC16 CRC by adding an array of bytes
+     *
+     * The checksum function adds the hash of one char at a time to the
+     * 16 bit checksum (uint16_t).
+     *
+     * @param data new bytes to hash
+     * @param crcAccum the already accumulated checksum
+     **/
+    static inline void crc_accumulate_buffer(
+        uint16_t *crcAccum,
+        const char *pBuffer,
+        uint16_t length)
+    {
+        const uint8_t *p = (const uint8_t *)pBuffer;
+        while (length--)
+        {
+            crc_accumulate(*p++, crcAccum);
+        }
+    }
 };
 
 }  // namespace aruwsrc::communication::serial
