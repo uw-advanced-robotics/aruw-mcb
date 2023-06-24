@@ -746,11 +746,11 @@ void sendGoToCenterPointStrategy() {
 }
 
 void toggleMovementCallback() {
-    autoNavMaybeBeybladeCommand.toggleMovement();
+    autoNavBeybladeCommand.toggleMovement();
 }
 
 void toggleBeybladeCallback() {
-    autoNavMaybeBeybladeCommand.toggleBeyblade();
+    autoNavBeybladeCommand.toggleBeyblade();
 }
 
 /* define command mappings --------------------------------------------------*/
@@ -768,8 +768,7 @@ HoldCommandMapping manualRightSwitchUp(
 
 HoldCommandMapping autoRightSwitchDown(
     drivers(),
-    // {&autoNavBeybladeCommand,
-    {&autoNavMaybeBeybladeCommand,
+    {&autoNavBeybladeCommand,
      &turretMajorControlCommand,
      &turretMinorGirlbossControlCommand,
      &turretMinorMalewifeControlCommand},

@@ -24,6 +24,7 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -31,6 +32,7 @@
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
+using namespace tap::communication::serial;
 
 namespace aruwsrc
 {
@@ -42,13 +44,15 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const aruwsrc::control::turret::TurretMotor& yawMotor,
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config)
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+    bool beybladeOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
-      config(config)
+      config(config),
+      beybladeOnlyInGame(beybladeOnlyInGame)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -81,6 +85,7 @@ void AutoNavBeybladeCommand::execute()
 
         float x = 0.0;
         float y = 0.0;
+        float rampTarget = 0.0;
 
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
@@ -97,24 +102,24 @@ void AutoNavBeybladeCommand::execute()
             }
         }
 
-        // Gets current turret yaw angle
-        float turretYawAngle = yawMotor.getAngleFromCenter();
-
-        // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
-        // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
-        const float translationalSpeedThreshold =
-            config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-
-        float rampTarget =
-            rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
-
-        // reduce the beyblade rotation when translating to allow for better translational speed
-        // (otherwise it is likely that you will barely move unless
-        // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-        if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
+        if ((!beybladeOnlyInGame || drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME) && beybladeEnabled)
         {
-            rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+            // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
+            // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
+            const float translationalSpeedThreshold =
+                config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+                config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+            float rampTarget =
+                rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+
+            // reduce the beyblade rotation when translating to allow for better translational speed
+            // (otherwise it is likely that you will barely move unless
+            // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+            if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
+            {
+                rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+            }
         }
 
         rotateSpeedRamp.setTarget(rampTarget);

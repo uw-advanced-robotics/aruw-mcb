@@ -45,7 +45,8 @@ public:
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config);
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+        bool beybladeOnlyInGame = false);
 
     void initialize() override;
 
@@ -55,7 +56,11 @@ public:
 
     bool isFinished() const override { return false; }
 
-    const char* getName() const override { return "chassis beyblade"; }
+    inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
+
+    inline void toggleMovement() { movementEnabled = !movementEnabled; };
+
+    const char* getName() const override { return "autonav beyblade"; }
 
 private:
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config;
@@ -69,6 +74,11 @@ private:
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
+
+    bool beybladeOnlyInGame;
+
+    bool beybladeEnabled = true;
+    bool movementEnabled = true;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

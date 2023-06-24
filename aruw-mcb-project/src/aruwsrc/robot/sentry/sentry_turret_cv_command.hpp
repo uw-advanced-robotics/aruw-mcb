@@ -154,10 +154,6 @@ public:
                                               : withinAimingToleranceMalewife;
     }
 
-    WrappedFloat debug1 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
-    WrappedFloat debug2 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
-    WrappedFloat debug3 = WrappedFloat(0.0f, 0.0f, M_TWOPI);
-
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
@@ -197,9 +193,6 @@ private:
     static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(90.0f);
     static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(270.0f);
 
-    // im stupid and thought th majorSetppoint was noisy
-    // static constexpr float SCAN_UPPER_DANGER_THRESHOLD = modm::toRadian(330.0f);
-    // static constexpr float SCAN_LOWER_DANGER_THRESHOLD = modm::toRadian(30.0f);
     tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceGirlboss = false;

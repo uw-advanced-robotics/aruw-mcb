@@ -42,11 +42,6 @@ enum class SentryStrategyRequest : uint8_t
     TOGGLE_BEYBLADE,
     NUM_MESSAGE_TYPES,
 };
-
-static constexpr uint16_t SENTRY_HOLD_FIRE_REQUEST_ID = 0x202;
-
-static constexpr uint16_t SENTRY_HOLD_POSITION_REQUEST_ID = 0x203;
-
 }  // namespace aruwsrc::communication::serial
 
 #endif  //  SENTRY_REQUEST_MESSAGE_TYPES_HPP_

@@ -191,7 +191,6 @@ public:
         float x;
         float y;
         long long timestamp;
-        bool shouldBeyblade;
     } modm_packed;
 
     // TODO: sentry only, refactor, comment
@@ -353,7 +352,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0, false};
+    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 
