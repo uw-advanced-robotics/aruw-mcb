@@ -36,6 +36,13 @@ enum class SentryRequestMessageType : uint8_t
     GO_TO_FRIENDLY_BASE,
     GO_TO_ENEMY_BASE,
     GO_TO_SUPPLIER_ZONE,
+    GO_TO_ENEMY_SUPPLIER_ZONE,
+    GO_TO_CENTER_POINT,
+    HOLD_FIRE,
+    STOP_MOVEMENT,
+    START_MOVEMENT,
+    STOP_BEYBLADE,
+    START_BEYBLADE,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial

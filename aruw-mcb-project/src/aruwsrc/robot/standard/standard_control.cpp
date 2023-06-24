@@ -187,6 +187,20 @@ aruwsrc::communication::serial::GoToEnemyBaseCommand sentrySendGoToEnemyBase(
     sentryRequestSubsystem);
 aruwsrc::communication::serial::GoToSupplierZoneCommand sentrySendGoToSupplierZone(
     sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemySupplierZoneCommand sentrySendGoToEnemySupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToCenterPointCommand sentrySendGoToCenterPoint(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::HoldFireCommand sentrySendHoldFire(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::StopMovementCommand sentrySendStopMovement(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::StartMovementCommand sentrySendStartMovement(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::StopBeybladeCommand sentrySendStopBeyblade(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::StartBeybladeCommand sentrySendStartBeyblade(
+    sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -411,22 +425,50 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 
 /// @brief sentry messages
-PressCommandMapping cPressed(
+PressCommandMapping dShiftPressed(
     drivers(),
     {&sentrySendNoMotionStrategy},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
+    RemoteMapState({Remote::Key::D, Remote::Key::SHIFT}));
+PressCommandMapping qShiftPressed(
     drivers(),
     {&sentrySendGoToFriendlyBase},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
+    RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
+PressCommandMapping eShiftPressed(
     drivers(),
     {&sentrySendGoToEnemyBase},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-PressCommandMapping vCtrlPressed(
+    RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
+PressCommandMapping rShiftPressed(
     drivers(),
     {&sentrySendGoToSupplierZone},
-    RemoteMapState({Remote::Key::V, Remote::Key::CTRL}));
+    RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
+PressCommandMapping fShiftPressed(
+    drivers(),
+    {&sentrySendGoToEnemySupplierZone},
+    RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
+PressCommandMapping gShiftPressed(
+    drivers(),
+    {&sentrySendGoToCenterPoint},
+    RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
+PressCommandMapping zShiftPressed(
+    drivers(),
+    {&sentrySendHoldFire},
+    RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
+PressCommandMapping xShiftPressed(
+    drivers(),
+    {&sentrySendStopMovement},
+    RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&sentrySendStartMovement},
+    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+PressCommandMapping vShiftPressed(
+    drivers(),
+    {&sentrySendStopBeyblade},
+    RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
+PressCommandMapping bShiftPressed(
+    drivers(),
+    {&sentrySendStartBeyblade},
+    RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -574,10 +616,17 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qNotEPressed);
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
-    drivers->commandMapper.addMap(&vCtrlPressed);
+    drivers->commandMapper.addMap(&dShiftPressed);
+    drivers->commandMapper.addMap(&qShiftPressed);
+    drivers->commandMapper.addMap(&eShiftPressed);
+    drivers->commandMapper.addMap(&rShiftPressed);
+    drivers->commandMapper.addMap(&fShiftPressed);
+    drivers->commandMapper.addMap(&gShiftPressed);
+    drivers->commandMapper.addMap(&zShiftPressed);
+    drivers->commandMapper.addMap(&xShiftPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&vShiftPressed);
+    drivers->commandMapper.addMap(&bShiftPressed);
     drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace standard_control

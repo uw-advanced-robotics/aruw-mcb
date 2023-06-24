@@ -133,6 +133,195 @@ public:
 private:
     SentryRequestSubsystem &sub;
 };
+
+/**
+ * Tells the sentry to go to the enemy supplier zone
+ * This command executes once when schedule
+ */
+class GoToEnemySupplierZoneCommand : public tap::control::Command
+{
+public:
+    GoToEnemySupplierZoneCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry go to enemy supplier zone command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_ENEMY_SUPPLIER_ZONE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to go to the center point
+ * This command executes once when schedule
+ */
+class GoToCenterPointCommand : public tap::control::Command
+{
+public:
+    GoToCenterPointCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry go to center point command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_CENTER_POINT);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to hold fire
+ * This command executes once when schedule
+ */
+class HoldFireCommand : public tap::control::Command
+{
+public:
+    HoldFireCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry hold fire command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::HOLD_FIRE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to stop moving
+ * This command executes once when schedule
+ */
+class StopMovementCommand : public tap::control::Command
+{
+public:
+    StopMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry stop moving command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::STOP_MOVEMENT);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to start moving
+ * This command executes once when schedule
+ */
+class StartMovementCommand : public tap::control::Command
+{
+public:
+    StartMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry start moving command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::START_MOVEMENT);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to stop beyblading
+ * This command executes once when schedule
+ */
+class StopBeybladeCommand : public tap::control::Command
+{
+public:
+    StopBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry stop beyblading command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::STOP_BEYBLADE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to start beyblading
+ * This command executes once when schedule
+ */
+class StartBeybladeCommand : public tap::control::Command
+{
+public:
+    StartBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry start beyblading command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::START_BEYBLADE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
 }  // namespace aruwsrc::communication::serial
 
 #endif  //  SENTRY_REQUEST_COMMANDS_HPP_
