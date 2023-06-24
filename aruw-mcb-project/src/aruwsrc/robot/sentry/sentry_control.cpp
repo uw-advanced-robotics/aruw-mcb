@@ -547,15 +547,6 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     aruwsrc::sentry::chassis::beybladeConfig);
 
 
-aruwsrc::chassis::AutoNavMaybeBeybladeCommand autoNavMaybeBeybladeCommand(
-    *drivers(),
-    sentryDrive,
-    turretMajor.yawMotor,
-    drivers()->visionCoprocessor,
-    odometrySubsystem,
-    aruwsrc::sentry::chassis::beybladeConfig);
-
-
 // general shooting ===================================
 
 PauseCommandGovernor holdFireGovernor(10000);
@@ -780,8 +771,7 @@ HoldCommandMapping autoRightSwitchMid(
 
 HoldCommandMapping autoRightSwitchUp(
     drivers(),
-    // {&autoNavBeybladeCommand, &sentryTurretCVCommand},
-    {&autoNavMaybeBeybladeCommand, &sentryTurretCVCommand},
+    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // Shoot Mode (left up)

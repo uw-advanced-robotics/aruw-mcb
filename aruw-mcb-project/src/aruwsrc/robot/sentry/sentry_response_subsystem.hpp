@@ -41,11 +41,11 @@
 
 //     inline mockable void queueRequest(SentryRequestMessageType type)
 //     {
-//         sentryRequestTransmitter.queueRequest(type);
+//         sentryResponseTransmitter.queueRequest(type);
 //     }
 
 // private:
-//     SentryRequestTransmitter sentryRequestTransmitter;
+//     SentryResponseTransmitter sentryResponseTransmitter;
 // };
 // }  // namespace aruwsrc::communication::serial
 
