@@ -118,15 +118,11 @@ public:
          */
         void setCRC16()
         {
-            CRC16 = tap::algorithms::calculateCRC16(
-                reinterpret_cast<uint8_t *>(this)[1],  // We don't want to include the head byte
-                sizeof(*this) - 3);
-
             CRC16 = crc_calculate(
                 reinterpret_cast<uint8_t *>(this) + 1,
                 5);                                                  // Calculate for header first
             crc_accumulate_buffer(&CRC16, data, header.dataLength);  // Then calculate for data
-            crc_accumulate(crc_extra, &CRC16);                       // Then calculate for crc_extra
+            crc_accumulate(CRC_EXTRA[header.messageId], &CRC16);     // Then calculate for crc_extra
         }
 
         FrameHeader header;
@@ -222,32 +218,44 @@ protected:
     uint16_t reading = 0;
     uint16_t readFromUart = 0;
 
-    uint32_t datathingy[512];
+    uint32_t datathingy[255];
 
     /**
      * Here's a bunch of code blatantly copied over from the mavlink page
      * https://github.com/mavlink/c_library_v1/blob/master/checksum.h to calculate the checksum
      */
 
-#define X25_INIT_CRC 0xffff
+    static constexpr uint8_t CRC_EXTRA[] = {
+        50,  124, 137, 0,   237, 217, 104, 119, 117, 0,   0,   89,  0,   0,   0,   0,   0,   0,
+        0,   0,   214, 159, 220, 168, 24,  23,  170, 144, 67,  115, 39,  246, 185, 104, 237, 244,
+        222, 212, 9,   254, 230, 28,  28,  132, 221, 232, 11,  153, 41,  39,  78,  196, 0,   0,
+        15,  3,   0,   0,   0,   0,   0,   167, 183, 119, 191, 118, 148, 21,  0,   243, 124, 0,
+        0,   38,  20,  158, 152, 143, 0,   0,   14,  106, 49,  22,  143, 140, 5,   150, 0,   231,
+        183, 63,  54,  47,  0,   0,   0,   0,   0,   0,   175, 102, 158, 208, 56,  93,  138, 108,
+        32,  185, 84,  34,  174, 124, 237, 4,   76,  128, 56,  116, 134, 237, 203, 250, 87,  203,
+        220, 25,  226, 46,  29,  223, 85,  6,   229, 203, 1,   195, 109, 168, 181, 47,  72,  131,
+        127, 0,   103, 154, 178, 200, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        189, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   36,  0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        0,   0,   0,   0,   0,   0,   0,   0,   0,   208, 0,   0,   0,   0,   163, 105, 151, 35,
+        150, 179, 0,   0,   0,   0,   0,   90,  104, 85,  95,  130, 184, 81,  8,   204, 49,  170,
+        44,  83,  46,  0};
 
-#ifndef MAVLINK_MESSAGE_CRCS
-#define MAVLINK_MESSAGE_CRCS                                                                       \
-    {                                                                                              \
-        50, 124, 137, 0, 237, 217, 104, 119, 117, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 214, 159, 220, \
-            168, 24, 23, 170, 144, 67, 115, 39, 246, 185, 104, 237, 244, 222, 212, 9, 254, 230,    \
-            28, 28, 132, 221, 232, 11, 153, 41, 39, 78, 196, 0, 0, 15, 3, 0, 0, 0, 0, 0, 167, 183, \
-            119, 191, 118, 148, 21, 0, 243, 124, 0, 0, 38, 20, 158, 152, 143, 0, 0, 14, 106, 49,   \
-            22, 143, 140, 5, 150, 0, 231, 183, 63, 54, 47, 0, 0, 0, 0, 0, 0, 175, 102, 158, 208,   \
-            56, 93, 138, 108, 32, 185, 84, 34, 174, 124, 237, 4, 76, 128, 56, 116, 134, 237, 203,  \
-            250, 87, 203, 220, 25, 226, 46, 29, 223, 85, 6, 229, 203, 1, 195, 109, 168, 181, 47,   \
-            72, 131, 127, 0, 103, 154, 178, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 189, 0, 0, 0, \
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0,   \
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \
-            0, 0, 208, 0, 0, 0, 0, 163, 105, 151, 35, 150, 179, 0, 0, 0, 0, 0, 90, 104, 85, 95,    \
-            130, 184, 81, 8, 204, 49, 170, 44, 83, 46, 0                                           \
+    static constexpr uint16_t X25_INIT_CRC = 0xffff;
+
+    static inline uint16_t calculateCRC(ReceivedMavlinkMessage msg)
+    {
+        uint16_t CRC16 = crc_calculate(
+            reinterpret_cast<uint8_t *>(&msg) + 1,
+            5);  // Calculate for header first
+        crc_accumulate_buffer(
+            &CRC16,
+            reinterpret_cast<const char *>(msg.data),
+            msg.header.dataLength);                           // Then calculate for data
+        crc_accumulate(CRC_EXTRA[msg.header.messageId], &CRC16);  // Then calculate for crc_extra
+        return CRC16;
     }
-#endif
 
     /**
      * @brief Accumulate the MCRF4XX CRC16 by adding one char at a time.
