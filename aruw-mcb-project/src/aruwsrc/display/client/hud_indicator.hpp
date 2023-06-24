@@ -56,11 +56,11 @@ public:
 
     HudIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    virtual modm::ResumableResult<bool> sendInitialGraphics() = 0;
+    virtual modm::ResumableResult<bool> sendInitialGraphics() {};
 
-    virtual modm::ResumableResult<bool> update() = 0;
+    virtual modm::ResumableResult<bool> update() {};
 
-    virtual void initialize() = 0;
+    virtual void initialize() {};
 
     /**
      * Resets the graphic name generator so the next time it is queried via `getUnusedGraphicName`,

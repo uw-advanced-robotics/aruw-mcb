@@ -52,8 +52,7 @@
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/display/client/client_display_command.hpp"
-#include "aruwsrc/display/client/client_display_subsystem.hpp"
+#include "aruwsrc/display/client/client_display_manager.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -161,7 +160,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-ClientDisplaySubsystem clientDisplay(drivers());
+ClientDisplayManager clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
@@ -367,22 +366,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    drivers()->commandScheduler,
-    drivers()->visionCoprocessor,
-    clientDisplay,
-    &hopperCover,
-    frictionWheels,
-    agitator,
-    turret,
-    imuCalibrateCommand,
-    &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
