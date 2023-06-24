@@ -76,14 +76,12 @@ public:
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
     // TODO: increasing this by quite a bit, bring it back down once we're done testing
-    // static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1);
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians
      */
-    // static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(7.0f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
 
     struct TurretIMUCalibrationConfig
     {

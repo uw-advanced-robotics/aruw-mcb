@@ -856,6 +856,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
 
     drivers->commandScheduler.registerSubsystem(&girlbossAgitator);
+    drivers->commandScheduler.registerSubsystem(&malewifeAgitator);
     drivers->visionCoprocessor.attachSentryTransformer(&sentryTransforms);
 }
 
