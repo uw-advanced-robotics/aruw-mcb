@@ -72,6 +72,7 @@ void AutoNavMaybeBeybladeCommand::execute()
         // default don't move
         float x = 0.0;
         float y = 0.0;
+        float beybladeV = 0.0f;
 
         if (visionCoprocessor.isCvOnline())
         {
@@ -95,7 +96,19 @@ void AutoNavMaybeBeybladeCommand::execute()
             }
 
             // @todo incorrect
-            float beybladeV = beybladeVelocity(maxWheelSpeed, x, y, setpointData);
+            beybladeV = beybladeVelocity(maxWheelSpeed, x, y, setpointData);
+        } else {
+            beybladeV = beybladeVelocity(maxWheelSpeed, x, y);
+        }
+
+        // ugly haha!
+        if (!movementEnabled) {
+            x = 0.0f;
+            y = 0.0f;
+        }
+
+        if (!beybladeEnabled) {
+            beybladeV = 0.0f;
         }
 
         // Rotate X and Y depending on turret angle
@@ -108,6 +121,8 @@ void AutoNavMaybeBeybladeCommand::execute()
         chassis.setDesiredOutput(x, y, beybladeV);
     }
 }
+
+
 
 float AutoNavMaybeBeybladeCommand::beybladeVelocity(
     float maxWheelSpeed,
@@ -132,6 +147,25 @@ float AutoNavMaybeBeybladeCommand::beybladeVelocity(
         rotateSpeedRamp.setTarget(0.0f);
         rotateSpeedRamp.update(config.beybladeRampRate);
     }
+
+    return rotateSpeedRamp.getValue();
+}
+
+float AutoNavMaybeBeybladeCommand::beybladeVelocity(float maxWheelSpeed, float vx, float vy)
+{
+    const float translationalSpeedThreshold =
+        config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+        config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+    float rampTarget =
+        ROTATION_DIRECTION * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+
+    if (fabsf(vx) > translationalSpeedThreshold || fabsf(vy) > translationalSpeedThreshold)
+    {
+        rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+    }
+    rotateSpeedRamp.setTarget(rampTarget);
+    rotateSpeedRamp.update(config.beybladeRampRate);
 
     return rotateSpeedRamp.getValue();
 }

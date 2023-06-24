@@ -57,6 +57,10 @@ public:
 
     const char* getName() const override { return "auto nav"; }
 
+    void toggleMovement(bool status) { movementEnabled = status; }
+    void toggleBeyblade(bool status) { beybladeEnabled = status; }
+
+
 private:
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
@@ -70,6 +74,9 @@ private:
     float desiredX = 0;
     float desiredY = 0;
 
+    bool movementEnabled = true; 
+    bool beybladeEnabled = true; 
+
     static constexpr float SPEED_FACTOR = 0.2f;
     static constexpr int ROTATION_DIRECTION = 1; // hardcode for now, figure out when to reset later
 
@@ -81,6 +88,7 @@ private:
      * Applies ramping so the beyblade does not instantly stop / start 
     */
     float beybladeVelocity(float maxWheelSpeed, float vx, float vy, aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setPointData);
+    float beybladeVelocity(float maxWheelSpeed, float vx, float vy);
 };  // class AutoNavCommand
 
 }  // namespace aruwsrc::chassis

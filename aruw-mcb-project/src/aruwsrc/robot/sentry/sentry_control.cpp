@@ -103,6 +103,7 @@
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_beyblade_command.hpp"
+#include "aruwsrc/control/chassis/autonav/auto_nav_maybe_beyblade_command.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -449,20 +450,6 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 
 /* define commands ----------------------------------------------------------*/
 
-// callbacks the sentry runs when receiving a message
-void sendNoMotionStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::NONE); 
-}
-void sendGoToFriendlyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_FRIENDLY_BASE); 
-}
-void sendGoToEnemyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_BASE); 
-}
-void sendGoToSupplierZoneStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_SUPPLIER_ZONE); 
-}
-
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -560,14 +547,19 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     odometrySubsystem,
     aruwsrc::sentry::chassis::beybladeConfig);
 
+
+aruwsrc::chassis::AutoNavMaybeBeybladeCommand autoNavMaybeBeybladeCommand(
+    *drivers(),
+    sentryDrive,
+    turretMajor.yawMotor,
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    aruwsrc::sentry::chassis::beybladeConfig);
+
+
 // general shooting ===================================
 
 PauseCommandGovernor holdFireGovernor(10000);
-
-aruwsrc::communication::serial::SentryHoldFireRequestHandler sentryHoldFireRequestHandler(holdFireGovernor);
-
-// girlboss shooting ======================
-// girlboss shooting ======================
 // girlboss shooting ======================
 // girlboss shooting ======================
 // girlboss shooting ======================
@@ -727,6 +719,48 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
 
 // void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
 
+// callbacks the sentry runs when receiving a message
+void sendNoMotionStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::NONE); 
+}
+void sendGoToFriendlyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_FRIENDLY_BASE); 
+}
+void sendGoToEnemyBaseStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_BASE); 
+}
+void sendGoToSupplierZoneStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_SUPPLIER_ZONE); 
+}
+
+void holdFireCallback() { 
+   holdFireGovernor.initiatePause();
+}
+
+void sendGoToEnemySupplierZoneStrategy() {
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_SUPPLIER_ZONE); 
+}
+
+void sendGoToCenterPointStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_CENTER_POINT); 
+}
+
+void stopMovementCallback() { 
+    autoNavMaybeBeybladeCommand.toggleMovement(false);
+}
+
+void startMovementCallback() { 
+    autoNavMaybeBeybladeCommand.toggleMovement(true);
+}
+
+void stopBeybladeCallback() { 
+    autoNavMaybeBeybladeCommand.toggleBeyblade(false);
+}
+
+void startBeybladeCallback() { 
+    autoNavMaybeBeybladeCommand.toggleBeyblade(true);
+}
+
 /* define command mappings --------------------------------------------------*/
 
 // @todo this whole thing looks scuffed but that's because there are a lot of workarounds for taproot's command mapping system
@@ -742,7 +776,8 @@ HoldCommandMapping manualRightSwitchUp(
 
 HoldCommandMapping autoRightSwitchDown(
     drivers(),
-    {&autoNavBeybladeCommand,
+    // {&autoNavBeybladeCommand,
+    {&autoNavMaybeBeybladeCommand,
      &turretMajorControlCommand,
      &turretMinorGirlbossControlCommand,
      &turretMinorMalewifeControlCommand},
@@ -755,7 +790,8 @@ HoldCommandMapping autoRightSwitchMid(
 
 HoldCommandMapping autoRightSwitchUp(
     drivers(),
-    {&autoNavBeybladeCommand, &sentryTurretCVCommand},
+    // {&autoNavBeybladeCommand, &sentryTurretCVCommand},
+    {&autoNavMaybeBeybladeCommand, &sentryTurretCVCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // Shoot Mode (left up)
@@ -851,12 +887,23 @@ void startSentryCommands(Drivers *drivers)
     sentryStrategyRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
     sentryStrategyRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
     sentryStrategyRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
+    sentryStrategyRequestHandler.attachGoToEnemySupplierZoneHandler(&sendGoToEnemySupplierZoneStrategy);
+    sentryStrategyRequestHandler.attachGoToCenterPointHandler(&sendGoToCenterPointStrategy);
+
+    // new commands to receive
+    sentryStrategyRequestHandler.attachHoldFireHandler(&holdFireCallback);
+    sentryStrategyRequestHandler.attachStopMovementHandler(&stopMovementCallback);
+    sentryStrategyRequestHandler.attachStartMovementHandler(&startMovementCallback);
+    sentryStrategyRequestHandler.attachStopBeybladeHandler(&stopBeybladeCallback);
+    sentryStrategyRequestHandler.attachStartBeybladeHandler(&startBeybladeCallback);
+    sentryStrategyRequestHandler.attachHoldFireHandler(&holdFireCallback);
+
+    // new commands to receive
+
+
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_STRATEGY_REQUEST_ID,
         &sentryStrategyRequestHandler);
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_HOLD_FIRE_REQUEST_ID,
-        &sentryHoldFireRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

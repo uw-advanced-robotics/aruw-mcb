@@ -22,6 +22,7 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "aruwsrc/control/governor/pause_command_governor.hpp"
+#include "sentry_request_message_types.hpp"
 
 namespace aruwsrc
 {
@@ -76,12 +77,55 @@ public:
         goToSupplierZoneHandler = callback;
     }
 
+    void attachGoToEnemySupplierZoneHandler(MessageReceivedCallback callback)
+    {
+        goToEnemySupplierZoneHandler = callback;
+    }
+
+    void attachGoToCenterPointHandler(MessageReceivedCallback callback)
+    {
+        goToCenterPointHandler = callback;
+    }
+
+    void attachHoldFireHandler(MessageReceivedCallback callback)
+    {
+        holdFireHandler = callback;
+    }
+
+    void attachStopMovementHandler(MessageReceivedCallback callback)
+    {
+        stopMovementHandler = callback;
+    }
+
+    void attachStartMovementHandler(MessageReceivedCallback callback)
+    {
+        startMovementHandler = callback;
+    }
+
+    void attachStopBeybladeHandler(MessageReceivedCallback callback)
+    {
+        stopBeybladeHandler = callback;
+    }
+
+    void attachStartBeybladeHandler(MessageReceivedCallback callback)
+    {
+        startBeybladeHandler = callback;
+    }
+
 private:
     tap::Drivers *drivers;
+    SentryStrategyRequest lastM = SentryStrategyRequest::NONE;
     MessageReceivedCallback noStrategyHandler = nullptr;
     MessageReceivedCallback goToFriendlyBaseHandler = nullptr;
     MessageReceivedCallback goToEnemyBaseHandler = nullptr;
     MessageReceivedCallback goToSupplierZoneHandler = nullptr;
+    MessageReceivedCallback goToEnemySupplierZoneHandler = nullptr;
+    MessageReceivedCallback goToCenterPointHandler = nullptr;
+    MessageReceivedCallback holdFireHandler = nullptr;
+    MessageReceivedCallback stopMovementHandler = nullptr;
+    MessageReceivedCallback startMovementHandler = nullptr;
+    MessageReceivedCallback stopBeybladeHandler = nullptr;
+    MessageReceivedCallback startBeybladeHandler = nullptr;
 };
 
 // @todo move

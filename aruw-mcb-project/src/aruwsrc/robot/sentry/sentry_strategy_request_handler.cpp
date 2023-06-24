@@ -35,30 +35,73 @@ void SentryStrategyRequestHandler::operator()(
     SentryStrategyRequest type = static_cast<SentryStrategyRequest>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
+    lastM = type;
     switch (type)
     {
         case SentryStrategyRequest::NONE:
             if (noStrategyHandler != nullptr)
             {
-                noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
+                noStrategyHandler(); 
             }
             break;
         case SentryStrategyRequest::GO_TO_FRIENDLY_BASE:
             if (goToFriendlyBaseHandler != nullptr)
             {
-                goToFriendlyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
+                goToFriendlyBaseHandler();
             }
             break;
         case SentryStrategyRequest::GO_TO_ENEMY_BASE:
             if (goToEnemyBaseHandler != nullptr)
             {
-                goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
+                goToEnemyBaseHandler(); 
             }
             break;
         case SentryStrategyRequest::GO_TO_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
-                goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
+                goToSupplierZoneHandler(); 
+            }
+            break;
+        case SentryStrategyRequest::GO_TO_ENEMY_SUPPLIER_ZONE:
+            if (goToEnemySupplierZoneHandler != nullptr)
+            {
+                goToEnemySupplierZoneHandler();
+            }
+            break;
+        case SentryStrategyRequest::GO_TO_CENTER_POINT:
+            if (goToCenterPointHandler != nullptr)
+            {
+                goToCenterPointHandler();
+            }
+            break;
+        case SentryStrategyRequest::HOLD_FIRE:
+            if (holdFireHandler != nullptr)
+            {
+                holdFireHandler();
+            }
+            break;
+        case SentryStrategyRequest::STOP_MOVEMENT:
+            if (stopMovementHandler != nullptr)
+            {
+                stopMovementHandler(); 
+            }
+            break;
+        case SentryStrategyRequest::START_MOVEMENT:
+            if (startMovementHandler != nullptr)
+            {
+                startMovementHandler();
+            }
+            break;
+        case SentryStrategyRequest::STOP_BEYBLADE:
+            if (stopBeybladeHandler != nullptr)
+            {
+                stopBeybladeHandler(); 
+            }
+            break;
+        case SentryStrategyRequest::START_BEYBLADE:
+            if (startBeybladeHandler != nullptr)
+            {
+                startBeybladeHandler();
             }
             break;
         default:
@@ -67,12 +110,4 @@ void SentryStrategyRequestHandler::operator()(
     }
 }
 
-SentryHoldFireRequestHandler::SentryHoldFireRequestHandler(PauseCommandGovernor& agitatorPauseGovernor)
-    : agitatorPauseGovernor(agitatorPauseGovernor) {}
-
-void SentryHoldFireRequestHandler::operator()(
-    const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
-{
-    agitatorPauseGovernor.initiatePause();
-}
 }  // namespace aruwsrc::communication::serial
