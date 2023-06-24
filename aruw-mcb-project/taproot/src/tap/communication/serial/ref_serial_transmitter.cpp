@@ -244,6 +244,7 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
     RF_END();
 }
 
+// @todo understandable but impossible to maintain
 /**
  * A helper function used by the RefSerialTransmitter's sendGraphic functions to send some
  * GraphicType to the referee system. The user may specify whether or not to configure the message
@@ -320,6 +321,7 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
         drivers->refSerial.getRobotData().robotId,
         drivers,
         0);
+    // this->graphicMsg = *graphicMsg;
     RF_END();
 }
 
@@ -377,15 +379,22 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
 // @todo create uart send method to reduce massive amounts of boilerplate and complexity
 modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     Tx::RobotToRobotMessage* robotToRobotMsg,
-    uint16_t msgId,
-    RobotId receiverId)
+    uint16_t contentId,
+    RobotId receiverId,
+    uint16_t dataLen)
 {
-    hah = true;
     RF_BEGIN(6);
+    // For limiting scope of local variable (otherwise causes cross initialization)
 
-    if (msgId < 0x0200 || msgId >= 0x02ff)
+    // Undocumented ref system requirement discovered empirically
+    if (dataLen == 1)
     {
-        RAISE_ERROR(drivers, "invalid msgId not betweene [0x200, 0x2ff)");
+        RAISE_ERROR(drivers, "dataLen cannot be of size 1");
+    }
+
+    if (contentId < 0x0200 || contentId >= 0x02ff)
+    {
+        RAISE_ERROR(drivers, "invalid contentId not betweene [0x200, 0x2ff)");
         RF_RETURN_1();
     }
 
@@ -396,27 +405,38 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
 
     RefSerialTransmitter::configFrameHeader(                                      
         &robotToRobotMsg->frameHeader,                                                 
-        sizeof(robotToRobotMsg->data) + sizeof(robotToRobotMsg->interactiveHeader));    
-                                                 
+        dataLen + sizeof(robotToRobotMsg->interactiveHeader));
+
     robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;     
 
     RefSerialTransmitter::configInteractiveHeader(                                
         &robotToRobotMsg->interactiveHeader,                                           
-        msgId,                                                                
-        drivers->refSerial.getRobotData().robotId,             
-        static_cast<uint16_t>(RefSerialData::RobotId::BLUE_SENTINEL));     
+        contentId,
+        drivers->refSerial.getRobotData().robotId,
+        static_cast<uint16_t>(receiverId));
 
-    robotToRobotMsg->crc16 = algorithms::calculateCRC16(                               
-        reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
-        sizeof(robotToRobotMsg->frameHeader) + sizeof(robotToRobotMsg->cmdId) + sizeof(robotToRobotMsg->interactiveHeader) + sizeof(robotToRobotMsg->data));
-                                                                        
-    drivers->refSerial.acquireTransmissionSemaphore();   
+    {
+
+    // True message size without unused buffer bytes
+    static constexpr int crc16Size = 2;
+    static constexpr int trueMsgHeaderSize = sizeof(robotToRobotMsg->frameHeader) +
+                                                     sizeof(robotToRobotMsg->cmdId) +
+                                                     sizeof(robotToRobotMsg->interactiveHeader);
+    uint16_t trueMsgSize = trueMsgHeaderSize + dataLen + crc16Size;
+
+    uint16_t* crc16Ptr = reinterpret_cast<uint16_t*>(robotToRobotMsg->dataAndCrc16 + dataLen);
+    *crc16Ptr = algorithms::calculateCRC16(
+        reinterpret_cast<uint8_t*>(robotToRobotMsg),
+        trueMsgSize - crc16Size);
+
+    drivers->refSerial.acquireTransmissionSemaphore();
 
     drivers->uart.write(                                                          
         bound_ports::REF_SERIAL_UART_PORT,                                        
         reinterpret_cast<uint8_t*>(robotToRobotMsg),                                   
-        sizeof(*robotToRobotMsg));      
-                                               
+        trueMsgSize);
+
+    }
     DELAY_REF_GRAPHIC(robotToRobotMsg);                 
                               
     drivers->refSerial.releaseTransmissionSemaphore();
