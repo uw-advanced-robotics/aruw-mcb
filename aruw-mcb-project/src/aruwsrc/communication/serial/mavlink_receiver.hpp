@@ -209,12 +209,16 @@ protected:
     Uart::UartPort port;
 
     int bytesToRead;
-    uint16_t headBytesCorrect = 0;
+    uint64_t headBytesCorrect = 0;
     uint16_t settingHeader = 0;
     uint16_t failedCRC = 0;
     uint16_t readTooMuch = 0;
     uint16_t gotaThirtyTwoMessageID = 0;
     uint16_t readAFullMessage = 0;
+    uint16_t reading = 0;
+    uint16_t readFromUart = 0;
+
+    uint32_t datathingy[512];
 };
 
 }  // namespace aruwsrc::communication::serial

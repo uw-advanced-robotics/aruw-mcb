@@ -82,7 +82,9 @@ private:
     LocalPositionNed localPositionNed;
     MavlinkMessage<sizeof(DoSetHomeCommandDefault)> setHomeCommand;
     DoSetHomeCommandDefault cmd;
-    bool gotAMessage = false;
+    uint16_t gotAMessage = 0;
+    bool gotMsgAcknowledgment = false;
+    bool wroteSetHomeCommand = false;
 };
 
 }  // namespace aruwsrc::drone

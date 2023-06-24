@@ -32,10 +32,14 @@ DroneTelemetryHandler::DroneTelemetryHandler(
 
 void DroneTelemetryHandler::messageReceiveCallback(const ReceivedMavlinkMessage& completeMessage)
 {
-    gotAMessage = true;
+    gotAMessage++;
     if (completeMessage.header.messageId == LOCAL_POSITION_NED_MSG_ID)
     {
         memcpy(&localPositionNed, &completeMessage.data, sizeof(localPositionNed));
+    }
+    if (completeMessage.header.messageId == 77)
+    {  // MSG acknowledgement
+        gotMsgAcknowledgment = true;
     }
 }
 
@@ -46,10 +50,11 @@ void DroneTelemetryHandler::setHomePosition()
     setHomeCommand.header.componentId = 1;
     setHomeCommand.header.systemId = 2;  // Needs to be not 0 or 1 cuz 0 invalid, 1 is drone
     setHomeCommand.header.messageId = COMMAND_INT_MSG_ID;
-    
+
     memcpy(setHomeCommand.data, &cmd, sizeof(cmd));
-    
+
     drivers->uart.write(port, reinterpret_cast<uint8_t*>(&setHomeCommand), sizeof(setHomeCommand));
+    wroteSetHomeCommand = true;
 }
 
 }  // namespace aruwsrc::drone

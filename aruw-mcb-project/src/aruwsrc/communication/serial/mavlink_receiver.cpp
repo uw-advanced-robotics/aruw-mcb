@@ -72,6 +72,7 @@ void MavlinkReceiver::initialize()
 
 void MavlinkReceiver::updateSerial()
 {
+    reading++;
     switch (mavlinkSerialRxState)
     {
         case SERIAL_HEADER_SEARCH:
@@ -80,6 +81,7 @@ void MavlinkReceiver::updateSerial()
             while (mavlinkSerialRxState == SERIAL_HEADER_SEARCH &&
                    READ(&newMessage.header.headByte, 1))
             {
+                readFromUart++;
                 // we found it, store the head byte
                 if (newMessage.header.headByte == SERIAL_HEAD_BYTE)
                 {
@@ -106,6 +108,8 @@ void MavlinkReceiver::updateSerial()
                     gotaThirtyTwoMessageID++;
                 }
 
+                datathingy[newMessage.header.messageId]++;
+
                 // move on to processing message body
                 mavlinkSerialRxState = PROCESS_FRAME_DATA;
             }
@@ -128,6 +132,8 @@ void MavlinkReceiver::updateSerial()
                         newMessage.data + newMessage.header.dataLength,
                         sizeof(newMessage.CRC16));
 
+                    readAFullMessage++;
+
                     if (newMessage.CRC16 !=
                         tap::algorithms::calculateCRC16(
                             reinterpret_cast<uint8_t *>(&newMessage) +
@@ -137,7 +143,7 @@ void MavlinkReceiver::updateSerial()
                         mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(drivers, "CRC16 failure");
                         failedCRC++;
-                        return;
+                        // return;
                     }
 
                     mostRecentMessage = newMessage;
@@ -146,7 +152,6 @@ void MavlinkReceiver::updateSerial()
 
                     mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
 
-                    readAFullMessage++;
                 }
                 else if (frameCurrReadByte > bytesToRead)
                 {
