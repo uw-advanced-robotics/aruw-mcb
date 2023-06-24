@@ -80,28 +80,16 @@ void SentryStrategyRequestHandler::operator()(
                 holdFireHandler();
             }
             break;
-        case SentryStrategyRequest::STOP_MOVEMENT:
-            if (stopMovementHandler != nullptr)
+        case SentryStrategyRequest::TOGGLE_MOVEMENT:
+            if (toggleMovementHandler != nullptr)
             {
-                stopMovementHandler(); 
+                toggleMovementHandler(); 
             }
             break;
-        case SentryStrategyRequest::START_MOVEMENT:
-            if (startMovementHandler != nullptr)
+        case SentryStrategyRequest::TOGGLE_BEYBLADE:
+            if (toggleBeybladeHandler != nullptr)
             {
-                startMovementHandler();
-            }
-            break;
-        case SentryStrategyRequest::STOP_BEYBLADE:
-            if (stopBeybladeHandler != nullptr)
-            {
-                stopBeybladeHandler(); 
-            }
-            break;
-        case SentryStrategyRequest::START_BEYBLADE:
-            if (startBeybladeHandler != nullptr)
-            {
-                startBeybladeHandler();
+                toggleBeybladeHandler(); 
             }
             break;
         default:

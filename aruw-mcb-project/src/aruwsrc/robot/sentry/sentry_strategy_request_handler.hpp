@@ -92,24 +92,14 @@ public:
         holdFireHandler = callback;
     }
 
-    void attachStopMovementHandler(MessageReceivedCallback callback)
+    void attachToggleMovementHandler(MessageReceivedCallback callback)
     {
-        stopMovementHandler = callback;
+        toggleMovementHandler = callback;
     }
 
-    void attachStartMovementHandler(MessageReceivedCallback callback)
+    void attachToggleBeybladeHandler(MessageReceivedCallback callback)
     {
-        startMovementHandler = callback;
-    }
-
-    void attachStopBeybladeHandler(MessageReceivedCallback callback)
-    {
-        stopBeybladeHandler = callback;
-    }
-
-    void attachStartBeybladeHandler(MessageReceivedCallback callback)
-    {
-        startBeybladeHandler = callback;
+        toggleBeybladeHandler = callback;
     }
 
 private:
@@ -122,10 +112,8 @@ private:
     MessageReceivedCallback goToEnemySupplierZoneHandler = nullptr;
     MessageReceivedCallback goToCenterPointHandler = nullptr;
     MessageReceivedCallback holdFireHandler = nullptr;
-    MessageReceivedCallback stopMovementHandler = nullptr;
-    MessageReceivedCallback startMovementHandler = nullptr;
-    MessageReceivedCallback stopBeybladeHandler = nullptr;
-    MessageReceivedCallback startBeybladeHandler = nullptr;
+    MessageReceivedCallback toggleMovementHandler = nullptr;
+    MessageReceivedCallback toggleBeybladeHandler = nullptr;
 };
 
 // @todo move

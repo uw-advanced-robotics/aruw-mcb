@@ -664,7 +664,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopMaleWifeFrict
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorMalewife(frictionWheelsMalewife);
 
-// Agitator commands (girl boss)
+// Agitator commands (male wife)
 MoveIntegralCommand malewifeRotateAgitator(malewifeAgitator, constants::AGITATOR_ROTATE_CONFIG);
 UnjamIntegralCommand malewifeUnjamAgitator(malewifeAgitator, constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand malewifeRotateAndUnjamAgitator(
@@ -745,20 +745,12 @@ void sendGoToCenterPointStrategy() {
     drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_CENTER_POINT); 
 }
 
-void stopMovementCallback() { 
-    autoNavMaybeBeybladeCommand.toggleMovement(false);
+void toggleMovementCallback() {
+    autoNavMaybeBeybladeCommand.toggleMovement();
 }
 
-void startMovementCallback() { 
-    autoNavMaybeBeybladeCommand.toggleMovement(true);
-}
-
-void stopBeybladeCallback() { 
-    autoNavMaybeBeybladeCommand.toggleBeyblade(false);
-}
-
-void startBeybladeCallback() { 
-    autoNavMaybeBeybladeCommand.toggleBeyblade(true);
+void toggleBeybladeCallback() {
+    autoNavMaybeBeybladeCommand.toggleBeyblade();
 }
 
 /* define command mappings --------------------------------------------------*/
@@ -844,6 +836,7 @@ void initializeSubsystems()
     frictionWheelsGirlboss.initialize();
     girlbossAgitator.initialize();
     frictionWheelsMalewife.initialize();
+    malewifeAgitator.initialize();
 
     isInitialized = true;
 }
@@ -892,10 +885,8 @@ void startSentryCommands(Drivers *drivers)
 
     // new commands to receive
     sentryStrategyRequestHandler.attachHoldFireHandler(&holdFireCallback);
-    sentryStrategyRequestHandler.attachStopMovementHandler(&stopMovementCallback);
-    sentryStrategyRequestHandler.attachStartMovementHandler(&startMovementCallback);
-    sentryStrategyRequestHandler.attachStopBeybladeHandler(&stopBeybladeCallback);
-    sentryStrategyRequestHandler.attachStartBeybladeHandler(&startBeybladeCallback);
+    sentryStrategyRequestHandler.attachToggleMovementHandler(&toggleMovementCallback);
+    sentryStrategyRequestHandler.attachToggleBeybladeHandler(&toggleBeybladeCallback);
     sentryStrategyRequestHandler.attachHoldFireHandler(&holdFireCallback);
 
     // new commands to receive

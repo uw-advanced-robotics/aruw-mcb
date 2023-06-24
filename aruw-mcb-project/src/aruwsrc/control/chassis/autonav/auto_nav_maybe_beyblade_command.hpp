@@ -57,8 +57,8 @@ public:
 
     const char* getName() const override { return "auto nav"; }
 
-    void toggleMovement(bool status) { movementEnabled = status; }
-    void toggleBeyblade(bool status) { beybladeEnabled = status; }
+    void toggleMovement() { movementEnabled = !movementEnabled; }
+    void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; }
 
 
 private:
