@@ -55,7 +55,7 @@ void SentryRequestHandler::operator()(
                 goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::GO_TO_SUPPLIER_ZONE:
+        case SentryRequestMessageType::GO_TO_FRIENDLY_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
                 goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
