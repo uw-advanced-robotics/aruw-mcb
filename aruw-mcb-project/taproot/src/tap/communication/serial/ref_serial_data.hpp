@@ -60,11 +60,11 @@ public:
 
         BLUE_HERO = 101,
         BLUE_ENGINEER = 102,
-        BLUE_SOLDIER_1 = 103,
+        BLUE_SOLDIER_1 = 103,  // @todo rename to standard
         BLUE_SOLDIER_2 = 104,
         BLUE_SOLDIER_3 = 105,
         BLUE_DRONE = 106,
-        BLUE_SENTINEL = 107,
+        BLUE_SENTINEL = 107,  // @todo rename to sentry
         BLUE_DART = 108,
         BLUE_RADAR_STATION = 109
     };

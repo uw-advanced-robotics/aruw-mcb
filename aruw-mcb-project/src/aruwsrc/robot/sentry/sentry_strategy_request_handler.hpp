@@ -104,7 +104,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    SentryStrategyRequest lastM = SentryStrategyRequest::NONE;
+    SentryRequestType lastM = SentryRequestType::NONE;
     MessageReceivedCallback noStrategyHandler = nullptr;
     MessageReceivedCallback goToFriendlyBaseHandler = nullptr;
     MessageReceivedCallback goToEnemyBaseHandler = nullptr;
@@ -114,22 +114,6 @@ private:
     MessageReceivedCallback holdFireHandler = nullptr;
     MessageReceivedCallback toggleMovementHandler = nullptr;
     MessageReceivedCallback toggleBeybladeHandler = nullptr;
-};
-
-// @todo move
-// @todo ad hoc
-class SentryHoldFireRequestHandler
-    : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
-{
-public:
-    using MessageReceivedCallback = void (*)();
-
-    SentryHoldFireRequestHandler(PauseCommandGovernor &agitatorPauseGovernor);
-
-    void operator()(
-        const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
-private:
-    PauseCommandGovernor &agitatorPauseGovernor;
 };
 }  // namespace aruwsrc::communication::serial
 

@@ -34,32 +34,12 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
-// #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-// #include "aruwsrc/communication/_command."
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
-// #include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-// #include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
-// #include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
-// #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
-// #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
-// #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-// #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-// #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-// #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_drive_manual_command.hpp"
-// #include "aruwsrc/control/chassis/sentry/sentry_drive_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-// #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-// #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-// #include "aruwsrc/control/governor/cv_has_target_governor.hpp"
-// #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-// #include "aruwsrc/rol/governor/cv_online_governor.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
@@ -71,13 +51,6 @@
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
-// #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-// #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-// #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-// #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
-// #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-// #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-// #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/governor/pause_command_governor.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 // #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
@@ -94,6 +67,8 @@
 #include "aruwsrc/robot/sentry/sentry_strategy_request_handler.hpp"
 #include "aruwsrc/robot/sentry/sentry_request_message_types.hpp"
 #include "aruwsrc/robot/sentry/sentry_beehive_launcher_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_response_transmitter.hpp"
+#include "aruwsrc/robot/sentry/sentry_response_message_types.hpp"
 
 #include "sentry_transform_constants.hpp"
 #include "sentry_transforms.hpp"
@@ -135,6 +110,7 @@ namespace sentry_control
 driversFunc drivers = DoNotUse_getDrivers;
 
 aruwsrc::communication::serial::SentryStrategyRequestHandler sentryStrategyRequestHandler(drivers());
+aruwsrc::communication::serial::SentryResponseTransmitter sentryResponseTransmitter(drivers());
 
 /* define swerve motors --------------------------------------------------------*/
 
@@ -527,12 +503,12 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     malewifeBallisticsSolver,
     sentryTransforms);
 
-aruwsrc::chassis::AutoNavCommand autoNavCommand(
-    *drivers(),
-    sentryDrive,
-    turretMajor.yawMotor,
-    drivers()->visionCoprocessor,
-    odometrySubsystem);
+// aruwsrc::chassis::AutoNavCommand autoNavCommand(
+//     *drivers(),
+//     sentryDrive,
+//     turretMajor.yawMotor,
+//     drivers()->visionCoprocessor,
+//     odometrySubsystem);
 
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
@@ -540,6 +516,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     turretMajor.yawMotor,
     drivers()->visionCoprocessor,
     odometrySubsystem,
+    sentryResponseTransmitter,
     aruwsrc::sentry::chassis::beybladeConfig);
 
 
@@ -707,28 +684,35 @@ GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
 
 // callbacks the sentry runs when receiving a message
 void sendNoMotionStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::NONE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::NONE); 
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::NONE);
 }
 void sendGoToFriendlyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_FRIENDLY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::GO_TO_FRIENDLY_BASE); 
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::GO_TO_FRIENDLY_BASE);
 }
 void sendGoToEnemyBaseStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_BASE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::GO_TO_ENEMY_BASE);
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::GO_TO_ENEMY_BASE);
 }
-void sendGoToSupplierZoneStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_SUPPLIER_ZONE); 
-}
-
-void holdFireCallback() { 
-   holdFireGovernor.initiatePause();
+void sendGoToFriendlySupplierZoneStrategy() { 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::GO_TO_FRIENDLY_SUPPLIER_ZONE);
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::GO_TO_FRIENDLY_SUPPLIER_ZONE);
 }
 
 void sendGoToEnemySupplierZoneStrategy() {
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_ENEMY_SUPPLIER_ZONE); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::GO_TO_ENEMY_SUPPLIER_ZONE);
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::GO_TO_ENEMY_SUPPLIER_ZONE);
 }
 
 void sendGoToCenterPointStrategy() { 
-    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest::GO_TO_CENTER_POINT); 
+    drivers()->visionCoprocessor.sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType::GO_TO_CENTER_POINT);
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::GO_TO_CENTER_POINT);
+}
+
+void holdFireCallback() { 
+    holdFireGovernor.initiatePause();
+    sentryResponseTransmitter.queueRequest(aruwsrc::communication::serial::SentryResponseType::HOLD_FIRE);
 }
 
 void toggleMovementCallback() {
@@ -864,7 +848,7 @@ void startSentryCommands(Drivers *drivers)
     sentryStrategyRequestHandler.attachNoStrategyHandler(&sendNoMotionStrategy);
     sentryStrategyRequestHandler.attachGoToFriendlyBaseHandler(&sendGoToFriendlyBaseStrategy);
     sentryStrategyRequestHandler.attachGoToEnemyBaseHandler(&sendGoToEnemyBaseStrategy);
-    sentryStrategyRequestHandler.attachGoToSupplierZoneHandler(&sendGoToSupplierZoneStrategy);
+    sentryStrategyRequestHandler.attachGoToSupplierZoneHandler(&sendGoToFriendlySupplierZoneStrategy);
     sentryStrategyRequestHandler.attachGoToEnemySupplierZoneHandler(&sendGoToEnemySupplierZoneStrategy);
     sentryStrategyRequestHandler.attachGoToCenterPointHandler(&sendGoToCenterPointStrategy);
 

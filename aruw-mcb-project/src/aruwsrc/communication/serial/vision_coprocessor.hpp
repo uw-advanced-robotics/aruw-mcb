@@ -293,7 +293,7 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
-    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryStrategyRequest strategy);
+    void sendMotionStrategyMessage(aruwsrc::communication::serial::SentryRequestType strategy);
     // static inline void handleTimeSyncRequest()
     // {
     //     visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();

@@ -17,23 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
-#define SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
+#ifndef SENTRY_RESPONSE_MESSAGE_TYPES_HPP_
+#define SENTRY_RESPONSE_MESSAGE_TYPES_HPP_
 
-#include <gmock/gmock.h>
+#include <cinttypes>
 
-#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
-
-namespace aruwsrc::mock
+namespace aruwsrc::communication::serial
 {
-class SentryRequestSubsystemMock : public communication::serial::SentryRequestSubsystem
-{
-public:
-    SentryRequestSubsystemMock(tap::Drivers *drivers);
-    ~SentryRequestSubsystemMock();
 
-    MOCK_METHOD(void, queueRequest, (communication::serial::SentryRequestType), (override));
+static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
+
+enum class SentryResponseType : uint8_t
+{
+    NONE = 0,
+    GO_TO_FRIENDLY_BASE,
+    GO_TO_ENEMY_BASE,
+    GO_TO_FRIENDLY_SUPPLIER_ZONE,
+    GO_TO_ENEMY_SUPPLIER_ZONE,
+    GO_TO_CENTER_POINT,
+    HOLD_FIRE,
+    MOVEMENT_ENABLED,
+    MOVEMENT_DISABLED,
+    BEYBLADE_ENABLED,
+    BEYBLADE_DISABLED,
+    NUM_MESSAGE_TYPES,
 };
-}  // namespace aruwsrc::mock
+}  // namespace aruwsrc::communication::serial
 
-#endif  // SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
+#endif  //  SENTRY_RESPONSE_MESSAGE_TYPES_HPP_

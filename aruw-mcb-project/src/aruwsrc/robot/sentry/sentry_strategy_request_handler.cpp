@@ -32,61 +32,61 @@ void SentryStrategyRequestHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     // The message type we sent came directly after the interactive header
-    SentryStrategyRequest type = static_cast<SentryStrategyRequest>(
+    SentryRequestType type = static_cast<SentryRequestType>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     lastM = type;
     switch (type)
     {
-        case SentryStrategyRequest::NONE:
+        case SentryRequestType::NONE:
             if (noStrategyHandler != nullptr)
             {
                 noStrategyHandler(); 
             }
             break;
-        case SentryStrategyRequest::GO_TO_FRIENDLY_BASE:
+        case SentryRequestType::GO_TO_FRIENDLY_BASE:
             if (goToFriendlyBaseHandler != nullptr)
             {
                 goToFriendlyBaseHandler();
             }
             break;
-        case SentryStrategyRequest::GO_TO_ENEMY_BASE:
+        case SentryRequestType::GO_TO_ENEMY_BASE:
             if (goToEnemyBaseHandler != nullptr)
             {
                 goToEnemyBaseHandler(); 
             }
             break;
-        case SentryStrategyRequest::GO_TO_SUPPLIER_ZONE:
+        case SentryRequestType::GO_TO_FRIENDLY_SUPPLIER_ZONE:
             if (goToSupplierZoneHandler != nullptr)
             {
                 goToSupplierZoneHandler(); 
             }
             break;
-        case SentryStrategyRequest::GO_TO_ENEMY_SUPPLIER_ZONE:
+        case SentryRequestType::GO_TO_ENEMY_SUPPLIER_ZONE:
             if (goToEnemySupplierZoneHandler != nullptr)
             {
                 goToEnemySupplierZoneHandler();
             }
             break;
-        case SentryStrategyRequest::GO_TO_CENTER_POINT:
+        case SentryRequestType::GO_TO_CENTER_POINT:
             if (goToCenterPointHandler != nullptr)
             {
                 goToCenterPointHandler();
             }
             break;
-        case SentryStrategyRequest::HOLD_FIRE:
+        case SentryRequestType::HOLD_FIRE:
             if (holdFireHandler != nullptr)
             {
                 holdFireHandler();
             }
             break;
-        case SentryStrategyRequest::TOGGLE_MOVEMENT:
+        case SentryRequestType::TOGGLE_MOVEMENT:
             if (toggleMovementHandler != nullptr)
             {
                 toggleMovementHandler(); 
             }
             break;
-        case SentryStrategyRequest::TOGGLE_BEYBLADE:
+        case SentryRequestType::TOGGLE_BEYBLADE:
             if (toggleBeybladeHandler != nullptr)
             {
                 toggleBeybladeHandler(); 

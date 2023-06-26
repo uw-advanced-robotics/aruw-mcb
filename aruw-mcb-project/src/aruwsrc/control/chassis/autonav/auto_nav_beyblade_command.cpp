@@ -44,6 +44,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const aruwsrc::control::turret::TurretMotor& yawMotor,
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
+    aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
     bool beybladeOnlyInGame)
     : drivers(drivers),
@@ -51,6 +52,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
       yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
+      sentryResponseTransmitter(sentryResponseTransmitter),
       config(config),
       beybladeOnlyInGame(beybladeOnlyInGame)
 {
@@ -68,6 +70,12 @@ void AutoNavBeybladeCommand::initialize()
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 #endif
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+
+    sentryResponseTransmitter.queueRequest(
+            beybladeEnabled ? aruwsrc::communication::serial::SentryResponseType::BEYBLADE_ENABLED : aruwsrc::communication::serial::SentryResponseType::BEYBLADE_DISABLED);
+    
+    sentryResponseTransmitter.queueRequest(
+            movementEnabled ? aruwsrc::communication::serial::SentryResponseType::MOVEMENT_ENABLED : aruwsrc::communication::serial::SentryResponseType::MOVEMENT_DISABLED);
 }
 
 void AutoNavBeybladeCommand::execute()
