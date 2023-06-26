@@ -102,7 +102,7 @@ void WorldFrameTurretYawCascadePIDController::runController(
         worldFrameSetpoint.getValue() - worldToBaseTransform.getYaw(),
         localAngle.getValue());
 
-    const float positionPidOutput =
+    positionPidOutput =
         positionPid.runControllerDerivateError(positionControllerError, dt);
 
     const float velocityControllerError = limitVal(positionPidOutput - localVelocity - chassisVelocity, -maxVelErrorInput, maxVelErrorInput);
@@ -110,7 +110,10 @@ void WorldFrameTurretYawCascadePIDController::runController(
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * girlboss.yawMotor.getMotorOutput() + minorMajorTorqueRatio * malewife.yawMotor.getMotorOutput());
+    torqueCompensation = girlboss.yawMotor.getMotorOutput() + malewife.yawMotor.getMotorOutput();
+    if (abs(torqueCompensation) < 2000) { torqueCompensation = 0; }
+
+    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
 }
 
 // @todo what's the point of this; overridden by runController anyways?

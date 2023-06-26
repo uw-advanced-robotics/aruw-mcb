@@ -23,11 +23,41 @@
 
 // namespace aruwsrc::communication::serial
 // {
-// SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers& drivers)
+// SentryStrategySubsystem::SentryStrategySubsystem(tap::Drivers& drivers)
 //     : tap::control::Subsystem(drivers),
 //       refSerialTransmitter(drivers.refSerialTransmitter)
 // {
 // }
 
-// void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.send(); }
+// void SentryStrategySubsystem::refresh() { 
+//     PT_BEGIN();
+
+//     while (true)
+//     {
+//         getNextMessageToSend();
+
+//         if ((queuedMessageType & (1 << static_cast<uint8_t>(lastSentMessage))) != 0)
+//         {
+//             *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCrc16) = static_cast<uint8_t>(lastSentMessage);
+
+//             // TODO configure rest of message if required by message type, currently this is not
+//             // necessary
+
+//             PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
+//                 &robotToRobotMessage,
+//                 SENTRY_REQUEST_ROBOT_ID,
+//                 drivers->refSerial.getRobotIdBasedOnCurrentRobotTeam(
+//                     RefSerialData::RobotId::BLUE_SENTINEL),
+//                 2));
+
+//             queuedMessageType &= ~(1 << static_cast<uint8_t>(lastSentMessage));
+//         }
+//         else
+//         {
+//             PT_YIELD();
+//         }
+//     }
+
+//     PT_END();
+// }
 // }  // namespace aruwsrc::communication::serial

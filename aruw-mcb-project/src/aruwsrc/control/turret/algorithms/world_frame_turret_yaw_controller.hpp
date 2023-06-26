@@ -113,6 +113,9 @@ private:
 
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
 
+    float positionPidOutput;
+    float torqueCompensation = 0.0f;
+
     TurretMotor& yawMotor;
 
     float maxVelErrorInput;
