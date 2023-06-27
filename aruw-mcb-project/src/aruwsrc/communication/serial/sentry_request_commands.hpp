@@ -216,23 +216,23 @@ private:
 };
 
 /**
- * Tells the sentry to stop moving
+ * Tells the sentry to toggle moving
  * This command executes once when schedule
  */
-class StopMovementCommand : public tap::control::Command
+class ToggleMovementCommand : public tap::control::Command
 {
 public:
-    StopMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    ToggleMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
         this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "sentry stop moving command"; }
+    virtual const char *getName() const { return "sentry toggle moving command"; }
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
-        this->sub.queueRequest(SentryRequestMessageType::STOP_MOVEMENT);
+        this->sub.queueRequest(SentryRequestMessageType::TOGGLE_MOVEMENT);
     }
     virtual void execute() {}
     virtual void end(bool) {}
@@ -243,77 +243,23 @@ private:
 };
 
 /**
- * Tells the sentry to start moving
+ * Tells the sentry to toggle beyblading
  * This command executes once when schedule
  */
-class StartMovementCommand : public tap::control::Command
+class ToggleBeybladeCommand : public tap::control::Command
 {
 public:
-    StartMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    ToggleBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
         this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "sentry start moving command"; }
+    virtual const char *getName() const { return "sentry toggle beyblading command"; }
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
-        this->sub.queueRequest(SentryRequestMessageType::START_MOVEMENT);
-    }
-    virtual void execute() {}
-    virtual void end(bool) {}
-    virtual bool isFinished() const { return true; }
-
-private:
-    SentryRequestSubsystem &sub;
-};
-
-/**
- * Tells the sentry to stop beyblading
- * This command executes once when schedule
- */
-class StopBeybladeCommand : public tap::control::Command
-{
-public:
-    StopBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
-        : sub(sentryRequestSubsystem)
-    {
-        this->addSubsystemRequirement(&sentryRequestSubsystem);
-    }
-
-    virtual const char *getName() const { return "sentry stop beyblading command"; }
-    virtual bool isReady() { return true; }
-    virtual void initialize()
-    {
-        this->sub.queueRequest(SentryRequestMessageType::STOP_BEYBLADE);
-    }
-    virtual void execute() {}
-    virtual void end(bool) {}
-    virtual bool isFinished() const { return true; }
-
-private:
-    SentryRequestSubsystem &sub;
-};
-
-/**
- * Tells the sentry to start beyblading
- * This command executes once when schedule
- */
-class StartBeybladeCommand : public tap::control::Command
-{
-public:
-    StartBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
-        : sub(sentryRequestSubsystem)
-    {
-        this->addSubsystemRequirement(&sentryRequestSubsystem);
-    }
-
-    virtual const char *getName() const { return "sentry start beyblading command"; }
-    virtual bool isReady() { return true; }
-    virtual void initialize()
-    {
-        this->sub.queueRequest(SentryRequestMessageType::START_BEYBLADE);
+        this->sub.queueRequest(SentryRequestMessageType::TOGGLE_BEYBLADE);
     }
     virtual void execute() {}
     virtual void end(bool) {}
