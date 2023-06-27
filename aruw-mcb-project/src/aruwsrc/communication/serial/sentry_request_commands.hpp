@@ -124,7 +124,7 @@ public:
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
-        this->sub.queueRequest(SentryRequestMessageType::GO_TO_SUPPLIER_ZONE);
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_FRIENDLY_SUPPLIER_ZONE);
     }
     virtual void execute() {}
     virtual void end(bool) {}

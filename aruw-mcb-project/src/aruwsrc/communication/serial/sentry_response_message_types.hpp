@@ -17,32 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_REQUEST_MESSAGE_TYPES_HPP_
-#define SENTRY_REQUEST_MESSAGE_TYPES_HPP_
+#ifndef SENTRY_RESPONSE_MESSAGE_TYPES_HPP_
+#define SENTRY_RESPONSE_MESSAGE_TYPES_HPP_
 
 #include <cinttypes>
 
 namespace aruwsrc::communication::serial
 {
 
-// @todo: check
-static constexpr uint16_t SENTRY_REQUEST_MESSAGE_ID = 0x200;
-
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
-enum class SentryRequestMessageType : uint16_t  // see refSerialTransmitter for why this is 2 bytes
+enum class SentryResponseType : uint16_t  // see refSerialTransmitter for why this is 2 bytes
 {
     NONE = 0,
     GO_TO_FRIENDLY_BASE,
     GO_TO_ENEMY_BASE,
     GO_TO_FRIENDLY_SUPPLIER_ZONE,
+    HOLD_FIRE,
     GO_TO_ENEMY_SUPPLIER_ZONE,
     GO_TO_CENTER_POINT,
-    HOLD_FIRE,
-    TOGGLE_MOVEMENT,
-    TOGGLE_BEYBLADE,
+    MOVEMENT_ENABLED,
+    MOVEMENT_DISABLED,
+    BEYBLADE_ENABLED,
+    BEYBLADE_DISABLED,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial
 
-#endif  //  SENTRY_REQUEST_MESSAGE_TYPES_HPP_
+#endif  //  SENTRY_RESPONSE_MESSAGE_TYPES_HPP_

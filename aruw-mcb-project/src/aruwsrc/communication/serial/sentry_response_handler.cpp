@@ -18,6 +18,7 @@
  */
 
 #include "sentry_response_handler.hpp"
+#include "sentry_response_message_types.hpp"
 
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -30,10 +31,17 @@ void SentryResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     if (message.header.dataLength !=
-        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
+        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + sizeof(SentryResponseType))
     {
         RAISE_ERROR((&drivers), "message length incorrect");
         return;
+    }
+
+    const SentryResponseType type = *reinterpret_cast<const SentryResponseType*>(message.data);
+
+    switch (type)
+    {
+        // @todo cases
     }
 
     this->sentryMoving = static_cast<bool>(
