@@ -35,25 +35,23 @@ void SentryArucoResetSubsystem::refresh()
         yawObserver.getChassisWorldYaw(&oldYaw);
         transformWorldOdomToChassis(newYaw, newPose, resetData.turretId);
 
-        resetPosition(resetData, oldYaw);
-        resetOrientation(resetData);
+        resetPosition(resetData, oldYaw, oldYaw);
+        // resetPosition(resetData, newYaw, oldYaw);
+        // resetOrientation(resetData, newYaw);
     }
 }
 
-void SentryArucoResetSubsystem::resetOrientation(const VisionCoprocessor::ArucoResetData& resetData)
+void SentryArucoResetSubsystem::resetOrientation(const VisionCoprocessor::ArucoResetData& resetData, float newYaw)
 {
-    modm::Vector3f eulerAngles = getEulerAngles(resetData);
-    float& yaw = eulerAngles.z;
-    yawObserver.overrideChassisYaw(yaw);
+    yawObserver.overrideChassisYaw(newYaw);
 }
 
 void SentryArucoResetSubsystem::SentryArucoResetSubsystem::resetPosition(
     const VisionCoprocessor::ArucoResetData& resetData,
+    float newYaw,
     float oldYaw)
 {
     // need to rely on this getting called before
-    modm::Vector3f eulerAngles = getEulerAngles(resetData);
-    float& newYaw = eulerAngles.z;
     modm::Vector2f newPos(resetData.x, resetData.y);
     odom.overrideOdometry(newPos, newYaw - oldYaw);
 }
@@ -69,7 +67,7 @@ void SentryArucoResetSubsystem::transformWorldOdomToChassis(
     auto& majorToMinor = transforms.getMajorToMinor(turretID);
     auto& chassisToMajor = transforms.getChassisToTurretMajor();
 
-    // @odo: notices all these
+    // @odo: notices all these plus signs!
     yaw -= worldToMinor.getYaw();
     // minor to major
     yaw += majorToMinor.getYaw();

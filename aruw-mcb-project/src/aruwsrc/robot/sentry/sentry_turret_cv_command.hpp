@@ -85,7 +85,7 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
-    static constexpr float SCAN_LOW_PASS_ALPHA = 0.013f;
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Time to ignore aim requests while the turret is u-turning to aim at a new quadrant.

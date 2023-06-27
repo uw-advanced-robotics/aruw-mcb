@@ -60,9 +60,9 @@ private:
     const VisionCoprocessor& vcpp;
     const SentryTransforms& transforms;
 
-    void resetOrientation(const VisionCoprocessor::ArucoResetData& resetData);
+    void resetOrientation(const VisionCoprocessor::ArucoResetData& resetData, float newYaw);
 
-    void resetPosition(const VisionCoprocessor::ArucoResetData& resetData, float oldYaw);
+    void resetPosition(const VisionCoprocessor::ArucoResetData& resetData, float newYaw, float oldYaw);
 
 
     void transformWorldOdomToChassis(
