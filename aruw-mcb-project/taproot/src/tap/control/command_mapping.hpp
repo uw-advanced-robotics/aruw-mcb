@@ -82,7 +82,8 @@ public:
      *
      * @param[in] currState The current state of the remote.
      */
-    virtual void executeCommandMapping(const RemoteMapState &currState) = 0;
+    virtual void executeCommandMappingAdd(const RemoteMapState &currState) = 0;
+    virtual void executeCommandMappingRemove(const RemoteMapState &currState) = 0;
 
     /**
      * @return `true` if `this`'s `mapState` is a subset of the passed in
