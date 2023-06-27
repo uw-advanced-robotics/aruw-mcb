@@ -64,6 +64,9 @@ public:
     bool getChassisWorldYaw(float* yaw) const final;
 
 
+    void overrideChassisYaw(float newYaw);
+
+
     float turretWorldYawRadians;
     float turretMinorMajorYawRadians;
     float turretMajorChassisYawRadians;
@@ -71,6 +74,10 @@ private:
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajorSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewifeSubsystem;
+
+
+
+    float offset = 0.0f;
 };
 
 }  // namespace aruwsrc::sentry

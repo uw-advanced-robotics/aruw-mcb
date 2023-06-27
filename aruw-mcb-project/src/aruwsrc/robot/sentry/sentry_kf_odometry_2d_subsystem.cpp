@@ -39,4 +39,32 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
 
 void SentryKFOdometry2DSubsystem::refresh() { update(); }
 
+void SentryKFOdometry2DSubsystem::overrideOdometry(const modm::Vector2f& newPos, const float& deltaYaw) {
+
+  // auto currKFState = ChassisKFOdometry::kf.getStateVectorAsMatrix();
+  auto currKFState = this->kf.getStateVectorAsMatrix();
+
+  float newState[int(ChassisKFOdometry::OdomState::NUM_STATES)] = {
+    newPos.x,
+    currKFState[int(ChassisKFOdometry::OdomState::VEL_X)], // TOOD: rotate these
+    currKFState[int(ChassisKFOdometry::OdomState::ACC_X)],
+    newPos.y,
+    currKFState[int(ChassisKFOdometry::OdomState::VEL_Y)],
+    currKFState[int(ChassisKFOdometry::OdomState::ACC_Y)]
+  };
+
+  tap::algorithms::rotateVector(
+      &newState[int(ChassisKFOdometry::OdomInput::VEL_X)],
+      &newState[int(ChassisKFOdometry::OdomInput::VEL_Y)],
+      deltaYaw);
+
+  tap::algorithms::rotateVector(
+      &newState[int(ChassisKFOdometry::OdomInput::ACC_X)],
+      &newState[int(ChassisKFOdometry::OdomInput::ACC_Y)],
+      deltaYaw);
+
+ ChassisKFOdometry::kf.init(newState);
+}
+
+
 }  // namespace aruwsrc::sentry

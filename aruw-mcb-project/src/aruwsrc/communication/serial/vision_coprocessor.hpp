@@ -193,6 +193,22 @@ public:
         long long timestamp;
     } modm_packed;
 
+    
+    // stores a camera to world transform
+    struct ArucoResetData
+    {
+        float x;
+        float y;
+        float z;
+        float quatW;
+        float quatX;
+        float quatY;
+        float quatZ;
+        long long timestamp;
+        uint8_t turretId;
+        bool updated; // whether or not this was received on the current cycle
+    } modm_packed;
+
     // TODO: sentry only, refactor, comment
     struct TurretMajorOrientationData
     {
@@ -260,6 +276,11 @@ public:
         assert(turretID < control::turret::NUM_TURRETS);
         return lastAimData[turretID];
     }
+
+    mockable inline const ArucoResetData& getLastArucoResetData() const 
+    {
+        return lastArucoData;
+    }
     
     mockable inline const AutoNavSetpointData& getLastSetpointData() const { return lastSetpointData; }
 
@@ -320,6 +341,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
     };
 
@@ -354,6 +376,8 @@ private:
 
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
+    ArucoResetData lastArucoData{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, false };
+
     DJISerial::SerialMessage<sizeof(OdometryData)> lastOdometryMessage;
 
     // CV online variables.
@@ -387,6 +411,9 @@ private:
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
