@@ -124,6 +124,7 @@ public:
     void end(bool) override {}
 
     bool isFinished() const override { return false; }
+    float debug = 0;
 
 private:
     tap::Drivers &drivers;

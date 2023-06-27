@@ -36,8 +36,12 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 3'750},
-    {120, 6'500},
+    {50, 4'500},
+    {60, 5'700},
+    {70, 6'400},
+    {80, 6'700},
+    {100, 7'000},
+    {120, 8'000},
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -63,7 +67,7 @@ static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 15.0f;
 static constexpr float VELOCITY_PID_KP = 20.0f;
 static constexpr float VELOCITY_PID_KI = 0.2f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 3'000.0f;
+static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
  * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -80,7 +84,7 @@ static constexpr float AUTOROTATION_PID_KP = 6'000.0f;
 static constexpr float AUTOROTATION_PID_KD = 55.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 3'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 4'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -97,11 +101,11 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Distance from center of the two front wheels (m)
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.38f;
 /**
  * Distance from center of the front and rear wheels (m).
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
@@ -118,7 +122,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading
  */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.9f;
+static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.8f;
 
 /**
  * Fraction between [0, 1], what we multiply user translational input by when beyblading.

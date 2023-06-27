@@ -19,6 +19,7 @@
 
 #include "turret_mcb_can_comm.hpp"
 
+#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -189,40 +190,22 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     }
 }
 
-void TurretMCBCanComm::transformImuData() {
-    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turretMCB> turretMCBAngles(
-        currProcessingImuData.roll,
-        currProcessingImuData.pitch,
-        currProcessingImuData.yaw);
-
-    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turret> turretAngles =
-        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAngles);
-
-    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turretMCB> turretMCBAngleRates(
-        currProcessingImuData.rawRollVelocity,
-        currProcessingImuData.rawPitchVelocity,
-        currProcessingImuData.rawYawVelocity);
-
-    tap::algorithms::transforms::Orientation<aruwsrc::transforms::turret> turretAngleRates =
-        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAngleRates);
-
-    tap::algorithms::transforms::Position<aruwsrc::transforms::turretMCB> turretMCBAccel(
-        currProcessingImuData.xAcceleration,
-        currProcessingImuData.yAcceleration,
-        currProcessingImuData.zAcceleration);
-
-    tap::algorithms::transforms::Position<aruwsrc::transforms::turret> turretAccel =
-        aruwsrc::transforms::turretMCBtoturret.apply(turretMCBAccel);
-
-    currProcessingImuData.roll = turretAngles.roll();
-    currProcessingImuData.pitch = turretAngles.pitch();
-    currProcessingImuData.yaw = turretAngles.yaw();
-    currProcessingImuData.rawRollVelocity = turretAngleRates.roll();
-    currProcessingImuData.rawPitchVelocity = turretAngleRates.pitch();
-    currProcessingImuData.rawYawVelocity = turretAngleRates.yaw();
-    currProcessingImuData.xAcceleration = turretAccel.x();
-    currProcessingImuData.yAcceleration = turretAccel.y();
-    currProcessingImuData.zAcceleration = turretAccel.z();
+void TurretMCBCanComm::transformImuData()
+{
+#if defined(TARGET_HERO)
+    currProcessingImuData.roll =
+        tap::algorithms::ContiguousFloat((-currProcessingImuData.roll - M_PI_2), -M_PI, M_PI)
+            .getValue();
+    currProcessingImuData.pitch = -currProcessingImuData.pitch;
+    currProcessingImuData.yaw = currProcessingImuData.yaw;
+    float temp = currProcessingImuData.rawPitchVelocity;
+    currProcessingImuData.rawRollVelocity = -currProcessingImuData.rawRollVelocity;
+    currProcessingImuData.rawPitchVelocity = -currProcessingImuData.rawYawVelocity;
+    currProcessingImuData.rawYawVelocity = -temp;
+    currProcessingImuData.xAcceleration = currProcessingImuData.xAcceleration;
+    std::swap(currProcessingImuData.yAcceleration, currProcessingImuData.zAcceleration);
+#else
+#endif
 }
 
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)

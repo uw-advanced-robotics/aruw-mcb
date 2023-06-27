@@ -143,18 +143,9 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_PITCH_MOTOR,
-    false,
+    true,
     "Pitch Turret");
-tap::motor::DoubleDjiMotor yawMotor(
-    drivers(),
-    YAW_BACK_MOTOR_ID,
-    YAW_FRONT_MOTOR_ID,
-    CAN_BUS_YAW_MOTORS,
-    CAN_BUS_YAW_MOTORS,
-    true,
-    true,
-    "Yaw Front Turret",
-    "Yaw Back Turret");
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -199,7 +190,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 BeybladeCommand beybladeCommand(
     drivers(),
@@ -230,14 +221,7 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
-    *drivers(),
-    turret.yawMotor,
-    world_rel_chassis_imu::YAW_PID_CONFIG);
-
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
-    world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
@@ -257,10 +241,14 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
     getTurretMCBCanComm(),
@@ -268,12 +256,19 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
+    worldFramePitchTurretImuVelPidCv
+);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    &worldFrameYawChassisImuController,
+    &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
@@ -285,7 +280,7 @@ cv::TurretCVCommand turretCVCommand(
     &drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuController,
+    &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
@@ -384,7 +379,7 @@ ClientDisplayCommand clientDisplayCommand(
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
+    nullptr,
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -396,7 +391,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&waterwheel::rotateAndUnjamWaterwheel},
+    {&kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -405,7 +400,7 @@ HoldCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
+    {&chassisDriveCommand, &turretCVCommand},  // &turretCVCommand
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
@@ -441,7 +436,8 @@ PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({R
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
-    {&imuCalibrateCommand},
+    // {&imuCalibrateCommand}, Due to non-flat calibration, we have to disable calibration.
+    {},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,
