@@ -23,29 +23,41 @@
 // #include "tap/control/subsystem.hpp"
 // #include "tap/util_macros.hpp"
 
-// #include "sentry_request_transmitter.hpp"
+// #include "tap/communication/serial/ref_serial_transmitter.hpp"
+// #include "tap/communication/serial/ref_serial.hpp"
 
-// namespace aruwsrc
+
+// enum class SentryStrategy : uint8_t
 // {
-// class Drivers;
-// }
+//     NONE = 0,
+//     GO_TO_FRIENDLY_BASE,
+//     GO_TO_ENEMY_BASE,
+//     GO_TO_SUPPLIER_ZONE,
+//     GO_TO_ENEMY_SUPPLIER_ZONE,
+//     GO_TO_CENTER_POINT,
+//     NUM_STRATEGIES,
+// };
 
 // namespace aruwsrc::communication::serial
 // {
-// class SentryResponseSubsystem : public tap::control::Subsystem
+// class SentryStrategySubsystem : public tap::control::Subsystem, public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 // {
 // public:
-//     SentryResponseSubsystem(tap::Drivers *drivers);
+//     struct SentryResponseMessage
+//     {
+//         SentryStrategy currentStrategy;
+//         uint8_t holdFireCountdown;
+//         bool beybladeEnabled;
+//         bool movementEnabled;
+//     };
+
+//     SentryStrategySubsystem(tap::Drivers& drivers);
 
 //     void refresh() override;
 
-//     inline mockable void queueRequest(SentryRequestMessageType type)
-//     {
-//         sentryResponseTransmitter.queueRequest(type);
-//     }
-
 // private:
-//     SentryResponseTransmitter sentryResponseTransmitter;
+//     tap::Drivers& drivers;
+//     RefSerialTransmitter refSerialTransmitter;
 // };
 // }  // namespace aruwsrc::communication::serial
 

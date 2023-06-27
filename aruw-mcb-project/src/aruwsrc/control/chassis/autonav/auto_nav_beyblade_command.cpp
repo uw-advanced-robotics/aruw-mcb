@@ -110,8 +110,7 @@ void AutoNavBeybladeCommand::execute()
                 config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
                 config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-            float rampTarget =
-                rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+            rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
             // reduce the beyblade rotation when translating to allow for better translational speed
             // (otherwise it is likely that you will barely move unless

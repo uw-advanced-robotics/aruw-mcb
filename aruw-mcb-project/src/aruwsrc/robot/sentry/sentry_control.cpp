@@ -415,10 +415,6 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  /
     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
 
-algorithms::ChassisFrameYawTurretController chassisFrameTurretMajorYawController(
-    turretMajor.yawMotor,
-    turretMajor::CHASSIS_REL_YAW_PID_CONFIG);
-
 // Otto ballistics solver --------------------------------------------------------------------
 
 OttoBallisticsSolver<TurretMinorGirlbossFrame> girlbossBallisticsSolver(
