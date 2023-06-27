@@ -33,7 +33,7 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
 {
 }
 
-void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::RemoteMapState &currState)
+void MultiShotCvCommandMapping::executeCommandMappingRemove(const tap::control::RemoteMapState &currState)
 {
     int timesToReschedule = 0;
 
@@ -66,6 +66,12 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
 
     setMaxTimesToSchedule(timesToReschedule);
 
-    tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
+    tap::control::HoldRepeatCommandMapping::executeCommandMappingRemove(currState);
 }
+
+void MultiShotCvCommandMapping::executeCommandMappingAdd(const tap::control::RemoteMapState &currState)
+{
+    tap::control::HoldRepeatCommandMapping::executeCommandMappingAdd(currState);
+}
+
 }  // namespace aruwsrc::control::agitator
