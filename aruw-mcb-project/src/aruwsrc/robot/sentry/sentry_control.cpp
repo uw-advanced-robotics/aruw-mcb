@@ -363,12 +363,6 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     0.5f, 0.5f);  // TODO: this
 
 
-SentryArucoResetSubsystem arucoResetSubsystem(
-    *drivers(),
-    sentryChassisWorldYawObserver,
-    odometrySubsystem,
-    drivers()->visionCoprocessor);
-
 // Transforms --------------------------------------------------------------------------------
 
 SentryTransformsSubsystem sentryTransforms(
@@ -378,6 +372,13 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorGirlboss,
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
+
+SentryArucoResetSubsystem arucoResetSubsystem(
+    *drivers(),
+    sentryChassisWorldYawObserver,
+    odometrySubsystem,
+    drivers()->visionCoprocessor,
+    sentryTransforms);
 
 // Turret controllers -------------------------------------------------------
 
