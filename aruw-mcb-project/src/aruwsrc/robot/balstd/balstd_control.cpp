@@ -47,6 +47,7 @@
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_home_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_jump_command.hpp"
+#include "aruwsrc/control/chassis/balancing/balancing_chassis_recovery_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_rel_drive_command.hpp"
 #include "aruwsrc/control/chassis/balancing/balancing_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -144,14 +145,14 @@ aruwsrc::motor::Tmotor_AK809 legmotorRR(
 
 tap::motor::DjiMotor leftWheel(
     drivers(),
-    tap::motor::MOTOR4,
+    tap::motor::MOTOR3,
     tap::can::CanBus::CAN_BUS1,
     false,
     "Left Wheel Motor");
 
 tap::motor::DjiMotor rightWheel(
     drivers(),
-    tap::motor::MOTOR3,
+    tap::motor::MOTOR4,
     tap::can::CanBus::CAN_BUS1,
     true,
     "Right Wheel Motor");
@@ -202,6 +203,7 @@ VelocityAgitatorSubsystem agitator(
 
 aruwsrc::chassis::BalancingChassisSubsystem chassis(
     drivers(),
+    getTurretMCBCanComm1(),
     getTurretMCBCanComm2(),
     turret.pitchMotor,
     turret.yawMotor,
@@ -368,9 +370,32 @@ aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
+client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    drivers()->commandScheduler,
+    drivers()->visionCoprocessor,
+    clientDisplay,
+    nullptr,
+    frictionWheels,
+    agitator,
+    turret,
+    imuCalibrateCommand,
+    &leftMousePressedBNotPressed,
+    &cvOnTargetGovernor,
+    nullptr,
+    nullptr,
+    nullptr,
+    sentryResponseHandler);
+
 aruwsrc::chassis::BalancingChassisHomeCommand homeLegCommand(drivers(), &chassis);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
+
+BalancingChassisRecoveryCommand recoveryCommand(
+    drivers(),
+    &chassis,
+    drivers()->controlOperatorInterface);
 
 BalancingChassisRelativeDriveCommand manualDriveCommand(
     drivers(),
@@ -426,9 +451,9 @@ PressCommandMapping leftSwitchUp(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Keyboard/Mouse related mappings
-PressCommandMapping gPressedCtrlNotPressed(
+ToggleCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {},
+    {&recoveryCommand},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
@@ -475,10 +500,7 @@ PressCommandMapping bCtrlPressed(
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
 PressCommandMapping qPressed(drivers(), {}, RemoteMapState({Remote::Key::Q}));
-PressCommandMapping ePressed(
-    drivers(),
-    {&jumpCommand},
-    RemoteMapState({Remote::Key::E}));
+PressCommandMapping ePressed(drivers(), {&jumpCommand}, RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
     {&autorotateDriveCommand},

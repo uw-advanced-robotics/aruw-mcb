@@ -43,7 +43,7 @@ public:
     static constexpr int16_t USER_MOUSE_PITCH_MAX = 1000;
     static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
     static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
-    static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
+    static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 8.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
 #if defined(TARGET_HERO_CYCLONE)
@@ -63,7 +63,7 @@ public:
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
     static constexpr float MAX_ACCELERATION_X = 1'000.0f;
-    static constexpr float MAX_DECELERATION_X = 10'000.0f;
+    static constexpr float MAX_DECELERATION_X = 2'000.0f;
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the y direction

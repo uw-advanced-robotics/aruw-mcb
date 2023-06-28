@@ -85,13 +85,13 @@ void BalancingChassisAutorotateCommand::updateAutorotateState()
         }
         else
         {
-            if (!lazyTimeout.isExpired())
+            if (lazyTimeout.isExpired())
             {
-                chassisAutorotating = false;
+                chassisAutorotating = true;
             }
             else
             {
-                chassisAutorotating = true;
+                chassisAutorotating = false;
             }
         }
     }
@@ -165,6 +165,7 @@ void BalancingChassisAutorotateCommand::execute()
         }
         runRotationController(chassisRotationSetpoint, dt);
         debug1 = angleToTarget;
+        debug2 = chassisRotationSetpoint;
         // The chassis-front-back output is rotated from the turret frame via a cosine
         float chassisXoutput = motionDesiredTurretRelative.getLength() * cos(angleToTarget);
         float chassisRoutput = DESIRED_ROTATION_SCALAR * desiredRotationAverage;

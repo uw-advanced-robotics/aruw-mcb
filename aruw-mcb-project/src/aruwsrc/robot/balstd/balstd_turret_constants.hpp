@@ -49,10 +49,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .maxAngle = M_PI,
     .limitMotorAngles = false,
 };
-static constexpr float CHASSIS_FALL_OVER_OFFSET = modm::toRadian(24.70);
+static constexpr float CHASSIS_FALL_OVER_OFFSET = modm::toRadian(22.7);
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2 - CHASSIS_FALL_OVER_OFFSET,
-    .startEncoderValue = 6942,
+    .startEncoderValue = 6988,
     .minAngle = modm::toRadian(55),
     .maxAngle = modm::toRadian(125),
     .limitMotorAngles = true,
@@ -107,7 +107,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.5f,
@@ -121,7 +121,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 35.0f,
+    .kp = 32.0f,
     .ki = 1.0f,
     .kd = 1.0f,
     .maxICumulative = 0.5f,

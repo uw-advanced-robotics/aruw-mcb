@@ -164,64 +164,16 @@ static constexpr float HEIGHT_REMOTE_SCALAR = .001;
 
 static constexpr float MASS_CHASSIS = 13.5f;  // kg
 
-static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.125, 0.325};
+static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.140, 0.325};
 
-static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
-    .kp = 4500,
-    .ki = 100,
-    .kd = 6,
-    .maxICumulative = 10000,
-    .maxOutput = 20000,
+static constexpr modm::Pair<float, float> HEIGHT_TO_SPEED_LUT[] = {
+    {.1f, 5.0f},
+    {.3f, .5f},
 };
-static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
-static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
-static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG = LF_LEG_MOTOR_PID_CONFIG;
 
-static const tap::algorithms::FuzzyPDConfig LF_LEG_MOTOR_FUZZY_PID_CONFIG = {
-    .maxError = modm::toRadian(90),
-    .maxErrorDerivative = 100.0f,
-    .fuzzyTable = tap::algorithms::FuzzyPDRuleTable(
-        std::array<float, 3>({35'000, 35'000, 35'000}),
-        std::array<float, 3>({30, 20, 30})),
-};
-static const tap::algorithms::FuzzyPDConfig LR_LEG_MOTOR_FUZZY_PID_CONFIG =
-    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
-static const tap::algorithms::FuzzyPDConfig RF_LEG_MOTOR_FUZZY_PID_CONFIG =
-    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
-static const tap::algorithms::FuzzyPDConfig RR_LEG_MOTOR_FUZZY_PID_CONFIG =
-    LF_LEG_MOTOR_FUZZY_PID_CONFIG;
-
-// static const tap::algorithms::SmoothPidConfig LF_LEG_MOTOR_PID_CONFIG{
-//     .kp = 10000,
-//     .ki = 5,
-//     .kd = .1,
-//     .maxICumulative = 5000,
-//     .maxOutput = 10000,
-// };
-
-// static const tap::algorithms::SmoothPidConfig LR_LEG_MOTOR_PID_CONFIG{
-//     .kp = 10000,
-//     .ki = 5,
-//     .kd = .1,
-//     .maxICumulative = 5000,
-//     .maxOutput = 10000,
-// };
-
-// static const tap::algorithms::SmoothPidConfig RF_LEG_MOTOR_PID_CONFIG{
-//     .kp = 10000,
-//     .ki = 5,
-//     .kd = .1,
-//     .maxICumulative = 5000,
-//     .maxOutput = 10000,
-// };
-
-// static const tap::algorithms::SmoothPidConfig RR_LEG_MOTOR_PID_CONFIG{
-//     .kp = 10000,
-//     .ki = 5,
-//     .kd = .1,
-//     .maxICumulative = 5000,
-//     .maxOutput = 10000,
-// };
+static modm::interpolation::Linear<modm::Pair<float, float>> CHASSIS_HEIGHT_TO_SPEED_INTERPOLATOR(
+    HEIGHT_TO_SPEED_LUT,
+    MODM_ARRAY_SIZE(HEIGHT_TO_SPEED_LUT));
 
 static const control::motion::FiveBarConfig FIVE_BAR_CONFIG{
     .defaultPosition = modm::Vector2f(0.0f, 0.100f),

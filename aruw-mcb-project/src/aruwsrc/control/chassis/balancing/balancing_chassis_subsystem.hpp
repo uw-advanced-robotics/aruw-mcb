@@ -65,6 +65,7 @@ public:
     BalancingChassisSubsystem(
         tap::Drivers* drivers,
         aruwsrc::can::TurretMCBCanComm& turretMCB,
+        aruwsrc::can::TurretMCBCanComm& chassisMCB,
         const aruwsrc::control::turret::TurretMotor& pitchMotor,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         aruwsrc::control::motion::FiveBarLinkage* fivebarLeft,
@@ -101,6 +102,10 @@ public:
         jumpTimeout.restart(JUMP_TIMEOUT_DURATION);
         debug1 += 1;
     }
+
+    void startRecovery() { balancingState = RECOVERY; }
+
+    void endRecovery() { setFallen(); }
 
     /**
      * @return the number of chassis motors
@@ -228,25 +233,27 @@ private:
     bool armed = false;
 
     tap::algorithms::Ramp velocityRamper;
-    static constexpr float MAX_ACCELERATION = 1.5;  // m/s/s
+    static constexpr float MAX_ACCELERATION = 4.0;  // m/s/s
 
     // Tunable constants related to the state transitions
     BalancingState balancingState = FALLEN_NOT_MOVING;
     tap::arch::MilliTimeout balanceAttemptTimeout;
-    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 300;
+    uint32_t BALANCE_ATTEMPT_TIMEOUT_DURATION = 350;
     tap::arch::MilliTimeout balanceAttemptCooldown;
     uint32_t BALANCE_ATTEMPT_COOLDOWN_DURATION = 2000;
     bool standupEnable = true;
-    float STANDUP_TORQUE_GAIN = .3;
+    float STANDUP_TORQUE_GAIN = .35;
 
-    float FALLING_FORCE_THRESHOLD = 40.0;  // Newtons
+    float FALLING_FORCE_THRESHOLD = 5.0;  // Newtons
     float JUMP_GRAV_GAIN = 3.5f;
     tap::arch::MilliTimeout jumpTimeout;
     uint32_t JUMP_TIMEOUT_DURATION = 200;
+    tap::arch::MilliTimeout fallTimeout;
+    uint32_t FALL_TIMEOUT_DURATION = 150;
 
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
-    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 2;
+    static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
 
     /**
      * Estimates the current state variables of the robot.
@@ -314,10 +321,11 @@ private:
     /// Runs control logic with gravity compensation for the five-bar linkage
     void fivebarController();
 
-    // Uses lookup tables to get 
-    CMSISMat<2,2> getVMCJacobian(float t1, float t4);
+    // Uses lookup tables to get
+    CMSISMat<2, 2> getVMCJacobian(float t1, float t4);
 
     aruwsrc::can::TurretMCBCanComm& turretMCB;
+    aruwsrc::can::TurretMCBCanComm& chassisMCB;
     const aruwsrc::control::turret::TurretMotor& pitchMotor;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
 
@@ -335,9 +343,10 @@ private:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     SmoothPid rollPid = SmoothPid(SmoothPidConfig{
-        .kp = 1.5,
+        .kp = 2.0,
+        .ki = .0,
         .kd = 0,
-        .maxICumulative = 0.0,
+        .maxICumulative = 0.05,
         .maxOutput = .2,
     });
 
@@ -358,11 +367,11 @@ private:
     });
 
     SmoothPidConfig retractionPidConfig = {
-        .kp = 500,
+        .kp = 2000,
         .ki = .0,
         .kd = .0,
         .maxICumulative = 0,
-        .maxOutput = 20,
+        .maxOutput = 80,
         .errDeadzone = .03,
     };
     SmoothPid retractionPid[2] = {SmoothPid(retractionPidConfig), SmoothPid(retractionPidConfig)};
