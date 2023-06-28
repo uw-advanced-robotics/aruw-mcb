@@ -62,20 +62,22 @@ void SentryArucoResetSubsystem::transformWorldOdomToChassis(
     uint8_t turretID)
 {
     // @todo: get inverse broken!!!!!!!!!!!!!!!!!!!!!!
-    auto& worldToMinor = transforms.getWorldToMinor(turretID);
+    // auto& worldToMinor = transforms.getWorldToMinor(turretID);
 
     auto& majorToMinor = transforms.getMajorToMinor(turretID);
     auto& chassisToMajor = transforms.getChassisToTurretMajor();
 
     // @odo: notices all these plus signs!
-    yaw -= worldToMinor.getYaw();
+    // yaw -= worldToMinor.getYaw();
     // minor to major
     yaw += majorToMinor.getYaw();
     // major to chassis
     yaw += chassisToMajor.getYaw();
 
-    pose.x -= worldToMinor.getX() + majorToMinor.getX() + chassisToMajor.getX();
-    pose.y -= worldToMinor.getY() + majorToMinor.getY() + chassisToMajor.getY();
+    // pose.x -= worldToMinor.getX() + majorToMinor.getX() + chassisToMajor.getX();
+    // pose.y -= worldToMinor.getY() + majorToMinor.getY() + chassisToMajor.getY();
+    pose.x -= majorToMinor.getX() + chassisToMajor.getX();
+    pose.y -= majorToMinor.getY() + chassisToMajor.getY();
 }
 
 }  // namespace aruwsrc::sentry
