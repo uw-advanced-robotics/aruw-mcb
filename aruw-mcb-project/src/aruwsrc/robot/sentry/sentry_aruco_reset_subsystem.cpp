@@ -25,35 +25,42 @@ SentryArucoResetSubsystem::SentryArucoResetSubsystem(
 void SentryArucoResetSubsystem::refresh()
 {
     // pull from vision coprocessor, if updated we reset certain things
-    const VisionCoprocessor::ArucoResetData& resetData = vcpp.getLastArucoResetData();
+    const aruwsrc::serial::VisionCoprocessor::ArucoResetData& resetData = vcpp.getLastArucoResetData();
+    
     if (resetData.updated)
     {
+        // @todo bypassing incomplete transform system
         modm::Vector3f newPose(resetData.x, resetData.y, resetData.z);
-        float newYaw = getEulerAngles(resetData).z;
+        float newYaw = getEulerAngles(resetData).z - transforms.getMajorToMinor(resetData.turretId).getYaw() - transforms.getChassisToTurretMajor().getYaw();
+        arucoYaw = newYaw;
+        debug1 = transforms.getMajorToMinor(resetData.turretId).getYaw();
+        debug2 = transforms.getChassisToTurretMajor().getYaw();
+        
 
         float oldYaw;
         yawObserver.getChassisWorldYaw(&oldYaw);
-        transformWorldOdomToChassis(newYaw, newPose, resetData.turretId);
+        // transformWorldOdomToChassis(newYaw, newPose, resetData.turretId);
 
-        // resetPosition(resetData, oldYaw, oldYaw);
-        resetPosition(resetData, newYaw, oldYaw);
-        resetOrientation(resetData, newYaw);
+        float chassisX = resetData.x - transforms.getWorldToMinor(resetData.turretId).getX() + transforms.getWorldToChassis().getX();
+        float chassisY = resetData.y - transforms.getWorldToMinor(resetData.turretId).getY() + transforms.getWorldToChassis().getY();
+
+        resetPosition(chassisX, chassisY);
+        resetOrientation(newYaw, oldYaw);
     }
 }
 
-void SentryArucoResetSubsystem::resetOrientation(const VisionCoprocessor::ArucoResetData& resetData, float newYaw)
+void SentryArucoResetSubsystem::resetOrientation(float newYaw, float oldYaw)
 {
-    yawObserver.overrideChassisYaw(newYaw);
+    odom.overrideOdometryOrientation(newYaw - oldYaw);
+    yawObserver.overrideChassisYaw(newYaw - oldYaw);
 }
 
 void SentryArucoResetSubsystem::SentryArucoResetSubsystem::resetPosition(
-    const VisionCoprocessor::ArucoResetData& resetData,
-    float newYaw,
-    float oldYaw)
+    const float x, const float y)
 {
     // need to rely on this getting called before
-    modm::Vector2f newPos(resetData.x, resetData.y);
-    odom.overrideOdometry(newPos, newYaw - oldYaw);
+    modm::Vector2f newPos(x, y);
+    odom.overrideOdometryPosition(newPos);
 }
 
 void SentryArucoResetSubsystem::transformWorldOdomToChassis(
@@ -78,8 +85,6 @@ void SentryArucoResetSubsystem::transformWorldOdomToChassis(
     // pose.y -= worldToMinor.getY() + majorToMinor.getY() + chassisToMajor.getY();
     pose.x -= majorToMinor.getX() + chassisToMajor.getX();
     pose.y -= majorToMinor.getY() + chassisToMajor.getY();
-
-    arucoYaw = yaw;
 }
 
 }  // namespace aruwsrc::sentry

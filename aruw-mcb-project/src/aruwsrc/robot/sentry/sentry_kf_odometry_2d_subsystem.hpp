@@ -62,7 +62,9 @@ public:
 
     void refresh() override;
 
-    void overrideOdometry(const modm::Vector2f& newPos, const float& deltaYaw);
+    void overrideOdometryPosition(const modm::Vector2f& newPos);
+
+    void overrideOdometryOrientation(const float deltaYaw);
 };
 
 }  // namespace aruwsrc::sentry

@@ -28,8 +28,6 @@
 #include "modm/math/geometry/quaternion.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 
-using namespace aruwsrc::serial;
-using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::sentry {
 
@@ -43,7 +41,7 @@ public:
         tap::Drivers& drivers,
         SentryChassisWorldYawObserver& yawObserver,
         SentryKFOdometry2DSubsystem& odom,
-        VisionCoprocessor& vcpp,
+        aruwsrc::serial::VisionCoprocessor& vcpp,
         SentryTransforms& transforms);
 
     void initialize() override {};
@@ -57,14 +55,16 @@ public:
 private:
     SentryChassisWorldYawObserver& yawObserver;
     SentryKFOdometry2DSubsystem& odom;
-    const VisionCoprocessor& vcpp;
+    const aruwsrc::serial::VisionCoprocessor& vcpp;
     const SentryTransforms& transforms;
 
-    void resetOrientation(const VisionCoprocessor::ArucoResetData& resetData, float newYaw);
+    void resetOrientation(float newYaw, float oldYaw);
 
-    void resetPosition(const VisionCoprocessor::ArucoResetData& resetData, float newYaw, float oldYaw);
+    void resetPosition(const float x, const float y);
 
     float arucoYaw;
+    float debug1;
+    float debug2;
 
 
     void transformWorldOdomToChassis(
@@ -73,10 +73,11 @@ private:
         uint8_t turretID
     );
 
-    modm::Vector3f turretPosToChassisPos(const VisionCoprocessor::ArucoResetData& resetData);
+    modm::Vector3f turretPosToChassisPos(const aruwsrc::serial::VisionCoprocessor::ArucoResetData& resetData);
 
     // returns vector3f of {x:roll, y:pitch: z: yaw}
-    static modm::Vector3f getEulerAngles(const VisionCoprocessor::ArucoResetData& resetData)  {
+    // @todo make this part of tap
+    static modm::Vector3f getEulerAngles(const aruwsrc::serial::VisionCoprocessor::ArucoResetData& resetData)  {
         modm::Vector3f eulerAngles;
         modm::Quaternion q(resetData.quatW, resetData.quatX, resetData.quatY, resetData.quatZ);
 

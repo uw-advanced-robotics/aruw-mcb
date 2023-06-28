@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#define TARGET_SENTRY_BEEHIVE
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
-#include "aruwsrc/robot/sentry/sentry_reset_odometry_command.hpp"
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"

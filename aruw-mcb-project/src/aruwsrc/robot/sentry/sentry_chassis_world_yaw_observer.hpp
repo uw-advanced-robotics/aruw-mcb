@@ -75,8 +75,7 @@ private:
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewifeSubsystem;
 
-
-
+    // error factor since we don't know how to reset the imu to some non-zero value outright
     float offset = 0.0f;
 };
 
