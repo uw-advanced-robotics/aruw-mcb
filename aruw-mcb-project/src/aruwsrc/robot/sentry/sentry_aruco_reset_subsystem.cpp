@@ -35,9 +35,9 @@ void SentryArucoResetSubsystem::refresh()
         yawObserver.getChassisWorldYaw(&oldYaw);
         transformWorldOdomToChassis(newYaw, newPose, resetData.turretId);
 
-        resetPosition(resetData, oldYaw, oldYaw);
-        // resetPosition(resetData, newYaw, oldYaw);
-        // resetOrientation(resetData, newYaw);
+        // resetPosition(resetData, oldYaw, oldYaw);
+        resetPosition(resetData, newYaw, oldYaw);
+        resetOrientation(resetData, newYaw);
     }
 }
 
@@ -78,6 +78,8 @@ void SentryArucoResetSubsystem::transformWorldOdomToChassis(
     // pose.y -= worldToMinor.getY() + majorToMinor.getY() + chassisToMajor.getY();
     pose.x -= majorToMinor.getX() + chassisToMajor.getX();
     pose.y -= majorToMinor.getY() + chassisToMajor.getY();
+
+    arucoYaw = yaw;
 }
 
 }  // namespace aruwsrc::sentry

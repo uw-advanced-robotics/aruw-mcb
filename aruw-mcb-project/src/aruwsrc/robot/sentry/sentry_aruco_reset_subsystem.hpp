@@ -64,6 +64,8 @@ private:
 
     void resetPosition(const VisionCoprocessor::ArucoResetData& resetData, float newYaw, float oldYaw);
 
+    float arucoYaw;
+
 
     void transformWorldOdomToChassis(
         float& worldYaw,

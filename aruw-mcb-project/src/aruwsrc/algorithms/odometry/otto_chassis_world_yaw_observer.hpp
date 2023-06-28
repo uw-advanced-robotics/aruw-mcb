@@ -66,6 +66,7 @@ public:
 
 private:
     const aruwsrc::control::turret::TurretSubsystem& turretSubsystem;
+    float* a;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

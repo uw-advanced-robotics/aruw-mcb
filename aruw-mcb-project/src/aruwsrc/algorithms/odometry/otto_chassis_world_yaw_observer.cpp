@@ -30,6 +30,7 @@ OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
     const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
     : turretSubsystem(turretSubsystem)
 {
+    *a = 0.0f;
 }
 
 bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
@@ -58,7 +59,11 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         float turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
 
         *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
+        // currentYaw = *output;
+        *a = *output;
+
         return true;
+
     }
 }
 
