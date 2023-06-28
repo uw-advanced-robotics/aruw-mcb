@@ -260,8 +260,7 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
-    worldFramePitchTurretImuVelPidCv
-);
+    worldFramePitchTurretImuVelPidCv);
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -436,8 +435,7 @@ PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({R
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
-    // {&imuCalibrateCommand}, Due to non-flat calibration, we have to disable calibration.
-    {},
+    {&imuCalibrateCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,

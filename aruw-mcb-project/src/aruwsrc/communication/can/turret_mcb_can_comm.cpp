@@ -193,17 +193,10 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 void TurretMCBCanComm::transformImuData()
 {
 #if defined(TARGET_HERO)
-    currProcessingImuData.roll =
-        tap::algorithms::ContiguousFloat((-currProcessingImuData.roll - M_PI_2), -M_PI, M_PI)
-            .getValue();
-    currProcessingImuData.pitch = -currProcessingImuData.pitch;
-    currProcessingImuData.yaw = currProcessingImuData.yaw;
-    float temp = currProcessingImuData.rawPitchVelocity;
-    currProcessingImuData.rawRollVelocity = -currProcessingImuData.rawRollVelocity;
-    currProcessingImuData.rawPitchVelocity = -currProcessingImuData.rawYawVelocity;
-    currProcessingImuData.rawYawVelocity = -temp;
-    currProcessingImuData.xAcceleration = currProcessingImuData.xAcceleration;
-    std::swap(currProcessingImuData.yAcceleration, currProcessingImuData.zAcceleration);
+    currProcessingImuData.pitch *= -1;
+    currProcessingImuData.rawPitchVelocity *= -1;
+    currProcessingImuData.roll *= -1;
+    currProcessingImuData.rawRollVelocity *= -1;
 #else
 #endif
 }
