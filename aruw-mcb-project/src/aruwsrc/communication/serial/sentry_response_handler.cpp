@@ -43,14 +43,19 @@ void SentryResponseHandler::operator()(
     {
         case SentryResponseType::MOVEMENT_ENABLED:
             this->sentryMovementEnabled = true;
+            break;
         case SentryResponseType::MOVEMENT_DISABLED:
             this->sentryMovementEnabled = false;
+            break;
         case SentryResponseType::BEYBLADE_ENABLED:
             this->sentryBeybladeEnabled = true;
+            break;
         case SentryResponseType::BEYBLADE_DISABLED:
             this->sentryBeybladeEnabled = false;
+            break;
         case SentryResponseType::HOLD_FIRE:
             this->holdFireTimer.restart(1000);
+            break;
         default:
             this->sentryStrategy = static_cast<SentryStrategy>(type);
     }
