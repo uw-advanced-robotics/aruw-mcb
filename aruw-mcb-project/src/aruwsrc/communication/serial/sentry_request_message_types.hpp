@@ -39,10 +39,8 @@ enum class SentryRequestMessageType : uint16_t  // see refSerialTransmitter for 
     GO_TO_ENEMY_SUPPLIER_ZONE,
     GO_TO_CENTER_POINT,
     HOLD_FIRE,
-    STOP_MOVEMENT,
-    START_MOVEMENT,
-    STOP_BEYBLADE,
-    START_BEYBLADE,
+    TOGGLE_MOVEMENT,
+    TOGGLE_BEYBLADE,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial
