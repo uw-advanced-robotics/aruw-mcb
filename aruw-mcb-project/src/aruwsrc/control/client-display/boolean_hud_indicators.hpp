@@ -111,7 +111,8 @@ private:
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
         /** Indicates whether or not the sentry is moving. */
-        SENTRY_DRIVE_STATUS,
+        SENTRY_MOVEMENT_ENABLED,
+        SENTRY_BEYBLADE_ENABLED,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */

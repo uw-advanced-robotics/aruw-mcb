@@ -73,10 +73,17 @@ BooleanHudIndicators::BooleanHudIndicators(
               0),
           BooleanHUDIndicator(
               refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
+              &booleanHudIndicatorGraphics[SENTRY_MOVEMENT_ENABLED],
               updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_MOVEMENT_ENABLED]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_MOVEMENT_ENABLED])>,
+              0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[SENTRY_BEYBLADE_ENABLED],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED])>,
               0),
       }
 {
@@ -114,8 +121,10 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
+    booleanHudIndicatorDrawers[SENTRY_MOVEMENT_ENABLED].setIndicatorState(
+        sentryResponseHandler.getSentryMovementEnabled());
+    booleanHudIndicatorDrawers[SENTRY_BEYBLADE_ENABLED].setIndicatorState(
+        sentryResponseHandler.getSentryBeybladeEnabled());
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;

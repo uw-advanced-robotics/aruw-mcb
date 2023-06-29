@@ -41,10 +41,18 @@ void SentryResponseHandler::operator()(
 
     switch (type)
     {
-        // @todo cases
+        case SentryResponseType::MOVEMENT_ENABLED:
+            this->sentryMovementEnabled = true;
+        case SentryResponseType::MOVEMENT_DISABLED:
+            this->sentryMovementEnabled = false;
+        case SentryResponseType::BEYBLADE_ENABLED:
+            this->sentryBeybladeEnabled = true;
+        case SentryResponseType::BEYBLADE_DISABLED:
+            this->sentryBeybladeEnabled = false;
+        case SentryResponseType::HOLD_FIRE:
+            this->holdFireTimer.restart(1000);
+        default:
+            this->sentryStrategy = static_cast<SentryStrategy>(type);
     }
-
-    this->sentryMoving = static_cast<bool>(
-        message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 }
 }  // namespace aruwsrc::communication::serial

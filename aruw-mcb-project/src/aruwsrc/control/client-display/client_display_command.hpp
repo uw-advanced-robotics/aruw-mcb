@@ -135,6 +135,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler;
 
     bool run();
 };
