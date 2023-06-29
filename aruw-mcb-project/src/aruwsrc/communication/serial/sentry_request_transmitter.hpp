@@ -59,7 +59,7 @@ private:
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 #endif
 
-    SentryRequestMessageType lastSentMessage = SentryRequestMessageType::SELECT_NEW_ROBOT;
+    SentryRequestMessageType lastSentMessage = SentryRequestMessageType::NONE;
     uint32_t queuedMessageType{};
     tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 
