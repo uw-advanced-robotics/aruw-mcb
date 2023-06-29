@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifdef TARGET_SENTRY_BEEHIVE
 #include "sentry_request_handler.hpp"
 
 #include "tap/drivers.hpp"
@@ -67,3 +67,5 @@ void SentryRequestHandler::operator()(
     }
 }
 }  // namespace aruwsrc::communication::serial
+
+#endif

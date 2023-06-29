@@ -48,7 +48,7 @@ bool SentryRequestTransmitter::send()
 
             PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
                 &robotToRobotMessage,
-                SENTRY_REQUEST_ROBOT_ID,
+                SENTRY_REQUEST_MESSAGE_ID,
                 drivers->refSerial.getRobotIdBasedOnCurrentRobotTeam(
                     RefSerialData::RobotId::BLUE_SENTINEL),
                 1));
