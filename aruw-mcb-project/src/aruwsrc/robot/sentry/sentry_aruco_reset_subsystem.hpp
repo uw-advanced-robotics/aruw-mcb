@@ -27,6 +27,7 @@
 #include "modm/math/geometry/vector3.hpp"
 #include "modm/math/geometry/quaternion.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
 
 
 namespace aruwsrc::sentry {
@@ -42,7 +43,8 @@ public:
         SentryChassisWorldYawObserver& yawObserver,
         SentryKFOdometry2DSubsystem& odom,
         aruwsrc::serial::VisionCoprocessor& vcpp,
-        SentryTransforms& transforms);
+        SentryTransforms& transforms,
+        aruwsrc::control::turret::algorithms::WorldFrameTurretYawCascadePIDController& majorController);
 
     void initialize() override {};
 
@@ -57,6 +59,7 @@ private:
     SentryKFOdometry2DSubsystem& odom;
     const aruwsrc::serial::VisionCoprocessor& vcpp;
     const SentryTransforms& transforms;
+    aruwsrc::control::turret::algorithms::WorldFrameTurretYawCascadePIDController& majorController;
 
     void resetOrientation(float newYaw, float oldYaw);
 

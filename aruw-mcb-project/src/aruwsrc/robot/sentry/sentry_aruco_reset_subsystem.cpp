@@ -3,6 +3,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "modm/math/geometry/vector2.hpp"
 #include "modm/math/geometry/vector3.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
 
 using namespace tap::algorithms::transforms;
 
@@ -13,12 +14,14 @@ SentryArucoResetSubsystem::SentryArucoResetSubsystem(
     SentryChassisWorldYawObserver& yawObserver,
     SentryKFOdometry2DSubsystem& odom,
     aruwsrc::serial::VisionCoprocessor& vcpp,
-    SentryTransforms& transforms)
+    SentryTransforms& transforms,
+    aruwsrc::control::turret::algorithms::WorldFrameTurretYawCascadePIDController& majorController)
     : tap::control::Subsystem(&drivers),
       yawObserver(yawObserver),
       odom(odom),
       vcpp(vcpp),
-      transforms(transforms)
+      transforms(transforms),
+      majorController(majorController)
 {
 }
 
@@ -53,6 +56,10 @@ void SentryArucoResetSubsystem::resetOrientation(float newYaw, float oldYaw)
 {
     odom.overrideOdometryOrientation(newYaw - oldYaw);
     yawObserver.overrideChassisYaw(newYaw - oldYaw);
+
+    float curMajorSetPoint = majorController.getSetpoint();
+
+    majorController.setSetpoint(curMajorSetPoint - (newYaw - oldYaw));
 }
 
 void SentryArucoResetSubsystem::SentryArucoResetSubsystem::resetPosition(

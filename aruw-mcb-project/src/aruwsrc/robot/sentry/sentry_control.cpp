@@ -370,14 +370,6 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorGirlboss,
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
-
-SentryArucoResetSubsystem arucoResetSubsystem(
-    *drivers(),
-    sentryChassisWorldYawObserver,
-    odometrySubsystem,
-    drivers()->visionCoprocessor,
-    sentryTransforms);
-
 // Turret controllers -------------------------------------------------------
 
 // @todo make controllers part of subsystem
@@ -413,6 +405,19 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  /
     turretMajorYawVelPid,
     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+
+
+// aruco reset
+
+
+SentryArucoResetSubsystem arucoResetSubsystem(
+    *drivers(),
+    sentryChassisWorldYawObserver,
+    odometrySubsystem,
+    drivers()->visionCoprocessor,
+    sentryTransforms,
+    turretMajorYawController);
+
 
 // Otto ballistics solver --------------------------------------------------------------------
 
