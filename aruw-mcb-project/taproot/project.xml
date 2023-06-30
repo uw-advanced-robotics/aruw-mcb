@@ -3,7 +3,7 @@
 <library>
   <repositories>
     <repository>
-      <path>..\..\taproot\modm\repo.lb</path>
+      <path>../../taproot/modm/repo.lb</path>
     </repository>
   </repositories>
   <options>
