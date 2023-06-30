@@ -48,11 +48,12 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
 static constexpr float DESIRED_LOAD_TIME_S = .5f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 6.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
-static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 10.0f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT =
+    WATERWHEEL_TARGET_DISPLACEMENT / 10.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.05f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 19.0f * 110/40, // Number of teeth on pulleys * M3508
+    .gearRatio = 19.0f * 110 / 40,  // Number of teeth on pulleys * M3508
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = true,
