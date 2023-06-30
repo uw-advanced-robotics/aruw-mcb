@@ -74,10 +74,10 @@ void HoldFireIndicator::initialize()
 
     RefSerialTransmitter::configInteger(
         TIMER_FONT_SIZE,
-        100, // @todo IDK what width means
+        10, // @todo IDK what width means
         msgX,
         msgY,
-        0, // @todo: grab from response
+        sentryResponseHandler.getHoldFireTimeRemainingSec(),
         &timerMessage.graphicData);
     }
 
