@@ -30,4 +30,5 @@ SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
 }
 
 void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.send(); }
+
 }  // namespace aruwsrc::communication::serial
