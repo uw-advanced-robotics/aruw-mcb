@@ -66,10 +66,10 @@ public:
 
     void overrideChassisYaw(float newYaw);
 
-
-    float turretWorldYawRadians;
-    float turretMinorMajorYawRadians;
-    float turretMajorChassisYawRadians;
+    mutable float lastGottenYaw;
+    mutable float turretWorldYawRadians;
+    mutable float turretMinorMajorYawRadians;
+    mutable float turretMajorChassisYawRadians;
 private:
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajorSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem;

@@ -40,7 +40,7 @@ void SentryArucoResetSubsystem::refresh()
         debug2 = transforms.getChassisToTurretMajor().getYaw();
         
 
-        float oldYaw;
+        // float oldYaw;
         yawObserver.getChassisWorldYaw(&oldYaw);
         // transformWorldOdomToChassis(newYaw, newPose, resetData.turretId);
 
@@ -59,7 +59,7 @@ void SentryArucoResetSubsystem::resetOrientation(float newYaw, float oldYaw)
 
     float curMajorSetPoint = majorController.getSetpoint();
 
-    majorController.setSetpoint(curMajorSetPoint - (newYaw - oldYaw));
+    // majorController.setSetpoint(curMajorSetPoint - (newYaw - oldYaw));
 }
 
 void SentryArucoResetSubsystem::SentryArucoResetSubsystem::resetPosition(

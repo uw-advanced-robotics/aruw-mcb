@@ -66,6 +66,7 @@ private:
     void resetPosition(const float x, const float y);
 
     float arucoYaw;
+    float oldYaw;
     float debug1;
     float debug2;
 
