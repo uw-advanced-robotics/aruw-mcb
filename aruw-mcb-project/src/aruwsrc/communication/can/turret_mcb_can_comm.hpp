@@ -244,7 +244,13 @@ private:
 
     tap::Drivers* drivers;
 
+    /**
+     * The Imu data struct as it is being filled out by incoming packets
+     */
     ImuData currProcessingImuData;
+    /**
+     * The most recent fully-populated data struct, comprised of 3 incoming data packets
+     */
     ImuData lastCompleteImuData;
 
     int yawRevolutions;
@@ -280,6 +286,12 @@ private:
     void handleTurretMessage(const modm::can::Message& message);
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
+
+    /**
+     * Used to apply a transformation to the turret MCB data to get it in the frame of the turret.
+     * Applies to the currProcessingData after all data is received.
+     */
+    void transformImuData();
 
     /**
      * Updates the passed in revolutionCounter if a revolution increment or decrement has been
