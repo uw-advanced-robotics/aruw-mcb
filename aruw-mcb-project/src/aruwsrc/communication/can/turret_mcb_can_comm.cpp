@@ -191,8 +191,12 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
 void TurretMCBCanComm::transformImuData()
 {
+    // don't do hardware-specific transformation in tests
 #ifndef PLATFORM_HOSTED
+// TODO: More elegant robot-specific implementation of flipping values for different robots,
+// dependent on build target redesign
 #if defined(TARGET_HERO)
+    // Turret MCB mounted backwards (+x => -x, +y => -y, +z => +z)
     currProcessingImuData.pitch *= -1;
     currProcessingImuData.rawPitchVelocity *= -1;
     currProcessingImuData.roll *= -1;
