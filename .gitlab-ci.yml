@@ -303,19 +303,19 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO
 
 "Hero: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO
 
 # Sentry (Beehive) build
 

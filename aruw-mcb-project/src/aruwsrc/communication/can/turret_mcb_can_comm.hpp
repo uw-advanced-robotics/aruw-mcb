@@ -253,12 +253,6 @@ private:
      */
     ImuData lastCompleteImuData;
 
-    /**
-     * The incoming IMU data is relative to the Type C (with the xt30s being +x, and the top being
-     * +z). We transform the data into the turret frame using a transform defined in robot_frames.
-     */
-    ImuData transformedImuData;
-
     int yawRevolutions;
     int pitchRevolutions;
     int rollRevolutions;
@@ -293,6 +287,10 @@ private:
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
 
+    /**
+     * Used to apply a transformation to the turret MCB data to get it in the frame of the turret.
+     * Applies to the currProcessingData after all data is received.
+     */
     void transformImuData();
 
     /**
