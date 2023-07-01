@@ -36,20 +36,21 @@ const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 enum MessageType
 {
     START = 0x01,
-    STOP = 0x02,
+    STOP = 0x02, 
     STATUS = 0x04,
-    SET_CHARGE_SPEED = 0x08,
-    SET_BATTERY_VOLTAGE = 0x10
+    DISCHARGE = 0x08,
+    SET_CHARGE_SPEED = 0x10,
+    SET_BATTERY_VOLTAGE = 0x20
 };
 
 enum Status
 {
     UNKNOWN = -1,
     RESET = 0,
-    CHARGE = 1,
-    CHARGE_DISCHARGE = 2,
-    DISCHARGE = 3,
-    FAULT = 4
+    CHARGE_DISCHARGE = 1,
+    SAFE = 2,
+    DISCHARGING = 3,
+    FAILURE = 4
 };
 
 class ExternalCapacitorBank : public tap::can::CanRxListener
@@ -63,6 +64,7 @@ public:
 
     void start() const;
     void stop() const;
+    void discharge() const;
     void setPowerLimit(uint16_t watts);
     void setBatteryVoltage(uint16_t milliVolts);
 
@@ -72,7 +74,8 @@ public:
     int getPowerLimit() const { return this->powerLimit; };
     Status getStatus() const { return this->status; };
 
-    bool systemsChanged = false; // debounce for the shift c input to change between cap and battery
+    void setSprintModifier(float sprintModifier);
+    float getSprintModifer() const { return this->sprintModifier; };
 
 private:
     const float capacitance;
@@ -85,6 +88,9 @@ private:
     Status status = Status::UNKNOWN;
 
     bool started = false;  // Set to true once any message from the cap bank is received
+
+    float sprintModifier;
+
 };
 }  // namespace aruwsrc::communication::sensors::power
 

@@ -61,10 +61,10 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             capBankGraphics.graphicData[0].operation = capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
             capBankGraphics.graphicData[1].operation = capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
             // Bottom of the bar is 9v
-            // Top of the bar is 22v
+            // Top of the bar is 21v
             // 9v - 11v is orange
             // 11v - 15v is yellow
-            // 15v - 22v is green
+            // 15v - 21v is green
 
             voltage = capBank->getVoltage();
 
@@ -75,7 +75,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             RefSerialTransmitter::configLine(
                 BOX_WIDTH - 20,
                 CAP_CENTER_X,
-                ((voltage - 9) / (22.0 - 9.0)) * (BOX_HEIGHT - 20) + BOTTOM + 10,
+                ((voltage - 9) / (21.0 - 9.0)) * (BOX_HEIGHT - 20) + BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);
@@ -88,7 +88,10 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             
             capBankGraphics.graphicData[0].color = static_cast<uint8_t>(
                 capBank->getStatus() == aruwsrc::communication::sensors::power::Status::RESET ? Tx::GraphicColor::YELLOW :
-                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE ? Tx::GraphicColor::WHITE : 
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE ? Tx::GraphicColor::WHITE :
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::DISCHARGING ? Tx::GraphicColor::CYAN :
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::FAILURE ? Tx::GraphicColor::PURPLISH_RED :
+
                 Tx::GraphicColor::ORANGE); 
 
             RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));

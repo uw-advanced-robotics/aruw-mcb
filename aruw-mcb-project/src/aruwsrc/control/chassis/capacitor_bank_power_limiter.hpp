@@ -53,6 +53,9 @@ public:
 private:
     const tap::Drivers *drivers;
     const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank;
+
+    const float LOWEST_CAP_VOLTAGE = 10.0f;
+    const float POWER_RAMPDOWN_RANGE = 5.0f;
 };
 }  // namespace aruwsrc::chassis
 

@@ -37,6 +37,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -44,6 +45,10 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_drain_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_diagonal_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -165,6 +170,8 @@ HeroTurretSubsystem turret(
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
+cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
@@ -206,6 +213,13 @@ BeybladeCommand beybladeCommand(
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
+
+// Cap Bank
+aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+
+aruwsrc::control::cap_bank::CapBankDrainCommand capBankDrainCommand(drivers(), capBankSubsystem);
+
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(drivers(), capBankSubsystem);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -476,6 +490,20 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
+// cap bank
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&capBankToggleCommand},
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+PressCommandMapping cCtrlPressed(
+    drivers(),
+    {&capBankDrainCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::C}));
+HoldCommandMapping shiftPressed(
+    drivers(),
+    {&capBankSprintCommand},
+    RemoteMapState({Remote::Key::SHIFT}));
+
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -491,6 +519,7 @@ void initializeSubsystems()
     waterwheelAgitator.initialize();
     turret.initialize();
     buzzer.initialize();
+    capBankSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -505,6 +534,7 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -551,6 +581,9 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&cCtrlPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
 }
 }  // namespace hero_control
 

@@ -37,8 +37,8 @@
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -47,6 +47,10 @@
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_drain_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -143,7 +147,10 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    &drivers()->capacitorBank);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
 
@@ -165,6 +172,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 ClientDisplaySubsystem clientDisplay(drivers());
 
 TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
+
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -215,6 +224,13 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
+
+// Cap Bank
+aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+
+aruwsrc::control::cap_bank::CapBankDrainCommand capBankDrainCommand(drivers(), capBankSubsystem);
+
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(drivers(), capBankSubsystem);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -497,6 +513,20 @@ CycleStateCommandMapping<
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
 
+// cap bank
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&capBankToggleCommand},
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+PressCommandMapping cCtrlPressed(
+    drivers(),
+    {&capBankDrainCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::C}));
+HoldCommandMapping shiftPressed(
+    drivers(),
+    {&capBankSprintCommand},
+    RemoteMapState({Remote::Key::SHIFT}));
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -512,8 +542,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
-
-    drivers->capacitorBank.initialize();
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -528,6 +557,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    capBankSubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -574,6 +604,9 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
     drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&cCtrlPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
 }
 }  // namespace standard_control
 

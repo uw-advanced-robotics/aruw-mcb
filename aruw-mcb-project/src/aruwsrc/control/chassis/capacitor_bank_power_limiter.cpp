@@ -27,16 +27,16 @@ namespace aruwsrc::chassis
 CapBankPowerLimiter::CapBankPowerLimiter(
     const tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
+    aruwsrc::communication::sensors::power::ExternalCapacitorBank *capacitorBank,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
     : fallbackLimiter(
-        drivers,
-        currentSensor,
-        startingEnergyBuffer,
-        energyBufferLimitThreshold,
-        energyBufferCritThreshold),
+          drivers,
+          currentSensor,
+          startingEnergyBuffer,
+          energyBufferLimitThreshold,
+          energyBufferCritThreshold),
       drivers(drivers),
       capacitorBank(capacitorBank)
 {
@@ -45,7 +45,7 @@ CapBankPowerLimiter::CapBankPowerLimiter(
 float CapBankPowerLimiter::getPowerLimitRatio(float desiredCurrent)
 {
     if (drivers->refSerial.getRefSerialReceivingData() &&
-        (drivers->refSerial.getRobotData().currentHp == 0 || 
+        (drivers->refSerial.getRobotData().currentHp == 0 ||
          (drivers->refSerial.getRobotData().robotPower.value & 0b010) == 0))
     {
         return 0;
@@ -53,14 +53,26 @@ float CapBankPowerLimiter::getPowerLimitRatio(float desiredCurrent)
 
     float fallbackLimit = fallbackLimiter.getPowerLimitRatio();
 
-    if (this->capacitorBank == nullptr || this->capacitorBank->getStatus() != aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE) {
+    if (this->capacitorBank == nullptr ||
+        this->capacitorBank->getStatus() !=
+            aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE)
+    {
         return fallbackLimit;
     }
 
-    float currentLimit = desiredCurrent != 0 ? tap::algorithms::limitVal(15'000.0f / desiredCurrent, 0.0f, 1.0f) : 1.0;
-    float capVoltageLimit = tap::algorithms::limitVal((this->capacitorBank->getVoltage() - 10) / 5, 0.0f, 1.0f);
+    // current limit
+    float currentLimit = desiredCurrent != 0
+                             ? tap::algorithms::limitVal(15'000.0f / desiredCurrent, 0.0f, 1.0f)
+                             : 1.0;
 
-    return std::min(std::min(fallbackLimit, currentLimit), capVoltageLimit);
+    // volage limit
+    float capVoltageLimit = tap::algorithms::limitVal(
+        (this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / POWER_RAMPDOWN_RANGE,
+        0.0f,
+        1.0f);
+
+        return this->capacitorBank->getSprintModifer() *
+           std::min(std::min(fallbackLimit, currentLimit), capVoltageLimit);
 }
 
 }  // namespace aruwsrc::chassis

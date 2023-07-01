@@ -142,6 +142,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->mpu6500TerminalSerialHandler.init();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
     ((Drivers *)drivers)->oledDisplay.initialize();
+    ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 }
 

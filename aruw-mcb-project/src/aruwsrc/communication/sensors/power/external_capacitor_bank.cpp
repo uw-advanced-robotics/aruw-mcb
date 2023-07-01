@@ -41,7 +41,10 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->current =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[0])) / 1000.0;
-            this->availableEnergy = tap::algorithms::limitVal(1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(9, 2)), 0.0, 2000.0);
+            this->availableEnergy = tap::algorithms::limitVal(
+                1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(9, 2)),
+                0.0,
+                2000.0);
             break;
         default:
             // Ignore unknown message IDs
@@ -58,32 +61,11 @@ void ExternalCapacitorBank::processMessage(const modm::can::Message& message)
 
         this->setBatteryVoltage(drivers->refSerial.getRobotData().chassis.volt);
 
-        if (drivers->refSerial.getRobotData().currentHp == 0 || 
-            (drivers->refSerial.getRobotData().robotPower.value & static_cast<uint8_t>(tap::communication::serial::RefSerialData::Rx::RobotPower::CHASSIS_HAS_POWER)) == 0)
-        {
-            this->stop();
-        } 
-        else
         {
             if (!this->started || this->status == Status::RESET)
             {
                 this->start();
                 this->started = true;
-            }
-            else if (this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::SHIFT) &&
-                this->drivers->remote.keyPressed(tap::communication::serial::Remote::Key::C) )
-            {
-                if (!this->systemsChanged) {
-                    this->systemsChanged = true;
-
-                    if (this->status == Status::CHARGE_DISCHARGE) {
-                        this->stop();
-                    } else {
-                        this->start();
-                    }
-                }
-            } else {
-                this->systemsChanged = false;
             }
         }
     }
@@ -111,6 +93,14 @@ void ExternalCapacitorBank::stop() const
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
+void ExternalCapacitorBank::discharge() const
+{
+    modm::can::Message message(CAP_BANK_CAN_ID, 8);
+    message.setExtended(false);
+    message.data[7] = MessageType::DISCHARGE;
+    this->drivers->can.sendMessage(this->canBus, message);
+}
+
 void ExternalCapacitorBank::setPowerLimit(uint16_t watts)
 {
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
@@ -129,5 +119,10 @@ void ExternalCapacitorBank::setBatteryVoltage(uint16_t milliVolts)
     message.data[0] = milliVolts;
     message.data[1] = milliVolts >> 8;
     this->drivers->can.sendMessage(this->canBus, message);
+}
+
+void ExternalCapacitorBank::setSprintModifier(float newSprintModifier)
+{
+    sprintModifier = tap::algorithms::limitVal(newSprintModifier, 0.0f, 1.0f);
 }
 }  // namespace aruwsrc::communication::sensors::power

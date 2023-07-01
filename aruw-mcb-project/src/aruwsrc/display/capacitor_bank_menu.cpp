@@ -50,17 +50,14 @@ void CapacitorBankMenu::draw()
         case communication::sensors::power::Status::RESET:
             display << "RESET";
             break;
-        case communication::sensors::power::Status::CHARGE:
-            display << "CHARGE";
-            break;
         case communication::sensors::power::Status::CHARGE_DISCHARGE:
             display << "CHARGE_DISCHARGE";
             break;
-        case communication::sensors::power::Status::DISCHARGE:
-            display << "DISCHARGE";
+        case communication::sensors::power::Status::SAFE:
+            display << "SAFE";
             break;
-        case communication::sensors::power::Status::FAULT:
-            display << "FAULT";
+        case communication::sensors::power::Status::DISCHARGING:
+            display << "DISCHARGING";
             break;
 
         default:
