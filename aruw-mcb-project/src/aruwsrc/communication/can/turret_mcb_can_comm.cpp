@@ -192,12 +192,14 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
 void TurretMCBCanComm::transformImuData()
 {
+#ifndef PLATFORM_HOSTED
 #if defined(TARGET_HERO)
     currProcessingImuData.pitch *= -1;
     currProcessingImuData.rawPitchVelocity *= -1;
     currProcessingImuData.roll *= -1;
     currProcessingImuData.rawRollVelocity *= -1;
 #else
+#endif
 #endif
 }
 
