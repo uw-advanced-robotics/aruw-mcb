@@ -64,7 +64,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
     .jammingTime = 500,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 5000.0f,
+    .velocityPIDFeedForwardGain = 7000.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config

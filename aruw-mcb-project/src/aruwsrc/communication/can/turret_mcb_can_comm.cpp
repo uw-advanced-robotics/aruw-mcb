@@ -19,7 +19,6 @@
 
 #include "turret_mcb_can_comm.hpp"
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
