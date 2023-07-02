@@ -83,8 +83,8 @@
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 #include "aruwsrc/control/governor/dual_barrel_heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/dual_barrel_ref_system_projectile_launched_governor.hpp"
-#include "aruwsrc/control/launcher/dual_barrel_referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/dual_barrel_friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/dual_barrel_referee_feedback_friction_wheel_subsystem.hpp"
 #endif
 
 #ifdef PLATFORM_HOSTED
