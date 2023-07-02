@@ -593,6 +593,11 @@ CycleStateCommandMapping<
         BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
         &barrelSwitchCommand,
         &BarrelSwitchCommand::setControlState);
+#else
+PressCommandMapping xPressed(
+    drivers(),
+    {&chassisAutorotateCommand},
+    RemoteMapState({Remote::Key::X}));
 #endif
 
 // Safe disconnect function
