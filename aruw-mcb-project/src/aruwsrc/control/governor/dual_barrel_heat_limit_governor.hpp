@@ -86,7 +86,7 @@ private:
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;
     aruwsrc::control::governor::HeatTracker heatTrackerRight;
     aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
-}; 
+};
 }  // namespace aruwsrc::control::governor
 
-#endif //DUAL_BARREL_HEAT_LIMIT_GOVERNOR_HPP_
+#endif  // DUAL_BARREL_HEAT_LIMIT_GOVERNOR_HPP_

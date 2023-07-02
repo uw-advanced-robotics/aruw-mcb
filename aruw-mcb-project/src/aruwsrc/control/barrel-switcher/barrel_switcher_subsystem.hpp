@@ -70,12 +70,12 @@ private:
     void setMotorOutput(int32_t velocity);
 
     /**
-     * true if there is a barrel in position to shoot, false otherwise 
-    */
+     * true if there is a barrel in position to shoot, false otherwise
+     */
     bool inPosition;
 
     /**
-     * Stores the state of this barrel switcher's state, mainly which barrel (left or right) 
+     * Stores the state of this barrel switcher's state, mainly which barrel (left or right)
      * is currently being used
      */
     BarrelState barrelState;
@@ -96,6 +96,6 @@ private:
      */
     tap::motor::DjiMotor motor;
 #endif
-}; // class BarrelSwitcherSubsystem
+};  // class BarrelSwitcherSubsystem
 }  // namespace aruwsrc::control
-#endif // BARREL_SWITCHER_SUBSYSTEM_HPP_
+#endif  // BARREL_SWITCHER_SUBSYSTEM_HPP_

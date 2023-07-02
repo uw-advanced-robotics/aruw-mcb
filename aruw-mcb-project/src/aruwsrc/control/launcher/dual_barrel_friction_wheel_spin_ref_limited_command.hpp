@@ -37,7 +37,7 @@ namespace aruwsrc::control::launcher
 /**
  * An extension of the FrictionWheelSpinRefLimitedCommand for a turret with
  * two barrels and a BarrelSwitcherSubystem.
- * 
+ *
  * Commands some associated friction wheel subsystem to spin such that the subsystem launches
  * projectiles at either the maximum speed allowed by the referee system or a default
  * speed specified in the constructor.
