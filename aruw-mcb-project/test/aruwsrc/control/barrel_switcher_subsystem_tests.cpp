@@ -47,7 +47,8 @@ TEST_F(BarrelSwitcherSubsystemTest, stop_changes_state)
     EXPECT_EQ(BarrelState::IDLE, barrelSwitcher.getBarrelState());
 }
 
-TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
+TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall)
+{
     int16_t rpm;
     int16_t torque;
 
@@ -57,7 +58,7 @@ TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
     rpm = config.maxRPM + 1;
     torque = config.minTorque + 1;
     EXPECT_EQ(false, barrelSwitcher.isStalled());
-    
+
     rpm = config.maxRPM - 1;
     torque = config.minTorque + 1;
     EXPECT_EQ(true, barrelSwitcher.isStalled());
@@ -73,7 +74,7 @@ TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall) {
     rpm = config.maxRPM + 1;
     torque = config.minTorque + 1;
     EXPECT_EQ(false, barrelSwitcher.isStalled());
-    
+
     rpm = config.maxRPM - 1;
     torque = config.minTorque + 1;
     EXPECT_EQ(true, barrelSwitcher.isStalled());
