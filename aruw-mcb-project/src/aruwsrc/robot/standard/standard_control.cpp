@@ -532,7 +532,7 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     false);
 
-PressCommandMapping rightMousePressed(
+HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));

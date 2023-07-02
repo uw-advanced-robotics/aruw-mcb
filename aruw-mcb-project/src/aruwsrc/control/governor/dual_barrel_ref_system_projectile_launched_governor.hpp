@@ -25,7 +25,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
-#include "aruwsrc\control\barrel-switcher\barrel_switcher_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 
 namespace aruwsrc::control::governor
 {
