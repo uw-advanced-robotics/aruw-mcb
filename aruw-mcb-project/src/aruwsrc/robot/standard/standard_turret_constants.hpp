@@ -211,9 +211,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 229'183.1f,
+    .kp = 150'183.1f,
     .ki = 0.0f,
-    .kd = 10'886.2f,
+    .kd = 6'886.2f,
     .maxICumulative = 0.0f,
     .maxOutput = 32'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -221,21 +221,21 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0f,
+    .errorDerivativeFloor = 1.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 229'183.1f,
-    .ki = 0.0f,
+    .kp = 150'183.1f,
+    .ki = 100.0f,
     .kd = 7'448.5f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = 32000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0f,
+    .errorDerivativeFloor = 1.0f,
 };
 
 }  // namespace chassis_rel
