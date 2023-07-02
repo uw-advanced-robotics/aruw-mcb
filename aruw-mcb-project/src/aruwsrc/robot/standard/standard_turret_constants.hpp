@@ -169,9 +169,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
     .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
+    .tRProportionalKalman = 40.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -185,7 +185,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.5f,
+    .tRProportionalKalman = 10.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
