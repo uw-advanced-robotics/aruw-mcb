@@ -68,7 +68,6 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    // .azimuthZeroOffset = 5105,
     .azimuthZeroOffset = 7888,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -76,7 +75,6 @@ aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    // .azimuthZeroOffset = 1713,
     .azimuthZeroOffset = 4452,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -84,7 +82,6 @@ aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    // .azimuthZeroOffset = 1724,
     .azimuthZeroOffset = 7172,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -92,7 +89,6 @@ aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    // .azimuthZeroOffset = 2394,
     .azimuthZeroOffset = 7878,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
