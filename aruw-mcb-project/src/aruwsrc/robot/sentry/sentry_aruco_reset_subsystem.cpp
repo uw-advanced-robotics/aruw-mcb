@@ -48,7 +48,7 @@ void SentryArucoResetSubsystem::refresh()
         float chassisY = resetData.y - transforms.getWorldToMinor(resetData.turretId).getY() + transforms.getWorldToChassis().getY();
 
         resetPosition(chassisX, chassisY);
-        resetOrientation(newYaw, oldYaw);
+        // resetOrientation(newYaw, oldYaw);
     }
 }
 
