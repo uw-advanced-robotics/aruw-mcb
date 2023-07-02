@@ -82,7 +82,6 @@ ClientDisplayCommand::ClientDisplayCommand(
 
 void ClientDisplayCommand::initialize()
 {
-    debug += 1;
     HudIndicator::resetGraphicNameGenerator();
     restart();  // restart protothread
     booleanHudIndicators.initialize();
