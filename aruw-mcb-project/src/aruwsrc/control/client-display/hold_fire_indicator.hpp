@@ -59,10 +59,13 @@ public:
 
 private:
     const aruwsrc::communication::serial::SentryResponseHandler& sentryResponseHandler;
+    static constexpr uint16_t START_Y = 760;
+    static constexpr uint16_t START_X = static_cast<int>(5 * SCREEN_WIDTH / 6);
 
 
     static constexpr Tx::GraphicColor TIMER_COLOR = Tx::GraphicColor::WHITE;
-    static constexpr uint16_t TIMER_FONT_SIZE = 16;
+    static constexpr uint16_t TIMER_FONT_SIZE = 30;
+    static constexpr uint16_t TIMER_LINE_WIDTH = 3;
     // hah
     Tx::Graphic1Message timerMessage;
 };

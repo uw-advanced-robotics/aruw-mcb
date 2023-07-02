@@ -47,6 +47,7 @@ modm::ResumableResult<bool> HoldFireIndicator::update()
 {
     RF_BEGIN(1);
     timerMessage.graphicData.value = sentryResponseHandler.getHoldFireTimeRemainingSec();
+    timerMessage.graphicData.operation = Tx::GRAPHIC_MODIFY;
     RF_CALL(refSerialTransmitter.sendGraphic(&timerMessage));
     RF_END();
 }
@@ -64,20 +65,12 @@ void HoldFireIndicator::initialize()
         DEFAULT_GRAPHIC_LAYER,
         TIMER_COLOR);
 
-
-    // center of the reticle, in pixels
-    // paste it in the center of the screen :) enjoy!
-    uint16_t msgX = static_cast<int>(SCREEN_WIDTH / 2);
-    uint16_t msgY = static_cast<int>(SCREEN_HEIGHT / 2);
-
-    // y coordinate of the horizontal reticle line
-
     RefSerialTransmitter::configInteger(
         TIMER_FONT_SIZE,
-        10, // @todo IDK what width means
-        msgX,
-        msgY,
-        sentryResponseHandler.getHoldFireTimeRemainingSec(),
+        TIMER_LINE_WIDTH, // @todo IDK what width means
+        START_X,
+        START_Y,
+        timerMessage.graphicData.value = sentryResponseHandler.getHoldFireTimeRemainingSec(),
         &timerMessage.graphicData);
     }
 
