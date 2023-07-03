@@ -69,7 +69,8 @@ public:
 
     void reset();
 
-private:
+// private:
+protected: // for now!
     float initialXPos;
     float initialYPos;
 

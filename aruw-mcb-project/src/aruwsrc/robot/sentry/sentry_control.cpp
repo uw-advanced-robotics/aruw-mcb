@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
-#include "aruwsrc/robot/sentry/sentry_reset_odometry_command.hpp"
 #include "aruwsrc/robot/sentry/match_running_governor.hpp"
 
 #include "tap/control/command_mapper.hpp"
@@ -104,6 +102,7 @@
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/autonav/auto_nav_beyblade_command.hpp"
+#include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
 
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -362,6 +361,7 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     modm::Location2D<float>(0., 0., M_PI * 0.75),
     0.5f, 0.5f);  // TODO: this
 
+
 // Transforms --------------------------------------------------------------------------------
 
 SentryTransformsSubsystem sentryTransforms(
@@ -371,7 +371,6 @@ SentryTransformsSubsystem sentryTransforms(
     turretMinorGirlboss,
     turretMinorMalewife,
     SENTRY_TRANSFORM_CONFIG);
-
 // Turret controllers -------------------------------------------------------
 
 // @todo make controllers part of subsystem
@@ -407,6 +406,19 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  /
     turretMajorYawVelPid,
     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+
+
+// aruco reset
+
+
+SentryArucoResetSubsystem arucoResetSubsystem(
+    *drivers(),
+    sentryChassisWorldYawObserver,
+    odometrySubsystem,
+    drivers()->visionCoprocessor,
+    sentryTransforms,
+    turretMajorYawController);
+
 
 // Otto ballistics solver --------------------------------------------------------------------
 
@@ -542,7 +554,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     aruwsrc::sentry::chassis::beybladeConfig,
-    true);
+    false);
 
 
 // general shooting ===================================
@@ -819,6 +831,8 @@ void initializeSubsystems()
     frictionWheelsMalewife.initialize();
     malewifeAgitator.initialize();
 
+    arucoResetSubsystem.initialize();
+
     isInitialized = true;
 }
 
@@ -832,6 +846,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&sentryTransforms);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
     drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);

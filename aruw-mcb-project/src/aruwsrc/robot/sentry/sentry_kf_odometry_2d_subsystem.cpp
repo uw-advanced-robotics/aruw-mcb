@@ -18,9 +18,10 @@
  */
 
 #include "sentry_kf_odometry_2d_subsystem.hpp"
-#include "sentry_chassis_world_yaw_observer.hpp"
 
 #include "tap/drivers.hpp"
+
+#include "sentry_chassis_world_yaw_observer.hpp"
 
 namespace aruwsrc::sentry
 {
@@ -38,5 +39,47 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
 }
 
 void SentryKFOdometry2DSubsystem::refresh() { update(); }
+
+void SentryKFOdometry2DSubsystem::overrideOdometryPosition(
+    const modm::Vector2f &newPos)
+{
+    auto currKFState = this->kf.getStateVectorAsMatrix();
+
+    float newState[int(ChassisKFOdometry::OdomState::NUM_STATES)] = {
+        newPos.x,
+        currKFState[int(ChassisKFOdometry::OdomState::VEL_X)],
+        currKFState[int(ChassisKFOdometry::OdomState::ACC_X)],
+        newPos.y,
+        currKFState[int(ChassisKFOdometry::OdomState::VEL_Y)],
+        currKFState[int(ChassisKFOdometry::OdomState::ACC_Y)]};
+
+    ChassisKFOdometry::kf.init(newState);
+}
+
+void SentryKFOdometry2DSubsystem::overrideOdometryOrientation(
+    float deltaYaw)
+{
+    auto currKFState = this->kf.getStateVectorAsMatrix();
+
+    float newState[int(ChassisKFOdometry::OdomState::NUM_STATES)] = {
+        currKFState[int(ChassisKFOdometry::OdomState::POS_X)],
+        currKFState[int(ChassisKFOdometry::OdomState::VEL_X)],
+        currKFState[int(ChassisKFOdometry::OdomState::ACC_X)],
+        currKFState[int(ChassisKFOdometry::OdomState::POS_Y)],
+        currKFState[int(ChassisKFOdometry::OdomState::VEL_Y)],
+        currKFState[int(ChassisKFOdometry::OdomState::ACC_Y)]};
+
+    tap::algorithms::rotateVector(
+        &newState[int(ChassisKFOdometry::OdomState::VEL_X)],
+        &newState[int(ChassisKFOdometry::OdomState::VEL_Y)],
+        deltaYaw);
+
+    tap::algorithms::rotateVector(
+        &newState[int(ChassisKFOdometry::OdomState::ACC_X)],
+        &newState[int(ChassisKFOdometry::OdomState::ACC_Y)],
+        deltaYaw);
+
+    ChassisKFOdometry::kf.init(newState);
+}
 
 }  // namespace aruwsrc::sentry

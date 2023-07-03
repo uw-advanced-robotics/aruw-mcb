@@ -64,13 +64,19 @@ public:
     bool getChassisWorldYaw(float* yaw) const final;
 
 
-    float turretWorldYawRadians;
-    float turretMinorMajorYawRadians;
-    float turretMajorChassisYawRadians;
+    void overrideChassisYaw(float newYaw);
+
+    mutable float lastGottenYaw;
+    mutable float turretWorldYawRadians;
+    mutable float turretMinorMajorYawRadians;
+    mutable float turretMajorChassisYawRadians;
 private:
     const aruwsrc::control::turret::SentryTurretMajorSubsystem& turretMajorSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlbossSubsystem;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewifeSubsystem;
+
+    // error factor since we don't know how to reset the imu to some non-zero value outright
+    float offset = 0.0f;
 };
 
 }  // namespace aruwsrc::sentry

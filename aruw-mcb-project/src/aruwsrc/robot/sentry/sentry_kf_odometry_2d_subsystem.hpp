@@ -25,8 +25,10 @@
 #include "tap/control/subsystem.hpp"
 
 #include "modm/math/geometry/location_2d.hpp"
+#include "modm/math/geometry/vector2.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
+#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 
 // Forward declarations
@@ -59,6 +61,10 @@ public:
         float initialYPos);
 
     void refresh() override;
+
+    void overrideOdometryPosition(const modm::Vector2f& newPos);
+
+    void overrideOdometryOrientation(const float deltaYaw);
 };
 
 }  // namespace aruwsrc::sentry
