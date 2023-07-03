@@ -45,14 +45,14 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
-    bool beybladeOnlyInGame)
+    bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
       config(config),
-      beybladeOnlyInGame(beybladeOnlyInGame)
+      autoNavOnlyInGame(autoNavOnlyInGame)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -90,7 +90,7 @@ void AutoNavBeybladeCommand::execute()
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
         
-        if (setpointData.pathFound && visionCoprocessor.isCvOnline())
+        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
             float desiredVelocityX = setpointData.x - currentX;
             float desiredVelocityY = setpointData.y - currentY;
@@ -102,7 +102,7 @@ void AutoNavBeybladeCommand::execute()
             }
         }
 
-        if ((!beybladeOnlyInGame || drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME) && beybladeEnabled)
+        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
         {
             // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
             // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)

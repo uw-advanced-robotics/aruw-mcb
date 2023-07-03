@@ -46,7 +46,7 @@ public:
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
-        bool beybladeOnlyInGame = false);
+        bool autoNavOnlyInGame = false);
 
     void initialize() override;
 
@@ -75,7 +75,7 @@ private:
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
 
-    bool beybladeOnlyInGame;
+    bool autoNavOnlyInGame;
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;

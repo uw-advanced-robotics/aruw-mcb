@@ -21,6 +21,7 @@
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_reset_odometry_command.hpp"
+#include "aruwsrc/robot/sentry/match_running_governor.hpp"
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -540,7 +541,8 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     turretMajor.yawMotor,
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    aruwsrc::sentry::chassis::beybladeConfig);
+    aruwsrc::sentry::chassis::beybladeConfig,
+    true);
 
 
 // general shooting ===================================
@@ -613,15 +615,18 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorGirlboss(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     girlboss::turretID);
 
-GovernorLimitedCommand<2> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
-    {&girlbossAgitator},
-    girlbossRotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss});
+MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-GovernorLimitedCommand<5> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<4> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
     {&girlbossAgitator},
     girlbossRotateAndUnjamAgitator,
-    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
+
+GovernorLimitedCommand<6> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+    {&girlbossAgitator},
+    girlbossRotateAndUnjamAgitator,
+    // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss, &matchRunningGovernor});
 
 // malewife shooting ======================
 // malewife shooting ======================
@@ -693,15 +698,17 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorMalewife(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     malewife::turretID);
 
+// @todo wtf
 GovernorLimitedCommand<4> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
     {&malewifeAgitator},
     malewifeRotateAndUnjamAgitator,
     {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
 
-GovernorLimitedCommand<5> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<6> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&malewifeAgitator},
     malewifeRotateAndUnjamAgitator,
-    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
+    // {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
+    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife, &matchRunningGovernor});
 
 // void toggleDriveMovementMessageHandler() { sentryAutoDrive.toggleDriveMovement(); }
 
