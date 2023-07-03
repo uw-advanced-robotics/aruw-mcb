@@ -595,11 +595,6 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerGirlboss(
 
 FireRateLimitGovernor fireRateLimitGovernorGirlboss(fireRateReselectionManagerGirlboss);
 
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedGirlBoss(
-    {&girlbossAgitator},
-    girlbossRotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
-
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorGirlboss(
     *drivers(),
@@ -677,11 +672,6 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerMalewife(
 );
 
 FireRateLimitGovernor fireRateLimitGovernorMalewife(fireRateReselectionManagerMalewife);
-
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunchedMalewife(
-    {&malewifeAgitator},
-    malewifeRotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorMalewife(
