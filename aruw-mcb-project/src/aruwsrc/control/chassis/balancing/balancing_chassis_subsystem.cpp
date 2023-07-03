@@ -338,12 +338,13 @@ void BalancingChassisSubsystem::setLegsRetracted(uint32_t dt)
 
 void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
 {
+    float maxSpeed = CHASSIS_HEIGHT_TO_SPEED_INTERPOLATOR.interpolate(currentZ);
     // 1. Run LQR controller
     float stateData[6] = {
         deadZone(tl, .0f),
         deadZone(tlRate, .1f),
         limitVal(currentX - desiredX, -2.0f, 2.0f),
-        limitVal(currentV - desiredV, -4.0f, 4.0f),
+        limitVal(currentV - desiredV, -maxSpeed, maxSpeed),
         -pitch,
         deadZone(-pitchRate, .1f),
     };

@@ -167,7 +167,7 @@ static constexpr float MASS_CHASSIS = 13.5f;  // kg
 static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.140, 0.325};
 
 static constexpr modm::Pair<float, float> HEIGHT_TO_SPEED_LUT[] = {
-    {.1f, 5.0f},
+    {.1f, 4.0f},
     {.3f, .5f},
 };
 
