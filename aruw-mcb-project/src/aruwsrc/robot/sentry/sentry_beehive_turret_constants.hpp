@@ -79,7 +79,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 24'500.0f,
+    .kp = 17'500.0f,
     .ki = 0.0f,
     .kd = -200'000.0f,
     .maxICumulative = 5'000.0f,
@@ -96,7 +96,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 // static constexpr boolean majorInverted = true;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
-static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.4f;
+static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.8f;
 }  // namespace turretMajor
 
 namespace girlboss
@@ -117,7 +117,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 1960,
     .minAngle = modm::toRadian(-9),
-    .maxAngle = modm::toRadian(42),
+    .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
 
@@ -144,7 +144,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 3285,
     .minAngle = modm::toRadian(-9),
-    .maxAngle = modm::toRadian(42),
+    .maxAngle = modm::toRadian(45),
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
@@ -159,9 +159,9 @@ namespace major_rel
 namespace malewife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 72'000.0f,
+    .kp = 68'000.0f,
     .ki = 370.0f,
-    .kd = 9'400.0f,
+    .kd = 12'400.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -172,9 +172,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 164'000.0f,
+    .kp = 134'000.0f,
     .ki = 75.0f,
-    .kd = 7'000.0f,
+    .kd = 5'500.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -188,9 +188,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 72'000.0f,
+    .kp = 68'000.0f,
     .ki = 370.0f,
-    .kd = 9'400.0f,
+    .kd = 12'400.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -201,9 +201,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 164'000.0f,
+    .kp = 134'000.0f,
     .ki = 75.0f,
-    .kd = 7'000.0f,
+    .kd = 5'500.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,

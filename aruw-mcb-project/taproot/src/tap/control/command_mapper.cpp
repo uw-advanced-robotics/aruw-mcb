@@ -60,7 +60,11 @@ void CommandMapper::handleKeyStateChange(
 
     for (CommandMapping *cmdMap : commandsToRun)
     {
-        cmdMap->executeCommandMapping(mapstate);
+        cmdMap->executeCommandMappingRemove(mapstate);
+    }
+    for (CommandMapping *cmdMap : commandsToRun)
+    {
+        cmdMap->executeCommandMappingAdd(mapstate);
     }
 }
 

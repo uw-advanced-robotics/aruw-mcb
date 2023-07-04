@@ -49,7 +49,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
         aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
-        bool beybladeOnlyInGame = false);
+        bool autoNavOnlyInGame = false);
 
     void initialize() override;
 
@@ -91,10 +91,13 @@ private:
     // @todo extremely ad hoc for sentry
     aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter;
 
-    bool beybladeOnlyInGame;
+    bool autoNavOnlyInGame;
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;
+
+    static constexpr float LOW_PASS_A = 0.01f;
+    static constexpr float APPLY_LOW_PASS_THRESHOLD = 0.1f;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

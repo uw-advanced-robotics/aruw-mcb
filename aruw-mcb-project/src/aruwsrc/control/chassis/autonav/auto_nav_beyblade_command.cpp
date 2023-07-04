@@ -46,7 +46,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
     aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
-    bool beybladeOnlyInGame)
+    bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -54,7 +54,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
       odometryInterface(odometryInterface),
       sentryResponseTransmitter(sentryResponseTransmitter),
       config(config),
-      beybladeOnlyInGame(beybladeOnlyInGame)
+      autoNavOnlyInGame(autoNavOnlyInGame)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -98,7 +98,7 @@ void AutoNavBeybladeCommand::execute()
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
         
-        if (setpointData.pathFound && visionCoprocessor.isCvOnline())
+        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
             float desiredVelocityX = setpointData.x - currentX;
             float desiredVelocityY = setpointData.y - currentY;
@@ -107,10 +107,17 @@ void AutoNavBeybladeCommand::execute()
             {
                 x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
                 y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+                // low pass x and y if close to setpoint
+                if (mag < APPLY_LOW_PASS_THRESHOLD) {
+                    auto chassisVel = chassis.getActualVelocityChassisRelative();
+                    x = lowPassFilter(chassisVel[0][0], x, LOW_PASS_A);
+                    y = lowPassFilter(chassisVel[1][0], y, LOW_PASS_A);
+                }
             }
         }
 
-        if ((!beybladeOnlyInGame || drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME) && beybladeEnabled)
+        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
         {
             // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
             // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
@@ -128,6 +135,7 @@ void AutoNavBeybladeCommand::execute()
                 rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
             }
         }
+
 
         rotateSpeedRamp.setTarget(rampTarget);
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration

@@ -69,7 +69,8 @@ public:
 
     void reset();
 
-private:
+// private:
+protected: // for now!
     float initialXPos;
     float initialYPos;
 
@@ -121,10 +122,10 @@ private:
     static constexpr float KF_Q[STATES_SQUARED] = {
         1E1, 0  , 0   , 0  , 0  , 0   ,
         0  , 1E0, 0   , 0  , 0  , 0   ,
-        0  , 0  , 1E-1, 0  , 0  , 0   ,
+        0  , 0  , 5E-1, 0  , 0  , 0   ,
         0  , 0  , 0   , 1E1, 0  , 0   ,
         0  , 0  , 0   , 0  , 1E0, 0   ,
-        0  , 0  , 0   , 0  , 0  , 1E-1,
+        0  , 0  , 0   , 0  , 0  , 5E-1,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
         1.0, 0  , 0  , 0  ,

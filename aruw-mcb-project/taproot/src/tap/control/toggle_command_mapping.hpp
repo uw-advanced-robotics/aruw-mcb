@@ -64,7 +64,8 @@ public:
      *
      * @param[in] currState The current RemoteMapState of the remote.
      */
-    void executeCommandMapping(const RemoteMapState &currState) override;
+    void executeCommandMappingAdd(const RemoteMapState &currState) override;
+    void executeCommandMappingRemove(const RemoteMapState &currState) override;
 
 private:
     bool pressed;

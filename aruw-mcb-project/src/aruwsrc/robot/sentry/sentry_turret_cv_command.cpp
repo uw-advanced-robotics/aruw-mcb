@@ -173,9 +173,10 @@ void SentryTurretCVCommand::execute()
 
         // major averaging
         auto& worldToChassisTransform = sentryTransforms.getWorldToChassis();
-        WrappedFloat majorYawWrapped = girlbossYawWrapped.minDifference(malewifeYawWrapped);
-
+        // conversion because otherwise divide by 2 doesn't work right otherwise
+        WrappedFloat majorYawWrapped = WrappedFloat(girlbossYawWrapped.minDifference(malewifeYawWrapped).getValue(), -M_PI, M_PI);
         majorYawWrapped /= -2.0f;
+        majorYawWrapped = WrappedFloat(majorYawWrapped.getValue(), 0, M_TWOPI);
         majorYawWrapped += malewifeYawWrapped;
 
         majorSetpoint = majorYawWrapped.getValue();

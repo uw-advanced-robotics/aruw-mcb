@@ -90,7 +90,8 @@ public:
 
     LaunchMode getLaunchMode() const { return launchMode; }
 
-    void executeCommandMapping(const tap::control::RemoteMapState &currState);
+    void executeCommandMappingAdd(const tap::control::RemoteMapState &currState) override;
+    void executeCommandMappingRemove(const tap::control::RemoteMapState &currState) override;
 
 private:
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager;

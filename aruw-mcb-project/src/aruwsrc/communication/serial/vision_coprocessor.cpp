@@ -92,6 +92,10 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 {
     lastMessageReceivedTimestamp = tap::arch::clock::getTimeMicroseconds();
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+
+    // ugly (???)
+    lastArucoData.updated = false;
+
     switch (completeMessage.messageType)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -104,6 +108,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToAutoNavSetpointData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        {
+            decodeToArucoResetData(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -114,6 +123,13 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
     return true;
 }
+
+bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message) {
+    memcpy(&lastArucoData, &message.data, sizeof(ArucoResetData));
+    lastArucoData.updated = true;
+    return true;
+}
+
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
