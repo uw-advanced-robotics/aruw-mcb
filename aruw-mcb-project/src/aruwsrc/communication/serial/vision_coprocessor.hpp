@@ -128,9 +128,9 @@ public:
 
     struct TimingData
     {
-        uint32_t duration;       ///< duration during which the plate is at the target point
-        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
         uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t duration;       ///< duration during which the plate is at the target point
                                  ///< next shot should ideally hit
 
         bool updated;  ///< whether or not this came from the most recent message
