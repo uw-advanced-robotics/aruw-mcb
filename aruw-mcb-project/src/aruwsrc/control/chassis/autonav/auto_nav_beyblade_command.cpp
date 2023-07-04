@@ -99,6 +99,13 @@ void AutoNavBeybladeCommand::execute()
             {
                 x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
                 y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+                // low pass x and y if close to setpoint
+                if (mag < APPLY_LOW_PASS_THRESHOLD) {
+                    auto chassisVel = chassis.getActualVelocityChassisRelative();
+                    x = lowPassFilter(chassisVel[0][0], x, LOW_PASS_A);
+                    y = lowPassFilter(chassisVel[1][0], y, LOW_PASS_A);
+                }
             }
         }
 
@@ -120,6 +127,7 @@ void AutoNavBeybladeCommand::execute()
                 rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
             }
         }
+
 
         rotateSpeedRamp.setTarget(rampTarget);
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration

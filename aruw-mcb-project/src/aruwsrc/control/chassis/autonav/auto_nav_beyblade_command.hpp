@@ -79,6 +79,9 @@ private:
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;
+
+    static constexpr float LOW_PASS_A = 0.01f;
+    static constexpr float APPLY_LOW_PASS_THRESHOLD = 0.1f;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis
