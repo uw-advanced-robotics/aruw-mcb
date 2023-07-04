@@ -47,7 +47,9 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::control::BarrelSwitcherSubsystem *barrelSwitcher
+    )
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -73,7 +75,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           cvOnTargetManager,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
-          chassisImuDriveCommand),
+          chassisImuDriveCommand,
+          barrelSwitcher),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter)
 {

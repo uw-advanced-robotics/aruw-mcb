@@ -38,6 +38,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 
 namespace tap::control
 {
@@ -113,7 +114,9 @@ public:
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+        const aruwsrc::control::BarrelSwitcherSubsystem *barrelSwitcher
+        );
 
     const char *getName() const override { return "client display"; }
 

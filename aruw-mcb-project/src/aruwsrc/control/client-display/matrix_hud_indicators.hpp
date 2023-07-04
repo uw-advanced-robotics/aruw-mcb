@@ -32,6 +32,7 @@
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -95,7 +96,8 @@ public:
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::control::BarrelSwitcherSubsystem *barrelSwitcher);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -146,6 +148,10 @@ private:
 #endif
         /** The current state of CV. */
         CV_STATUS,
+
+#if defined(TARGET_STANDARD_SPIDER)
+        BARREL_SWITCHER_STATE,
+#endif
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -165,7 +171,11 @@ private:
 #if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\n10Hz\n20Hz"},
 #endif
-            {"CV  ", "GATE\nNOGT\nOFFL"}
+            {"CV  ", "GATE\nNOGT\nOFFL"},
+
+#if defined(TARGET_STANDARD_SPIDER)
+            {"BSWR", "IDLE\nLEFT\nRIGHT"}
+#endif
         };
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
@@ -213,6 +223,8 @@ private:
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
+
+    const aruwsrc::control::BarrelSwitcherSubsystem *barrelSwitcher;
 
     /**
      * List of commands that will be checked for in the scheduler when determining which drive

@@ -464,7 +464,13 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand,
-    sentryResponseHandler);
+    sentryResponseHandler,
+    #ifdef TARGET_STANDARD_SPIDER
+    &barrelSwitcher
+    #else
+    nullptr // :D
+    #endif
+    );
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 

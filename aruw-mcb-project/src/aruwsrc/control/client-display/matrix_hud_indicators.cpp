@@ -64,7 +64,9 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
+    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    const aruwsrc::control::BarrelSwitcherSubsystem *barrelSwitcher
+    )
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -102,6 +104,14 @@ MatrixHudIndicators::MatrixHudIndicators(
             &matrixHudIndicatorGraphics[CV_STATUS],
             updateGraphicYLocation,
             0),
+
+#if defined(TARGET_STANDARD_SPIDER) 
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[BARREL_SWITCHER_STATE],
+            updateGraphicYLocation,
+            0),
+#endif
 }
 {
 }
@@ -190,6 +200,14 @@ void MatrixHudIndicators::updateIndicatorState()
     // update firing mode
     matrixHudIndicatorDrawers[FIRING_MODE].setIndicatorState(getIndicatorYCoordinate(
         static_cast<int>(multiShotHandler == nullptr ? 0 : multiShotHandler->getLaunchMode())));
+#endif
+
+
+#if defined(TARGET_STANDARD_SPIDER)
+    // update barrel state
+    // this message depends on the order of elements in a struct! too bad!
+    matrixHudIndicatorDrawers[BARREL_SWITCHER_STATE].setIndicatorState(getIndicatorYCoordinate(
+        static_cast<int>(barrelSwitcher == nullptr ? 0 :  int(barrelSwitcher->getBarrelState()))));
 #endif
 
     CVStatus cvStatus = CVStatus::VISION_COPROCESSOR_OFFLINE;
