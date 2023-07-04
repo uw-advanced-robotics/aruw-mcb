@@ -18,6 +18,7 @@
  */
 
 #include "sentry_imu_calibrate_command.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 
 #include "tap/drivers.hpp"
 
@@ -37,6 +38,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
     chassis::HolonomicChassisSubsystem *chassis,
+    aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface)  // @todo tried to create separate command for resetting kf; for some reason it never got fucking scheduled; so we're resorting to this instead
     : tap::control::Command(),
       drivers(drivers),
@@ -44,6 +46,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajor(turretMajor),
       turretMajorController(turretMajorController),
       chassis(chassis),
+      yawObserver(yawObserver),
       odometryInterface(odometryInterface)
 {
     for (auto &config : turretsAndControllers)
@@ -64,6 +67,7 @@ bool SentryImuCalibrateCommand::isReady() { return true; }
 
 void SentryImuCalibrateCommand::initialize()
 {
+    yawObserver.overrideChassisYaw(0);
     // reset odometry
     odometryInterface.reset();
 

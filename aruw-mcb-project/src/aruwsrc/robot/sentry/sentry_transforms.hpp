@@ -52,9 +52,9 @@ public:
     inline const Transform<WorldFrame, TurretMinorGirlbossFrame>& getWorldToTurretGirlboss() const { return worldToTurretGirlboss; };
     inline const Transform<WorldFrame, TurretMinorMalewifeFrame>& getWorldToTurretMalewife() const { return worldToTurretMalewife; };
 
-    inline const Transform<WorldFrame, TurretMinorFrame>& getWorldToMinor(uint8_t turretID) const {  // @todo highly questionable
+    inline const Transform<WorldFrame, TurretMinorFrame>& getWorldToMinor(uint8_t turretID) const {
         if (turretID == malewife::turretID) return reinterpret_cast<const Transform<WorldFrame, TurretMinorFrame>&>(worldToTurretMalewife);
-        reinterpret_cast<const Transform<WorldFrame, TurretMinorFrame>&>(worldToTurretGirlboss);
+        return reinterpret_cast<const Transform<WorldFrame, TurretMinorFrame>&>(worldToTurretGirlboss);
     };
 
     inline const Transform<TurretMajorFrame, TurretMinorGirlbossFrame>& getMajorToGirlboss() const { return turretMajorToTurretGirlboss; };
@@ -62,7 +62,7 @@ public:
 
     inline const Transform<TurretMajorFrame, TurretMinorFrame>& getMajorToMinor(uint8_t turretID) const {
         if (turretID == malewife::turretID) return reinterpret_cast<const Transform<TurretMajorFrame, TurretMinorFrame>&>(turretMajorToTurretMalewife);
-        reinterpret_cast<const Transform<WorldFrame, TurretMinorFrame>&>(turretMajorToTurretGirlboss);
+        return reinterpret_cast<const Transform<TurretMajorFrame, TurretMinorFrame>&>(turretMajorToTurretGirlboss);
     };
 
     inline const tap::algorithms::transforms::Transform<ChassisFrame, TurretMajorFrame>& getChassisToTurretMajor() const { return chassisToTurretMajor ; };

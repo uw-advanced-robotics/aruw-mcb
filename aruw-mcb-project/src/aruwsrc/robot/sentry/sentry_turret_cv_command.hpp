@@ -182,6 +182,7 @@ private:
      * Handles scanning logic in the yaw direction
      */
     bool scanning = false;
+    bool targetFound = false;
 
     // scan direction
     static constexpr int SCAN_CLOCKWISE = -1;

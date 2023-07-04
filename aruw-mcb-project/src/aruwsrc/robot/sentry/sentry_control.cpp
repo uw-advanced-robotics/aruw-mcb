@@ -479,6 +479,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     &turretMajor,
     &turretMajorYawController,
     &sentryDrive,
+    sentryChassisWorldYawObserver,
     odometrySubsystem);
 
 // Chassis drive manual

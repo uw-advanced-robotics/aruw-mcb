@@ -115,6 +115,7 @@ public:
         aruwsrc::control::turret::SentryTurretMajorSubsystem* turretMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface* turretMajorController,
         chassis::HolonomicChassisSubsystem *chassis,
+        aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver,
         aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -175,6 +176,8 @@ private:
      * Timeout used to determine if we should give up on calibration.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
+
+    aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver;
 
     aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometryInterface;
 };

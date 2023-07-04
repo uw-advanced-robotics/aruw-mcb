@@ -102,7 +102,7 @@ void SentryTurretCVCommand::execute()
     auto malewifeAimData = visionCoprocessor.getLastAimData(1);
     auto malewifeBallisticsSolution = malewifeBallisticsSolver.computeTurretAimAngles(malewifeAimData);
 
-    bool targetFound = visionCoprocessor.isCvOnline() && !(girlbossBallisticsSolution == std::nullopt && malewifeBallisticsSolution == std::nullopt);
+    targetFound = visionCoprocessor.isCvOnline() && !(girlbossBallisticsSolution == std::nullopt && malewifeBallisticsSolution == std::nullopt);
 
     // Turret minor control
     // If target spotted
