@@ -28,6 +28,8 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
+#include "aruwsrc/robot/sentry/sentry_response_transmitter.hpp"
+#include "aruwsrc/robot/sentry/sentry_response_message_types.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -45,6 +47,7 @@ public:
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
+        aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
         bool autoNavOnlyInGame = false);
 
@@ -56,9 +59,19 @@ public:
 
     bool isFinished() const override { return false; }
 
-    inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
+    inline void toggleBeyblade()
+    {
+        beybladeEnabled = !beybladeEnabled;
+        sentryResponseTransmitter.queueRequest(
+            beybladeEnabled ? aruwsrc::communication::serial::SentryResponseType::BEYBLADE_ENABLED : aruwsrc::communication::serial::SentryResponseType::BEYBLADE_DISABLED);
+    };
 
-    inline void toggleMovement() { movementEnabled = !movementEnabled; };
+    inline void toggleMovement()
+    {
+        movementEnabled = !movementEnabled;
+        sentryResponseTransmitter.queueRequest(
+            movementEnabled ? aruwsrc::communication::serial::SentryResponseType::MOVEMENT_ENABLED : aruwsrc::communication::serial::SentryResponseType::MOVEMENT_DISABLED);
+    };
 
     const char* getName() const override { return "autonav beyblade"; }
 
@@ -76,6 +89,8 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
 
     bool autoNavOnlyInGame;
+    // @todo extremely ad hoc for sentry
+    aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter;
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;

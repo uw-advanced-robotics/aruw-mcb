@@ -17,23 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
-#define SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
+#ifndef SENTRY_RESPONSE_SUBSYSTEM_HPP_
+#define SENTRY_RESPONSE_SUBSYSTEM_HPP_
 
-#include <gmock/gmock.h>
+#include "tap/control/subsystem.hpp"
+#include "tap/util_macros.hpp"
 
-#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
+#include "sentry_response_transmitter.hpp"
 
-namespace aruwsrc::mock
+namespace aruwsrc
 {
-class SentryRequestSubsystemMock : public communication::serial::SentryRequestSubsystem
+class Drivers;
+}
+
+namespace aruwsrc::communication::serial
+{
+class SentryResponseSubsystem : public tap::control::Subsystem
 {
 public:
-    SentryRequestSubsystemMock(tap::Drivers *drivers);
-    ~SentryRequestSubsystemMock();
+    SentryResponseSubsystem(tap::Drivers *drivers, SentryResponseTransmitter& transmitter);
 
-    MOCK_METHOD(void, queueRequest, (communication::serial::SentryRequestType), (override));
+    void refresh() override;
+
+private:
+    SentryResponseTransmitter& sentryResponseTransmitter;
 };
-}  // namespace aruwsrc::mock
+}  // namespace aruwsrc::communication::serial
 
-#endif  // SENTRY_REQUEST_SUBSYSTEM_MOCK_HPP_
+#endif  // SENTRY_REQUEST_SUBSYSTEM_HPP_
