@@ -68,7 +68,7 @@ class SentryTurretCVCommand : public tap::control::Command
 {
 public:
     // TODO: config someplace
-    static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(0.0f);
+    static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
     static constexpr float SCAN_GIRLBOSS_YAW = modm::toRadian(90.0f);
     static constexpr float SCAN_MALEWIFE_YAW = modm::toRadian(-90.0f);
