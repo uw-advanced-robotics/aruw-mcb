@@ -55,16 +55,30 @@ public:
     BarrelSwitcherSubsystem(
         tap::Drivers* drivers,
         aruwsrc::control::StallThresholdConfig config,
-        tap::motor::MotorId motorid);
+        tap::motor::DjiMotor& motor);
+    
+    bool isStalled() const;
+
+    bool isInPosition() const;
+
+    void useRight();
+
+    void useLeft();
+
+    void stop();
+    
+    BarrelState getBarrelState() const;
+
+    /* Inherited Methods */
 
     void initialize() override;
+
     void refresh() override;
-    bool isStalled() const;
-    bool isInPosition() const;
-    void useRight();
-    void useLeft();
-    void stop();
-    BarrelState getBarrelState() const;
+
+    void refreshSafeDisconnect() override
+    {
+        motor.setDesiredOutput(0);
+    }
 
 private:
     void setMotorOutput(int32_t velocity);
@@ -85,17 +99,11 @@ private:
      */
     aruwsrc::control::StallThresholdConfig config;
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> motor;
-
-private:
-#else
     /**
      * The motor that switches the turret's barrels
      */
-    tap::motor::DjiMotor motor;
-#endif
+    tap::motor::DjiMotor& motor;
 };  // class BarrelSwitcherSubsystem
 }  // namespace aruwsrc::control
+
 #endif  // BARREL_SWITCHER_SUBSYSTEM_HPP_

@@ -136,6 +136,7 @@ tap::motor::DjiMotor yawMotor(
     false,
 #endif
     "Yaw Turret");
+
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -201,10 +202,17 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 #ifdef TARGET_STANDARD_SPIDER
+tap::motor::DjiMotor barrelSwitcherMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR8,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Barrel Switcher Motor");
+
 BarrelSwitcherSubsystem barrelSwitcher(
     drivers(),
     STALL_THRESHOLD_CONFIG,
-    tap::motor::MotorId::MOTOR8);
+    barrelSwitcherMotor);
 #endif
 
 /* define commands ----------------------------------------------------------*/

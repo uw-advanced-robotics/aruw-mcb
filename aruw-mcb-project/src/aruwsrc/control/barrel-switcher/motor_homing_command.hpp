@@ -80,4 +80,5 @@ private:
 
 };  // class MotorHomingCommand
 }  // namespace aruwsrc::control
+
 #endif  // MOTOR_HOMING_COMMAND_HPP_

@@ -28,10 +28,10 @@ namespace aruwsrc::control
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     tap::Drivers* drivers,
     aruwsrc::control::StallThresholdConfig config,
-    tap::motor::MotorId motorid)
+    tap::motor::DjiMotor& motor)
     : Subsystem(drivers),
       config(config),
-      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
+      motor(motor)
 {
 }
 
@@ -73,7 +73,10 @@ void BarrelSwitcherSubsystem::refresh()
     }
 }
 
-BarrelState BarrelSwitcherSubsystem::getBarrelState() const { return barrelState; }
+BarrelState BarrelSwitcherSubsystem::getBarrelState() const
+{
+    return barrelState;
+}
 
 void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
 {
@@ -87,7 +90,10 @@ bool BarrelSwitcherSubsystem::isStalled() const
         (fabsl(motor.getTorque()) > config.minTorque));
 }
 
-bool BarrelSwitcherSubsystem::isInPosition() const { return inPosition; }
+bool BarrelSwitcherSubsystem::isInPosition() const
+{
+    return inPosition;
+}
 
 void BarrelSwitcherSubsystem::useRight()
 {
@@ -106,4 +112,4 @@ void BarrelSwitcherSubsystem::stop()
     this->setMotorOutput(0);
     barrelState = BarrelState::IDLE;
 }
-};  // namespace aruwsrc::control
+}  // namespace aruwsrc::control

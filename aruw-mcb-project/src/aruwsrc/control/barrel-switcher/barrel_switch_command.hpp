@@ -54,17 +54,19 @@ public:
         addSubsystemRequirement(barrelSwitcher);
     };
 
+    void setControlState(SwitchingControlState state);
+
+    /* Inherited Methods */
+
     void initialize() override;
 
     void execute() override;
 
-    void setControlState(SwitchingControlState state);
-
-    bool isFinished() const override;
+    bool isFinished() const override { return false; };
 
     void end(bool interrupt) override;
 
-    const char* getName() const override { return "barrel switch command"; };
+    const char* getName() const override { return "Barrel Switch Command"; };
 
 private:
     aruwsrc::control::BarrelSwitcherSubsystem* barrelSwitcher;
@@ -74,4 +76,4 @@ private:
 };  // class BarrelSwitchCommand
 }  // namespace aruwsrc::control
 
-#endif
+#endif  // BARREL_SWITCH_COMMAND_HPP_

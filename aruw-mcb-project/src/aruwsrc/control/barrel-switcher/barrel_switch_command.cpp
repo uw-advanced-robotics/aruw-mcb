@@ -21,7 +21,10 @@
 
 namespace aruwsrc::control
 {
-void BarrelSwitchCommand::initialize() { controlState = SwitchingControlState::AUTOMATIC; }
+void BarrelSwitchCommand::initialize()
+{
+    controlState = SwitchingControlState::AUTOMATIC;
+}
 
 void BarrelSwitchCommand::execute()
 {
@@ -69,7 +72,8 @@ void BarrelSwitchCommand::setControlState(SwitchingControlState state)
     }
 }
 
-void BarrelSwitchCommand::end(bool) { barrelSwitcher->stop(); }
-
-bool BarrelSwitchCommand::isFinished() const { return false; }
+void BarrelSwitchCommand::end(bool)
+{
+    barrelSwitcher->stop();
+}
 }  // namespace aruwsrc::control
