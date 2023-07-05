@@ -337,7 +337,8 @@ SentryKFOdometry2DSubsystem odometrySubsystem(
     sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
     modm::Location2D<float>(0., 0., M_PI * 0.75),
-    0.5f, 0.5f);  // TODO: this
+    3.074f, 3.074f);  // TODO: this belongs in config
+    // 0.5f, 0.5f);  // 1v1 debug
 
 
 // Transforms --------------------------------------------------------------------------------
