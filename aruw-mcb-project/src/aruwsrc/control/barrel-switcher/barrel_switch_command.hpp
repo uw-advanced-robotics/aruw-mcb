@@ -56,6 +56,8 @@ public:
 
     void setControlState(SwitchingControlState state);
 
+    inline SwitchingControlState getControlState() const { return controlState; }
+
     /* Inherited Methods */
 
     void initialize() override;

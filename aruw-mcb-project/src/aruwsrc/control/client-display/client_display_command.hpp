@@ -28,6 +28,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
@@ -114,6 +115,7 @@ public:
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
         const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
 
     const char *getName() const override { return "client display"; }

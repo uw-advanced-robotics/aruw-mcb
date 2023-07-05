@@ -28,6 +28,7 @@
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -61,6 +62,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
+        const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
         const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -106,13 +108,13 @@ private:
      */
     enum BooleanHUDIndicatorIndex
     {
-        /** Indicates systems (such as the IMU) are calibrating. */
-        SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
         /** Indicates whether or not the sentry is moving. */
         SENTRY_MOVEMENT_ENABLED,
         SENTRY_BEYBLADE_ENABLED,
+        /** Indicates if barrel switcher on automatic. */
+        BARREL_SWITCH_AUTOMATIC,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -125,10 +127,6 @@ private:
      */
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
-            BooleanHUDIndicatorTuple(  // @todo remove top two
-                "SYS CALIB ",
-                Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
-                Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,
@@ -139,6 +137,10 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
                 "SEN BEY ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "BARREL ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -167,12 +169,15 @@ private:
      */
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
 
+    const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand;
+
     /**
      * SentryResponseHandler that provides information about whether or not the sentry is
      * moving.
      */
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
 
+    // @todo docs
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
      * depending on whether or not the hopper is open or closed.

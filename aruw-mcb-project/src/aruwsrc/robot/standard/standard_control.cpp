@@ -481,6 +481,11 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand,
+#ifdef TARGET_STANDARD_SPIDER
+    &barrelSwitchCommand,
+#else
+    nullptr,
+#endif
     sentryResponseHandler);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -606,10 +611,10 @@ PressCommandMapping qEPressed(
     {&wiggleCommand},
     RemoteMapState({Remote::Key::Q, Remote::Key::E})); // TODO: Do we need this?
 
-PressCommandMapping xPressedNotShiftPressed(
-    drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
+// PressCommandMapping xPressedNotShiftPressed(
+//     drivers(),
+//     {&chassisAutorotateCommand},
+//     RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
@@ -627,14 +632,14 @@ CycleStateCommandMapping<
     BarrelSwitchCommand::SwitchingControlState,
     BarrelSwitchCommand::SwitchingControlState::NUM_STATES,
     BarrelSwitchCommand>
-    xPressed(
+    xPressedNotShiftPressed(
         drivers(),
-        RemoteMapState({Remote::Key::X}),
+        RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}),
         BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
         &barrelSwitchCommand,
         &BarrelSwitchCommand::setControlState);
 #else
-PressCommandMapping xPressed(
+PressCommandMapping xPressedNotShiftPressed(
     drivers(),
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
