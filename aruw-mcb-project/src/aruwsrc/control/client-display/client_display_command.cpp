@@ -73,9 +73,12 @@ ClientDisplayCommand::ClientDisplayCommand(
           cvOnTargetManager,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
-          chassisImuDriveCommand),
+          chassisImuDriveCommand,
+          &sentryResponseHandler),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
+      holdFireIndicator(sentryResponseHandler, refSerialTransmitter),
+      sentryResponseHandler(sentryResponseHandler)
 {
     addSubsystemRequirement(&clientDisplay);
 }
@@ -89,6 +92,7 @@ void ClientDisplayCommand::initialize()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+    holdFireIndicator.initialize();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -104,6 +108,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
+    PT_CALL(holdFireIndicator.sendInitialGraphics());
 
     while (true)
     {
@@ -112,6 +117,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
+        PT_CALL(holdFireIndicator.update());
         PT_YIELD();
     }
     PT_END();

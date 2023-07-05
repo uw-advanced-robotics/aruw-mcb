@@ -38,6 +38,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
+#include "hold_fire_indicator.hpp"
 
 namespace tap::control
 {
@@ -135,6 +136,8 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    HoldFireIndicator holdFireIndicator;
+    aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler;
 
     bool run();
 };

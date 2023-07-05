@@ -32,6 +32,7 @@
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -83,6 +84,7 @@ public:
      * will never be selected as the current chassis command in the HUD.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command in the HUD.
+     * @param[in] sentryResponseHandler May be nullptr. If nullptr  @todo
      */
     MatrixHudIndicators(
         tap::Drivers &drivers,
@@ -95,7 +97,8 @@ public:
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const aruwsrc::communication::serial::SentryResponseHandler *sentryResponseHandler);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -149,6 +152,7 @@ private:
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
+        SENTRY_NAV_STRATEGY,
         NUM_MATRIX_HUD_INDICATORS,
     };
     /** The number of characters in a matrix indicator title (or label). */
@@ -165,7 +169,8 @@ private:
 #if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\n10Hz\n20Hz"},
 #endif
-            {"CV  ", "GATE\nNOGT\nOFFL"}
+            {"CV  ", "GATE\nNOGT\nOFFL"},
+            {"STRY", "AUTO\nFBSE\nEBSE\nFSPL\nESPL\nCNTR"}
         };
 
     /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
@@ -213,6 +218,8 @@ private:
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
+
+    const aruwsrc::communication::serial::SentryResponseHandler *sentryResponseHandler;
 
     /**
      * List of commands that will be checked for in the scheduler when determining which drive
