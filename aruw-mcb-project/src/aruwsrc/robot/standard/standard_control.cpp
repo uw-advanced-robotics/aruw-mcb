@@ -507,10 +507,10 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 
 /// @brief sentry messages
-PressCommandMapping dShiftPressed(
+PressCommandMapping cShiftPressed(
     drivers(),
     {&sentrySendNoMotionStrategy},
-    RemoteMapState({Remote::Key::D, Remote::Key::SHIFT}));
+    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
 PressCommandMapping qShiftPressed(
     drivers(),
     {&sentrySendGoToFriendlyBase},
@@ -539,7 +539,7 @@ PressCommandMapping xShiftPressed(
     drivers(),
     {&sentrySendToggleMovement},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
-PressCommandMapping bShiftPressed(
+PressCommandMapping vShiftPressed(
     drivers(),
     {&sentrySendToggleBeyblade},
     RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
@@ -610,9 +610,9 @@ CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
     MultiShotCvCommandMapping>
-    vNotCtrlPressed(
+    vNotShiftPressed(
         drivers(),
-        RemoteMapState({Remote::Key::V}, {Remote::Key::CTRL}),
+        RemoteMapState({Remote::Key::V}, {Remote::Key::SHIFT}),
         MultiShotCvCommandMapping::SINGLE,
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
@@ -714,7 +714,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&bCtrlPressedNotShiftPressed);
     //drivers->commandMapper.addMap(&qEPressed);
     drivers->commandMapper.addMap(&xPressedNotShiftPressed);
-    drivers->commandMapper.addMap(&dShiftPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&qShiftPressed);
     drivers->commandMapper.addMap(&eShiftPressed);
     drivers->commandMapper.addMap(&rShiftPressed);
@@ -722,8 +722,8 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gShiftPressed);
     drivers->commandMapper.addMap(&zShiftPressed);
     drivers->commandMapper.addMap(&xShiftPressed);
-    drivers->commandMapper.addMap(&bShiftPressed);
-    drivers->commandMapper.addMap(&vNotCtrlPressed);
+    drivers->commandMapper.addMap(&vShiftPressed);
+    drivers->commandMapper.addMap(&vNotShiftPressed);
 }
 }  // namespace standard_control
 
