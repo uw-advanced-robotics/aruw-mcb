@@ -28,10 +28,10 @@ namespace aruwsrc::control
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     tap::Drivers* drivers,
     aruwsrc::control::StallThresholdConfig config,
-    tap::motor::MotorId motorid)
+    tap::motor::DjiMotor& motor)
     : Subsystem(drivers),
       config(config),
-      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
+      motor(motor)
 {
 }
 
@@ -106,4 +106,4 @@ void BarrelSwitcherSubsystem::stop()
     this->setMotorOutput(0);
     barrelState = BarrelState::IDLE;
 }
-};  // namespace aruwsrc::control
+}  // namespace aruwsrc::control

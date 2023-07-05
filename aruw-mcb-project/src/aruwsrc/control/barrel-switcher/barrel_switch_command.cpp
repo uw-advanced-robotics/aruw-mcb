@@ -70,6 +70,4 @@ void BarrelSwitchCommand::setControlState(SwitchingControlState state)
 }
 
 void BarrelSwitchCommand::end(bool) { barrelSwitcher->stop(); }
-
-bool BarrelSwitchCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::control

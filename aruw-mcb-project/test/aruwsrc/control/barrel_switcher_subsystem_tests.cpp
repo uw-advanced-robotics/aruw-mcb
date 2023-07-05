@@ -20,20 +20,27 @@
 #include <gtest/gtest.h>
 
 #include "tap/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/barrel-switcher/barrel_switcher_subsystem.hpp"
 
 using namespace aruwsrc::control;
+using namespace tap::mock;
 using namespace testing;
 
 class BarrelSwitcherSubsystemTest : public Test
 {
+public:
+    NiceMock<DjiMotorMock> motor;
+
 protected:
-    BarrelSwitcherSubsystemTest() : barrelSwitcher(&drivers, config, motorid) {}
+    BarrelSwitcherSubsystemTest()
+        : motor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor"),
+          barrelSwitcher(&drivers, config, motor)
+    {
+    }
 
     tap::Drivers drivers;
-    tap::motor::MotorId motorid;
     aruwsrc::control::StallThresholdConfig config{
         .maxRPM = 100,
         .minTorque = 10,
@@ -52,8 +59,8 @@ TEST_F(BarrelSwitcherSubsystemTest, correctly_detects_stall)
     int16_t rpm;
     int16_t torque;
 
-    ON_CALL(barrelSwitcher.motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
-    ON_CALL(barrelSwitcher.motor, getTorque).WillByDefault(ReturnPointee(&torque));
+    ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
     rpm = config.maxRPM + 1;
     torque = config.minTorque + 1;
