@@ -24,7 +24,6 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
-#include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -75,11 +74,14 @@ private:
     const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank;
 
     /**
-     * Two graphics that represent chassis orientation. The first graphic is the line representing
-     * the turret, and the second graphic is a thick line that represents the chassis and is rotated
-     * some amount to represent chassis orientation.
+     * Two graphics that represent the Capacitor Bank charge. The first graphic is the background for the bar, while the second is the charge of the Capacitor Bank.
      */
     Tx::Graphic2Message capBankGraphics;
+
+    /**
+     * A graphic that represents the current status of the Capacitor Bank.
+     */
+    Tx::GraphicCharacterMessage capBankTextGraphic;
 };
 }  // namespace aruwsrc::control::client_display
 

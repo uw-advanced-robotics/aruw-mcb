@@ -86,20 +86,8 @@ void PowerLimiter::updatePowerAndEnergyBuffer()
     // See rules manual for reasoning behind the energy buffer calculation.
     const float dt = tap::arch::clock::getTimeMilliseconds() - prevTime;
     prevTime = tap::arch::clock::getTimeMilliseconds();
-    float energyConsumed = (consumedPower - chassisData.powerConsumptionLimit) * dt / 1000.0f;
+    energyBuffer -= (consumedPower - chassisData.powerConsumptionLimit) * dt / 1000.0f;
 
-    if (this->externalEnergyBuffer > energyConsumed)
-    {
-        this->externalEnergyBuffer -= energyConsumed;
-        energyConsumed = 0;
-    }
-    else
-    {
-        this->externalEnergyBuffer = 0;
-        energyConsumed -= this->externalEnergyBuffer;
-    }
-
-    energyBuffer -= energyConsumed;
     if (robotData.robotDataReceivedTimestamp != prevRobotDataReceivedTimestamp)
     {
         energyBuffer = chassisData.powerBuffer;

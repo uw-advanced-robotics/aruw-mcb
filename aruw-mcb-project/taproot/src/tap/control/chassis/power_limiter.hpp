@@ -99,19 +99,6 @@ public:
      */
     float getPowerLimitRatio();
 
-    /**
-     * Allows for energy to be drawn from external sources before drawing from the power limit set
-     * by the referee system.
-     *
-     * @param[in] energy Sets the energy in joules that are available to draw from.
-     */
-    void setExternalEnergyBuffer(float energy) { this->externalEnergyBuffer = energy; };
-
-    /**
-     * Returns the remaining energy from the external buffer.
-     */
-    float getExternalEnergyBuffer() const { return this->externalEnergyBuffer; };
-
 private:
     const tap::Drivers *drivers;
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor;
@@ -120,7 +107,6 @@ private:
     const float energyBufferCritThreshold;
 
     float energyBuffer;
-    float externalEnergyBuffer = 0.0f;
     float consumedPower;
     uint32_t prevTime;
     uint32_t prevRobotDataReceivedTimestamp;

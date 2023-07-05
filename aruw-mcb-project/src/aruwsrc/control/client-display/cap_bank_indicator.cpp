@@ -43,6 +43,7 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
 
     // remove initial graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
+    RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
 
     RF_END();
 }
@@ -60,12 +61,15 @@ modm::ResumableResult<bool> CapBankIndicator::update()
         {
             capBankGraphics.graphicData[0].operation = capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
             capBankGraphics.graphicData[1].operation = capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+            capBankTextGraphic.graphicData.operation = capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
+            // Update the voltage bar
+
             // Bottom of the bar is 9v
             // Top of the bar is 21v
             // 9v - 11v is orange
             // 11v - 15v is yellow
             // 15v - 21v is green
-
             voltage = capBank->getVoltage();
 
             if (voltage < 9.1) {
@@ -85,16 +89,41 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 voltage < 15.0 ? Tx::GraphicColor::YELLOW : 
                 Tx::GraphicColor::GREEN);
 
-            
+            // Update the background status
             capBankGraphics.graphicData[0].color = static_cast<uint8_t>(
                 capBank->getStatus() == aruwsrc::communication::sensors::power::Status::RESET ? Tx::GraphicColor::YELLOW :
                 capBank->getStatus() == aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE ? Tx::GraphicColor::WHITE :
                 capBank->getStatus() == aruwsrc::communication::sensors::power::Status::DISCHARGING ? Tx::GraphicColor::CYAN :
                 capBank->getStatus() == aruwsrc::communication::sensors::power::Status::FAILURE ? Tx::GraphicColor::PURPLISH_RED :
-
                 Tx::GraphicColor::ORANGE); 
 
+            // Update the text
+            capBankTextGraphic.graphicData.endAngle = 5; // Sets the length of the string
+            switch (capBank->getStatus())
+            {
+                case aruwsrc::communication::sensors::power::Status::UNKNOWN: 
+                    strncpy(capBankTextGraphic.msg, "UNK ", 5); 
+                    break;
+                case aruwsrc::communication::sensors::power::Status::RESET: 
+                    strncpy(capBankTextGraphic.msg, "RST ", 5); 
+                    break;
+                case aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE: 
+                    strncpy(capBankTextGraphic.msg, "CAPS", 5); 
+                    break;
+                case aruwsrc::communication::sensors::power::Status::SAFE: 
+                    strncpy(capBankTextGraphic.msg, "SAFE", 5); 
+                    break;
+                case aruwsrc::communication::sensors::power::Status::DISCHARGING: 
+                    strncpy(capBankTextGraphic.msg, "DIS ", 5); 
+                    break;
+                case aruwsrc::communication::sensors::power::Status::FAILURE: 
+                    strncpy(capBankTextGraphic.msg, "FAIL", 5); 
+                    break;
+            }
+
+            // Send data
             RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
+            RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
         }
     }
 
@@ -120,6 +149,14 @@ void CapBankIndicator::initialize()
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER + 1,
         Tx::GraphicColor::GREEN);
+
+    getUnusedGraphicName(capBankName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &capBankTextGraphic.graphicData,
+        capBankName,
+        Tx::GRAPHIC_DELETE,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::WHITE);
     
     if (capBank != nullptr)
     {
@@ -138,6 +175,14 @@ void CapBankIndicator::initialize()
             CAP_CENTER_X,
             CAP_CENTER_Y - BOX_HEIGHT / 2 + 10,
             &capBankGraphics.graphicData[1]);
+
+        RefSerialTransmitter::configCharacterMsg(
+            15,
+            3,
+            CAP_CENTER_X - 15 * 2,
+            CAP_CENTER_Y + BOX_HEIGHT / 2 + 15 + 5,
+            "",
+            &capBankTextGraphic);
     }
 }
 }  // namespace aruwsrc::control::client_display
