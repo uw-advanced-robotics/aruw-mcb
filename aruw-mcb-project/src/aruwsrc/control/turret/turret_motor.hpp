@@ -113,7 +113,7 @@ public:
      */
     mockable inline float getChassisFrameVelocity() const
     {
-        return (M_TWOPI / 60) * motor->getShaftRPM();
+        return (M_TWOPI / 60) * static_cast<float>(motor->getShaftRPM());
     }
 
     /**
