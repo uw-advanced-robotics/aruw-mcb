@@ -84,6 +84,8 @@ public:
 
     void setZeroRPM() override;
 
+    void refreshSafeDisconnect() override { setZeroRPM(); }
+
     Module* getModule(unsigned int i);
 
     /**

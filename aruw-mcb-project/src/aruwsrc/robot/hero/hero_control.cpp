@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_CYCLONE)
+#if defined(TARGET_HERO)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -50,12 +50,12 @@
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/control/chassis/chassis_diagonal_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -121,7 +121,10 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -148,18 +151,9 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_PITCH_MOTOR,
-    false,
+    true,
     "Pitch Turret");
-tap::motor::DoubleDjiMotor yawMotor(
-    drivers(),
-    YAW_BACK_MOTOR_ID,
-    YAW_FRONT_MOTOR_ID,
-    CAN_BUS_YAW_MOTORS,
-    CAN_BUS_YAW_MOTORS,
-    true,
-    true,
-    "Yaw Front Turret",
-    "Yaw Back Turret");
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -201,12 +195,12 @@ ChassisImuDriveCommand chassisImuDriveCommand(
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &drivers()->controlOperatorInterface, &chassis);
 
-ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
+ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 BeybladeCommand beybladeCommand(
     drivers(),
@@ -244,14 +238,7 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
-    *drivers(),
-    turret.yawMotor,
-    world_rel_chassis_imu::YAW_PID_CONFIG);
-
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
-    world_rel_turret_imu::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
@@ -271,10 +258,14 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
     getTurretMCBCanComm(),
@@ -282,12 +273,18 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
+    worldFramePitchTurretImuVelPidCv);
+
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    &worldFrameYawChassisImuController,
+    &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
@@ -299,7 +296,7 @@ cv::TurretCVCommand turretCVCommand(
     &drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuController,
+    &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
@@ -397,212 +394,220 @@ ClientDisplayCommand clientDisplayCommand(
     nullptr,
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
-    &chassisDiagonalDriveCommand,
-    &chassisImuDriveCommand,
-    sentryResponseHandler);
+    &chassisAutorotateCommand,
+    nullptr,
+    sentryResponseHandler,
+    &drivers()->capacitorBank);
 
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+    aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
-/* define command mappings --------------------------------------------------*/
-HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&stopFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping rightSwitchUp(
-    drivers(),
-    {&kicker::launchKickerHeatAndCVLimited},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    false);
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    /* define command mappings --------------------------------------------------*/
+    HoldCommandMapping rightSwitchDown(
+        drivers(),
+        {&stopFrictionWheels},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    HoldRepeatCommandMapping rightSwitchUp(
+        drivers(),
+        {&kicker::launchKickerHeatAndCVLimited},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        false);
+    HoldCommandMapping leftSwitchDown(
+        drivers(),
+        {&beybladeCommand},
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    HoldCommandMapping leftSwitchUp(
+        drivers(),
+        {&chassisDriveCommand, &turretCVCommand},  // &turretCVCommand
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// Keyboard/Mouse related mappings
-PressCommandMapping cPressed(
-    drivers(),
-    {&sentryToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
-    drivers(),
-    {&sentryTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
-    drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
-    *drivers(),
-    kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    std::nullopt,
-    kicker::cvOnTargetGovernor);
-HoldRepeatCommandMapping leftMousePressedBPressed(
-    drivers(),
-    {&kicker::launchKickerNoHeatLimiting},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    false);
-HoldCommandMapping rightMousePressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
-// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping bNotCtrlPressedRightSwitchDown(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::B},
-        {Remote::Key::CTRL},
-        false,
-        false));
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
-// client display command. This is necessary since we don't know when the robot is connected to the
-// server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressed(
-    drivers(),
-    {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+    // Keyboard/Mouse related mappings
+    PressCommandMapping cPressed(
+        drivers(),
+        {&sentryToggleDriveMovementCommand},
+        RemoteMapState({Remote::Key::C}));
+    PressCommandMapping gPressedCtrlNotPressed(
+        drivers(),
+        {&sentryTargetNewQuadrantCommand},
+        RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
+    PressCommandMapping gCtrlPressed(
+        drivers(),
+        {&sentryPauseProjectileLaunchingCommand},
+        RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+    MultiShotCvCommandMapping leftMousePressedBNotPressed(
+        *drivers(),
+        kicker::launchKickerHeatAndCVLimited,
+        RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+        std::nullopt,
+        kicker::cvOnTargetGovernor);
+    HoldRepeatCommandMapping leftMousePressedBPressed(
+        drivers(),
+        {&kicker::launchKickerNoHeatLimiting},
+        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+        false);
+    HoldCommandMapping rightMousePressed(
+        drivers(),
+        {&turretCVCommand},
+        RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+    ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+    PressCommandMapping zPressed(
+        drivers(),
+        {&turretUTurnCommand},
+        RemoteMapState({Remote::Key::Z}));
+    // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a
+    // match.
+    PressCommandMapping bNotCtrlPressedRightSwitchDown(
+        drivers(),
+        {&imuCalibrateCommand},
+        RemoteMapState(
+            Remote::SwitchState::UNKNOWN,
+            Remote::SwitchState::DOWN,
+            {Remote::Key::B},
+            {Remote::Key::CTRL},
+            false,
+            false));
+    // The user can press b+ctrl when the remote right switch is in the down position to restart the
+    // client display command. This is necessary since we don't know when the robot is connected to
+    // the server and thus don't know when to start sending the initial HUD graphics.
+    PressCommandMapping bCtrlPressed(
+        drivers(),
+        {&clientDisplayCommand},
+        RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping qPressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::Q}));
-PressCommandMapping ePressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::E}));
-PressCommandMapping xPressed(
-    drivers(),
-    {&chassisDiagonalDriveCommand},
-    RemoteMapState({Remote::Key::X}));
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::R}),
-    true,
-    &kicker::cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
+    PressCommandMapping qPressed(
+        drivers(),
+        {&chassisImuDriveCommand},
+        RemoteMapState({Remote::Key::Q}));
+    PressCommandMapping ePressed(
+        drivers(),
+        {&chassisImuDriveCommand},
+        RemoteMapState({Remote::Key::E}));
+    PressCommandMapping xPressed(
+        drivers(),
+        {&chassisAutorotateCommand},
+        RemoteMapState({Remote::Key::X}));
+    CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::R}),
+        true,
+        &kicker::cvOnTargetGovernor,
+        &CvOnTargetGovernor::setGovernorEnabled);
 
-// cap bank
-PressCommandMapping cShiftPressed(
-    drivers(),
-    {&capBankToggleCommand},
-    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-PressCommandMapping cCtrlPressed(
-    drivers(),
-    {&capBankDrainCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::C}));
-HoldCommandMapping shiftPressed(
-    drivers(),
-    {&capBankSprintCommand},
-    RemoteMapState({Remote::Key::SHIFT}));
+    // cap bank
+    PressCommandMapping cShiftPressed(
+        drivers(),
+        {&capBankToggleCommand},
+        RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+    PressCommandMapping cCtrlPressed(
+        drivers(),
+        {&capBankDrainCommand},
+        RemoteMapState({Remote::Key::CTRL, Remote::Key::C}));
+    HoldCommandMapping shiftPressed(
+        drivers(),
+        {&capBankSprintCommand},
+        RemoteMapState({Remote::Key::SHIFT}));
 
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+    // Safe disconnect function
+    aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    sentryRequestSubsystem.initialize();
-    chassis.initialize();
-    frictionWheels.initialize();
-    odometrySubsystem.initialize();
-    clientDisplay.initialize();
-    kickerAgitator.initialize();
-    waterwheelAgitator.initialize();
-    turret.initialize();
-    buzzer.initialize();
-    capBankSubsystem.initialize();
-}
+    /* initialize subsystems ----------------------------------------------------*/
+    void initializeSubsystems()
+    {
+        sentryRequestSubsystem.initialize();
+        chassis.initialize();
+        frictionWheels.initialize();
+        odometrySubsystem.initialize();
+        clientDisplay.initialize();
+        kickerAgitator.initialize();
+        waterwheelAgitator.initialize();
+        turret.initialize();
+        buzzer.initialize();
+        capBankSubsystem.initialize();
+    }
 
-/* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(Drivers *drivers)
-{
-    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
-    drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&clientDisplay);
-    drivers->commandScheduler.registerSubsystem(&kickerAgitator);
-    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
-    drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&buzzer);
-    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
-}
+    /* register subsystems here -------------------------------------------------*/
+    void registerHeroSubsystems(Drivers *drivers)
+    {
+        drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
+        drivers->commandScheduler.registerSubsystem(&chassis);
+        drivers->commandScheduler.registerSubsystem(&frictionWheels);
+        drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+        drivers->commandScheduler.registerSubsystem(&clientDisplay);
+        drivers->commandScheduler.registerSubsystem(&kickerAgitator);
+        drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
+        drivers->commandScheduler.registerSubsystem(&turret);
+        drivers->commandScheduler.registerSubsystem(&buzzer);
+        drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    }
 
-/* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands()
-{
-    chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
-    kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
-}
+    /* set any default commands to subsystems here ------------------------------*/
+    void setDefaultHeroCommands()
+    {
+        chassis.setDefaultCommand(&chassisAutorotateCommand);
+        frictionWheels.setDefaultCommand(&spinFrictionWheels);
+        turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+        waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+        kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
+    }
 
-/* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *drivers)
-{
-    drivers->commandScheduler.addCommand(&clientDisplayCommand);
-    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    /* add any starting commands to the scheduler here --------------------------*/
+    void startHeroCommands(Drivers *drivers)
+    {
+        drivers->commandScheduler.addCommand(&clientDisplayCommand);
+        drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+        drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+        drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
-}
+        drivers->refSerial.attachRobotToRobotMessageHandler(
+            aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
+            &sentryResponseHandler);
+    }
 
-/* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers *drivers)
-{
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&ePressed);
-    drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
-    drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
-    drivers->commandMapper.addMap(&cCtrlPressed);
-    drivers->commandMapper.addMap(&shiftPressed);
-}
-}  // namespace hero_control
+    /* register io mappings here ------------------------------------------------*/
+    void registerHeroIoMappings(Drivers *drivers)
+    {
+        drivers->commandMapper.addMap(&rightSwitchDown);
+        drivers->commandMapper.addMap(&rightSwitchUp);
+        drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+        drivers->commandMapper.addMap(&leftMousePressedBPressed);
+        drivers->commandMapper.addMap(&rightMousePressed);
+        drivers->commandMapper.addMap(&leftSwitchDown);
+        drivers->commandMapper.addMap(&leftSwitchUp);
+        drivers->commandMapper.addMap(&fToggled);
+        drivers->commandMapper.addMap(&zPressed);
+        drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+        drivers->commandMapper.addMap(&bCtrlPressed);
+        drivers->commandMapper.addMap(&qPressed);
+        drivers->commandMapper.addMap(&ePressed);
+        drivers->commandMapper.addMap(&xPressed);
+        drivers->commandMapper.addMap(&cPressed);
+        drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+        drivers->commandMapper.addMap(&gCtrlPressed);
+        drivers->commandMapper.addMap(&rPressed);
+        drivers->commandMapper.addMap(&cShiftPressed);
+        drivers->commandMapper.addMap(&cCtrlPressed);
+        drivers->commandMapper.addMap(&shiftPressed);
+    }
+    }  // namespace hero_control
 
-namespace aruwsrc::hero
-{
-void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
-{
-    drivers->commandScheduler.setSafeDisconnectFunction(
-        &hero_control::remoteSafeDisconnectFunction);
-    hero_control::initializeSubsystems();
-    hero_control::registerHeroSubsystems(drivers);
-    hero_control::setDefaultHeroCommands();
-    hero_control::startHeroCommands(drivers);
-    hero_control::registerHeroIoMappings(drivers);
-}
-}  // namespace aruwsrc::hero
+    namespace aruwsrc::hero
+    {
+    void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
+    {
+        drivers->commandScheduler.setSafeDisconnectFunction(
+            &hero_control::remoteSafeDisconnectFunction);
+        hero_control::initializeSubsystems();
+        hero_control::registerHeroSubsystems(drivers);
+        hero_control::setDefaultHeroCommands();
+        hero_control::startHeroCommands(drivers);
+        hero_control::registerHeroIoMappings(drivers);
+    }
+    }  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+    imu::ImuCalibrateCommand *getImuCalibrateCommand()
+    {
+        return &hero_control::imuCalibrateCommand;
+    }
 #endif
 
 #endif

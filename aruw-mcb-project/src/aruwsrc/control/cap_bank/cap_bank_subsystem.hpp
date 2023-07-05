@@ -64,6 +64,7 @@ private:
 
     const float SPRINT_MODIFIER = 1.0f;
     const float REGULAR_MODIFIER = 0.40f;
+    const float BASE_MODIFIER = 0.2f;
 
     float desiredSprintModifier = REGULAR_MODIFIER;
 

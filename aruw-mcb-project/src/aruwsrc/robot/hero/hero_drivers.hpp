@@ -56,7 +56,7 @@ public:
               &visionCoprocessor,
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
-              nullptr),
+              &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),

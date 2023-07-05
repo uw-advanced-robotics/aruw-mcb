@@ -52,9 +52,8 @@ void CapBankSubsystem::changeSprintMode(SprintMode mode)
     {
         case SprintMode::REGULAR:
         {
-            float regularModifer =
-                (((float)capacitorBank.getPowerLimit()) / 120) * REGULAR_MODIFIER;
-            desiredSprintModifier = regularModifer;
+            desiredSprintModifier =
+                ((((float)capacitorBank.getPowerLimit()) / 120) * REGULAR_MODIFIER) + BASE_MODIFIER;
             break;
         }
 
