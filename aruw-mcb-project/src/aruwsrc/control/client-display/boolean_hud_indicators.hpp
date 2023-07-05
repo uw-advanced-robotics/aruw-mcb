@@ -111,7 +111,8 @@ private:
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
         /** Indicates whether or not the sentry is moving. */
-        SENTRY_DRIVE_STATUS,
+        SENTRY_MOVEMENT_ENABLED,
+        SENTRY_BEYBLADE_ENABLED,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -124,7 +125,7 @@ private:
      */
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
-            BooleanHUDIndicatorTuple(
+            BooleanHUDIndicatorTuple(  // @todo remove top two
                 "SYS CALIB ",
                 Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
@@ -133,7 +134,11 @@ private:
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
-                "SEN DRIVE ",
+                "SEN MOV ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "SEN BEY ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -180,10 +185,10 @@ private:
 
     /** Use this index when iterating through the booleanHudIndicatorDrawers in the update function.
      * Should be a local variable, but since it's in a protothread it can't be local. */
-    int booleanHudIndicatorIndexUpdate = 0;
+    int indicatorIndexUpdate = 0;
     /** @see booleanHudIndicatorIndexUpdate, similar variable but used in sendInitialGraphics
      * function. */
-    int booleanHudIndicatorIndexSendInitialGraphics = 0;
+    int indicatorIndexInit = 0;
 
     /**
      * Graphics associated with the the hud indicator graphics that do not change (labels and

@@ -257,11 +257,14 @@ public:
         bool sendMsg = true);
     ///@}
 
+    /**
+     * @todo doc
+     */
     mockable modm::ResumableResult<void> sendRobotToRobotMsg(
         Tx::RobotToRobotMessage* robotToRobotMsg,
         uint16_t msgId,
         RobotId receiverId,
-        uint16_t msgLen);
+        uint16_t dataLen);
 
 private:
     tap::Drivers* drivers;

@@ -35,7 +35,6 @@ namespace aruwsrc
 {
 class Drivers;
 }
-
 namespace aruwsrc::communication::serial
 {
 class SentryRequestTransmitter : public modm::pt::Protothread
@@ -46,7 +45,6 @@ public:
     bool send();
 
     void queueRequest(SentryRequestMessageType type);
-
 private:
     tap::Drivers *drivers;
 
@@ -58,8 +56,7 @@ private:
 #else
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 #endif
-
-    SentryRequestMessageType lastSentMessage = SentryRequestMessageType::SELECT_NEW_ROBOT;
+    SentryRequestMessageType lastSentMessage = SentryRequestMessageType::NONE;
     uint32_t queuedMessageType{};
     tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 

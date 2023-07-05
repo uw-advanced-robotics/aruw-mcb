@@ -179,12 +179,14 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
+aruwsrc::communication::serial::NoMotionStrategyCommand sentrySendNoMotionStrategy(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sentrySendGoToFriendlyBase(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sentrySendGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sentrySendGoToSupplierZone(
+    sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -411,16 +413,22 @@ HoldCommandMapping leftSwitchUp(
 // Keyboard/Mouse related mappings
 PressCommandMapping cPressed(
     drivers(),
-    {&sentryToggleDriveMovementCommand},
+    {&sentrySendNoMotionStrategy},
     RemoteMapState({Remote::Key::C}));
 PressCommandMapping gPressedCtrlNotPressed(
     drivers(),
-    {&sentryTargetNewQuadrantCommand},
+    {&sentrySendGoToFriendlyBase},
     RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
 PressCommandMapping gCtrlPressed(
     drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
+    {&sentrySendGoToEnemyBase},
     RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+
+PressCommandMapping vCtrlPressed(
+    drivers(),
+    {&sentrySendGoToEnemyBase},
+    RemoteMapState({Remote::Key::V, Remote::Key::CTRL}));
+
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,

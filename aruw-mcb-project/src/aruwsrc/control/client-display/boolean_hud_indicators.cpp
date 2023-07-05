@@ -73,10 +73,17 @@ BooleanHudIndicators::BooleanHudIndicators(
               0),
           BooleanHUDIndicator(
               refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
+              &booleanHudIndicatorGraphics[SENTRY_MOVEMENT_ENABLED],
               updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_MOVEMENT_ENABLED]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_MOVEMENT_ENABLED])>,
+              0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[SENTRY_BEYBLADE_ENABLED],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED])>,
               0),
       }
 {
@@ -87,17 +94,15 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
     RF_BEGIN(0);
 
     // send all boolean hud indicator graphics (labels and circles)
-    for (booleanHudIndicatorIndexSendInitialGraphics = 0;
-         booleanHudIndicatorIndexSendInitialGraphics < NUM_BOOLEAN_HUD_INDICATORS;
-         booleanHudIndicatorIndexSendInitialGraphics++)
+    for (indicatorIndexInit = 0; indicatorIndexInit < NUM_BOOLEAN_HUD_INDICATORS; indicatorIndexInit++)
     {
         RF_CALL(
-            booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize());
+            booleanHudIndicatorDrawers[indicatorIndexInit].initialize());
 
         RF_CALL(refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
+            &booleanHudIndicatorStaticGraphics[indicatorIndexInit]));
         RF_CALL(refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
+            &booleanHudIndicatorStaticLabelGraphics[indicatorIndexInit]));
     }
 
     RF_END();
@@ -114,15 +119,15 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
+    booleanHudIndicatorDrawers[SENTRY_MOVEMENT_ENABLED].setIndicatorState(
+        sentryResponseHandler.getSentryMovementEnabled());
+    booleanHudIndicatorDrawers[SENTRY_BEYBLADE_ENABLED].setIndicatorState(
+        sentryResponseHandler.getSentryBeybladeEnabled());
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
-    for (booleanHudIndicatorIndexUpdate = 0;
-         booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;
-         booleanHudIndicatorIndexUpdate++)
+    for (indicatorIndexUpdate = 0; indicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS; indicatorIndexUpdate++)
     {
-        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw());
+        RF_CALL(booleanHudIndicatorDrawers[indicatorIndexUpdate].draw());
     }
 
     RF_END();
@@ -130,7 +135,7 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
 
 void BooleanHudIndicators::initialize()
 {
-    uint8_t booleanHudIndicatorName[3] = {};
+    uint8_t booleanHudIndicatorName[3] = {};  // @todo make clear either through documentation or code that 3 is for the number of bytes in the graphic data name as specified by ref serial protocol
     uint16_t hudIndicatorListCurrY = BOOLEAN_HUD_INDICATOR_LIST_START_Y;
 
     // Configure hopper cover hud indicator

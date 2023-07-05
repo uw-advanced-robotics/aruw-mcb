@@ -37,28 +37,28 @@ void SentryRequestHandler::operator()(
 
     switch (type)
     {
-        case SentryRequestMessageType::SELECT_NEW_ROBOT:
-            if (selectNewRobotMessageHandler != nullptr)
+        case SentryRequestMessageType::NONE:
+            if (noStrategyHandler != nullptr)
             {
-                selectNewRobotMessageHandler();
+                noStrategyHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::TARGET_NEW_QUADRANT:
-            if (targetNewQuadrantMessageHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_FRIENDLY_BASE:
+            if (goToFriendlyBaseHandler != nullptr)
             {
-                targetNewQuadrantMessageHandler();
+                goToFriendlyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::TOGGLE_DRIVE_MOVEMENT:
-            if (toggleDriveMovementMessageHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_ENEMY_BASE:
+            if (goToEnemyBaseHandler != nullptr)
             {
-                toggleDriveMovementMessageHandler();
+                goToEnemyBaseHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
-        case SentryRequestMessageType::PAUSE_PROJECTILE_LAUNCHING:
-            if (pauseProjectileLaunchingHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_FRIENDLY_SUPPLIER_ZONE:
+            if (goToSupplierZoneHandler != nullptr)
             {
-                pauseProjectileLaunchingHandler();
+                goToSupplierZoneHandler(); // @TODO: make sure we know message signature, set this up in a better way with message types
             }
             break;
         default:

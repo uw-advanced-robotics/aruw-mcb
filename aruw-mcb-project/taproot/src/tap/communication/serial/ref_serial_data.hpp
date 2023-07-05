@@ -432,7 +432,7 @@ public:
             DJISerial::FrameHeader frameHeader;
             uint16_t cmdId;
             InteractiveHeader interactiveHeader;
-            uint8_t dataAndCRC16[115];
+            uint8_t dataAndCrc16[115];  // Buffer for variable length data of max len 113
         } modm_packed;
 
         struct Graphic2Message

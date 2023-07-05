@@ -18,6 +18,7 @@
  */
 
 #include "sentry_response_handler.hpp"
+#include "sentry_response_message_types.hpp"
 
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -30,13 +31,33 @@ void SentryResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     if (message.header.dataLength !=
-        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
+        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + sizeof(SentryResponseType))
     {
         RAISE_ERROR((&drivers), "message length incorrect");
         return;
     }
 
-    this->sentryMoving = static_cast<bool>(
-        message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
+    const SentryResponseType type = *reinterpret_cast<const SentryResponseType*>(message.data);
+
+    switch (type)
+    {
+        case SentryResponseType::MOVEMENT_ENABLED:
+            this->sentryMovementEnabled = true;
+            break;
+        case SentryResponseType::MOVEMENT_DISABLED:
+            this->sentryMovementEnabled = false;
+            break;
+        case SentryResponseType::BEYBLADE_ENABLED:
+            this->sentryBeybladeEnabled = true;
+            break;
+        case SentryResponseType::BEYBLADE_DISABLED:
+            this->sentryBeybladeEnabled = false;
+            break;
+        case SentryResponseType::HOLD_FIRE:
+            this->holdFireTimer.restart(1000);
+            break;
+        default:
+            this->sentryStrategy = static_cast<SentryStrategy>(type);
+    }
 }
 }  // namespace aruwsrc::communication::serial
