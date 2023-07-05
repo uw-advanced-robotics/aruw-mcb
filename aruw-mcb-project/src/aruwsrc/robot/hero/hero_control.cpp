@@ -121,7 +121,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+XDriveChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
