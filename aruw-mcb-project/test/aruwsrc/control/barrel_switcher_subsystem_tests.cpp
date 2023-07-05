@@ -35,8 +35,10 @@ public:
 
 protected:
     BarrelSwitcherSubsystemTest()
-    :   motor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor"),
-        barrelSwitcher(&drivers, config, motor) {}
+        : motor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "motor"),
+          barrelSwitcher(&drivers, config, motor)
+    {
+    }
 
     tap::Drivers drivers;
     aruwsrc::control::StallThresholdConfig config{

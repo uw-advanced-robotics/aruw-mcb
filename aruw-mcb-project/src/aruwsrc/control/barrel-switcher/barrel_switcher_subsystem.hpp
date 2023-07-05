@@ -56,7 +56,7 @@ public:
         tap::Drivers* drivers,
         aruwsrc::control::StallThresholdConfig config,
         tap::motor::DjiMotor& motor);
-    
+
     bool isStalled() const;
 
     bool isInPosition() const;
@@ -66,7 +66,7 @@ public:
     void useLeft();
 
     void stop();
-    
+
     BarrelState getBarrelState() const;
 
     /* Inherited Methods */
@@ -75,10 +75,7 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override
-    {
-        motor.setDesiredOutput(0);
-    }
+    void refreshSafeDisconnect() override { motor.setDesiredOutput(0); }
 
 private:
     void setMotorOutput(int32_t velocity);

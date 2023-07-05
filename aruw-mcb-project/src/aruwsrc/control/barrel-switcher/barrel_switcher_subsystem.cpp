@@ -73,10 +73,7 @@ void BarrelSwitcherSubsystem::refresh()
     }
 }
 
-BarrelState BarrelSwitcherSubsystem::getBarrelState() const
-{
-    return barrelState;
-}
+BarrelState BarrelSwitcherSubsystem::getBarrelState() const { return barrelState; }
 
 void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
 {
@@ -90,10 +87,7 @@ bool BarrelSwitcherSubsystem::isStalled() const
         (fabsl(motor.getTorque()) > config.minTorque));
 }
 
-bool BarrelSwitcherSubsystem::isInPosition() const
-{
-    return inPosition;
-}
+bool BarrelSwitcherSubsystem::isInPosition() const { return inPosition; }
 
 void BarrelSwitcherSubsystem::useRight()
 {

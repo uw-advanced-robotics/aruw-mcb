@@ -60,7 +60,8 @@ void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
         {
             barrel = leftBarrel;
         }
-        else if (barrelSwitcher.getBarrelState() == aruwsrc::control::BarrelState::USING_RIGHT_BARREL)
+        else if (
+            barrelSwitcher.getBarrelState() == aruwsrc::control::BarrelState::USING_RIGHT_BARREL)
         {
             barrel = rightBarrel;
         }

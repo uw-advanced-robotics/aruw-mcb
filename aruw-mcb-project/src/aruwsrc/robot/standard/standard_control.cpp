@@ -209,10 +209,7 @@ tap::motor::DjiMotor barrelSwitcherMotor(
     false,
     "Barrel Switcher Motor");
 
-BarrelSwitcherSubsystem barrelSwitcher(
-    drivers(),
-    STALL_THRESHOLD_CONFIG,
-    barrelSwitcherMotor);
+BarrelSwitcherSubsystem barrelSwitcher(drivers(), STALL_THRESHOLD_CONFIG, barrelSwitcherMotor);
 #endif
 
 /* define commands ----------------------------------------------------------*/
