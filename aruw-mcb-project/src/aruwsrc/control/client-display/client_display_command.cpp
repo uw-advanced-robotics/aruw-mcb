@@ -106,20 +106,29 @@ bool ClientDisplayCommand::run()
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
-    PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
+    // PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(holdFireIndicator.sendInitialGraphics());
 
-    while (true)
-    {
-        PT_CALL(booleanHudIndicators.update());
-        PT_CALL(chassisOrientationIndicator.update());
-        PT_CALL(positionHudIndicators.update());
-        PT_CALL(reticleIndicator.update());
-        PT_CALL(visionHudIndicators.update());
-        PT_CALL(holdFireIndicator.update());
+    while (true) {
+        counter++;
+        
+        if (counter%6 == 0) {
+            PT_CALL(booleanHudIndicators.update());
+        } else if (counter%6 == 1 ) {
+            // PT_CALL(chassisOrientationIndicator.update());
+        } else if (counter%6 == 2) {
+            PT_CALL(positionHudIndicators.update());
+        } else if (counter%6 == 3) {
+            PT_CALL(reticleIndicator.update());
+        } else if (counter%6 == 4) {
+            PT_CALL(visionHudIndicators.update());
+        } else if (counter%6 == 5) {
+            // PT_CALL(holdFireIndicator.update());
+        }
+
         PT_YIELD();
     }
     PT_END();

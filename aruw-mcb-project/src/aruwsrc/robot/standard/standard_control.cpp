@@ -549,7 +549,7 @@ PressCommandMapping xShiftPressed(
     drivers(),
     {&sentrySendToggleMovement},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
-PressCommandMapping vShiftPressed(
+PressCommandMapping bShiftPressed(
     drivers(),
     {&sentrySendToggleBeyblade},
     RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
@@ -586,17 +586,16 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressedNotShiftPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping bNotCtrlPressedNotShiftPressedRightSwitchDown(
+PressCommandMapping vShiftPressed(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,
-        {Remote::Key::B},
-        {Remote::Key::CTRL, Remote::Key::SHIFT},
+        {Remote::Key::V, Remote::Key::SHIFT}, {},
         false,
         false));
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// The user can press b+ctrl when the remote right switch is in the down position to restart the,
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
 PressCommandMapping bCtrlPressedNotShiftPressed(
@@ -720,7 +719,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedBPressedNotShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressedNotShiftPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedNotShiftPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&vShiftPressed);
     drivers->commandMapper.addMap(&bCtrlPressedNotShiftPressed);
     //drivers->commandMapper.addMap(&qEPressed);
     drivers->commandMapper.addMap(&xPressedNotShiftPressed);
@@ -732,7 +731,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gShiftPressed);
     drivers->commandMapper.addMap(&zShiftPressed);
     drivers->commandMapper.addMap(&xShiftPressed);
-    drivers->commandMapper.addMap(&vShiftPressed);
+    drivers->commandMapper.addMap(&bShiftPressed);
     drivers->commandMapper.addMap(&vNotShiftPressed);
 }
 }  // namespace standard_control
