@@ -624,11 +624,11 @@ GovernorLimitedCommand<4> girlbossRotateAndUnjamAgitatorWithHeatLimiting(
     girlbossRotateAndUnjamAgitator,
     {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss});
 
-GovernorLimitedCommand<6> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<7> girlbossRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&girlbossAgitator},
     girlbossRotateAndUnjamAgitator,
     // {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss});
-    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss, &matchRunningGovernor});
+    {&heatLimitGovernorGirlboss, &refSystemProjectileLaunchedGovernorGirlboss, &frictionWheelsOnGovernorGirlboss, &fireRateLimitGovernorGirlboss, &cvOnTargetGovernorGirlboss, &matchRunningGovernor, &holdFireGovernor});
 
 // malewife shooting ======================
 // malewife shooting ======================
@@ -701,11 +701,11 @@ GovernorLimitedCommand<4> malewifeRotateAndUnjamAgitatorWithHeatLimiting(
     malewifeRotateAndUnjamAgitator,
     {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife});
 
-GovernorLimitedCommand<6> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<7> malewifeRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&malewifeAgitator},
     malewifeRotateAndUnjamAgitator,
     // {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife});
-    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife, &matchRunningGovernor});
+    {&heatLimitGovernorMalewife, &refSystemProjectileLaunchedGovernorMalewife, &frictionWheelsOnGovernorMalewife, &fireRateLimitGovernorMalewife, &cvOnTargetGovernorMalewife, &matchRunningGovernor, &holdFireGovernor});
 
 // callbacks the sentry runs when receiving a message
 void sendNoMotionStrategy() { 
