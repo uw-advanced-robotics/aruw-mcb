@@ -127,6 +127,7 @@ public:
     bool isFinished() const override { return false; }
 
 private:
+    uint32_t counter = 0;
     tap::Drivers &drivers;
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;

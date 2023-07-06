@@ -29,6 +29,7 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -61,7 +62,8 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+        const aruwsrc::chassis::BeybladeCommand& beybladeCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -106,13 +108,13 @@ private:
      */
     enum BooleanHUDIndicatorIndex
     {
-        /** Indicates systems (such as the IMU) are calibrating. */
-        SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
         /** Indicates whether or not the sentry is moving. */
         SENTRY_MOVEMENT_ENABLED,
         SENTRY_BEYBLADE_ENABLED,
+        /** Indicates if we are beyblading */
+        BEYBLADING,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -125,10 +127,6 @@ private:
      */
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
-            BooleanHUDIndicatorTuple(  // @todo remove top two
-                "SYS CALIB ",
-                Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
-                Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,
@@ -139,6 +137,10 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
                 "SEN BEY ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "BEYBLD ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -173,6 +175,9 @@ private:
      */
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
 
+    const aruwsrc::chassis::BeybladeCommand &beybladeCommand;
+
+    // @todo docs
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
      * depending on whether or not the hopper is open or closed.
