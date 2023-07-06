@@ -74,17 +74,19 @@ ClientDisplayCommand::ClientDisplayCommand(
           cvOnTargetManager,
           chassisBeybladeCmd,
           chassisAutorotateCmd,
-          chassisImuDriveCommand),
+          chassisImuDriveCommand,
+          &sentryResponseHandler),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       capBankIndicator(drivers, refSerialTransmitter, capBank)
+      holdFireIndicator(sentryResponseHandler, refSerialTransmitter),
+      sentryResponseHandler(sentryResponseHandler)
 {
     addSubsystemRequirement(&clientDisplay);
 }
 
 void ClientDisplayCommand::initialize()
 {
-    debug += 1;
     HudIndicator::resetGraphicNameGenerator();
     restart();  // restart protothread
     booleanHudIndicators.initialize();
@@ -93,6 +95,7 @@ void ClientDisplayCommand::initialize()
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
     capBankIndicator.initialize();
+    holdFireIndicator.initialize();
 }
 
 void ClientDisplayCommand::execute() { run(); }
@@ -109,6 +112,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(capBankIndicator.sendInitialGraphics());
+    PT_CALL(holdFireIndicator.sendInitialGraphics());
 
     while (true)
     {
@@ -118,6 +122,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
         PT_CALL(capBankIndicator.update());
+        PT_CALL(holdFireIndicator.update());
         PT_YIELD();
     }
     PT_END();

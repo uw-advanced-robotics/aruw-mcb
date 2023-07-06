@@ -64,7 +64,8 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
     const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
     const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
+    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    const aruwsrc::communication::serial::SentryResponseHandler *sentryResponseHandler)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -73,18 +74,19 @@ MatrixHudIndicators::MatrixHudIndicators(
       turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
       cvOnTargetGovernor(cvOnTargetGovernor),
+      sentryResponseHandler(sentryResponseHandler),
       driveCommands{
           chassisBeybladeCmd,
           chassisAutorotateCmd,
           chassisImuDriveCommand,
       },
       matrixHudIndicatorDrawers
-{
-    StateHUDIndicator<uint16_t>(
-        refSerialTransmitter,
-        &matrixHudIndicatorGraphics[CHASSIS_STATE],
-        updateGraphicYLocation,
-        0),
+      {
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[CHASSIS_STATE],
+            updateGraphicYLocation,
+            0),
         StateHUDIndicator<uint16_t>(
             refSerialTransmitter,
             &matrixHudIndicatorGraphics[SHOOTER_STATE],
@@ -102,7 +104,12 @@ MatrixHudIndicators::MatrixHudIndicators(
             &matrixHudIndicatorGraphics[CV_STATUS],
             updateGraphicYLocation,
             0),
-}
+        StateHUDIndicator<uint16_t>(
+            refSerialTransmitter,
+            &matrixHudIndicatorGraphics[SENTRY_NAV_STRATEGY],
+            updateGraphicYLocation,
+            0)
+      }
 {
 }
 
@@ -210,6 +217,9 @@ void MatrixHudIndicators::updateIndicatorState()
 
     matrixHudIndicatorDrawers[CV_STATUS].setIndicatorState(
         getIndicatorYCoordinate(static_cast<int>(cvStatus)));
+    
+    matrixHudIndicatorDrawers[SENTRY_NAV_STRATEGY].setIndicatorState(
+        getIndicatorYCoordinate(static_cast<int>(sentryResponseHandler->getSentryStrategy())));
 }
 
 void MatrixHudIndicators::initialize()

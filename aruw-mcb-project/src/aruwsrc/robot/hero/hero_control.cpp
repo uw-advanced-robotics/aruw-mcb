@@ -180,12 +180,24 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
+aruwsrc::communication::serial::NoMotionStrategyCommand sentrySendNoMotionStrategy(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sentrySendGoToFriendlyBase(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sentrySendGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sentrySendGoToSupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemySupplierZoneCommand sentrySendGoToEnemySupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToCenterPointCommand sentrySendGoToCenterPoint(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::HoldFireCommand sentrySendHoldFire(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleMovementCommand sentrySendToggleMovement(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleBeybladeCommand sentrySendToggleBeyblade(
+    sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -420,58 +432,80 @@ ClientDisplayCommand clientDisplayCommand(
         {&chassisDriveCommand, &turretCVCommand},  // &turretCVCommand
         RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-    // Keyboard/Mouse related mappings
-    PressCommandMapping cPressed(
-        drivers(),
-        {&sentryToggleDriveMovementCommand},
-        RemoteMapState({Remote::Key::C}));
-    PressCommandMapping gPressedCtrlNotPressed(
-        drivers(),
-        {&sentryTargetNewQuadrantCommand},
-        RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-    PressCommandMapping gCtrlPressed(
-        drivers(),
-        {&sentryPauseProjectileLaunchingCommand},
-        RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
-    MultiShotCvCommandMapping leftMousePressedBNotPressed(
-        *drivers(),
-        kicker::launchKickerHeatAndCVLimited,
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-        std::nullopt,
-        kicker::cvOnTargetGovernor);
-    HoldRepeatCommandMapping leftMousePressedBPressed(
-        drivers(),
-        {&kicker::launchKickerNoHeatLimiting},
-        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-        false);
-    HoldCommandMapping rightMousePressed(
-        drivers(),
-        {&turretCVCommand},
-        RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-    ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-    PressCommandMapping zPressed(
-        drivers(),
-        {&turretUTurnCommand},
-        RemoteMapState({Remote::Key::Z}));
-    // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a
-    // match.
-    PressCommandMapping bNotCtrlPressedRightSwitchDown(
-        drivers(),
-        {&imuCalibrateCommand},
-        RemoteMapState(
-            Remote::SwitchState::UNKNOWN,
-            Remote::SwitchState::DOWN,
-            {Remote::Key::B},
-            {Remote::Key::CTRL},
-            false,
-            false));
-    // The user can press b+ctrl when the remote right switch is in the down position to restart the
-    // client display command. This is necessary since we don't know when the robot is connected to
-    // the server and thus don't know when to start sending the initial HUD graphics.
-    PressCommandMapping bCtrlPressed(
-        drivers(),
-        {&clientDisplayCommand},
-        RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+// Keyboard/Mouse related mappings
+/// @brief sentry messages
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&sentrySendNoMotionStrategy},
+    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+PressCommandMapping qShiftPressed(
+    drivers(),
+    {&sentrySendGoToFriendlyBase},
+    RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
+PressCommandMapping eShiftPressed(
+    drivers(),
+    {&sentrySendGoToEnemyBase},
+    RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
+PressCommandMapping rShiftPressed(
+    drivers(),
+    {&sentrySendGoToSupplierZone},
+    RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
+PressCommandMapping fShiftPressed(
+    drivers(),
+    {&sentrySendGoToEnemySupplierZone},
+    RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
+PressCommandMapping gShiftPressed(
+    drivers(),
+    {&sentrySendGoToCenterPoint},
+    RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
+PressCommandMapping zShiftPressed(
+    drivers(),
+    {&sentrySendHoldFire},
+    RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
+PressCommandMapping xShiftPressed(
+    drivers(),
+    {&sentrySendToggleMovement},
+    RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+PressCommandMapping vShiftPressed(
+    drivers(),
+    {&sentrySendToggleBeyblade},
+    RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
+
+MultiShotCvCommandMapping leftMousePressedBNotPressed(
+    *drivers(),
+    kicker::launchKickerHeatAndCVLimited,
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    std::nullopt,
+    kicker::cvOnTargetGovernor);
+HoldRepeatCommandMapping leftMousePressedBPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
+HoldCommandMapping rightMousePressed(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+PressCommandMapping bNotCtrlPressedRightSwitchDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(
+        Remote::SwitchState::UNKNOWN,
+        Remote::SwitchState::DOWN,
+        {Remote::Key::B},
+        {Remote::Key::CTRL},
+        false,
+        false));
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
     PressCommandMapping qPressed(
         drivers(),
@@ -562,32 +596,38 @@ ClientDisplayCommand clientDisplayCommand(
             &sentryResponseHandler);
     }
 
-    /* register io mappings here ------------------------------------------------*/
-    void registerHeroIoMappings(Drivers *drivers)
-    {
-        drivers->commandMapper.addMap(&rightSwitchDown);
-        drivers->commandMapper.addMap(&rightSwitchUp);
-        drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
-        drivers->commandMapper.addMap(&leftMousePressedBPressed);
-        drivers->commandMapper.addMap(&rightMousePressed);
-        drivers->commandMapper.addMap(&leftSwitchDown);
-        drivers->commandMapper.addMap(&leftSwitchUp);
-        drivers->commandMapper.addMap(&fToggled);
-        drivers->commandMapper.addMap(&zPressed);
-        drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-        drivers->commandMapper.addMap(&bCtrlPressed);
-        drivers->commandMapper.addMap(&qPressed);
-        drivers->commandMapper.addMap(&ePressed);
-        drivers->commandMapper.addMap(&xPressed);
-        drivers->commandMapper.addMap(&cPressed);
-        drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-        drivers->commandMapper.addMap(&gCtrlPressed);
-        drivers->commandMapper.addMap(&rPressed);
-        drivers->commandMapper.addMap(&cShiftPressed);
-        drivers->commandMapper.addMap(&cCtrlPressed);
-        drivers->commandMapper.addMap(&shiftPressed);
-    }
-    }  // namespace hero_control
+/* register io mappings here ------------------------------------------------*/
+void registerHeroIoMappings(Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
+    drivers->commandMapper.addMap(&qPressed);
+    drivers->commandMapper.addMap(&ePressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&qShiftPressed);
+    drivers->commandMapper.addMap(&eShiftPressed);
+    drivers->commandMapper.addMap(&rShiftPressed);
+    drivers->commandMapper.addMap(&fShiftPressed);
+    drivers->commandMapper.addMap(&gShiftPressed);
+    drivers->commandMapper.addMap(&zShiftPressed);
+    drivers->commandMapper.addMap(&xShiftPressed);
+    drivers->commandMapper.addMap(&vShiftPressed);
+    drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&cCtrlPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
+}
+}  // namespace hero_control
 
     namespace aruwsrc::hero
     {

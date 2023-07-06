@@ -39,6 +39,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
+#include "hold_fire_indicator.hpp"
 
 namespace tap::control
 {
@@ -126,7 +127,6 @@ public:
     void end(bool) override {}
 
     bool isFinished() const override { return false; }
-    float debug = 0;
 
 private:
     tap::Drivers &drivers;
@@ -139,6 +139,8 @@ private:
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     CapBankIndicator capBankIndicator;
+    HoldFireIndicator holdFireIndicator;
+    aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler;
 
     bool run();
 };
