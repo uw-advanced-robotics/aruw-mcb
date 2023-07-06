@@ -36,10 +36,10 @@
 #include "boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
+#include "hold_fire_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
-#include "hold_fire_indicator.hpp"
 
 namespace tap::control
 {

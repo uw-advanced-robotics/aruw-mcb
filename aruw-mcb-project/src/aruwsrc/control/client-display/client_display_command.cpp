@@ -78,7 +78,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           &sentryResponseHandler),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
-      capBankIndicator(drivers, refSerialTransmitter, capBank)
+      capBankIndicator(drivers, refSerialTransmitter, capBank),
       holdFireIndicator(sentryResponseHandler, refSerialTransmitter),
       sentryResponseHandler(sentryResponseHandler)
 {
