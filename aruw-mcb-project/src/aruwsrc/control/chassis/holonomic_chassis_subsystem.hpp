@@ -29,12 +29,13 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/util_macros.hpp"
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
-#include "capacitor_bank_power_limiter.hpp"
+#include "aruwsrc/util_macros.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
+
+#include "capacitor_bank_power_limiter.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -60,7 +61,7 @@ public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank);
+        aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank = nullptr);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().

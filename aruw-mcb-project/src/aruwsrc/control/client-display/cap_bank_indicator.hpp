@@ -51,7 +51,7 @@ public:
     CapBankIndicator(
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank);
+        const aruwsrc::communication::sensors::power::ExternalCapacitorBank *capBank);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -71,10 +71,11 @@ private:
 
     tap::Drivers &drivers;
 
-    const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank;
+    const aruwsrc::communication::sensors::power::ExternalCapacitorBank *capBank;
 
     /**
-     * Two graphics that represent the Capacitor Bank charge. The first graphic is the background for the bar, while the second is the charge of the Capacitor Bank.
+     * Two graphics that represent the Capacitor Bank charge. The first graphic is the background
+     * for the bar, while the second is the charge of the Capacitor Bank.
      */
     Tx::Graphic2Message capBankGraphics;
 

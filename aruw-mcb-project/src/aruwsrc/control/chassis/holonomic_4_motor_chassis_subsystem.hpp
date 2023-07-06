@@ -25,7 +25,6 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
-
 #include "constants/chassis_constants.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
@@ -43,7 +42,7 @@ public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
+        aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank = nullptr,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,

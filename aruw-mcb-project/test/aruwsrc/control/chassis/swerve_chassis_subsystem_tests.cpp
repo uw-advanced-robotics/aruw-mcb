@@ -76,6 +76,7 @@ protected:
           chassis(
               &drivers,
               &currentSensor,
+              nullptr,
               &moduleLF,
               &moduleRF,
               &moduleLB,

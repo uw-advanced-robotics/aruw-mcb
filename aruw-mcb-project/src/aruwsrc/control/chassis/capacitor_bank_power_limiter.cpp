@@ -71,7 +71,7 @@ float CapBankPowerLimiter::getPowerLimitRatio(float desiredCurrent)
         0.0f,
         1.0f);
 
-        return this->capacitorBank->getSprintModifer() *
+    return this->capacitorBank->getSprintModifer() *
            std::min(std::min(fallbackLimit, currentLimit), capVoltageLimit);
 }
 

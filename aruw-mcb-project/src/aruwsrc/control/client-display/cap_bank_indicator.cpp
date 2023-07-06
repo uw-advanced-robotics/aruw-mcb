@@ -30,7 +30,7 @@ namespace aruwsrc::control::client_display
 CapBankIndicator::CapBankIndicator(
     tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capBank)
+    const aruwsrc::communication::sensors::power::ExternalCapacitorBank *capBank)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       capBank(capBank)
@@ -54,14 +54,20 @@ modm::ResumableResult<bool> CapBankIndicator::update()
     float voltage = 0;
 
     RF_BEGIN(1);
-    
+
     if (capBank != nullptr)
     {
         if (capBank->getStatus() != aruwsrc::communication::sensors::power::Status::UNKNOWN)
         {
-            capBankGraphics.graphicData[0].operation = capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
-            capBankGraphics.graphicData[1].operation = capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
-            capBankTextGraphic.graphicData.operation = capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+            capBankGraphics.graphicData[0].operation =
+                capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
+            capBankGraphics.graphicData[1].operation =
+                capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
+            capBankTextGraphic.graphicData.operation =
+                capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
 
             // Update the voltage bar
 
@@ -72,7 +78,8 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             // 15v - 21v is green
             voltage = capBank->getVoltage();
 
-            if (voltage < 9.1) {
+            if (voltage < 9.1)
+            {
                 voltage = 9.1;
             }
 
@@ -83,41 +90,47 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);
-            
+
             capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
-                voltage < 11.0 ? Tx::GraphicColor::ORANGE :
-                voltage < 15.0 ? Tx::GraphicColor::YELLOW : 
-                Tx::GraphicColor::GREEN);
+                voltage < 11.0   ? Tx::GraphicColor::ORANGE
+                : voltage < 15.0 ? Tx::GraphicColor::YELLOW
+                                 : Tx::GraphicColor::GREEN);
 
             // Update the background status
             capBankGraphics.graphicData[0].color = static_cast<uint8_t>(
-                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::RESET ? Tx::GraphicColor::YELLOW :
-                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE ? Tx::GraphicColor::WHITE :
-                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::DISCHARGING ? Tx::GraphicColor::CYAN :
-                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::FAILURE ? Tx::GraphicColor::PURPLISH_RED :
-                Tx::GraphicColor::ORANGE); 
+                capBank->getStatus() == aruwsrc::communication::sensors::power::Status::RESET
+                    ? Tx::GraphicColor::YELLOW
+                : capBank->getStatus() ==
+                        aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE
+                    ? Tx::GraphicColor::WHITE
+                : capBank->getStatus() ==
+                        aruwsrc::communication::sensors::power::Status::DISCHARGING
+                    ? Tx::GraphicColor::CYAN
+                : capBank->getStatus() == aruwsrc::communication::sensors::power::Status::FAILURE
+                    ? Tx::GraphicColor::PURPLISH_RED
+                    : Tx::GraphicColor::ORANGE);
 
             // Update the text
-            capBankTextGraphic.graphicData.endAngle = 5; // Sets the length of the string
+            capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
             switch (capBank->getStatus())
             {
-                case aruwsrc::communication::sensors::power::Status::UNKNOWN: 
-                    strncpy(capBankTextGraphic.msg, "UNK ", 5); 
+                case aruwsrc::communication::sensors::power::Status::UNKNOWN:
+                    strncpy(capBankTextGraphic.msg, "UNK ", 5);
                     break;
-                case aruwsrc::communication::sensors::power::Status::RESET: 
-                    strncpy(capBankTextGraphic.msg, "RST ", 5); 
+                case aruwsrc::communication::sensors::power::Status::RESET:
+                    strncpy(capBankTextGraphic.msg, "RST ", 5);
                     break;
-                case aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE: 
-                    strncpy(capBankTextGraphic.msg, "CAPS", 5); 
+                case aruwsrc::communication::sensors::power::Status::CHARGE_DISCHARGE:
+                    strncpy(capBankTextGraphic.msg, "CAPS", 5);
                     break;
-                case aruwsrc::communication::sensors::power::Status::SAFE: 
-                    strncpy(capBankTextGraphic.msg, "SAFE", 5); 
+                case aruwsrc::communication::sensors::power::Status::SAFE:
+                    strncpy(capBankTextGraphic.msg, "SAFE", 5);
                     break;
-                case aruwsrc::communication::sensors::power::Status::DISCHARGING: 
-                    strncpy(capBankTextGraphic.msg, "DIS ", 5); 
+                case aruwsrc::communication::sensors::power::Status::DISCHARGING:
+                    strncpy(capBankTextGraphic.msg, "DIS ", 5);
                     break;
-                case aruwsrc::communication::sensors::power::Status::FAILURE: 
-                    strncpy(capBankTextGraphic.msg, "FAIL", 5); 
+                case aruwsrc::communication::sensors::power::Status::FAILURE:
+                    strncpy(capBankTextGraphic.msg, "FAIL", 5);
                     break;
             }
 
@@ -127,7 +140,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
         }
     }
 
-    RF_END();   
+    RF_END();
 }
 
 void CapBankIndicator::initialize()
@@ -157,7 +170,7 @@ void CapBankIndicator::initialize()
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::WHITE);
-    
+
     if (capBank != nullptr)
     {
         RefSerialTransmitter::configLine(

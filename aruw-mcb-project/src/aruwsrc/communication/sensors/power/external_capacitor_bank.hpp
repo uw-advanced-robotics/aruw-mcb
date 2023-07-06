@@ -36,7 +36,7 @@ const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 enum MessageType
 {
     START = 0x01,
-    STOP = 0x02, 
+    STOP = 0x02,
     STATUS = 0x04,
     DISCHARGE = 0x08,
     SET_CHARGE_SPEED = 0x10,
@@ -90,7 +90,6 @@ private:
     bool started = false;  // Set to true once any message from the cap bank is received
 
     float sprintModifier;
-
 };
 }  // namespace aruwsrc::communication::sensors::power
 

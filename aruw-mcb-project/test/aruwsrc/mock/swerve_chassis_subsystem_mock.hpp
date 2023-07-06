@@ -34,6 +34,7 @@ public:
     SwerveChassisSubsystemMock(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,

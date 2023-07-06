@@ -21,8 +21,8 @@
 #define ARUWSRC_POWER_LIMITER_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
-#include "tap/control/chassis/power_limiter.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/control/chassis/power_limiter.hpp"
 
 #include "aruwsrc/communication/sensors/power/external_capacitor_bank.hpp"
 
@@ -38,7 +38,7 @@ class CapBankPowerLimiter
 {
 public:
     CapBankPowerLimiter(
-        const tap::Drivers *drivers,
+        const tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
         float startingEnergyBuffer,
@@ -51,7 +51,7 @@ public:
     tap::control::chassis::PowerLimiter fallbackLimiter;
 
 private:
-    const tap::Drivers *drivers;
+    const tap::Drivers* drivers;
     const aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank;
 
     const float LOWEST_CAP_VOLTAGE = 10.0f;

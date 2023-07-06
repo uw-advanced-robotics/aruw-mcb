@@ -111,11 +111,12 @@ XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
 SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rb)
-    : SwerveChassisSubsystem(drivers, currentSensor, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
+    : SwerveChassisSubsystem(drivers, currentSensor, capacitorBank, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
 {
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
@@ -163,8 +164,9 @@ OledDisplayMock::OledDisplayMock(
     tap::Drivers *drivers,
     aruwsrc::serial::VisionCoprocessor *vc,
     can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2)
-    : display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
+    can::TurretMCBCanComm *turretMCBCanCommBus2,
+    aruwsrc::communication::sensors::power::ExternalCapacitorBank* capacitorBank)
+    : display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2, capacitorBank)
 {
 }
 OledDisplayMock::~OledDisplayMock() {}
