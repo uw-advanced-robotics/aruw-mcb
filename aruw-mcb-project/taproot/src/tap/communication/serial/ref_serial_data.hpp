@@ -429,10 +429,11 @@ public:
 
         struct RobotToRobotMessage
         {
+            static constexpr int MAX_CONTENT_LENGTH = 113; ///< Max content length of a robot-to-robot message (bytes)
             DJISerial::FrameHeader frameHeader;
             uint16_t cmdId;
             InteractiveHeader interactiveHeader;
-            uint8_t dataAndCrc16[115];  // Buffer for variable length data of max len 113
+            uint8_t dataAndCRC16[MAX_CONTENT_LENGTH + 2]; ///< CRC has length of two bytes
         } modm_packed;
 
         struct Graphic2Message

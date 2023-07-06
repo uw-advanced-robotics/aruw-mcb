@@ -94,8 +94,9 @@ public:
      */
     inline bool isExpired() const { return this->isRunning && TimeFunc() >= this->expireTime; }
 
+
     /**
-     * @return time left in timer if still running and not yet expired
+     * @return time left until timer expires (0 if not running or already expired)
     */
     inline uint32_t timeRemaining() const { return this->isRunning && TimeFunc() < this->expireTime ? this->expireTime - TimeFunc() : 0; }
 

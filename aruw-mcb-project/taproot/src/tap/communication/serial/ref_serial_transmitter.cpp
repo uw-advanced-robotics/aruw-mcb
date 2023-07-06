@@ -244,7 +244,6 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
     RF_END();
 }
 
-// @todo understandable but impossible to maintain
 /**
  * A helper function used by the RefSerialTransmitter's sendGraphic functions to send some
  * GraphicType to the referee system. The user may specify whether or not to configure the message
@@ -321,7 +320,6 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
         drivers->refSerial.getRobotData().robotId,
         drivers,
         0);
-    // this->graphicMsg = *graphicMsg;
     RF_END();
 }
 
@@ -376,7 +374,6 @@ modm::ResumableResult<void> RefSerialTransmitter::sendGraphic(
     RF_END();
 }
 
-// @todo create uart send method to reduce massive amounts of boilerplate and complexity
 modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     Tx::RobotToRobotMessage* robotToRobotMsg,
     uint16_t contentId,
@@ -384,17 +381,23 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
     uint16_t dataLen)
 {
     RF_BEGIN(6);
-    // For limiting scope of local variable (otherwise causes cross initialization)
 
     // Undocumented ref system requirement discovered empirically
     if (dataLen == 1)
     {
         RAISE_ERROR(drivers, "dataLen cannot be of size 1");
+        RF_RETURN_1();
     }
 
     if (contentId < 0x0200 || contentId >= 0x02ff)
     {
-        RAISE_ERROR(drivers, "invalid contentId not betweene [0x200, 0x2ff)");
+        RAISE_ERROR(drivers, "invalid contentId not between [0x200, 0x2ff)");
+        RF_RETURN_1();
+    }
+
+    if (dataLen > robotToRobotMsg->MAX_CONTENT_LENGTH)
+    {
+        RAISE_ERROR(drivers, "message length > message char maximum");
         RF_RETURN_1();
     }
 
@@ -403,20 +406,19 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         RF_RETURN_1();
     }
 
-    RefSerialTransmitter::configFrameHeader(                                      
-        &robotToRobotMsg->frameHeader,                                                 
-        dataLen + sizeof(robotToRobotMsg->interactiveHeader));
+    RefSerialTransmitter::configFrameHeader(
+        &robotToRobotMsg->frameHeader,
+        sizeof(robotToRobotMsg->interactiveHeader) + dataLen);
 
-    robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;     
+    robotToRobotMsg->cmdId = RefSerial::REF_MESSAGE_TYPE_CUSTOM_DATA;
 
-    RefSerialTransmitter::configInteractiveHeader(                                
-        &robotToRobotMsg->interactiveHeader,                                           
+    RefSerialTransmitter::configInteractiveHeader(
+        &robotToRobotMsg->interactiveHeader,
         contentId,
         drivers->refSerial.getRobotData().robotId,
         static_cast<uint16_t>(receiverId));
 
     {
-
     // True message size without unused buffer bytes
     static constexpr int crc16Size = 2;
     static constexpr int trueMsgHeaderSize = sizeof(robotToRobotMsg->frameHeader) +
@@ -424,7 +426,7 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
                                                      sizeof(robotToRobotMsg->interactiveHeader);
     uint16_t trueMsgSize = trueMsgHeaderSize + dataLen + crc16Size;
 
-    uint16_t* crc16Ptr = reinterpret_cast<uint16_t*>(robotToRobotMsg->dataAndCrc16 + dataLen);
+    uint16_t* crc16Ptr = reinterpret_cast<uint16_t*>(robotToRobotMsg->dataAndCRC16 + dataLen);
     *crc16Ptr = algorithms::calculateCRC16(
         reinterpret_cast<uint8_t*>(robotToRobotMsg),
         trueMsgSize - crc16Size);
@@ -437,8 +439,8 @@ modm::ResumableResult<void> RefSerialTransmitter::sendRobotToRobotMsg(
         trueMsgSize);
 
     }
-    DELAY_REF_GRAPHIC(robotToRobotMsg);                 
-                              
+    DELAY_REF_GRAPHIC(robotToRobotMsg);
+
     drivers->refSerial.releaseTransmissionSemaphore();
 
     RF_END();

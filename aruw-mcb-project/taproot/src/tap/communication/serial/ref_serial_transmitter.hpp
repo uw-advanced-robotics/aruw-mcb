@@ -257,12 +257,9 @@ public:
         bool sendMsg = true);
     ///@}
 
-    /**
-     * @todo doc
-     */
     mockable modm::ResumableResult<void> sendRobotToRobotMsg(
         Tx::RobotToRobotMessage* robotToRobotMsg,
-        uint16_t msgId,
+        uint16_t contentId,
         RobotId receiverId,
         uint16_t dataLen);
 

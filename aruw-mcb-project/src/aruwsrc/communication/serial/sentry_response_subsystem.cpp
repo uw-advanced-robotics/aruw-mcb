@@ -49,7 +49,7 @@ bool SentryResponseSubsystem::run()
         {
             this->sentryMoving = this->getDriveStatus();
 
-            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCrc16) = static_cast<uint16_t>(this->sentryMoving);
+            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCRC16) = static_cast<uint16_t>(this->sentryMoving);
 
             PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
                 &this->robotToRobotMessage,
