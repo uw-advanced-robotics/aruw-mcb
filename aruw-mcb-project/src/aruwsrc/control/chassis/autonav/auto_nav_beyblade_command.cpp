@@ -103,6 +103,9 @@ void AutoNavBeybladeCommand::execute()
         
         if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
+            uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+            uint32_t dt = currTime - prevTime;
+            prevTime = currTime;
             x = xPid.runControllerDerivateError(setpointData.x - currentX, DT);
             y = yPid.runControllerDerivateError(setpointData.y - currentY, DT);
             // float desiredVelocityX = setpointData.x - currentX;
