@@ -54,7 +54,8 @@ public:
 
     inline SentryStrategy getSentryStrategy() const { return this->sentryStrategy; }
 
-    inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining() / 1000); }
+    // inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining() / 1000); }
+    inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining()); }
 
 private:
     tap::Drivers &drivers;
@@ -63,8 +64,8 @@ private:
     bool sentryBeybladeEnabled = true;
 
     tap::arch::MilliTimeout holdFireTimer;
-
     SentryStrategy sentryStrategy = SentryStrategy::NONE;
+    uint8_t myData[256];
 };
 }  // namespace aruwsrc::communication::serial
 #endif  // SENTRY_RESPONSE_HANDLER_HPP_

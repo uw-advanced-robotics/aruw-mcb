@@ -37,7 +37,9 @@ void SentryResponseHandler::operator()(
         return;
     }
 
-    const SentryResponseType type = *reinterpret_cast<const SentryResponseType*>(message.data);
+    memcpy(myData, message.data, message.header.dataLength);
+    // const SentryResponseType type = *reinterpret_cast<const SentryResponseType*>(message.data);
+    SentryResponseType type = static_cast<SentryResponseType>(message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     switch (type)
     {
@@ -54,10 +56,11 @@ void SentryResponseHandler::operator()(
             this->sentryBeybladeEnabled = false;
             break;
         case SentryResponseType::HOLD_FIRE:
-            this->holdFireTimer.restart(1000);
+            this->holdFireTimer.restart(10000);
             break;
         default:
             this->sentryStrategy = static_cast<SentryStrategy>(type);
     }
+    this->sentryStrategy = static_cast<SentryStrategy>(type);
 }
 }  // namespace aruwsrc::communication::serial
