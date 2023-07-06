@@ -107,9 +107,9 @@ private:
     enum BooleanHUDIndicatorIndex
     {
         /** Indicates systems (such as the IMU) are calibrating. */
-        SYSTEMS_CALIBRATING = 0,
+        // SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
-        AGITATOR_STATUS_HEALTHY,
+        AGITATOR_STATUS_HEALTHY = 0,
         /** Indicates whether or not the sentry is moving. */
         SENTRY_MOVEMENT_ENABLED,
         SENTRY_BEYBLADE_ENABLED,
@@ -125,10 +125,10 @@ private:
      */
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
-            BooleanHUDIndicatorTuple(  // @todo remove top two
-                "SYS CALIB ",
-                Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
-                Tx::GraphicColor::GREEN),        // Green when not calibrating
+            // BooleanHUDIndicatorTuple(  // @todo remove top two
+            //     "SYS CALIB ",
+            //     Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
+            //     Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,

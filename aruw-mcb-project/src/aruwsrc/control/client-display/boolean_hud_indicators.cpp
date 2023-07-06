@@ -57,13 +57,13 @@ BooleanHudIndicators::BooleanHudIndicators(
       imuCalibrateCommand(imuCalibrateCommand),
       sentryResponseHandler(sentryResponseHandler),
       booleanHudIndicatorDrawers{
-          BooleanHUDIndicator(
-              refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
-              updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>,
-              0),
+        //   BooleanHUDIndicator(
+        //       refSerialTransmitter,
+        //       &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
+        //       updateGraphicColor<
+        //           std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
+        //           std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>,
+        //       0),
           BooleanHUDIndicator(
               refSerialTransmitter,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
@@ -116,8 +116,8 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
 
-    booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
-        commandScheduler.isCommandScheduled(&imuCalibrateCommand));
+    // booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
+        // commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
     booleanHudIndicatorDrawers[SENTRY_MOVEMENT_ENABLED].setIndicatorState(
         sentryResponseHandler.getSentryMovementEnabled());
