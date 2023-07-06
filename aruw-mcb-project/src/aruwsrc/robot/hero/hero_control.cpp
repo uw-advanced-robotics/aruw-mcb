@@ -469,7 +469,7 @@ PressCommandMapping xShiftPressed(
 PressCommandMapping vShiftPressed(
     drivers(),
     {&sentrySendToggleBeyblade},
-    RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
+    RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
@@ -527,14 +527,14 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &CvOnTargetGovernor::setGovernorEnabled);
 
 // cap bank
-PressCommandMapping cShiftPressed(
-    drivers(),
-    {&capBankToggleCommand},
-    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
 PressCommandMapping cCtrlPressed(
     drivers(),
-    {&capBankDrainCommand},
+    {&capBankToggleCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::C}));
+PressCommandMapping xCtrlPressed(
+    drivers(),
+    {&capBankDrainCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::X}));
 HoldCommandMapping shiftPressed(
     drivers(),
     {&capBankSprintCommand},
@@ -623,7 +623,7 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&vShiftPressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&xCtrlPressed);
     drivers->commandMapper.addMap(&cCtrlPressed);
     drivers->commandMapper.addMap(&shiftPressed);
 }

@@ -27,6 +27,6 @@
 
 // #define TARGET_HERO
 // #define TARGET_STANDARD_SPIDER
-// #define TARGET_HERO_CYCLONE
+#define TARGET_HERO
 
 #endif
