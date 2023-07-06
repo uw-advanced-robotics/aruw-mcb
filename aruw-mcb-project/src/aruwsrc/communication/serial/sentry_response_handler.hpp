@@ -64,6 +64,8 @@ private:
 
     tap::arch::MilliTimeout holdFireTimer;
 
+
+
     SentryStrategy sentryStrategy = SentryStrategy::NONE;
 };
 }  // namespace aruwsrc::communication::serial
