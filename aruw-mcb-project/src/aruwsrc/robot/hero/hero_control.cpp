@@ -451,7 +451,7 @@ PressCommandMapping xShiftPressed(
 PressCommandMapping vShiftPressed(
     drivers(),
     {&sentrySendToggleBeyblade},
-    RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
+    RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
