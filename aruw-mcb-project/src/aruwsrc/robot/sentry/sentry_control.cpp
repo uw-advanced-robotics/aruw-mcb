@@ -527,6 +527,19 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
 //     drivers()->visionCoprocessor,
 //     odometrySubsystem);
 
+static constexpr tap::algorithms::SmoothPidConfig AUTO_NAV_POS_PID = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 3'000.0f,
+    .maxOutput = 28'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     sentryDrive,
@@ -535,6 +548,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     odometrySubsystem,
     sentryResponseTransmitter,
     aruwsrc::sentry::chassis::beybladeConfig,
+    AUTO_NAV_POS_PID,
     false);  // @todo this should be in config!
 
 

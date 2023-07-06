@@ -46,6 +46,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
     aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+    tap::algorithms::SmoothPidConfig pidConfig,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
@@ -54,7 +55,9 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
       odometryInterface(odometryInterface),
       sentryResponseTransmitter(sentryResponseTransmitter),
       config(config),
-      autoNavOnlyInGame(autoNavOnlyInGame)
+      autoNavOnlyInGame(autoNavOnlyInGame),
+      xPid(pidConfig),
+      yPid(pidConfig)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -100,14 +103,16 @@ void AutoNavBeybladeCommand::execute()
         
         if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
-            float desiredVelocityX = setpointData.x - currentX;
-            float desiredVelocityY = setpointData.y - currentY;
-            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
-            if (mag > 0.01)
-            {
-                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-            }
+            x = xPid.runControllerDerivateError(setpointData.x - currentX, DT);
+            y = yPid.runControllerDerivateError(setpointData.y - currentY, DT);
+            // float desiredVelocityX = setpointData.x - currentX;
+            // float desiredVelocityY = setpointData.y - currentY;
+            // float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+            // if (mag > 0.01)
+            // {
+            //     x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            //     y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            // }
         }
 
         if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)

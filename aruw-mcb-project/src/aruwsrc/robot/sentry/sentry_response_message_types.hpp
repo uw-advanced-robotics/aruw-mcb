@@ -27,7 +27,7 @@ namespace aruwsrc::communication::serial
 
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
-enum class SentryResponseType : uint8_t
+enum class SentryResponseType : uint16_t
 {
     NONE = 0,
     GO_TO_FRIENDLY_BASE,

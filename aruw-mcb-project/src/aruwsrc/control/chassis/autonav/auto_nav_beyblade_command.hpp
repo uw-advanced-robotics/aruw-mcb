@@ -23,6 +23,7 @@
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
@@ -49,6 +50,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
         aruwsrc::communication::serial::SentryResponseTransmitter& sentryResponseTransmitter,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+        const tap::algorithms::SmoothPidConfig pidConfig,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -87,6 +89,11 @@ private:
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
+
+    tap::algorithms::SmoothPid xPid;
+    tap::algorithms::SmoothPid yPid;
+
+    uint32_t prevTime = 0;
 
     bool autoNavOnlyInGame;
     // @todo extremely ad hoc for sentry
