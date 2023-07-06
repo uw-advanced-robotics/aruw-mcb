@@ -48,7 +48,8 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
     const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::chassis::BeybladeCommand& beybladeCommand)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -62,7 +63,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           agitatorSubsystem,
           imuCalibrateCommand,
           barrelSwitchCommand,
-          sentryResponseHandler),
+          sentryResponseHandler,
+          beybladeCommand),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
@@ -90,7 +92,7 @@ void ClientDisplayCommand::initialize()
     HudIndicator::resetGraphicNameGenerator();
     restart();  // restart protothread
     booleanHudIndicators.initialize();
-    chassisOrientationIndicator.initialize();
+    // chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
@@ -126,7 +128,7 @@ bool ClientDisplayCommand::run()
         } else if (counter%6 == 4) {
             PT_CALL(visionHudIndicators.update());
         } else if (counter%6 == 5) {
-            // PT_CALL(holdFireIndicator.update());
+            PT_CALL(holdFireIndicator.update());
         }
 
         PT_YIELD();

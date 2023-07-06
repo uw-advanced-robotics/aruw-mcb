@@ -46,9 +46,12 @@ modm::ResumableResult<bool> HoldFireIndicator::sendInitialGraphics()
 modm::ResumableResult<bool> HoldFireIndicator::update()
 {
     RF_BEGIN(1);
-    timerMessage.graphicData.value = sentryResponseHandler.getHoldFireTimeRemainingSec();
-    timerMessage.graphicData.operation = Tx::GRAPHIC_MODIFY;
-    RF_CALL(refSerialTransmitter.sendGraphic(&timerMessage));
+    if (sentryResponseHandler.getHoldFireTimeRemainingSec() != lastVal) {
+        timerMessage.graphicData.value = sentryResponseHandler.getHoldFireTimeRemainingSec();
+        timerMessage.graphicData.operation = Tx::GRAPHIC_MODIFY;
+        lastVal = sentryResponseHandler.getHoldFireTimeRemainingSec();
+        RF_CALL(refSerialTransmitter.sendGraphic(&timerMessage));
+    }
     RF_END();
 }
 

@@ -116,7 +116,8 @@ public:
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
         const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+        const aruwsrc::chassis::BeybladeCommand& beybladeCommand);
 
     const char *getName() const override { return "client display"; }
 

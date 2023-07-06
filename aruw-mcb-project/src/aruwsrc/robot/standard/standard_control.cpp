@@ -486,7 +486,8 @@ ClientDisplayCommand clientDisplayCommand(
 #else
     nullptr,
 #endif
-    sentryResponseHandler);
+    sentryResponseHandler,
+    beybladeCommand);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -561,7 +562,8 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressedNotShiftPressed(
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-ToggleCommandMapping fToggledNotShiftPressed(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}, {Remote::Key::SHIFT}));
+// ToggleCommandMapping fToggledNotShiftPressed(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}, {Remote::Key::SHIFT}));
+ToggleCommandMapping fToggledNotShiftPressed(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}, {}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),

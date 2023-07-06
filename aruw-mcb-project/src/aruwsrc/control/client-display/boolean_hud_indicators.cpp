@@ -49,7 +49,8 @@ BooleanHudIndicators::BooleanHudIndicators(
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::chassis::BeybladeCommand &beybladeCommand)
     : HudIndicator(refSerialTransmitter),
       commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
@@ -58,6 +59,7 @@ BooleanHudIndicators::BooleanHudIndicators(
       imuCalibrateCommand(imuCalibrateCommand),
       barrelSwitchCommand(barrelSwitchCommand),
       sentryResponseHandler(sentryResponseHandler),
+      beybladeCommand(beybladeCommand),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -86,6 +88,13 @@ BooleanHudIndicators::BooleanHudIndicators(
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BARREL_SWITCH_AUTOMATIC]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BARREL_SWITCH_AUTOMATIC])>,
+              0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[BEYBLADING],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BEYBLADING]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BEYBLADING])>,
               0),
       }
 {
@@ -126,6 +135,9 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
         sentryResponseHandler.getSentryMovementEnabled());
     booleanHudIndicatorDrawers[SENTRY_BEYBLADE_ENABLED].setIndicatorState(
         sentryResponseHandler.getSentryBeybladeEnabled());
+
+    booleanHudIndicatorDrawers[BEYBLADING].setIndicatorState(
+        commandScheduler.isCommandScheduled(&beybladeCommand));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (indicatorIndexUpdate = 0; indicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS; indicatorIndexUpdate++)

@@ -30,6 +30,7 @@
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/barrel-switcher/barrel_switch_command.hpp"
 #include "modm/processing/resumable.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
 
 #include "hud_indicator.hpp"
 
@@ -63,7 +64,8 @@ public:
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::BarrelSwitchCommand *barrelSwitchCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+        const aruwsrc::chassis::BeybladeCommand& beybladeCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -115,6 +117,8 @@ private:
         SENTRY_BEYBLADE_ENABLED,
         /** Indicates if barrel switcher on automatic. */
         BARREL_SWITCH_AUTOMATIC,
+        /** Indicates if we are beyblading */
+        BEYBLADING,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -141,6 +145,10 @@ private:
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
                 "BARREL ",
+                Tx::GraphicColor::GREEN,
+                Tx::GraphicColor::PURPLISH_RED),
+            BooleanHUDIndicatorTuple(
+                "BEYBLD ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -176,6 +184,8 @@ private:
      * moving.
      */
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
+
+    const aruwsrc::chassis::BeybladeCommand &beybladeCommand;
 
     // @todo docs
     /**

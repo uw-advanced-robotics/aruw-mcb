@@ -68,6 +68,8 @@ private:
     static constexpr uint16_t TIMER_LINE_WIDTH = 3;
     // hah
     Tx::Graphic1Message timerMessage;
+
+    uint32_t lastVal = 0;
 };
 }  // namespace aruwsrc::control::client_display
 
