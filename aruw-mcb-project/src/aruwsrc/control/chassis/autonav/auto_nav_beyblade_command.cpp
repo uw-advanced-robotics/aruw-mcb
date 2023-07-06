@@ -106,8 +106,8 @@ void AutoNavBeybladeCommand::execute()
             uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
             uint32_t dt = currTime - prevTime;
             prevTime = currTime;
-            x = xPid.runControllerDerivateError(setpointData.x - currentX, DT);
-            y = yPid.runControllerDerivateError(setpointData.y - currentY, DT);
+            x = xPid.runControllerDerivateError(setpointData.x - currentX, dt);
+            y = yPid.runControllerDerivateError(setpointData.y - currentY, dt);
             // float desiredVelocityX = setpointData.x - currentX;
             // float desiredVelocityY = setpointData.y - currentY;
             // float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
