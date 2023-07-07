@@ -118,18 +118,21 @@ bool ClientDisplayCommand::run()
     while (true) {
         counter++;
         
-        if (counter%6 == 0) {
+        // @todo Make something more scaleable 
+        if (counter%7 == 0) {
             PT_CALL(booleanHudIndicators.update());
-        } else if (counter%6 == 1 ) {
+        } else if (counter%7 == 1 ) {
             // PT_CALL(chassisOrientationIndicator.update());  // @todo may not be necessary
-        } else if (counter%6 == 2) {
+        } else if (counter%7 == 2) {
             PT_CALL(positionHudIndicators.update());
-        } else if (counter%6 == 3) {
+        } else if (counter%7 == 3) {
             PT_CALL(reticleIndicator.update());
-        } else if (counter%6 == 4) {
+        } else if (counter%7 == 4) {
             PT_CALL(visionHudIndicators.update());
-        } else if (counter%6 == 5) {
+        } else if (counter%7 == 5) {
             PT_CALL(holdFireIndicator.update());
+        } else if (counter%7 == 6) {
+            PT_CALL(capBankIndicator.update());
         }
 
         PT_YIELD();
