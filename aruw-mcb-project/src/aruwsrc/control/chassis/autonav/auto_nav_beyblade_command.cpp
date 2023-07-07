@@ -71,6 +71,7 @@ void AutoNavBeybladeCommand::initialize()
     rotationDirection = 1;
 #else
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
+    // rotationDirection = -1;
 #endif
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
@@ -104,7 +105,7 @@ void AutoNavBeybladeCommand::execute()
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
         const tap::communication::serial::RefSerialData::Rx::GameType& gametype =  drivers.refSerial.getGameData().gameType;
         
-        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
+        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline() && movementEnabled)
         {
             xRamp.setTarget(setpointData.x);
             yRamp.setTarget(setpointData.y);

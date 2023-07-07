@@ -68,31 +68,39 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    .azimuthZeroOffset = 7888,
+    // .azimuthZeroOffset = 7888,
+    .azimuthZeroOffset = 3753,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .driveMotorInverted = false,
+    // .driveMotorInverted = false,
+    .driveMotorInverted = true,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = 4452,
+    // .azimuthZeroOffset = 4452,
+    .azimuthZeroOffset = 356,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .driveMotorInverted = false,
+    // .driveMotorInverted = false,
+    .driveMotorInverted = true,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = 7172,
+    // .azimuthZeroOffset = 7172,
+    .azimuthZeroOffset = 3093,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .driveMotorInverted = false,
+    // .driveMotorInverted = false,
+    .driveMotorInverted = true,
 };
 
 aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    .azimuthZeroOffset = 7878,
+    // .azimuthZeroOffset = 7878,
+    .azimuthZeroOffset = 3679,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .driveMotorInverted = false,
+    // .driveMotorInverted = false,
+    .driveMotorInverted = true,
 };
 
 

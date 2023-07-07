@@ -81,11 +81,11 @@ float SwerveModule::calculate(float x, float y, float r)
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
         // reverse module if it's a smaller azimuth rotation to do so
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        {
-            rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        }
+        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        // {
+        //     rotationOffset -=
+        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        // }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
@@ -125,9 +125,12 @@ void SwerveModule::updateMotorOutputs(float driveOutput, float azimuthOutput)
 {
     driveDesiredOutput = driveOutput;
     driveMotor.setDesiredOutput(driveDesiredOutput);
+    // driveMotor.setDesiredOutput(0);
+
 
     azimuthDesiredOutput = azimuthOutput;
     azimuthMotor.setDesiredOutput(azimuthDesiredOutput);
+    // azimuthMotor.setDesiredOutput(0);
 }
 
 float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
