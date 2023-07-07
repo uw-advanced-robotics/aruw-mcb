@@ -37,8 +37,6 @@ void SentryResponseHandler::operator()(
         return;
     }
 
-    memcpy(myData, message.data, message.header.dataLength);
-    // const SentryResponseType type = *reinterpret_cast<const SentryResponseType*>(message.data);
     SentryResponseType type = static_cast<SentryResponseType>(message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     switch (type)

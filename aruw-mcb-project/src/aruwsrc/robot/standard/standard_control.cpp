@@ -550,10 +550,10 @@ PressCommandMapping xShiftPressed(
     drivers(),
     {&sentrySendToggleMovement},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
-PressCommandMapping bShiftPressed(
+PressCommandMapping vShiftPressed(
     drivers(),
     {&sentrySendToggleBeyblade},
-    RemoteMapState({Remote::Key::B, Remote::Key::SHIFT}));
+    RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressedNotShiftPressed(
     drivers(),
@@ -588,13 +588,13 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 PressCommandMapping zPressedNotShiftPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping vShiftPressed(
+PressCommandMapping bNotCtrlPressed(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,
-        {Remote::Key::V, Remote::Key::SHIFT}, {},
+        {Remote::Key::B}, {Remote::Key::CTRL},
         false,
         false));
 // The user can press b+ctrl when the remote right switch is in the down position to restart the,
@@ -721,7 +721,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMousePressedBPressedNotShiftPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressedNotShiftPressed);
-    drivers->commandMapper.addMap(&vShiftPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressed);
     drivers->commandMapper.addMap(&bCtrlPressedNotShiftPressed);
     //drivers->commandMapper.addMap(&qEPressed);
     drivers->commandMapper.addMap(&xPressedNotShiftPressed);
@@ -733,7 +733,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&gShiftPressed);
     drivers->commandMapper.addMap(&zShiftPressed);
     drivers->commandMapper.addMap(&xShiftPressed);
-    drivers->commandMapper.addMap(&bShiftPressed);
+    drivers->commandMapper.addMap(&vShiftPressed);
     drivers->commandMapper.addMap(&vNotShiftPressed);
 }
 }  // namespace standard_control
