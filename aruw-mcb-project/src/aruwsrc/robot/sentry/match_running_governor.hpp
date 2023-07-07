@@ -38,7 +38,7 @@ public:
     {
     }
 
-    bool isReady() override { return (refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME); }
+    bool isReady() override { return (int(refSerial.getGameData().gameType) == 0 || refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME); }
 
     bool isFinished() override { return false; }
 
