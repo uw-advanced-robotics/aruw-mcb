@@ -54,8 +54,7 @@ public:
 
     inline SentryStrategy getSentryStrategy() const { return this->sentryStrategy; }
 
-    // inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining() / 1000); }
-    inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining()); }
+    inline uint32_t getHoldFireTimeRemainingSec() const { return int(this->holdFireTimer.timeRemaining() / 1000); }
 
 private:
     tap::Drivers &drivers;

@@ -59,6 +59,5 @@ void SentryResponseHandler::operator()(
         default:
             this->sentryStrategy = static_cast<SentryStrategy>(type);
     }
-    this->sentryStrategy = static_cast<SentryStrategy>(type);
 }
 }  // namespace aruwsrc::communication::serial
