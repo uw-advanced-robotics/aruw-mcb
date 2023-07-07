@@ -54,6 +54,11 @@ public:
 
     void changeSprintMode(SprintMode mode);
 
+    void refreshSafeDisconnect() override
+    {
+        desiredStatus = communication::sensors::power::Status::SAFE;
+    }
+
     void refresh() override;
 
 private:
@@ -63,8 +68,8 @@ private:
         communication::sensors::power::Status::SAFE;
 
     const float SPRINT_MODIFIER = 1.0f;
-    const float REGULAR_MODIFIER = 0.25f;
-    const float BASE_MODIFIER = 0.25f;
+    const float REGULAR_MODIFIER = 0.15f;
+    const float BASE_MODIFIER = 0.4f;
 
     float desiredSprintModifier = REGULAR_MODIFIER;
 

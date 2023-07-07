@@ -86,7 +86,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             RefSerialTransmitter::configLine(
                 BOX_WIDTH - 20,
                 CAP_CENTER_X,
-                ((voltage - 9) / (21.0 - 9.0)) * (BOX_HEIGHT - 20) + BOTTOM + 10,
+                ((voltage - 9) / (20.5 - 9.0)) * (BOX_HEIGHT - 20) + BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);

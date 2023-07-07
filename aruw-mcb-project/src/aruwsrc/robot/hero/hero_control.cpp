@@ -487,7 +487,7 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
+PressCommandMapping zShiftNotPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
@@ -507,21 +507,13 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping qPressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::Q}));
-PressCommandMapping ePressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::E}));
-PressCommandMapping xPressed(
+PressCommandMapping xNotShiftPressed(
     drivers(),
     {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+    RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rNotShiftPressed(
     drivers(),
-    RemoteMapState({Remote::Key::R}),
+    RemoteMapState({Remote::Key::R}, {Remote::Key::SHIFT}),
     true,
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
@@ -607,11 +599,11 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&zShiftNotPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&ePressed);
+    drivers->commandMapper.addMap(&xNotShiftPressed);
+    drivers->commandMapper.addMap(&rNotShiftPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&qShiftPressed);
     drivers->commandMapper.addMap(&eShiftPressed);
@@ -621,8 +613,6 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zShiftPressed);
     drivers->commandMapper.addMap(&xShiftPressed);
     drivers->commandMapper.addMap(&vShiftPressed);
-    drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&xCtrlPressed);
     drivers->commandMapper.addMap(&cCtrlPressed);
     drivers->commandMapper.addMap(&shiftPressed);

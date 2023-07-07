@@ -48,7 +48,8 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::chassis::BeybladeCommand &beybladeCommand)
     : HudIndicator(refSerialTransmitter),
       commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
@@ -56,14 +57,8 @@ BooleanHudIndicators::BooleanHudIndicators(
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
       sentryResponseHandler(sentryResponseHandler),
+      beybladeCommand(beybladeCommand),
       booleanHudIndicatorDrawers{
-          BooleanHUDIndicator(
-              refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SYSTEMS_CALIBRATING],
-              updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SYSTEMS_CALIBRATING])>,
-              0),
           BooleanHUDIndicator(
               refSerialTransmitter,
               &booleanHudIndicatorGraphics[AGITATOR_STATUS_HEALTHY],
@@ -85,6 +80,13 @@ BooleanHudIndicators::BooleanHudIndicators(
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_BEYBLADE_ENABLED])>,
               0),
+          BooleanHUDIndicator(
+              refSerialTransmitter,
+              &booleanHudIndicatorGraphics[BEYBLADING],
+              updateGraphicColor<
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BEYBLADING]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[BEYBLADING])>,
+              0),
       }
 {
 }
@@ -99,8 +101,8 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
         RF_CALL(
             booleanHudIndicatorDrawers[indicatorIndexInit].initialize());
 
-        RF_CALL(refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[indicatorIndexInit]));
+        // RF_CALL(refSerialTransmitter.sendGraphic(
+        //     &booleanHudIndicatorStaticGraphics[indicatorIndexInit]));
         RF_CALL(refSerialTransmitter.sendGraphic(
             &booleanHudIndicatorStaticLabelGraphics[indicatorIndexInit]));
     }
@@ -116,13 +118,13 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
 
-    booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
-        commandScheduler.isCommandScheduled(&imuCalibrateCommand));
-
     booleanHudIndicatorDrawers[SENTRY_MOVEMENT_ENABLED].setIndicatorState(
         sentryResponseHandler.getSentryMovementEnabled());
     booleanHudIndicatorDrawers[SENTRY_BEYBLADE_ENABLED].setIndicatorState(
         sentryResponseHandler.getSentryBeybladeEnabled());
+
+    booleanHudIndicatorDrawers[BEYBLADING].setIndicatorState(
+        commandScheduler.isCommandScheduled(&beybladeCommand));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (indicatorIndexUpdate = 0; indicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS; indicatorIndexUpdate++)
@@ -159,21 +161,21 @@ void BooleanHudIndicators::initialize()
             &booleanHudIndicatorGraphics[i].graphicData);
 
         // config the border circle that bounds the booleanHudIndicatorGraphics
-        getUnusedGraphicName(booleanHudIndicatorName);
+        // getUnusedGraphicName(booleanHudIndicatorName);
 
-        RefSerialTransmitter::configGraphicGenerics(
-            &booleanHudIndicatorStaticGraphics[i].graphicData,
-            booleanHudIndicatorName,
-            Tx::GRAPHIC_ADD,
-            DEFAULT_GRAPHIC_LAYER,
-            BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
+        // RefSerialTransmitter::configGraphicGenerics(
+        //     &booleanHudIndicatorStaticGraphics[i].graphicData,
+        //     booleanHudIndicatorName,
+        //     Tx::GRAPHIC_ADD,
+        //     DEFAULT_GRAPHIC_LAYER,
+        //     BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
-        RefSerialTransmitter::configCircle(
-            BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
-            BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-            hudIndicatorListCurrY,
-            BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
-            &booleanHudIndicatorStaticGraphics[i].graphicData);
+        // RefSerialTransmitter::configCircle(
+        //     BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+        //     BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+        //     hudIndicatorListCurrY,
+        //     BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+        //     &booleanHudIndicatorStaticGraphics[i].graphicData);
 
         // config the label associated with the particular indicator
         getUnusedGraphicName(booleanHudIndicatorName);

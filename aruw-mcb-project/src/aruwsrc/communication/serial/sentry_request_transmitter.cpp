@@ -41,7 +41,7 @@ bool SentryRequestTransmitter::send()
 
         if ((queuedMessageType & (1 << static_cast<uint8_t>(lastSentMessage))) != 0)
         {
-            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCrc16) = static_cast<uint8_t>(lastSentMessage);
+            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCRC16) = static_cast<uint8_t>(lastSentMessage);
 
             // TODO configure rest of message if required by message type, currently this is not
             // necessary
