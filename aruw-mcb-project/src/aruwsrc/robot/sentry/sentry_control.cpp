@@ -254,7 +254,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 
 // Chassis
-aruwsrc::chassis::SwerveChassisSubsystem sentryDrive(
+aruwsrc::chassis::SwerveChassisSubsystem chassis(
     drivers(),
     &drivers()->mcbLite.currentSensor,
     &leftFrontSwerveModule,
@@ -333,7 +333,7 @@ SentryChassisWorldYawObserver sentryChassisWorldYawObserver(
 // odometry is cringe (?) so we're not using it
 SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
-    sentryDrive,
+    chassis,
     sentryChassisWorldYawObserver,
     drivers()->mcbLite.imu,
     modm::Location2D<float>(0., 0., M_PI * 0.75),
@@ -377,7 +377,7 @@ tap::algorithms::SmoothPid turretMajorYawVelPid(turretMajor::YAW_VEL_PID_CONFIG)
 
 algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  // @todo rename
     sentryTransforms.getWorldToChassis(),
-    sentryDrive,
+    chassis,
     turretMajor.yawMotor,
     turretMinorGirlboss,
     turretMinorMalewife,
@@ -457,7 +457,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     },
     &turretMajor,
     &turretMajorYawController,
-    &sentryDrive,
+    &chassis,
     sentryChassisWorldYawObserver,
     odometrySubsystem);
 
@@ -465,13 +465,13 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &sentryDrive);
+    &chassis);
 
 
 // Chassis beyblade
 aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
     drivers(),
-    &sentryDrive,
+    &chassis,
     &turretMajor.yawMotor,
     drivers()->controlOperatorInterface,
     sentryTransforms.getWorldToChassis(),
@@ -522,15 +522,15 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
 
 // aruwsrc::chassis::AutoNavCommand autoNavCommand(
 //     *drivers(),
-//     sentryDrive,
+//     chassis,
 //     turretMajor.yawMotor,
 //     drivers()->visionCoprocessor,
 //     odometrySubsystem);
 
 static constexpr tap::algorithms::SmoothPidConfig AUTO_NAV_POS_PID = {
-    .kp = 0.0f,
+    .kp = 13.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 800.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -542,14 +542,14 @@ static constexpr tap::algorithms::SmoothPidConfig AUTO_NAV_POS_PID = {
 
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
-    sentryDrive,
+    chassis,
     turretMajor.yawMotor,
     drivers()->visionCoprocessor,
     odometrySubsystem,
     sentryResponseTransmitter,
     aruwsrc::sentry::chassis::beybladeConfig,
     AUTO_NAV_POS_PID,
-    false);  // @todo this should be in config!
+    true);  // @todo this should be in config!
 
 
 // general shooting ===================================
@@ -819,7 +819,7 @@ bool isInitialized = false;
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentryDrive.initialize();
+    chassis.initialize();
     turretMajor.initialize();
     turretMinorGirlboss.initialize();
     turretMinorMalewife.initialize();
@@ -842,7 +842,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentryDrive);
+    drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretMinorGirlboss);
     drivers->commandScheduler.registerSubsystem(&turretMinorMalewife);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
@@ -862,7 +862,7 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    sentryDrive.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     turretMajor.setDefaultCommand(&turretMajorControlCommand);
     turretMinorGirlboss.setDefaultCommand(&turretMinorGirlbossControlCommand);  // @todo https://gitlab.com/aruw/controls/taproot/-/issues/215
     turretMinorMalewife.setDefaultCommand(&turretMinorMalewifeControlCommand);

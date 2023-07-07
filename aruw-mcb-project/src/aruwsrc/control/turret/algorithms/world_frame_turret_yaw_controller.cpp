@@ -113,7 +113,7 @@ void WorldFrameTurretYawCascadePIDController::runController(
     torqueCompensation = girlboss.yawMotor.getMotorOutput() + malewife.yawMotor.getMotorOutput();
     if (abs(torqueCompensation) < 2000) { torqueCompensation = 0; }
 
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
+    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation + chassis.getActualVelocityChassisRelative()[3][0]);
 }
 
 // @todo what's the point of this; overridden by runController anyways?

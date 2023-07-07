@@ -73,6 +73,8 @@ void AutoNavBeybladeCommand::initialize()
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 #endif
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+    xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
+    yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
 
     sentryResponseTransmitter.queueRequest(
             beybladeEnabled ? aruwsrc::communication::serial::SentryResponseType::BEYBLADE_ENABLED : aruwsrc::communication::serial::SentryResponseType::BEYBLADE_DISABLED);
@@ -85,6 +87,9 @@ void AutoNavBeybladeCommand::execute()
 {
     if (yawMotor.isOnline())
     {
+        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+        uint32_t dt = currTime - prevTime;
+        prevTime = currTime;
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
         float currentY = odometryInterface.getCurrentLocation2D().getY();
@@ -94,20 +99,18 @@ void AutoNavBeybladeCommand::execute()
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        float x = 0.0;
-        float y = 0.0;
         float rampTarget = 0.0;
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
-            visionCoprocessor.getLastSetpointData();
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
         
         if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
-            uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-            uint32_t dt = currTime - prevTime;
-            prevTime = currTime;
-            x = xPid.runControllerDerivateError(setpointData.x - currentX, dt);
-            y = yPid.runControllerDerivateError(setpointData.y - currentY, dt);
+            xRamp.setTarget(setpointData.x);
+            yRamp.setTarget(setpointData.y);
+
+            xRamp.update(POS_RAMP_RATE);
+            yRamp.update(POS_RAMP_RATE);
+
             // float desiredVelocityX = setpointData.x - currentX;
             // float desiredVelocityY = setpointData.y - currentY;
             // float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
@@ -117,6 +120,9 @@ void AutoNavBeybladeCommand::execute()
             //     y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
             // }
         }
+        
+        float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        float y = yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
         if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
         {
