@@ -68,7 +68,7 @@ private:
         communication::sensors::power::Status::SAFE;
 
     const float SPRINT_MODIFIER = 1.0f;
-    const float REGULAR_MODIFIER = 0.15f;
+    const float REGULAR_MODIFIER = 0.2f;
     const float BASE_MODIFIER = 0.4f;
 
     float desiredSprintModifier = REGULAR_MODIFIER;

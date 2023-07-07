@@ -36,10 +36,10 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 7'000},
-    {60, 7'000},
+    {50, 8'000},
+    {60, 8'000},
     {70, 8'000},
-    {80, 8'000},
+    {80, 9'000},
     {100, 9'000},
     {120, 9'000},
 };
@@ -64,7 +64,7 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 15.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
+static constexpr float VELOCITY_PID_KP = 15.0f;
 static constexpr float VELOCITY_PID_KI = 0.2f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
