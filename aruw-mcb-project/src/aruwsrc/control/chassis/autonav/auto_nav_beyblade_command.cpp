@@ -102,8 +102,9 @@ void AutoNavBeybladeCommand::execute()
         float rampTarget = 0.0;
 
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
+        const tap::communication::serial::RefSerialData::Rx::GameType& gametype =  drivers.refSerial.getGameData().gameType;
         
-        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
+        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline())
         {
             xRamp.setTarget(setpointData.x);
             yRamp.setTarget(setpointData.y);
@@ -124,7 +125,7 @@ void AutoNavBeybladeCommand::execute()
         float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
         float y = yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-        if ((!autoNavOnlyInGame || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
+        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
         {
             // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
             // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
