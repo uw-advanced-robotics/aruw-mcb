@@ -54,7 +54,7 @@ void SentryResponseHandler::operator()(
             this->sentryBeybladeEnabled = false;
             break;
         case SentryResponseType::HOLD_FIRE:
-            this->holdFireTimer.restart(1000);
+            this->holdFireTimer.restart(10000);
             break;
         default:
             this->sentryStrategy = static_cast<SentryStrategy>(type);
