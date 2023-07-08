@@ -161,18 +161,18 @@ VelocityAgitatorSubsystem agitator(
     constants::AGITATOR_PID_CONFIG,
     constants::AGITATOR_CONFIG);
 
-#ifdef TARGET_STANDARD_SPIDER
-aruwsrc::control::launcher::DualBarrelRefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheels(
-        drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+// aruwsrc::control::launcher::DualBarrelRefereeFeedbackFrictionWheelSubsystem<
+//     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+//     frictionWheels(
+//         drivers(),
+//         aruwsrc::control::launcher::LEFT_MOTOR_ID,
+//         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+//         aruwsrc::control::launcher::CAN_BUS_MOTORS,
+//         &getTurretMCBCanComm(),
+//         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+// #else
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -182,7 +182,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-#endif
+// #endif
 
 ClientDisplaySubsystem clientDisplay(drivers());
 
@@ -201,16 +201,16 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-#ifdef TARGET_STANDARD_SPIDER
-tap::motor::DjiMotor barrelSwitcherMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR8,
-    tap::can::CanBus::CAN_BUS1,
-    false,
-    "Barrel Switcher Motor");
+// #ifdef TARGET_STANDARD_SPIDER
+// tap::motor::DjiMotor barrelSwitcherMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR8,
+//     tap::can::CanBus::CAN_BUS1,
+//     false,
+//     "Barrel Switcher Motor");
 
-BarrelSwitcherSubsystem barrelSwitcher(drivers(), STALL_THRESHOLD_CONFIG, barrelSwitcherMotor);
-#endif
+// BarrelSwitcherSubsystem barrelSwitcher(drivers(), STALL_THRESHOLD_CONFIG, barrelSwitcherMotor);
+// #endif
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::communication::serial::NoMotionStrategyCommand sentrySendNoMotionStrategy(
@@ -313,14 +313,14 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
-#ifdef TARGET_STANDARD_SPIDER
-BarrelSwitchCommand barrelSwitchCommand(
-    &barrelSwitcher,
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    constants::HEAT_LIMIT_BUFFER);
-#endif
+// #ifdef TARGET_STANDARD_SPIDER
+// BarrelSwitchCommand barrelSwitchCommand(
+//     &barrelSwitcher,
+//     *drivers(),
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+//     constants::HEAT_LIMIT_BUFFER);
+// #endif
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -357,17 +357,17 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
-#ifdef TARGET_STANDARD_SPIDER
-RefSystemProjectileLaunchedDualBarrelGovernor refSystemProjectileLaunchedGovernor(
-    drivers()->refSerial,
-    barrelSwitcher,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+// RefSystemProjectileLaunchedDualBarrelGovernor refSystemProjectileLaunchedGovernor(
+//     drivers()->refSerial,
+//     barrelSwitcher,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+// #else
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
     drivers()->refSerial,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-#endif
+// #endif
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
@@ -386,42 +386,42 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-#ifdef TARGET_STANDARD_SPIDER
-HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
-    *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    constants::HEAT_LIMIT_BUFFER,
-    barrelSwitcher);
-// rotates agitator with heat limiting and barrel position checking applied
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimitingDualBarrels(
-    {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitDualBarrelSwitcherGovernor});
-// rotates agitator when aiming at target and within heat limit
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels(
-    {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitDualBarrelSwitcherGovernor, &cvOnTargetGovernor});
+// #ifdef TARGET_STANDARD_SPIDER
+// HeatLimitDualBarrelSwitcherGovernor heatLimitDualBarrelSwitcherGovernor(
+//     *drivers(),
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+//     constants::HEAT_LIMIT_BUFFER,
+//     barrelSwitcher);
+// // rotates agitator with heat limiting and barrel position checking applied
+// GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimitingDualBarrels(
+//     {&agitator},
+//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+//     {&heatLimitDualBarrelSwitcherGovernor});
+// // rotates agitator when aiming at target and within heat limit
+// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels(
+//     {&agitator},
+//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+//     {&heatLimitDualBarrelSwitcherGovernor, &cvOnTargetGovernor});
 
-aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand spinFrictionWheels(
-    drivers(),
-    &frictionWheels,
-    15.0f,
-    false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    barrelSwitcher);
+// aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+//     drivers(),
+//     &frictionWheels,
+//     15.0f,
+//     false,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+//     barrelSwitcher);
 
-aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand stopFrictionWheels(
-    drivers(),
-    &frictionWheels,
-    0.0f,
-    true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    barrelSwitcher);
-#else
+// aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand stopFrictionWheels(
+//     drivers(),
+//     &frictionWheels,
+//     0.0f,
+//     true,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
+//     barrelSwitcher);
+// #else
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
@@ -450,7 +450,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-#endif
+// #endif
 
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
@@ -481,11 +481,11 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     &chassisImuDriveCommand,
-#ifdef TARGET_STANDARD_SPIDER
-    &barrelSwitchCommand,
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+//     &barrelSwitchCommand,
+// #else
     nullptr,
-#endif
+// #endif
     sentryResponseHandler,
     beybladeCommand);
 
@@ -499,11 +499,11 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-#ifdef TARGET_STANDARD_SPIDER
-    {&rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels},
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+    // {&rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels},
+// #else
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-#endif
+// #endif
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -628,23 +628,23 @@ CycleStateCommandMapping<
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
 
-#ifdef TARGET_STANDARD_SPIDER
-CycleStateCommandMapping<
-    BarrelSwitchCommand::SwitchingControlState,
-    BarrelSwitchCommand::SwitchingControlState::NUM_STATES,
-    BarrelSwitchCommand>
-    xPressedNotShiftPressed(
-        drivers(),
-        RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}),
-        BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
-        &barrelSwitchCommand,
-        &BarrelSwitchCommand::setControlState);
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+// CycleStateCommandMapping<
+//     BarrelSwitchCommand::SwitchingControlState,
+//     BarrelSwitchCommand::SwitchingControlState::NUM_STATES,
+//     BarrelSwitchCommand>
+//     xPressedNotShiftPressed(
+//         drivers(),
+//         RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}),
+//         BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
+//         &barrelSwitchCommand,
+//         &BarrelSwitchCommand::setControlState);
+// #else
 PressCommandMapping xPressedNotShiftPressed(
     drivers(),
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
-#endif
+// #endif
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -661,9 +661,9 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
-#ifdef TARGET_STANDARD_SPIDER
-    drivers->commandScheduler.registerSubsystem(&barrelSwitcher);
-#endif
+// #ifdef TARGET_STANDARD_SPIDER
+//     drivers->commandScheduler.registerSubsystem(&barrelSwitcher);
+// #endif
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -678,9 +678,9 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
-#ifdef TARGET_STANDARD_SPIDER
-    barrelSwitcher.initialize();
-#endif
+// #ifdef TARGET_STANDARD_SPIDER
+//     barrelSwitcher.initialize();
+// #endif
 }
 
 /* set any default commands to subsystems here ------------------------------*/
