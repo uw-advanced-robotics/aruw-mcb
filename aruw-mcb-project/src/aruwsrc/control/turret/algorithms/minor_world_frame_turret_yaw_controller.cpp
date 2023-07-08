@@ -85,6 +85,10 @@ void WorldFrameTurretYawCascadePIDControllerMinor::runController(
 
     float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getYaw());
 
+    yawMotor.setChassisFrameSetpoint(localSetpoint);
+
+    localSetpoint = yawMotor.getChassisFrameSetpoint();
+
     worldFrameSetpoint = localSetpoint + worldToBaseTransform.getYaw();
 
     const float positionControllerError = turretMotor.getValidMinError(

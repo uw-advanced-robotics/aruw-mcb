@@ -81,9 +81,15 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
 {
     float localAngle = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
 
+    const float 
+
     const float localVelocity = turretMotor.getChassisFrameVelocity();
 
     float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getPitch());
+
+    // limitVal
+    turretMotor.setChassisFrameSetpoint(localSetpoint);
+    localSetpoint = turretMotor.getChassisFrameSetpoint();
 
     worldFrameSetpoint = localSetpoint + worldToBaseTransform.getPitch();
 
@@ -93,7 +99,7 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
-    const float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - localVelocity, dt);
+    const float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - localVelocity - , dt);
 
     pitchMotor.setMotorOutput(velocityPidOutput);
 }
