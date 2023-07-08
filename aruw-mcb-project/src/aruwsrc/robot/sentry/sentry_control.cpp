@@ -19,6 +19,8 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/minor_world_frame_turret_yaw_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/minor_world_frame_turret_pitch_controller.hpp"
 #include "aruwsrc/robot/sentry/match_running_governor.hpp"
 
 #include "tap/control/command_mapper.hpp"
@@ -352,22 +354,36 @@ SentryTransformsSubsystem sentryTransforms(
     SENTRY_TRANSFORM_CONFIG);
 // Turret controllers -------------------------------------------------------
 
+SmoothPid girlbossYawPosPid{major_rel::girlboss::YAW_POS_PID_CONFIG};
+SmoothPid girlbossYawVelPid{major_rel::girlboss::YAW_VEL_PID_CONFIG};
+SmoothPid malewifeYawPosPid{major_rel::malewife::YAW_POS_PID_CONFIG};
+SmoothPid malewifeYawVelPid{major_rel::malewife::YAW_VEL_PID_CONFIG};
+SmoothPid girlbossPitchPosPid{major_rel::girlboss::PITCH_POS_PID_CONFIG};
+SmoothPid girlbossPitchVelPid{major_rel::girlboss::PITCH_VEL_PID_CONFIG};
+SmoothPid malewifePitchPosPid{major_rel::malewife::PITCH_POS_PID_CONFIG};
+SmoothPid malewifePitchVelPid{major_rel::malewife::PITCH_VEL_PID_CONFIG};
+
 // @todo make controllers part of subsystem
-algorithms::ChassisFramePitchTurretController girlbossPitchController(
-    turretMinorGirlboss.pitchMotor,
-    major_rel::girlboss::PITCH_PID_CONFIG);
-
-algorithms::ChassisFramePitchTurretController malewifePitchController(
-    turretMinorMalewife.pitchMotor,
-    major_rel::malewife::PITCH_PID_CONFIG);
-
-algorithms::ChassisFrameYawTurretController girlbossYawController(
+algorithms::WorldFrameTurretYawCascadePIDControllerMinor girlbossYawController(
+    sentryTransforms.getWorldToTurretMajor(),
     turretMinorGirlboss.yawMotor,
-    major_rel::girlboss::YAW_PID_CONFIG);
-
-algorithms::ChassisFrameYawTurretController malewifeYawController(
+    girlbossYawPosPid,
+    girlbossYawVelPid);
+algorithms::WorldFrameTurretYawCascadePIDControllerMinor malewifeYawController(
+    sentryTransforms.getWorldToTurretMajor(),
     turretMinorMalewife.yawMotor,
-    major_rel::malewife::YAW_PID_CONFIG);
+    malewifeYawPosPid,
+    malewifeYawVelPid);
+algorithms::WorldFrameTurretPitchCascadePIDControllerMinor girlbossPitchController(
+    sentryTransforms.getWorldToTurretMajor(),
+    turretMinorGirlboss.pitchMotor,
+    girlbossPitchPosPid,
+    girlbossPitchVelPid);
+algorithms::WorldFrameTurretPitchCascadePIDControllerMinor malewifePitchController(
+    sentryTransforms.getWorldToTurretMajor(),
+    turretMinorMalewife.pitchMotor,
+    malewifePitchPosPid,
+    malewifePitchVelPid);
 
 // @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate

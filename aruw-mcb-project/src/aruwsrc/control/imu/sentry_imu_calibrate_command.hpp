@@ -31,6 +31,8 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+#include "aruwsrc/control/turret/algorithms/minor_world_frame_turret_pitch_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/minor_world_frame_turret_yaw_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
@@ -90,9 +92,9 @@ public:
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
-        turret::algorithms::ChassisFrameYawTurretController *yawController;
+        turret::algorithms::WorldFrameTurretYawCascadePIDControllerMinor *yawController;
         /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFramePitchTurretController *pitchController;
+        turret::algorithms::WorldFrameTurretPitchCascadePIDControllerMinor *pitchController;
         /**
          * `true` if the turret IMU is mounted on the pitch axis of the
          * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint

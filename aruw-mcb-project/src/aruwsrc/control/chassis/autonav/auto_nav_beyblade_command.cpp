@@ -104,6 +104,9 @@ void AutoNavBeybladeCommand::execute()
 
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
         const tap::communication::serial::RefSerialData::Rx::GameType& gametype =  drivers.refSerial.getGameData().gameType;
+
+        float x = 0;
+        float y = 0;
         
         if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline() && movementEnabled)
         {
@@ -115,16 +118,20 @@ void AutoNavBeybladeCommand::execute()
 
             // float desiredVelocityX = setpointData.x - currentX;
             // float desiredVelocityY = setpointData.y - currentY;
-            // float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
-            // if (mag > 0.01)
-            // {
-            //     x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-            //     y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-            // }
+            float desiredVelocityX = xRamp.getValue() - currentX;
+            float desiredVelocityY = yRamp.getValue() - currentY;
+            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+            if (mag > 0.01)
+            {
+                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+            }
         }
         
-        float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-        float y = yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        // float y = yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+        // float x = xRamp.getValue();
+        // float y = yRamp.getValue();
 
         if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
         {
