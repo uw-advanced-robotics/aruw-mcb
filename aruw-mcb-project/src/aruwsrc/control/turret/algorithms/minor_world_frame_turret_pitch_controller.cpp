@@ -55,7 +55,7 @@ WorldFrameTurretPitchCascadePIDControllerMinor::WorldFrameTurretPitchCascadePIDC
       worldToBaseTransform(worldToBaseTransform),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
+      worldFrameSetpoint(0),
       pitchMotor(pitchMotor)
 {
 }
@@ -67,7 +67,7 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setValue(pitchMotor.getChassisFrameSetpoint() + worldToBaseTransform.getPitch());
+        worldFrameSetpoint = pitchMotor.getChassisFrameSetpoint() + worldToBaseTransform.getPitch();
 
         pitchMotor.attachTurretController(this);
     }
@@ -79,17 +79,17 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    ContiguousFloat localAngle = pitchMotor.getChassisFrameMeasuredAngle();
+    float localAngle = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
 
-    const float localVelocity = pitchMotor.getChassisFrameVelocity();
+    const float localVelocity = turretMotor.getChassisFrameVelocity();
 
-    // const float majorVelocity = ;
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getPitch());
 
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint = localSetpoint + worldToBaseTransform.getPitch();
 
     const float positionControllerError = turretMotor.getValidMinError(
-        worldFrameSetpoint.getValue(),
-        localAngle.getValue() + worldToBaseTransform.getPitch());
+        localSetpoint,
+        localAngle);
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
@@ -101,17 +101,17 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
 // @todo what's the point of this; overridden by runController anyways?
 void WorldFrameTurretPitchCascadePIDControllerMinor::setSetpoint(float desiredSetpoint)
 {
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 }
 
 float WorldFrameTurretPitchCascadePIDControllerMinor::getSetpoint() const
 {
-    return worldFrameSetpoint.getValue();
+    return worldFrameSetpoint;
 }
 
 float WorldFrameTurretPitchCascadePIDControllerMinor::getMeasurement() const
 {
-    return pitchMotor.getChassisFrameMeasuredAngle().getValue() + worldToBaseTransform.getPitch();
+    return pitchMotor.getChassisFrameUnwrappedMeasuredAngle() + worldToBaseTransform.getPitch();
 }
 
 // @todo ask benjamin about this (benjamin go look at your tracking sheet)

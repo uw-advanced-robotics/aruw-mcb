@@ -117,8 +117,8 @@ void SentryTurretCVCommand::execute()
             girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
 
             // convert world-relative setpoints to turret major frame setpoint
-            girlbossYawSetpoint = girlbossYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-            girlbossPitchSetpoint = girlbossPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
+            // girlbossYawSetpoint = girlbossYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
+            // girlbossPitchSetpoint = girlbossPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
 
             /**
              * the setpoint returned by the ballistics solver is between [0, 2*PI)

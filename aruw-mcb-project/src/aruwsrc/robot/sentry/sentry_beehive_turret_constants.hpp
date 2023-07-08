@@ -67,9 +67,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 3.9f,
-    .ki = 0.0002f,
-    .kd = -93.0f,
+    .kp = 1.2f,
+    .ki = 0.0f,
+    .kd = -30.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 500.0f,
     .tRDerivativeKalman = 40.0f,
@@ -79,14 +79,14 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 14'500.0f,
+    .kp = 22'500.0f,
     .ki = 0.0f,
     .kd = -180'000.0f,
     .maxICumulative = 5'000.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 600.0f,
+    .tRProportionalKalman = 900.0f,
     .errDeadzone = 0.0f,
 };
 
@@ -159,10 +159,10 @@ namespace major_rel
 namespace malewife
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 000.0f,
-    .ki = 0.0f,
-    .kd = 00.0f,
-    .maxICumulative = 2'000.0f,
+    .kp = 12.8f,
+    .ki = 0.0001f,
+    .kd = 0.0f,
+    .maxICumulative = 1.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
@@ -185,10 +185,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 000.0f,
-    .ki = 0.0f,
-    .kd = 00.0f,
-    .maxICumulative = 2'000.0f,
+    .kp = 12.8f,
+    .ki = 0.0001f,
+    .kd = 0.0f,
+    .maxICumulative = 1.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
@@ -214,10 +214,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 000.0f,
-    .ki = 0.0f,
-    .kd = 00.0f,
-    .maxICumulative = 2'000.0f,
+    .kp = 12.8f,
+    .ki = 0.0001f,
+    .kd = 0.0f,
+    .maxICumulative = 1.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
@@ -240,10 +240,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 000.0f,
-    .ki = 0.0f,
-    .kd = 00.0f,
-    .maxICumulative = 2'000.0f,
+    .kp = 9.8f,
+    .ki = 0.0001f,
+    .kd = 0.0f,
+    .maxICumulative = 1.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,

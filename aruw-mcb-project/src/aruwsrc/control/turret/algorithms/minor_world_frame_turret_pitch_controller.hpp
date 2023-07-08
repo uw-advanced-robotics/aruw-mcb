@@ -103,7 +103,7 @@ private:
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    float worldFrameSetpoint;
 
     float positionPidOutput;
 

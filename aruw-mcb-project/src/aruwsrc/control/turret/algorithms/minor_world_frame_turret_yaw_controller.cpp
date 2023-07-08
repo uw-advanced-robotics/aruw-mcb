@@ -55,7 +55,7 @@ WorldFrameTurretYawCascadePIDControllerMinor::WorldFrameTurretYawCascadePIDContr
       worldToBaseTransform(worldToBaseTransform),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
+      worldFrameSetpoint(0),
       yawMotor(yawMotor)
 {
 }
@@ -67,7 +67,7 @@ void WorldFrameTurretYawCascadePIDControllerMinor::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setValue(yawMotor.getChassisFrameSetpoint() + worldToBaseTransform.getYaw());
+        worldFrameSetpoint = yawMotor.getChassisFrameSetpoint() + worldToBaseTransform.getYaw();
 
         yawMotor.attachTurretController(this);
     }
@@ -79,17 +79,17 @@ void WorldFrameTurretYawCascadePIDControllerMinor::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    ContiguousFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
+    float localAngle = yawMotor.getChassisFrameUnwrappedMeasuredAngle();
 
     const float localVelocity = yawMotor.getChassisFrameVelocity();
 
-    // const float majorVelocity = ;
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getYaw());
 
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint = localSetpoint + worldToBaseTransform.getYaw();
 
     const float positionControllerError = turretMotor.getValidMinError(
-        worldFrameSetpoint.getValue() - worldToBaseTransform.getYaw(),
-        localAngle.getValue());
+        localSetpoint,
+        localAngle);
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
@@ -101,12 +101,14 @@ void WorldFrameTurretYawCascadePIDControllerMinor::runController(
 // @todo what's the point of this; overridden by runController anyways?
 void WorldFrameTurretYawCascadePIDControllerMinor::setSetpoint(float desiredSetpoint)
 {
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getYaw());
+
+    worldFrameSetpoint = localSetpoint + worldToBaseTransform.getYaw();
 }
 
 float WorldFrameTurretYawCascadePIDControllerMinor::getSetpoint() const
 {
-    return worldFrameSetpoint.getValue();
+    return worldFrameSetpoint;
 }
 
 float WorldFrameTurretYawCascadePIDControllerMinor::getMeasurement() const
