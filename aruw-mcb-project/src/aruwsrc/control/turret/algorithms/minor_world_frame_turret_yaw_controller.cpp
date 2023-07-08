@@ -50,13 +50,15 @@ WorldFrameTurretYawCascadePIDControllerMinor::WorldFrameTurretYawCascadePIDContr
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform,
         TurretMotor &yawMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid)
+        tap::algorithms::SmoothPid &velocityPid,
+        const aruwsrc::can::TurretMCBCanComm& turretMCB)
     : TurretYawControllerInterface(yawMotor),
       worldToBaseTransform(worldToBaseTransform),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0),
-      yawMotor(yawMotor)
+      yawMotor(yawMotor),
+      turretMCB(turretMCB)
 {
 }
 
@@ -83,7 +85,7 @@ void WorldFrameTurretYawCascadePIDControllerMinor::runController(
 
     const float localVelocity = yawMotor.getChassisFrameVelocity();
 
-    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getYaw());
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - turretMCB.getYaw());
 
     yawMotor.setChassisFrameSetpoint(localSetpoint);
 
@@ -97,7 +99,7 @@ void WorldFrameTurretYawCascadePIDControllerMinor::runController(
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
-    const float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - localVelocity, dt);
+    const float velocityPidOutput = velocityPid.runController(positionPidOutput - localVelocity, turretMCB.getYawVelocity(), dt);
 
     yawMotor.setMotorOutput(velocityPidOutput);
 }

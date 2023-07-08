@@ -50,13 +50,15 @@ WorldFrameTurretPitchCascadePIDControllerMinor::WorldFrameTurretPitchCascadePIDC
         const tap::algorithms::transforms::Transform<aruwsrc::sentry::WorldFrame, aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform,
         TurretMotor &pitchMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid)
+        tap::algorithms::SmoothPid &velocityPid,
+        const aruwsrc::can::TurretMCBCanComm& turretMCB)
     : TurretPitchControllerInterface(pitchMotor),
       worldToBaseTransform(worldToBaseTransform),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0),
-      pitchMotor(pitchMotor)
+      pitchMotor(pitchMotor),
+      turretMCB(turretMCB)
 {
 }
 
@@ -81,11 +83,9 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
 {
     float localAngle = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
 
-    const float 
-
     const float localVelocity = turretMotor.getChassisFrameVelocity();
 
-    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getPitch());
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - turretMCB.getPitch());
 
     // limitVal
     turretMotor.setChassisFrameSetpoint(localSetpoint);
@@ -99,7 +99,7 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
-    const float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - localVelocity - , dt);
+    const float velocityPidOutput = velocityPid.runController(positionPidOutput - localVelocity, turretMCB.getPitchVelocity(), dt);
 
     pitchMotor.setMotorOutput(velocityPidOutput);
 }

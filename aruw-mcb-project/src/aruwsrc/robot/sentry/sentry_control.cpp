@@ -368,22 +368,26 @@ algorithms::WorldFrameTurretYawCascadePIDControllerMinor girlbossYawController(
     sentryTransforms.getWorldToTurretMajor(),
     turretMinorGirlboss.yawMotor,
     girlbossYawPosPid,
-    girlbossYawVelPid);
+    girlbossYawVelPid,
+    *turretMinorGirlboss.getTurretMCB());
 algorithms::WorldFrameTurretYawCascadePIDControllerMinor malewifeYawController(
     sentryTransforms.getWorldToTurretMajor(),
     turretMinorMalewife.yawMotor,
     malewifeYawPosPid,
-    malewifeYawVelPid);
+    malewifeYawVelPid,
+    *turretMinorMalewife.getTurretMCB());
 algorithms::WorldFrameTurretPitchCascadePIDControllerMinor girlbossPitchController(
     sentryTransforms.getWorldToTurretMajor(),
     turretMinorGirlboss.pitchMotor,
     girlbossPitchPosPid,
-    girlbossPitchVelPid);
+    girlbossPitchVelPid,
+    *turretMinorGirlboss.getTurretMCB());
 algorithms::WorldFrameTurretPitchCascadePIDControllerMinor malewifePitchController(
     sentryTransforms.getWorldToTurretMajor(),
     turretMinorMalewife.pitchMotor,
     malewifePitchPosPid,
-    malewifePitchVelPid);
+    malewifePitchVelPid,
+    *turretMinorMalewife.getTurretMCB());
 
 // @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate
