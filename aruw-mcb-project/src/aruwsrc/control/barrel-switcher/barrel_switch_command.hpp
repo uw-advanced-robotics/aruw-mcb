@@ -32,19 +32,20 @@ namespace aruwsrc::control::barrel_switcher
 class BarrelSwitchCommand : public tap::control::Command
 {
 public:
-    BarrelSwitchCommand(tap::Drivers& drivers, BarrelSwitcherSubsystem& barrelSwap);
+    BarrelSwitchCommand(
+        tap::Drivers& drivers,
+        BarrelSwitcherSubsystem& barrelSwitcher,
+        uint16_t heatLimitBuffer);
 
     void initialize() override;
 
     void execute() override;
 
-    void end(bool interrupted) override;
+    void end(bool) override {}
 
-    bool isReady() override;
+    bool isFinished() const override { return false; }
 
-    bool isFinished() const override;
-
-    const char* getName() const override { return "barrel swap command"; }
+    const char* getName() const override { return "barrel switch"; }
 
 private:
     tap::Drivers& drivers;
@@ -57,11 +58,11 @@ private:
 
     bool barrelSwitchRequested{false};
 
-    BarrelSide currentCalibratingBarrel = BarrelSide::LEFT;
+    const uint16_t heatLimitBuffer;
 
     bool canShootSafely();
 };
 
 }  // namespace aruwsrc::control::barrel_switcher
 
-#endif
+#endif  // BARREL_SWITCH_COMMAND_HPP_

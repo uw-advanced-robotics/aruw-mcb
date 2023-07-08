@@ -45,6 +45,7 @@
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/barrel-switcher/calibrate_barrel_switcher_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
@@ -168,9 +169,7 @@ aruwsrc::control::launcher::DualBarrelRefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+        &getTurretMCBCanComm());
 #else
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -301,6 +300,10 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 #ifdef TARGET_STANDARD_SPIDER
 aruwsrc::control::barrel_switcher::BarrelSwitchCommand barrelSwitchCommand(
     *drivers(),
+    barrelSwitcher,
+    constants::HEAT_LIMIT_BUFFER);
+
+aruwsrc::control::barrel_switcher::CalibrateBarrelSwitcherCommand calibrateBarrelSwitcher(
     barrelSwitcher);
 #endif
 
@@ -391,8 +394,6 @@ aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand spinFri
     &frictionWheels,
     15.0f,
     false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     barrelSwitcher);
 
 aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand stopFrictionWheels(
@@ -400,8 +401,6 @@ aruwsrc::control::launcher::DualBarrelFrictionWheelSpinRefLimitedCommand stopFri
     &frictionWheels,
     0.0f,
     true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
     barrelSwitcher);
 #else
 HeatLimitGovernor heatLimitGovernor(
@@ -539,7 +538,12 @@ PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({R
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
-    {&imuCalibrateCommand},
+    {&imuCalibrateCommand
+#ifdef TARGET_STANDARD_SPIDER
+     ,
+     &calibrateBarrelSwitcher
+#endif
+    },
     RemoteMapState(
         Remote::SwitchState::UNKNOWN,
         Remote::SwitchState::DOWN,

@@ -25,6 +25,7 @@
 
 namespace aruwsrc::control::barrel_switcher
 {
+// ============================================================================
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
     tap::Drivers& drivers,
     const BarrelSwitcherMotorConfig& motorConfig,
@@ -36,13 +37,13 @@ BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
           motorConfig.motorId,
           motorConfig.canBus,
           motorConfig.isInverted,
-          "Barrel Swap Motor"),
+          "barrel switcher"),
       positionPid(pidConfig),
-      config(config),
-      currentBarrel(tap::communication::serial::RefSerial::Rx::TURRET_17MM_1)
+      config(config)
 {
 }
 
+// ============================================================================
 void BarrelSwitcherSubsystem::initialize()
 {
     swapMotor.initialize();
@@ -50,6 +51,7 @@ void BarrelSwitcherSubsystem::initialize()
     currentSpikeTimer.execute();
 }
 
+// ============================================================================
 void BarrelSwitcherSubsystem::refresh()
 {
     if (swapMotor.isMotorOnline())
@@ -73,18 +75,14 @@ void BarrelSwitcherSubsystem::refresh()
 
             swapMotor.setDesiredOutput(out);
         }
-
-        if (isBarrelAligned() && currentBarrelSide != BarrelSide::CALIBRATING)
-        {
-            currentBarrel = config.barrelArray[static_cast<int>(currentBarrelSide)];
-        }
     }
 }
 
+// ============================================================================
 void BarrelSwitcherSubsystem::performCalibration()
 {
     // Slam into each wall and find current spike. Save position
-    swapMotor.setDesiredOutput(-config.leadScrewCaliOutput);
+    swapMotor.setDesiredOutput(config.leadScrewCaliOutput);
 
     if (currentSpikeTimer.execute() &&
         abs(swapMotor.getTorque()) >= config.leadScrewCurrentSpikeTorque)
@@ -106,43 +104,61 @@ void BarrelSwitcherSubsystem::performCalibration()
     }
 }
 
-BarrelSide BarrelSwitcherSubsystem::getSide() const { return currentBarrelSide; }
-
-void BarrelSwitcherSubsystem::toggleSide()
+// ============================================================================
+void BarrelSwitcherSubsystem::switchBarrel()
 {
-    currentBarrelSide =
-        (currentBarrelSide == BarrelSide::LEFT) ? BarrelSide::RIGHT : BarrelSide::LEFT;
+    if (currentBarrelSide.has_value())
+    {
+        currentBarrelSide =
+            (currentBarrelSide == BarrelSide::LEFT) ? BarrelSide::RIGHT : BarrelSide::LEFT;
+    }
 }
 
+// ============================================================================
 bool BarrelSwitcherSubsystem::isBarrelAligned() const
 {
     return abs(getCalibratedMotorPosition() - getDesiredBarrelPosition()) <=
            config.barrelsAlignedToleranceMM;
 }
 
-float BarrelSwitcherSubsystem::getDesiredBarrelPosition() const
+// ============================================================================
+std::optional<BarrelMechanismId> BarrelSwitcherSubsystem::getCurBarrelMechId() const
 {
-    switch (getSide())
+    if (!currentBarrelSide.has_value())
     {
-        case BarrelSide::LEFT:
-            return getLeftSidePosition();
-        case BarrelSide::RIGHT:
-            return getRightSidePosition();
-        case BarrelSide::CALIBRATING:
-            return 0;
-        default:
-            assert(false);
+        return std::nullopt;
     }
+    return config.barrelArray[static_cast<int>(*currentBarrelSide)];
 }
 
+// ============================================================================
+float BarrelSwitcherSubsystem::getDesiredBarrelPosition() const
+{
+    if (currentBarrelSide.has_value())
+    {
+        switch (*currentBarrelSide)
+        {
+            case BarrelSide::LEFT:
+                return getLeftSidePosition();
+            case BarrelSide::RIGHT:
+                return getRightSidePosition();
+            default:
+                assert(false);
+        }
+    }
+
+    return 0;
+}
+
+// ============================================================================
 float BarrelSwitcherSubsystem::getRawPosition() const
 {
     return swapMotor.getEncoderUnwrapped() / config.leadScrewTicksPerMM;
 }
 
+// ============================================================================
 float BarrelSwitcherSubsystem::getCalibratedMotorPosition() const
 {
     return getRawPosition() - leftSideCalibrationPosition;
 }
-
 }  // namespace aruwsrc::control::barrel_switcher

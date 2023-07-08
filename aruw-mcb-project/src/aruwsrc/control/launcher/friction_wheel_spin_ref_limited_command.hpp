@@ -72,9 +72,10 @@ public:
 
     const char *getName() const override { return "friction wheel spin ref limited"; }
 
-private:
+protected:
     tap::Drivers *drivers;
 
+private:
     FrictionWheelSubsystem *frictionWheels;
 
     const float defaultLaunchSpeed;
@@ -82,6 +83,8 @@ private:
     const bool alwaysUseDefaultLaunchSpeed;
 
     const tap::communication::serial::RefSerialData::Rx::MechanismID barrel;
+
+    virtual uint16_t getMaxBarrelSpeed() const;
 };
 }  // namespace aruwsrc::control::launcher
 

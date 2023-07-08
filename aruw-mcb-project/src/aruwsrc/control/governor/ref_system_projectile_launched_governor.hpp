@@ -64,7 +64,9 @@ public:
 
 private:
     tap::communication::serial::RefSerial &refSerial;
+
     tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismId;
+
     std::optional<uint32_t> lastProjectileLaunchTime = 0;
 
     inline std::optional<uint32_t> getRecentProjectileLaunchTime()

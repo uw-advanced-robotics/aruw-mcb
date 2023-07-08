@@ -78,6 +78,8 @@ public:
                heatBelowLimit;
     }
 
+    inline auto getFiringSystemMechanismID() const { return firingSystemMechanismID; }
+
 private:
     tap::Drivers &drivers;
 

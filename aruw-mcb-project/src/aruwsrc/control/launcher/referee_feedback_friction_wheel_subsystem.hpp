@@ -81,6 +81,9 @@ public:
         updatePredictedLaunchSpeed();
     }
 
+protected:
+    uint32_t prevLaunchingDataReceiveTimestamp = 0;
+
 private:
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
 
@@ -88,9 +91,14 @@ private:
 
     float lastDesiredLaunchSpeed = 0;
 
-    uint32_t prevLaunchingDataReceiveTimestamp = 0;
-
     float pastProjectileVelocitySpeedSummed = 0;
+
+    virtual bool newFiringDataReceived()
+    {
+        const auto &turretData = drivers->refSerial.getRobotData().turret;
+        return prevLaunchingDataReceiveTimestamp != turretData.lastReceivedLaunchingInfoTimestamp &&
+               turretData.launchMechanismID == firingSystemMechanismID;
+    }
 
     void updatePredictedLaunchSpeed()
     {
@@ -110,9 +118,7 @@ private:
             const auto &turretData = drivers->refSerial.getRobotData().turret;
 
             // compute average bullet speed if new firing data received from correct mech ID
-            if (prevLaunchingDataReceiveTimestamp !=
-                    turretData.lastReceivedLaunchingInfoTimestamp &&
-                turretData.launchMechanismID == firingSystemMechanismID)
+            if (newFiringDataReceived())
             {
                 // remove element to make room for new element
                 if (ballSpeedAveragingTracker.isFull())

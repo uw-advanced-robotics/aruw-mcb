@@ -49,23 +49,28 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     }
     else
     {
-        uint16_t maxBarrelSpeed = 0;
-
-        switch (barrel)
-        {
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
-                break;
-        }
-
-        frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
+        frictionWheels->setDesiredLaunchSpeed(getMaxBarrelSpeed());
     }
+}
+
+uint16_t FrictionWheelSpinRefLimitedCommand::getMaxBarrelSpeed() const
+{
+    uint16_t maxBarrelSpeed = 0;
+
+    switch (barrel)
+    {
+        case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
+            maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
+            break;
+        case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
+            maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
+            break;
+        case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
+            maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
+            break;
+    }
+
+    return maxBarrelSpeed;
 }
 
 }  // namespace aruwsrc::control::launcher

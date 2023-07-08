@@ -22,6 +22,7 @@
 #include <cassert>
 
 #include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "modm/architecture/interface/assert.hpp"
 
@@ -32,51 +33,40 @@ DualBarrelFrictionWheelSpinRefLimitedCommand::DualBarrelFrictionWheelSpinRefLimi
     FrictionWheelSubsystem *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
-    tap::communication::serial::RefSerialData::Rx::MechanismID leftBarrel,
-    tap::communication::serial::RefSerialData::Rx::MechanismID rightBarrel,
     aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher)
-    : drivers(drivers),
-      frictionWheels(frictionWheels),
-      defaultLaunchSpeed(defaultLaunchSpeed),
-      alwaysUseDefaultLaunchSpeed(alwaysUseDefaultLaunchSpeed),
-      leftBarrel(leftBarrel),
-      rightBarrel(rightBarrel),
+    : FrictionWheelSpinRefLimitedCommand(
+          drivers,
+          frictionWheels,
+          defaultLaunchSpeed,
+          alwaysUseDefaultLaunchSpeed,
+          BarrelMechanismID::TURRET_17MM_1),  // placeholder
       barrelSwitcher(barrelSwitcher)
 {
-    modm_assert(drivers != nullptr, "FrictionWheelSpinRefLimitedCommand", "nullptr exception");
-    addSubsystemRequirement(frictionWheels);
 }
 
-void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
+uint16_t DualBarrelFrictionWheelSpinRefLimitedCommand::getMaxBarrelSpeed() const
 {
-    if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
-    {
-        frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);
-    }
-    else
-    {
-        uint16_t maxBarrelSpeed = 0;
-        tap::communication::serial::RefSerialData::Rx::MechanismID barrel =
-            barrelSwitcher.getCurrentBarrel();
+    uint16_t maxBarrelSpeed = 0;
+    auto barrel(barrelSwitcher.getCurBarrelMechId());
 
-        if (barrelSwitcher.getSide() != aruwsrc::control::barrel_switcher::BarrelSide::CALIBRATING)
+    if (barrel.has_value())
+    {
+        switch (*barrel)
         {
-            switch (barrel)
-            {
-                case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                    maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
-                    break;
-                case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                    maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
-                    break;
-                case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                    // this doesn't make sense
-                    maxBarrelSpeed = 15;
-                    break;
-            }
-            frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);
+            case BarrelMechanismID::TURRET_17MM_1:
+                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID1;
+                break;
+            case BarrelMechanismID::TURRET_17MM_2:
+                maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
+                break;
+            case BarrelMechanismID::TURRET_42MM:
+                // this doesn't make sense
+                RAISE_ERROR(drivers, "invalid mech id");
+                break;
         }
     }
+
+    return maxBarrelSpeed;
 }
 
 }  // namespace aruwsrc::control::launcher

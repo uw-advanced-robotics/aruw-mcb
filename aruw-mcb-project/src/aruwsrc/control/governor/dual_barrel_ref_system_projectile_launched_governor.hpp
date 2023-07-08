@@ -87,18 +87,17 @@ private:
             return std::nullopt;
         }
 
-        using BarrelSide = aruwsrc::control::barrel_switcher::BarrelSide;
+        auto lastReceivedTime(refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp);
+        auto lastLaunchedBarrel(refSerial.getRobotData().turret.launchMechanismID);
 
-        if ((barrelSwitcher.getSide() != BarrelSide::LEFT ||
-             refSerial.getRobotData().turret.launchMechanismID != barrelMechanismIdLeft) &&
-            (barrelSwitcher.getSide() != BarrelSide::RIGHT ||
-             refSerial.getRobotData().turret.launchMechanismID != barrelMechanismIdRight))
+        // one of the switched barrels was used.
+        if (lastLaunchedBarrel == barrelMechanismIdLeft ||
+            lastLaunchedBarrel == barrelMechanismIdRight)
         {
-            return lastProjectileLaunchTime;
+            return lastReceivedTime;
         }
 
-        // if using left and recieving left, or using right and recieving right
-        return refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+        return lastProjectileLaunchTime;
     }
 };
 }  // namespace aruwsrc::control::governor

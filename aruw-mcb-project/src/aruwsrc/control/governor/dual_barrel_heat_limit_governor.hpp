@@ -56,37 +56,24 @@ public:
 
     bool isReady() final
     {
-        if (!barrelSwitcher.isBarrelAligned())
+        auto barrel(barrelSwitcher.getCurBarrelMechId());
+
+        if (!barrelSwitcher.isBarrelAligned() || !barrel.has_value())
         {
             return false;
         }
-        if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::LEFT)
+        if (*barrel == heatTrackerLeft.getFiringSystemMechanismID())
         {
             return heatTrackerLeft.enoughHeatToLaunchProjectile();
         }
-        else if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::RIGHT)
+        if (*barrel == heatTrackerRight.getFiringSystemMechanismID())
         {
             return heatTrackerRight.enoughHeatToLaunchProjectile();
         }
         return false;
     }
 
-    bool isFinished() final
-    {
-        if (!barrelSwitcher.isBarrelAligned())
-        {
-            return true;
-        }
-        if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::LEFT)
-        {
-            return !heatTrackerLeft.enoughHeatToLaunchProjectile();
-        }
-        else if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::RIGHT)
-        {
-            return !heatTrackerRight.enoughHeatToLaunchProjectile();
-        }
-        return true;
-    }
+    bool isFinished() final { return !isReady(); }
 
 private:
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;

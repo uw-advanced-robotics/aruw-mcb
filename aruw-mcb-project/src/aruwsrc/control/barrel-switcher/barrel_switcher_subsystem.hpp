@@ -22,6 +22,8 @@
 #ifndef BARREL_SWITCHER_SUBSYSTEM_HPP_
 #define BARREL_SWITCHER_SUBSYSTEM_HPP_
 
+#include <optional>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -31,13 +33,14 @@
 
 namespace aruwsrc::control::barrel_switcher
 {
+using BarrelMechanismId = tap::communication::serial::RefSerialData::Rx::MechanismID;
+
 // To the Left is negative encoder counts
 // To the Right is positive encoder counts
 enum class BarrelSide
 {
     LEFT = 0,
     RIGHT,
-    CALIBRATING,
 };
 
 struct BarrelSwitcherMotorConfig
@@ -55,7 +58,7 @@ struct BarrelSwitcherConfig
     float leadScrewTicksPerMM;
     int16_t leadScrewCurrentSpikeTorque;
     int16_t leadScrewCaliOutput;
-    std::array<tap::communication::serial::RefSerialData::Rx::MechanismID, 2> barrelArray;
+    std::array<BarrelMechanismId, 2> barrelArray;
 };
 
 class BarrelSwitcherSubsystem : public tap::control::Subsystem
@@ -79,22 +82,16 @@ public:
     inline void requestCalibration()
     {
         calibrationRequested = true;
-        currentBarrelSide = BarrelSide::CALIBRATING;
+        currentBarrelSide = std::nullopt;
     }
 
-    // Finds which barrel is equipped
-    BarrelSide getSide() const;
-
     // Will toggle which barrel is equipped
-    void toggleSide();
+    void switchBarrel();
 
     // Returns true when barrel is aligned with the flywheels (with a tolerance)
     bool isBarrelAligned() const;
 
-    tap::communication::serial::RefSerialData::Rx::MechanismID getCurrentBarrel() const
-    {
-        return currentBarrel;
-    }
+    std::optional<BarrelMechanismId> getCurBarrelMechId() const;
 
 private:
     bool calibrationRequested{false};
@@ -103,7 +100,7 @@ private:
 
     tap::arch::MilliTimeout currentSpikeTimer{};
 
-    BarrelSide currentBarrelSide{BarrelSide::LEFT};
+    std::optional<BarrelSide> currentBarrelSide{BarrelSide::LEFT};
 
     tap::motor::DjiMotor swapMotor;
 
@@ -113,8 +110,6 @@ private:
 
     // Constants to be set by at the construction of a new barrel manager instance
     const BarrelSwitcherConfig config;
-
-    tap::communication::serial::RefSerialData::Rx::MechanismID currentBarrel;
 
     uint32_t prevTime{};
 
@@ -138,4 +133,4 @@ private:
 
 }  // namespace aruwsrc::control::barrel_switcher
 
-#endif
+#endif  // BARREL_SWITCHER_SUBSYSTEM_HPP_

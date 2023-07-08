@@ -23,39 +23,30 @@
 
 namespace aruwsrc::control::barrel_switcher
 {
+// ============================================================================
 BarrelSwitchCommand::BarrelSwitchCommand(
     tap::Drivers& drivers,
-    BarrelSwitcherSubsystem& barrelSwitcher)
+    BarrelSwitcherSubsystem& barrelSwitcher,
+    uint16_t heatLimitBuffer)
     : drivers(drivers),
-      barrelSwitcher(barrelSwitcher)
+      barrelSwitcher(barrelSwitcher),
+      heatLimitBuffer(heatLimitBuffer)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&barrelSwitcher));
 }
 
+// ============================================================================
 void BarrelSwitchCommand::initialize() {}
 
+// ============================================================================
 void BarrelSwitchCommand::execute()
 {
-    // jank calibration
-    auto bPressedRightSwitchDown(
-        drivers.remote.keyPressed(tap::communication::serial::Remote::Key::G) &&
-        drivers.remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) ==
-            tap::communication::serial::Remote::SwitchState::DOWN);
-
-    // key pressed and calibration request timed out
-    if (bPressedRightSwitchDown &&
-        (calibrationRequestedTimeout.isStopped() || calibrationRequestedTimeout.isExpired()))
-    {
-        calibrationRequestedTimeout.restart(1000);
-        barrelSwitcher.requestCalibration();
-    }
-
-    if (barrelSwitcher.getSide() != BarrelSide::CALIBRATING)
+    if (barrelSwitcher.getCurBarrelMechId().has_value())
     {
         if (!canShootSafely() && !barrelSwitchRequested)
         {
             barrelSwitchRequested = true;
-            barrelSwitcher.toggleSide();
+            barrelSwitcher.switchBarrel();
         }
 
         if (barrelSwitchRequested && barrelSwitcher.isBarrelAligned())
@@ -65,12 +56,7 @@ void BarrelSwitchCommand::execute()
     }
 }
 
-void BarrelSwitchCommand::end(bool) {}
-
-bool BarrelSwitchCommand::isReady() { return true; }
-
-bool BarrelSwitchCommand::isFinished() const { return false; }
-
+// ============================================================================
 bool BarrelSwitchCommand::canShootSafely()
 {
     auto& turretData(drivers.refSerial.getRobotData().turret);
@@ -78,28 +64,33 @@ bool BarrelSwitchCommand::canShootSafely()
     uint16_t heatLimit{};
     uint16_t curHeat{};
 
-    using RefSerialRxData = tap::communication::serial::RefSerial::Rx;
+    using MechanismID = tap::communication::serial::RefSerial::Rx::MechanismID;
 
-    switch (barrelSwitcher.getCurrentBarrel())
+    auto barrel(barrelSwitcher.getCurBarrelMechId());
+
+    if (barrel.has_value())
     {
-        case RefSerialRxData::MechanismID::TURRET_17MM_1:
+        switch (*barrel)
         {
-            curHeat = turretData.heat17ID1;
-            heatLimit = turretData.heatLimit17ID1;
-            break;
+            case MechanismID::TURRET_17MM_1:
+            {
+                curHeat = turretData.heat17ID1;
+                heatLimit = turretData.heatLimit17ID1;
+                break;
+            }
+            case MechanismID::TURRET_17MM_2:
+            {
+                curHeat = turretData.heat17ID2;
+                heatLimit = turretData.heatLimit17ID2;
+                break;
+            }
+            case MechanismID::TURRET_42MM:
+                break;
+            default:
+                break;
         }
-        case RefSerialRxData::MechanismID::TURRET_17MM_2:
-        {
-            curHeat = turretData.heat17ID2;
-            heatLimit = turretData.heatLimit17ID2;
-            break;
-        }
-        case RefSerialRxData::MechanismID::TURRET_42MM:
-            break;
-        default:
-            break;
     }
 
-    return curHeat + 20 < heatLimit;
+    return curHeat + heatLimitBuffer < heatLimit;
 }
 }  // namespace aruwsrc::control::barrel_switcher
