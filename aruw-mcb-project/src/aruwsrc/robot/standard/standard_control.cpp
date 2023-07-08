@@ -567,11 +567,11 @@ ToggleCommandMapping fToggledNotShiftPressed(drivers(), {&beybladeCommand}, Remo
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
-#ifdef TARGET_STANDARD_SPIDER
-    rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels,
-#else
+// #ifdef TARGET_STANDARD_SPIDER
+    // rotateAndUnjamAgitatorWithHeatAndCVLimitingDualBarrels,
+// #else
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-#endif
+// #endif
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor);
@@ -690,9 +690,9 @@ void setDefaultStandardCommands(Drivers *)
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
 
-#ifdef TARGET_STANDARD_SPIDER
-    barrelSwitcher.setDefaultCommand(&barrelSwitchCommand);
-#endif
+// #ifdef TARGET_STANDARD_SPIDER
+    // barrelSwitcher.setDefaultCommand(&barrelSwitchCommand);
+// #endif
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
