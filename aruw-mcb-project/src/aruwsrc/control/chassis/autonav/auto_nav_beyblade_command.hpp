@@ -42,7 +42,7 @@ class HolonomicChassisSubsystem;
 class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
-    static constexpr float POS_RAMP_RATE = 0.0006f;
+    static constexpr float POS_RAMP_RATE = 0.0002f;
 
     AutoNavBeybladeCommand(
         tap::Drivers& drivers,
