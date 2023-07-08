@@ -94,9 +94,41 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr aruwsrc::control::StallThresholdConfig STALL_THRESHOLD_CONFIG = {
-    .maxRPM = 5,
-    .minTorque = 1000,
+// this shouldn't go here
+
+static constexpr tap::algorithms::SmoothPidConfig BARREL_SWITCHER_PID_CONFIG = {
+    .kp = 1000.0f,
+    .ki = 0.0f,
+    .kd = 0.5f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr aruwsrc::control::barrel_switcher::BarrelSwitcherMotorConfig
+    BARREL_SWITCHER_MOTOR_CONFIG = {
+        .motorId = tap::motor::MotorId::MOTOR8,
+        .canBus = tap::can::CanBus::CAN_BUS1,
+        .isInverted = false,
+};
+
+static constexpr aruwsrc::control::barrel_switcher::BarrelSwitcherConfig BARREL_SWITCHER_CONFIG = {
+    .hardStopOffsetMM = 0.0f,  // mm
+    .barrelSwapDistanceMM = 45.5f,
+    .barrelsAlignedToleranceMM = 2,
+    .leadScrewTicksPerMM =
+        tap::motor::DjiMotor::ENC_RESOLUTION * 36.0 /
+        8.0,  //  X encoder ticks per rot. * 36 motor rotations / 8mm of lead ; // ticks/mm,
+    .leadScrewCurrentSpikeTorque = 650,
+    .leadScrewCaliOutput = 600,
+    .barrelArray =
+        {tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2},
 };
 #endif
 

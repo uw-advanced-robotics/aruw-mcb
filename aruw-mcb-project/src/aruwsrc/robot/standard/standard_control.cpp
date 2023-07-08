@@ -201,10 +201,12 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitcherSubsystem barrelSwitcher(
-    drivers(),
-    STALL_THRESHOLD_CONFIG,
-    tap::motor::MotorId::MOTOR8);
+// barrel that is switched to.
+aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem barrelSwitcher(
+    *drivers(),
+    BARREL_SWITCHER_MOTOR_CONFIG,
+    BARREL_SWITCHER_CONFIG,
+    BARREL_SWITCHER_PID_CONFIG);
 #endif
 
 /* define commands ----------------------------------------------------------*/
@@ -297,12 +299,9 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuVelPidCv);
 
 #ifdef TARGET_STANDARD_SPIDER
-BarrelSwitchCommand barrelSwitchCommand(
-    &barrelSwitcher,
+aruwsrc::control::barrel_switcher::BarrelSwitchCommand barrelSwitchCommand(
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2,
-    constants::HEAT_LIMIT_BUFFER);
+    barrelSwitcher);
 #endif
 
 // turret commands
@@ -582,23 +581,10 @@ CycleStateCommandMapping<
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState);
 
-#ifdef TARGET_STANDARD_SPIDER
-CycleStateCommandMapping<
-    BarrelSwitchCommand::SwitchingControlState,
-    BarrelSwitchCommand::SwitchingControlState::NUM_STATES,
-    BarrelSwitchCommand>
-    xPressed(
-        drivers(),
-        RemoteMapState({Remote::Key::X}),
-        BarrelSwitchCommand::SwitchingControlState::AUTOMATIC,
-        &barrelSwitchCommand,
-        &BarrelSwitchCommand::setControlState);
-#else
 PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
-#endif
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

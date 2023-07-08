@@ -17,59 +17,89 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Inspired by TAMU barrel switcher
+
 #include "barrel_switch_command.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::barrel_switcher
 {
-void BarrelSwitchCommand::initialize() { controlState = SwitchingControlState::AUTOMATIC; }
+BarrelSwitchCommand::BarrelSwitchCommand(
+    tap::Drivers& drivers,
+    BarrelSwitcherSubsystem& barrelSwitcher)
+    : drivers(drivers),
+      barrelSwitcher(barrelSwitcher)
+{
+    addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&barrelSwitcher));
+}
+
+void BarrelSwitchCommand::initialize() {}
 
 void BarrelSwitchCommand::execute()
 {
-    switch (controlState)
+    // jank calibration
+    auto bPressedRightSwitchDown(
+        drivers.remote.keyPressed(tap::communication::serial::Remote::Key::G) &&
+        drivers.remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) ==
+            tap::communication::serial::Remote::SwitchState::DOWN);
+
+    // key pressed and calibration request timed out
+    if (bPressedRightSwitchDown &&
+        (calibrationRequestedTimeout.isStopped() || calibrationRequestedTimeout.isExpired()))
     {
-        case SwitchingControlState::USING_LEFT:
-            if (barrelSwitcher->getBarrelState() != BarrelState::USING_LEFT_BARREL)
-            {
-                barrelSwitcher->useLeft();
-            }
-            break;
-        case SwitchingControlState::USING_RIGHT:
-            if (barrelSwitcher->getBarrelState() != BarrelState::USING_RIGHT_BARREL)
-            {
-                barrelSwitcher->useRight();
-            }
-            break;
-        case SwitchingControlState::AUTOMATIC:
-            if (barrelSwitcher->getBarrelState() == BarrelState::IDLE)
-            {
-                barrelSwitcher->useRight();
-            }
-            if (barrelSwitcher->getBarrelState() == BarrelState::USING_LEFT_BARREL &&
-                !heatTrackerLeft.enoughHeatToLaunchProjectile())
-            {
-                barrelSwitcher->useRight();
-            }
-            else if (
-                barrelSwitcher->getBarrelState() == BarrelState::USING_RIGHT_BARREL &&
-                !heatTrackerRight.enoughHeatToLaunchProjectile())
-            {
-                barrelSwitcher->useLeft();
-            }
-            break;
-        case SwitchingControlState::NUM_STATES:
-            break;
+        calibrationRequestedTimeout.restart(1000);
+        barrelSwitcher.requestCalibration();
+    }
+
+    if (barrelSwitcher.getSide() != BarrelSide::CALIBRATING)
+    {
+        if (!canShootSafely() && !barrelSwitchRequested)
+        {
+            barrelSwitchRequested = true;
+            barrelSwitcher.toggleSide();
+        }
+
+        if (barrelSwitchRequested && barrelSwitcher.isBarrelAligned())
+        {
+            barrelSwitchRequested = false;
+        }
     }
 }
 
-void BarrelSwitchCommand::setControlState(SwitchingControlState state)
-{
-    if (state < SwitchingControlState::NUM_STATES)
-    {
-        this->controlState = state;
-    }
-}
+void BarrelSwitchCommand::end(bool) {}
 
-void BarrelSwitchCommand::end(bool) { barrelSwitcher->stop(); }
+bool BarrelSwitchCommand::isReady() { return true; }
 
 bool BarrelSwitchCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::control
+
+bool BarrelSwitchCommand::canShootSafely()
+{
+    auto& turretData(drivers.refSerial.getRobotData().turret);
+
+    uint16_t heatLimit{};
+    uint16_t curHeat{};
+
+    using RefSerialRxData = tap::communication::serial::RefSerial::Rx;
+
+    switch (barrelSwitcher.getCurrentBarrel())
+    {
+        case RefSerialRxData::MechanismID::TURRET_17MM_1:
+        {
+            curHeat = turretData.heat17ID1;
+            heatLimit = turretData.heatLimit17ID1;
+            break;
+        }
+        case RefSerialRxData::MechanismID::TURRET_17MM_2:
+        {
+            curHeat = turretData.heat17ID2;
+            heatLimit = turretData.heatLimit17ID2;
+            break;
+        }
+        case RefSerialRxData::MechanismID::TURRET_42MM:
+            break;
+        default:
+            break;
+    }
+
+    return curHeat + 20 < heatLimit;
+}
+}  // namespace aruwsrc::control::barrel_switcher

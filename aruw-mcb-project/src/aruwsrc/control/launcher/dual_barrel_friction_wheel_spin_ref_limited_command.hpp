@@ -71,7 +71,7 @@ public:
         bool alwaysUseDefaultLaunchSpeed,
         tap::communication::serial::RefSerialData::Rx::MechanismID leftBarrel,
         tap::communication::serial::RefSerialData::Rx::MechanismID rightBarrel,
-        BarrelSwitcherSubsystem &barrelSwitcher);
+        aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher);
 
     void initialize() override {}
 
@@ -95,7 +95,7 @@ private:
     const tap::communication::serial::RefSerialData::Rx::MechanismID leftBarrel;
     const tap::communication::serial::RefSerialData::Rx::MechanismID rightBarrel;
 
-    const aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
+    const aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher;
 };
 }  // namespace aruwsrc::control::launcher
 

@@ -51,7 +51,7 @@ public:
      */
     RefSystemProjectileLaunchedDualBarrelGovernor(
         tap::communication::serial::RefSerial &refSerial,
-        aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher,
+        aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher,
         tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismIdLeft,
         tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismIdRight)
         : refSerial(refSerial),
@@ -75,7 +75,7 @@ public:
 
 private:
     tap::communication::serial::RefSerial &refSerial;
-    aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
+    aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher;
     tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismIdLeft;
     tap::communication::serial::RefSerialData::Rx::MechanismID barrelMechanismIdRight;
     std::optional<uint32_t> lastProjectileLaunchTime = 0;
@@ -87,9 +87,11 @@ private:
             return std::nullopt;
         }
 
-        if ((barrelSwitcher.getBarrelState() != BarrelState::USING_LEFT_BARREL ||
+        using BarrelSide = aruwsrc::control::barrel_switcher::BarrelSide;
+
+        if ((barrelSwitcher.getSide() != BarrelSide::LEFT ||
              refSerial.getRobotData().turret.launchMechanismID != barrelMechanismIdLeft) &&
-            (barrelSwitcher.getBarrelState() != BarrelState::USING_RIGHT_BARREL ||
+            (barrelSwitcher.getSide() != BarrelSide::RIGHT ||
              refSerial.getRobotData().turret.launchMechanismID != barrelMechanismIdRight))
         {
             return lastProjectileLaunchTime;

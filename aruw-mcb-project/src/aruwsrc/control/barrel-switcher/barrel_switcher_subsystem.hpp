@@ -17,85 +17,125 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Inspired by TAMU barrel switcher
+
 #ifndef BARREL_SWITCHER_SUBSYSTEM_HPP_
 #define BARREL_SWITCHER_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include <gmock/gmock.h>
-
-#include "tap/mock/dji_motor_mock.hpp"
-#endif
-
-namespace aruwsrc::control
+namespace aruwsrc::control::barrel_switcher
 {
-static constexpr int32_t MOTOR_OUTPUT = SHRT_MAX / 16;
-
-struct StallThresholdConfig
+// To the Left is negative encoder counts
+// To the Right is positive encoder counts
+enum class BarrelSide
 {
-    /**Maximum rpm value at which to detect a stall*/
-    int16_t maxRPM;
-    /**Minimum torque value at which to not detect a stall*/
-    int16_t minTorque;
+    LEFT = 0,
+    RIGHT,
+    CALIBRATING,
 };
 
-enum class BarrelState
+struct BarrelSwitcherMotorConfig
 {
-    IDLE,
-    USING_LEFT_BARREL,
-    USING_RIGHT_BARREL
+    tap::motor::MotorId motorId;
+    tap::can::CanBus canBus;
+    bool isInverted;
+};
+
+struct BarrelSwitcherConfig
+{
+    float hardStopOffsetMM;
+    float barrelSwapDistanceMM;
+    float barrelsAlignedToleranceMM;
+    float leadScrewTicksPerMM;
+    int16_t leadScrewCurrentSpikeTorque;
+    int16_t leadScrewCaliOutput;
+    std::array<tap::communication::serial::RefSerialData::Rx::MechanismID, 2> barrelArray;
 };
 
 class BarrelSwitcherSubsystem : public tap::control::Subsystem
 {
 public:
     BarrelSwitcherSubsystem(
-        tap::Drivers* drivers,
-        aruwsrc::control::StallThresholdConfig config,
-        tap::motor::MotorId motorid);
+        tap::Drivers& drivers,
+        const BarrelSwitcherMotorConfig& motorConfig,
+        const BarrelSwitcherConfig& config,
+        const tap::algorithms::SmoothPidConfig& pidConfig);
 
     void initialize() override;
+
     void refresh() override;
-    bool isStalled() const;
-    bool isInPosition() const;
-    void useRight();
-    void useLeft();
-    void stop();
-    BarrelState getBarrelState() const;
+
+    const char* getName() override { return "Barrel Manager Subsystem"; }
+
+    inline bool isOnline() const { return swapMotor.isMotorOnline(); }
+
+    // Runs into hard stops on both sides of lead screw to find their position
+    inline void requestCalibration()
+    {
+        calibrationRequested = true;
+        currentBarrelSide = BarrelSide::CALIBRATING;
+    }
+
+    // Finds which barrel is equipped
+    BarrelSide getSide() const;
+
+    // Will toggle which barrel is equipped
+    void toggleSide();
+
+    // Returns true when barrel is aligned with the flywheels (with a tolerance)
+    bool isBarrelAligned() const;
+
+    tap::communication::serial::RefSerialData::Rx::MechanismID getCurrentBarrel() const
+    {
+        return currentBarrel;
+    }
 
 private:
-    void setMotorOutput(int32_t velocity);
+    bool calibrationRequested{false};
 
-    /**
-     * true if there is a barrel in position to shoot, false otherwise
-     */
-    bool inPosition;
+    tap::Drivers* drivers;
 
-    /**
-     * Stores the state of this barrel switcher's state, mainly which barrel (left or right)
-     * is currently being used
-     */
-    BarrelState barrelState;
+    tap::arch::MilliTimeout currentSpikeTimer{};
 
-    /**
-     * stores the thresholds for shaftRPM and torque; used to indicate motor stall
-     */
-    aruwsrc::control::StallThresholdConfig config;
+    BarrelSide currentBarrelSide{BarrelSide::LEFT};
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
-    testing::NiceMock<tap::mock::DjiMotorMock> motor;
+    tap::motor::DjiMotor swapMotor;
 
-private:
-#else
-    /**
-     * The motor that switches the turret's barrels
-     */
-    tap::motor::DjiMotor motor;
+    float leftSideCalibrationPosition{};
+
+    tap::algorithms::SmoothPid positionPid;
+
+    // Constants to be set by at the construction of a new barrel manager instance
+    const BarrelSwitcherConfig config;
+
+    tap::communication::serial::RefSerialData::Rx::MechanismID currentBarrel;
+
+    uint32_t prevTime{};
+
+    void performCalibration();
+
+    float getLeftSidePosition() const { return config.hardStopOffsetMM; }
+
+    float getRightSidePosition() const
+    {
+        return getLeftSidePosition() + config.barrelSwapDistanceMM;
+    }
+
+    float getDesiredBarrelPosition() const;
+
+    // Returns raw position of the motor (not calibrated).
+    float getRawPosition() const;
+
+    // Returns encoder value of motor
+    float getCalibratedMotorPosition() const;
+};
+
+}  // namespace aruwsrc::control::barrel_switcher
+
 #endif
-};  // class BarrelSwitcherSubsystem
-}  // namespace aruwsrc::control
-#endif  // BARREL_SWITCHER_SUBSYSTEM_HPP_

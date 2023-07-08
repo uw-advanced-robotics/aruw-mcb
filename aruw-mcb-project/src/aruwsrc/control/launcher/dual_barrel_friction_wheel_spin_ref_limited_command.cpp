@@ -19,6 +19,8 @@
 
 #include "dual_barrel_friction_wheel_spin_ref_limited_command.hpp"
 
+#include <cassert>
+
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/assert.hpp"
@@ -32,7 +34,7 @@ DualBarrelFrictionWheelSpinRefLimitedCommand::DualBarrelFrictionWheelSpinRefLimi
     bool alwaysUseDefaultLaunchSpeed,
     tap::communication::serial::RefSerialData::Rx::MechanismID leftBarrel,
     tap::communication::serial::RefSerialData::Rx::MechanismID rightBarrel,
-    aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher)
+    aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher)
     : drivers(drivers),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
@@ -54,24 +56,10 @@ void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
     else
     {
         uint16_t maxBarrelSpeed = 0;
-        tap::communication::serial::RefSerialData::Rx::MechanismID barrel;
+        tap::communication::serial::RefSerialData::Rx::MechanismID barrel =
+            barrelSwitcher.getCurrentBarrel();
 
-        if (barrelSwitcher.getBarrelState() == aruwsrc::control::BarrelState::USING_LEFT_BARREL)
-        {
-            barrel = leftBarrel;
-        }
-        else if (
-            barrelSwitcher.getBarrelState() == aruwsrc::control::BarrelState::USING_RIGHT_BARREL)
-        {
-            barrel = rightBarrel;
-        }
-        else
-        {
-            frictionWheels->setDesiredLaunchSpeed(0);
-            return;
-        }
-
-        if (barrelSwitcher.getBarrelState() != aruwsrc::control::BarrelState::IDLE)
+        if (barrelSwitcher.getSide() != aruwsrc::control::barrel_switcher::BarrelSide::CALIBRATING)
         {
             switch (barrel)
             {
@@ -82,7 +70,8 @@ void DualBarrelFrictionWheelSpinRefLimitedCommand::execute()
                     maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit17ID2;
                     break;
                 case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                    maxBarrelSpeed = drivers->refSerial.getRobotData().turret.barrelSpeedLimit42;
+                    // this doesn't make sense
+                    maxBarrelSpeed = 15;
                     break;
             }
             frictionWheels->setDesiredLaunchSpeed(maxBarrelSpeed);

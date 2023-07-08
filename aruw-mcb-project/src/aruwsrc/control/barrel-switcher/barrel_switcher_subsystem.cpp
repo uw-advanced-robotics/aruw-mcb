@@ -17,93 +17,132 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Inspired by TAMU barrel switcher
+
 #include "barrel_switcher_subsystem.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
+#include <cassert>
 
-namespace aruwsrc::control
+namespace aruwsrc::control::barrel_switcher
 {
 BarrelSwitcherSubsystem::BarrelSwitcherSubsystem(
-    tap::Drivers* drivers,
-    aruwsrc::control::StallThresholdConfig config,
-    tap::motor::MotorId motorid)
-    : Subsystem(drivers),
+    tap::Drivers& drivers,
+    const BarrelSwitcherMotorConfig& motorConfig,
+    const BarrelSwitcherConfig& config,
+    const tap::algorithms::SmoothPidConfig& pidConfig)
+    : tap::control::Subsystem(&drivers),
+      swapMotor(
+          &drivers,
+          motorConfig.motorId,
+          motorConfig.canBus,
+          motorConfig.isInverted,
+          "Barrel Swap Motor"),
+      positionPid(pidConfig),
       config(config),
-      motor(drivers, motorid, tap::can::CanBus::CAN_BUS1, false, "barrel switching motor")
+      currentBarrel(tap::communication::serial::RefSerial::Rx::TURRET_17MM_1)
 {
 }
 
 void BarrelSwitcherSubsystem::initialize()
 {
-    barrelState = BarrelState::IDLE;
-    motor.initialize();
+    swapMotor.initialize();
+    swapMotor.setDesiredOutput(0);
+    currentSpikeTimer.execute();
 }
 
 void BarrelSwitcherSubsystem::refresh()
 {
-    switch (barrelState)
+    if (swapMotor.isMotorOnline())
     {
-        case BarrelState::USING_LEFT_BARREL:
-            if (!isStalled() && !inPosition)
-            {
-                setMotorOutput(MOTOR_OUTPUT);
-            }
-            else
-            {
-                inPosition = true;
-                setMotorOutput(0);
-            }
-            break;
-        case BarrelState::USING_RIGHT_BARREL:
-            if (!isStalled() && !inPosition)
-            {
-                setMotorOutput(-MOTOR_OUTPUT);
-            }
-            else
-            {
-                inPosition = true;
-                setMotorOutput(0);
-            }
-            break;
-        case BarrelState::IDLE:
-            setMotorOutput(0);
-            break;
+        if (calibrationRequested)
+        {
+            performCalibration();
+        }
+        else
+        {
+            // run position pid controller
+            float positionControllerError =
+                getDesiredBarrelPosition() - getCalibratedMotorPosition();
+
+            auto curTime = tap::arch::clock::getTimeMilliseconds();
+            float dt = curTime - prevTime;
+            prevTime = curTime;
+
+            float out =
+                positionPid.runController(positionControllerError, swapMotor.getShaftRPM(), dt);
+
+            swapMotor.setDesiredOutput(out);
+        }
+
+        if (isBarrelAligned() && currentBarrelSide != BarrelSide::CALIBRATING)
+        {
+            currentBarrel = config.barrelArray[static_cast<int>(currentBarrelSide)];
+        }
     }
 }
 
-BarrelState BarrelSwitcherSubsystem::getBarrelState() const { return barrelState; }
-
-void BarrelSwitcherSubsystem::setMotorOutput(int32_t desiredOutput)
+void BarrelSwitcherSubsystem::performCalibration()
 {
-    motor.setDesiredOutput(desiredOutput);
+    // Slam into each wall and find current spike. Save position
+    swapMotor.setDesiredOutput(-config.leadScrewCaliOutput);
+
+    if (currentSpikeTimer.execute() &&
+        abs(swapMotor.getTorque()) >= config.leadScrewCurrentSpikeTorque)
+    {
+        // finished, found left side.
+        swapMotor.setDesiredOutput(0);
+
+        leftSideCalibrationPosition = getRawPosition();
+
+        currentBarrelSide = BarrelSide::LEFT;
+
+        calibrationRequested = false;
+    }
+
+    if (abs(swapMotor.getTorque()) >= config.leadScrewCurrentSpikeTorque &&
+        (currentSpikeTimer.isExpired() || currentSpikeTimer.isStopped()))
+    {
+        currentSpikeTimer.restart(500);
+    }
 }
 
-bool BarrelSwitcherSubsystem::isStalled() const
+BarrelSide BarrelSwitcherSubsystem::getSide() const { return currentBarrelSide; }
+
+void BarrelSwitcherSubsystem::toggleSide()
 {
-    return (
-        (fabs(motor.getShaftRPM()) < config.maxRPM) &&
-        (fabsl(motor.getTorque()) > config.minTorque));
+    currentBarrelSide =
+        (currentBarrelSide == BarrelSide::LEFT) ? BarrelSide::RIGHT : BarrelSide::LEFT;
 }
 
-bool BarrelSwitcherSubsystem::isInPosition() const { return inPosition; }
-
-void BarrelSwitcherSubsystem::useRight()
+bool BarrelSwitcherSubsystem::isBarrelAligned() const
 {
-    barrelState = BarrelState::USING_RIGHT_BARREL;
-    inPosition = false;
+    return abs(getCalibratedMotorPosition() - getDesiredBarrelPosition()) <=
+           config.barrelsAlignedToleranceMM;
 }
 
-void BarrelSwitcherSubsystem::useLeft()
+float BarrelSwitcherSubsystem::getDesiredBarrelPosition() const
 {
-    barrelState = BarrelState::USING_LEFT_BARREL;
-    inPosition = false;
+    switch (getSide())
+    {
+        case BarrelSide::LEFT:
+            return getLeftSidePosition();
+        case BarrelSide::RIGHT:
+            return getRightSidePosition();
+        case BarrelSide::CALIBRATING:
+            return 0;
+        default:
+            assert(false);
+    }
 }
 
-void BarrelSwitcherSubsystem::stop()
+float BarrelSwitcherSubsystem::getRawPosition() const
 {
-    this->setMotorOutput(0);
-    barrelState = BarrelState::IDLE;
+    return swapMotor.getEncoderUnwrapped() / config.leadScrewTicksPerMM;
 }
-};  // namespace aruwsrc::control
+
+float BarrelSwitcherSubsystem::getCalibratedMotorPosition() const
+{
+    return getRawPosition() - leftSideCalibrationPosition;
+}
+
+}  // namespace aruwsrc::control::barrel_switcher

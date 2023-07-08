@@ -47,7 +47,7 @@ public:
         const tap::communication::serial::RefSerialData::Rx::MechanismID
             firingSystemMechanismIDRight,
         const uint16_t heatLimitBuffer,
-        aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher)
+        aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher)
         : heatTrackerLeft(drivers, firingSystemMechanismIDLeft, heatLimitBuffer),
           heatTrackerRight(drivers, firingSystemMechanismIDRight, heatLimitBuffer),
           barrelSwitcher(barrelSwitcher)
@@ -56,12 +56,15 @@ public:
 
     bool isReady() final
     {
-        if (!barrelSwitcher.isInPosition()) return false;
-        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL)
+        if (!barrelSwitcher.isBarrelAligned())
+        {
+            return false;
+        }
+        if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::LEFT)
         {
             return heatTrackerLeft.enoughHeatToLaunchProjectile();
         }
-        else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL)
+        else if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::RIGHT)
         {
             return heatTrackerRight.enoughHeatToLaunchProjectile();
         }
@@ -70,12 +73,15 @@ public:
 
     bool isFinished() final
     {
-        if (!barrelSwitcher.isInPosition()) return true;
-        if (barrelSwitcher.getBarrelState() == BarrelState::USING_LEFT_BARREL)
+        if (!barrelSwitcher.isBarrelAligned())
+        {
+            return true;
+        }
+        if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::LEFT)
         {
             return !heatTrackerLeft.enoughHeatToLaunchProjectile();
         }
-        else if (barrelSwitcher.getBarrelState() == BarrelState::USING_RIGHT_BARREL)
+        else if (barrelSwitcher.getSide() == aruwsrc::control::barrel_switcher::BarrelSide::RIGHT)
         {
             return !heatTrackerRight.enoughHeatToLaunchProjectile();
         }
@@ -85,7 +91,7 @@ public:
 private:
     aruwsrc::control::governor::HeatTracker heatTrackerLeft;
     aruwsrc::control::governor::HeatTracker heatTrackerRight;
-    aruwsrc::control::BarrelSwitcherSubsystem &barrelSwitcher;
+    aruwsrc::control::barrel_switcher::BarrelSwitcherSubsystem &barrelSwitcher;
 };
 }  // namespace aruwsrc::control::governor
 
