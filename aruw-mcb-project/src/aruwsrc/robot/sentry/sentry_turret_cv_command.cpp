@@ -229,8 +229,8 @@ void SentryTurretCVCommand::execute()
             girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             malewifePitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             girlbossYawSetpoint = SCAN_GIRLBOSS_YAW;
-            malewifeYawSetpoint = SCAN_MALEWIFE_YAW + majorSetpoint;
-            // malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(SCAN_MALEWIFE_YAW + majorSetpoint);
+            // malewifeYawSetpoint = SCAN_MALEWIFE_YAW + majorSetpoint;
+            malewifeYawSetpoint = turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(SCAN_MALEWIFE_YAW + majorSetpoint);
             // girlbossYawSetpoint = SCAN_GIRLBOSS_YAW + majorSetpoint;
         }
     }
