@@ -147,8 +147,8 @@ void SentryTurretCVCommand::execute()
             // convert world-relative setpoints to respective turret frame setpoint
             // hold on, is it minor frame or major frame that the controllers are running in?
             // convert world-relative setpoints to turret major frame setpoint
-            malewifeYawSetpoint = malewifeYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-            malewifePitchSetpoint = malewifePitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
+            // malewifeYawSetpoint = malewifeYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
+            // malewifePitchSetpoint = malewifePitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
 
             /**
              * the setpoint returned by the ballistics solver is between [0, 2*PI)
@@ -216,8 +216,8 @@ void SentryTurretCVCommand::execute()
             // majorSetpoint = majorScanValue.getValue();
             girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             malewifePitchSetpoint = SCAN_TURRET_MINOR_PITCH;
-            girlbossYawSetpoint = SCAN_GIRLBOSS_YAW;
-            malewifeYawSetpoint = SCAN_MALEWIFE_YAW;
+            girlbossYawSetpoint = SCAN_GIRLBOSS_YAW + majorSetpoint;
+            malewifeYawSetpoint = SCAN_MALEWIFE_YAW + majorSetpoint;
         }
     }
 

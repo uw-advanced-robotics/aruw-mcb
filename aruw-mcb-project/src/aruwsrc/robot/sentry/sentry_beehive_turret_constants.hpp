@@ -67,8 +67,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 3.8f,
-    .ki = 0.0f,
+    .kp = 3.9f,
+    .ki = 0.0002f,
     .kd = -93.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 500.0f,
@@ -81,12 +81,12 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kp = 14'500.0f,
     .ki = 0.0f,
-    .kd = -200'000.0f,
+    .kd = -180'000.0f,
     .maxICumulative = 5'000.0f,
-    .maxOutput = 25'000.0f,
+    .maxOutput = 15'000.0f,
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 900.0f,
+    .tRProportionalKalman = 600.0f,
     .errDeadzone = 0.0f,
 };
 
@@ -172,7 +172,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 42'500.0f,
+    .kp = 9'500.0f,
     .ki = 0.0f,
     .kd = 30'000.0f,
     .maxICumulative = 2'000.0f,
@@ -230,7 +230,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 42'500.0f,
+    .kp = 9'500.0f,
     .ki = 0.0f,
     .kd = 30'000.0f,
     .maxICumulative = 2'000.0f,
