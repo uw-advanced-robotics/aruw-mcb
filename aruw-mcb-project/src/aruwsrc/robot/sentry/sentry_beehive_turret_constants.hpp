@@ -186,8 +186,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .kp = 45.0f,
-    .ki = 0.0f,
-    // .ki = 0.6f,
+    .ki = 0.6f,
     .kd = 1.0f,
     .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,
@@ -214,38 +213,67 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 };
 }  // namespace malewife
 
+// BEGIN CHASSIS RELATIVE
 namespace girlboss
 {
-static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 12.8f,
-    .ki = 0.0001f,
-    .kd = 0.0f,
-    .maxICumulative = 1.0f,
-    .maxOutput = 7'000.0f,
+// static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
+//     .kp = 12.8f,
+//     .ki = 0.0001f,
+//     .kd = 0.0f,
+//     .maxICumulative = 1.0f,
+//     .maxOutput = 7'000.0f,
+//     .tQDerivativeKalman = 1.0f,
+//     .tRDerivativeKalman = 0.0f,
+//     .tQProportionalKalman = 1.0f,
+//     .tRProportionalKalman = 0.0f,
+//     .errDeadzone = 0.0f,
+// };
+
+// static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
+//     .kp = 9'500.0f,
+//     .ki = 0.0f,
+//     .kd = 30'000.0f,
+//     .maxICumulative = 2'000.0f,
+//     .maxOutput = 30'000.0f,
+//     .tQDerivativeKalman = 1.0f,
+//     .tRDerivativeKalman = 0.0f,
+//     .tQProportionalKalman = 1.0f,
+//     .tRProportionalKalman = 0.0f,
+//     .errDeadzone = 0.0f,
+// };
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 58'000.0f,
+    .ki = 370.0f,
+    .kd = 12'400.0f,
+    .maxICumulative = 2'000.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 9'500.0f,
-    .ki = 0.0f,
-    .kd = 30'000.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+    .kp = 94'000.0f,
+    .ki = 55.0f,
+    .kd = 5'500.0f,
+    .maxICumulative = 3'000.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+// END CHASSIS RELATIVE
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .kp = 45.0f,
-    .ki = 0.0f,
-    // .ki = 0.6f,
+    // .ki = 0.0f,
+    .ki = 0.6f,
     .kd = 1.0f,
     .maxICumulative = 0.5f,
     .maxOutput = 10'000.0f,

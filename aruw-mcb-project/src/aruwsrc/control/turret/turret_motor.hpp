@@ -255,9 +255,10 @@ private:
     /// Low-level motor object that this object interacts with
     tap::motor::MotorInterface *motor;
 
+public:
     /// Associated turret controller interface that is being used by a command to control this motor
     const algorithms::TurretControllerInterface *turretController = nullptr;
-
+private:
     /**
      * Offset applied when the motor is turned on. When the turret is turned on, the distance
      * between the start encoder value and the current encoder value is measured. If the magnitude

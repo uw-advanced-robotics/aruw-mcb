@@ -92,9 +92,10 @@ public:
     bool isOnline() const final;
 
     // @todo see todo in interface class
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final { return 0.0; };
+    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final {
+        return controllerFrameAngle + turretMotor.getChassisFrameUnwrappedMeasuredAngle() - turretMCB.getYawUnwrapped(); };
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final { return 0.0; };
+    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final { return chassisFrameAngle - turretMotor.getChassisFrameUnwrappedMeasuredAngle() + turretMCB.getYawUnwrapped(); };
 
 // void overWrite
 

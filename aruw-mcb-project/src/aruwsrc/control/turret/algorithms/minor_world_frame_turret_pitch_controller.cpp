@@ -28,7 +28,7 @@
 
 float CG_X = 8.14;
 float CG_Z = -2.4;
-float G_COMPENSATION_SCALAR = -6'800.0f;
+float G_COMPENSATION_SCALAR = -8'000.0f;
 
 
 using namespace tap::algorithms;
@@ -75,7 +75,7 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint = pitchMotor.getChassisFrameSetpoint() + worldToBaseTransform.getPitch();
+        worldFrameSetpoint = turretMCB.getYawUnwrapped() - pitchMotor.getChassisFrameUnwrappedMeasuredAngle() + pitchMotor.getChassisFrameSetpoint();
 
         pitchMotor.attachTurretController(this);
     }

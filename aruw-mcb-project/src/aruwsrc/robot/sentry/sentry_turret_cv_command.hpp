@@ -195,6 +195,7 @@ private:
     static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
 
     tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    float majorSetpoint = 0.0f;
 
     bool withinAimingToleranceGirlboss = false;
     bool withinAimingToleranceMalewife = false;

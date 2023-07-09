@@ -354,8 +354,8 @@ SentryTransformsSubsystem sentryTransforms(
     SENTRY_TRANSFORM_CONFIG);
 // Turret controllers -------------------------------------------------------
 
-SmoothPid girlbossYawPosPid{major_rel::girlboss::YAW_POS_PID_CONFIG};
-SmoothPid girlbossYawVelPid{major_rel::girlboss::YAW_VEL_PID_CONFIG};
+// SmoothPid girlbossYawPosPid{major_rel::girlboss::YAW_POS_PID_CONFIG};
+// SmoothPid girlbossYawVelPid{major_rel::girlboss::YAW_VEL_PID_CONFIG};
 SmoothPid malewifeYawPosPid{major_rel::malewife::YAW_POS_PID_CONFIG};
 SmoothPid malewifeYawVelPid{major_rel::malewife::YAW_VEL_PID_CONFIG};
 SmoothPid girlbossPitchPosPid{major_rel::girlboss::PITCH_POS_PID_CONFIG};
@@ -364,12 +364,15 @@ SmoothPid malewifePitchPosPid{major_rel::malewife::PITCH_POS_PID_CONFIG};
 SmoothPid malewifePitchVelPid{major_rel::malewife::PITCH_VEL_PID_CONFIG};
 
 // @todo make controllers part of subsystem
-algorithms::WorldFrameTurretYawCascadePIDControllerMinor girlbossYawController(
-    sentryTransforms.getWorldToTurretMajor(),
+// algorithms::WorldFrameTurretYawCascadePIDControllerMinor girlbossYawController(
+//     sentryTransforms.getWorldToTurretMajor(),
+//     turretMinorGirlboss.yawMotor,
+//     girlbossYawPosPid,
+//     girlbossYawVelPid,
+//     *turretMinorGirlboss.getTurretMCB());
+algorithms::ChassisFrameYawTurretController girlbossYawController(
     turretMinorGirlboss.yawMotor,
-    girlbossYawPosPid,
-    girlbossYawVelPid,
-    *turretMinorGirlboss.getTurretMCB());
+    major_rel::girlboss::YAW_PID_CONFIG);
 algorithms::WorldFrameTurretYawCascadePIDControllerMinor malewifeYawController(
     sentryTransforms.getWorldToTurretMajor(),
     turretMinorMalewife.yawMotor,
@@ -457,6 +460,16 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerMalewife(
 
 /* define commands ----------------------------------------------------------*/
 
+algorithms::ChassisFrameYawTurretController malewifeYawControllerChassis(
+    turretMinorMalewife.yawMotor,
+    major_rel::girlboss::YAW_PID_CONFIG);
+algorithms::ChassisFramePitchTurretController girlbossPitchControllerChassis(
+    turretMinorGirlboss.pitchMotor,
+    major_rel::girlboss::PITCH_PID_CONFIG);
+algorithms::ChassisFramePitchTurretController malewifePitchControllerChassis(
+    turretMinorMalewife.pitchMotor,
+    major_rel::girlboss::PITCH_PID_CONFIG);
+
 imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -464,14 +477,14 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
             &drivers()->turretMCBCanCommBus2,
             &turretMinorGirlboss,
             &girlbossYawController,
-            &girlbossPitchController,
+            &girlbossPitchControllerChassis,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
             &turretMinorMalewife,
-            &malewifeYawController,
-            &malewifePitchController,
+            &malewifeYawControllerChassis,
+            &malewifePitchControllerChassis,
             true,
         },
     },
