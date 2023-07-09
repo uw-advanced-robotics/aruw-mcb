@@ -17,13 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "minor_world_frame_turret_Pitch_controller.hpp"
+#include "minor_world_frame_turret_pitch_controller.hpp"
 
 #include "tap/algorithms/contiguous_float.hpp"
 
 #include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "turret_gravity_compensation.hpp"
+
+float CG_X = 8.14;
+float CG_Z = -2.4;
+float G_COMPENSATION_SCALAR = -6'800.0f;
+
 
 using namespace tap::algorithms;
 
@@ -75,21 +81,23 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::initialize()
     }
 }
 
+float velocityPidOutput = 0.0f;
+
 // @todo implement separate controller with limiting or refactor elsewhere
 //       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes code difficult to trace, follow, and maintain
 void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    float localAngle = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+    float localAngle = turretMCB.getPitch() - worldToBaseTransform.getPitch();
 
-    const float localVelocity = turretMotor.getChassisFrameVelocity();
+    const float worldVelocity = turretMCB.getPitchVelocity();
 
-    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - turretMCB.getPitch());
+    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - worldToBaseTransform.getPitch());
 
-    // limitVal
-    turretMotor.setChassisFrameSetpoint(localSetpoint);
-    localSetpoint = turretMotor.getChassisFrameSetpoint();
+    pitchMotor.setChassisFrameSetpoint(localSetpoint);
+
+    localSetpoint = pitchMotor.getChassisFrameSetpoint();
 
     worldFrameSetpoint = localSetpoint + worldToBaseTransform.getPitch();
 
@@ -97,9 +105,15 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
         localSetpoint,
         localAngle);
 
-    positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
+    positionPidOutput = positionPid.runController(positionControllerError, turretMCB.getPitchVelocity(), dt);
 
-    const float velocityPidOutput = velocityPid.runController(positionPidOutput - localVelocity, turretMCB.getPitchVelocity(), dt);
+    float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - worldVelocity, dt);
+
+    velocityPidOutput += computeGravitationalForceOffset(
+        CG_X,
+        CG_Z,
+        turretMCB.getPitch(),
+        G_COMPENSATION_SCALAR);
 
     pitchMotor.setMotorOutput(velocityPidOutput);
 }

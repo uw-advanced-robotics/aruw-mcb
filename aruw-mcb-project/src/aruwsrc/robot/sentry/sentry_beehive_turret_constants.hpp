@@ -67,9 +67,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 2.2f,
+    .kp = 3.8f,
     .ki = 0.0f,
-    .kd = -30.0f,
+    .kd = -93.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 500.0f,
     .tRDerivativeKalman = 40.0f,
@@ -79,9 +79,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 22'500.0f,
+    .kp = 14'500.0f,
     .ki = 0.0f,
-    .kd = -180'000.0f,
+    .kd = -200'000.0f,
     .maxICumulative = 5'000.0f,
     .maxOutput = 25'000.0f,
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do anything that motor encoder resolution becomes a problem
@@ -163,9 +163,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0001f,
     .kd = 0.0f,
     .maxICumulative = 1.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 7'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 40.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -174,40 +174,43 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kp = 42'500.0f,
     .ki = 0.0f,
-    .kd = -430'000.0f,
+    .kd = 30'000.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 70'000.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1'000.0f,
-    .errDeadzone = 0.0f,
-};
-
-static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 12.8f,
-    .ki = 0.0001f,
-    .kd = 0.0f,
-    .maxICumulative = 1.0f,
-    .maxOutput = 28'000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 40.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 27'000.0f,
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
+    .kp = 45.0f,
     .ki = 0.0f,
-    .kd = -8'700'000.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    // .ki = 0.6f,
+    .kd = 1.0f,
+    .maxICumulative = 0.5f,
+    .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 2'570'000.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1'800.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
+    .kp = 4'200.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace malewife
 
@@ -218,51 +221,54 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0001f,
     .kd = 0.0f,
     .maxICumulative = 1.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 7'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 40.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 17'000.0f,
+    .kp = 42'500.0f,
     .ki = 0.0f,
-    .kd = -570'000.0f,
+    .kd = 30'000.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 30'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 70'000.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1'000.0f,
-    .errDeadzone = 0.0f,
-};
-
-static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 9.8f,
-    .ki = 0.0001f,
-    .kd = 0.0f,
-    .maxICumulative = 1.0f,
-    .maxOutput = 28'000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 40.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 27'000.0f,
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
+    .kp = 45.0f,
     .ki = 0.0f,
-    .kd = -8'700'000.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    // .ki = 0.6f,
+    .kd = 1.0f,
+    .maxICumulative = 0.5f,
+    .maxOutput = 10'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 2'570'000.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1'800.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
+    .kp = 4'200.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
 };
 }  // namespace girlboss
 }  // namespace major_rel

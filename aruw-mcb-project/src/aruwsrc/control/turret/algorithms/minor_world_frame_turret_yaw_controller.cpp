@@ -75,31 +75,31 @@ void WorldFrameTurretYawCascadePIDControllerMinor::initialize()
     }
 }
 
+float localSetpoint = 0;
+
 // @todo implement separate controller with limiting or refactor elsewhere
 //       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes code difficult to trace, follow, and maintain
 void WorldFrameTurretYawCascadePIDControllerMinor::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    float localAngle = yawMotor.getChassisFrameUnwrappedMeasuredAngle();
+    // float localAngle = turretMCB.getYawUnwrapped() - worldToBaseTransform.getYaw();
 
-    const float localVelocity = yawMotor.getChassisFrameVelocity();
-
-    float localSetpoint = turretMotor.getSetpointWithinTurretRange(desiredSetpoint - turretMCB.getYaw());
+    localSetpoint = desiredSetpoint + yawMotor.getChassisFrameUnwrappedMeasuredAngle() - turretMCB.getYawUnwrapped();
 
     yawMotor.setChassisFrameSetpoint(localSetpoint);
 
     localSetpoint = yawMotor.getChassisFrameSetpoint();
 
-    worldFrameSetpoint = localSetpoint + worldToBaseTransform.getYaw();
+    worldFrameSetpoint = localSetpoint - yawMotor.getChassisFrameUnwrappedMeasuredAngle() + turretMCB.getYawUnwrapped();
 
     const float positionControllerError = turretMotor.getValidMinError(
-        localSetpoint,
-        localAngle);
+        worldFrameSetpoint,
+        turretMCB.getYawUnwrapped());
 
-    positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
+    positionPidOutput = positionPid.runController(positionControllerError, turretMCB.getYawVelocity(), dt);
 
-    const float velocityPidOutput = velocityPid.runController(positionPidOutput - localVelocity, turretMCB.getYawVelocity(), dt);
+    const float velocityPidOutput = velocityPid.runControllerDerivateError(positionPidOutput - turretMCB.getYawVelocity(), dt);
 
     yawMotor.setMotorOutput(velocityPidOutput);
 }
