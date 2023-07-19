@@ -107,7 +107,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1345,
+    .startEncoderValue = 1430,
     .minAngle = modm::toRadian(-30),
     .maxAngle = modm::toRadian(210),
     .limitMotorAngles = true,
@@ -188,9 +188,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 namespace girlboss
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 68'000.0f,
-    .ki = 370.0f,
-    .kd = 12'400.0f,
+    .kp = 58'000.0f,
+    .ki = 360.0f,
+    .kd = 11'400.0f,
     .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
