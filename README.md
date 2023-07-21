@@ -11,8 +11,8 @@ wheels, and human input.
 
 Software we use:
 - `modm`, a C++-native HAL
-- the gcc compiler
-- openocd to deploy and debug
+- The GCC compiler
+- OpenOCD to deploy and debug
 - VSCode, an editor
 - [Taproot](https://gitlab.com/aruw/controls/taproot), a RoboMaster controls framework
 
@@ -50,13 +50,7 @@ Otherwise, follow the guide appropriate for your operating system.
 - macOS: https://gitlab.com/aruw/controls/taproot/-/wikis/macOS-Setup
 - Windows: https://gitlab.com/aruw/controls/taproot/-/wikis/Windows-Setup
 
-Finally, install `pipenv` and set up the build tools:
-
-```
-pip3 install pipenv
-cd aruw-mcb-project/
-pipenv install
-```
+Then, install pipenv with `pip3 install pipenv`.
 
 ### Getting started with this repo
 
@@ -75,10 +69,16 @@ run:
 git submodule update --init --recursive
 ```
 
-Now, `cd` into the project directory, activate the virtualenv, and run some builds:
+Then go into the `aruw-mcb/aruw-mcb-project` directory and set up the build tools:
 
 ```
-cd aruw-mcb/aruw-mcb-project
+cd aruw-mcb/aruw-mcb-project/
+pipenv install
+```
+
+The following will then activate the virtualenv in the project directory and run some builds to confirm functionality:
+
+```
 pipenv shell
 # Build for hardware
 scons build
@@ -138,7 +138,7 @@ page](https://gitlab.com/aruw/controls/taproot/-/wikis/Build-Targets-Overview) f
 information). Because the build setup is different for the test, sim, and MCB environments, while
 working on a particular portion of code you may select an appropriate profile that provides optimal
 [intellisense](https://code.visualstudio.com/docs/editor/intellisense). To select a configuration,
-in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, then type "C/C++:Select a Configuration"
+in VSCode, type <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, then type `C/C++: Select a Configuration`
 and hit enter. A dropdown menu will appear where you may choose either the "Test", "Sim", or "MCB"
 configuration.
 
@@ -152,7 +152,7 @@ Taproot that they depend on. The guide for doing so is
 
 ### What is modm?
 
-We use an embedded library generator called modm in our codebase. It will eventually be important that you understand what how modm works. For now you can just think about it as handling lower level IO on our MCB. You should read [modm's homepage](https://modm.io/) so you have a general idea of what it does.
+We use an embedded library generator called modm in our codebase. It will eventually be important that you understand how modm works. For now, you can just think about it as handling lower level IO on our MCB. You should read [modm's homepage](https://modm.io/) so you have a general idea of what it does.
 
 ### Modm examples
 
