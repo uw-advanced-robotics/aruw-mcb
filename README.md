@@ -50,6 +50,8 @@ Otherwise, follow the guide appropriate for your operating system.
 - macOS: https://gitlab.com/aruw/controls/taproot/-/wikis/macOS-Setup
 - Windows: https://gitlab.com/aruw/controls/taproot/-/wikis/Windows-Setup
 
+Then, install pipenv with `pip3 install pipenv`.
+
 ### Getting started with this repo
 
 _Make sure you have followed the above setup instructions._
@@ -67,18 +69,16 @@ run:
 git submodule update --init --recursive
 ```
 
-In the `aruw-mcb` directory, run the following to install `pipenv` and set up the build tools:
+Then go into the `aruw-mcb/aruw-mcb-project` directory and set up the build tools:
 
 ```
-pip3 install pipenv
-cd aruw-mcb-project/
+cd aruw-mcb/aruw-mcb-project/
 pipenv install
 ```
 
-Now activate the virtualenv in the project directory and run some builds to confirm functionality:
+The following will then activate the virtualenv in the project directory and run some builds to confirm functionality:
 
 ```
-cd aruw-mcb/aruw-mcb-project
 pipenv shell
 # Build for hardware
 scons build
