@@ -85,7 +85,7 @@ public:
         uint8_t systemId;
         uint8_t componentId;
         uint8_t messageId;
-    } modm_packed;
+    };
 
     /**
      * A container for storing and sending message over serial.
@@ -120,15 +120,18 @@ public:
         {
             CRC16 = crc_calculate(
                 reinterpret_cast<uint8_t *>(this) + 1,
-                5);                                                  // Calculate for header first
-            crc_accumulate_buffer(&CRC16, data, header.dataLength);  // Then calculate for data
-            crc_accumulate(CRC_EXTRA[header.messageId], &CRC16);     // Then calculate for crc_extra
+                5);  // Calculate for header first
+            crc_accumulate_buffer(
+                &CRC16,
+                reinterpret_cast<const char *>(data),
+                header.dataLength);  // Then calculate for data
+            crc_accumulate(CRC_EXTRA[header.messageId], &CRC16);
         }
 
         FrameHeader header;
         uint8_t data[DATA_SIZE];
-        uint16_t CRC16;
-    } modm_packed;
+        uint16_t CRC16 = 0;
+    };
 
     static const uint8_t SERIAL_RX_BUFF_SIZE =
         255;  // This is 256 in DJI serial but like max is 255
@@ -173,9 +176,22 @@ public:
      */
     virtual void messageReceiveCallback(const ReceivedMavlinkMessage &completeMessage) = 0;
 
-#ifndef ENV_UNIT_TESTS
-protected:
-#endif
+    static inline uint16_t calculateCRC(ReceivedMavlinkMessage *msg)
+    {
+        uint16_t CRC16 = crc_calculate(
+            reinterpret_cast<uint8_t *>(msg) + 1,
+            5);  // Calculate for header first
+        // crc_accumulate_buffer(
+        //     &CRC16,
+        //     reinterpret_cast<const char *>(msg.data),
+        //     msg.header.dataLength);                               // Then calculate for data
+        // crc_accumulate(CRC_EXTRA[msg.header.messageId], &CRC16);  // Then calculate for crc_extra
+        return CRC16;
+    }
+
+    // #ifndef ENV_UNIT_TESTS
+    // protected:
+    // #endif
     enum SerialRxState
     {
         SERIAL_HEADER_SEARCH,  /// A header byte has not yet been received.
@@ -220,6 +236,8 @@ protected:
 
     uint32_t datathingy[255];
 
+    uint16_t tempCRC = 0;
+
     /**
      * Here's a bunch of code blatantly copied over from the mavlink page
      * https://github.com/mavlink/c_library_v1/blob/master/checksum.h to calculate the checksum
@@ -243,19 +261,6 @@ protected:
         44,  83,  46,  0};
 
     static constexpr uint16_t X25_INIT_CRC = 0xffff;
-
-    static inline uint16_t calculateCRC(ReceivedMavlinkMessage msg)
-    {
-        uint16_t CRC16 = crc_calculate(
-            reinterpret_cast<uint8_t *>(&msg) + 1,
-            5);  // Calculate for header first
-        crc_accumulate_buffer(
-            &CRC16,
-            reinterpret_cast<const char *>(msg.data),
-            msg.header.dataLength);                           // Then calculate for data
-        crc_accumulate(CRC_EXTRA[msg.header.messageId], &CRC16);  // Then calculate for crc_extra
-        return CRC16;
-    }
 
     /**
      * @brief Accumulate the MCRF4XX CRC16 by adding one char at a time.

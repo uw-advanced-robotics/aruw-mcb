@@ -53,6 +53,8 @@ void DroneTelemetryHandler::setHomePosition()
 
     memcpy(setHomeCommand.data, &cmd, sizeof(cmd));
 
+    setHomeCommand.setCRC16();
+
     drivers->uart.write(port, reinterpret_cast<uint8_t*>(&setHomeCommand), sizeof(setHomeCommand));
     wroteSetHomeCommand = true;
 }

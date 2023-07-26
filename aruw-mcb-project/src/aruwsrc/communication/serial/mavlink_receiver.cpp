@@ -135,16 +135,22 @@ void MavlinkReceiver::updateSerial()
 
                     readAFullMessage++;
 
-                    if (newMessage.CRC16 !=
-                        tap::algorithms::calculateCRC16(
-                            reinterpret_cast<uint8_t *>(&newMessage) +
-                                1,  // We ignore the head byte
-                            sizeof(newMessage.header) - 1 + newMessage.header.dataLength))
+                    tempCRC = crc_calculate(
+                        reinterpret_cast<uint8_t *>(&(newMessage.header)) + 1,
+                        5);  // Calculate for header first
+
+                    crc_accumulate_buffer(
+                        &tempCRC,
+                        reinterpret_cast<const char *>(newMessage.data),
+                        newMessage.header.dataLength);  // Then calculate for data
+                    crc_accumulate(CRC_EXTRA[newMessage.header.messageId], &tempCRC);
+
+                    if (newMessage.CRC16 != tempCRC)
                     {
                         mavlinkSerialRxState = SERIAL_HEADER_SEARCH;
                         RAISE_ERROR(drivers, "CRC16 failure");
                         failedCRC++;
-                        // return;
+                        return;
                     }
 
                     mostRecentMessage = newMessage;
