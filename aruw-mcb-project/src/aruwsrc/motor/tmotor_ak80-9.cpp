@@ -47,6 +47,7 @@ Tmotor_AK809::Tmotor_AK809(
 void Tmotor_AK809::initialize()
 {
     attachSelfToRxHandler();
+    sendPositionHomeResetMessage();
     sendPositionHomeGetMessage();
 }
 
@@ -100,7 +101,7 @@ bool Tmotor_AK809::isMotorOnline() const
     }
     else
     {
-        sendPositionHomeGetMessage();
+        sendPositionHomeResetMessage();
         return false;
     }
 }

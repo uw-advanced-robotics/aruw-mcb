@@ -164,7 +164,7 @@ static constexpr float HEIGHT_REMOTE_SCALAR = .001;
 
 static constexpr float MASS_CHASSIS = 13.5f;  // kg
 
-static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.140, 0.325};
+static constexpr modm::Pair<float, float> CHASSIS_HEIGHTS = {0.125, 0.350};
 
 static constexpr modm::Pair<float, float> HEIGHT_TO_SPEED_LUT[] = {
     {.1f, 4.0f},

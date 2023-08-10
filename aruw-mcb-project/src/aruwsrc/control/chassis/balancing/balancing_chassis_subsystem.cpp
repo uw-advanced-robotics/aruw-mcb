@@ -203,9 +203,9 @@ void BalancingChassisSubsystem::getAngles(uint32_t dt)
     float rollRate2 = lowPassFilter(rollRate, -chassisMCB.getRollVelocity(), .1);
 
     // pitchRate = pitchRate2;
-    yawRate = yawRate2;
-    rollRate = rollRate2;
-    roll = roll2;
+    // yawRate = yawRate2;
+    // rollRate = rollRate2;
+    // roll = roll2;
 
     // debug1 = yawRate-yawRate2;
     // debug2 = pitchRate-pitchRate2;
@@ -354,7 +354,7 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
     int i = 0;
     for (i = 0; i < 6; i++)
     {
-        debug[i] = LQR_K.data[i + 6] * stateVector.data[i];
+        debug[i] = LQR_K.data[i] * stateVector.data[i];
     }
 
     CMSISMat<2, 1> torques = -LQR_K * stateVector;
@@ -386,8 +386,8 @@ void BalancingChassisSubsystem::updateBalancing(uint32_t dt)
 
     // gravityFeedForward = 0;
 
-    desiredLinkTorqueRight += linkAngleAdjustment;
-    desiredLinkTorqueLeft -= linkAngleAdjustment;
+    desiredLinkTorqueRight -= linkAngleAdjustment;
+    desiredLinkTorqueLeft += linkAngleAdjustment;
 
     desiredLinkForceLeft = legForceLeft + gravityFeedForward;
     desiredLinkForceRight = legForceRight + gravityFeedForward;
@@ -507,6 +507,7 @@ void BalancingChassisSubsystem::updateFalling(uint32_t dt)
 
     if (fallTimeout.isExpired())
     {
+        desiredX = currentX;
         desiredZRamper.setTarget(CHASSIS_HEIGHTS.getFirst());
         balancingState = BALANCING;
     }
