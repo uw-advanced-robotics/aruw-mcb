@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* Link for dynamic modeling & kinematics open-source: https://zhuanlan.zhihu.com/p/563048952 */
+
 #include "aruwsrc/util_macros.hpp"
 
 #ifdef TARGET_BALSTD

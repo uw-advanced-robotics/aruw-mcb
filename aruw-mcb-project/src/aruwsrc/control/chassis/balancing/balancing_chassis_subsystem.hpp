@@ -251,6 +251,9 @@ private:
     tap::arch::MilliTimeout fallTimeout;
     uint32_t FALL_TIMEOUT_DURATION = 150;
 
+    /**
+     * Describes the threshold for when the robot goes from "balancing" to "fallen" and vice versa
+     */
     static constexpr float FALLEN_ANGLE_THRESHOLD = modm::toRadian(26);
     static constexpr float FALLEN_ANGLE_RETURN = modm::toRadian(5);
     static constexpr float FALLEN_ANGLE_RATE_THRESHOLD = 3;
@@ -264,7 +267,6 @@ private:
 
     /**
      * Estimates leg link force based on feedback, and decides if the robot is freefalling
-     *
      */
     void airborneDetector();
 
