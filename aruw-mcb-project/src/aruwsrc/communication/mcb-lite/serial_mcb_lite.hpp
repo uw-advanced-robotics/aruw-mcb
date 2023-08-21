@@ -75,8 +75,6 @@ public:
 
     void sendData();
 
-    void calibrateIMU();
-
     void initialize();
 
     constexpr static int UART_BAUDRATE = 500'000;
@@ -94,9 +92,6 @@ private:
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
     tap::communication::serial::Uart::UartPort port;
-
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<0> calibrateIMUMessage;
-    bool sendIMUCalibrationMessage = false;
 
     IMUMessage currentIMUData;
     CurrentSensorMessage currentCurrentSensorData;

@@ -29,7 +29,9 @@ class VirtualCurrentSensor : public tap::communication::sensors::current::Curren
 
 public:
     VirtualCurrentSensor() {}
+
     void update() override {}
+
     float getCurrentMa() const override { return current; }
 
 private:

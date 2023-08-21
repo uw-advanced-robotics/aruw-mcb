@@ -33,11 +33,14 @@ namespace aruwsrc::virtualMCB
  */
 class VirtualDJIMotorTxHandler : public tap::motor::DjiMotorTxHandler
 {
+    friend class SerialMCBLite;
+
 public:
     VirtualDJIMotorTxHandler(tap::Drivers* drivers);
 
     void encodeAndSendCanData();
 
+private:
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can1MessageLowSend;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>

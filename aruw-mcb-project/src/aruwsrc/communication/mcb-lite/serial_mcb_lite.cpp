@@ -35,7 +35,6 @@ SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::
       currentSensor(),
       imu(),
       port(port),
-      calibrateIMUMessage(),
       currentIMUData(),
       currentCurrentSensorData()
 {
@@ -90,22 +89,15 @@ void SerialMCBLite::sendData()
             reinterpret_cast<uint8_t*>(&(motorTxHandler.can2MessageHighSend)),
             sizeof(motorTxHandler.can2MessageHighSend));
 
-        if (sendIMUCalibrationMessage)
+        if (imu.requestCalibrationFlag)
         {
             drivers->uart.write(
                 port,
-                reinterpret_cast<uint8_t*>(&(calibrateIMUMessage)),
-                sizeof(calibrateIMUMessage));
-            sendIMUCalibrationMessage = false;
+                reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
+                sizeof(imu.calibrateIMUMessage));
+            imu.requestCalibrationFlag = false;
         }
     }
-}
-
-void SerialMCBLite::calibrateIMU()
-{
-    calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU;
-    calibrateIMUMessage.setCRC16();
-    sendIMUCalibrationMessage = true;
 }
 
 void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)

@@ -22,6 +22,7 @@
 
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -32,7 +33,12 @@ class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterfac
     friend class SerialMCBLite;
 
 public:
-    VirtualIMUInterface() {}
+    VirtualIMUInterface()
+    {
+        calibrateIMUMessage.messageType = 4;
+        calibrateIMUMessage.data[0] = 0;
+        calibrateIMUMessage.setCRC16();
+    }
 
     float getPitch() override { return pitch; }
     float getRoll() override { return roll; }
@@ -45,7 +51,10 @@ public:
     float getAz() override { return Az; }
     float getTemp() override { return temperature; }
     Mpu6500::ImuState getImuState() { return imuState; }
+
     virtual inline const char* getName() const { return "Virtual IMU"; }
+    
+    void requestCalibration() { requestCalibrationFlag = true; };
 
 private:
     float pitch, roll, yaw;
@@ -53,6 +62,8 @@ private:
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
+    bool requestCalibrationFlag = false;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB
