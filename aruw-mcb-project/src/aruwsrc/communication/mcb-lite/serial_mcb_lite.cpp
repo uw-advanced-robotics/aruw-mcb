@@ -34,6 +34,8 @@ SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
       currentSensor(),
       imu(),
+      digital(),
+      analog(),
       port(port),
       currentIMUData(),
       currentCurrentSensorData()
@@ -97,6 +99,18 @@ void SerialMCBLite::sendData()
                 sizeof(imu.calibrateIMUMessage));
             imu.requestCalibrationFlag = false;
         }
+
+        if(digital.hasNewData()){
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.outputPinValuesMessage)),
+                sizeof(digital.outputPinValuesMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.pinModesMessage)),
+                sizeof(digital.pinModesMessage));
+            digital.updated = true;   
+        }
     }
 }
 
@@ -116,6 +130,12 @@ void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& complete
                 break;
             case MessageTypes::CURRENT_SENSOR_MESSAGE:
                 processCurrentSensorMessage(completeMessage);
+                break;
+            case MessageTypes::ANALOG_PIN_READ_MESSAGE:
+                processAnalogMessage(completeMessage);
+                break;
+            case MessageTypes::DIGITAL_PID_READ_MESSAGE:
+                processDigitalMessage(completeMessage);
                 break;
             default:
                 break;
@@ -164,6 +184,22 @@ void SerialMCBLite::processCurrentSensorMessage(const ReceivedSerialMessage& com
 {
     memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(currentCurrentSensorData));
     currentSensor.current = currentCurrentSensorData.current;
+}
+
+void SerialMCBLite::processAnalogMessage(const ReceivedSerialMessage& completeMessage)
+{
+    memcpy(&currentAnalogData, completeMessage.data, sizeof(currentAnalogData));
+    analog.SPinValue = currentAnalogData.SPinValue;
+    analog.TPinValue = currentAnalogData.TPinValue;
+    analog.UPinValue = currentAnalogData.UPinValue;
+    analog.VPinValue = currentAnalogData.VPinValue;
+    analog.OLEDPinValue = currentAnalogData.OLEDPinValue;
+}
+
+void SerialMCBLite::processDigitalMessage(const ReceivedSerialMessage& completeMessage)
+{
+    memcpy(&currentDigitalData, completeMessage.data, sizeof(currentDigitalData));
+    memcpy(&digital.inputPinValues, &currentDigitalData, sizeof(currentDigitalData));
 }
 
 }  // namespace aruwsrc::virtualMCB

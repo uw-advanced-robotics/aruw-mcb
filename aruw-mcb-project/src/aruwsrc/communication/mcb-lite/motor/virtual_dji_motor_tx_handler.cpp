@@ -19,11 +19,7 @@
 
 #include "virtual_dji_motor_tx_handler.hpp"
 
-#include "tap/communication/can/can.hpp"
-#include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
-#include "tap/drivers.hpp"
-#include "tap/errors/create_errors.hpp"
+
 
 namespace aruwsrc::virtualMCB
 {
@@ -82,25 +78,25 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
     if (can1ValidMotorMessageLow)
     {
         memcpy(can1MessageLowSend.data, &can1MessageLow, sizeof(modm::can::Message));
-        can1MessageLowSend.messageType = 0;
+        can1MessageLowSend.messageType = CANBUS1_MESSAGE;
         can1MessageLowSend.setCRC16();
     }
     if (can1ValidMotorMessageHigh)
     {
         memcpy(can1MessageHighSend.data, &can1MessageHigh, sizeof(modm::can::Message));
-        can1MessageHighSend.messageType = 0;
+        can1MessageHighSend.messageType = CANBUS1_MESSAGE;
         can1MessageHighSend.setCRC16();
     }
     if (can2ValidMotorMessageLow)
     {
         memcpy(can2MessageLowSend.data, &can2MessageLow, sizeof(modm::can::Message));
-        can2MessageLowSend.messageType = 1;
+        can2MessageLowSend.messageType = CANBUS2_MESSAGE;
         can2MessageLowSend.setCRC16();
     }
     if (can2ValidMotorMessageHigh)
     {
         memcpy(can2MessageHighSend.data, &can2MessageHigh, sizeof(modm::can::Message));
-        can2MessageHighSend.messageType = 1;
+        can2MessageHighSend.messageType = CANBUS2_MESSAGE;
         can2MessageHighSend.setCRC16();
     }
 }

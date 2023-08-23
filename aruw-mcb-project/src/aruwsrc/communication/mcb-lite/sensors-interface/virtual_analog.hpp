@@ -16,26 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VIRTUAL_CURRENT_SENSOR_HPP_
-#define VIRTUAL_CURRENT_SENSOR_HPP_
 
-#include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#ifndef VIRTUAL_ANALOG_HPP_
+#define VIRTUAL_ANALOG_HPP_
+
+#include "tap/communication/gpio/analog.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
+
+struct AnalogMessage
+{
+    uint16_t SPinValue;
+    uint16_t TPinValue;
+    uint16_t UPinValue;
+    uint16_t VPinValue;
+    uint16_t OLEDPinValue;
+} modm_packed;
+
+class VirtualAnalog : public tap::gpio::Analog
 {
     friend class SerialMCBLite;
 
 public:
-    VirtualCurrentSensor() {}
+    VirtualAnalog() = default;
 
-    void update() override {}
+    // Please don't call this, shouldn't be used
+    void init(){};
 
-    float getCurrentMa() const override { return current; }
+    // Returns 0 if pin is not initialized, or data has not been received
+    uint16_t read(Analog::Pin pin) const;
 
 private:
-    float current;
+    uint16_t SPinValue, TPinValue, UPinValue, VPinValue, OLEDPinValue;
 };
 
 }  // namespace aruwsrc::virtualMCB
