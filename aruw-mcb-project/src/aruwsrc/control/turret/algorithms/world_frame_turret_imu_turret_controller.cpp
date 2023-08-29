@@ -134,17 +134,17 @@ static inline void initializeWorldFrameTurretImuController(
     TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid,
-    tap::algorithms::ContiguousFloat &worldFrameSetpoint)
+    float &worldFrameSetpoint)
 {
     if (turretMotor.getTurretController() != controllerToInitialize)
     {
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+        worldFrameSetpoint = transformChassisFrameToWorldFrame(
             turretMotor.getChassisFrameUnwrappedMeasuredAngle(),
             worldFrameMeasurement,
-            turretMotor.getChassisFrameSetpoint()));
+            turretMotor.getChassisFrameSetpoint());
 
         turretMotor.attachTurretController(controllerToInitialize);
     }
@@ -173,10 +173,10 @@ static inline void updateWorldFrameSetpoint(
     const float desiredSetpoint,
     const float chassisFrameMeasurement,
     const float worldFrameMeasurement,
-    tap::algorithms::ContiguousFloat &worldFrameSetpoint,
+    float &worldFrameSetpoint,
     TurretMotor &turretMotor)
 {
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 
     // transform target angle from turret imu relative to chassis relative
     // to keep turret/command setpoints synchronized
@@ -188,7 +188,7 @@ static inline void updateWorldFrameSetpoint(
     turretMotor.setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
         chassisFrameMeasurement,
         worldFrameMeasurement,
-        worldFrameSetpoint.getValue()));
+        worldFrameSetpoint));
 
     // @TODO: limiting
     // does not actually perform any motor limiting in terms of preventing the turret from breaking
@@ -198,10 +198,10 @@ static inline void updateWorldFrameSetpoint(
     {
         // transform angle that is limited by subsystem to world relative again to run the
         // controller
-        worldFrameSetpoint.setValue(transformChassisFrameToWorldFrame(
+        worldFrameSetpoint = transformChassisFrameToWorldFrame(
             chassisFrameMeasurement,
             worldFrameMeasurement,
-            turretMotor.getChassisFrameSetpoint()));
+            turretMotor.getChassisFrameSetpoint());
     }
 }
 
@@ -253,7 +253,7 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
+      worldFrameSetpoint(0),
       majorMotor(majorMotor)
 {
 }
@@ -269,57 +269,28 @@ void WorldFrameYawTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint);
 }
 
+float positionPidOutput = 0;
+
 void WorldFrameYawTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)  // desired yaw setpoint in the world frame
 {
-    // turretMotor getChassisFrameUnwrappedMeasuredAngle will return the angle
-    // of the turret relative to where it is mounted on the major
-    // const float chassisFrameYaw = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
-    // angle of the minor in the world frame
-    // const float worldFrameYawAngle = turretMCBCanComm.getYawUnwrapped();
-    // yaw vel of the minor in the world frame
-    // const float worldFrameYawVelocity = turretMCBCanComm.getYawVelocity();
 
-    // const float majorYawChassisRel = majorMotor.getChassisFrameUnwrappedMeasuredAngle();
-    ContiguousFloat chassisToMajor = majorMotor.getChassisFrameMeasuredAngle();
-    ContiguousFloat majorToMinor = turretMotor.getChassisFrameMeasuredAngle();
+    const float idealLocalSetpoint = desiredSetpoint + turretMotor.getChassisFrameUnwrappedMeasuredAngle() - turretMCBCanComm.getYawUnwrapped();
+    turretMotor.setChassisFrameSetpoint(idealLocalSetpoint);
+    const float realLocalSetpoint = turretMotor.getChassisFrameSetpoint();
 
-    // convert desiredsetpoint to major frame
-    const float currentMajorFrameMinorVelocity = turretMotor.getChassisFrameVelocity();
-
-    // where we want the turret to point in world frame
-    // @todo subtract yaw of chassis in world rel
-    worldFrameSetpoint.setValue(desiredSetpoint);
-
-    // major relative setpoint
-    tap::algorithms::ContiguousFloat majorFrameMinorSetpoint(
-        chassisToMajor.getValue() + worldFrameSetpoint.getValue(),
-        0,
-        M_TWOPI);
-    // const float majorSetpoint = desiredSetpoint - chassisToMajor;
-
-    // indicate this is where we want to go
-    turretMotor.setChassisFrameSetpoint(majorFrameMinorSetpoint.getValue());
-
-    // limiting =======
-    // this just limits the stored worldRelSetpoint using the limited
-    // setpoint in the turretMotor
-    const float limitedMajorFrameMinorSetpoint = turretMotor.getChassisFrameSetpoint();
-    // transform the setpoint back to the world frame using the major's rotation
-
-    worldFrameSetpoint.setValue(chassisToMajor.difference(limitedMajorFrameMinorSetpoint));
-    // limiting =======
+    this->worldFrameSetpoint = realLocalSetpoint - turretMotor.getChassisFrameUnwrappedMeasuredAngle() + turretMCBCanComm.getYawUnwrapped();
 
     // use PID to compute how to get to where we want to go
     const float positionControllerError = turretMotor.getValidMinError(
-        limitedMajorFrameMinorSetpoint,
-        majorToMinor.getValue());
+        this->worldFrameSetpoint,
+        turretMCBCanComm.getYawUnwrapped());
 
-    const float positionPidOutput =
-        positionPid.runController(positionControllerError, -currentMajorFrameMinorVelocity, dt);
+    // const float positionPidOutput =
+    //     positionPid.runController(positionControllerError, turretMCBCanComm.getYawVelocity(), dt);
 
-    const float velocityControllerError = positionPidOutput - currentMajorFrameMinorVelocity;
+    const float velocityControllerError = positionPidOutput - turretMCBCanComm.getYawVelocity();
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
@@ -338,7 +309,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desired
     const float desiredSetPointMajorRel = desiredSetpoint + chassisToMajor;
 
     // where we want the turret to point in world frame
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 
     // indicate this is where we want to go
     turretMotor.setChassisFrameSetpoint(desiredSetPointMajorRel);
@@ -353,7 +324,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(float desired
 
 float WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
 {
-    return worldFrameSetpoint.getValue();
+    return worldFrameSetpoint;
 }
 
 float WorldFrameYawTurretImuCascadePidTurretController::getMeasurement() const
@@ -401,7 +372,7 @@ WorldFramePitchTurretImuCascadePidTurretController::
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI)
+      worldFrameSetpoint(0)
 {
 }
 
@@ -432,7 +403,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         turretMotor);
 
     float pidOut = runWorldFrameTurretImuController(
-        worldFrameSetpoint.getValue(),
+        worldFrameSetpoint,
         worldFramePitchAngle,
         worldFramePitchVelocity,
         dt,
@@ -464,7 +435,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(float desir
 
 float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
 {
-    return worldFrameSetpoint.getValue();
+    return worldFrameSetpoint;
 }
 
 float WorldFramePitchTurretImuCascadePidTurretController::getMeasurement() const

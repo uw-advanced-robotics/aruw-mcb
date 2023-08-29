@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_HPP_
-#define WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_HPP_
+#ifndef WORLD_FRAME_TURRET_YAW_CONTROLLER_HPP_
+#define WORLD_FRAME_TURRET_YAW_CONTROLLER_HPP_
 
 #include <cstdint>
 

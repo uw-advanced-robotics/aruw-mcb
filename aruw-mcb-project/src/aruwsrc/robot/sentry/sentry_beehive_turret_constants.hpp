@@ -158,7 +158,7 @@ namespace major_rel
 
 namespace malewife
 {
-static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_YAW_POS_PID_CONFIG = {
     .kp = 68'000.0f,
     .ki = 370.0f,
     .kd = 12'400.0f,
@@ -171,7 +171,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_PITCH_POS_PID_CONFIG = {
     .kp = 134'000.0f,
     .ki = 75.0f,
     .kd = 5'500.0f,
@@ -183,11 +183,64 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_POS_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_POS_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_VEL_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
 }  // namespace malewife
 
 namespace girlboss
 {
-static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_YAW_POS_PID_CONFIG = {
     .kp = 58'000.0f,
     .ki = 360.0f,
     .kd = 11'400.0f,
@@ -200,7 +253,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_PITCH_POS_PID_CONFIG = {
     .kp = 134'000.0f,
     .ki = 75.0f,
     .kd = 5'500.0f,
@@ -212,6 +265,59 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_POS_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_POS_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG = {
+    .kp = 20'000.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_VEL_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 20.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
 }  // namespace girlboss
 }  // namespace major_rel
 

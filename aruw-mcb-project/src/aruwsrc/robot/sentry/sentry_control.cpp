@@ -19,6 +19,7 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/robot/sentry/match_running_governor.hpp"
 
 #include "tap/control/command_mapper.hpp"
@@ -31,6 +32,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
@@ -353,21 +355,67 @@ SentryTransformsSubsystem sentryTransforms(
 // Turret controllers -------------------------------------------------------
 
 // @todo make controllers part of subsystem
-algorithms::ChassisFramePitchTurretController girlbossPitchController(
+
+// Chassis relative pitch and yaw controllers for imu calibrate
+algorithms::ChassisFramePitchTurretController girlbossChassisRelPitchController(
     turretMinorGirlboss.pitchMotor,
-    major_rel::girlboss::PITCH_PID_CONFIG);
+    major_rel::girlboss::CHASSIS_REL_PITCH_POS_PID_CONFIG);
 
-algorithms::ChassisFramePitchTurretController malewifePitchController(
+algorithms::ChassisFramePitchTurretController malewifeChassisRelPitchController(
     turretMinorMalewife.pitchMotor,
-    major_rel::malewife::PITCH_PID_CONFIG);
+    major_rel::malewife::CHASSIS_REL_PITCH_POS_PID_CONFIG);
 
-algorithms::ChassisFrameYawTurretController girlbossYawController(
+algorithms::ChassisFrameYawTurretController girlbossChassisRelYawController(
     turretMinorGirlboss.yawMotor,
-    major_rel::girlboss::YAW_PID_CONFIG);
+    major_rel::girlboss::CHASSIS_REL_YAW_POS_PID_CONFIG);
 
-algorithms::ChassisFrameYawTurretController malewifeYawController(
+algorithms::ChassisFrameYawTurretController malewifeChassisRelYawController(
     turretMinorMalewife.yawMotor,
-    major_rel::malewife::YAW_PID_CONFIG);
+    major_rel::malewife::CHASSIS_REL_YAW_POS_PID_CONFIG);
+
+// World relative pitch and yaw controllers for everything else
+
+SmoothPid girlbossWorldRelPitchPositionPid(major_rel::girlboss::WORLD_REL_PITCH_POS_PID_CONFIG);
+SmoothPid girlbossWorldRelPitchVelocityPid(major_rel::girlboss::WORLD_REL_PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController girlbossWorldRelPitchController(
+    *turretMinorGirlboss.getTurretMCB(),
+    turretMinorGirlboss.pitchMotor,
+    girlbossWorldRelPitchPositionPid,
+    girlbossWorldRelPitchVelocityPid
+);
+
+SmoothPid malewifeWorldRelPitchPositionPid(major_rel::malewife::WORLD_REL_PITCH_POS_PID_CONFIG);
+SmoothPid malewifeWorldRelPitchVelocityPid(major_rel::malewife::WORLD_REL_PITCH_VEL_PID_CONFIG);
+
+algorithms::WorldFramePitchTurretImuCascadePidTurretController malewifeWorldRelPitchController(
+    *turretMinorMalewife.getTurretMCB(),
+    turretMinorMalewife.pitchMotor,
+    malewifeWorldRelPitchPositionPid,
+    malewifeWorldRelPitchVelocityPid
+);
+
+SmoothPid girlbossWorldRelYawPositionPid(major_rel::girlboss::WORLD_REL_YAW_POS_PID_CONFIG);
+SmoothPid girlbossWorldRelYawVelocityPid(major_rel::girlboss::WORLD_REL_YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController girlbossWorldRelYawController(
+    *turretMinorGirlboss.getTurretMCB(),
+    turretMinorGirlboss.yawMotor,
+    turretMajor.yawMotor,
+    girlbossWorldRelYawPositionPid,
+    girlbossWorldRelYawVelocityPid
+);
+
+SmoothPid malewifeWorldRelYawPositionPid(major_rel::malewife::WORLD_REL_YAW_POS_PID_CONFIG);
+SmoothPid malewifeWorldRelYawVelocityPid(major_rel::malewife::WORLD_REL_YAW_VEL_PID_CONFIG);
+
+algorithms::WorldFrameYawTurretImuCascadePidTurretController malewifeWorldRelYawController(
+    *turretMinorMalewife.getTurretMCB(),
+    turretMinorMalewife.yawMotor,
+    turretMajor.yawMotor,
+    malewifeWorldRelYawPositionPid,
+    malewifeWorldRelYawVelocityPid
+);
 
 // @todo interesting circular dependency issue since transforms required by controller but subsystem required by transforms
 // Because there is no thing for the turret major, we need to instantiate
@@ -388,7 +436,6 @@ algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  /
 
 
 // aruco reset
-
 
 SentryArucoResetSubsystem arucoResetSubsystem(
     *drivers(),
@@ -443,15 +490,15 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
         {
             &drivers()->turretMCBCanCommBus2,
             &turretMinorGirlboss,
-            &girlbossYawController,
-            &girlbossPitchController,
+            &girlbossChassisRelYawController,
+            &girlbossChassisRelPitchController,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
             &turretMinorMalewife,
-            &malewifeYawController,
-            &malewifePitchController,
+            &malewifeChassisRelYawController,
+            &malewifeChassisRelPitchController,
             true,
         },
     },
@@ -491,8 +538,8 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorGir
     drivers(),
     drivers()->controlOperatorInterface,
     turretMinorGirlboss,
-    girlbossYawController,
-    girlbossPitchController,
+    girlbossWorldRelYawController,
+    girlbossWorldRelPitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
@@ -500,8 +547,8 @@ aruwsrc::control::turret::sentry::TurretMinorSentryControlCommand turretMinorMal
     drivers(),
     drivers()->controlOperatorInterface,
     turretMinorMalewife,
-    malewifeYawController,
-    malewifePitchController,
+    malewifeWorldRelYawController,
+    malewifeWorldRelPitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
@@ -512,10 +559,10 @@ aruwsrc::control::turret::SentryTurretCVCommand sentryTurretCVCommand(
     turretMinorGirlboss,
     turretMinorMalewife,
     turretMajorYawController,  // Create + use CV version??
-    girlbossYawController,
-    girlbossPitchController,
-    malewifeYawController,
-    malewifePitchController,
+    girlbossWorldRelYawController,
+    girlbossWorldRelPitchController,
+    malewifeWorldRelYawController,
+    malewifeWorldRelPitchController,
     girlbossBallisticsSolver,
     malewifeBallisticsSolver,
     sentryTransforms);

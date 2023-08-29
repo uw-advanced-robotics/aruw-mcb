@@ -95,7 +95,7 @@ private:
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    float worldFrameSetpoint;
 
     const TurretMotor& majorMotor;
 };
@@ -158,7 +158,7 @@ private:
     tap::algorithms::SmoothPid &positionPid;
     tap::algorithms::SmoothPid &velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    float worldFrameSetpoint;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
