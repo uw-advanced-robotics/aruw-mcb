@@ -83,7 +83,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 0.0f,
     .kd = -180'000.0f,
     .maxICumulative = 5'000.0f,
-    .maxOutput = 25'000.0f,
+    .maxOutput = 0.0f,  // 25,000
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 600.0f,
@@ -293,11 +293,11 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_POS_PID_CONFIG
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG = {
-    .kp = 20'000.0f,
+    .kp = 30'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 50'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
