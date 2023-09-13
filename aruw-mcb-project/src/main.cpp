@@ -42,6 +42,7 @@
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
@@ -90,12 +91,14 @@ int main()
      *      IO states and run the scheduler.
      */
     Drivers *drivers = DoNotUse_getDrivers();
+    aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers);
 
     Board::initialize();
     gotHere = true;
     initializeIo(drivers);
     gotHalfWay = true;
     initSubsystemCommands(drivers);
+    drivers->commandScheduler.initializeSubsystems();
     gotPastHere = true;
 
     while (1)

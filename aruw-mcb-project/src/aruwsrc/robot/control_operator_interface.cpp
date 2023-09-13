@@ -224,12 +224,6 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
             return 0;
     }
 }
-
-float ControlOperatorInterface::getSentrySpeedInput()
-{
-    return (-drivers->remote.getChannel(Remote::Channel::WHEEL) / 660.0f) *
-           USER_STICK_SENTRY_DRIVE_SCALAR;
-}
 }  // namespace control
 
 }  // namespace aruwsrc
