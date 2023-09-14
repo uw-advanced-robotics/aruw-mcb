@@ -60,7 +60,7 @@
 // #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 // #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-// #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 // #include "aruwsrc/robot/sentry/sentry_otto_kf_odometry_2d_subsystem.hpp"
 // #include "aruwsrc/robot/sentry/sentry_turret_subsystem.hpp"
 
@@ -88,10 +88,10 @@
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-driversFunc drivers = DoNotUse_getDrivers;
+// driversFunc drivers = DoNotUse_getDrivers;
 
-namespace sentry_control
-{
+// namespace sentry_control
+// {
 // static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::B;
 // static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
@@ -398,78 +398,78 @@ namespace sentry_control
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    // sentryDrive.initialize();
-    // turretZero.agitator.initialize();
-    // turretZero.frictionWheels.initialize();
-    // turretZero.turretSubsystem.initialize();
-    // turretOne.agitator.initialize();
-    // turretOne.frictionWheels.initialize();
-    // turretOne.turretSubsystem.initialize();
-    // odometrySubsystem.initialize();
-    // sentryResponseSubsystem.initialize();
-    // buzzer.initialize();
-}
+// void initializeSubsystems()
+// {
+// sentryDrive.initialize();
+// turretZero.agitator.initialize();
+// turretZero.frictionWheels.initialize();
+// turretZero.turretSubsystem.initialize();
+// turretOne.agitator.initialize();
+// turretOne.frictionWheels.initialize();
+// turretOne.turretSubsystem.initialize();
+// odometrySubsystem.initialize();
+// sentryResponseSubsystem.initialize();
+// buzzer.initialize();
+// }
 
-RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+// RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(Drivers *drivers)
-{
-    // drivers->commandScheduler.registerSubsystem(&sentryDrive);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
-    // drivers->commandScheduler.registerSubsystem(&turretZero.turretSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.agitator);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
-    // drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    // drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
-    // drivers->commandScheduler.registerSubsystem(&buzzer);
-}
+// void registerSentrySubsystems(Drivers *drivers)
+// {
+// drivers->commandScheduler.registerSubsystem(&sentryDrive);
+// drivers->commandScheduler.registerSubsystem(&turretZero.agitator);
+// drivers->commandScheduler.registerSubsystem(&turretZero.frictionWheels);
+// drivers->commandScheduler.registerSubsystem(&turretZero.turretSubsystem);
+// drivers->commandScheduler.registerSubsystem(&turretOne.agitator);
+// drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
+// drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
+// drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+// drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
+// drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+// drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
+// drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
+// drivers->commandScheduler.registerSubsystem(&buzzer);
+// }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(Drivers *)
-{
-    // sentryDrive.setDefaultCommand(&sentryAutoDrive);
-    // turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
-    // turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
-    // turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
-    // turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
-    // turretZero.agitator.setDefaultCommand(
-    //     &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
-    // turretOne.agitator.setDefaultCommand(
-    //     &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
-}
+// void setDefaultSentryCommands(Drivers *)
+// {
+// sentryDrive.setDefaultCommand(&sentryAutoDrive);
+// turretZero.frictionWheels.setDefaultCommand(&turretZero.spinFrictionWheels);
+// turretOne.frictionWheels.setDefaultCommand(&turretOne.spinFrictionWheels);
+// turretZero.turretSubsystem.setDefaultCommand(&turretZero.turretCVCommand);
+// turretOne.turretSubsystem.setDefaultCommand(&turretOne.turretCVCommand);
+// turretZero.agitator.setDefaultCommand(
+//     &turretZero.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
+// turretOne.agitator.setDefaultCommand(
+//     &turretOne.rotateAndUnjamAgitatorWithHeatAndCvLimitingWhenCvOnline);
+// }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(Drivers *drivers)
-{
-    // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+// void startSentryCommands(Drivers *drivers)
+// {
+// drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
-    // sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-    //     pauseProjectileLaunchMessageHandler);
-    // sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
-    // sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    // sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
-    // drivers->refSerial.attachRobotToRobotMessageHandler(
-    //     aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
-    //     &sentryRequestHandler);
-}
+// sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
+//     pauseProjectileLaunchMessageHandler);
+// sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+// sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+// sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
+// drivers->refSerial.attachRobotToRobotMessageHandler(
+//     aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
+//     &sentryRequestHandler);
+// }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings(Drivers *drivers)
-{
-    // drivers->commandMapper.addMap(&rightSwitchDown);
-    // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchMid);
-}
-}  // namespace sentry_control
+// void registerSentryIoMappings(Drivers *drivers)
+// {
+// drivers->commandMapper.addMap(&rightSwitchDown);
+// drivers->commandMapper.addMap(&rightSwitchUp);
+// drivers->commandMapper.addMap(&leftSwitchDown);
+// drivers->commandMapper.addMap(&leftSwitchMid);
+// }
+// }  // namespace sentry_control
 
 namespace aruwsrc::sentry
 {
