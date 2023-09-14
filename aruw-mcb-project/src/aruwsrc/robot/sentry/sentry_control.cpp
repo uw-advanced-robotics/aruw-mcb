@@ -165,7 +165,8 @@ namespace sentry_control
 //               30.0f,
 //               true,
 //               config.turretBarrelMechanismId),
-//           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true, config.turretBarrelMechanismId),
+//           stopFrictionWheels(&drivers, &frictionWheels, 0.0f, true,
+//           config.turretBarrelMechanismId),
 //           chassisFramePitchTurretController(turretSubsystem.pitchMotor, config.pitchPidConfig),
 //           chassisFrameYawTurretController(turretSubsystem.yawMotor, config.yawPidConfig),
 //           worldFrameYawTurretImuPosPid(config.yawPosPidConfig),
@@ -196,8 +197,8 @@ namespace sentry_control
 //           unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG),
 //           rotateAndUnjamAgitator(drivers, agitator, rotateAgitator, unjamAgitator),
 //           frictionWheelsOnGovernor(frictionWheels),
-//           heatLimitGovernor(drivers, config.turretBarrelMechanismId, constants::HEAT_LIMIT_BUFFER),
-//           cvOnTargetGovernor(
+//           heatLimitGovernor(drivers, config.turretBarrelMechanismId,
+//           constants::HEAT_LIMIT_BUFFER), cvOnTargetGovernor(
 //               &drivers,
 //               drivers.visionCoprocessor,
 //               turretCVCommand,
@@ -252,7 +253,8 @@ namespace sentry_control
 
 //     tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid;
 //     tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid;
-//     algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+//     algorithms::WorldFrameYawTurretImuCascadePidTurretController
+//     worldFrameYawTurretImuController;
 
 //     // turret commands
 //     // limits fire rate
@@ -324,9 +326,10 @@ namespace sentry_control
 //     turretOne.turretSubsystem);
 
 // /* define commands ----------------------------------------------------------*/
-// // Two identical drive commands since you can't map an identical command to two different mappings
-// SentryDriveManualCommand sentryDriveManual1(&(drivers()->controlOperatorInterface), &sentryDrive);
-// SentryDriveManualCommand sentryDriveManual2(&(drivers()->controlOperatorInterface), &sentryDrive);
+// // Two identical drive commands since you can't map an identical command to two different
+// mappings SentryDriveManualCommand sentryDriveManual1(&(drivers()->controlOperatorInterface),
+// &sentryDrive); SentryDriveManualCommand
+// sentryDriveManual2(&(drivers()->controlOperatorInterface), &sentryDrive);
 
 // SentryAutoDriveComprisedCommand sentryAutoDrive(drivers(), &sentryDrive);
 
@@ -352,7 +355,8 @@ namespace sentry_control
 
 // aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
-// void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage(); }
+// void selectNewRobotMessageHandler() { drivers()->visionCoprocessor.sendSelectNewTargetMessage();
+// }
 
 // void targetNewQuadrantMessageHandler()
 // {
@@ -482,7 +486,7 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }  // namespace aruwsrc::sentry
 
 // #ifndef PLATFORM_HOSTED
-// imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
-// #endif
+// imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand;
+// } #endif
 
 #endif
