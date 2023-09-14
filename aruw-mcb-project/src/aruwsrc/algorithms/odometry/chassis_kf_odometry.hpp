@@ -42,8 +42,8 @@ class ChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
-     * Constructor
-     * 
+     * Constructor.
+     *
      * @param chassisSubsystem The chassis subsystem of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration

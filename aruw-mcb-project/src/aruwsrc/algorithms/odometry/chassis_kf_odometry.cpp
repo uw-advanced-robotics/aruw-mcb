@@ -36,7 +36,7 @@ ChassisKFOdometry::ChassisKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[int(OdomState::NUM_STATES)] = { initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f };
+    float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
     kf.init(initialX);
 }
 
