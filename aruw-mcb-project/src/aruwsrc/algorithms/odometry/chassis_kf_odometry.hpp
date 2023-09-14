@@ -37,16 +37,23 @@ namespace aruwsrc::algorithms::odometry
  * specifically for robots whose chassis does not measure absolute position (i.e. all ground
  * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
- *
- * @note Assumes the world frame has an origin of (0, 0) wherever the robot was booted from.
  */
 class ChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
+    /**
+     * Constructor
+     * 
+     * @param chassisSubsystem The chassis subsystem of the robot for odometry measurements
+     * @param chassisYawObserver Interface that computes the yaw of the chassis externally
+     * @param imu IMU mounted on the chassis to measure chassis acceleration
+     * @param initPos Initial position of chassis when robot boots
+     */
     ChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-        tap::communication::sensors::imu::ImuInterface& imu);
+        tap::communication::sensors::imu::ImuInterface& imu,
+        const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
