@@ -47,6 +47,11 @@ void TurretMotor::updateMotorAngle()
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
 
+        if (config.limitMotorAngles)
+        {
+            startEncoderOffset = 0;
+        }
+
         if (startEncoderOffset == INT16_MIN)
         {
             int encoderDiff =
