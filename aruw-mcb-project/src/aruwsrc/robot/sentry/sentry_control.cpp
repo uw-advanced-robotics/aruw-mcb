@@ -53,7 +53,7 @@
 // #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 // #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 // #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-// #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 // #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 // #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 // #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -88,7 +88,7 @@
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-// driversFunc drivers = DoNotUse_getDrivers;
+driversFunc drivers = DoNotUse_getDrivers;
 
 // namespace sentry_control
 // {
@@ -412,7 +412,7 @@
 // buzzer.initialize();
 // }
 
-// RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
 // void registerSentrySubsystems(Drivers *drivers)
@@ -475,8 +475,8 @@ namespace aruwsrc::sentry
 {
 void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 {
-    // drivers->commandScheduler.setSafeDisconnectFunction(
-    //     &sentry_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &sentry_control::remoteSafeDisconnectFunction);
     // sentry_control::initializeSubsystems();
     // sentry_control::registerSentrySubsystems(drivers);
     // sentry_control::setDefaultSentryCommands(drivers);
