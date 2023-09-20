@@ -28,12 +28,39 @@ static constexpr uint16_t SENTRY_REQUEST_ROBOT_ID = 0x200;
 
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
+/**
+ * Request message friendly robots send to the enemy
+*/
 enum class SentryRequestMessageType : uint8_t
 {
-    SELECT_NEW_ROBOT = 0,
-    TARGET_NEW_QUADRANT,
-    TOGGLE_DRIVE_MOVEMENT,
-    PAUSE_PROJECTILE_LAUNCHING,
+    NONE = 0,
+    GO_TO_FRIENDLY_BASE,
+    GO_TO_ENEMY_BASE,
+    GO_TO_FRIENDLY_SUPPLIER_ZONE,
+    GO_TO_ENEMY_SUPPLIER_ZONE,
+    GO_TO_CENTER_POINT,
+    HOLD_FIRE,
+    TOGGLE_MOVEMENT,
+    TOGGLE_BEYBLADE,
+    NUM_MESSAGE_TYPES,
+};
+
+/**
+ * Response message the sentry broadcasts to all friendly robots.
+ */
+enum class SentryResponseMessageType : uint16_t
+{
+    NONE = 0,
+    GO_TO_FRIENDLY_BASE,
+    GO_TO_ENEMY_BASE,
+    GO_TO_FRIENDLY_SUPPLIER_ZONE,
+    GO_TO_ENEMY_SUPPLIER_ZONE,
+    GO_TO_CENTER_POINT,
+    HOLD_FIRE,
+    MOVEMENT_ENABLED,
+    MOVEMENT_DISABLED,
+    BEYBLADE_ENABLED,
+    BEYBLADE_DISABLED,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial
