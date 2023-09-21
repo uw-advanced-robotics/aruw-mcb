@@ -20,11 +20,10 @@
 #ifndef SENTRY_RESPONSE_SUBSYSTEM_HPP_
 #define SENTRY_RESPONSE_SUBSYSTEM_HPP_
 
-#include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/subsystem.hpp"
-
-#include "aruwsrc/control/chassis/sentry/sentry_auto_drive_comprised_command.hpp"
-#include "modm/processing/protothread.hpp"
+#include "tap/util_macros.hpp"
+#include "sentry_strategy_message_types.hpp"
+#include "inter_robot_signal_transmitter.hpp"
 
 namespace aruwsrc
 {
@@ -33,43 +32,21 @@ class Drivers;
 
 namespace aruwsrc::communication::serial
 {
-/**
- * Subsystem that handles responding to sentry requests. Currently, this subsystem only handles
- * sending the current drive status of the sentry. In other words, the sentry will send to other
- * robots whether or not it is automatically moving or not.
- */
-class SentryResponseSubsystem : public tap::control::Subsystem, ::modm::pt::Protothread
+class SentryResponseSubsystem : public tap::control::Subsystem
 {
 public:
-    /**
-     * @param[in] drivers Reference to a global drivers instance.
-     * @param[in] driveCommand A reference to a global `SentryAutoDriveComprisedCommand`. Used to
-     * check if the robot is driving or not.
-     */
-    SentryResponseSubsystem(
-        tap::Drivers &drivers,
-        aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand);
+    SentryResponseSubsystem(tap::Drivers *drivers);
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { stop(); }
+    inline mockable void queueResponse(SentryResponseMessageType type)
+    {
+        sentryResponseTransmitter.queueMessage(type);
+    }
 
 private:
-    tap::Drivers &drivers;
-    aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand;
-
-    tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-
-    /// Message to be sent by the sentry to other robots.
-    tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
-
-    bool sentryMoving = true;
-
-    bool run();
-
-    /// @return True if the `driveCommand` is scheduled and the command is in the moving state.
-    bool getDriveStatus();
+    InterRobotSignalMessageTransmitter<SentryResponseMessageType, static_cast<uint8_t>(SentryResponseMessageType::NUM_MESSAGE_TYPES)> sentryResponseTransmitter;
 };
 }  // namespace aruwsrc::communication::serial
 
-#endif  //  SENTRY_RESPONSE_SUBSYSTEM_HPP_
+#endif  // SENTRY_RESPONSE_SUBSYSTEM_HPP_

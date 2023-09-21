@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/serial/sentry_request_transmitter.hpp"
+#include "aruwsrc/communication/serial/inter_robot_signal_transmitter.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;
@@ -48,7 +48,7 @@ protected:
 TEST_F(SentryRequestTransmitterTest, send_doesnt_send_when_no_messages_queued)
 {
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg).Times(0);
-    transmitter.send();
+    transmitter.sendQueued();
 }
 
 TEST_F(SentryRequestTransmitterTest, send_sends_select_new_target_when_message_queued)
@@ -66,7 +66,7 @@ TEST_F(SentryRequestTransmitterTest, send_sends_select_new_target_when_message_q
                 return modm::ResumableResult<void>(modm::rf::Stop);
             });
     transmitter.queueRequest(SentryRequestMessageType::SELECT_NEW_ROBOT);
-    transmitter.send();
+    transmitter.sendQueued();
 }
 
 TEST_F(SentryRequestTransmitterTest, send_sends_target_new_quadrant_when_message_queued)
@@ -84,7 +84,7 @@ TEST_F(SentryRequestTransmitterTest, send_sends_target_new_quadrant_when_message
                 return modm::ResumableResult<void>(modm::rf::Stop);
             });
     transmitter.queueRequest(SentryRequestMessageType::TARGET_NEW_QUADRANT);
-    transmitter.send();
+    transmitter.sendQueued();
 }
 
 TEST_F(SentryRequestTransmitterTest, send_sends_both_queued_messages)
@@ -92,5 +92,5 @@ TEST_F(SentryRequestTransmitterTest, send_sends_both_queued_messages)
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg).Times(2);
     transmitter.queueRequest(SentryRequestMessageType::TARGET_NEW_QUADRANT);
     transmitter.queueRequest(SentryRequestMessageType::SELECT_NEW_ROBOT);
-    transmitter.send();
+    transmitter.sendQueued();
 }
