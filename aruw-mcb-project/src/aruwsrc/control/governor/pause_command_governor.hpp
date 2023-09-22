@@ -27,7 +27,6 @@
 
 namespace aruwsrc::control::governor
 {
-
 /**
  * A governor that when triggered pauses the ability to schedule an associated Command for a
  * specified period.
