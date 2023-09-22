@@ -27,7 +27,8 @@
 #endif
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "modm/architecture/interface/register.hpp"
+#include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include <type_traits>
 
@@ -36,17 +37,23 @@ namespace aruwsrc
 class Drivers;
 }
 
+// template<typename MSG_TYPE_ENUM>
+// concept Enumable = requires
+// {
+//     MSG_TYPE
+// }
+
 namespace aruwsrc::communication::serial
 {
 template<typename MSG_TYPE_ENUM, uint8_t NUM_MSG_TYPES>
 class InterRobotSignalReceiver
 {
-    static_assert(std::is_enum<MSG_TYPE_ENUM>(), "MSG_TYPE_ENUM must be an enum.");
-    static_assert(std::is_same_v(uint8_t, std::underlying_type<MSG_TYPE_ENUM>), "Message type enum must be uint8_t.");
+    static_assert(std::is_enum_v<MSG_TYPE_ENUM>, "MSG_TYPE_ENUM must be an enum.");
+    // static_assert(std::is_same_v<uint8_t, std::underlying_type_t<MSG_TYPE_ENUM>>, "Message type enum must be uint8_t.");
     static_assert(NUM_MSG_TYPES <= 32, "Only 32 message types maximum allowed.");
     static_assert(NUM_MSG_TYPES >= 1, "There must at least be 1 message type.");
 public:
-    inline InterRobotSignalReceiver()
+    inline InterRobotSignalReceiver(tap::Drivers *drivers) : drivers(drivers)
     {
     }
 
@@ -55,13 +62,14 @@ public:
         if (message.header.dataLength !=
             sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + sizeof(MSG_TYPE_ENUM))
         {
-            RAISE_ERROR((&drivers), "message length incorrect");
-            return;
+            RAISE_ERROR((drivers), "message length incorrect");
         }
         // In a robot-to-robot message, the message data has an InteractiveHeader and then the actual contents
         // The actual contents is just a signal type
         return static_cast<MSG_TYPE_ENUM>(message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
     }
+private:
+    tap::Drivers *drivers;
 };
 }  // namespace aruwsrc::communication::serial
 

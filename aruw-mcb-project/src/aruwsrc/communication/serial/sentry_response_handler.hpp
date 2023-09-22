@@ -21,6 +21,7 @@
 #define SENTRY_RESPONSE_HANDLER_HPP_
 
 #include "inter_robot_signal_receiver.hpp"
+#include "sentry_strategy_message_types.hpp"
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/architecture/timeout.hpp"

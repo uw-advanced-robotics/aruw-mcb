@@ -48,7 +48,7 @@ enum class SentryRequestMessageType : uint8_t
 /**
  * Response message the sentry broadcasts to all friendly robots.
  */
-enum class SentryResponseMessageType : uint16_t
+enum class SentryResponseMessageType : uint8_t
 {
     NONE = 0,
     GO_TO_FRIENDLY_BASE,

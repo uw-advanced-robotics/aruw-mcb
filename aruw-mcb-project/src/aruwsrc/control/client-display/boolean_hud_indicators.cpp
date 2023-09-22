@@ -114,9 +114,6 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
-
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
          booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;

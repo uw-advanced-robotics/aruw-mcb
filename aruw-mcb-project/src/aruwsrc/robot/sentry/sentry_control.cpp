@@ -32,9 +32,6 @@
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/communication/serial/sentry_request_handler.hpp"
-#include "aruwsrc/communication/serial/sentry_request_message_types.hpp"
-#include "aruwsrc/communication/serial/sentry_response_subsystem.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -95,7 +92,7 @@ namespace sentry_control
 static constexpr Digital::InputPin LEFT_LIMIT_SWITCH = Digital::InputPin::B;
 static constexpr Digital::InputPin RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
-aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
+// aruwsrc::communication::serial::SentryRequestHandler sentryRequestHandler(drivers());
 
 // forward declare before sentry turret to be used in turret CV command
 extern SentryOttoKFOdometry2DSubsystem odometrySubsystem;
@@ -368,9 +365,9 @@ void pauseProjectileLaunchMessageHandler()
     turretOne.pauseCommandGovernor.initiatePause();
 }
 
-aruwsrc::communication::serial::SentryResponseSubsystem sentryResponseSubsystem(
-    *drivers(),
-    sentryAutoDrive);
+// aruwsrc::communication::serial::SentryResponseSubsystem sentryResponseSubsystem(
+//     *drivers(),
+//     sentryAutoDrive);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -404,7 +401,7 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
-    sentryResponseSubsystem.initialize();
+    // sentryResponseSubsystem.initialize();
     buzzer.initialize();
 }
 
@@ -421,7 +418,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
@@ -447,14 +444,14 @@ void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
 
-    sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-        pauseProjectileLaunchMessageHandler);
-    sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
-    sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
-        &sentryRequestHandler);
+    // sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
+    //     pauseProjectileLaunchMessageHandler);
+    // sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
+    // sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
+    // sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
+    // drivers->refSerial.attachRobotToRobotMessageHandler(
+    //     aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
+    //     &sentryRequestHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/

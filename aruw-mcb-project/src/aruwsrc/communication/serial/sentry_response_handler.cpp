@@ -25,7 +25,7 @@
 
 namespace aruwsrc::communication::serial
 {
-SentryResponseHandler::SentryResponseHandler(tap::Drivers &drivers) : drivers(drivers) {}
+SentryResponseHandler::SentryResponseHandler(tap::Drivers &drivers) : drivers(drivers), signalReceiver(&drivers) {}
 
 void SentryResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
