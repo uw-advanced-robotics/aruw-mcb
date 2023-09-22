@@ -22,8 +22,8 @@
 
 #include <cstdint>
 
-#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
 // @todo namespace????
@@ -34,14 +34,16 @@
 class MatchRunningGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    MatchRunningGovernor(const tap::communication::serial::RefSerial& refSerial) : refSerial(refSerial)
+    MatchRunningGovernor(const tap::communication::serial::RefSerial& refSerial)
+        : refSerial(refSerial)
     {
     }
 
-    bool isReady() override {
+    bool isReady() override
+    {
         auto gameData = refSerial.getGameData();
         return (
-            gameData.gameType == tap::communication::serial::RefSerial::Rx::GameType::UNKNOWN || 
+            gameData.gameType == tap::communication::serial::RefSerial::Rx::GameType::UNKNOWN ||
             gameData.gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME);
     }
 
