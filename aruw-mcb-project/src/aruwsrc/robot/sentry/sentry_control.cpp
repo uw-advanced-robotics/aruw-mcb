@@ -88,7 +88,7 @@
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
-driversFunc drivers = DoNotUse_getDrivers;
+aruwsrc::sentry::driversFunc drivers = DoNotUse_getDrivers;
 
 // namespace sentry_control
 // {
