@@ -191,7 +191,7 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_POS_PID_CONFIG =
     .maxICumulative = 0.0f,
     .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -204,7 +204,7 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_POS_PID_CONFIG
     .maxICumulative = 0.0f,
     .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -217,7 +217,7 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG =
     .maxICumulative = 0.0f,
     .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -230,7 +230,7 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_VEL_PID_CONFIG
     .maxICumulative = 0.0f,
     .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -267,15 +267,28 @@ static constexpr tap::algorithms::SmoothPidConfig CHASSIS_REL_PITCH_POS_PID_CONF
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_POS_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 3.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG = {
+    .kp = 10'000.0f,
+    .ki = 1'000.0f,
+    .kd = -10'000.0f,
+    .maxICumulative = 1'000.0f,
+    .maxOutput = 50'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
 };
 
@@ -289,19 +302,6 @@ static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_PITCH_POS_PID_CONFIG
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
-    .errDeadzone = 0.0f,
-};
-
-static constexpr tap::algorithms::SmoothPidConfig WORLD_REL_YAW_VEL_PID_CONFIG = {
-    .kp = 30'000.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 50'000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
 };
 

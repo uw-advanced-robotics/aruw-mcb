@@ -269,7 +269,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint);
 }
 
-float positionPidOutput = 0;
+// float positionPidOutput = 0;
 
 void WorldFrameYawTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
@@ -287,8 +287,8 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
         this->worldFrameSetpoint,
         turretMCBCanComm.getYawUnwrapped());
 
-    // const float positionPidOutput =
-    //     positionPid.runController(positionControllerError, turretMCBCanComm.getYawVelocity(), dt);
+    const float positionPidOutput =
+        positionPid.runController(positionControllerError, turretMCBCanComm.getYawVelocity(), dt);
 
     const float velocityControllerError = positionPidOutput - turretMCBCanComm.getYawVelocity();
     const float velocityPidOutput =
