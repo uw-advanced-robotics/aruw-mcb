@@ -74,7 +74,9 @@ private:
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
+    
     bool requestCalibrationFlag = false;
+
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
 };
 

@@ -29,53 +29,28 @@ VirtualDigital::VirtualDigital() : outputPinValuesMessage(), pinModesMessage() {
 
 void VirtualDigital::configureInputPullMode(InputPin pin, InputPullMode mode)
 {
+    uint8_t pinMode = static_cast<uint8_t>(mode);
     switch (pin)
     {
         case InputPin::B:
-            pinModes[0] = static_cast<uint8_t>(mode);
+            inputPinBMode = pinMode;
             break;
         case InputPin::C:
-            pinModes[1] = static_cast<uint8_t>(mode);
+            inputPinCMode = pinMode;
             break;
         case InputPin::D:
-            pinModes[2] = static_cast<uint8_t>(mode);
+            inputPinDMode = pinMode;
             break;
         case InputPin::Button:
-            pinModes[3] = static_cast<uint8_t>(mode);
+            inputPinButtonMode = pinMode;
             break;
         default:
             break;
     }
-    updated = false;
-	memcpy(pinModesMessage.data, pinModes, sizeof(pinModes));
+    pinModesMessage.data[pin] = pinMode;
 	pinModesMessage.setCRC16();
-}
 
-void VirtualDigital::set(OutputPin pin, bool isSet)
-{
-    switch (pin)
-    {
-        case OutputPin::E:
-            outputPinValues[0] = isSet;
-            break;
-        case OutputPin::F:
-            outputPinValues[1] = isSet;
-            break;
-        case OutputPin::G:
-            outputPinValues[2] = isSet;
-            break;
-        case OutputPin::H:
-            outputPinValues[3] = isSet;
-            break;
-        case OutputPin::Laser:
-            outputPinValues[4] = isSet;
-            break;
-        default:
-            break;
-    }
-    updated = false;
-	memcpy(outputPinValuesMessage.data, outputPinValues, sizeof(outputPinValues));
-	outputPinValuesMessage.setCRC16();
+    hasNewMessageData = true;
 }
 
 bool VirtualDigital::read(InputPin pin) const
@@ -83,16 +58,46 @@ bool VirtualDigital::read(InputPin pin) const
     switch (pin)
     {
         case InputPin::B:
-            return inputPinValues[0];
+            return inputPinB;
         case InputPin::C:
-            return inputPinValues[1];
+            return inputPinC;
         case InputPin::D:
-            return inputPinValues[2];
+            return inputPinD;
         case InputPin::Button:
-            return inputPinValues[3];
+            return inputPinButton;
         default:
             return false;
     }
 }
+
+void VirtualDigital::set(OutputPin pin, bool isSet)
+{
+    switch (pin)
+    {
+        case OutputPin::E:
+            outputPinE = isSet;
+            break;
+        case OutputPin::F:
+            outputPinF = isSet;
+            break;
+        case OutputPin::G:
+            outputPinG = isSet;
+            break;
+        case OutputPin::H:
+            outputPinH = isSet;
+            break;
+        case OutputPin::Laser:
+            outputPinLaser = isSet; 
+            break;
+        default:
+            break;
+    }
+    outputPinValuesMessage.data[pin] = isSet;
+	outputPinValuesMessage.setCRC16();
+    
+    hasNewMessageData = true;
+}
+
+
 
 }  // namespace aruwsrc::virtualMCB

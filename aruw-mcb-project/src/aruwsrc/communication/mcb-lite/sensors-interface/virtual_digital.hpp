@@ -74,15 +74,13 @@ public:
     bool read(InputPin pin) const;
 
 private:
-    uint8_t outputPinValues[5];
+    bool outputPinE, outputPinF, outputPinG, outputPinH, outputPinLaser;
     
-    uint8_t pinModes[4];
+    uint8_t inputPinBMode, inputPinCMode, inputPinDMode, inputPinButtonMode;
 
-    bool inputPinValues[4];
+    bool inputPinB, inputPinC, inputPinD, inputPinButton;
 
-    bool updated = true;
-
-    bool hasNewData() { return !updated; };
+    bool hasNewMessageData = false;
 
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<5> outputPinValuesMessage;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<4> pinModesMessage;

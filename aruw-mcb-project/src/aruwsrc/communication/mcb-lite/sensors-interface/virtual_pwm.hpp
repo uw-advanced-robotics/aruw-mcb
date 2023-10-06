@@ -75,11 +75,9 @@ private:
 
 	float PinDuty[6];
 
-    bool timerPaused[3]
+    bool timerPaused[3];
 
-	bool updated = true;
-
-	bool hasUpdates() { return !updated; }
+	bool hasNewMessageData = true;
 
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<6> pinDutyMessage;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<3> timerMessage;

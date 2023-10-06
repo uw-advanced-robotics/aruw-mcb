@@ -100,7 +100,7 @@ void SerialMCBLite::sendData()
             imu.requestCalibrationFlag = false;
         }
 
-        if(digital.hasNewData()){
+        if(digital.hasNewMessageData){
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.outputPinValuesMessage)),
@@ -109,7 +109,7 @@ void SerialMCBLite::sendData()
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.pinModesMessage)),
                 sizeof(digital.pinModesMessage));
-            digital.updated = true;   
+            digital.hasNewMessageData = false;   
         }
     }
 }
@@ -199,7 +199,10 @@ void SerialMCBLite::processAnalogMessage(const ReceivedSerialMessage& completeMe
 void SerialMCBLite::processDigitalMessage(const ReceivedSerialMessage& completeMessage)
 {
     memcpy(&currentDigitalData, completeMessage.data, sizeof(currentDigitalData));
-    memcpy(&digital.inputPinValues, &currentDigitalData, sizeof(currentDigitalData));
+    digital.inputPinB = currentDigitalData.BPinValue;
+    digital.inputPinC = currentDigitalData.CPinValue;
+    digital.inputPinD = currentDigitalData.DPinValue;
+    digital.inputPinButton = currentDigitalData.ButtonPinValue;
 }
 
 }  // namespace aruwsrc::virtualMCB
