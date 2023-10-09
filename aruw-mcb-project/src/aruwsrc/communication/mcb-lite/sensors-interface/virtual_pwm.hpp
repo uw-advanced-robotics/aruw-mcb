@@ -20,7 +20,6 @@
 #ifndef VIRTUAL_PWM_HPP_
 #define VIRTUAL_PWM_HPP_
 
-
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
@@ -28,24 +27,40 @@
 
 namespace aruwsrc::virtualMCB
 {
-struct PWMMessage{
-	float WPinDuty;
-	float XPinDuty;
-	float YPinDuty;
-	float ZPinDuty;
-	float BuzzerPinDuty;
-	float IMUHeaterPinDuty;
+
+// Struct of message being sent to MCBLite
+struct PWMPinDutyMessage
+{
+    float WPinDuty;
+    float XPinDuty;
+    float YPinDuty;
+    float ZPinDuty;
+    float BuzzerPinDuty;
+    float IMUHeaterPinDuty;
+} modm_packed;
+
+struct PWNTimerFrequencyMessage
+{
+    uint32_t timer8Frequency;
+    uint32_t timer12Frequency;
+    uint32_t timer3Frequency;
+} modm_packed;
+
+struct PWMTimerStartedMessage
+{
+    bool timer8Started;
+    bool timer12Started;
+    bool timer3Started;
 } modm_packed;
 
 class VirtualPwm : public tap::gpio::Pwm
 {
-	friend class SerialMCBLite;
+    friend class SerialMCBLite;
 
 public:
+    VirtualPwm();
 
-	VirtualPwm();
-
-	// Please dont't call this, shouldn't be used
+    // Please dont't call this, shouldn't be used
     void init() {}
 
     /**
@@ -72,16 +87,21 @@ public:
     void start(Timer timer);
 
 private:
+    float WPinDuty, XPinDuty, YPinDuty, ZPinDuty, BuzzerPinDuty, IMUHeaterPinDuty;
 
-	float PinDuty[6];
+    uint32_t timer8Frequency, timer12Frequency, timer3Frequency;
 
-    bool timerPaused[3];
+    bool timer8Started, timer12Started, timer3Started;
 
-	bool hasNewMessageData = true;
+    bool hasNewMessageData = false;
 
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<6> pinDutyMessage;
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<3> timerMessage;
-
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(PWMPinDutyMessage)>
+        pinDutyMessage;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(
+        PWNTimerFrequencyMessage)>
+        timerFrequencyMessage;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(PWMTimerStartedMessage)>
+        timerStartedMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB

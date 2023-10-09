@@ -25,11 +25,11 @@
 
 #include "aruwsrc/communication/mcb-lite/message_types.hpp"
 
-
 namespace aruwsrc::virtualMCB
 {
 
-struct DigitalMessage
+// Struct of message coming from MCBLite
+struct DigitalInputPinMessage
 {
     bool BPinValue;
     bool CPinValue;
@@ -37,16 +37,33 @@ struct DigitalMessage
     bool ButtonPinValue;
 } modm_packed;
 
+// Structs of messages being sent to MCBLite
+struct DigitalOutputPinMessage
+{
+    bool EPinValue;
+    bool FPinValue;
+    bool GPinValue;
+    bool HPinValue;
+    bool LaserPinValue;
+} modm_packed;
+
+struct DigitalPinModeMessage
+{
+    uint8_t BPinMode;
+    uint8_t CPinMode;
+    uint8_t DPinMode;
+    uint8_t ButtonPinMode;
+} modm_packed;
+
 class VirtualDigital : public tap::gpio::Digital
 {
-	friend class SerialMCBLite;
+    friend class SerialMCBLite;
 
 public:
-
-	VirtualDigital();
+    VirtualDigital();
 
     // Don't call this please, shouldn't be used
-	void init() {};
+    void init(){};
 
     /**
      * By default input pins are floating. Configure them to have a pull-up
@@ -75,16 +92,17 @@ public:
 
 private:
     bool outputPinE, outputPinF, outputPinG, outputPinH, outputPinLaser;
-    
+
     uint8_t inputPinBMode, inputPinCMode, inputPinDMode, inputPinButtonMode;
 
     bool inputPinB, inputPinC, inputPinD, inputPinButton;
 
     bool hasNewMessageData = false;
 
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<5> outputPinValuesMessage;
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<4> pinModesMessage;
-
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(DigitalOutputPinMessage)>
+        outputPinValuesMessage;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(DigitalPinModeMessage)>
+        pinModesMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB

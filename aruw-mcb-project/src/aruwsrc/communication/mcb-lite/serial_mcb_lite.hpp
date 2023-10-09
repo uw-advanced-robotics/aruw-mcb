@@ -82,9 +82,9 @@ private:
 
     // DEBUG VARIABLES
     IMUMessage currentIMUData;
-    CurrentSensorMessage currentCurrentSensorData;
-    AnalogMessage currentAnalogData;
-    DigitalMessage currentDigitalData;
+    CurrentSensorInputMessage currentCurrentSensorData;
+    AnalogInputPinMessage currentAnalogData;
+    DigitalInputPinMessage currentDigitalData;
     uint8_t can1Data[64];
     uint8_t can2Data[64];
 };

@@ -24,7 +24,8 @@
 namespace aruwsrc::virtualMCB
 {
 
-struct CurrentSensorMessage
+// Struct of message coming from MCBLite
+struct CurrentSensorInputMessage
 {
     float current;
 } modm_packed;
@@ -36,6 +37,7 @@ class VirtualCurrentSensor : public tap::communication::sensors::current::Curren
 public:
     VirtualCurrentSensor() {}
 
+    // Please don't call this
     void update() override {}
 
     float getCurrentMa() const override { return current; }

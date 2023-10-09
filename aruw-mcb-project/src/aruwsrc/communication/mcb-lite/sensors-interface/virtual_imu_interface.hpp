@@ -31,6 +31,7 @@ using namespace tap::communication::sensors::imu::mpu6500;
 namespace aruwsrc::virtualMCB
 {
 
+// Struct of message coming from MCBLite
 struct IMUMessage
 {
     float pitch, roll, yaw;
@@ -38,6 +39,12 @@ struct IMUMessage
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
+} modm_packed;
+
+// Struct of messages being sent to MCBLite
+struct CalibrateIMUMessage
+{
+    uint8_t calibrateIMU;  // Value is ignored, message is only used to trigger calibration
 } modm_packed;
 
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
@@ -74,10 +81,11 @@ private:
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
-    
+
     bool requestCalibrationFlag = false;
 
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(CalibrateIMUMessage)>
+        calibrateIMUMessage;
 };
 
 }  // namespace aruwsrc::virtualMCB

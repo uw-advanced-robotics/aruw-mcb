@@ -24,8 +24,8 @@
 
 namespace aruwsrc::virtualMCB
 {
-
-struct AnalogMessage
+// Struct of message coming from MCBLite
+struct AnalogInputPinMessage
 {
     uint16_t SPinValue;
     uint16_t TPinValue;

@@ -22,6 +22,26 @@
 namespace aruwsrc::virtualMCB
 {
 
-VirtualPwm::VirtualPwm() : pinDutyMessage(), timerMessage() {}
+VirtualPwm::VirtualPwm() : pinDutyMessage(), timerStartedMessage(), timerFrequencyMessage() {
+	pinDutyMessage.messageType = PWM_PIN_DUTY_MESSAGE;
+	timerStartedMessage.messageType = PWM_TIMER_STARTED_MESSAGE;
+	timerFrequencyMessage.messageType = PWM_TIMER_FREQUENCY_MESSAGE;
+}
+
+void VirtualPwm::writeAllZeros(){
+	WPinDuty = 0;
+	XPinDuty = 0;
+	YPinDuty = 0;
+	ZPinDuty = 0;
+	BuzzerPinDuty = 0;
+	IMUHeaterPinDuty = 0;
+
+	memset(&pinDutyMessage.data, 0, sizeof(pinDutyMessage.data));
+
+	hasNewMessageData = true;
+	pinDutyMessage.setCRC16();
+}
+
+
 
 }  // namespace aruwsrc::virtualMCB
