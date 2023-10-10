@@ -36,6 +36,8 @@ SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::
       imu(),
       digital(),
       analog(),
+      pwm(),
+      leds(),
       port(port),
       currentIMUData(),
       currentCurrentSensorData()
@@ -74,6 +76,7 @@ void SerialMCBLite::sendData()
     if (drivers->uart.isWriteFinished(port))
     {
         motorTxHandler.encodeAndSendCanData();
+        // 100 bytes
         drivers->uart.write(
             port,
             reinterpret_cast<uint8_t*>(&(motorTxHandler.can1MessageLowSend)),
@@ -92,7 +95,7 @@ void SerialMCBLite::sendData()
             sizeof(motorTxHandler.can2MessageHighSend));
 
         if (imu.requestCalibrationFlag)
-        {
+        {  // 10 bytes
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
@@ -100,7 +103,8 @@ void SerialMCBLite::sendData()
             imu.requestCalibrationFlag = false;
         }
 
-        if(digital.hasNewMessageData){
+        if (digital.hasNewMessageData)
+        {  // 27 bytes
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.outputPinValuesMessage)),
@@ -109,7 +113,33 @@ void SerialMCBLite::sendData()
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.pinModesMessage)),
                 sizeof(digital.pinModesMessage));
-            digital.hasNewMessageData = false;   
+            digital.hasNewMessageData = false;
+        }
+
+        if (pwm.hasNewMessageData)
+        {  // 66 bytes
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pinDutyMessage)),
+                sizeof(pwm.pinDutyMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.timerStartedMessage)),
+                sizeof(pwm.timerStartedMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.timerFrequencyMessage)),
+                sizeof(pwm.timerFrequencyMessage));
+            pwm.hasNewMessageData = false;
+        }
+
+        if (leds.hasNewMessageData)
+        {  // 19 bytes
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(leds.ledControlMessage)),
+                sizeof(leds.ledControlMessage));
+            leds.hasNewMessageData = false;
         }
     }
 }

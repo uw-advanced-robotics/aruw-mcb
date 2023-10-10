@@ -32,6 +32,8 @@
 #include "sensors-interface/virtual_current_sensor.hpp"
 #include "sensors-interface/virtual_digital.hpp"
 #include "sensors-interface/virtual_imu_interface.hpp"
+#include "sensors-interface/virtual_pwm.hpp"
+#include "sensors-interface/virtual_leds.hpp"
 
 #include "message_types.hpp"
 
@@ -65,6 +67,8 @@ public:
     VirtualIMUInterface imu;
     VirtualDigital digital;
     VirtualAnalog analog;
+    VirtualPwm pwm;
+    VirtualLeds leds;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);

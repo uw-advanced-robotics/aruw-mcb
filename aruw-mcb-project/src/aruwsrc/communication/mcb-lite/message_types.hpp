@@ -37,7 +37,8 @@ enum MessageTypes : uint8_t
     ANALOG_PIN_READ_MESSAGE = 8,
     PWM_PIN_DUTY_MESSAGE = 9,
     PWM_TIMER_FREQUENCY_MESSAGE = 10,
-    PWM_TIMER_STARTED_MESSAGE = 11
+    PWM_TIMER_STARTED_MESSAGE = 11,
+    LED_CONTROL_MESSAGE = 12
 };
 }  // namespace aruwsrc::virtualMCB
 
