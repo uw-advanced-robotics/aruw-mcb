@@ -27,7 +27,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 // Struct of message being sent to MCBLite
 struct PWMPinDutyMessage
 {

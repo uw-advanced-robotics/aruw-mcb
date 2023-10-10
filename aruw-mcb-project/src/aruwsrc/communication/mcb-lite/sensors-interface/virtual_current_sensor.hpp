@@ -23,7 +23,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 // Struct of message coming from MCBLite
 struct CurrentSensorInputMessage
 {

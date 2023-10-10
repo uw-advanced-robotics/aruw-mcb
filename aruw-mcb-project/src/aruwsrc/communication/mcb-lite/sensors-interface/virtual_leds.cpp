@@ -17,55 +17,53 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "virtual_leds.hpp"
 
 namespace aruwsrc::virtualMCB
 {
+VirtualLeds::VirtualLeds() { ledControlMessage.messageType = LED_CONTROL_MESSAGE; }
 
-VirtualLeds::VirtualLeds(){
-	ledControlMessage.messageType = LED_CONTROL_MESSAGE;
-}
+void VirtualLeds::set(tap::gpio::Leds::LedPin led, bool isSet)
+{
+    switch (led)
+    {
+        case tap::gpio::Leds::LedPin::A:
+            ALedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::B:
+            BLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::C:
+            CLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::D:
+            DLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::E:
+            ELedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::F:
+            FLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::G:
+            GLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::H:
+            HLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::Green:
+            GreenLedOn = isSet;
+            break;
+        case tap::gpio::Leds::LedPin::Red:
+            RedLedOn = isSet;
+            break;
+        default:
+            break;
+    }
+    hasNewMessageData = true;
 
-void VirtualLeds::set(tap::gpio::Leds::LedPin led, bool isSet){
-	switch(led){
-		case tap::gpio::Leds::LedPin::A:
-			ALedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::B:
-			BLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::C:
-			CLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::D:
-			DLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::E:
-			ELedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::F:
-			FLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::G:
-			GLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::H:
-			HLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::Green:
-			GreenLedOn = isSet;
-			break;
-		case tap::gpio::Leds::LedPin::Red:
-			RedLedOn = isSet;
-			break;
-		default:
-			break;
-	}
-	hasNewMessageData = true;
-
-	ledControlMessage.data[led] = isSet;
-	ledControlMessage.setCRC16();
+    ledControlMessage.data[led] = isSet;
+    ledControlMessage.setCRC16();
 }
 
 }  // namespace aruwsrc::virtualMCB

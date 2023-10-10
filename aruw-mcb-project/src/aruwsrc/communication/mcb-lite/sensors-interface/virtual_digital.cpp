@@ -21,10 +21,10 @@
 
 namespace aruwsrc::virtualMCB
 {
-
-VirtualDigital::VirtualDigital() : outputPinValuesMessage(), pinModesMessage() {
-	outputPinValuesMessage.messageType = DIGITAL_OUTPUT_MESSAGE;
-	pinModesMessage.messageType = DIGITAL_PIN_MODE_MESSAGE;
+VirtualDigital::VirtualDigital() : outputPinValuesMessage(), pinModesMessage()
+{
+    outputPinValuesMessage.messageType = DIGITAL_OUTPUT_MESSAGE;
+    pinModesMessage.messageType = DIGITAL_PIN_MODE_MESSAGE;
 }
 
 void VirtualDigital::configureInputPullMode(InputPin pin, InputPullMode mode)
@@ -48,7 +48,7 @@ void VirtualDigital::configureInputPullMode(InputPin pin, InputPullMode mode)
             break;
     }
     pinModesMessage.data[pin] = pinMode;
-	pinModesMessage.setCRC16();
+    pinModesMessage.setCRC16();
 
     hasNewMessageData = true;
 }
@@ -87,17 +87,15 @@ void VirtualDigital::set(OutputPin pin, bool isSet)
             outputPinH = isSet;
             break;
         case OutputPin::Laser:
-            outputPinLaser = isSet; 
+            outputPinLaser = isSet;
             break;
         default:
             break;
     }
     outputPinValuesMessage.data[pin] = isSet;
-	outputPinValuesMessage.setCRC16();
-    
+    outputPinValuesMessage.setCRC16();
+
     hasNewMessageData = true;
 }
-
-
 
 }  // namespace aruwsrc::virtualMCB

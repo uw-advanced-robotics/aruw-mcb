@@ -23,21 +23,21 @@ namespace aruwsrc::virtualMCB
 {
 uint16_t VirtualAnalog::read(Analog::Pin pin) const
 {
-	switch (pin)
-	{
-		case Analog::Pin::S:
-			return SPinValue;
-		case Analog::Pin::T:
-			return TPinValue;
-		case Analog::Pin::U:
-			return UPinValue;
-		case Analog::Pin::V:
-			return VPinValue;
-		case Analog::Pin::OledJoystick:
-			return OLEDPinValue;
-		default:
-			return 0;
-	}
+    switch (pin)
+    {
+        case Analog::Pin::S:
+            return SPinValue;
+        case Analog::Pin::T:
+            return TPinValue;
+        case Analog::Pin::U:
+            return UPinValue;
+        case Analog::Pin::V:
+            return VPinValue;
+        case Analog::Pin::OledJoystick:
+            return OLEDPinValue;
+        default:
+            return 0;
+    }
 }
 
 }  // namespace aruwsrc::virtualMCB

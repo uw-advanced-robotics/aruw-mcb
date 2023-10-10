@@ -21,116 +21,124 @@
 
 namespace aruwsrc::virtualMCB
 {
-
-VirtualPwm::VirtualPwm() : pinDutyMessage(), timerStartedMessage(), timerFrequencyMessage() {
-	pinDutyMessage.messageType = PWM_PIN_DUTY_MESSAGE;
-	timerStartedMessage.messageType = PWM_TIMER_STARTED_MESSAGE;
-	timerFrequencyMessage.messageType = PWM_TIMER_FREQUENCY_MESSAGE;
+VirtualPwm::VirtualPwm() : pinDutyMessage(), timerFrequencyMessage(), timerStartedMessage()
+{
+    pinDutyMessage.messageType = PWM_PIN_DUTY_MESSAGE;
+    timerStartedMessage.messageType = PWM_TIMER_STARTED_MESSAGE;
+    timerFrequencyMessage.messageType = PWM_TIMER_FREQUENCY_MESSAGE;
 }
 
-void VirtualPwm::writeAllZeros(){
-	WPinDuty = 0;
-	XPinDuty = 0;
-	YPinDuty = 0;
-	ZPinDuty = 0;
-	BuzzerPinDuty = 0;
-	IMUHeaterPinDuty = 0;
+void VirtualPwm::writeAllZeros()
+{
+    WPinDuty = 0;
+    XPinDuty = 0;
+    YPinDuty = 0;
+    ZPinDuty = 0;
+    BuzzerPinDuty = 0;
+    IMUHeaterPinDuty = 0;
 
-	memset(&pinDutyMessage.data, 0, sizeof(pinDutyMessage.data));
+    memset(&pinDutyMessage.data, 0, sizeof(pinDutyMessage.data));
 
-	hasNewMessageData = true;
-	pinDutyMessage.setCRC16();
+    hasNewMessageData = true;
+    pinDutyMessage.setCRC16();
 }
 
-void VirtualPwm::write(float duty, Pwm::Pin pin){
-	switch(pin){
-		case Pwm::Pin::W:
-			WPinDuty = duty;
-			break;
-		case Pwm::Pin::X:
-			XPinDuty = duty;
-			break;
-		case Pwm::Pin::Y:
-			YPinDuty = duty;
-			break;
-		case Pwm::Pin::Z:
-			ZPinDuty = duty;
-			break;
-		case Pwm::Pin::Buzzer:
-			BuzzerPinDuty = duty;
-			break;
-		case Pwm::Pin::ImuHeater:
-			IMUHeaterPinDuty = duty;
-			break;
-		default:
-			break;
-	}
+void VirtualPwm::write(float duty, Pwm::Pin pin)
+{
+    switch (pin)
+    {
+        case Pwm::Pin::W:
+            WPinDuty = duty;
+            break;
+        case Pwm::Pin::X:
+            XPinDuty = duty;
+            break;
+        case Pwm::Pin::Y:
+            YPinDuty = duty;
+            break;
+        case Pwm::Pin::Z:
+            ZPinDuty = duty;
+            break;
+        case Pwm::Pin::Buzzer:
+            BuzzerPinDuty = duty;
+            break;
+        case Pwm::Pin::ImuHeater:
+            IMUHeaterPinDuty = duty;
+            break;
+        default:
+            break;
+    }
 
-	pinDutyMessage.data[pin] = duty;
+    pinDutyMessage.data[pin] = duty;
 
-	hasNewMessageData = true;
-	pinDutyMessage.setCRC16();
+    hasNewMessageData = true;
+    pinDutyMessage.setCRC16();
 }
 
+void VirtualPwm::setTimerFrequency(Pwm::Timer timer, uint32_t frequency)
+{
+    switch (timer)
+    {
+        case Pwm::Timer::TIMER8:
+            timer8Frequency = frequency;
+            break;
+        case Pwm::Timer::TIMER12:
+            timer12Frequency = frequency;
+            break;
+        case Pwm::Timer::TIMER3:
+            timer3Frequency = frequency;
+            break;
+        default:
+            break;
+    }
+    timerFrequencyMessage.data[timer] = frequency;
 
-void VirtualPwm::setTimerFrequency(Pwm::Timer timer, uint32_t frequency){
-	switch(timer){
-		case Pwm::Timer::TIMER8:
-			timer8Frequency = frequency;
-			break;
-		case Pwm::Timer::TIMER12:
-			timer12Frequency = frequency;
-			break;
-		case Pwm::Timer::TIMER3:
-			timer3Frequency = frequency;
-			break;
-		default:
-			break;
-	}
-	timerFrequencyMessage.data[timer] = frequency;
-
-	hasNewMessageData = true;
-	timerFrequencyMessage.setCRC16();
+    hasNewMessageData = true;
+    timerFrequencyMessage.setCRC16();
 }
 
-void VirtualPwm::pause(Pwm::Timer timer){
-	switch(timer){
-		case Pwm::Timer::TIMER8:
-			timer8Started = false;
-			break;
-		case Pwm::Timer::TIMER12:
-			timer12Started = false;
-			break;
-		case Pwm::Timer::TIMER3:
-			timer3Started = false;
-			break;
-		default:
-			break;
-	}
-	timerStartedMessage.data[timer] = false;
+void VirtualPwm::pause(Pwm::Timer timer)
+{
+    switch (timer)
+    {
+        case Pwm::Timer::TIMER8:
+            timer8Started = false;
+            break;
+        case Pwm::Timer::TIMER12:
+            timer12Started = false;
+            break;
+        case Pwm::Timer::TIMER3:
+            timer3Started = false;
+            break;
+        default:
+            break;
+    }
+    timerStartedMessage.data[timer] = false;
 
-	hasNewMessageData = true;
-	timerStartedMessage.setCRC16();
+    hasNewMessageData = true;
+    timerStartedMessage.setCRC16();
 }
 
-void VirtualPwm::start(Pwm::Timer timer){
-	switch(timer){
-		case Pwm::Timer::TIMER8:
-			timer8Started = true;
-			break;
-		case Pwm::Timer::TIMER12:
-			timer12Started = true;
-			break;
-		case Pwm::Timer::TIMER3:
-			timer3Started = true;
-			break;
-		default:
-			break;
-	}
-	timerStartedMessage.data[timer] = true;
+void VirtualPwm::start(Pwm::Timer timer)
+{
+    switch (timer)
+    {
+        case Pwm::Timer::TIMER8:
+            timer8Started = true;
+            break;
+        case Pwm::Timer::TIMER12:
+            timer12Started = true;
+            break;
+        case Pwm::Timer::TIMER3:
+            timer3Started = true;
+            break;
+        default:
+            break;
+    }
+    timerStartedMessage.data[timer] = true;
 
-	hasNewMessageData = true;
-	timerStartedMessage.setCRC16();
+    hasNewMessageData = true;
+    timerStartedMessage.setCRC16();
 }
 
 }  // namespace aruwsrc::virtualMCB

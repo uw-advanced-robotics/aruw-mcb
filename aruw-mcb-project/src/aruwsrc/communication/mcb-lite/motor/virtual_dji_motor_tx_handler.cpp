@@ -19,8 +19,6 @@
 
 #include "virtual_dji_motor_tx_handler.hpp"
 
-
-
 namespace aruwsrc::virtualMCB
 {
 VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers)

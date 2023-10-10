@@ -32,8 +32,8 @@
 #include "sensors-interface/virtual_current_sensor.hpp"
 #include "sensors-interface/virtual_digital.hpp"
 #include "sensors-interface/virtual_imu_interface.hpp"
-#include "sensors-interface/virtual_pwm.hpp"
 #include "sensors-interface/virtual_leds.hpp"
+#include "sensors-interface/virtual_pwm.hpp"
 
 #include "message_types.hpp"
 
@@ -80,7 +80,6 @@ private:
     void processAnalogMessage(const ReceivedSerialMessage& completeMessage);
 
     void processDigitalMessage(const ReceivedSerialMessage& completeMessage);
-
 
     tap::communication::serial::Uart::UartPort port;
 

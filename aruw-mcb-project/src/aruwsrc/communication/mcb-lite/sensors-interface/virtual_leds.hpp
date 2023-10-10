@@ -27,7 +27,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-
 struct LEDControlMessage
 {
     bool ALedOn;

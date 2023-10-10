@@ -30,7 +30,6 @@ using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::virtualMCB
 {
-
 // Struct of message coming from MCBLite
 struct IMUMessage
 {
