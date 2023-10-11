@@ -20,6 +20,8 @@
 #ifndef VIRTUAL_PWM_HPP_
 #define VIRTUAL_PWM_HPP_
 
+#include <cstring>
+
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
