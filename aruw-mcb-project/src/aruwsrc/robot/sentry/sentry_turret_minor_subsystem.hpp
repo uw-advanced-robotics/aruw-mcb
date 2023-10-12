@@ -25,7 +25,6 @@
 
 namespace aruwsrc::control::sentry
 {
-
 class SentryTurretMinorSubsystem final : aruwsrc::control::turret::TurretSubsystem
 {
     SentryTurretMinorSubsystem(
