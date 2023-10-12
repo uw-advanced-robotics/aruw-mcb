@@ -19,6 +19,8 @@
 
 #ifndef SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
 #define SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_
+#include "tap/motor/motor_interface.hpp"
+
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc::control::sentry
@@ -26,9 +28,22 @@ namespace aruwsrc::control::sentry
 
 class SentryTurretMinorSubsystem final : aruwsrc::control::turret::TurretSubsystem
 {
+    SentryTurretMinorSubsystem(
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface* pitchMotor,
+        tap::motor::MotorInterface* yawMotor,
+        const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+        const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
+        const aruwsrc::can::TurretMCBCanComm* turretMCB,
+        uint8_t turretID);
+
 public:
     float getMajorFrameYaw() const;
     float getMajorFramePitch() const;
+    uint8_t getTurretID() const { return this->turretID; };
+
+private:
+    uint8_t turretID = 0;
 };
 
 }  // namespace aruwsrc::control::sentry

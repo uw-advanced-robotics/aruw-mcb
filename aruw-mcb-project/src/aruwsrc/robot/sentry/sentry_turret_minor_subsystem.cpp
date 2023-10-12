@@ -21,6 +21,25 @@
 
 namespace aruwsrc::control::sentry
 {
+SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
+    tap::Drivers* drivers,
+    tap::motor::MotorInterface* pitchMotor,
+    tap::motor::MotorInterface* yawMotor,
+    const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+    const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
+    const aruwsrc::can::TurretMCBCanComm* turretMCB,
+    uint8_t turretID)
+    : aruwsrc::control::turret::TurretSubsystem(
+          drivers,
+          pitchMotor,
+          yawMotor,
+          pitchMotorConfig,
+          yawMotorConfig,
+          turretMCB),
+      turretID(turretID)
+{
+}
+
 float SentryTurretMinorSubsystem::getMajorFramePitch() const
 {
     return this->pitchMotor.getChassisFrameMeasuredAngle().getValue();
