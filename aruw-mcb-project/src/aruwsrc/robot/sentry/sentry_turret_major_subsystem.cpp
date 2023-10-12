@@ -33,4 +33,10 @@ SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
 void SentryTurretMajorSubsystem::refresh() { yawMotor.updateMotorAngle(); }
 
 void SentryTurretMajorSubsystem::initialize() { yawMotor.initialize(); }
+
+float SentryTurretMajorSubsystem::getChassisYaw() const
+{
+    return yawMotor.getChassisFrameMeasuredAngle().getValue();
+}
+
 }  // namespace aruwsrc::control::sentry

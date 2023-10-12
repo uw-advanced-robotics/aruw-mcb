@@ -45,7 +45,7 @@ public:
 
     void initialize();
 
-    float getWorldYaw() const;
+    float getChassisYaw() const;
 
     /**
      * @return Timestamp of when the turret subsystem returns the angle
