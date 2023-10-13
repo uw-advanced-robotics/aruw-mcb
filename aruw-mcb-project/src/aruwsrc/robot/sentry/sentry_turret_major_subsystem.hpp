@@ -47,13 +47,6 @@ public:
 
     float getChassisYaw() const;
 
-    /**
-     * @return Timestamp of when the turret subsystem returns the angle
-     * measurements.
-     * I don't know why.
-     */
-    uint32_t getLastMeasurementTimeMicroseconds() const;
-
     aruwsrc::control::turret::TurretMotor yawMotor;
 };  // class SentryTurretMajorSubsystem
 
