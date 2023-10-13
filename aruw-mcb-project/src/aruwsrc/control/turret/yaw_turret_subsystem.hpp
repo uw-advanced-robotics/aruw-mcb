@@ -17,15 +17,18 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_TURRET_MAJOR_SUBSYSTEM_HPP_
-#define SENTRY_TURRET_MAJOR_SUBSYSTEM_HPP_
+#ifndef YAW_TURRET_SUBSYSTEM_HPP_
+#define YAW_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::control::sentry
+#include "turret_motor.hpp"
+
+namespace aruwsrc::control::turret
 {
 /**
- * Turret major subsystem for the Sentry.
+ *
+ * A turret subystem that is only capable of yawing.
  *
  * Stores software necessary for interacting with a gimbal that control the
  * yaw of a turret. Provides a convenient API for other commands to interact with a turret.
@@ -33,10 +36,10 @@ namespace aruwsrc::control::sentry
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from above.
  */
-class SentryTurretMajorSubsystem final : public tap::control::Subsystem
+class YawTurretSubsystem final : public tap::control::Subsystem
 {
 public:
-    SentryTurretMajorSubsystem(
+    YawTurretSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface* yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig);
@@ -48,8 +51,8 @@ public:
     float getChassisYaw() const;
 
     aruwsrc::control::turret::TurretMotor yawMotor;
-};  // class SentryTurretMajorSubsystem
+};  // class YawTurretSubsystem
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::control::turret
 
-#endif  // SENTRY_TURRET_MAJOR_SUBSYSTEM_HPP_
+#endif  // YAW_TURRET_SUBSYSTEM_HPP_

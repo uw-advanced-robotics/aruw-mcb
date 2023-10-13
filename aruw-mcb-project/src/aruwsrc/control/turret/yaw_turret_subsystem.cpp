@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_turret_major_subsystem.hpp"
+#include "yaw_turret_subsystem.hpp"
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::control::turret
 {
-SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
+YawTurretSubsystem::YawTurretSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface* yawMotor,
     const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig)
@@ -30,13 +30,13 @@ SentryTurretMajorSubsystem::SentryTurretMajorSubsystem(
 {
 }
 
-void SentryTurretMajorSubsystem::refresh() { yawMotor.updateMotorAngle(); }
+void YawTurretSubsystem::refresh() { yawMotor.updateMotorAngle(); }
 
-void SentryTurretMajorSubsystem::initialize() { yawMotor.initialize(); }
+void YawTurretSubsystem::initialize() { yawMotor.initialize(); }
 
-float SentryTurretMajorSubsystem::getChassisYaw() const
+float YawTurretSubsystem::getChassisYaw() const
 {
     return yawMotor.getChassisFrameMeasuredAngle().getValue();
 }
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::control::turret
