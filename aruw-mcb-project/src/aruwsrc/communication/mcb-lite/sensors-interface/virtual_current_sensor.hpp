@@ -23,11 +23,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-// Struct of message coming from MCBLite
-struct CurrentSensorInputMessage
-{
-    float current;
-} modm_packed;
 
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {

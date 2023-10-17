@@ -24,15 +24,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-// Struct of message coming from MCBLite
-struct AnalogInputPinMessage
-{
-    uint16_t SPinValue;
-    uint16_t TPinValue;
-    uint16_t UPinValue;
-    uint16_t VPinValue;
-    uint16_t OLEDPinValue;
-} modm_packed;
 
 class VirtualAnalog : public tap::gpio::Analog
 {

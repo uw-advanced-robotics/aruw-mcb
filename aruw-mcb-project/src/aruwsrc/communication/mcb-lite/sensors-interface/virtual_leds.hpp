@@ -27,19 +27,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-struct LEDControlMessage
-{
-    bool ALedOn;
-    bool BLedOn;
-    bool CLedOn;
-    bool DLedOn;
-    bool ELedOn;
-    bool FLedOn;
-    bool GLedOn;
-    bool HLedOn;
-    bool GreenLedOn;
-    bool RedLedOn;
-} modm_packed;
 
 class VirtualLeds : public tap::gpio::Leds
 {

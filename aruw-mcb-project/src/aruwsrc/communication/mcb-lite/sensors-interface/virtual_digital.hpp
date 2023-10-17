@@ -27,32 +27,7 @@
 
 namespace aruwsrc::virtualMCB
 {
-// Struct of message coming from MCBLite
-struct DigitalInputPinMessage
-{
-    bool BPinValue;
-    bool CPinValue;
-    bool DPinValue;
-    bool ButtonPinValue;
-} modm_packed;
 
-// Structs of messages being sent to MCBLite
-struct DigitalOutputPinMessage
-{
-    bool EPinValue;
-    bool FPinValue;
-    bool GPinValue;
-    bool HPinValue;
-    bool LaserPinValue;
-} modm_packed;
-
-struct DigitalPinModeMessage
-{
-    uint8_t BPinMode;
-    uint8_t CPinMode;
-    uint8_t DPinMode;
-    uint8_t ButtonPinMode;
-} modm_packed;
 
 class VirtualDigital : public tap::gpio::Digital
 {

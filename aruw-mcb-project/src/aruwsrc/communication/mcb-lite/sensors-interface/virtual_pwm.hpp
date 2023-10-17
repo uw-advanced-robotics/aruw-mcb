@@ -29,30 +29,6 @@
 
 namespace aruwsrc::virtualMCB
 {
-// Struct of message being sent to MCBLite
-struct PWMPinDutyMessage
-{
-    float WPinDuty;
-    float XPinDuty;
-    float YPinDuty;
-    float ZPinDuty;
-    float BuzzerPinDuty;
-    float IMUHeaterPinDuty;
-} modm_packed;
-
-struct PWNTimerFrequencyMessage
-{
-    uint32_t timer8Frequency;
-    uint32_t timer12Frequency;
-    uint32_t timer3Frequency;
-} modm_packed;
-
-struct PWMTimerStartedMessage
-{
-    bool timer8Started;
-    bool timer12Started;
-    bool timer3Started;
-} modm_packed;
 
 class VirtualPwm : public tap::gpio::Pwm
 {
