@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -40,8 +40,8 @@ class YawTurretSubsystem final : public tap::control::Subsystem
 {
 public:
     YawTurretSubsystem(
-        tap::Drivers* drivers,
-        tap::motor::MotorInterface* yawMotor,
+        tap::Drivers& drivers,
+        tap::motor::MotorInterface& yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig);
 
     void refresh();
@@ -50,9 +50,9 @@ public:
 
     float getChassisYaw() const;
 
+private:
     aruwsrc::control::turret::TurretMotor yawMotor;
 };  // class YawTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
-
 #endif  // YAW_TURRET_SUBSYSTEM_HPP_

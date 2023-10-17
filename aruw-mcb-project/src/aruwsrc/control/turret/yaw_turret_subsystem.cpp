@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,11 +22,11 @@
 namespace aruwsrc::control::turret
 {
 YawTurretSubsystem::YawTurretSubsystem(
-    tap::Drivers* drivers,
-    tap::motor::MotorInterface* yawMotor,
+    tap::Drivers& drivers,
+    tap::motor::MotorInterface& yawMotor,
     const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig)
-    : tap::control::Subsystem(drivers),
-      yawMotor(yawMotor, yawMotorConfig)
+    : tap::control::Subsystem(&drivers),
+      yawMotor(&yawMotor, yawMotorConfig)
 {
 }
 
