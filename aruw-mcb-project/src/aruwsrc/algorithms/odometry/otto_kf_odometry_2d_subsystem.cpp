@@ -26,9 +26,10 @@ namespace aruwsrc::algorithms::odometry
 OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
     tap::Drivers &drivers,
     const aruwsrc::control::turret::TurretSubsystem &turret,
-    tap::control::chassis::ChassisSubsystemInterface &chassis)
+    tap::control::chassis::ChassisSubsystemInterface &chassis,
+    const modm::Vector2f initPos)
     : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500),
+      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500, initPos),
       orientationObserver(turret)
 {
 }

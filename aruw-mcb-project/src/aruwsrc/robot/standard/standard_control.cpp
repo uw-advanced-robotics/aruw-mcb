@@ -144,7 +144,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
