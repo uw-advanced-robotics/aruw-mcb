@@ -26,7 +26,8 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
-// @todo namespace????
+namespace aruwsrc::control::governor
+{
 /**
  * A governor that when triggered pauses the ability to schedule an associated Command for a
  * specified period.
@@ -52,5 +53,7 @@ public:
 private:
     const tap::communication::serial::RefSerial& refSerial;
 };
+
+}  // namespace aruwsrc::control::governor
 
 #endif  // MATCH_RUNNING_GOVERNOR_HPP_
