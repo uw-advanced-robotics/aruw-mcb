@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,51 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_STRATEGY_MESSAGE_TYPES_HPP_
-#define SENTRY_STRATEGY_MESSAGE_TYPES_HPP_
+#ifndef SENTRY_REQUEST_MESSAGE_TYPES_HPP_
+#define SENTRY_REQUEST_MESSAGE_TYPES_HPP_
 
 #include <cinttypes>
+
 namespace aruwsrc::communication::serial
 {
 static constexpr uint16_t SENTRY_REQUEST_ROBOT_ID = 0x200;
 
 static constexpr uint16_t SENTRY_RESPONSE_MESSAGE_ID = 0x201;
 
-/**
- * Request message friendly robots send to the enemy
- */
 enum class SentryRequestMessageType : uint8_t
 {
-    NONE = 0,
-    GO_TO_FRIENDLY_BASE,
-    GO_TO_ENEMY_BASE,
-    GO_TO_FRIENDLY_SUPPLIER_ZONE,
-    GO_TO_ENEMY_SUPPLIER_ZONE,
-    GO_TO_CENTER_POINT,
-    HOLD_FIRE,
-    TOGGLE_MOVEMENT,
-    TOGGLE_BEYBLADE,
-    NUM_MESSAGE_TYPES,
-};
-
-/**
- * Response message the sentry broadcasts to all friendly robots.
- */
-enum class SentryResponseMessageType : uint16_t
-{
-    NONE = 0,
-    GO_TO_FRIENDLY_BASE,
-    GO_TO_ENEMY_BASE,
-    GO_TO_FRIENDLY_SUPPLIER_ZONE,
-    GO_TO_ENEMY_SUPPLIER_ZONE,
-    GO_TO_CENTER_POINT,
-    HOLD_FIRE,
-    MOVEMENT_ENABLED,
-    MOVEMENT_DISABLED,
-    BEYBLADE_ENABLED,
-    BEYBLADE_DISABLED,
+    SELECT_NEW_ROBOT = 0,
+    TARGET_NEW_QUADRANT,
+    TOGGLE_DRIVE_MOVEMENT,
+    PAUSE_PROJECTILE_LAUNCHING,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial
 
-#endif  //  SENTRY_STRATEGY_MESSAGE_TYPES_HPP_
+#endif  //  SENTRY_REQUEST_MESSAGE_TYPES_HPP_
