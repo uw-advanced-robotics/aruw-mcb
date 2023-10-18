@@ -25,6 +25,8 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 
+namespace aruwsrc::control::governor
+{
 /**
  * A governor that when triggered pauses the ability to schedule an associated Command for a
  * specified period.
@@ -52,5 +54,7 @@ private:
 
     tap::arch::MilliTimeout timeout;
 };
+
+}  // namespace aruwsrc::control::governor
 
 #endif  // PAUSE_COMMAND_GOVERNOR_HPP_
