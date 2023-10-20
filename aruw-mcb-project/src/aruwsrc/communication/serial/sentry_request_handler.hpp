@@ -29,7 +29,6 @@ class Drivers;
 
 namespace aruwsrc::communication::serial
 {
-
 class SentryRequestHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
