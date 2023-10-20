@@ -446,15 +446,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-
-    sentryRequestHandler.attachPauseProjectileLaunchingMessageHandler(
-        pauseProjectileLaunchMessageHandler);
-    sentryRequestHandler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandler);
-    sentryRequestHandler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandler);
-    sentryRequestHandler.attachToggleDriveMovementMessageHandler(toggleDriveMovementMessageHandler);
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_REQUEST_ROBOT_ID,
-        &sentryRequestHandler);
+    // @todo: attach message handlers here
 }
 
 /* register io mappings here ------------------------------------------------*/
