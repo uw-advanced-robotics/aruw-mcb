@@ -26,6 +26,8 @@
 #include "aruwsrc/robot/sentry/sentry_beehive_agitator_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
+#elif defined(TARGET_TESTBED)
+#include "aruwsrc/robot/testbed/testbed_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_
