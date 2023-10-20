@@ -31,7 +31,7 @@ using namespace tap::communication::serial;
 class HandlerMock
 {
 public:
-    MOCK_METHOD0(noStrategyHnalderMock, void());
+    MOCK_METHOD0(noStrategyHanlderMock, void());
     MOCK_METHOD0(goToFriendlyBaseHandlerMock, void());
 };
 
@@ -40,7 +40,7 @@ class SentryRequestHandlerTest : public Test
 protected:
     SentryRequestHandlerTest() : handler(&drivers) { i = 0; }
 
-    static void noStrategyHnalderMock() { i++; };
+    static void noStrategyHanlderMock() { i++; };
     static void goToFriendlyBaseHandlerMock() { i++; };
 
     tap::Drivers drivers;
