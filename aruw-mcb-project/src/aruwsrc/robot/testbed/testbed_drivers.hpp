@@ -32,11 +32,18 @@ class Drivers : public tap::Drivers
 public:
 #endif
     Drivers()
-        : tap::Drivers()
+        : tap::Drivers(),
+          spinMotor(this, spinMotorID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor")
     {
     }
-    
+
+public:
+    // Motor you just want to spin real fast
+    tap::motor::MotorId spinMotorID = tap::motor::MotorId::MOTOR1;
+
+    tap::motor::DjiMotor spinMotor;
+
 };  // class aruwsrc::StandardDrivers
-}  // namespace aruwsrc::standard
+}  // namespace aruwsrc::testbed
 
 #endif  // STANDARD_DRIVERS_HPP_

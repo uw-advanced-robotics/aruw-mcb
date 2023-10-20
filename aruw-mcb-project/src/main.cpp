@@ -118,6 +118,11 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
+
+#if defined(TARGET_TESTBED)
+            drivers->spinMotor.setDesiredOutput(
+                drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL) * 1000);
+#endif
         }
         modm::delay_us(10);
     }
