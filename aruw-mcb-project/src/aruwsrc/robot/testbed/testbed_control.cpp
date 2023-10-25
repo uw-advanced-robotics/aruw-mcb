@@ -39,7 +39,7 @@ namespace testbed_control
 {
 
 
-void initializeSubsystems() { drivers()->spinMotor.initialize(); }
+void initializeSubsystems() {}
 
 
 }  // namespace testbed_control
