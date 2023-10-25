@@ -25,7 +25,7 @@
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
-#include "tap/drivers.hpp"
+#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
