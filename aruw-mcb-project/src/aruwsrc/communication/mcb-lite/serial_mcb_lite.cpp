@@ -146,6 +146,7 @@ void SerialMCBLite::sendData()
 
 void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
+    gotAFullMessage++;
     switch (completeMessage.messageType)
     {
         {
@@ -156,6 +157,7 @@ void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& complete
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
             case MessageTypes::IMU_MESSAGE:
+                gotAIMUMessage++;
                 processIMUMessage(completeMessage);
                 break;
             case MessageTypes::CURRENT_SENSOR_MESSAGE:

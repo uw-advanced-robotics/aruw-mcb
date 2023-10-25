@@ -79,6 +79,7 @@ void DJISerial::initialize()
 
 void DJISerial::updateSerial()
 {
+    polled++;
     switch (djiSerialRxState)
     {
         case SERIAL_HEADER_SEARCH:

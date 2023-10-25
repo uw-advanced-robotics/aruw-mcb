@@ -215,6 +215,8 @@ private:
         return tap::algorithms::calculateCRC8(message, messageLength) == expectedCRC8;
     }
 
+    uint64_t polled;
+
 protected:
     Drivers *drivers;
 };

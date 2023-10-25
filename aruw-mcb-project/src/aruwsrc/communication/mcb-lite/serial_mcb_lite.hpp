@@ -59,7 +59,7 @@ public:
 
     void initialize();
 
-    constexpr static int UART_BAUDRATE = 500'000;
+    constexpr static int UART_BAUDRATE = 115'200;
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
@@ -90,6 +90,10 @@ private:
     DigitalInputPinMessage currentDigitalData;
     uint8_t can1Data[64];
     uint8_t can2Data[64];
+
+    uint8_t gotAFullMessage;
+    uint8_t gotAIMUMessage;
+
 };
 }  // namespace aruwsrc::virtualMCB
 
