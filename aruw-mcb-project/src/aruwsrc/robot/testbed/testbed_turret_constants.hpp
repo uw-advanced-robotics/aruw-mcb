@@ -17,23 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef TESTBED_TURRET_CONSTANTS_HPP_
+#define TESTBED_TURRET_CONSTANTS_HPP_
+
+// Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
-#define TURRET_CONSTANTS_HPP_
-
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_HERO_CYCLONE)
-#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
-#elif defined(TARGET_DRONE)
-#include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_turret_constants.hpp"
+#error "Do not include this file directly! Use turret_controller_constants.hpp instead."
 #endif
 
-#endif  // TURRET_CONSTANTS_HPP_
+namespace aruwsrc::control::turret
+{
+// These are needed to not break vision coprocessor ¯\_(ツ)_/¯, temp fix to issue
+static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr float TURRET_CG_X = 0;
+static constexpr float TURRET_CG_Z = 0;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
+}  // namespace aruwsrc::control::turret
+
+#endif  // DART_TURRET_CONSTANTS_HPP_
