@@ -31,13 +31,9 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers()
-        : tap::Drivers()
-    {
-    }
+    Drivers() : tap::Drivers() {}
 
 public:
-
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
 

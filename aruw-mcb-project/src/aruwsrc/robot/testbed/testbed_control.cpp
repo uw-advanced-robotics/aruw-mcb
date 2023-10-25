@@ -37,10 +37,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-
-
 void initializeSubsystems() {}
-
 
 }  // namespace testbed_control
 
