@@ -22,7 +22,7 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualPwm::VirtualPwm() : pinDutyMessage(), timerFrequencyMessage(), timerStartedMessage()
+VirtualPwm::VirtualPwm() : Pwm(), pinDutyMessage(), timerFrequencyMessage(), timerStartedMessage()
 {
     pinDutyMessage.messageType = PWM_PIN_DUTY_MESSAGE;
     timerStartedMessage.messageType = PWM_TIMER_STARTED_MESSAGE;

@@ -21,7 +21,7 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualLeds::VirtualLeds() { ledControlMessage.messageType = LED_CONTROL_MESSAGE; }
+VirtualLeds::VirtualLeds() : Leds() { ledControlMessage.messageType = LED_CONTROL_MESSAGE; }
 
 void VirtualLeds::set(tap::gpio::Leds::LedPin led, bool isSet)
 {

@@ -30,7 +30,7 @@ class VirtualAnalog : public tap::gpio::Analog
     friend class SerialMCBLite;
 
 public:
-    VirtualAnalog() = default;
+    VirtualAnalog() : Analog(){};
 
     // Please don't call this, shouldn't be used
     void init(){};

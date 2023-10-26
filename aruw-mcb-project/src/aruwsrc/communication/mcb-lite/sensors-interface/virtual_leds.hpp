@@ -35,7 +35,7 @@ class VirtualLeds : public tap::gpio::Leds
 public:
     VirtualLeds();
 
-    void init();  // don't call this please
+    void init(){};  // don't call this please
 
     void set(tap::gpio::Leds::LedPin led, bool isSet);
 

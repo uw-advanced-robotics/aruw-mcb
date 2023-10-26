@@ -21,7 +21,7 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualDigital::VirtualDigital() : outputPinValuesMessage(), pinModesMessage()
+VirtualDigital::VirtualDigital() : Digital(), outputPinValuesMessage(), pinModesMessage()
 {
     outputPinValuesMessage.messageType = DIGITAL_OUTPUT_MESSAGE;
     pinModesMessage.messageType = DIGITAL_PIN_MODE_MESSAGE;
