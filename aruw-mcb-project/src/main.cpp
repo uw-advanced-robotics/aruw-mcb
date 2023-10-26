@@ -146,7 +146,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 
-#if defined(ALL_STANDARDS)
+#if defined(TARGET_TESTBED)
     ((Drivers *)drivers)->mcbLite.initialize();
 #endif
 
@@ -162,8 +162,7 @@ static void updateIo(tap::Drivers *drivers)
 #ifdef ALL_STANDARDS
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
-    ((Drivers *)drivers)->mcbLite.updateSerial();
-    ((Drivers *)drivers)->mcbLite.sendData();
+
 #endif
 
 #ifdef TARGET_HERO_CYCLONE
@@ -175,5 +174,9 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 
+#ifdef TARGET_TESTBED
+    ((Drivers *)drivers)->mcbLite.updateSerial();
+    ((Drivers *)drivers)->mcbLite.sendData();
+#endif
 
 }

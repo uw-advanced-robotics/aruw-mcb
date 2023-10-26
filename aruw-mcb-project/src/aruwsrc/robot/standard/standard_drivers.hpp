@@ -36,8 +36,6 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
-
-#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
 #endif
 
 namespace aruwsrc::standard
@@ -56,8 +54,7 @@ public:
           oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          mcbLite(this, tap::communication::serial::Uart::UartPort::Uart3)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500)
     {
     }
 
@@ -77,7 +74,6 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 
-aruwsrc::virtualMCB::SerialMCBLite mcbLite;
 
 #endif
 };  // class aruwsrc::StandardDrivers

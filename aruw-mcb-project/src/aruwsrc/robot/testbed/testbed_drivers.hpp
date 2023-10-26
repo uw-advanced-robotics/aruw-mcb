@@ -21,6 +21,8 @@
 #define TESTBED_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
+
 
 namespace aruwsrc::testbed
 {
@@ -31,9 +33,11 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), mcbLite(this, tap::communication::serial::Uart::UartPort::Uart2) {}
 
 public:
+    aruwsrc::virtualMCB::SerialMCBLite mcbLite;
+
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
 
