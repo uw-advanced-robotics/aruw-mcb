@@ -23,15 +23,16 @@
 
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
- * through the limit switch when it is at an end of its axis.  
-*/
+ * through the limit switch when it is at an end of its axis.
+ */
 class LimitSwitchTrigger : public TriggerInterface
 {
 public:
     LimitSwitchTrigger() {}
     bool isTriggered();
+
 private:
-    //LimitSwitch limitSwitch;
+    // LimitSwitch limitSwitch;
 };
 
-#endif // LIMIT_SWITCH_TRIGGER_HPP_
+#endif  // LIMIT_SWITCH_TRIGGER_HPP_

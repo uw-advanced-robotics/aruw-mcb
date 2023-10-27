@@ -18,12 +18,13 @@
  */
 
 #include "motor_stall_trigger.hpp"
+
 #include "tap/motor/dji_motor.hpp"
 
-MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque) : 
-    motor(&motor),
-    maxRPM(maxRPM),
-    minTorque(minTorque)
+MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque)
+    : motor(&motor),
+      maxRPM(maxRPM),
+      minTorque(minTorque)
 {
 }
 

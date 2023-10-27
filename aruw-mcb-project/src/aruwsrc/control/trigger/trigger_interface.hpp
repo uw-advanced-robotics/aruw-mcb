@@ -22,16 +22,16 @@
 
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
- * through a trigger when it is at an end of its axis.  
-*/
+ * through a trigger when it is at an end of its axis.
+ */
 class TriggerInterface
 {
 public:
     TriggerInterface() {}
 
-/**
- * Detects whether or not the trigger is triggered.
-*/
+    /**
+     * Detects whether or not the trigger is triggered.
+     */
     virtual bool isTriggered() = 0;
 };
 #endif
