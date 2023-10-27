@@ -20,7 +20,7 @@
 #ifndef MOTOR_STALL_TRIGGER_HPP_
 #define MOTOR_STALL_TRIGGER_HPP_
 
-#include "aruw-mcb-project\src\aruwsrc\control\trigger\trigger_interface.hpp"
+#include "aruwsrc/control/trigger/trigger_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 /**
@@ -34,7 +34,6 @@ public:
         tap::motor::DjiMotor& motor,
         int16_t maxRPM,
         int16_t minTorque);
-
 
     /**
      * Detects whether the subsystem's motor is stalled, indicating that the trigger is triggered.
