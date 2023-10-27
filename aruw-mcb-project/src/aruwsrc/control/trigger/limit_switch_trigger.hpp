@@ -16,16 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef LIMIT_SWITCH_TRIGGER_HPP_
+#define LIMIT_SWITCH_TRIGGER_HPP_
 
-#ifndef TRIGGER_INTERFACE_HPP_
-#define TRIGGER_INTERFACE_HPP_
+#include "trigger_interface.hpp"
 
-class TriggerInterface
+/**
+ * Represents a "trigger" used by Homeable Subsystems to detect
+ * through the limit switch when it is at an end of its axis.  
+*/
+class LimitSwitchTrigger : public TriggerInterface
 {
 public:
-    TriggerInterface() {}
-
-    virtual void isTriggered() = 0;
+    LimitSwitchTrigger() {}
+    bool isTriggered();
+private:
+    //LimitSwitch limitSwitch;
 };
 
-#endif
+#endif // LIMIT_SWITCH_TRIGGER_HPP_
