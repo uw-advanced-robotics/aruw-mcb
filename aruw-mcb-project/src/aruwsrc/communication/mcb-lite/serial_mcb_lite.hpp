@@ -70,6 +70,26 @@ public:
     VirtualPwm pwm;
     VirtualLeds leds;
 
+    // Debug method
+    void updateEverything()
+    {
+        if (updateIO)
+        {
+            imu.requestCalibration();
+
+            digital.set(tap::gpio::Digital::OutputPin::E, true);
+            digital.configureInputPullMode(
+                tap::gpio::Digital::InputPin::B,
+                tap::gpio::Digital::InputPullMode::PullUp);
+
+            pwm.write(0.5f, tap::gpio::Pwm::Buzzer);
+            pwm.setTimerFrequency(tap::gpio::Pwm::TIMER12, 440);
+            pwm.start(tap::gpio::Pwm::TIMER12);
+
+            leds.set(tap::gpio::Leds::LedPin::B, true);
+        }
+    };
+
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
 
@@ -94,6 +114,7 @@ private:
     uint8_t gotAFullMessage;
     uint8_t gotAIMUMessage;
 
+    bool updateIO = false;
 };
 }  // namespace aruwsrc::virtualMCB
 

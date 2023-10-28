@@ -24,6 +24,7 @@ namespace aruwsrc::virtualMCB
 {
 VirtualPwm::VirtualPwm() : Pwm(), pinDutyMessage(), timerFrequencyMessage(), timerStartedMessage()
 {
+    setDefaultTimerFrequencies();
     pinDutyMessage.messageType = PWM_PIN_DUTY_MESSAGE;
     timerStartedMessage.messageType = PWM_TIMER_STARTED_MESSAGE;
     timerFrequencyMessage.messageType = PWM_TIMER_FREQUENCY_MESSAGE;
@@ -70,7 +71,8 @@ void VirtualPwm::write(float duty, Pwm::Pin pin)
             break;
     }
 
-    pinDutyMessage.data[pin] = duty;
+    // pinDutyMessage.data[pin * sizeof(float)] = duty;
+    memcpy(pinDutyMessage.data + (pin * sizeof(float)), &duty, sizeof(float));
 
     hasNewMessageData = true;
     pinDutyMessage.setCRC16();
@@ -92,7 +94,8 @@ void VirtualPwm::setTimerFrequency(Pwm::Timer timer, uint32_t frequency)
         default:
             break;
     }
-    timerFrequencyMessage.data[timer] = frequency;
+    // timerFrequencyMessage.data[timer * sizeof(uint32_t)] = frequency;
+    memcpy(timerFrequencyMessage.data + (timer * sizeof(uint32_t)), &frequency, sizeof(uint32_t));
 
     hasNewMessageData = true;
     timerFrequencyMessage.setCRC16();

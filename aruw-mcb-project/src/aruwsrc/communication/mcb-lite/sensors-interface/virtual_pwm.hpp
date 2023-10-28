@@ -63,7 +63,7 @@ public:
 
     void start(Timer timer);
 
-private:
+// private:
     float WPinDuty, XPinDuty, YPinDuty, ZPinDuty, BuzzerPinDuty, IMUHeaterPinDuty;
 
     uint32_t timer8Frequency, timer12Frequency, timer3Frequency;
@@ -79,7 +79,16 @@ private:
         timerFrequencyMessage;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(PWMTimerStartedMessage)>
         timerStartedMessage;
+
+    void setDefaultTimerFrequencies()
+    {
+        setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 1'000);
+        setTimerFrequency(tap::gpio::Pwm::Timer::TIMER12, 1'000);
+        setTimerFrequency(tap::gpio::Pwm::Timer::TIMER3, 1'000);
+    };
+
 };
+
 
 }  // namespace aruwsrc::virtualMCB
 

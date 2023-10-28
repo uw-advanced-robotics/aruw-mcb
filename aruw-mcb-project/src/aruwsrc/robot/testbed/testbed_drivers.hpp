@@ -33,7 +33,7 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), mcbLite(this, tap::communication::serial::Uart::UartPort::Uart2) {}
+    Drivers() : tap::Drivers(), mcbLite(this, tap::communication::serial::Uart::UartPort::Uart3) {}
 
 public:
     aruwsrc::virtualMCB::SerialMCBLite mcbLite;

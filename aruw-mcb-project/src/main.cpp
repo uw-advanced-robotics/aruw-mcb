@@ -176,6 +176,9 @@ static void updateIo(tap::Drivers *drivers)
 
 #ifdef TARGET_TESTBED
     ((Drivers *)drivers)->mcbLite.updateSerial();
+
+    ((Drivers *)drivers)->mcbLite.updateEverything();
+
     ((Drivers *)drivers)->mcbLite.sendData();
 #endif
 
