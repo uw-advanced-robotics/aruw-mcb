@@ -29,6 +29,7 @@ namespace aruwsrc::communication::serial
 /**
  * Command that is scheduled once that queues the pause projectile launching
  * SentryRequestMessageType.
+ * @todo: new commands, deprecate these
  */
 class PauseProjectileLaunchingCommand : public tap::control::Command
 {
