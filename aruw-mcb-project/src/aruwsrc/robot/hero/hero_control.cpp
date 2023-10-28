@@ -107,7 +107,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-// aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
+aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -473,7 +473,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    // sentryRequestSubsystem.initialize();
+    sentryRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -487,7 +487,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -538,9 +538,9 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
+    // drivers->commandMapper.addMap(&cPressed);
+    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    // drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control

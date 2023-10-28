@@ -603,9 +603,9 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qNotEPressed);
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
+    // drivers->commandMapper.addMap(&cPressed);
+    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    // drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace standard_control
