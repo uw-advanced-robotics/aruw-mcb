@@ -113,7 +113,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-// aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
+aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
 tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
@@ -179,7 +179,23 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-// @todo: commands to send messages to sentry
+aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemySupplierZoneCommand sendSentryGoToEnemySupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToCenterPointCommand sendSentryGoToCenterPoint(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::HoldFireCommand sendSentryHoldFire(sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleMovementCommand sendSentryToggleMovement(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleBeybladeCommand sendSentryToggleBeyblade(
+    sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -382,6 +398,7 @@ ClientDisplayCommand clientDisplayCommand(
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 /* define command mappings --------------------------------------------------*/
+
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
@@ -401,19 +418,44 @@ HoldCommandMapping leftSwitchUp(
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// Keyboard/Mouse related mappings
-PressCommandMapping cPressed(
-    drivers(),
-    {&sentryToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
-    drivers(),
-    {&sentryTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
-    drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+// @todo: sort out all mappings in a different PR
+/// @brief sentry messages
+// PressCommandMapping cShiftPressed(
+//     drivers(),
+//     {&sendSentryNoMotionStrategy},
+//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+// PressCommandMapping qShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToFriendlyBase},
+//     RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
+// PressCommandMapping eShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToEnemyBase},
+//     RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
+// PressCommandMapping rShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToSupplierZone},
+//     RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
+// PressCommandMapping fShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToEnemySupplierZone},
+//     RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
+// PressCommandMapping gShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToCenterPoint},
+//     RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
+// PressCommandMapping zShiftPressed(
+//     drivers(),
+//     {&sendSentryHoldFire},
+//     RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
+// PressCommandMapping xShiftPressed(
+//     drivers(),
+//     {&sendSentryToggleMovement},
+//     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+// PressCommandMapping vShiftPressed(
+//     drivers(),
+//     {&sendSentryToggleBeyblade},
+//     RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -496,7 +538,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
+    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -510,7 +552,7 @@ void registerStandardSubsystems(Drivers *drivers)
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    // sentryRequestSubsystem.initialize();
+    sentryRequestSubsystem.initialize();
     turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();

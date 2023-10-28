@@ -23,7 +23,8 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
-#include "sentry_request_transmitter.hpp"
+#include "inter_robot_signal_transmitter.hpp"
+#include "sentry_strategy_message_types.hpp"
 
 namespace aruwsrc
 {
@@ -43,11 +44,14 @@ public:
 
     inline mockable void queueRequest(SentryRequestMessageType type)
     {
-        sentryRequestTransmitter.queueRequest(type);
+        sentryRequestTransmitter.queueMessage(type);
     }
 
 private:
-    SentryRequestTransmitter sentryRequestTransmitter;
+    InterRobotSignalMessageTransmitter<
+        SentryRequestMessageType,
+        static_cast<uint8_t>(SentryRequestMessageType::NUM_MESSAGE_TYPES)>
+        sentryRequestTransmitter;
 };
 }  // namespace aruwsrc::communication::serial
 

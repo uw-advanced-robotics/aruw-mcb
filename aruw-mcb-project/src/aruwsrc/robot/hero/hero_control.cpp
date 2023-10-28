@@ -179,7 +179,16 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-// @todo: commands to send messages to sentry
+
+// @todo: keybindings
+aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
+    sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -403,19 +412,6 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// Keyboard/Mouse related mappings
-PressCommandMapping cPressed(
-    drivers(),
-    {&sentryToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
-    drivers(),
-    {&sentryTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
-    drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
