@@ -24,7 +24,6 @@
 
 namespace aruwsrc::control
 {
-
 /**
  * Interface for a homeable subsystem, which is a subsytem where its one motor
  * is constrained to a specific axis that bounded on either end. The axis length is
