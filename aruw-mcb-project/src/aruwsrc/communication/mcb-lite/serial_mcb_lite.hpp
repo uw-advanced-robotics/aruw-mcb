@@ -112,10 +112,10 @@ private:
     uint8_t can2Data[64];
 
     uint8_t gotAFullMessage;
-    uint8_t gotAIMUMessage;
+    uint8_t gotAIMUMessage;              
 
     bool updateIO = false;
-    
+
 };
 }  // namespace aruwsrc::virtualMCB      
 #endif
