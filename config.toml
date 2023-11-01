@@ -1,0 +1,18 @@
+concurrent = 1
+check_interval = 0
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "Sumedh's Laptop"
+  url = "https://gitlab.com/"
+  id = 29138815
+  token = "glrt-gEzx83N5cvch-awQMNe7"
+  token_obtained_at = 2023-11-01T02:03:33Z
+  token_expires_at = 0001-01-01T00:00:00Z
+  executor = "shell"
+  shell = "pwsh"
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
