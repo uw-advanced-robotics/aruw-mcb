@@ -75,8 +75,7 @@ TEST_F(InterRobotSignalTransmitterTests, send_sends_BAR_when_message_queued)
             [](tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage* robotToRobotMsg,
                uint16_t,
                tap::communication::serial::RefSerialData::RobotId,
-               uint16_t)
-            {
+               uint16_t) {
                 EXPECT_EQ(
                     static_cast<uint8_t>(mock_message_types::BAR),
                     robotToRobotMsg->dataAndCRC16[0]);
@@ -94,8 +93,7 @@ TEST_F(InterRobotSignalTransmitterTests, send_sends_FOO_when_message_queued)
             [](tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage* robotToRobotMsg,
                uint16_t,
                tap::communication::serial::RefSerialData::RobotId,
-               uint16_t)
-            {
+               uint16_t) {
                 EXPECT_EQ(
                     static_cast<uint8_t>(mock_message_types::FOO),
                     robotToRobotMsg->dataAndCRC16[0]);
