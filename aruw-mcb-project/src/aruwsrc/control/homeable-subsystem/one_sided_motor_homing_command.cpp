@@ -21,6 +21,7 @@
 
 namespace aruwsrc::control
 {
+
 void OneSidedMotorHomingCommand::initialize() { subsystem.moveTowardLowerBound(); }
 
 void OneSidedMotorHomingCommand::execute()

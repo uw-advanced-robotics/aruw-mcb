@@ -27,6 +27,11 @@
 
 namespace aruwsrc::control
 {
+
+/**
+ * A command whose job is to locate and set the upper and lower bounds of the motor in a homeable
+ * subsystem.
+ */
 class MotorHomingCommandInterface : public tap::control::Command
 {
 public:

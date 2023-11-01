@@ -25,6 +25,11 @@
 
 namespace aruwsrc::control
 {
+
+/**
+ * A motor homing command that only homes to the lower bound, then calculates the upper bound using
+ * the length of the range of the motor.
+ */
 class OneSidedMotorHomingCommand : public MotorHomingCommandInterface
 {
 public:
