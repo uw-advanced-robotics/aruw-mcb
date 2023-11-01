@@ -20,8 +20,7 @@
 #ifndef TRIGGER_INTERFACE_HPP_
 #define TRIGGER_INTERFACE_HPP_
 
-
-namespace aruwsrc::control 
+namespace aruwsrc::control
 {
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
@@ -37,5 +36,5 @@ public:
      */
     virtual bool isTriggered() = 0;
 };
-}  // namespace aruw::control
+}  // namespace aruwsrc::control
 #endif

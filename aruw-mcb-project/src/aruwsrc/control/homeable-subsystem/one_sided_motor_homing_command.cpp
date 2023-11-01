@@ -21,24 +21,19 @@
 
 namespace aruwsrc::control
 {
+void OneSidedMotorHomingCommand::initialize() { subsystem.moveTowardLowerBound(); }
 
-void OneSidedMotorHomingCommand::initialize() {
-    subsystem.moveTowardLowerBound();
-}
-
-void OneSidedMotorHomingCommand::execute() {
-    if(trigger.isTriggered()) {
+void OneSidedMotorHomingCommand::execute()
+{
+    if (trigger.isTriggered())
+    {
         subsystem.setLowerBound();
         subsystem.setUpperBound();
     }
 }
 
-bool OneSidedMotorHomingCommand::isFinished() const {
-    return subsystem.boundsSet();
-}
+bool OneSidedMotorHomingCommand::isFinished() const { return subsystem.boundsSet(); }
 
-void OneSidedMotorHomingCommand::end(bool) {
-    subsystem.stop();
-}
+void OneSidedMotorHomingCommand::end(bool) { subsystem.stop(); }
 
-}  // namespace aruw::control
+}  // namespace aruwsrc::control

@@ -23,7 +23,6 @@
 
 namespace aruwsrc::control
 {
-
 MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque)
     : motor(&motor),
       maxRPM(maxRPM),
@@ -35,4 +34,4 @@ bool MotorStallTrigger::isTriggered()
 {
     return ((fabs(motor->getShaftRPM()) < maxRPM) && (fabsl(motor->getTorque()) > minTorque));
 }
-}
+}  // namespace aruwsrc::control

@@ -21,10 +21,11 @@
 #define MOTOR_STALL_TRIGGER_HPP_
 
 #include "tap/motor/dji_motor.hpp"
+
 #include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
 
-namespace aruwsrc::control {
-
+namespace aruwsrc::control
+{
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
  * through the stalling of the motor when it is at an end of its axis.
@@ -44,6 +45,6 @@ private:
     int16_t maxRPM;
     int16_t minTorque;
 };
-}
+}  // namespace aruwsrc::control
 
 #endif  // MOTOR_STALL_TRIGGER_HPP_

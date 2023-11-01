@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 #ifndef MOTOR_HOMING_COMMAND_INTERFACE_HPP_
 #define MOTOR_HOMING_COMMAND_INTERFACE_HPP_
 
@@ -30,8 +30,7 @@ namespace aruwsrc::control
 class MotorHomingCommandInterface : public tap::control::Command
 {
 public:
-    MotorHomingCommandInterface(
-        aruwsrc::control::HomeableSubsystemInterface& subsystem)
+    MotorHomingCommandInterface(aruwsrc::control::HomeableSubsystemInterface& subsystem)
         : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
@@ -40,6 +39,6 @@ public:
 protected:
     aruwsrc::control::HomeableSubsystemInterface& subsystem;
 };
-}
+}  // namespace aruwsrc::control
 
 #endif

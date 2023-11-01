@@ -19,8 +19,8 @@
 #ifndef ONE_SIDED_MOTOR_HOMING_COMMAND_HPP_
 #define ONE_SIDED_MOTOR_HOMING_COMMAND_HPP_
 
-#include "aruwsrc/control/homeable-subsystem/motor_homing_command_interface.hpp"
 #include "aruwsrc/control/homeable-subsystem/homeable_subsystem_interface.hpp"
+#include "aruwsrc/control/homeable-subsystem/motor_homing_command_interface.hpp"
 #include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
 
 namespace aruwsrc::control
@@ -28,12 +28,11 @@ namespace aruwsrc::control
 class OneSidedMotorHomingCommand : public MotorHomingCommandInterface
 {
 public:
-    OneSidedMotorHomingCommand(
-        HomeableSubsystemInterface& subsystem,
-        TriggerInterface& trigger) 
-    : MotorHomingCommandInterface(subsystem),
-    trigger(trigger)
-    {}
+    OneSidedMotorHomingCommand(HomeableSubsystemInterface& subsystem, TriggerInterface& trigger)
+        : MotorHomingCommandInterface(subsystem),
+          trigger(trigger)
+    {
+    }
 
     void initialize() override;
 
@@ -43,11 +42,8 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override
-    {
-        return "One-Sided Motor homing";
-    }
-    
+    const char* getName() const override { return "One-Sided Motor homing"; }
+
 private:
     TriggerInterface& trigger;
 };
