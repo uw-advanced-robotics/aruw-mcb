@@ -115,6 +115,9 @@ private:
     uint8_t gotAIMUMessage;
 
     bool updateIO = false;
+
+
+    
 };
 }  // namespace aruwsrc::virtualMCB      
 #endif
