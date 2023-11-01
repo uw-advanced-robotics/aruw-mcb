@@ -20,6 +20,8 @@
 
 #include "gtest/gtest.h"
 #include "aruwsrc/communication/mcb-lite/sensors-interface/virtual_analog.hpp"
+#include <chrono>
+#include <thread>
 
 using namespace aruwsrc::virtualMCB;
 using namespace testing;
@@ -35,5 +37,30 @@ TEST(VirtualAnalog, get_proper_t_pin_value){
 	virtualAnalog.TPinValue = 2'000;
 	EXPECT_EQ(virtualAnalog.read(tap::gpio::Analog::Pin::T), 2'000);
 }
+
+TEST(VirtualAnalog, get_proper_u_pin_value){
+	VirtualAnalog virtualAnalog;
+	virtualAnalog.UPinValue = 3'000;
+	EXPECT_EQ(virtualAnalog.read(tap::gpio::Analog::Pin::U), 3'000);
+}
+
+TEST(VirtualAnalog, get_proper_v_pin_value){
+	VirtualAnalog virtualAnalog;
+	virtualAnalog.VPinValue = 4'000;
+	EXPECT_EQ(virtualAnalog.read(tap::gpio::Analog::Pin::V), 4'000);
+}
+
+TEST(VirtualAnalog, get_proper_oled_joystick_pin_value){
+	VirtualAnalog virtualAnalog;
+	virtualAnalog.OLEDPinValue = 5'000;
+	// std::chrono::seconds(40);
+
+	 using namespace std::chrono_literals;
+  std::this_thread::sleep_for(6000s);
+
+	EXPECT_EQ(virtualAnalog.read(tap::gpio::Analog::Pin::OledJoystick), 5'000);
+
+}
+
 
 
