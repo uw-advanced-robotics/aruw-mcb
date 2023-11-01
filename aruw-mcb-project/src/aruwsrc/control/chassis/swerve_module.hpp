@@ -27,7 +27,6 @@
 
 #include "aruwsrc/algorithms/wheel.hpp"
 #include "constants/chassis_constants.hpp"
-#include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #include "swerve_module_config.hpp"
@@ -167,7 +166,7 @@ private:
 
     const SwerveModuleConfig config;
 
-    modm::Pid<float> drivePid;
+    tap::algorithms::SmoothPid drivePid;
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;

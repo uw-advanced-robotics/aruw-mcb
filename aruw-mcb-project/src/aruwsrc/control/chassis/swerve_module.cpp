@@ -30,12 +30,7 @@ SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleC
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),
-      drivePid(
-          config.drivePidKp,
-          config.drivePidKi,
-          config.drivePidKd,
-          config.drivePidMaxIntegralErrorSum,
-          config.drivePidMaxOutput),
+      drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
       rotationVectorY(config.positionWithinChassisX),
@@ -119,8 +114,8 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpointRPM - getDriveRPM());
-    driveMotor.setDesiredOutput(drivePid.getValue());
+    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+    driveMotor.setDesiredOutput(drivePid.getOutput());
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
