@@ -92,7 +92,7 @@ float SwerveModule::calculate(float x, float y, float r)
         //     rotationOffset -=
         //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
         // }
-        // preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
+        preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
             wheel.mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
