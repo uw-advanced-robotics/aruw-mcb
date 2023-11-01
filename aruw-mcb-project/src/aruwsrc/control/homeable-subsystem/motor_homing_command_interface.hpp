@@ -16,26 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+ 
+#ifndef MOTOR_HOMING_COMMAND_INTERFACE_HPP_
+#define MOTOR_HOMING_COMMAND_INTERFACE_HPP_
 
-#ifndef TRIGGER_INTERFACE_HPP_
-#define TRIGGER_INTERFACE_HPP_
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
+#include "aruwsrc/control/homeable-subsystem/homeable_subsystem_interface.hpp"
 
-namespace aruwsrc::control 
+namespace aruwsrc::control
 {
-/**
- * Represents a "trigger" used by Homeable Subsystems to detect
- * through a trigger when it is at an end of its axis.
- */
-class TriggerInterface
+class MotorHomingCommandInterface : public tap::control::Command
 {
 public:
-    TriggerInterface() {}
+    MotorHomingCommandInterface(
+        aruwsrc::control::HomeableSubsystemInterface& subsystem)
+        : subsystem(subsystem)
+    {
+        addSubsystemRequirement(&subsystem);
+    }
 
-    /**
-     * Detects whether or not the trigger is triggered.
-     */
-    virtual bool isTriggered() = 0;
+protected:
+    aruwsrc::control::HomeableSubsystemInterface& subsystem;
 };
-}  // namespace aruw::control
+}
+
 #endif

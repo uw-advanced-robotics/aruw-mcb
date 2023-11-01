@@ -21,6 +21,9 @@
 
 #include "trigger_interface.hpp"
 
+namespace aruwsrc::control
+{
+
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
  * through the limit switch when it is at an end of its axis.
@@ -34,5 +37,6 @@ public:
 private:
     // LimitSwitch limitSwitch;
 };
+}
 
 #endif  // LIMIT_SWITCH_TRIGGER_HPP_

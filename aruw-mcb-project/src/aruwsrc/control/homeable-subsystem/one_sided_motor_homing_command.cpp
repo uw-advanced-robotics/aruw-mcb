@@ -17,25 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRIGGER_INTERFACE_HPP_
-#define TRIGGER_INTERFACE_HPP_
+#include "one_sided_motor_homing_command.hpp"
 
-
-namespace aruwsrc::control 
+namespace aruwsrc::control
 {
-/**
- * Represents a "trigger" used by Homeable Subsystems to detect
- * through a trigger when it is at an end of its axis.
- */
-class TriggerInterface
-{
-public:
-    TriggerInterface() {}
 
-    /**
-     * Detects whether or not the trigger is triggered.
-     */
-    virtual bool isTriggered() = 0;
-};
+void OneSidedMotorHomingCommand::initialize() {
+    subsystem.moveTowardLowerBound();
+}
+
+void OneSidedMotorHomingCommand::execute() {
+    if(trigger.isTriggered()) {
+        subsystem.setLowerBound();
+        subsystem.setUpperBound();
+    }
+}
+
+bool OneSidedMotorHomingCommand::isFinished() const {
+    return subsystem.boundsSet();
+}
+
+void OneSidedMotorHomingCommand::end(bool) {
+    subsystem.stop();
+}
+
 }  // namespace aruw::control
-#endif

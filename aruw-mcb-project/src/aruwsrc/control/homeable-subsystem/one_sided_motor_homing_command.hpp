@@ -16,34 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef ONE_SIDED_MOTOR_HOMING_COMMAND_HPP_
+#define ONE_SIDED_MOTOR_HOMING_COMMAND_HPP_
 
-#ifndef MOTOR_STALL_TRIGGER_HPP_
-#define MOTOR_STALL_TRIGGER_HPP_
-
-#include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/control/homeable-subsystem/motor_homing_command_interface.hpp"
+#include "aruwsrc/control/homeable-subsystem/homeable_subsystem_interface.hpp"
 #include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
 
-namespace aruwsrc::control {
-
-/**
- * Represents a "trigger" used by Homeable Subsystems to detect
- * through the stalling of the motor when it is at an end of its axis.
- */
-class MotorStallTrigger : public TriggerInterface
+namespace aruwsrc::control
+{
+class OneSidedMotorHomingCommand : public MotorHomingCommandInterface
 {
 public:
-    MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque);
+    OneSidedMotorHomingCommand(
+        HomeableSubsystemInterface& subsystem,
+        TriggerInterface& trigger) 
+    : MotorHomingCommandInterface(subsystem),
+    trigger(trigger)
+    {}
 
-    /**
-     * Detects whether the subsystem's motor is stalled, indicating that the trigger is triggered.
-     */
-    bool isTriggered();
+    void initialize() override;
 
+    void execute() override;
+
+    void end(bool interrupted) override;
+
+    bool isFinished() const override;
+
+    const char* getName() const override
+    {
+        return "One-Sided Motor homing";
+    }
+    
 private:
-    tap::motor::DjiMotor* motor;
-    int16_t maxRPM;
-    int16_t minTorque;
+    TriggerInterface& trigger;
 };
-}
+}  // namespace aruwsrc::control
 
-#endif  // MOTOR_STALL_TRIGGER_HPP_
+#endif
