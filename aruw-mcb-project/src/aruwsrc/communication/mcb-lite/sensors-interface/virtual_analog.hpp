@@ -38,7 +38,9 @@ public:
     // Returns 0 if pin is not initialized, or data has not been received
     uint16_t read(Analog::Pin pin) const;
 
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     uint16_t SPinValue, TPinValue, UPinValue, VPinValue, OLEDPinValue;
 };
 
