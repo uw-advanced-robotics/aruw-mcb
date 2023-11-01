@@ -116,7 +116,6 @@ private:
 
     bool updateIO = false;
 };
-}  // namespace aruwsrc::virtualMCB   
-
+}  // namespace aruwsrc::virtualMCB 
 #endif
   
