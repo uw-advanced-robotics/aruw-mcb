@@ -22,7 +22,7 @@
 
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/trigger/trigger_interface.hpp"
+#include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
 
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
