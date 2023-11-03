@@ -21,6 +21,7 @@
 #define HOMEABLE_SUBSYSTEM_INTERFACE_HPP_
 
 #include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control
 {
