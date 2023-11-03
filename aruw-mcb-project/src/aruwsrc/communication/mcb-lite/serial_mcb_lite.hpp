@@ -111,7 +111,7 @@ private:
     uint8_t can1Data[64];
     uint8_t can2Data[64];
 
-qwjwpowqejpqw
+
 
     uint8_t gotAFullMessage;           
     uint8_t gotAIMUMessage;              
