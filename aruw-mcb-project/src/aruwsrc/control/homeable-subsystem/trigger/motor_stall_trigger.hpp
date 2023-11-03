@@ -21,7 +21,6 @@
 #define MOTOR_STALL_TRIGGER_HPP_
 
 #include "tap/motor/dji_motor.hpp"
-
 #include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
 
 namespace aruwsrc::control
