@@ -38,7 +38,7 @@ public:
     /**
      * Detects whether the subsystem's motor is stalled, indicating that the trigger is triggered.
      */
-    bool isTriggered();
+    bool isTriggered() override;
 
 private:
     tap::motor::DjiMotor* motor;

@@ -31,7 +31,7 @@ class LimitSwitchTrigger : public TriggerInterface
 {
 public:
     LimitSwitchTrigger() {}
-    bool isTriggered();
+    bool isTriggered() override;
 
 private:
     // LimitSwitch limitSwitch;
