@@ -41,9 +41,10 @@ public:
     bool isTriggered();
 
 private:
-    tap::motor::DjiMotor* motor;
+    tap::motor::DjiMotor& motor;
     int16_t maxRPM;
     int16_t minTorque;
+
 };
 }  // namespace aruwsrc::control
 
