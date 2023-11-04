@@ -20,9 +20,9 @@
 #include <gtest/gtest.h>
 
 #include "tap/drivers.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/homeable-subsystem/trigger/motor_stall_trigger.hpp"
-#include "tap/mock/dji_motor_mock.hpp"
 
 using namespace aruwsrc::control;
 using namespace testing;
@@ -50,7 +50,6 @@ TEST_F(MotorStallTriggerTest, torque_in_rpm_out_no_stall)
 
     ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
-    
 
     rpm = maxRPM + 1;
     torque = minTorque - 1;
@@ -60,7 +59,6 @@ TEST_F(MotorStallTriggerTest, torque_in_rpm_out_no_stall)
     torque = -minTorque + 1;
     EXPECT_EQ(false, trigger.isTriggered());
 }
-
 
 TEST_F(MotorStallTriggerTest, torque_out_rpm_in_stall)
 {
@@ -79,7 +77,8 @@ TEST_F(MotorStallTriggerTest, torque_out_rpm_in_stall)
     EXPECT_EQ(true, trigger.isTriggered());
 }
 
-TEST_F(MotorStallTriggerTest, torque_in_rpm_in_no_stall) {
+TEST_F(MotorStallTriggerTest, torque_in_rpm_in_no_stall)
+{
     int16_t rpm;
     int16_t torque;
 
@@ -95,13 +94,14 @@ TEST_F(MotorStallTriggerTest, torque_in_rpm_in_no_stall) {
     EXPECT_EQ(false, trigger.isTriggered());
 }
 
-TEST_F(MotorStallTriggerTest, torque_out_rpm_out_no_stall) {
+TEST_F(MotorStallTriggerTest, torque_out_rpm_out_no_stall)
+{
     int16_t rpm;
     int16_t torque;
 
     ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
-    
+
     rpm = maxRPM + 1;
     torque = minTorque + 1;
     EXPECT_EQ(false, trigger.isTriggered());

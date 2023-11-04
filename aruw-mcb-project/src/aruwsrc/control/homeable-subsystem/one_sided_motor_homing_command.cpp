@@ -36,6 +36,4 @@ bool OneSidedMotorHomingCommand::isFinished() const { return subsystem.boundsSet
 
 void OneSidedMotorHomingCommand::end(bool) { subsystem.stop(); }
 
-
-
 }  // namespace aruwsrc::control
