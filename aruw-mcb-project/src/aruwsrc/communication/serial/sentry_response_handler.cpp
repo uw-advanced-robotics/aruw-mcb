@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -18,6 +18,7 @@
  */
 
 #include "sentry_response_handler.hpp"
+#include "sentry_strategy_message_types.hpp"
 
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -29,14 +30,27 @@ SentryResponseHandler::SentryResponseHandler(tap::Drivers &drivers) : drivers(dr
 void SentryResponseHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
-    if (message.header.dataLength !=
-        sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader) + 1)
-    {
-        RAISE_ERROR((&drivers), "message length incorrect");
-        return;
-    }
+    SentryResponseMessageType type = signalReciver.parse(message);
 
-    this->sentryMoving = static_cast<bool>(
-        message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
+    switch (type)
+    {
+        case SentryResponseMessageType::MOVEMENT_ENABLED:
+            this->sentryMovementEnabled = true;
+            break;
+        case SentryResponseMessageType::MOVEMENT_DISABLED:
+            this->sentryMovementEnabled = false;
+            break;
+        case SentryResponseMessageType::BEYBLADE_ENABLED:
+            this->sentryBeybladeEnabled = true;
+            break;
+        case SentryResponseMessageType::BEYBLADE_DISABLED:
+            this->sentryBeybladeEnabled = false;
+            break;
+        case SentryResponseMessageType::HOLD_FIRE:
+            this->holdFireTimer.restart(10000);
+            break;
+        default:
+            this->sentryStrategy = static_cast<SentryStrategy>(type);
+    }
 }
 }  // namespace aruwsrc::communication::serial
