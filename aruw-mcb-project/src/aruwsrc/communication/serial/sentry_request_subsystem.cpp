@@ -25,10 +25,13 @@ namespace aruwsrc::communication::serial
 {
 SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
     : tap::control::Subsystem(drivers),
-      sentryRequestTransmitter(drivers)
+      sentryRequestTransmitter{
+          *drivers,
+          {tap::communication::serial::RefSerialData::RobotId::BLUE_SENTINEL},
+          SENTRY_REQUEST_ROBOT_ID}
 {
 }
 
-void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.send(); }
+void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.sendQueued(); }
 
 }  // namespace aruwsrc::communication::serial
