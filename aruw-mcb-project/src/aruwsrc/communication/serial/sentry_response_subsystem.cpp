@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,65 +20,16 @@
 #include "sentry_response_subsystem.hpp"
 
 #include "tap/drivers.hpp"
-
-#include "sentry_request_message_types.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::communication::serial
 {
-SentryResponseSubsystem::SentryResponseSubsystem(
-    tap::Drivers &drivers,
-    aruwsrc::control::sentry::drive::SentryAutoDriveComprisedCommand &driveCommand)
-    : tap::control::Subsystem(&drivers),
-      drivers(drivers),
-      driveCommand(driveCommand),
-      refSerialTransmitter(&drivers)
+SentryResponseSubsystem::SentryResponseSubsystem(tap::Drivers *drivers)
+    : tap::control::Subsystem(drivers),
+      sentryResponseTransmitter{*drivers, {tap::communication::serial::RefSerialData::RobotId::BLUE_HERO, tap::communication::serial::RefSerialData::RobotId::BLUE_SOLDIER_1}, SENTRY_RESPONSE_MESSAGE_ID}
 {
 }
 
-void SentryResponseSubsystem::refresh() { this->run(); }
+void SentryResponseSubsystem::refresh() { sentryResponseTransmitter.sendQueued(); }
 
-bool SentryResponseSubsystem::run()
-{
-    PT_BEGIN();
-
-    PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
-
-    while (true)
-    {
-        if (this->sentryMoving != this->getDriveStatus())
-        {
-            this->sentryMoving = this->getDriveStatus();
-
-            *reinterpret_cast<uint16_t*>(this->robotToRobotMessage.dataAndCRC16) = static_cast<uint16_t>(this->sentryMoving);
-
-            PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
-                &this->robotToRobotMessage,
-                SENTRY_RESPONSE_MESSAGE_ID,
-                drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
-                    tap::communication::serial::RefSerialData::RobotId::BLUE_HERO),
-                2));
-
-            PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
-                &this->robotToRobotMessage,
-                SENTRY_RESPONSE_MESSAGE_ID,
-                drivers.refSerial.getRobotIdBasedOnCurrentRobotTeam(
-                    tap::communication::serial::RefSerialData::RobotId::BLUE_SOLDIER_1),
-                2));
-        }
-
-        PT_YIELD();
-    }
-
-    PT_END();
-}
-
-bool SentryResponseSubsystem::getDriveStatus()
-{
-    if (!this->drivers.commandScheduler.isCommandScheduled(&this->driveCommand))
-    {
-        return false;
-    }
-
-    return this->driveCommand.getMovementStatus();
-}
 }  // namespace aruwsrc::communication::serial

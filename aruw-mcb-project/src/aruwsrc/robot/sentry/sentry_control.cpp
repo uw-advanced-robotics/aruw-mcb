@@ -368,9 +368,9 @@ void pauseProjectileLaunchMessageHandler()
     turretOne.pauseCommandGovernor.initiatePause();
 }
 
-aruwsrc::communication::serial::SentryResponseSubsystem sentryResponseSubsystem(
-    *drivers(),
-    sentryAutoDrive);
+// aruwsrc::communication::serial::SentryResponseSubsystem sentryResponseSubsystem(
+//     *drivers(),
+//     sentryAutoDrive);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -404,7 +404,7 @@ void initializeSubsystems()
     turretOne.frictionWheels.initialize();
     turretOne.turretSubsystem.initialize();
     odometrySubsystem.initialize();
-    sentryResponseSubsystem.initialize();
+    // sentryResponseSubsystem.initialize();
     buzzer.initialize();
 }
 
@@ -421,7 +421,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretOne.frictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretOne.turretSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&sentryResponseSubsystem);
     drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretZero.turretSubsystem, 0);
     drivers->visionCoprocessor.attachTurretOrientationInterface(&turretOne.turretSubsystem, 1);
