@@ -22,6 +22,7 @@
 
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 namespace aruwsrc::control
 {
@@ -36,7 +37,7 @@ namespace aruwsrc::control
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    HomeableSubsystemInterface(tap::Drivers* drivers, uint64_t length)
+    HomeableSubsystemInterface(tap::Drivers* drivers)
         : Subsystem(drivers),
           length(length)
     {
@@ -60,23 +61,27 @@ public:
     /**
      * Sets the lower bound of this homeable subsystem's home for the motor at its current position.
      */
-    virtual void setLowerBound() = 0;
-
-    /**
-     * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
-     */
-    virtual void setUpperBound() = 0;
+    void setBounds() {
+        lowerBound = motor.getEncoderUnwrapped();
+        isBounded = true;
+    }
 
     /**
      * Returns whether or not the bounds have been set.
      */
-    virtual bool boundsSet() = 0;
+    virtual bool boundsSet() {
+        return isBounded;
+    }
 
-private:
+protected:
     /**
      * The length of the homeable subsystem's axis in encoder ticks.
      */
+    tap::motor::DjiMotor motor;
+    uint64_t lowerBound;
     uint64_t length;
+private:
+    bool isBounded;
 };  // class HomeableSubsystemInterface
 }  // namespace aruwsrc::control
 
