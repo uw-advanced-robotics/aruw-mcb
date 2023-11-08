@@ -18,6 +18,9 @@
  */
 
 #if defined(TARGET_SENTRY_BEEHIVE)
+#include "aruwsrc/drivers_singleton.hpp"
+
+using namespace aruwsrc::sentry;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -25,40 +28,48 @@
  *      and thus we must pass in the single statically allocated
  *      Drivers class to all of these objects.
  */
+driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
+/* define subsystems --------------------------------------------------------*/
+
+/* define commands ----------------------------------------------------------*/
+
 /* define command mappings --------------------------------------------------*/
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { }
-
+void initializeSubsystems()
+{
+}
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems() { }
+void registerSentrySubsystems(Drivers *drivers)
+{
+}
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands()
+void setDefaultSentryCommands(Drivers *)
 {
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands()
+void startSentryCommands(Drivers *drivers)
 {
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings()
+void registerSentryIoMappings(Drivers *drivers)
 {
 }
 }  // namespace sentry_control
 
 namespace aruwsrc::sentry
 {
-void initSubsystemCommands()
+void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 {
+
 }
 }  // namespace aruwsrc::sentry
-
 
 #endif
