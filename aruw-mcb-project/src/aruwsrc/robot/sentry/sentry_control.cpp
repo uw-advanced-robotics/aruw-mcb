@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// #if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_BEEHIVE)
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -61,4 +61,4 @@ void initSubsystemCommands()
 }  // namespace aruwsrc::sentry
 
 
-// #endif
+#endif
