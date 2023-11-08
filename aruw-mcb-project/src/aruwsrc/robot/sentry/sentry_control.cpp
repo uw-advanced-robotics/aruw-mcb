@@ -39,37 +39,25 @@ namespace sentry_control
 /* define command mappings --------------------------------------------------*/
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-}
+void initializeSubsystems() {}
 
+// note: some stubs commented out because CI screams about unused parameters
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(Drivers *drivers)
-{
-}
+void registerSentrySubsystems(Drivers *drivers) { drivers = drivers; }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(Drivers *)
-{
-}
+void setDefaultSentryCommands(Drivers *) { drivers = drivers; }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(Drivers *drivers)
-{
-}
+void startSentryCommands(Drivers *drivers) { drivers = drivers; }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings(Drivers *drivers)
-{
-}
+// void registerSentryIoMappings(Drivers *drivers) { drivers = drivers; }
 }  // namespace sentry_control
 
 namespace aruwsrc::sentry
 {
-void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
-{
-
-}
+void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers) { drivers = drivers; }
 }  // namespace aruwsrc::sentry
 
 #endif
