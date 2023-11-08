@@ -74,7 +74,7 @@ public:
 
 private:
     /**
-     * The length of the homeable subsystem's axis in encoder ticks.
+     * The length of the homeable subsystem's axis in encoder ticks. 
      */
     uint64_t length;
 };  // class HomeableSubsystemInterface
