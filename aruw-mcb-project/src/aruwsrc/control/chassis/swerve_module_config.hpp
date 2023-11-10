@@ -37,6 +37,8 @@ struct SwerveModuleConfig
     const float WHEEL_DIAMETER_M = 0.076f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
+    const float DRIVE_MOTOR_GEARBOX_RATIO = 1.0f / 19.0f;
+
     // in encoder clicks
     const int64_t azimuthZeroOffset = 0;
 
