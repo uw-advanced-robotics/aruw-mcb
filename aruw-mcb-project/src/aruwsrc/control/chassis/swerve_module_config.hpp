@@ -55,19 +55,20 @@ struct SwerveModuleConfig
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
     tap::algorithms::SmoothPidConfig drivePidConfig = {
-        .kp = 10.0f,
+        .kp = 7.0f,
         .ki = 0.0f,
-        .kd = 0.0f,
+        .kd = -80.0f,
         .maxICumulative = 0.0f,
-        .maxOutput = 16'384.0f,
+        .maxOutput = 16'000.0f,
+        .tRDerivativeKalman = 100.0f,
+        .tRProportionalKalman = 100.0f,
         .errDeadzone = 0.0f,
-        .errorDerivativeFloor = 0.0f,
-    };
+        .errorDerivativeFloor = 0.0f};
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 8000.0f,
+        .kp = 15000.0f,  // 10000.0f
         .ki = 0.0f,
-        .kd = 1.0f,
+        .kd = 0.0f,  // 12.0f
         .maxICumulative = 0.0f,
         .maxOutput = 16'000.0f,
         .errDeadzone = 0.0f,
