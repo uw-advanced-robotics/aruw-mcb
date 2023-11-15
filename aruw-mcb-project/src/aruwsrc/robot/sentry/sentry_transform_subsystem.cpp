@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -28,5 +27,4 @@ SentryTransformSubystem::SentryTransformSubystem(
       transformer(transformer)
 {
 }
-
 }  // namespace aruwsrc::sentry

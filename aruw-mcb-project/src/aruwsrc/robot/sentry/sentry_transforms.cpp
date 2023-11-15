@@ -25,7 +25,6 @@ using namespace tap::algorithms::odometry;
 
 namespace aruwsrc::sentry
 {
-
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,

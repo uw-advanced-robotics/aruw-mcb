@@ -25,10 +25,8 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
-// using namespace tap::algorithms::transforms;
 namespace aruwsrc::sentry
 {
-
 class SentryTransforms
 {
 public:
@@ -83,7 +81,7 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
     const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlboss;
-    const const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife;
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;
