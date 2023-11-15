@@ -163,7 +163,7 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,

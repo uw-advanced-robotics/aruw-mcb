@@ -25,6 +25,7 @@
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
+#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
@@ -38,6 +39,8 @@ namespace aruwsrc::drone
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart
+#elif defined(TARGET_TESTBED)
+namespace aruwsrc::testbed
 #endif
 {
 void initSubsystemCommands(Drivers *drivers);

@@ -70,6 +70,8 @@ using namespace aruwsrc::drone;
 using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
+#elif defined(TARGET_TESTBED)
+using namespace aruwsrc::testbed;
 #endif
 
 int main()

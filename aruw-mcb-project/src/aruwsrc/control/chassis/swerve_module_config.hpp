@@ -37,6 +37,8 @@ struct SwerveModuleConfig
     const float WHEEL_DIAMETER_M = 0.076f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
+    const float DRIVE_MOTOR_GEARBOX_RATIO = 1.0f / 19.0f;
+
     // in encoder clicks
     const int64_t azimuthZeroOffset = 0;
 
@@ -52,17 +54,21 @@ struct SwerveModuleConfig
     // Gear ratios for motors
     const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
 
-    const float drivePidKp = 10.0f;
-    const float drivePidKi = 0.0f;
-    const float drivePidKd = 0.0f;
-    const float drivePidMaxIntegralErrorSum = 0.0f;
-    const float drivePidMaxOutput = 16'384.0f;
-    const float drivePidFeedForwardConstant = 0.0f;
+    tap::algorithms::SmoothPidConfig drivePidConfig = {
+        .kp = 7.0f,
+        .ki = 0.0f,
+        .kd = -80.0f,
+        .maxICumulative = 0.0f,
+        .maxOutput = 16'000.0f,
+        .tRDerivativeKalman = 100.0f,
+        .tRProportionalKalman = 100.0f,
+        .errDeadzone = 0.0f,
+        .errorDerivativeFloor = 0.0f};
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 8000.0f,
+        .kp = 15000.0f,  // 10000.0f
         .ki = 0.0f,
-        .kd = 1.0f,
+        .kd = 0.0f,  // 12.0f
         .maxICumulative = 0.0f,
         .maxOutput = 16'000.0f,
         .errDeadzone = 0.0f,

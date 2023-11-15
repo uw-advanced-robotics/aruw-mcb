@@ -26,16 +26,11 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
-    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, CHASSIS_GEARBOX_RATIO),
+    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.DRIVE_MOTOR_GEARBOX_RATIO),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),
-      drivePid(
-          config.drivePidKp,
-          config.drivePidKi,
-          config.drivePidKd,
-          config.drivePidMaxIntegralErrorSum,
-          config.drivePidMaxOutput),
+      drivePid(config.drivePidConfig),
       azimuthPid(config.azimuthPidConfig),
       rotationVectorX(-config.positionWithinChassisY),
       rotationVectorY(config.positionWithinChassisX),
@@ -84,12 +79,14 @@ float SwerveModule::calculate(float x, float y, float r)
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
+        // TODO: mechanical problem with the tension wheels in swerve module make this not work
+        //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        {
-            rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        }
+        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        // {
+        //     rotationOffset -=
+        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        // }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
@@ -117,8 +114,8 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 
 void SwerveModule::refresh()
 {
-    drivePid.update(speedSetpointRPM - getDriveRPM());
-    driveMotor.setDesiredOutput(drivePid.getValue());
+    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+    driveMotor.setDesiredOutput(drivePid.getOutput());
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());

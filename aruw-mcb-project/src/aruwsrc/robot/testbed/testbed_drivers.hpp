@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_kf_odometry_2d_subsystem.hpp"
+#ifndef TESTBED_DRIVERS_HPP_
+#define TESTBED_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::testbed
 {
-OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
-    tap::Drivers &drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turret,
-    tap::control::chassis::ChassisSubsystemInterface &chassis,
-    const modm::Vector2f initPos)
-    : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500, initPos),
-      orientationObserver(turret)
+class Drivers : public tap::Drivers
 {
-}
+    friend class DriversSingleton;
 
-void OttoKFOdometry2DSubsystem::refresh() { update(); }
+#ifdef ENV_UNIT_TESTS
+public:
+#endif
+    Drivers() : tap::Drivers() {}
 
-}  // namespace aruwsrc::algorithms::odometry
+public:
+};  // class aruwsrc::StandardDrivers
+}  // namespace aruwsrc::testbed
+
+#endif  // STANDARD_DRIVERS_HPP_

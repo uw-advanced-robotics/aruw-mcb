@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,18 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "otto_kf_odometry_2d_subsystem.hpp"
+#include "motor_stall_trigger.hpp"
 
-#include "tap/drivers.hpp"
+#include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::algorithms::odometry
-{
-OttoKFOdometry2DSubsystem::OttoKFOdometry2DSubsystem(
-    tap::Drivers &drivers,
-    const aruwsrc::control::turret::TurretSubsystem &turret,
-    tap::control::chassis::ChassisSubsystemInterface &chassis,
-    const modm::Vector2f initPos)
-    : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, orientationObserver, drivers.mpu6500, initPos),
-      orientationObserver(turret)
+MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque)
+    : motor(&motor),
+      maxRPM(maxRPM),
+      minTorque(minTorque)
 {
 }
 
-void OttoKFOdometry2DSubsystem::refresh() { update(); }
-
-}  // namespace aruwsrc::algorithms::odometry
+bool MotorStallTrigger::isTriggered()
+{
+    return ((fabs(motor->getShaftRPM()) < maxRPM) && (fabsl(motor->getTorque()) > minTorque));
+}

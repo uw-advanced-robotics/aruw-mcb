@@ -24,7 +24,7 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "modm/math/geometry/location_2d.hpp"
+#include "modm/math/geometry.hpp"
 
 #include "chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
@@ -63,11 +63,13 @@ public:
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
      * it is used
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
+     * @param[in] initPos initial position of chassis on boot
      */
     OttoKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::control::chassis::ChassisSubsystemInterface& chassis);
+        tap::control::chassis::ChassisSubsystemInterface& chassis,
+        modm::Vector2f initPos);
 
     void refresh() override;
 
