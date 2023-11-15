@@ -45,12 +45,12 @@ public:
     /**
      * Moves the motor on the homeeable axis towards its upper mechanical limit.
      */
-    virtual void moveTowardUpperBound() = 0;
+    virtual void startMoveTowardUpperBound() = 0;
 
     /**
      * Moves the motor on the homeable axis towards its lower mechanical limit.
      */
-    virtual void moveTowardLowerBound() = 0;
+    virtual void startMoveTowardLowerBound() = 0;
 
     /**
      * Stops the motor on the homeable axis.
@@ -58,12 +58,12 @@ public:
     virtual void stop() = 0;
 
     /**
-     * Sets the lower bound of this homeable subsystem's home for the motor at its current position.
+     * Sets the lower bound of this homeable subsystem's home for the motor.
      */
     virtual void setLowerBound() = 0;
 
     /**
-     * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
+     * Sets the upper bound of this homeable subsystem's home for the motor.
      */
     virtual void setUpperBound() = 0;
 
