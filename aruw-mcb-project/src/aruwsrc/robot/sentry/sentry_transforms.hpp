@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,24 +19,86 @@
 #ifndef SENTRY_TRANSFORMS_HPP_
 #define SENTRY_TRANSFORMS_HPP_
 
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-using namespace tap::algorithms::transforms;
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
-namespace aruwsrc::algorithms::transforms
+// using namespace tap::algorithms::transforms;
+namespace aruwsrc::sentry
 {
 
 class SentryTransforms
 {
 public:
-    // @todo: rename turret minors
-    // @note: blocked by subsystem implementations
-    // SentryTransforms(
-    //     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-    //     const SentryTurretMajorSubsystem& turretMajor,
-    //     const SentryTurretMinorSubsystem& turretMinorGirlboss,
-    //     const SentryTurretMinorSubsystem& turretMinorMalewife);
+    struct SentryTransformConfig
+    {
+        // Offset from turret minor yaw axis to turret major yaw axis (should only be in the
+        // y-direction of the turret major frame)
+        const float turretMinorOffset;
+    };
+
+    SentryTransforms(
+        const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
+        const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
+        const aruwsrc::control::turret::TurretSubsystem& turretLeft,
+        const aruwsrc::control::turret::TurretSubsystem& turretRight,
+        const SentryTransformConfig& config);
+
+    void updateTransforms();
+
+    inline uint32_t lastComputedTimestamp() const { return lastComputedTime; };
+
+    inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
+    {
+        return worldToChassis;
+    };
+    inline const tap::algorithms::transforms::Transform& getWorldToTurretMajor() const
+    {
+        return worldToTurretMajor;
+    };
+    inline const tap::algorithms::transforms::Transform& getWorldToTurretLeft() const
+    {
+        return worldToTurretLeft;
+    };
+    inline const tap::algorithms::transforms::Transform& getWorldToTurretRight() const
+    {
+        return worldToTurretRight;
+    };
+
+    inline const tap::algorithms::transforms::Transform& getMajorToTurretLeft() const
+    {
+        return turretMajorToTurretLeft;
+    };
+
+    inline const tap::algorithms::transforms::Transform& getMajorToTurretRight() const
+    {
+        return turretMajorToTurretRight;
+    };
+
+private:
+    SentryTransformConfig config;
+
+    const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
+    const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
+    const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlboss;
+    const const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife;
+
+    // Transforms
+    tap::algorithms::transforms::Transform worldToChassis;
+    tap::algorithms::transforms::Transform worldToTurretMajor;
+    tap::algorithms::transforms::Transform worldToTurretLeft;
+    tap::algorithms::transforms::Transform worldToTurretRight;
+
+    // Intermediary transforms
+    tap::algorithms::transforms::Transform chassisToTurretMajor;
+    tap::algorithms::transforms::Transform turretMajorToTurretLeft;
+    tap::algorithms::transforms::Transform turretMajorToTurretRight;
+
+    uint32_t lastComputedTime = 0;
 };
-}  // namespace aruwsrc::algorithms::transforms
+
+}  // namespace aruwsrc::sentry
 
 #endif  // SENTRY_TRANSFORMS_HPP_
