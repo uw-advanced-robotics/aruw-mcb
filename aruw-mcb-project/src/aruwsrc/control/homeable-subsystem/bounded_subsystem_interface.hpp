@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HOMEABLE_SUBSYSTEM_INTERFACE_HPP_
-#define HOMEABLE_SUBSYSTEM_INTERFACE_HPP_
+#ifndef BOUNDED_SUBSYSTEM_INTERFACE_HPP_
+#define BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
@@ -26,22 +26,41 @@
 namespace aruwsrc::control
 {
 /**
- * Interface for a homeable subsystem, which is a subsytem where its one motor
- * is constrained to a specific axis that bounded on either end. The axis length is
+ * Interface for a homeable and bounded subsystem, which is a subsytem where its one motor
+ * is both homeable and constrained to a specific bounded axis. The axis length is
  * the length between bounds measured in motor encoder ticks.
  *
  * The lower bound is the furthest the motor is allowed to move in one direction along its axis of
  * movement and the upper bound is the furthest it can move in the opposite direction.
  */
+
 class HomeableSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    HomeableSubsystemInterface(tap::Drivers* drivers, uint64_t length)
-        : Subsystem(drivers),
-          length(length)
-    {
-    }
+    HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+    
+    /**
+     * Finds and sets the home AND bounds. Upon completion of this function,
+     * homedAndBounded will be true.
+    */
+    virtual void calibrate() = 0;
 
+    /**
+     * Returns whether or not the home AND bounds have been set.
+     */
+    virtual bool homedAndBounded() const = 0;
+
+    /**
+     * Returns the upper bound in motor encoder ticks.
+    */
+    virtual uint64_t getUpperBound() const = 0;
+
+    /**
+     * Returns the lower bound in motor encoder ticks.
+    */
+    virtual uint64_t getLowerBound() const = 0;
+
+protected:
     /**
      * Moves the motor on the homeeable axis towards its upper mechanical limit.
      */
@@ -58,25 +77,19 @@ public:
     virtual void stop() = 0;
 
     /**
-     * Sets the lower bound of this homeable subsystem's home for the motor at its current position.
+     * Sets the lower bound of this bounded subsystem to the given encoder position.
      */
-    virtual void setLowerBound() = 0;
+    virtual void setLowerBound(uint64_t encoderPosition) = 0;
 
     /**
-     * Sets the upper bound of this homeable subsystem's home for the motor at its current position.
+     * Sets the upper bound of this bounded subsystem to the given encoder position.
      */
-    virtual void setUpperBound() = 0;
+    virtual void setUpperBound(uint64_t encoderPosition) = 0;
 
     /**
-     * Returns whether or not the bounds have been set.
-     */
-    virtual bool boundsSet() = 0;
-
-private:
-    /**
-     * The length of the homeable subsystem's axis in encoder ticks.
-     */
-    uint64_t length;
+     * Sets the given motor encoder position to now be the "home" of the subsystem's motor.
+    */
+    virtual void setHome(uint64_t encoderPosition) = 0;
 };  // class HomeableSubsystemInterface
 }  // namespace aruwsrc::control
 
