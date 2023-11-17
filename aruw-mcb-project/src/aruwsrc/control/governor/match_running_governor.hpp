@@ -29,8 +29,8 @@
 namespace aruwsrc::control::governor
 {
 /**
- * A governor that when triggered pauses the ability to schedule an associated Command for a
- * specified period.
+ * A governor that tracks game state. Is ready if the game state is unknown (offline)
+ * or if the game is running
  */
 class MatchRunningGovernor : public tap::control::governor::CommandGovernorInterface
 {
