@@ -28,7 +28,12 @@ namespace aruwsrc::sentry
 class SentryTransformSubystem : public tap::control::Subsystem
 {
 public:
-    SentryTransformSubystem(tap::Drivers& drivers, aruwsrc::sentry::SentryTransforms& transformer);
+    SentryTransformSubystem(tap::Drivers& drivers, aruwsrc::sentry::SentryTransforms& transformer)
+        : tap::control::Subsystem(&drivers),
+          transformer(transformer)
+    {
+    }
+
     inline void initialize() override{};
     inline void refresh() override { transformer.updateTransforms(); };
 
