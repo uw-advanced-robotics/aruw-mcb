@@ -25,7 +25,6 @@ using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms::transforms
 {
-
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
     const RobotTurretSubsystem& turret)
