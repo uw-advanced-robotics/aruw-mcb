@@ -44,7 +44,7 @@ public:
      */
     TurretMCBMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm);
+        aruwsrc::can::TurretMCBCanComm *turretMCBCanComm);
 
     void draw() override;
 
@@ -59,7 +59,7 @@ public:
 private:
     static constexpr int TURRET_MCB_MENU_ID = 12;
 
-    aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    aruwsrc::can::TurretMCBCanComm *turretMCBCanComm;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };
