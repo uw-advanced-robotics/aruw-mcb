@@ -34,6 +34,7 @@
 #include "../chassis/constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
+#include "wheel.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
