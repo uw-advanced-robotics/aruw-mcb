@@ -27,26 +27,25 @@ namespace aruwsrc::control
 {
 /**
  * Interface for a homeable and bounded subsystem, which is a subsytem where its one motor
- * is both homeable and constrained to a specific bounded axis. The axis length is
- * the length between bounds measured in motor encoder ticks.
+ * is both homeable and constrained to a specific bounded axis.
  *
- * The lower bound is the furthest the motor is allowed to move in one direction along its axis of
- * movement and the upper bound is the furthest it can move in the opposite direction.
+ * The lower bound is the furthest the motor is allowed to move in one (arbitrary) direction along its axis 
+ * of movement and the upper bound is the furthest it can move in the opposite direction.
  */
 
-class HomeableSubsystemInterface : public tap::control::Subsystem
+class BoundedSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    HomeableSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+    BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
     
     /**
-     * Finds and sets the home AND bounds. Upon completion of this function,
-     * homedAndBounded will be true.
+     * Finds and sets the home and bounds. Upon completion of this function,
+     * homedAndBounded() will now return true.
     */
     virtual void calibrate() = 0;
 
     /**
-     * Returns whether or not the home AND bounds have been set.
+     * Returns whether or not the home and bounds have been set.
      */
     virtual bool homedAndBounded() const = 0;
 
@@ -61,20 +60,11 @@ public:
     virtual uint64_t getLowerBound() const = 0;
 
 protected:
-    /**
-     * Moves the motor on the homeeable axis towards its upper mechanical limit.
-     */
-    virtual void moveTowardUpperBound() = 0;
 
     /**
-     * Moves the motor on the homeable axis towards its lower mechanical limit.
+     * Stops the motor from moving. Only to be used during calibration.
      */
-    virtual void moveTowardLowerBound() = 0;
-
-    /**
-     * Stops the motor on the homeable axis.
-     */
-    virtual void stop() = 0;
+    virtual void haltHoming() = 0;
 
     /**
      * Sets the lower bound of this bounded subsystem to the given encoder position.
