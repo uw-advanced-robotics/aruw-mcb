@@ -45,7 +45,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-    class Wheel; //need a real wheel class. Kinda sucks rn
 /**
  * Abstract subsystem for a holonomic chassis
  *
