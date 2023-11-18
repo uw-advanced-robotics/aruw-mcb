@@ -26,23 +26,24 @@
 namespace aruwsrc::control
 {
 /**
- * Interface for a homeable and bounded subsystem, which is a subsytem where its one motor
+ * Interface for a homeable and bounded subsystem, which is a subsytem where its motor
  * is both homeable and constrained to a specific bounded axis.
  *
- * The lower bound is the furthest the motor is allowed to move in one (arbitrary) direction along its axis 
- * of movement and the upper bound is the furthest it can move in the opposite direction.
+ * The lower bound is defined as the furthest the motor is allowed to move in one (arbitrary)
+ * direction along its axis of movement and the upper bound is the furthest it can move in the
+ * opposite direction.
  */
 
 class BoundedSubsystemInterface : public tap::control::Subsystem
 {
 public:
     BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
-    
+
     /**
-     * Finds and sets the home and bounds. Upon completion of this function,
-     * homedAndBounded() will now return true.
-    */
-    virtual void calibrate() = 0;
+     * Starts the calibration. Sets CalibrationState to CALIBRATING_LOWER_BOUND.
+     * The actual calibrating logic occurs in refresh() of the base class.
+     */
+    void startCalibrate() { calibrationState = CalibrationState::CALIBRATING_LOWER_BOUND; }
 
     /**
      * Returns whether or not the home and bounds have been set.
@@ -51,15 +52,27 @@ public:
 
     /**
      * Returns the upper bound in motor encoder ticks.
-    */
+     */
     virtual uint64_t getUpperBound() const = 0;
 
     /**
      * Returns the lower bound in motor encoder ticks.
-    */
+     */
     virtual uint64_t getLowerBound() const = 0;
 
 protected:
+    /**
+     * Specifies the current calibration state that command is in. Use in refresh() of child class.
+     */
+    enum class CalibrationState
+    {
+        AWAITING_CALIBRATE,  // not yet calibrating: call startCalibrate() to start.
+        CALIBRATING_LOWER_BOUND,
+        CALIBRATING_UPPER_BOUND,  // one-sided does not use this
+        CALIBRATION_COMPLETE      // calibration done
+    };
+
+    CalibrationState calibrationState;
 
     /**
      * Stops the motor from moving. Only to be used during calibration.
@@ -77,8 +90,8 @@ protected:
     virtual void setUpperBound(uint64_t encoderPosition) = 0;
 
     /**
-     * Sets the given motor encoder position to now be the "home" of the subsystem's motor.
-    */
+     * Sets the given motor encoder position to be the "home" of the subsystem's motor.
+     */
     virtual void setHome(uint64_t encoderPosition) = 0;
 };  // class HomeableSubsystemInterface
 }  // namespace aruwsrc::control

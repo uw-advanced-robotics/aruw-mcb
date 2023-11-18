@@ -26,28 +26,33 @@
 namespace aruwsrc::control
 {
 /**
- * A Bounded Subsystem whose home and bounds are set upon activating a trigger
+ * A bounded subsystem whose home and bounds are set upon activating a trigger
  * on one side of its axis.
-*/
+ */
 class OneSidedBoundedSubsystemInterface : public BoundedSubsystemInterface
 {
 public:
-    OneSidedBoundedSubsystemInterface(tap::Drivers* drivers,
-                                      TriggerInterface& trigger, 
-                                      uint64_t length) 
-    : BoundedSubsystemInterface(drivers),
-      trigger(trigger),
-      length(length) {}
+    OneSidedBoundedSubsystemInterface(
+        tap::Drivers* drivers,
+        TriggerInterface& trigger,
+        uint64_t length)
+        : BoundedSubsystemInterface(drivers),
+          trigger(trigger),
+          length(length)
+    {
+    }
 
-    void calibrate() override;
-    
-private:
+protected:
     /**
      * Moves the motor along its axis towards the lower bound.
-    */
+     */
     virtual void moveTowardLowerBound() = 0;
 
     TriggerInterface& trigger;
+
+    /**
+     * The length of the subsystem. Used to calculate the motor's upper bound.
+     */
     uint64_t length;
 };  // class OneSidedBoundedSubsystemInterface
 }  // namespace aruwsrc::control

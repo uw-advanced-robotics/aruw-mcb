@@ -26,34 +26,35 @@
 namespace aruwsrc::control
 {
 /**
- * A Bounded Subsystem whose home and bounds are set upon activating two triggers
- * on either end of the axis, one after the other.
-*/
+ * A Bounded Subsystem whose home and bounds are set upon sequentially activating two triggers
+ * located on either end of the axis.
+ */
 class TwoSidedBoundedSubsystemInterface : public BoundedSubsystemInterface
 {
 public:
-    TwoSidedBoundedSubsystemInterface(tap::Drivers* drivers, 
-                                      TriggerInterface& lowerTrigger, 
-                                      TriggerInterface& upperTrigger) 
-    : BoundedSubsystemInterface(drivers),
-      lowerTrigger(lowerTrigger),
-      upperTrigger(upperTrigger) {}
+    TwoSidedBoundedSubsystemInterface(
+        tap::Drivers* drivers,
+        TriggerInterface& lowerTrigger,
+        TriggerInterface& upperTrigger)
+        : BoundedSubsystemInterface(drivers),
+          lowerTrigger(lowerTrigger),
+          upperTrigger(upperTrigger)
+    {
+    }
 
-    void calibrate() override;
-private:
+protected:
     /**
      * Moves the motor along its axis towards the lower bound.
-    */
+     */
     virtual void moveTowardLowerBound() = 0;
-    
+
     /**
      * Moves the motor along its axis towards the upper bound.
-    */
+     */
     virtual void moveTowardUpperBound() = 0;
 
     TriggerInterface& lowerTrigger;
     TriggerInterface& upperTrigger;
-    uint64_t length;
 };  // class OneSidedBoundedSubsystemInterface
 }  // namespace aruwsrc::control
 

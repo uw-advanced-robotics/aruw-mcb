@@ -28,13 +28,12 @@
 namespace aruwsrc::control
 {
 /**
- * A command that tells a Bounded subsystem to calibrate.
+ * A command that tells a bounded subsystem to calibrate.
  */
 class HomingCommand : public tap::control::Command
 {
 public:
-    HomingCommand(aruwsrc::control::BoundedSubsystemInterface& subsystem)
-        : subsystem(subsystem)
+    HomingCommand(aruwsrc::control::BoundedSubsystemInterface& subsystem) : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
     }

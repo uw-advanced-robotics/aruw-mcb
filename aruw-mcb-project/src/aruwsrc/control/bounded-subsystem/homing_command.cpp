@@ -21,9 +21,11 @@
 
 namespace aruwsrc::control
 {
-// Once calibrate() finishes, homedAndBounded will be true, and the subsystem's motor will
-// be at rest.
-void HomingCommand::initialize() { subsystem.calibrate(); }
+/**
+ * Once the subsystem's calibration is finished, homedAndBounded will be true, and the subsystem's
+ * motor will be at rest.
+ */
+void HomingCommand::initialize() { subsystem.startCalibrate(); }
 
 bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
 
