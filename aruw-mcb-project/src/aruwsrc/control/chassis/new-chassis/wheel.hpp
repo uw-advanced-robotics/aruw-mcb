@@ -37,7 +37,7 @@ struct WheelConfig
 class Wheel 
 {
 
-//create a struct with wheel pose/radius/orientation
+    //create a struct with wheel pose/radius/orientation
 public: 
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
