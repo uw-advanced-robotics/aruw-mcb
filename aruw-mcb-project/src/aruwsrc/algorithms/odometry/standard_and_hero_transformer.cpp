@@ -19,6 +19,8 @@
 
 #include "standard_and_hero_transformer.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+
 using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
@@ -40,17 +42,23 @@ void StandardAndHeroTransformer::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+
+    // @note: here we are assuming that the chassis does not pitch or roll
+    // This is fine for flat fields, but for an RMUC field with inclines
+    // the state of the robot will not be properly tracked
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
-    worldToTurret.updateRotation(0.0f, turret.getWorldPitch(), turret.getWorldYaw());
+    float roll = 0.0f;
+    const aruwsrc::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
 
-    // turret is in center of chassis, for now no z offset?
+    // @note: must shift by PI / 3 since turret mcb roll is in the range [- PI / 2, PI / 2] while
+    // turret pitch and yaw are both in [0, PI]
+    if (turretMCB != nullptr) roll = turretMCB->getRoll() + M_PI_2;
+
+    worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
+
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
-
-    chassisToTurret.updateRotation(
-        worldToTurret.getRoll() - worldToChassis.getRoll(),
-        worldToTurret.getPitch() - worldToChassis.getPitch(),
-        worldToTurret.getYaw() - worldToChassis.getYaw());
+    chassisToTurret = worldToChassis.getInverse().compose(worldToTurret);
 }
 
 }  // namespace aruwsrc::algorithms::transforms

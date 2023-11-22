@@ -26,6 +26,9 @@
 
 namespace aruwsrc::algorithms::transforms
 {
+/**
+ * @brief a convenience subsystem for updating a StandardAndHeroTransformer each control loop
+ */
 class StandardAnderHeroTransformerSubsystem : public tap::control::Subsystem
 {
 public:

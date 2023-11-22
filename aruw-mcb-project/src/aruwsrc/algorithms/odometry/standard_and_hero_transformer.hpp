@@ -31,6 +31,8 @@ namespace aruwsrc::algorithms::transforms
 {
 /**
  * @brief transform provider for both the standard and hero
+ * Use the StandardAndHeroTransformerSubsystem as a convenience class to
+ * update the transformer each loop
  */
 class StandardAndHeroTransformer
 {
@@ -41,10 +43,13 @@ public:
 
     /**
      * @brief updates the transforms stored by the transformer
-     * Should be called once per loop
+     * Should be called once per control loop
      */
     void updateTransforms();
 
+    // @note: In updating this transform we are assuming that the chassis does not pitch or roll
+    // This is fine for flat fields, but for an RMUC field with inclines
+    // the state of the robot will not be properly tracked
     inline const tap::algorithms::transforms::Transform& getWorldToChassis()
     {
         return worldToChassis;
