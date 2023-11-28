@@ -56,7 +56,7 @@ public:
 
     /**
      * @brief Updates the motor angles.
-     * 
+     *
      * @note Rewraps motor revolutions when motors come online according to resetMotorRevolutions.
      */
     mockable void updateMotorAngle();
@@ -271,10 +271,10 @@ private:
      * Converts from unwrapped encoder values to chassis-relative angles.
      */
     float unwrappedEncoderToUnwrappedAngle(int64_t encoderUnwrapped) const;
-    
+
     /**
      * @brief Resets internal motor encoder revolutions count.
-     * 
+     *
      * If motor has unwrapped angle limits, resets revolutions such that motor unwrapped angle is
      * within config minAngle and maxAngle. If motor has no limits, resets revolutions such that
      * motor angle is closest to config startAngle.

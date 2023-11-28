@@ -168,8 +168,9 @@ float TurretMotor::getSetpointWithinTurretRange(float setpoint) const
 float TurretMotor::unwrappedEncoderToUnwrappedAngle(int64_t encoderUnwrapped) const
 {
     return static_cast<float>(
-        encoderUnwrapped - static_cast<int64_t>(this->config.startEncoderValue)) *
-        M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) + this->config.startAngle;
+               encoderUnwrapped - static_cast<int64_t>(this->config.startEncoderValue)) *
+               M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
+           this->config.startAngle;
 }
 
 void TurretMotor::resetMotorRevolutions()
@@ -177,19 +178,21 @@ void TurretMotor::resetMotorRevolutions()
     int revolutionsOffset = 0;
     if (this->config.limitMotorAngles)
     {
-        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) > this->config.maxAngle)
+        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) >
+               this->config.maxAngle)
         {
             revolutionsOffset--;
         }
-        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) < this->config.minAngle)
+        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) <
+               this->config.minAngle)
         {
             revolutionsOffset++;
         }
     }
     else
     {
-        int encoderDiff =
-                static_cast<int>(config.startEncoderValue) - static_cast<int>(this->motor->getEncoderUnwrapped());
+        int encoderDiff = static_cast<int>(config.startEncoderValue) -
+                          static_cast<int>(this->motor->getEncoderUnwrapped());
 
         while (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
         {
