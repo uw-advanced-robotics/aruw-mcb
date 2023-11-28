@@ -35,7 +35,8 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       chassisFrameSetpoint(config.startAngle),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
       chassisFrameUnwrappedMeasurement(config.startAngle),
-      lastUpdatedEncoderValue(config.startEncoderValue)
+      lastUpdatedEncoderValue(config.startEncoderValue),
+      motorLastOnline(false)
 {
     if (config.limitMotorAngles)
     {
