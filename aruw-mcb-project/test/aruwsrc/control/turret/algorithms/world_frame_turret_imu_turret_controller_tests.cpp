@@ -104,8 +104,8 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_
     motorConfig = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
 
@@ -118,27 +118,27 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_
         posPid,
         velPid);
 
-    turretController.runController(1, -2.0f * M_TWOPI);
+    turretController.runController(1, -2.0f * M_PI_2);
 
-    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(-M_PI_2, turretController.getSetpoint(), 1e-5f);
 
-    turretController.runController(1, 2.0f * M_TWOPI);
+    turretController.runController(1, 2.0f * M_PI_2);
 
-    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(M_PI_2, turretController.getSetpoint(), 1e-5f);
 
-    turretFrameImuValue = 2.0f * M_TWOPI;
+    turretFrameImuValue = 2.0f * M_PI_2;
 
     turretController.runController(1, 0);
 
-    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(M_PI_2, turretController.getSetpoint(), 1e-5f);
 
     turretFrameImuValue = 0;
-    chassisFrameUnwrappedMeasurement = 2.0f * M_TWOPI;
+    chassisFrameUnwrappedMeasurement = 2.0f * M_PI_2;
     turretMotor.updateMotorAngle();
 
     turretController.runController(1, 0);
 
-    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(-M_PI_2, turretController.getSetpoint(), 1e-5f);
 }
 
 TEST_F(
@@ -312,8 +312,8 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_fram
     motorConfig = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
 
@@ -326,27 +326,27 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_fram
         posPid,
         velPid);
 
-    turretController.runController(1, -2.0f * M_TWOPI);
+    turretController.runController(1, -2.0f * M_PI_2);
 
-    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(-M_PI_2, turretController.getSetpoint(), 1e-5f);
 
-    turretController.runController(1, 2.0f * M_TWOPI);
+    turretController.runController(1, 2.0f * M_PI_2);
 
-    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(M_PI_2, turretController.getSetpoint(), 1e-5f);
 
-    turretFrameImuValue = 2.0f * M_TWOPI;
+    turretFrameImuValue = 2.0f * M_PI_2;
 
     turretController.runController(1, 0);
 
-    EXPECT_NEAR(M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(M_PI_2, turretController.getSetpoint(), 1e-5f);
 
     turretFrameImuValue = 0;
-    chassisFrameUnwrappedMeasurement = 2.0f * M_TWOPI;
+    chassisFrameUnwrappedMeasurement = 2.0f * M_PI_2;
     turretMotor.updateMotorAngle();
 
     turretController.runController(1, 0);
 
-    EXPECT_NEAR(-M_TWOPI, turretController.getSetpoint(), 1e-5f);
+    EXPECT_NEAR(-M_PI_2, turretController.getSetpoint(), 1e-5f);
 }
 
 TEST_F(

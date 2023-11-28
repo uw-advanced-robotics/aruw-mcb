@@ -370,8 +370,8 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
     TurretMotorConfig mc = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
     TurretMotor tm(&motor, mc);
@@ -379,10 +379,10 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
     motorOnline = true;
 
     std::vector<std::tuple<float, float, float>> errorMeasurementsToTest = {
-        {-M_TWOPI, -M_TWOPI, 0},
-        {-M_TWOPI, 0, M_TWOPI},
-        {-M_TWOPI, M_TWOPI, 2 * M_TWOPI},
-        {M_TWOPI, -M_TWOPI, -2 * M_TWOPI},
+        {-M_PI_2, -M_PI_2, 0},
+        {-M_PI_2, 0, M_PI_2},
+        {-M_PI_2, M_PI_2, 2 * M_PI_2},
+        {M_PI_2, -M_PI_2, -2 * M_PI_2},
     };
 
     setEncoder(getEncoderUnwrapped(mc, mc.startAngle));
@@ -431,16 +431,16 @@ TEST_F(TurretMotorTest, getSetpointWithinTurretRange)
     TurretMotorConfig mc = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
     TurretMotor tm(&motor, mc);
 
     std::vector<std::tuple<float, float>> valuesToTest = {
         {0, 0},
-        {-M_TWOPI, -M_TWOPI},
-        {M_TWOPI, M_TWOPI},
+        {-M_PI_2, -M_PI_2},
+        {M_PI_2, M_PI_2},
         {M_PI, M_PI},
         {-M_PI, -M_PI},
         {-M_TWOPI - 0.1, -0.1},
@@ -602,15 +602,15 @@ std::vector<TurretMotorConfig> motorConfigValuesToTest = {
     {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_PI,
-        .maxAngle = M_PI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     },
     {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI,
+        .maxAngle = M_PI,
         .limitMotorAngles = true,
     },
 };

@@ -37,8 +37,11 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       chassisFrameUnwrappedMeasurement(config.startAngle),
       lastUpdatedEncoderValue(config.startEncoderValue)
 {
-    assert(config.minAngle < config.maxAngle);
-    assert(config.maxAngle <= config.minAngle + M_TWOPI);
+    if (config.limitMotorAngles)
+    {
+        assert(config.minAngle <= config.maxAngle);
+        assert(config.maxAngle <= config.minAngle + M_TWOPI + 1E3);
+    }
     assert(motor != nullptr);
 }
 

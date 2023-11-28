@@ -35,11 +35,10 @@ struct TurretMotorConfig
                            /// startEncoderValue.
     uint16_t startEncoderValue = 0;  /// Encoder value between [0, ENC_RESOLUTION) associated
                                      /// with startAngle.
-    float minAngle = 0;  /// Min angle that the turret will be limited to (in radians). Should be
-                         /// within [0, 2 PI) and < minAngle
-    float maxAngle = 0;  /// Max wrapped angle that the turret will be limited to (in radians). DOES
-                         /// NOT have to be wrapped between [0, 2 PI) to allow for any angle
-                         /// interval, but must be > minAngle and <= minAngle + 2 PI.
+    float minAngle = 0;  /// Min unwrapped angle that the turret will be limited to (in radians).
+                         /// Should be <= minAngle.
+    float maxAngle = 0;  /// Max unwrapped angle that the turret will be limited to (in radians).
+                         /// Must be >= minAngle and <= minAngle + 2 PI.
     bool limitMotorAngles = true;  /// true if the motor will be limited between [minAngle,
                                    /// maxAngle], false otherwise.
 };
