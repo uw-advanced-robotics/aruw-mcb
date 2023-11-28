@@ -37,7 +37,8 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       chassisFrameUnwrappedMeasurement(config.startAngle),
       lastUpdatedEncoderValue(config.startEncoderValue)
 {
-    assert(config.minAngle <= config.maxAngle);
+    assert(config.minAngle < config.maxAngle);
+    assert(config.maxAngle <= config.minAngle + M_TWOPI);
     assert(motor != nullptr);
 }
 
@@ -45,34 +46,13 @@ void TurretMotor::updateMotorAngle()
 {
     if (isOnline())
     {
+        if (!motorLastOnline)
+        {
+            this->resetMotorRevolutions();
+            this->motorLastOnline = true;
+        }
+
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
-
-        if (config.limitMotorAngles)
-        {
-            startEncoderOffset = 0;
-        }
-
-        if (startEncoderOffset == INT16_MIN)
-        {
-            int encoderDiff =
-                static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
-
-            if (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
-            {
-                // encoder offset by 1 rev in negative direction
-                startEncoderOffset = -DjiMotor::ENC_RESOLUTION;
-            }
-            else if (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
-            {
-                // offset by 1 rev in positive direction
-                startEncoderOffset = DjiMotor::ENC_RESOLUTION;
-            }
-            else
-            {
-                // no offset necessary
-                startEncoderOffset = 0;
-            }
-        }
 
         if (lastUpdatedEncoderValue == encoderUnwrapped)
         {
@@ -81,24 +61,19 @@ void TurretMotor::updateMotorAngle()
 
         lastUpdatedEncoderValue = encoderUnwrapped;
 
-        chassisFrameUnwrappedMeasurement =
-            static_cast<float>(
-                encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
-                startEncoderOffset) *
-                M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;
+        chassisFrameUnwrappedMeasurement = unwrappedEncoderToUnwrappedAngle(encoderUnwrapped);
 
         chassisFrameMeasuredAngle.setValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
-        if (lastUpdatedEncoderValue == config.startEncoderValue)
+        if (!this->motorLastOnline)
         {
             return;
         }
 
         lastUpdatedEncoderValue = config.startEncoderValue;
-        startEncoderOffset = INT16_MIN;
+        this->motorLastOnline = false;
 
         chassisFrameMeasuredAngle.setValue(config.startAngle);
     }
@@ -188,6 +163,45 @@ float TurretMotor::getSetpointWithinTurretRange(float setpoint) const
     }
 
     return setpoint;
+}
+
+float TurretMotor::unwrappedEncoderToUnwrappedAngle(int64_t encoderUnwrapped) const
+{
+    return static_cast<float>(
+        encoderUnwrapped - static_cast<int64_t>(this->config.startEncoderValue)) *
+        M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) + this->config.startAngle;
+}
+
+void TurretMotor::resetMotorRevolutions()
+{
+    int revolutionsOffset = 0;
+    if (this->config.limitMotorAngles)
+    {
+        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) > this->config.maxAngle)
+        {
+            revolutionsOffset--;
+        }
+        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) < this->config.minAngle)
+        {
+            revolutionsOffset++;
+        }
+    }
+    else
+    {
+        int encoderDiff =
+                static_cast<int>(config.startEncoderValue) - static_cast<int>(this->motor->getEncoderUnwrapped());
+
+        while (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
+        {
+            revolutionsOffset--;
+        }
+        while (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
+        {
+            // offset by 1 rev in positive direction
+            revolutionsOffset++;
+        }
+    }
+    this->motor->offsetRevolutions(revolutionsOffset);
 }
 
 }  // namespace aruwsrc::control::turret

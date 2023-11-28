@@ -33,8 +33,8 @@ namespace aruwsrc::control::turret
 {
 /**
  * Logic encapsulating the control of a single axis of a turret gimbal motor. Contains logic for
- * storing chassis relative position measurements and setpoints and logic for limiting the angle
- * setpoint.
+ * translating motor encoder values to angle measurements, storing those chassis relative angle
+ * measurements, storing angle setpoints, and for limiting the angle setpoint.
  *
  * Currently, there are GM6020-specific motor parameters in this object such that it is expected
  * that the gimbal motor used is a 6020, but in general with some taproot-side MRs, this class can
@@ -54,7 +54,11 @@ public:
 
     mockable inline void initialize() { motor->initialize(); }
 
-    /// Updates the measured motor angle
+    /**
+     * @brief Updates the motor angles.
+     * 
+     * @note Rewraps motor revolutions when motors come online according to resetMotorRevolutions.
+     */
     mockable void updateMotorAngle();
 
     /**
@@ -258,14 +262,24 @@ private:
     const algorithms::TurretControllerInterface *turretController = nullptr;
 
     /**
-     * Offset applied when the motor is turned on. When the turret is turned on, the distance
-     * between the start encoder value and the current encoder value is measured. If the magnitude
-     * of this difference is greater than DjiMotor::ENC_RESOLUTION / 2, an offset of
-     * DjiMotor::ENC_RESOLUTION is applied to measured encoder values to avoid bad angle wrapping.
-     *
-     * If equal to UINT16_MAX, needs to be re-computed
+     * Represents whether the motor was last online. If motor disconnects and reconnects, this class
+     * resets the number of motor revolutions.
      */
-    int16_t startEncoderOffset = INT16_MIN;
+    bool motorLastOnline;
+
+    /**
+     * Converts from unwrapped encoder values to chassis-relative angles.
+     */
+    float unwrappedEncoderToUnwrappedAngle(int64_t encoderUnwrapped) const;
+    
+    /**
+     * @brief Resets internal motor encoder revolutions count.
+     * 
+     * If motor has unwrapped angle limits, resets revolutions such that motor unwrapped angle is
+     * within config minAngle and maxAngle. If motor has no limits, resets revolutions such that
+     * motor angle is closest to config startAngle.
+     */
+    void resetMotorRevolutions();
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
