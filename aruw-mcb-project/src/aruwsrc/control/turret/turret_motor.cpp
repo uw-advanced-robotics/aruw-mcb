@@ -32,11 +32,11 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
     : config(motorConfig),
       motor(motor),
+      motorLastOnline(false),
       chassisFrameSetpoint(config.startAngle),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
       chassisFrameUnwrappedMeasurement(config.startAngle),
-      lastUpdatedEncoderValue(config.startEncoderValue),
-      motorLastOnline(false)
+      lastUpdatedEncoderValue(config.startEncoderValue)
 {
     if (config.limitMotorAngles)
     {
