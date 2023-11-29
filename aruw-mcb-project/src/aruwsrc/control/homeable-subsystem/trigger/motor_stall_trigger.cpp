@@ -21,8 +21,10 @@
 
 #include "tap/motor/dji_motor.hpp"
 
+namespace aruwsrc::control
+{
 MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque)
-    : motor(&motor),
+    : motor(motor),
       maxRPM(maxRPM),
       minTorque(minTorque)
 {
@@ -30,5 +32,6 @@ MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM
 
 bool MotorStallTrigger::isTriggered()
 {
-    return ((fabs(motor->getShaftRPM()) < maxRPM) && (fabsl(motor->getTorque()) > minTorque));
+    return ((abs(motor.getShaftRPM()) < maxRPM) && (abs(motor.getTorque()) > minTorque));
 }
+}  // namespace aruwsrc::control
