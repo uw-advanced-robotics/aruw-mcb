@@ -19,68 +19,74 @@
 #ifndef WHEEL_HPP_
 #define WHEEL_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "modm/math/filter/pid.hpp"
 #include "modm/container/pair.hpp"
-
+#include "modm/math/filter/pid.hpp"
+using Motor = tap::motor::DjiMotor;
+using SmoothPid = tap::algorithms::SmoothPid;
+using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 namespace aruwsrc
 {
-namespace chassis 
+namespace chassis
 {
-    
-//create a struct with wheel pose/radius/orientation
+
+// create a struct with wheel pose/radius/orientation
 struct WheelConfig
 {
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
+    bool isPowered = false;
+    SmoothPidConfig& velocityPidConfig;
 };
 
-class Wheel 
+class Wheel
 {
-public: 
+public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
     Wheel(
-        tap::motor::MotorId motorId,
-        const WheelConfig& config,
-        bool isPowered = true
+        Motor& driveMotor,
+        WheelConfig& config
         );
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
      * components of the chassis velocity
-     * 
+     *
      * @param[in] vx The desired velocity of the chassis to move in the x direction in m/s
      * @param[in] vy The desired velocity of the chassis to move in the y direction in m/s
      * @param[in] vr The desired rotational velocity of the chassis in rpm
-     * 
+     *
      * @return a float Pair with the first value containing the desired velocity of the wheel
      *         in the x direction and the second value containing the desired velocity
      *         of the wheel in the y direction. Units: m/s. Might change type later???
      */
-    modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr);
+    virtual modm::Pair<float, float> calculateDesiredWheelVelocity(
+        float vx,
+        float vy,
+        float vr) = 0;
 
     /**
-     * Updates the desired wheel RPM based on passed in x and y components of desired 
+     * Updates the desired wheel RPM based on passed in x and y components of desired
      * wheel velocity
      * @param[in] vx The desired velocity of the wheel to move in the x direction in m/s
      * @param[in] vy The desired velocity of the wheel to move in the y direction in m/s
      */
-    void executeWheelVelocity(float vx, float vy);
+    virtual void executeWheelVelocity(float vx, float vy) = 0;
 
 private:
-    //Motor that drives the wheel
-    tap::motor::DjiMotor* motor;
-    //PID used to control the driving motor
-    modm::Pid<float> velocityPid;
-    //Whether or not the wheel is driven
-    bool isPowered;
+    // Motor that drives the wheel
+    Motor& motor;
+    // PID used to control the driving motor
+    SmoothPid velocityPid;
+    // Whether or not the wheel is driven
+    WheelConfig config;
 
-
-}; //class Wheel
-} // namespace chassis
-} // namespace aruwsrc
+};  // class Wheel
+}  // namespace chassis
+}  // namespace aruwsrc
 
 #endif  // WHEEL_HPP_
