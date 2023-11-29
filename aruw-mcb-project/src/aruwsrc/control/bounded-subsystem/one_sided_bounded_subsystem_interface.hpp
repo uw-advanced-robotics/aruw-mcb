@@ -26,7 +26,7 @@
 namespace aruwsrc::control
 {
 /**
- * A bounded subsystem whose home and both of its bounds are set upon activating a single 
+ * A bounded subsystem whose home and both of its bounds are set upon activating a single
  * trigger on one side of its axis. Its other bound is derived using its length.
  */
 class OneSidedBoundedSubsystemInterface : public BoundedSubsystemInterface
