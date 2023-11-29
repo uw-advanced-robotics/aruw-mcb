@@ -21,16 +21,37 @@
 
 #include "tap/drivers.hpp"
 
+#include "modm/math/geometry/vector2.hpp"
+#include "modm/math/geometry/vector3.hpp"
+
 namespace aruwsrc::communication::serial
 {
-SentryArucoResetSubsystem::SentryArucoResetSubsystem(tap::Drivers *drivers, aruwsrc::serial::VisionCoprocessor &visionCoprocessor)
-    : tap::control::Subsystem(drivers), sentryVisionCoprocessor(visionCoprocessor)
+SentryArucoResetSubsystem::SentryArucoResetSubsystem(
+    tap::Drivers *drivers,
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver,
+    aruwsrc::algorithms::odometry::SentryOttoKFOdometry2DSubsystem &odometry2DSubsystem)
+    : tap::control::Subsystem(drivers),
+      sentryVisionCoprocessor(visionCoprocessor),
+      yawObserver (yawObserver),
+      odometry2DSubsystem (odometry2DSubsystem)
+
 {
 }
 
-void SentryArucoResetSubsystem::refresh() {
-    if(sentryVisionCoprocessor.getArucoResetData().updated){
-        //add stuff
+void SentryArucoResetSubsystem::refresh()
+{
+    const aruwsrc::serial::VisionCoprocessor::ArucoResetData &resetData =
+        sentryVisionCoprocessor.getArucoResetData();
+
+    if (resetData.updated)
+    {
+        // add stuff
+        modm::Vector3f newPose(resetData.message.x, resetData.message.y, resetData.message.z);
+        // waiting for transforms
+        // float newYaw = getEulerAngles(resetData).z -
+        // transforms.getMajorToMinor(resetData.turretId).getYaw() -
+        // transforms.getChassisToTurretMajor().getYaw();
 
         sentryVisionCoprocessor.setArucoResetUpdatedFalse();
     }
