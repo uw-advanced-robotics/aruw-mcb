@@ -44,7 +44,7 @@ public:
 
 protected:
     /**
-     * Moves the motor along its axis towards the lower bound. 
+     * Moves the motor along its axis towards the lower bound.
      */
     virtual void moveTowardLowerBound() = 0;
 

@@ -60,7 +60,7 @@ public:
      */
     virtual uint64_t getLowerBound() const = 0;
 
-protected:
+private:
     /**
      * Specifies the current calibration state that command is in. Use in refresh() of child class.
      */
@@ -72,12 +72,13 @@ protected:
         CALIBRATION_COMPLETE      // calibration done
     };
 
+protected:
     CalibrationState calibrationState;
 
     /**
      * Stops the motor from moving. Only to be used during calibration.
      */
-    virtual void haltHoming() = 0;
+    virtual void stopDuringHoming() = 0;
 
     /**
      * Sets the lower bound of this bounded subsystem to the given encoder position.
