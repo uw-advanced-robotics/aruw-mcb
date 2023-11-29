@@ -99,6 +99,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        {
+            decodeToArucoResetData(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -135,6 +140,13 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
             }
         }
     }
+    return true;
+}
+
+bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
+{
+    memcpy(&lastArucoResetData.message, &message, sizeof(ReceivedArucoResetMessage));
+    lastArucoResetData.updated = true;
     return true;
 }
 

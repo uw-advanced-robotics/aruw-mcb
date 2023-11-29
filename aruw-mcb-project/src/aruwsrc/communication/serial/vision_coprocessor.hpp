@@ -168,11 +168,35 @@ public:
         float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
     } modm_packed;
 
+    // @todo: update this to send world relative odometry
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
+    } modm_packed;
+
+    // World to turret message sent by vision
+    struct ReceivedArucoResetMessage
+    {
+        uint32_t x;
+        uint32_t y;
+        uint32_t z;
+        // quaternion fields
+        uint32_t quat_w;
+        uint32_t quat_x;
+        uint32_t quat_y;
+        uint32_t quat_z;
+        // metadata
+        uint64_t timestamp;
+        unsigned char turretId;
+    } modm_packed;
+
+    struct ArucoResetData
+    {
+        ReceivedArucoResetMessage message;
+        bool updated;  // true if came from the current cycle. Should be set to 0 by consumer when
+                       // processed
     } modm_packed;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -286,6 +310,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 0xA,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -316,6 +341,9 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
+
+    /// The last aruco reset data received from the jetson
+    ArucoResetData lastArucoResetData;
 
     // CV online variables.
     /// Timer for determining if serial is offline.
@@ -348,6 +376,8 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
 
 #ifdef ENV_UNIT_TESTS
 public:
