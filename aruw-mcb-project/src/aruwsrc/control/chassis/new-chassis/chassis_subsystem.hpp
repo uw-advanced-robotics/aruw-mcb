@@ -30,10 +30,11 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "../constants/chassis_constants.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "../chassis/constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
+
 #include "wheel.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -116,7 +117,7 @@ public:
     {
         for (int i = 0; i < getNumChassisWheels(); i++)
         {
-            wheels[i]->executeWheelVelocity(0); //nonexistent function now
+            wheels[i].executeWheelVelocity(0.0, 0.0);
         }
     }
 

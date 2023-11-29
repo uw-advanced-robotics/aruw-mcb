@@ -70,8 +70,7 @@ float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float e
     return wheelRotationSpeed;
 }
 
-float ChassisSubsystem::calculateRotationTranslationalGain(
-    float chassisRotationDesiredWheelspeed)
+float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
 {
     // what we will multiply x and y speed by to take into account rotation
     float rTranslationalGain = 1.0f;
