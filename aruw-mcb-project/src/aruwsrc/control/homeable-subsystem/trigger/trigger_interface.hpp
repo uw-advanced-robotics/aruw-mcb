@@ -20,6 +20,8 @@
 #ifndef TRIGGER_INTERFACE_HPP_
 #define TRIGGER_INTERFACE_HPP_
 
+namespace aruwsrc::control
+{
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
  * through a trigger when it is at an end of its axis.
@@ -34,4 +36,5 @@ public:
      */
     virtual bool isTriggered() = 0;
 };
+}  // namespace aruwsrc::control
 #endif
