@@ -19,7 +19,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-// #ifdef ALL_STANDARDS
+#ifdef ALL_STANDARDS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -151,7 +151,7 @@ OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::V
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -517,6 +517,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -531,6 +532,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    transformSubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -599,6 +601,6 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
-// #endif
+#endif
 
 #endif
