@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
+
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
 using Motor = tap::motor::DjiMotor;
@@ -30,15 +31,14 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 // create a struct with wheel pose/radius/orientation
 struct WheelConfig
 {
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    bool isPowered = false;
     SmoothPidConfig& velocityPidConfig;
+    bool isPowered = true;
 };
 
 class Wheel
@@ -47,10 +47,7 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(
-        Motor& driveMotor,
-        WheelConfig& config
-        );
+    Wheel(Motor& driveMotor, WheelConfig& config);
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
