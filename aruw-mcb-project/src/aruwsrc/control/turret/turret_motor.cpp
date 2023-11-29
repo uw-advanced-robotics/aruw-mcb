@@ -183,14 +183,16 @@ void TurretMotor::resetMotorRevolutions()
     if (this->config.limitMotorAngles)
     {
         while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) >
-               this->config.maxAngle)
+               this->config.maxAngle - 0.001)
         {
             revolutionsOffset--;
+            this->motor->offsetRevolutions(-1);
         }
         while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) <
-               this->config.minAngle)
+               this->config.minAngle + 0.001)
         {
             revolutionsOffset++;
+            this->motor->offsetRevolutions(1);
         }
     }
     else
@@ -208,7 +210,7 @@ void TurretMotor::resetMotorRevolutions()
             revolutionsOffset++;
         }
     }
-    this->motor->offsetRevolutions(revolutionsOffset);
+    // this->motor->offsetRevolutions(revolutionsOffset);
 }
 
 }  // namespace aruwsrc::control::turret
