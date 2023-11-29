@@ -292,6 +292,16 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    inline ArucoResetData getArucoResetData()
+    {
+        return this->lastArucoResetData;
+    }
+
+    inline void setArucoResetUpdatedFalse()
+    {
+        this->lastArucoResetData.updated = false;
+    }
+
 private:
     enum TxMessageTypes
     {
