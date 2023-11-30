@@ -24,6 +24,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
+#include "aruwsrc/robot/testbed/motor_subsystem.hpp"
 
 using namespace aruwsrc::testbed;
 
@@ -37,14 +38,37 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-void initializeSubsystems() {}
 
+tap::motor::DjiMotor leftChannelMotor(drivers(),
+    tap::motor::MOTOR1,  // id 1
+    tap::can::CanBus::CAN_BUS1,  // bus 1
+    false,
+    "LMotor");
+MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, tap::communication::serial::Remote::Channel::LEFT_VERTICAL, static_cast<int16_t>(10000));
+
+tap::motor::DjiMotor rightChannelMotor(drivers(),
+    tap::motor::MOTOR2,  // id 2
+    tap::can::CanBus::CAN_BUS1,  // bus 1
+    false,
+    "RMotor");
+MotorSubsystem rightMotorSubsystem(drivers(), rightChannelMotor, tap::communication::serial::Remote::Channel::RIGHT_VERTICAL, static_cast<int16_t>(10000));
+
+void initializeSubsystems() {
+    leftMotorSubsystem.initialize();
+    rightMotorSubsystem.initialize();
+}
+
+void registerSubsystems() {
+    drivers()->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    drivers()->commandScheduler.registerSubsystem(&rightMotorSubsystem);
+}
 }  // namespace testbed_control
 
 namespace aruwsrc::testbed
 {
 void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
 {
+    testbed_control::registerSubsystems();
     testbed_control::initializeSubsystems();
 }
 
