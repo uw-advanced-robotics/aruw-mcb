@@ -26,7 +26,6 @@
 #include "tap/motor/m3508_constants.hpp"
 
 #include "aruwsrc/algorithms/wheel.hpp"
-#include "constants/chassis_constants.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #include "swerve_module_config.hpp"
@@ -43,11 +42,6 @@ using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
-class Drivers;
-}
-
-namespace aruwsrc
-{
 namespace chassis
 {
 /**
@@ -58,10 +52,7 @@ namespace chassis
 class SwerveModule
 {
 public:
-    SwerveModule(
-        Motor& driveMotor,
-        Motor& azimuthMotor,
-        SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
+    SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& swerveModuleConfig);
 
     /**
      * uses the internally stored values from calculate() to update

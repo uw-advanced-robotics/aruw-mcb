@@ -18,9 +18,16 @@
  */
 
 #if defined(TARGET_SENTRY_BEEHIVE)
+
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_beehive_chassis_constants.hpp"
 
 using namespace aruwsrc::sentry;
+using namespace aruwsrc::control;
+using namespace aruwsrc::chassis;
+using namespace aruwsrc::virtualMCB;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -33,6 +40,92 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace sentry_control
 {
 /* define subsystems --------------------------------------------------------*/
+
+VirtualDjiMotor leftFrontDriveMotor(
+    drivers(),
+    MOTOR2,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.driveMotorInverted,
+    "Left Front Swerve Drive Motor");
+
+VirtualDjiMotor leftFrontAzimuthMotor(
+    drivers(),
+    MOTOR6,
+    // MOTOR5,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
+    "Left Front Swerve Azimuth Motor");
+
+VirtualDjiMotor rightFrontDriveMotor(
+    drivers(),
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,  // TODO: BRUHHH
+    "Right Front Swerve Drive Motor");
+
+VirtualDjiMotor rightFrontAzimuthMotor(
+    drivers(),
+    MOTOR5,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
+    "Right Front Swerve Azimuth Motor");
+
+VirtualDjiMotor leftBackDriveMotor(
+    drivers(),
+    MOTOR3,
+    tap::can::CanBus::CAN_BUS2,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.driveMotorInverted,
+    "Left Back Swerve Drive Motor");
+
+VirtualDjiMotor leftBackAzimuthMotor(
+    drivers(),
+    MOTOR7,
+    tap::can::CanBus::CAN_BUS2,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.azimuthMotorInverted,
+    "Left Back Swerve Azimuth Motor");
+
+VirtualDjiMotor rightBackDriveMotor(
+    drivers(),
+    MOTOR4,
+    tap::can::CanBus::CAN_BUS2,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.driveMotorInverted,
+    "Right Back Swerve Drive Motor");
+
+VirtualDjiMotor rightBackAzimuthMotor(
+    drivers(),
+    MOTOR8,
+    tap::can::CanBus::CAN_BUS2,
+    &(drivers()->mcbLite),
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.azimuthMotorInverted,
+    "Right Back Swerve Azimuth Motor");
+
+// these four swerve modules will later be passed into SwerveChassisSubsystem
+aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
+    leftFrontDriveMotor,
+    leftFrontAzimuthMotor,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig);
+
+aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
+    rightFrontDriveMotor,
+    rightFrontAzimuthMotor,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig);
+
+aruwsrc::chassis::SwerveModule leftBackSwerveModule(
+    leftBackDriveMotor,
+    leftBackAzimuthMotor,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig);
+
+aruwsrc::chassis::SwerveModule rightBackSwerveModule(
+    rightBackDriveMotor,
+    rightBackAzimuthMotor,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig);
 
 /* define commands ----------------------------------------------------------*/
 
