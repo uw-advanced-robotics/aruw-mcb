@@ -118,6 +118,13 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
+
+#if defined(TARGET_TESTBED)
+    if(drivers->digital.read(tap::gpio::Digital::Button)){
+        drivers->mpu6500.requestCalibration();
+    }
+    drivers->mpu6500.getYaw();
+#endif
         }
         modm::delay_us(10);
     }
