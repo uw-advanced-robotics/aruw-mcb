@@ -35,6 +35,8 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -96,6 +98,7 @@ using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::algorithms::transforms;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -145,6 +148,10 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+
+// transforms
+StandardAndHeroTransformer transformer(odometrySubsystem, turret);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -510,6 +517,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -524,6 +532,7 @@ void initializeSubsystems()
     hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
+    transformSubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
