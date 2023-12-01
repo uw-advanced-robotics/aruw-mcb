@@ -60,8 +60,8 @@ class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 public:
     ChassisSubsystem(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        std::vector<Wheel> wheels);
+        std::vector<Wheel>* wheels,
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -177,7 +177,7 @@ public:
 
     float desiredRotation = 0;
 
-    std::vector<Wheel> wheels;
+    std::vector<Wheel>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
