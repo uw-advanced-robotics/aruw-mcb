@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -28,6 +28,8 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/board/board.hpp"
+#include "tap/communication/sensors/imu/ist8310/ist8310_config.hpp"
+#include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
@@ -57,6 +59,17 @@ void Mpu6500::requestCalibration()
         raw.accelOffset.x = 0;
         raw.accelOffset.y = 0;
         raw.accelOffset.z = 0;
+
+        raw.magnetometerOffset.x = 1;
+        raw.magnetometerOffset.y = 1;
+        raw.magnetometerOffset.z = 1;
+        calibrationMaxReading.x = IST8310_XY_AXIS_MIN;
+        calibrationMaxReading.y = IST8310_XY_AXIS_MIN;
+        calibrationMaxReading.z = IST8310_Z_AXIS_MIN;
+        calibrationMinReading.x = IST8310_XY_AXIS_MAX;
+        calibrationMinReading.y = IST8310_XY_AXIS_MAX;
+        calibrationMinReading.z = IST8310_Z_AXIS_MAX;
+
         calibrationSample = 0;
         imuState = ImuState::IMU_CALIBRATING;
     }
@@ -118,6 +131,10 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     modm::delay_ms(1);
     spiWriteRegister(MPU6500_USER_CTRL, MPU6500_USER_CTRL_DATA);
     modm::delay_ms(1);
+
+    // Configure IST8310
+    ist8310Init();
+    modm::delay_ms(10);
 #endif
 
     imuHeater.initialize();
@@ -130,6 +147,7 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
+    balonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
@@ -138,11 +156,22 @@ void Mpu6500::periodicIMUUpdate()
 {
     if (imuState == ImuState::IMU_NOT_CALIBRATED || imuState == ImuState::IMU_CALIBRATED)
     {
+        normalizeMagnetometerReading();
         mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        balonyAlgorithm.update(
+            getGx(),
+            getGy(),
+            getGz(),
+            getAx(),
+            getAy(),
+            getAz(),
+            normalizedMagnetometer.x,
+            normalizedMagnetometer.y,
+            normalizedMagnetometer.z);
         tiltAngleCalculated = false;
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
-    else
+    else if (imuState == ImuState::IMU_CALIBRATING)
     {
         calibrationSample++;
 
@@ -162,8 +191,34 @@ void Mpu6500::periodicIMUUpdate()
             raw.accelOffset.x /= MPU6500_OFFSET_SAMPLES;
             raw.accelOffset.y /= MPU6500_OFFSET_SAMPLES;
             raw.accelOffset.z /= MPU6500_OFFSET_SAMPLES;
+            imuState = ImuState::IMU_CALIBRATING_MAGNETOMETER;
+            mahonyAlgorithm.reset();
+            balonyAlgorithm.reset();
+        }
+    }
+    else if (imuState == ImuState::IMU_CALIBRATING_MAGNETOMETER)
+    {
+        calibrationSample++;
+
+        calibrationMaxReading.x = std::max(calibrationMaxReading.x, raw.magnetometer.x);
+        calibrationMaxReading.y = std::max(calibrationMaxReading.y, raw.magnetometer.y);
+        calibrationMaxReading.z = std::max(calibrationMaxReading.z, raw.magnetometer.z);
+
+        calibrationMinReading.x = std::min(calibrationMinReading.x, raw.magnetometer.x);
+        calibrationMinReading.y = std::min(calibrationMinReading.y, raw.magnetometer.y);
+        calibrationMinReading.z = std::min(calibrationMinReading.z, raw.magnetometer.z);
+
+        if (calibrationSample >= MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES)
+        {
+            calibrationSample = 0;
+
+            raw.magnetometerOffset.x = (calibrationMaxReading.x + calibrationMinReading.x) / 2.0f;
+            raw.magnetometerOffset.y = (calibrationMaxReading.y + calibrationMinReading.y) / 2.0f;
+            raw.magnetometerOffset.z = (calibrationMaxReading.z + calibrationMinReading.z) / 2.0f;
+
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
+            balonyAlgorithm.reset();
         }
     }
 
@@ -189,8 +244,7 @@ bool Mpu6500::read()
         PT_CALL(Board::ImuSpiMaster::transfer(&tx, &rx, 1));
         PT_CALL(Board::ImuSpiMaster::transfer(txBuff, rxBuff, ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE));
         mpuNssHigh();
-
-        (*processRawMpu6500DataFn)(rxBuff, raw.accel, raw.gyro);
+        (*processRawMpu6500DataFn)(rxBuff, raw.accel, raw.gyro, raw.magnetometer);
 
         raw.temperature = rxBuff[6] << 8 | rxBuff[7];
 
@@ -278,6 +332,75 @@ void Mpu6500::mpuNssHigh()
 #endif
 }
 
+void Mpu6500::writeIST8310Register(uint8_t regAddr, uint8_t data)
+{
+#ifdef PLATFORM_HOSTED
+    UNUSED(regAddr);
+    UNUSED(data);
+#else
+    spiWriteRegister(MPU6500_I2C_SLV1_CTRL, 0x00);  // Turn off slave 1
+    modm::delay_ms(2);
+    spiWriteRegister(MPU6500_I2C_SLV1_REG, regAddr);
+    modm::delay_ms(2);
+    spiWriteRegister(MPU6500_I2C_SLV1_DO, data);
+    modm::delay_ms(2);
+    spiWriteRegister(MPU6500_I2C_SLV1_CTRL, MPU6500_READ_BIT | 0x01);  // Turn on slave 1, 1 byte
+    modm::delay_ms(10);
+#endif
+}
+
+void Mpu6500::ist8310Init()
+{
+    spiWriteRegister(MPU6500_USER_CTRL, 0x30);  // enable I2C master mode, reset slaves
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_MST_CTRL, 0x0D);  // 400 kHz I2C clock speed
+    modm::delay_ms(10);
+
+    // ----------------CONFIG-----------------------
+    /* turn on slave 1 for ist write and slave 4 to ist read */
+    spiWriteRegister(MPU6500_I2C_SLV1_ADDR, IST8310_IIC_ADDRESS);
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_SLV4_ADDR, MPU6500_READ_BIT | IST8310_IIC_ADDRESS);
+    modm::delay_ms(10);
+
+    writeIST8310Register(IST8310_CONTROL_REGISTER2, IST8310_CONTROL_REGISTER2_DATA);
+    modm::delay_ms(10);
+
+    writeIST8310Register(IST8310_AVERAGE_CONTROL_REGISTER, IST8310_AVERAGE_CONTROL_REGISTER_DATA);
+    modm::delay_ms(10);
+
+    // Turn off slave 1 and 4
+    spiWriteRegister(MPU6500_I2C_SLV1_CTRL, 0x00);
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_SLV4_CTRL, 0x00);
+    modm::delay_ms(10);
+
+    // ----------------AUTO READ-----------------------
+    // Slave 0 for auto receive
+    spiWriteRegister(
+        MPU6500_I2C_SLV0_ADDR,
+        IST8310_IIC_ADDRESS | MPU6500_READ_BIT);  // read from device 0x0e
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_SLV0_REG, IST8310_DATA_START_ADDRESS);  // read data from 0x03 reg
+    modm::delay_ms(10);
+
+    // Slave 1 for auto transmit
+    spiWriteRegister(MPU6500_I2C_SLV1_ADDR, IST8310_IIC_ADDRESS);  // write into device 0x0e
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_SLV1_REG, IST8310_CONTROL_REGISTER1);  // write data into 0x0a reg
+    modm::delay_ms(10);
+    spiWriteRegister(
+        MPU6500_I2C_SLV1_DO,
+        IST8310_SINGLE_MEASUREMENT_MODE);  // send measurement command
+    modm::delay_ms(10);
+    // enable slave 0 and 1
+    spiWriteRegister(
+        MPU6500_I2C_SLV0_CTRL,
+        I2C_SLAVE_READ_CONFIG | IST8310_DATA_LENGTH);  // swap endian + 6 bytes rx
+    modm::delay_ms(10);
+    spiWriteRegister(MPU6500_I2C_SLV1_CTRL, 0x01 | MPU6500_READ_BIT);  // 1 bytes tx
+}
+
 /**
  * Add any errors to the error handler that have came up due to calls to validateReading.
  */
@@ -302,7 +425,8 @@ void Mpu6500::addValidationErrors()
 void Mpu6500::defaultProcessRawMpu6500Data(
     const uint8_t (&rxBuff)[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE],
     modm::Vector3f &accel,
-    modm::Vector3f &gyro)
+    modm::Vector3f &gyro,
+    modm::Vector3f &mag)
 {
     accel.x = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
     accel.y = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 2);
@@ -311,6 +435,10 @@ void Mpu6500::defaultProcessRawMpu6500Data(
     gyro.x = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 8);
     gyro.y = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 10);
     gyro.z = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 12);
+
+    mag.x = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 14) * IST8310_SENSITIVITY;
+    mag.y = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 16) * IST8310_SENSITIVITY;
+    mag.z = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 18) * IST8310_SENSITIVITY;
 }
 
 }  // namespace tap::communication::sensors::imu::mpu6500

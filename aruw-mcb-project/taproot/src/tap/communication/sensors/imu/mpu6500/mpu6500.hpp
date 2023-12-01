@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -46,10 +46,11 @@ class Drivers;
 namespace tap::communication::sensors::imu::mpu6500
 {
 /**
- * A class specifically designed for interfacing with the RoboMaster type A board Mpu6500.
+ * A class specifically designed for interfacing with the RoboMaster type A board Mpu6500
+ * and attached IST8310, connected as an slave device over I2C.
  *
- * To use this class, call Remote::init() to properly initialize and calibrate
- * the MPU6500. Next, call Remote::read() to read acceleration, gyro, and temperature
+ * To use this class, call Mpu6500::init() to properly initialize and calibrate
+ * the MPU6500. Next, call Mpu6500::read() to read acceleration, gyro, and temperature
  * values from the imu. Use the getter methods to access imu information.
  *
  * @note if you are shaking the imu while it is initializing, the offsets will likely
@@ -60,8 +61,10 @@ class Mpu6500 final_mockable : public ::modm::pt::Protothread, public ImuInterfa
 public:
     /**
      * The number of bytes read to read acceleration, gyro, and temperature.
+     * Read 6 bytes for magnetometer data.
      */
-    static constexpr uint8_t ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE = 14;
+    static constexpr uint8_t ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE =
+        20;  // From accel data (0x3B) to external sensor data (0x4E)
 
     /**
      * Storage for the raw data we receive from the mpu6500, as well as offsets
@@ -77,12 +80,18 @@ public:
          * Raw gyroscope data.
          */
         modm::Vector3f gyro;
-
         /**
          * Raw temperature.
          */
         uint16_t temperature = 0;
-
+        /**
+         * Raw magnetometer data.
+         */
+        modm::Vector3f magnetometer;
+        /**
+         * Magnetometer axis offset and scalar.
+         */
+        modm::Vector3f magnetometerOffset;
         /**
          * Acceleration offset calculated in init.
          */
@@ -93,10 +102,16 @@ public:
         modm::Vector3f gyroOffset;
     };
 
+    /**
+     * The number of bytes read to read magnetometer data.
+     */
+    static constexpr uint8_t MAG_BUFF_RX_SIZE = 6;
+
     using ProcessRawMpu6500DataFn = void (*)(
         const uint8_t (&)[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE],
         modm::Vector3f &accel,
-        modm::Vector3f &gyro);
+        modm::Vector3f &gyro,
+        modm::Vector3f &mag);
 
     Mpu6500(Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(Mpu6500)
@@ -127,7 +142,7 @@ public:
 
     /**
      * Returns the state of the IMU. Can be not connected, connected but not calibrated, calibrating
-     * or calibrated. When not connected, IMU data is undefiend. When not calibrated, IMU data is
+     * or calibrated. When not connected, IMU data is undefined. When not calibrated, IMU data is
      * valid but the computed yaw angle data will drift. When calibrating, the IMU data is invalid.
      * When calibrated, the IMU data is valid and assuming proper calibration the IMU data should
      * not drift.
@@ -245,7 +260,9 @@ public:
     /**
      * Returns yaw angle. in degrees.
      */
-    inline float getYaw() final_mockable { return validateReading(mahonyAlgorithm.getYaw()); }
+    inline float getYaw() final_mockable { 
+        balonyAlgorithm.getYaw();
+        return validateReading(mahonyAlgorithm.getYaw()); }
 
     /**
      * Returns pitch angle in degrees.
@@ -256,6 +273,14 @@ public:
      * Returns roll angle in degrees.
      */
     inline float getRoll() final_mockable { return validateReading(mahonyAlgorithm.getRoll()); }
+
+    /**
+     * Returns the magnetometer head in the xy plane.
+     */
+    inline float getMagneticHeading() mockable
+    {
+        return validateReading(modm::toDegree(atan2f(raw.magnetometer.y, raw.magnetometer.x)));
+    }
 
     mockable inline uint32_t getPrevIMUDataReceivedTime() const { return prevIMUDataReceivedTime; }
 
@@ -325,6 +350,7 @@ private:
     RawData raw;
 
     Mahony mahonyAlgorithm;
+    Mahony balonyAlgorithm;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -340,6 +366,16 @@ private:
     uint8_t errorState = 0;
 
     uint32_t prevIMUDataReceivedTime = 0;
+
+    modm::Vector3f calibrationMaxReading;
+    modm::Vector3f calibrationMinReading;
+
+    modm::Vector3f normalizedMagnetometer;
+
+    /**
+     * The number of samples we take while calibrating in order to determine the mpu offsets.
+     */
+    static constexpr float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 3000;
 
     // Functions for interacting with hardware directly.
 
@@ -379,7 +415,40 @@ private:
     static void defaultProcessRawMpu6500Data(
         const uint8_t (&rxBuff)[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE],
         modm::Vector3f &accel,
-        modm::Vector3f &gyro);
+        modm::Vector3f &gyro,
+        modm::Vector3f &mag);
+
+    void ist8310Init();
+
+    void writeIST8310Register(uint8_t reg, uint8_t data);
+
+    inline void normalizeMagnetometerReading()
+    {
+        normalizedMagnetometer.x = (raw.magnetometer.x - raw.magnetometerOffset.x);
+        normalizedMagnetometer.y = (raw.magnetometer.y - raw.magnetometerOffset.y);
+        normalizedMagnetometer.z = (raw.magnetometer.z - raw.magnetometerOffset.z);
+
+        if (raw.magnetometerOffset.x != 0)
+        {
+            normalizedMagnetometer.x /= raw.magnetometerOffset.x;
+        } else {
+            normalizedMagnetometer.x /= calibrationMaxReading.x - raw.magnetometerOffset.x;
+        }
+
+        if (raw.magnetometerOffset.y != 0)
+        {
+            normalizedMagnetometer.y /= raw.magnetometerOffset.y;
+        } else {
+            normalizedMagnetometer.y /= calibrationMaxReading.y - raw.magnetometerOffset.y;
+        }
+
+        if (raw.magnetometerOffset.z != 0)
+        {
+            normalizedMagnetometer.z /= raw.magnetometerOffset.z;
+        } else {
+            normalizedMagnetometer.z /= calibrationMaxReading.z - raw.magnetometerOffset.z;
+        }
+    }
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
