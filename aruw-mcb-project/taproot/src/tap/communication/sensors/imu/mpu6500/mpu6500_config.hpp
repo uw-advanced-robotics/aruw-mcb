@@ -25,7 +25,7 @@
 #define TAPROOT_MPU6500_CONFIG_HPP_
 
 // See register datasheet for more information about configuring the mpu6500:
-// https://3cfeqx1hf82y3xcoull08ihx-wpengine.netdna-ssl.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf
+// https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf
 
 #define BIT_SHIFT(data, shiftAmnt) ((data) << (shiftAmnt))
 #define BIT_MASK(data, mask) ((data) & (mask))
@@ -195,5 +195,15 @@
 #define MPU6500_SIGNAL_PATH_RESET_ALL                                           \
     (MPU6500_SIGNAL_PATH_RESET_GYRO_RST | MPU6500_SIGNAL_PATH_RESET_ACCEL_RST | \
      MPU6500_SIGNAL_PATH_RESET_TEMP_RST)
+
+/////////////// SLAVE I2C CONTROL ///////////////
+#define I2C_SLAVE_GROUP_BYTES_EVEN_REGISTER BIT_SHIFT(0b1, 4)
+#define I2C_SLAVE_REGISTER_DIS BIT_SHIFT(0b1, 5)
+#define I2C_SLAVE_SWAP_ENDIANNESS BIT_SHIFT(0b1, 6)
+#define I2C_SLAVE_READ_ENABLE BIT_SHIFT(0b1, 7)
+
+#define I2C_SLAVE_READ_CONFIG \
+    (I2C_SLAVE_GROUP_BYTES_EVEN_REGISTER | I2C_SLAVE_SWAP_ENDIANNESS | \
+    I2C_SLAVE_READ_ENABLE)
 
 #endif  // TAPROOT_MPU6500_CONFIG_HPP_
