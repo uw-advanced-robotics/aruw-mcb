@@ -58,8 +58,6 @@ void SentryTransforms::updateTransforms()
     chassisToTurretMajor.updateRotation(0., 0., turretMajor.getChassisYaw());
 
     // Turret Major to Minors
-    // @todo have to access the damn motor inside because there's no getMotorEncoder or getMotorYaw
-    // in the TurretSubsystem interface
     turretMajorToTurretLeft.updateRotation(
         0.,
         turretMinorGirlboss.pitchMotor.getAngleFromCenter(),
@@ -73,9 +71,6 @@ void SentryTransforms::updateTransforms()
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
     worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
     worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
-
-    lastComputedTime =
-        tap::arch::clock::getTimeMicroseconds();  // @todo not necessarily the best way
 }
 
 }  // namespace aruwsrc::sentry

@@ -46,8 +46,6 @@ public:
 
     void updateTransforms();
 
-    inline uint32_t lastComputedTimestamp() const { return lastComputedTime; };
-
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
         return worldToChassis;
@@ -93,8 +91,6 @@ private:
     tap::algorithms::transforms::Transform chassisToTurretMajor;
     tap::algorithms::transforms::Transform turretMajorToTurretLeft;
     tap::algorithms::transforms::Transform turretMajorToTurretRight;
-
-    uint32_t lastComputedTime = 0;
 };
 
 }  // namespace aruwsrc::sentry
