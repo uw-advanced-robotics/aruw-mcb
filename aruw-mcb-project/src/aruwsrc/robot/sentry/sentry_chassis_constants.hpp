@@ -23,10 +23,29 @@
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 // #include "sentry_beyblade_command.hpp"  //TODO: uncomment this stuff when command is created
 
+// Do not include this file directly: use chassis_constants.hpp instead.
+#ifndef CHASSIS_CONSTANTS_HPP_
+#error "Do not include this file directly! Use chassis_constants.hpp instead."
+#endif
+
 namespace aruwsrc::chassis
 {
 static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
-}
+
+/**
+ * "Maps max power (in Watts) to max chassis wheel speed (RPM).
+ *
+ * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
+ * high values."
+ * TODO: this may have actually been used in comp...? get actual values
+ */
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
+
+static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
+    CHASSIS_POWER_TO_MAX_SPEED_LUT,
+    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
+
+}  // namespace aruwsrc::chassis
 
 namespace aruwsrc::sentry::chassis
 {

@@ -20,9 +20,9 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/sentry/sentry_beehive_chassis_constants.hpp"
 
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control;
