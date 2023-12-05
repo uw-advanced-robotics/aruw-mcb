@@ -120,9 +120,11 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED)
-            drivers->spinMotor.setDesiredOutput(
-                drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL) *
-                drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL) * 16'000);
+            // drivers->spinMotor.setDesiredOutput(
+            //     drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL)
+            //     *
+            //     drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL)
+            //     * 16'000);
 #endif
         }
         modm::delay_us(10);

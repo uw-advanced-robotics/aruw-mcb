@@ -33,15 +33,18 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          spinMotor(this, spinMotorID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor")
+          motor1(this, motor1ID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor 1"),
+          motor2(this, motor2ID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor 2")
     {
     }
 
 public:
-    // Motor you just want to spin real fast
-    tap::motor::MotorId spinMotorID = tap::motor::MotorId::MOTOR1;
+        // Motors you just want to spin
+    tap::motor::MotorId motor1ID = tap::motor::MotorId::MOTOR1;
+    tap::motor::MotorId motor2ID = tap::motor::MotorId::MOTOR2;
 
-    tap::motor::DjiMotor spinMotor;
+    tap::motor::DjiMotor motor1;
+    tap::motor::DjiMotor motor2;
 
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
