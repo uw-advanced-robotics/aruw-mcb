@@ -29,7 +29,6 @@
 
 namespace aruwsrc::control::sentry
 {
-
 class SentryControlOperatorInterface
 {
 public:

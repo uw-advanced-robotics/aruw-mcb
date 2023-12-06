@@ -31,7 +31,6 @@ namespace aruwsrc
 {
 namespace control::sentry
 {
-
 bool SentryControlOperatorInterface::isTurretControlMode()
 {
     return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
