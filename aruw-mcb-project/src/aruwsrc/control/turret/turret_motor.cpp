@@ -40,8 +40,9 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
 {
     if (config.limitMotorAngles)
     {
+        constexpr float EPS = 1E3;
         assert(config.minAngle <= config.maxAngle);
-        assert(config.maxAngle <= config.minAngle + M_TWOPI + 1E3);
+        assert(config.maxAngle <= config.minAngle + M_TWOPI + EPS);
     }
     assert(motor != nullptr);
 }
@@ -182,21 +183,15 @@ void TurretMotor::resetMotorRevolutions()
     int revolutionsOffset = 0;
     if (this->config.limitMotorAngles)
     {
-        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) >
-               this->config.maxAngle - 0.001)
-        {
-            revolutionsOffset--;
-            this->motor->offsetRevolutions(-1);
-        }
-        while (this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped()) <
-               this->config.minAngle + 0.001)
-        {
-            revolutionsOffset++;
-            this->motor->offsetRevolutions(1);
-        }
+        // Find offset to make unwrapped angle as close to within limits as possible
+        int currAngle = this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped());
+        int midAngle = 0.5f * (this->config.minAngle + this->config.maxAngle);
+        revolutionsOffset = -static_cast<int>(std::round((currAngle - midAngle) / M_TWOPI));
     }
     else
     {
+        // Find offset such that unwrapped angle is as close to start angle/encoder value as possible
+        // Relies on initial motor revolutions being 0
         int encoderDiff = static_cast<int>(config.startEncoderValue) -
                           static_cast<int>(this->motor->getEncoderUnwrapped());
 
@@ -210,7 +205,7 @@ void TurretMotor::resetMotorRevolutions()
             revolutionsOffset++;
         }
     }
-    // this->motor->offsetRevolutions(revolutionsOffset);
+    this->motor->offsetRevolutions(revolutionsOffset);
 }
 
 }  // namespace aruwsrc::control::turret
