@@ -63,6 +63,12 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
+    /**
+     * @brief Resets the KF back to the robot's boot position.
+     */
+
+    void reset();
+
     void update();
 
 private:
@@ -150,6 +156,8 @@ private:
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+
+    const modm::Vector2f initPos;
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
