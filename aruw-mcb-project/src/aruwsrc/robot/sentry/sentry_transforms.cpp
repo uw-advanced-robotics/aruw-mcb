@@ -36,7 +36,6 @@ SentryTransforms::SentryTransforms(
       turretMajor(turretMajor),
       turretMinorGirlboss(turretMinorGirlboss),
       turretMinorMalewife(turretMinorMalewife),
-      // @todo: transform default constructor
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
