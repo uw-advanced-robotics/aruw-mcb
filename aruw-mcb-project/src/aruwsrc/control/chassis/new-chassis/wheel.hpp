@@ -19,8 +19,11 @@
 #ifndef WHEEL_HPP_
 #define WHEEL_HPP_
 
+#include <cinttypes>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/algorithms/cmsis_mat.hpp"
 
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
@@ -31,22 +34,21 @@ namespace aruwsrc
 {
 namespace chassis
 {
-// create a struct with wheel pose/radius/orientation
+// create a struct with wheel pose/orientation/radius
 struct WheelConfig
 {
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
+    float wheelRadius;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
 };
 
+template <uint16_t STATES, uint16_t INPUTS>
 class Wheel
 {
 public:
-    /* Creates a wheel object using given motorId, x-direction distance from chassis center,
-        y-direction distance from chassis center, wheel orientation, if wheel is powered
-    */
     Wheel(Motor& driveMotor, WheelConfig& config);
 
     /**
@@ -61,10 +63,21 @@ public:
      *         in the x direction and the second value containing the desired velocity
      *         of the wheel in the y direction. Units: m/s. Might change type later???
      */
-    virtual modm::Pair<float, float> calculateDesiredWheelVelocity(
+    inline modm::Pair<float, float> calculateDesiredWheelVelocity(
         float vx,
         float vy,
-        float vr) = 0;
+        float vr) {
+            const float (chassisRelativePoseArr)[2 * 3] = {1, 0, -config.wheelPositionChassisRelativeY,
+                                                            0, 1, config.wheelPositionChassisRelativeX}
+            CMSISMat<(uint16_t) 2, (uint16_t) 3> chassisRelativePoseMat = chassisRelativePoseArr;
+            const float (chassisMovementArr)[3 * 1] = {vx,
+                                                        vy,
+                                                        vr};
+            CMSISMat<(uint16_t) 3, (uint16_t) 1> chassisMovementMat = chassisMovementArr;
+            CMSISMat<2, 1> wheelCentricVelocity = chassisRelativePostMat * chassisMovementMat;
+            modm::Pair<float, float> wheelCentricVelocityPair= {wheelCentricVelocity.data[0], wheelCentricVelocity.data[0]};
+            return wheelCentricVelocityPair;
+        }
 
     /**
      * Updates the desired wheel RPM based on passed in x and y components of desired
@@ -79,7 +92,7 @@ private:
     Motor& motor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
-    // Whether or not the wheel is driven
+    // config struct for the wheel
     WheelConfig config;
 
 };  // class Wheel
