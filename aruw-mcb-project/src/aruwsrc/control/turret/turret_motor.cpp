@@ -183,15 +183,15 @@ void TurretMotor::resetMotorRevolutions()
     int revolutionsOffset = 0;
     if (this->config.limitMotorAngles)
     {
-        // Find offset to make unwrapped angle as close to within limits as possible
+        // Find offset to make unwrapped angle as close to within limits as possible.
         int currAngle = this->unwrappedEncoderToUnwrappedAngle(this->motor->getEncoderUnwrapped());
         int midAngle = 0.5f * (this->config.minAngle + this->config.maxAngle);
         revolutionsOffset = -static_cast<int>(std::round((currAngle - midAngle) / M_TWOPI));
     }
     else
     {
-        // Find offset such that unwrapped angle is as close to start angle/encoder value as possible
-        // Relies on initial motor revolutions being 0
+        // Find offset such that unwrapped angle is as close to start angle/encoder value as
+        // possible. Relies on initial motor revolutions being 0.
         int encoderDiff = static_cast<int>(config.startEncoderValue) -
                           static_cast<int>(this->motor->getEncoderUnwrapped());
 

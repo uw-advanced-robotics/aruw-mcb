@@ -278,7 +278,7 @@ private:
      * If motor has unwrapped angle limits, resets revolutions such that motor unwrapped angle is
      * as close to within config minAngle and maxAngle. If motor has no limits, resets revolutions
      * such that motor angle is closest to config startAngle.
-     * 
+     *
      * @note Relies on motor initial encoder revolutions being 0 for unlimited motors.
      */
     void resetMotorRevolutions();
