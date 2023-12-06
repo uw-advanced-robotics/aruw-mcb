@@ -179,12 +179,23 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
+aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemySupplierZoneCommand sendSentryGoToEnemySupplierZone(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToCenterPointCommand sendSentryGoToCenterPoint(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::HoldFireCommand sendSentryHoldFire(sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleMovementCommand sendSentryToggleMovement(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::ToggleBeybladeCommand sendSentryToggleBeyblade(
+    sentryRequestSubsystem);
 
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -387,6 +398,7 @@ ClientDisplayCommand clientDisplayCommand(
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 /* define command mappings --------------------------------------------------*/
+
 // Remote related mappings
 HoldCommandMapping rightSwitchDown(
     drivers(),
@@ -406,19 +418,44 @@ HoldCommandMapping leftSwitchUp(
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// Keyboard/Mouse related mappings
-PressCommandMapping cPressed(
-    drivers(),
-    {&sentryToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
-    drivers(),
-    {&sentryTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
-    drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
+// @todo: sort out all mappings in a different PR
+/// @brief sentry messages
+// PressCommandMapping cShiftPressed(
+//     drivers(),
+//     {&sendSentryNoMotionStrategy},
+//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+// PressCommandMapping qShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToFriendlyBase},
+//     RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
+// PressCommandMapping eShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToEnemyBase},
+//     RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
+// PressCommandMapping rShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToSupplierZone},
+//     RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
+// PressCommandMapping fShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToEnemySupplierZone},
+//     RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
+// PressCommandMapping gShiftPressed(
+//     drivers(),
+//     {&sendSentryGoToCenterPoint},
+//     RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
+// PressCommandMapping zShiftPressed(
+//     drivers(),
+//     {&sendSentryHoldFire},
+//     RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
+// PressCommandMapping xShiftPressed(
+//     drivers(),
+//     {&sendSentryToggleMovement},
+//     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+// PressCommandMapping vShiftPressed(
+//     drivers(),
+//     {&sendSentryToggleBeyblade},
+//     RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -566,9 +603,9 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qNotEPressed);
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
+    // drivers->commandMapper.addMap(&cPressed);
+    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    // drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&vPressed);
 }
 }  // namespace standard_control

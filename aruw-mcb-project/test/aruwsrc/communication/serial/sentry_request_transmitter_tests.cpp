@@ -19,17 +19,33 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/communication/serial/ref_serial.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/serial/sentry_request_transmitter.hpp"
+#include "aruwsrc/communication/serial/inter_robot_signal_transmitter.hpp"
+#include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 
 using namespace testing;
 using namespace aruwsrc::communication::serial;
 
-class SentryRequestTransmitterTest : public Test
+enum class mock_message_types : uint8_t
+{
+    FOO = 0,
+    BAR,
+    BAZ
+};
+
+class InterRobotSignalTransmitterTests : public Test
 {
 protected:
-    SentryRequestTransmitterTest() : transmitter(&drivers) {}
+    InterRobotSignalTransmitterTests()
+        : transmitter(
+              drivers,
+              {tap::communication::serial::RefSerialData::RobotId::BLUE_SENTINEL},
+              999)
+    {
+    }
     void SetUp() override
     {
         ON_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg)
@@ -41,17 +57,17 @@ protected:
     }
 
     tap::Drivers drivers;
-    SentryRequestTransmitter transmitter;
+    InterRobotSignalMessageTransmitter<mock_message_types, 3> transmitter;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
-TEST_F(SentryRequestTransmitterTest, send_doesnt_send_when_no_messages_queued)
+TEST_F(InterRobotSignalTransmitterTests, send_doesnt_send_when_no_messages_queued)
 {
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg).Times(0);
-    transmitter.send();
+    transmitter.sendQueued();
 }
 
-TEST_F(SentryRequestTransmitterTest, send_sends_select_new_target_when_message_queued)
+TEST_F(InterRobotSignalTransmitterTests, send_sends_BAR_when_message_queued)
 {
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg)
         .Times(1)
@@ -61,15 +77,15 @@ TEST_F(SentryRequestTransmitterTest, send_sends_select_new_target_when_message_q
                tap::communication::serial::RefSerialData::RobotId,
                uint16_t) {
                 EXPECT_EQ(
-                    static_cast<uint8_t>(SentryRequestMessageType::SELECT_NEW_ROBOT),
+                    static_cast<uint8_t>(mock_message_types::BAR),
                     robotToRobotMsg->dataAndCRC16[0]);
                 return modm::ResumableResult<void>(modm::rf::Stop);
             });
-    transmitter.queueRequest(SentryRequestMessageType::SELECT_NEW_ROBOT);
-    transmitter.send();
+    transmitter.queueMessage(mock_message_types::BAR);
+    transmitter.sendQueued();
 }
 
-TEST_F(SentryRequestTransmitterTest, send_sends_target_new_quadrant_when_message_queued)
+TEST_F(InterRobotSignalTransmitterTests, send_sends_FOO_when_message_queued)
 {
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg)
         .Times(1)
@@ -79,18 +95,18 @@ TEST_F(SentryRequestTransmitterTest, send_sends_target_new_quadrant_when_message
                tap::communication::serial::RefSerialData::RobotId,
                uint16_t) {
                 EXPECT_EQ(
-                    static_cast<uint8_t>(SentryRequestMessageType::TARGET_NEW_QUADRANT),
+                    static_cast<uint8_t>(mock_message_types::FOO),
                     robotToRobotMsg->dataAndCRC16[0]);
                 return modm::ResumableResult<void>(modm::rf::Stop);
             });
-    transmitter.queueRequest(SentryRequestMessageType::TARGET_NEW_QUADRANT);
-    transmitter.send();
+    transmitter.queueMessage(mock_message_types::FOO);
+    transmitter.sendQueued();
 }
 
-TEST_F(SentryRequestTransmitterTest, send_sends_both_queued_messages)
+TEST_F(InterRobotSignalTransmitterTests, send_sends_both_queued_messages)
 {
     EXPECT_CALL(transmitter.refSerialTransmitter, sendRobotToRobotMsg).Times(2);
-    transmitter.queueRequest(SentryRequestMessageType::TARGET_NEW_QUADRANT);
-    transmitter.queueRequest(SentryRequestMessageType::SELECT_NEW_ROBOT);
-    transmitter.send();
+    transmitter.queueMessage(mock_message_types::BAZ);
+    transmitter.queueMessage(mock_message_types::FOO);
+    transmitter.sendQueued();
 }
