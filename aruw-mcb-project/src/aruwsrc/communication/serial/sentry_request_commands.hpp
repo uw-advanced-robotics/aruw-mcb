@@ -27,24 +27,21 @@
 namespace aruwsrc::communication::serial
 {
 /**
- * Command that is scheduled once that queues the pause projectile launching
- * SentryRequestMessageType.
+ * Command that is scheduled once that tells the sentry that
+ * there is no motion strategy
  */
-class PauseProjectileLaunchingCommand : public tap::control::Command
+class NoMotionStrategyCommand : public tap::control::Command
 {
 public:
-    PauseProjectileLaunchingCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    NoMotionStrategyCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
         this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "pause projectile launching"; }
+    virtual const char *getName() const { return "sentry no motion strategy"; }
     virtual bool isReady() { return true; }
-    virtual void initialize()
-    {
-        this->sub.queueRequest(SentryRequestMessageType::PAUSE_PROJECTILE_LAUNCHING);
-    }
+    virtual void initialize() { this->sub.queueRequest(SentryRequestMessageType::NONE); }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
@@ -54,22 +51,23 @@ private:
 };
 
 /**
- * Command that is scheduled once that queues the toggle drive movement SentryRequestMessageType.
+ * Tells the sentry to go to the friendly base.
+ * This command executes once when schedule
  */
-class ToggleDriveMovementCommand : public tap::control::Command
+class GoToFriendlyBaseCommand : public tap::control::Command
 {
 public:
-    ToggleDriveMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    GoToFriendlyBaseCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
         this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "toggle drive movement"; }
+    virtual const char *getName() const { return "sentry go to friendly base"; }
     virtual bool isReady() { return true; }
     virtual void initialize()
     {
-        this->sub.queueRequest(SentryRequestMessageType::TOGGLE_DRIVE_MOVEMENT);
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_FRIENDLY_BASE);
     }
     virtual void execute() {}
     virtual void end(bool) {}
@@ -80,20 +78,24 @@ private:
 };
 
 /**
- * Command that is scheduled once and queues the select new robot SentryRequestMessageType.
+ * Tells the sentry to go to the enemy base.
+ * This command executes once when schedule
  */
-class SelectNewRobotCommand : public tap::control::Command
+class GoToEnemyBaseCommand : public tap::control::Command
 {
 public:
-    SelectNewRobotCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    GoToEnemyBaseCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
-        addSubsystemRequirement(&sentryRequestSubsystem);
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "select new robot"; }
+    virtual const char *getName() const { return "sentry go to enemy base"; }
     virtual bool isReady() { return true; }
-    virtual void initialize() { sub.queueRequest(SentryRequestMessageType::SELECT_NEW_ROBOT); }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_ENEMY_BASE);
+    }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
@@ -103,20 +105,149 @@ private:
 };
 
 /**
- * Command that is scheduled once that queues the target new quadrant SentryRequestMessageType.
+ * Tells the sentry to go to the supplier zone
+ * This command executes once when schedule
  */
-class TargetNewQuadrantCommand : public tap::control::Command
+class GoToSupplierZoneCommand : public tap::control::Command
 {
 public:
-    TargetNewQuadrantCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+    GoToSupplierZoneCommand(SentryRequestSubsystem &sentryRequestSubsystem)
         : sub(sentryRequestSubsystem)
     {
-        addSubsystemRequirement(&sentryRequestSubsystem);
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
     }
 
-    virtual const char *getName() const { return "target new quadrant"; }
+    virtual const char *getName() const { return "sentry go to supplier zone command"; }
     virtual bool isReady() { return true; }
-    virtual void initialize() { sub.queueRequest(SentryRequestMessageType::TARGET_NEW_QUADRANT); }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_FRIENDLY_SUPPLIER_ZONE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to go to the enemy supplier zone
+ * This command executes once when schedule
+ */
+class GoToEnemySupplierZoneCommand : public tap::control::Command
+{
+public:
+    GoToEnemySupplierZoneCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry go to enemy supplier zone command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_ENEMY_SUPPLIER_ZONE);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to go to the center point
+ * This command executes once when schedule
+ */
+class GoToCenterPointCommand : public tap::control::Command
+{
+public:
+    GoToCenterPointCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry go to center point command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize()
+    {
+        this->sub.queueRequest(SentryRequestMessageType::GO_TO_CENTER_POINT);
+    }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to hold fire
+ * This command executes once when schedule
+ */
+class HoldFireCommand : public tap::control::Command
+{
+public:
+    HoldFireCommand(SentryRequestSubsystem &sentryRequestSubsystem) : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry hold fire command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize() { this->sub.queueRequest(SentryRequestMessageType::HOLD_FIRE); }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to toggle moving
+ * This command executes once when schedule
+ */
+class ToggleMovementCommand : public tap::control::Command
+{
+public:
+    ToggleMovementCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry toggle moving command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize() { this->sub.queueRequest(SentryRequestMessageType::TOGGLE_MOVEMENT); }
+    virtual void execute() {}
+    virtual void end(bool) {}
+    virtual bool isFinished() const { return true; }
+
+private:
+    SentryRequestSubsystem &sub;
+};
+
+/**
+ * Tells the sentry to toggle beyblading
+ * This command executes once when schedule
+ */
+class ToggleBeybladeCommand : public tap::control::Command
+{
+public:
+    ToggleBeybladeCommand(SentryRequestSubsystem &sentryRequestSubsystem)
+        : sub(sentryRequestSubsystem)
+    {
+        this->addSubsystemRequirement(&sentryRequestSubsystem);
+    }
+
+    virtual const char *getName() const { return "sentry toggle beyblading command"; }
+    virtual bool isReady() { return true; }
+    virtual void initialize() { this->sub.queueRequest(SentryRequestMessageType::TOGGLE_BEYBLADE); }
     virtual void execute() {}
     virtual void end(bool) {}
     virtual bool isFinished() const { return true; }
