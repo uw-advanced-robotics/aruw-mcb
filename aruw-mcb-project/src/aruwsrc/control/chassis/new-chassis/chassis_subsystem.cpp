@@ -29,8 +29,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
+
+modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
@@ -47,8 +47,6 @@ ChassisSubsystem::ChassisSubsystem(
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
 }
-
-// ChassisSubsystem::~ChassisSubsystem() {}
 
 float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
@@ -95,6 +93,30 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     }
     return rTranslationalGain;
 }
+
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r) { //TO IMPLEMENT!!!!
+    float rotationTranslationGain = calculateRotationTranslationalGain(r);
+    for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            modm::Pair<float, float> desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(rotationTranslationGain* x, rotationTranslationGain * y, r);
+            wheels[i].executeWheelVelocity(desiredWheelVel.first, desiredWheelVel.second);
+        }
+}
+
+void ChassisSubsystem::initialize() {
+    for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            wheels[i].initialize();
+        }
+}
+
+void ChassisSubsystem::refresh() {
+    for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            wheels[i].refresh();
+        }
+}
+
 
 }  // namespace chassis
 

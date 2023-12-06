@@ -74,6 +74,10 @@ public:
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
 
+    virtual void initialize();
+
+    virtual void refresh();
+
 private:
     // Motor that drives the wheel
     Motor& motor;

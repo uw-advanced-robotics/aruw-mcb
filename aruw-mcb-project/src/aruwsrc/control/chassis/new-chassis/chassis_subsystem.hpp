@@ -100,14 +100,14 @@ public:
      * system).
      *
      * @param[in] x The desired velocity of the wheels to move in the x direction.
-     *      So if x=1000, the chassis algorithm will attempt to apply 1000 RPM to motors
+     *      So if x=10, the chassis algorithm will attempt to apply 10 m/s to motors
      *      in order to move the chassis forward.
      * @param[in] y The desired velocity of the wheels to move in the y direction.
      *      See x param for further description.
      * @param[in] r The desired velocity of the wheels to rotate the chassis.
      *      See x param for further description.
      */
-    virtual void setDesiredOutput(float x, float y, float r) = 0;
+    void setDesiredOutput(float x, float y, float r);
 
     void initialize();
 
@@ -115,17 +115,19 @@ public:
 
     void refreshSafeDisconnect()
     {
-        for (int i = 0; i < getNumChassisWheels(); i++)
-        {
-            wheels[i].executeWheelVelocity(0.0, 0.0);
-        }
+        setZeroRPM();
     }
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    virtual void setZeroRPM() = 0;
+    inline void setZeroRPM() {
+        for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            wheels[i].executeWheelVelocity(0.0, 0.0);
+        }
+    }
 
     /**
      * Run chassis rotation PID on some actual turret angle offset.
