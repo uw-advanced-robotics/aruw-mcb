@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/dji_motor_mock.hpp"
 
-#include "aruwsrc/control/homeable-subsystem/trigger/motor_stall_trigger.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
 
 using namespace aruwsrc::control;
 using namespace testing;
