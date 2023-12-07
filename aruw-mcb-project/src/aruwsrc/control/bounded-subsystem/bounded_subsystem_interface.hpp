@@ -60,7 +60,7 @@ public:
      */
     virtual uint64_t getLowerBound() const = 0;
 
-private:
+protected:
     /**
      * Specifies the current calibration state that command is in. Use in refresh() of child class.
      */
@@ -72,7 +72,6 @@ private:
         CALIBRATION_COMPLETE      // calibration done
     };
 
-protected:
     CalibrationState calibrationState;
 
     /**
