@@ -145,6 +145,7 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     assert(delayBtwnCalcAndReadReg >= 0);
 
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
+    readRegistersMagTimeout.restart(magDelay);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
     balonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
@@ -154,21 +155,38 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
 
 void Mpu6500::periodicIMUUpdate()
 {
+    if (reset)
+    {
+        requestCalibration();
+        reset = false;
+    }
+
     if (imuState == ImuState::IMU_NOT_CALIBRATED || imuState == ImuState::IMU_CALIBRATED)
     {
         normalizeMagnetometerReading();
         mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
-        balonyAlgorithm.update(
-            getGx(),
-            getGy(),
-            getGz(),
-            getAx(),
-            getAy(),
-            getAz(),
-            normalizedMagnetometer.x,
-            normalizedMagnetometer.y,
-            normalizedMagnetometer.z);
+
+        // if(readRegistersMagTimeout.execute()) {
+            // readRegistersMagTimeout.restart(magDelay);
+            balonyAlgorithm.update(
+                getGx(),
+                getGy(),
+                getGz(),
+                getAx(),
+                getAy(),
+                getAz(),
+                normalizedMagnetometer.y,
+                normalizedMagnetometer.x,
+                normalizedMagnetometer.z);
+        //     balonyUpdateCount *= -1;
+        // } else {
+        //     balonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        //     balonyUpdateCount++;
+        // }
+
+        
         tiltAngleCalculated = false;
+        gravityMagnitude = getAz();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else if (imuState == ImuState::IMU_CALIBRATING)
@@ -192,8 +210,6 @@ void Mpu6500::periodicIMUUpdate()
             raw.accelOffset.y /= MPU6500_OFFSET_SAMPLES;
             raw.accelOffset.z /= MPU6500_OFFSET_SAMPLES;
             imuState = ImuState::IMU_CALIBRATING_MAGNETOMETER;
-            mahonyAlgorithm.reset();
-            balonyAlgorithm.reset();
         }
     }
     else if (imuState == ImuState::IMU_CALIBRATING_MAGNETOMETER)
@@ -221,6 +237,9 @@ void Mpu6500::periodicIMUUpdate()
             balonyAlgorithm.reset();
         }
     }
+
+    mahonyYaw = mahonyAlgorithm.getYaw() - offsetForMahony;
+    balonyYaw = balonyAlgorithm.getYaw();
 
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 

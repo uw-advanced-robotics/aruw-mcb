@@ -254,7 +254,7 @@ public:
      */
     inline float getTemp() final_mockable
     {
-        return validateReading(21.0f + static_cast<float>(raw.temperature) / 333.87f);
+        return 21.0f + static_cast<float>(raw.temperature) / 333.87f;
     }
 
     /**
@@ -313,7 +313,7 @@ private:
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
-    static constexpr float MPU6500_OFFSET_SAMPLES = 1000;
+    float MPU6500_OFFSET_SAMPLES = 4000;
 
     /**
      * The time to read the registers in nonblocking mode, in microseconds.
@@ -375,7 +375,7 @@ private:
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
-    static constexpr float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 2500;
+    float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 4000;
 
     // Functions for interacting with hardware directly.
 
@@ -448,6 +448,18 @@ private:
             normalizedMagnetometer.z /= calibrationMaxReading.z - raw.magnetometerOffset.z;
         }
     }
+
+    float gravityMagnitude = 0.0f;
+    bool reset = 0;
+
+    float mahonyYaw = 0.0f;
+    float balonyYaw = 0.0f;
+
+    int magDelay = 5000;
+    tap::arch::MicroTimeout readRegistersMagTimeout;
+    int balonyUpdateCount = 0;
+    float offsetForMahony = 0.0f;
+
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
