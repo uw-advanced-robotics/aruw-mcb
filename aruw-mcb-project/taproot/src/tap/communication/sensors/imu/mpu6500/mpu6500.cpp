@@ -166,8 +166,9 @@ void Mpu6500::periodicIMUUpdate()
         normalizeMagnetometerReading();
         mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
 
-        // if(readRegistersMagTimeout.execute()) {
-            // readRegistersMagTimeout.restart(magDelay);
+        if (readRegistersMagTimeout.execute())
+        {
+            readRegistersMagTimeout.restart(magDelay);
             balonyAlgorithm.update(
                 getGx(),
                 getGy(),
@@ -178,13 +179,24 @@ void Mpu6500::periodicIMUUpdate()
                 normalizedMagnetometer.y,
                 normalizedMagnetometer.x,
                 normalizedMagnetometer.z);
-        //     balonyUpdateCount *= -1;
-        // } else {
-        //     balonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
-        //     balonyUpdateCount++;
-        // }
+            madgwickAlgorithm.MadgwickAHRSupdate(
+                getGx(),
+                getGy(),
+                getGz(),
+                getAx(),
+                getAy(),
+                getAz(),
+                normalizedMagnetometer.y,
+                normalizedMagnetometer.x,
+                normalizedMagnetometer.z);
+        }
+        else
+        {
+            balonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+            madgwickAlgorithm
+                .MadgwickAHRSupdateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        }
 
-        
         tiltAngleCalculated = false;
         gravityMagnitude = getAz();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
@@ -235,11 +247,13 @@ void Mpu6500::periodicIMUUpdate()
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
             balonyAlgorithm.reset();
+            madgwickAlgorithm.reset();
         }
     }
 
     mahonyYaw = mahonyAlgorithm.getYaw() - offsetForMahony;
     balonyYaw = balonyAlgorithm.getYaw();
+    madgwickYaw = madgwickAlgorithm.getYaw();
 
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 

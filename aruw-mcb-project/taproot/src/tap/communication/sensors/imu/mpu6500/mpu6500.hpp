@@ -27,6 +27,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/MahonyAHRS.h"
+#include "tap/algorithms/MadgwickAHRS.h"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
@@ -351,6 +352,7 @@ private:
 
     Mahony mahonyAlgorithm;
     Mahony balonyAlgorithm;
+    Madgwick madgwickAlgorithm;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -454,6 +456,7 @@ private:
 
     float mahonyYaw = 0.0f;
     float balonyYaw = 0.0f;
+    float madgwickYaw = 0.0f;
 
     int magDelay = 5000;
     tap::arch::MicroTimeout readRegistersMagTimeout;

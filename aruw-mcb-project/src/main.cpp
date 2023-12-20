@@ -44,7 +44,7 @@
 #include "aruwsrc/util_macros.hpp"
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
-static constexpr float MAHONY_KP = 0.1f;
+static constexpr float MAHONY_KP = 50.0f;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
