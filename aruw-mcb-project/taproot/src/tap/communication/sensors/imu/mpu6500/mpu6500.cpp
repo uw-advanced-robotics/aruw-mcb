@@ -166,8 +166,8 @@ void Mpu6500::periodicIMUUpdate()
         normalizeMagnetometerReading();
         mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
 
-        if (readRegistersMagTimeout.execute())
-        {
+        // if (readRegistersMagTimeout.execute())
+        // {
             readRegistersMagTimeout.restart(magDelay);
             balonyAlgorithm.update(
                 getGx(),
@@ -186,16 +186,16 @@ void Mpu6500::periodicIMUUpdate()
                 getAx(),
                 getAy(),
                 getAz(),
-                normalizedMagnetometer.y,
                 normalizedMagnetometer.x,
+                normalizedMagnetometer.y,
                 normalizedMagnetometer.z);
-        }
-        else
-        {
-            balonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
-            madgwickAlgorithm
-                .MadgwickAHRSupdateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
-        }
+        // }
+        // else
+        // {
+        //     balonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        //     madgwickAlgorithm
+        //         .MadgwickAHRSupdateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        // }
 
         tiltAngleCalculated = false;
         gravityMagnitude = getAz();

@@ -48,7 +48,7 @@ public:
     float getYaw()
     {
         computeAngles();
-        return yaw  * 57.29578f;
+        return yaw  * 57.29578f + 180.0f;
     }
 
     void reset()

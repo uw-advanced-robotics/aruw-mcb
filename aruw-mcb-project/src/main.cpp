@@ -44,7 +44,7 @@
 #include "aruwsrc/util_macros.hpp"
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
-static constexpr float MAHONY_KP = 50.0f;
+static constexpr float MAHONY_KP = 25.0f;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
@@ -120,10 +120,11 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED)
-    if(drivers->digital.read(tap::gpio::Digital::Button)){
-        drivers->mpu6500.requestCalibration();
-    }
-    drivers->mpu6500.getYaw();
+            if (drivers->digital.read(tap::gpio::Digital::Button))
+            {
+                drivers->mpu6500.requestCalibration();
+            }
+            drivers->mpu6500.getYaw();
 #endif
         }
         modm::delay_us(10);
