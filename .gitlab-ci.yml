@@ -373,7 +373,7 @@ before_script:
     - apk add --no-cache g++ gcc libxml2-dev libxslt-dev
     - cat /etc/*-release
     - apk add py3-lxml
-    - apk add py3-sphinx py3-breathe
+    - apk add py3-sphinx py3-breathe exhale
     - apk add py3-sphinx_rtd_theme
     - apk add doxygen
   script:
