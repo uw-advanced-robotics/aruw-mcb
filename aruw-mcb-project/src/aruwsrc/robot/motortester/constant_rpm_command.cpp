@@ -11,11 +11,7 @@ ConstantRpmCommand::ConstantRpmCommand(MotorSubsystem* subsystem, float rpm, flo
     this->addSubsystemRequirement(subsystem);
 }
 
-void ConstantRpmCommand::execute()
-{
-    motorSubsystem->setDesiredRPM(rpm / pulleyRatio);
-    motorSubsystem->refresh();
-}
+void ConstantRpmCommand::execute() { motorSubsystem->setDesiredRPM(rpm / pulleyRatio); }
 
 void ConstantRpmCommand::end(bool) { motorSubsystem->stop(); }
 

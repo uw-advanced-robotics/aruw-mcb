@@ -28,7 +28,6 @@ void StickRpmCommand::execute()
     //     deadenedStick = (stick + STICK_DEADZONE) / (1 - STICK_DEADZONE);
     // }
     motorSubsystem->setDesiredRPM(maxRpm * stick);
-    motorSubsystem->refresh();
 }
 
 void StickRpmCommand::end(bool) { motorSubsystem->stop(); }
