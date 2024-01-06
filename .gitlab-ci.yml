@@ -371,6 +371,7 @@ before_script:
     - apk add py-pip python3-dev
     - apk add make
     - apk add --no-cache g++ gcc libxml2-dev libxslt-dev
+    - cat /etc/*-release
     - apt-get install python3-lxml
     - apt-get install python3-sphinx python3-breathe python3-exhale
     - apt-get install python3-sphinx_rtd_theme
