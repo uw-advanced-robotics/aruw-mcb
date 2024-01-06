@@ -35,7 +35,7 @@ ORGANIZATION_NAME = "Advanced Robotics at the University of Washington"
 PROJECT_DIR = "aruw-mcb-project"
 
 
-def format():
+def clang_format():
     CLANG_FORMAT_DIRS = [
         "aruw-mcb-project/src/",
         "aruw-mcb-project/test/",
@@ -73,11 +73,12 @@ def check_header_guards():
     run(["python", "./taproot-scripts/check_header_guard.py", *HEADER_GUARD_CHECK_DIRS, *(["-p", HEADER_PREFIX] if HEADER_PREFIX else []), "-i", *IGNORE_HEADER])
 
 
-def check_taproot_submodule():
-    VALID_BRANCHES = ["release", "develop"]
-    print("Checking taproot submodule...")
-    # TODO: It's a shell script
-    run(["bash" "./taproot-scripts/check_taproot_submodule.sh", PROJECT_DIR, "taproot", " ".join(VALID_BRANCHES)])
+# def check_taproot_submodule():
+#     VALID_BRANCHES = ["release", "develop"]
+#     print("Checking taproot submodule...")
+    # FIXME: Newly written powershell script relies on lbuild build command which is broken for windows
+    # Need to replace with below wrapper for lbuild build
+    # run(["bash" "./taproot-scripts/check_taproot_submodule.sh", PROJECT_DIR, "taproot", " ".join(VALID_BRANCHES)])
 
 
 def run_lbuild():
@@ -161,16 +162,20 @@ def build_and_run_tests(target : Optional[BuildTarget] = None):
 
 
 def build_sim(target : Optional[BuildTarget] = None):
-    print("Checking sim build...")
-    run(["pipenv", "run", "scons", "build-sim", "profile=fast", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
+    print(f"Checking sim build for {target.value if target else 'all'}...")
+    if not target:
+        for t in BuildTarget:
+            build_mcb(t)
+    else:
+        run(["pipenv", "run", "scons", "build-sim", "profile=fast", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
 
 
 action_to_method : Dict[str, Callable] = {
-    "format" : format,
+    "format" : clang_format,
     "singleton_drivers" : check_singleton_drivers,
     "license" : check_license_headers,
     "header_guards" : check_header_guards,
-    "taproot" : check_taproot_submodule,
+    # "taproot" : check_taproot_submodule,
     "lbuild" : run_lbuild,
     "build" : build_mcb,
     "test" : build_and_run_tests,
@@ -195,19 +200,19 @@ def main():
             action_to_method[args.action]()
     else:
         # Format
-        format()
+        clang_format()
         
         # Policy checks
         check_singleton_drivers()
         check_license_headers()
         check_header_guards()
-        check_taproot_submodule()
+        # check_taproot_submodule()
 
         # Build
         run_lbuild()
         build_mcb()
         build_and_run_tests()
-        # build_sim()
+        build_sim()
 
     # TODO: idk how docs work
 
