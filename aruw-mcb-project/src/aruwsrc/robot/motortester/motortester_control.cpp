@@ -149,8 +149,6 @@ void registerSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
 }
 
-void setDefaultCommands(Drivers *drivers) {}
-
 void registerIoMappings(Drivers *drivers)
 {
     // drivers->commandMapper.addMap(&leftSwitchUp);
@@ -169,7 +167,6 @@ void initSubsystemCommands(aruwsrc::motortester::Drivers *drivers)
 {
     motortester_control::registerSubsystems(drivers);
     motortester_control::initializeSubsystems();
-    motortester_control::setDefaultCommands(drivers);
     motortester_control::registerIoMappings(drivers);
 }
 
