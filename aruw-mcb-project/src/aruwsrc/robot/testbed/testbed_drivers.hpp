@@ -31,21 +31,9 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers()
-        : tap::Drivers(),
-          motor1(this, motor1ID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor 1"),
-          motor2(this, motor2ID, tap::can::CanBus::CAN_BUS1, false, "Testbed spinny motor 2")
-    {
-    }
+    Drivers() : tap::Drivers() {}
 
 public:
-        // Motors you just want to spin
-    tap::motor::MotorId motor1ID = tap::motor::MotorId::MOTOR1;
-    tap::motor::MotorId motor2ID = tap::motor::MotorId::MOTOR2;
-
-    tap::motor::DjiMotor motor1;
-    tap::motor::DjiMotor motor2;
-
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
 

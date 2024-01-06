@@ -63,6 +63,12 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
+    /**
+     * @brief Resets the KF back to the robot's boot position.
+     */
+
+    void reset();
+
     void update();
 
 private:
@@ -112,12 +118,12 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E2, 0  , 0   , 0  , 0  , 0   ,
-        0  , 1E1, 0   , 0  , 0  , 0   ,
-        0  , 0  , 5E0, 0  , 0  , 0   ,
-        0  , 0  , 0   , 1E2, 0  , 0   ,
-        0  , 0  , 0   , 0  , 1E1, 0   ,
-        0  , 0  , 0   , 0  , 0  , 5E0,
+        1E2, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E1, 0  , 0  , 0  , 0  ,
+        0  , 0  , 5E0, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E1, 0  ,
+        0  , 0  , 0  , 0  , 0  , 5E0,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
         1.0, 0  , 0  , 0  ,
@@ -150,6 +156,8 @@ private:
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+
+    const modm::Vector2f initPos;
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 

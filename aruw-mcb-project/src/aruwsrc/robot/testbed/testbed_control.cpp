@@ -19,8 +19,6 @@
 
 #if defined(TARGET_TESTBED)
 
-#include "tap/control/hold_command_mapping.hpp"
-// #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/drivers_singleton.hpp"
@@ -39,14 +37,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-
 void initializeSubsystems() {}
-
-void registerSubsystems(Drivers *drivers) {}
-
-void setDefaultCommands(Drivers *drivers) {}
-
-void registerIoMappings(Drivers *drivers) {}
 
 }  // namespace testbed_control
 
@@ -54,10 +45,7 @@ namespace aruwsrc::testbed
 {
 void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
 {
-    testbed_control::registerSubsystems(drivers);
     testbed_control::initializeSubsystems();
-    testbed_control::setDefaultCommands(drivers);
-    testbed_control::registerIoMappings(drivers);
 }
 
 }  // namespace aruwsrc::testbed
