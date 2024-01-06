@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,20 +29,6 @@ class Drivers;
 
 namespace aruwsrc::communication::serial
 {
-/**
- * Handler that decodes requests made from other robots to the sentry robot. Various robot
- * commands may be sent via the handler. These include the following:
- * - Select new robot: The sentry should target a new robot. If there are no new robots in frame,
- *   doesn't switch target.
- * - Target new quadrant: The sentry will stop targeting and move the turret backwards if it is
- *   pointing forward or forward if it is pointing backwards.
- * - Toggle drive movement: The sentry will switch between driving evasively and driving to the
- *   right of the rail and stopping.
- *
- * Message structure:
- * - byte 1: message type
- * - byte 2-n: message if the message type requires a message
- */
 class SentryRequestHandler
     : public tap::communication::serial::RefSerial::RobotToRobotMessageHandler
 {
@@ -54,29 +40,56 @@ public:
     void operator()(
         const tap::communication::serial::DJISerial::ReceivedSerialMessage &message) override final;
 
-    void attachSelectNewRobotMessageHandler(MessageReceivedCallback callback)
+    void attachNoStrategyHandler(MessageReceivedCallback callback) { noStrategyHandler = callback; }
+
+    void attachGoToFriendlyBaseHandler(MessageReceivedCallback callback)
     {
-        selectNewRobotMessageHandler = callback;
+        goToFriendlyBaseHandler = callback;
     }
-    void attachTargetNewQuadrantMessageHandler(MessageReceivedCallback callback)
+
+    void attachGoToEnemyBaseHandler(MessageReceivedCallback callback)
     {
-        targetNewQuadrantMessageHandler = callback;
+        goToEnemyBaseHandler = callback;
     }
-    void attachToggleDriveMovementMessageHandler(MessageReceivedCallback callback)
+
+    void attachGoToSupplierZoneHandler(MessageReceivedCallback callback)
     {
-        toggleDriveMovementMessageHandler = callback;
+        goToSupplierZoneHandler = callback;
     }
-    void attachPauseProjectileLaunchingMessageHandler(MessageReceivedCallback callback)
+
+    void attachGoToEnemySupplierZoneHandler(MessageReceivedCallback callback)
     {
-        pauseProjectileLaunchingHandler = callback;
+        goToEnemySupplierZoneHandler = callback;
+    }
+
+    void attachGoToCenterPointHandler(MessageReceivedCallback callback)
+    {
+        goToCenterPointHandler = callback;
+    }
+
+    void attachHoldFireHandler(MessageReceivedCallback callback) { holdFireHandler = callback; }
+
+    void attachToggleMovementHandler(MessageReceivedCallback callback)
+    {
+        toggleMovementHandler = callback;
+    }
+
+    void attachToggleBeybladeHandler(MessageReceivedCallback callback)
+    {
+        toggleBeybladeHandler = callback;
     }
 
 private:
     tap::Drivers *drivers;
-    MessageReceivedCallback selectNewRobotMessageHandler = nullptr;
-    MessageReceivedCallback targetNewQuadrantMessageHandler = nullptr;
-    MessageReceivedCallback toggleDriveMovementMessageHandler = nullptr;
-    MessageReceivedCallback pauseProjectileLaunchingHandler = nullptr;
+    MessageReceivedCallback noStrategyHandler = nullptr;
+    MessageReceivedCallback goToFriendlyBaseHandler = nullptr;
+    MessageReceivedCallback goToEnemyBaseHandler = nullptr;
+    MessageReceivedCallback goToSupplierZoneHandler = nullptr;
+    MessageReceivedCallback goToEnemySupplierZoneHandler = nullptr;
+    MessageReceivedCallback goToCenterPointHandler = nullptr;
+    MessageReceivedCallback holdFireHandler = nullptr;
+    MessageReceivedCallback toggleMovementHandler = nullptr;
+    MessageReceivedCallback toggleBeybladeHandler = nullptr;
 };
 }  // namespace aruwsrc::communication::serial
 
