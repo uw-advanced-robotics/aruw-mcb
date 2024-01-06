@@ -25,7 +25,8 @@ namespace aruwsrc::control::turret::sentry
 {
 TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
-    TurretSubsystem &turretMinorSubsystem,
+    aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface,
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretMinorSubsystem,
     algorithms::TurretYawControllerInterface &yawController,
     algorithms::TurretPitchControllerInterface &pitchController,
     float userYawInputScalar,
@@ -34,7 +35,6 @@ TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
       turretMinorSubsystem(turretMinorSubsystem),
-      turretId(turretID),
       yawController(yawController),
       pitchController(pitchController),
       userYawInputScalar(userYawInputScalar),
@@ -60,7 +60,7 @@ void TurretMinorSentryControlCommand::execute()
 
     // Get pitch input from control operator interface
     float pitchInput;
-    switch (turretMinorSubsystem.turretID)
+    switch (turretMinorSubsystem.getTurretID())
     {
         case 0:
             pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
@@ -74,7 +74,8 @@ void TurretMinorSentryControlCommand::execute()
 
     // Get yaw input from control operator interface
     float yawInput;
-    switch (turretMinorSubsystem.turretID)
+
+    switch (turretMinorSubsystem.getTurretID())
     {
         case 0:
             yawInput = controlOperatorInterface.getTurretMinor1YawVelocity();
@@ -99,13 +100,7 @@ bool TurretMinorSentryControlCommand::isFinished() const
 }
 
 void TurretMinorSentryControlCommand::end(bool)
-// TODO: change this to do something other than hold position when we deschedule
 {
-    // uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    // uint32_t dt = currTime - prevTime;
-    // pitchController.runController(dt, 0);
-    // yawController.runController(dt, 0);
-
     turretMinorSubsystem.pitchMotor.setMotorOutput(0);
     turretMinorSubsystem.yawMotor.setMotorOutput(0);
 }
