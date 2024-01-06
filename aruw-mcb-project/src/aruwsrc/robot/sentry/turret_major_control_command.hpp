@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_MAJOR_SENTRY_CONTROL_COMMAND_HPP_
-#define TURRET_MAJOR_SENTRY_CONTROL_COMMAND_HPP_
+#ifndef TURRET_MAJOR_CONTROL_COMMAND_HPP_
+#define TURRET_MAJOR_CONTROL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -86,4 +86,4 @@ private:
 };
 }  // namespace aruwsrc::control::turret::sentry
 
-#endif
+#endif  // TURRET_MAJOR_CONTROL_COMMAND_HPP_
