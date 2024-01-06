@@ -72,6 +72,8 @@ using namespace aruwsrc::engineer;
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
+#elif defined(TARGET_MOTOR_TESTER)
+using namespace aruwsrc::motortester;
 #endif
 
 int main()
@@ -125,6 +127,10 @@ int main()
             //     *
             //     drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL)
             //     * 16'000);
+#endif
+
+#if defined(TARGET_MOTOR_TESTER)
+            // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
         modm::delay_us(10);

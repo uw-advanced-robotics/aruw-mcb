@@ -6,6 +6,9 @@
 
 #include "motor_subsystem.hpp"
 
+namespace aruwsrc::motortester
+{
+
 class ConstantRpmCommand : public tap::control::Command
 {
 public:
@@ -27,3 +30,5 @@ private:
 };  // class ConstantRpmCommand
 
 #endif  // CONSTANT_RPM_COMMAND_HPP_
+
+}  // namespace aruwsrc::motortester

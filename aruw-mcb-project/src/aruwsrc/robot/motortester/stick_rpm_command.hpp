@@ -7,6 +7,8 @@
 
 #include "motor_subsystem.hpp"
 
+using namespace aruwsrc::motortester;
+
 class StickRpmCommand : public tap::control::Command
 {
 public:

@@ -8,6 +8,9 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+namespace aruwsrc::motortester
+{
+
 class MotorSubsystem : public tap::control::Subsystem
 {
 public:
@@ -61,5 +64,7 @@ private:
     float desiredRPM{0};
     uint32_t prevTime = 0;
 };
+
+}  // namespace aruwsrc::motortester
 
 #endif

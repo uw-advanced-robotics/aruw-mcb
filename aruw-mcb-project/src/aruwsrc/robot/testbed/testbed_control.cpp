@@ -25,9 +25,6 @@
 
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
-#include "aruwsrc/robot/testbed/constant_rpm_command.hpp"
-#include "aruwsrc/robot/testbed/motor_subsystem.hpp"
-#include "aruwsrc/robot/testbed/stick_rpm_command.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
@@ -43,123 +40,13 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace testbed_control
 {
 
-tap::algorithms::SmoothPidConfig m2006PidConfig =
-    {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+void initializeSubsystems() {}
 
-tap::algorithms::SmoothPidConfig m3508PidConfig =
-    {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-// unfinished 2006
-tap::motor::DjiMotor leftChannelMotor(
-    drivers(),
-    tap::motor::MOTOR2,          // id 2
-    tap::can::CanBus::CAN_BUS1,  // bus 1
-    false,
-    "LMotor");
-
-// 3508
-tap::motor::DjiMotor rightChannelMotor(
-    drivers(),
-    tap::motor::MOTOR1,          // id 1
-    tap::can::CanBus::CAN_BUS1,  // bus 1
-    false,
-    "RMotor");
-
-MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, m2006PidConfig, 1.0f);
-
-MotorSubsystem rightMotorSubsystem(
-    drivers(),
-    rightChannelMotor,
-    m3508PidConfig,
-    (187.0f / 3591.0f));  // internal gearbox ratio
-
-// Commands
-
-ConstantRpmCommand leftSwitchUpRpm(&leftMotorSubsystem, 225.0f);
-StickRpmCommand leftManual(
-    &leftMotorSubsystem,
-    &drivers()->remote,
-    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-    500.0f);
-ConstantRpmCommand leftSwitchDownRpm(&leftMotorSubsystem, 187.5f);
-
-ConstantRpmCommand rightSwitchUpRpm(&rightMotorSubsystem, 30.0f, 32.0f / 110.0f);
-StickRpmCommand rightManual(
-    &rightMotorSubsystem,
-    &drivers()->remote,
-    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
-    482.0f);
-ConstantRpmCommand rightSwitchDownRpm(&rightMotorSubsystem, 15.0f, 32.0f / 152.0f);
-
-// command mappings
-
-tap::control::HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&leftSwitchUpRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&leftManual},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&leftSwitchDownRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
-
-tap::control::HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&rightSwitchUpRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping rightSwitchMid(
-    drivers(),
-    {&rightManual},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&rightSwitchDownRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
-
-// inits
-
-void initializeSubsystems()
-{
-    // leftMotorSubsystem.initialize();
-    rightMotorSubsystem.initialize();
-}
-
-void registerSubsystems(Drivers *drivers)
-{
-    // drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
-    drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
-}
+void registerSubsystems(Drivers *drivers) {}
 
 void setDefaultCommands(Drivers *drivers) {}
 
-void registerIoMappings(Drivers *drivers)
-{
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchMid);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchMid);
-}
+void registerIoMappings(Drivers *drivers) {}
 
 }  // namespace testbed_control
 
