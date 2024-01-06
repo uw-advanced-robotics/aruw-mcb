@@ -372,9 +372,9 @@ before_script:
     - apk add make
     - apk add --no-cache g++ gcc libxml2-dev libxslt-dev
     - cat /etc/*-release
-    - apt-get install python3-lxml
-    - apt-get install python3-sphinx python3-breathe python3-exhale
-    - apt-get install python3-sphinx_rtd_theme
+    - apk add py3-lxml
+    - apk add py3-sphinx py3-breathe py3-exhale
+    - apk add py3-sphinx_rtd_theme
     - apk add doxygen
   script:
     - cd docs && make html
