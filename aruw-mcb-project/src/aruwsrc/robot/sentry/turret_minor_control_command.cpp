@@ -21,17 +21,18 @@
 
 #include "tap/drivers.hpp"
 
+using namespace aruwsrc::control::sentry;
+
 namespace aruwsrc::control::turret::sentry
 {
 TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
-    aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface,
-    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretMinorSubsystem,
+    SentryControlOperatorInterface &controlOperatorInterface,
+    SentryTurretMinorSubsystem &turretMinorSubsystem,
     algorithms::TurretYawControllerInterface &yawController,
     algorithms::TurretPitchControllerInterface &pitchController,
     float userYawInputScalar,
-    float userPitchInputScalar,
-    uint8_t turretID)
+    float userPitchInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
       turretMinorSubsystem(turretMinorSubsystem),
@@ -60,33 +61,22 @@ void TurretMinorSentryControlCommand::execute()
 
     // Get pitch input from control operator interface
     float pitchInput;
-    switch (turretMinorSubsystem.getTurretID())
-    {
-        case 0:
-            pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
-            break;
-        case 1:
-            pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
-            break;
-        default:
-            pitchInput = 0;
-    }
-
-    // Get yaw input from control operator interface
     float yawInput;
-
     switch (turretMinorSubsystem.getTurretID())
     {
-        case 0:
+        case SentryTurretMinorSubsystem::TurretID::TURRET_ID_ZERO:
+            pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
             yawInput = controlOperatorInterface.getTurretMinor1YawVelocity();
+
             break;
-        case 1:
+        case SentryTurretMinorSubsystem::TurretID::TURRET_ID_ONE:
+            pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
             yawInput = controlOperatorInterface.getTurretMinor2YawVelocity();
             break;
         default:
+            pitchInput = 0;
             yawInput = 0;
     }
-
     const float pitchSetpoint = pitchController.getSetpoint() + userPitchInputScalar * pitchInput;
     pitchController.runController(dt, pitchSetpoint);
 

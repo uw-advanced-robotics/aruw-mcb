@@ -28,7 +28,7 @@ SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
     const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
     const aruwsrc::can::TurretMCBCanComm* turretMCB,
-    uint8_t turretID)
+    TurretID turretID)
     : aruwsrc::control::turret::TurretSubsystem(
           drivers,
           pitchMotor,

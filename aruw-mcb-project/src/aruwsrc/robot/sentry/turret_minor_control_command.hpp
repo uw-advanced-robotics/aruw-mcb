@@ -59,8 +59,7 @@ public:
         algorithms::TurretYawControllerInterface &yawController,
         algorithms::TurretPitchControllerInterface &pitchController,
         float userYawInputScalar,
-        float userPitchInputScalar,
-        uint8_t turretID);
+        float userPitchInputScalar);
 
     bool isReady() override;
 
