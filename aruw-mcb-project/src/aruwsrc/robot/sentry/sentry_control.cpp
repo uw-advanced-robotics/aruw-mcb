@@ -19,6 +19,8 @@
 
 #if defined(TARGET_SENTRY_BEEHIVE)
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 
 using namespace aruwsrc::sentry;
 

@@ -50,6 +50,8 @@ public:
 
     float getChassisYaw() const;
 
+    inline aruwsrc::control::turret::TurretMotor& getMotor() { return yawMotor; }
+
 private:
     aruwsrc::control::turret::TurretMotor yawMotor;
 };  // class YawTurretSubsystem
