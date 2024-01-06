@@ -25,6 +25,7 @@
 // #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 // #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc
 {
@@ -77,6 +78,7 @@ public:
 private:
     tap::Drivers *drivers;
     // SentryControlOperatorInterface &controlOperatorInterface;
+    ControlOperatorInterface &controlOperatorInterface;
     TurretSubsystem &turretMinorSubsystem;
 
     uint8_t turretID;

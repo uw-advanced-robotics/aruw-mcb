@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -25,7 +25,6 @@ namespace aruwsrc::control::turret::sentry
 {
 TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
-    // SentryControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem &turretMinorSubsystem,
     algorithms::TurretYawControllerInterface &yawController,
     algorithms::TurretPitchControllerInterface &pitchController,
@@ -33,7 +32,7 @@ TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     float userPitchInputScalar,
     uint8_t turretID)
     : drivers(drivers),
-      //   controlOperatorInterface(controlOperatorInterface),
+      controlOperatorInterface(controlOperatorInterface),
       turretMinorSubsystem(turretMinorSubsystem),
       turretId(turretID),
       yawController(yawController),
