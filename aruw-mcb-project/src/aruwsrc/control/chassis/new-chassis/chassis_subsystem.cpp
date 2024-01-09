@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
 using namespace tap::algorithms;
 
@@ -29,8 +30,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
+modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
+    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
@@ -39,6 +40,13 @@ ChassisSubsystem::ChassisSubsystem(
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       wheels(*wheels),
       currentSensor(currentSensor),
+      chasisSpeedRotationPID({
+        AUTOROTATION_PID_KP,
+        0.0f,
+        AUTOROTATION_PID_KD,
+        0.0f,
+        AUTOROTATION_PID_MAX_OUTPUT, //also needs a whole bunch of kalman stuff, deadzone, and floor but idk how to do
+      }),
       chassisPowerLimiter(
           drivers,
           currentSensor,
@@ -50,22 +58,23 @@ ChassisSubsystem::ChassisSubsystem(
 
 float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
-    // P
-    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
-    currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
+    return chasisSpeedRotationPID.runController(currentAngleError, errD, 1.0f); //calculate dt how?????
+    // // P
+    // float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
+    // currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
 
-    // D
-    float currentRotationPidD = errD * AUTOROTATION_PID_KD;
+    // // D
+    // float currentRotationPidD = errD * AUTOROTATION_PID_KD;
 
-    currentRotationPidD =
-        limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
+    // currentRotationPidD =
+    //     limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
 
-    float wheelRotationSpeed = limitVal(
-        currRotationPidP + currentRotationPidD,
-        -AUTOROTATION_PID_MAX_OUTPUT,
-        AUTOROTATION_PID_MAX_OUTPUT);
+    // float wheelRotationSpeed = limitVal(
+    //     currRotationPidP + currentRotationPidD,
+    //     -AUTOROTATION_PID_MAX_OUTPUT,
+    //     AUTOROTATION_PID_MAX_OUTPUT);
 
-    return wheelRotationSpeed;
+    // return wheelRotationSpeed;
 }
 
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
@@ -94,29 +103,34 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r) { //TO IMPLEMENT!!!!
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+{
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     for (int i = 0; i < getNumChassisWheels(); i++)
-        {
-            modm::Pair<float, float> desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(rotationTranslationGain* x, rotationTranslationGain * y, r);
-            wheels[i].executeWheelVelocity(desiredWheelVel.first, desiredWheelVel.second);
-        }
+    {
+        modm::Pair<float, float> desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
+            rotationTranslationGain * x,
+            rotationTranslationGain * y,
+            r);
+        wheels[i].executeWheelVelocity(desiredWheelVel.first, desiredWheelVel.second);
+    }
 }
 
-void ChassisSubsystem::initialize() {
+void ChassisSubsystem::initialize()
+{
     for (int i = 0; i < getNumChassisWheels(); i++)
-        {
-            wheels[i].initialize();
-        }
+    {
+        wheels[i].initialize();
+    }
 }
 
-void ChassisSubsystem::refresh() {
+void ChassisSubsystem::refresh()
+{
     for (int i = 0; i < getNumChassisWheels(); i++)
-        {
-            wheels[i].refresh();
-        }
+    {
+        wheels[i].refresh();
+    }
 }
-
 
 }  // namespace chassis
 

@@ -113,16 +113,14 @@ public:
 
     void refresh();
 
-    void refreshSafeDisconnect()
-    {
-        setZeroRPM();
-    }
+    void refreshSafeDisconnect() { setZeroRPM(); }
 
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
      */
-    inline void setZeroRPM() {
+    inline void setZeroRPM()
+    {
         for (int i = 0; i < getNumChassisWheels(); i++)
         {
             wheels[i].executeWheelVelocity(0.0, 0.0);
@@ -182,6 +180,8 @@ public:
     std::vector<Wheel>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
+
+    tap::algorithms::SmoothPid chasisSpeedRotationPID;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
