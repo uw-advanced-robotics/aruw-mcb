@@ -37,8 +37,12 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
+    float diameter;
+    float gearRatio;
+    float motorGearRatio;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
+    float azimuthZeroOffset;
 };
 
 class Wheel
@@ -64,7 +68,7 @@ public:
     virtual modm::Pair<float, float> calculateDesiredWheelVelocity(
         float vx,
         float vy,
-        float vr) = 0;
+        float vr);
 
     /**
      * Updates the desired wheel RPM based on passed in x and y components of desired
@@ -74,6 +78,16 @@ public:
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
 
+    inline float Wheel::mpsToRpm(float mps) const
+    {
+        return (mps / (config.diameter * M_PI)) / config.motorGearRatio * 60.0f / config.gearRatio;
+    }
+
+    inline float Wheel::rpmToMps(float rpm) const
+    {
+        return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
+    }
+
 private:
     // Motor that drives the wheel
     Motor& motor;
@@ -81,6 +95,19 @@ private:
     SmoothPid velocityPid;
     // Whether or not the wheel is driven
     WheelConfig config;
+
+    virtual void initialize();
+
+    virtual void refresh();
+
+    virtual void setZeroRPM();
+
+    virtual bool allMotorsOnline() const;
+
+    virtual float getDriveVelocity() const;
+
+    virtual float getDriveRPM() const;
+
 
 };  // class Wheel
 }  // namespace chassis
