@@ -36,7 +36,7 @@ namespace aruwsrc::control::turret
  * All angles computed using a right hand coordinate system. In other words, yaw is a value from
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from above.
  */
-class YawTurretSubsystem final : public tap::control::Subsystem
+class YawTurretSubsystem : public tap::control::Subsystem
 {
 public:
     YawTurretSubsystem(
@@ -47,6 +47,8 @@ public:
     void refresh();
 
     void initialize();
+
+    mockable inline bool isOnline() const { return yawMotor.isOnline(); };
 
     float getChassisYaw() const;
 

@@ -42,6 +42,7 @@
 #include "vision_coprocessor_mock.hpp"
 #include "x_axis_subsystem_mock.hpp"
 #include "x_drive_chassis_subsystem_mock.hpp"
+#include "yaw_turret_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
 // so in a source file allows for faster compilation than defining constructors
@@ -222,6 +223,13 @@ TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
+
+YawTurretSubsystemMock::YawTurretSubsystemMock(tap::Drivers *drivers)
+    : YawTurretSubsystem(*drivers, m, MOTOR_CONFIG)
+{
+}
+YawTurretSubsystemMock::~YawTurretSubsystemMock() {}
+
 
 RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
     : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
