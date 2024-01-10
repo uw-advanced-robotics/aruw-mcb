@@ -26,6 +26,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruw-mcb-project/src/aruwsrc/control/homeable-subsystem/homeable_subsystem_interface.hpp"
+
 namespace aruwsrc::robot::dart
 {
 /**
