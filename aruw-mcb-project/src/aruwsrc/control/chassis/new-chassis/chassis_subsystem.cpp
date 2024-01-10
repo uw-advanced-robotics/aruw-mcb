@@ -21,9 +21,9 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
-#include "tap/architecture/clock.hpp"
 
 using namespace tap::algorithms;
 
