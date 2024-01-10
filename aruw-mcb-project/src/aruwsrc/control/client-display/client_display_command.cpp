@@ -83,12 +83,13 @@ ClientDisplayCommand::ClientDisplayCommand(
 
 void ClientDisplayCommand::initialize()
 {
-    // We cannot reset the thread from here because there might be locked 
+    // We cannot reset the thread from here because there might be locked
     // resources that we need to finish first.
     this->restarting = true;
 }
 
-void ClientDisplayCommand::restartHud() {
+void ClientDisplayCommand::restartHud()
+{
     HudIndicator::resetGraphicNameGenerator();
     booleanHudIndicators.initialize();
     chassisOrientationIndicator.initialize();
@@ -105,7 +106,7 @@ void ClientDisplayCommand::execute() { run(); }
 bool ClientDisplayCommand::run()
 {
     // The thread has exited the loop, meaning that there are no locked resources
-    if (!this->isRunning()) 
+    if (!this->isRunning())
     {
         // Restart the thread
         restart();
@@ -133,7 +134,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }
-    // Breaking out of the loop successfully calls this method, 
+    // Breaking out of the loop successfully calls this method,
     // allowing us to know that all execution is over.
     PT_END();
 }
