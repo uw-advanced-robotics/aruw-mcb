@@ -79,7 +79,7 @@ private:
     Motor& motor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
-    // Whether or not the wheel is driven
+    // config for the wheel PID controller
     WheelConfig config;
 
 };  // class Wheel

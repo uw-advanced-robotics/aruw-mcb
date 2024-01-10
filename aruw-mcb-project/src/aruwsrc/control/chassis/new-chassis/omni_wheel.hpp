@@ -32,11 +32,20 @@ public:
     /* Creates an omni wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    OmniWheel(Motor& driveMotor, WheelConfig& config);
+    OmniWheel(Motor& driveMotor, WheelConfig& config, SmoothPidConfig& wheelPIDConfig);
 
     const double WHEEL_RELATIVE_ROLLER_ANGLE = M_PI_2;
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
-    
+private:
+    // Motor that drives the wheel
+    tap::motor::DjiMotor& motor;
+    // PID used to control the driving motor
+    tap::algorithms::SmoothPid velocityPid;
+    // config for the wheel PID controller
+    WheelConfig config;
+    //matrices 1 and 2 in equation on Swerve! Notion
+    tap::algorithms::CMSISMat<2, 2> mat1;
+    tap::algorithms::CMSISMat<2, 2> mat2;
 };  // class OmniWheel
 }  // namespace chassis
 }  // namespace aruwsrc

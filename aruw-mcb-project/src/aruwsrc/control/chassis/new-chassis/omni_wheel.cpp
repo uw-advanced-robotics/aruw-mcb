@@ -23,8 +23,19 @@ namespace aruwsrc
 {
 namespace chassis
 {
- OmniWheel::OmniWheel(Motor& driveMotor, WheelConfig& config)
- : Wheel(driveMotor, config){}
+ OmniWheel::OmniWheel(Motor& driveMotor, WheelConfig& config, SmoothPidConfig& wheelPIDConfig)
+ : Wheel(driveMotor, config),
+ motor(driveMotor),
+config(config),
+velocityPid(SmoothPid(wheelPIDConfig))
+{
+        mat1 = tap::algorithms::CMSISMat<2, 2>({     0.0,      1.0,
+                                                config.diameter/2, 0.0});
+        mat1 = mat1.inverse();
+        mat2 = tap::algorithms::CMSISMat<2, 2>({0.0, -1.0,
+                                                1.0, 0.0});
+        mat2 = mat2.inverse();
+}
 
  modm::Pair<float, float> calculateDesiredWheelVelocity(
         float vx,
