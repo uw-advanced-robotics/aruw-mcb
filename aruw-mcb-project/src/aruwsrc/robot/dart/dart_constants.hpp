@@ -21,33 +21,64 @@
 #define DART_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
-
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::control::turret
 {
-static constexpr tap::motor::MotorId PULL_MOTOR_ID =
-    tap::motor::MOTOR6;  // TODO: update correct motor
-static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
-static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+/** Motor IDs */
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
-static constexpr float LOADER_HOOKING_POSITION = 0.0f;
+static constexpr tap::motor::MotorId LAUNCHER_PULL_MOTOR_1_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId LAUNCHER_PULL_MOTOR_2_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LAUNCHER_ENCODER_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float TOP_LOADER_POSITION = 0.0f;
-static constexpr float TOP_LOADER_HOOKING_POSITION = 0.0f;
+static constexpr tap::gpio::Digital::OutputPin LAUNCHER_ACTUATOR_RELEASE_PIN = tap::gpio::Digital::OutputPin::G;
+static constexpr tap::gpio::Digital::OutputPin LAUNCHER_ACTUATOR_LOCK_PIN = tap::gpio::Digital::OutputPin::H;
 
-static constexpr float MIDDLE_LOADER_POSITION = 0.0f;
-static constexpr float MIDDLE_LOADER_HOOKING_POSITION = 0.0f;
+static constexpr tap::motor::MotorId PIVOT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId PIVOT_DEAD_MOTOR_ID = tap::motor::MOTOR4;
 
-static constexpr float BOTTOM_LOADER_POSITION = 0.0f;
-static constexpr float BOTTOM_LOADER_HOOKING_POSITION = 0.0f;
+static constexpr tap::motor::MotorId LOADER_TOP_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId LOADER_MIDDLE_MOTOR_ID = tap::motor::MOTOR8;
+static constexpr tap::motor::MotorId LOADER_BOTTOM_MOTOR_ID = tap::motor::MOTOR7;
 
-static constexpr float PIVOT_OUTPOST_POSITION = 0.0f;
-static constexpr float PIVOT_BASE_POSITION = 0.0f;
+/** Kinematic Constants */
 
+static constexpr int64_t LAUNCHER_ENCODER_MOTOR_AT_TOP = 0; ///< Encoder val at which the cart is at the top of the launcher
+static constexpr uint64_t LAUNCHER_ENCODER_MOTOR_AT_TOP_TOLERANCE = 5;
+static constexpr int16_t LAUNCHER_PULL_MOTORS_SLOW_RELEASE_SPEED = 8000;
+
+static constexpr uint16_t HOMING_SPEED = 250.0f;
+
+/** PID Configs */
+
+static constexpr tap::algorithms::SmoothPidConfig pivotPID = {
+    .kp = 10.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 5000.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig launcherPullPID = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig loaderPID = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 }  // namespace aruwsrc::control::turret
 #endif
