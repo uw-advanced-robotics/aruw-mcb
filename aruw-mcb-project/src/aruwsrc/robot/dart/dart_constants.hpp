@@ -80,5 +80,9 @@ static constexpr tap::algorithms::SmoothPidConfig loaderPID = {
     .errorDerivativeFloor = 0.0f,
 };
 
+// TODO: change these values
+static constexpr int16_t maxPivotStallRPM = 0;
+static constexpr int16_t minPivotStallTorque = 0;
+
 }  // namespace aruwsrc::control::turret
 #endif

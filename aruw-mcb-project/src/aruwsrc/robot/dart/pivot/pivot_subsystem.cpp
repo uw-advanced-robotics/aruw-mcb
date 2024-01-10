@@ -25,8 +25,10 @@ PivotSubsystem::PivotSubsystem(
     tap::Drivers* drivers,
     tap::motor::DjiMotor* pivotMotor,
     tap::motor::DjiMotor* pivotDeadMotor,
-    const tap::algorithms::SmoothPidConfig& pidParams)
-    : tap::control::Subsystem(drivers),
+    const tap::algorithms::SmoothPidConfig& pidParams,
+    aruwsrc::control::MotorStallTrigger& trigger1,
+    aruwsrc::control::MotorStallTrigger& trigger2)
+    : aruwsrc::control::TwoSidedBoundedSubsystemInterface(drivers, trigger1, trigger2),
       drivers(drivers),
       pivotMotor(pivotMotor),
       pivotDeadMotor(pivotDeadMotor),
@@ -71,5 +73,8 @@ void PivotSubsystem::setSetpoint(uint64_t setpoint)
 }
 
 void PivotSubsystem::stop() { pivotMotor->setDesiredOutput(0); }
+
+/** Homing functions */
+
 
 }  // namespace aruwsrc::robot::dart

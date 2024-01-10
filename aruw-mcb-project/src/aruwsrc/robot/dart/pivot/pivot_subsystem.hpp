@@ -26,14 +26,15 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruw-mcb-project/src/aruwsrc/control/homeable-subsystem/homeable_subsystem_interface.hpp"
+#include "aruwsrc/control/bounded-subsystem/two_sided_bounded_subsystem_interface.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
 
 namespace aruwsrc::robot::dart
 {
 /**
  * Subsystems whose primary use to control the pivot motor of the dart launcher.
  */
-class PivotSubsystem : public tap::control::Subsystem
+class PivotSubsystem : public aruwsrc::control::TwoSidedBoundedSubsystemInterface
 {
 public:
     /**
@@ -45,7 +46,9 @@ public:
         tap::Drivers* drivers,
         tap::motor::DjiMotor* pivotMotor,
         tap::motor::DjiMotor* pivotDeadMotor,
-        const tap::algorithms::SmoothPidConfig& pidParams);
+        const tap::algorithms::SmoothPidConfig& pidParams,
+        aruwsrc::control::MotorStallTrigger& trigger1,
+        aruwsrc::control::MotorStallTrigger& trigger2);
 
     void initialize() override;
 
@@ -77,6 +80,26 @@ public:
 
     static constexpr uint16_t TURN_SPEED = 1000;
 
+    /**************** Inherited Homing functions ********************/
+
+    bool homedAndBounded() const override;
+
+    uint64_t getUpperBound() const override;
+
+    uint64_t getLowerBound() const override;
+
+    void stopDuringHoming() override;
+
+    void setLowerBound(uint64_t encoderPosition) override;
+
+    void setUpperBound(uint64_t encoderPosition) override;
+
+    void setHome(uint64_t encoderPosition) override;
+
+    void moveTowardLowerBound() override;
+
+    void moveTowardUpperBound() override;
+
 private:
     tap::Drivers* drivers;
 
@@ -85,6 +108,9 @@ private:
 
     tap::algorithms::SmoothPid pid;
     const tap::algorithms::SmoothPidConfig& pidParams;
+
+    aruwsrc::control::MotorStallTrigger& trigger1;
+    aruwsrc::control::MotorStallTrigger& trigger2;
 
     uint32_t prevTime = 0;
     bool isUsingPID = false;
