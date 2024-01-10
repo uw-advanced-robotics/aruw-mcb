@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
+#include "tap\architecture\clock.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 
 using namespace tap::algorithms;
@@ -45,7 +46,7 @@ ChassisSubsystem::ChassisSubsystem(
         0.0f,
         AUTOROTATION_PID_KD,
         0.0f,
-        AUTOROTATION_PID_MAX_OUTPUT, //also needs a whole bunch of kalman stuff, deadzone, and floor but idk how to do
+        AUTOROTATION_PID_MAX_OUTPUT, //Able to take a lot of kalman stuff, deadzone, and floor but might not need
       }),
       chassisPowerLimiter(
           drivers,
@@ -58,23 +59,10 @@ ChassisSubsystem::ChassisSubsystem(
 
 float ChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
 {
-    return chasisSpeedRotationPID.runController(currentAngleError, errD, 1.0f); //calculate dt how?????
-    // // P
-    // float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
-    // currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
-
-    // // D
-    // float currentRotationPidD = errD * AUTOROTATION_PID_KD;
-
-    // currentRotationPidD =
-    //     limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
-
-    // float wheelRotationSpeed = limitVal(
-    //     currRotationPidP + currentRotationPidD,
-    //     -AUTOROTATION_PID_MAX_OUTPUT,
-    //     AUTOROTATION_PID_MAX_OUTPUT);
-
-    // return wheelRotationSpeed;
+    double currTime = tap::arch::clock::getTimeMicroseconds();
+    double dt = currTime - prevTime;
+    prevTime = currTime;
+    return chasisSpeedRotationPID.runController(currentAngleError, errD, dt);
 }
 
 float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotationDesiredWheelspeed)
