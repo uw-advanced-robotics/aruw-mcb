@@ -42,7 +42,6 @@ struct WheelConfig
     float motorGearRatio;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
-    float azimuthZeroOffset;
 };
 
 class Wheel
