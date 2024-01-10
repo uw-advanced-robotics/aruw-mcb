@@ -20,10 +20,10 @@
 #include "chassis_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 #include "tap\architecture\clock.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
 
 using namespace tap::algorithms;
 
@@ -42,11 +42,12 @@ ChassisSubsystem::ChassisSubsystem(
       wheels(*wheels),
       currentSensor(currentSensor),
       chasisSpeedRotationPID({
-        AUTOROTATION_PID_KP,
-        0.0f,
-        AUTOROTATION_PID_KD,
-        0.0f,
-        AUTOROTATION_PID_MAX_OUTPUT, //Able to take a lot of kalman stuff, deadzone, and floor but might not need
+          AUTOROTATION_PID_KP,
+          0.0f,
+          AUTOROTATION_PID_KD,
+          0.0f,
+          AUTOROTATION_PID_MAX_OUTPUT,  // Able to take a lot of kalman stuff, deadzone, and floor
+                                        // but might not need
       }),
       chassisPowerLimiter(
           drivers,
