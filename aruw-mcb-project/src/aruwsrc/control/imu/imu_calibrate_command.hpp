@@ -163,6 +163,8 @@ private:
      * Timeout used to determine if we should give up on calibration.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
+
+    int r_value = 4000;
 };
 }  // namespace aruwsrc::control::imu
 

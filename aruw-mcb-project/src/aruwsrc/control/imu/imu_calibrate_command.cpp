@@ -153,6 +153,11 @@ void ImuCalibrateCommand::execute()
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
+            if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATING_MAGNETOMETER)
+            {
+                chassis->setDesiredOutput(0, 0, r_value);
+            }
+
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
             {
                 // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
@@ -161,11 +166,15 @@ void ImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+
+                chassis->setDesiredOutput(0, 0, 0);
             }
 
             break;
 
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            chassis->setDesiredOutput(0, 0, 0);
+
             break;
     }
 
@@ -193,6 +202,7 @@ void ImuCalibrateCommand::end(bool)
         config.turret->yawMotor.setMotorOutput(0);
         config.turret->pitchMotor.setMotorOutput(0);
     }
+    chassis->setDesiredOutput(0, 0, 0);
 }
 
 bool ImuCalibrateCommand::isFinished() const

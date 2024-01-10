@@ -27,9 +27,10 @@
 #include <cstdint>
 
 #include "tap/algorithms/MahonyAHRS.h"
-#include "tap/algorithms/MadgwickAHRS.h"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/ist8310/ist8310_config.hpp"
+#include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
@@ -171,7 +172,9 @@ public:
             errorState |= 1 << static_cast<uint8_t>(ImuState::IMU_NOT_CALIBRATED);
             return reading;
         }
-        else if (imuState == ImuState::IMU_CALIBRATING)
+        else if (
+            imuState == ImuState::IMU_CALIBRATING ||
+            imuState == ImuState::IMU_CALIBRATING_MAGNETOMETER)
         {
             errorState |= 1 << static_cast<uint8_t>(ImuState::IMU_CALIBRATING);
             return 0.0f;
@@ -247,6 +250,40 @@ public:
     }
 
     /**
+     * Returns the magnetometer reading in the x direction, in mT.
+     * Note: This is not the x-reading off the sensor, but the y-reading off the sensor as to align
+     * with the gyroscope and accelerometer axes.
+     */
+    inline float getMx() mockable
+    {
+        return validateReading(
+            (raw.magnetometer.y - raw.magnetometerOffset.y) /
+            (calibrationMaxReading.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
+    }
+
+    /**
+     * Returns the magnetometer reading in the y direction, in mT
+     * Note: This is not the y-reading off the sensor, but the x-reading off the sensor as to align
+     * with the gyroscope and accelerometer axes.
+     */
+    inline float getMy() mockable
+    {
+        return validateReading(
+            (raw.magnetometer.x - raw.magnetometerOffset.x) /
+            (calibrationMaxReading.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
+    }
+
+    /**
+     * Returns the magnetometer reading in the z direction, in mT
+     */
+    inline float getMz() mockable
+    {
+        return validateReading(
+            (raw.magnetometer.z - raw.magnetometerOffset.z) /
+            (calibrationMaxReading.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
+    }
+
+    /**
      * Returns the temperature of the imu in degrees C.
      *
      * @see page 33 of this datasheet:
@@ -261,9 +298,7 @@ public:
     /**
      * Returns yaw angle. in degrees.
      */
-    inline float getYaw() final_mockable { 
-        balonyAlgorithm.getYaw();
-        return validateReading(mahonyAlgorithm.getYaw()); }
+    inline float getYaw() final_mockable { return validateReading(mahonyAlgorithm.getYaw()); }
 
     /**
      * Returns pitch angle in degrees.
@@ -274,14 +309,6 @@ public:
      * Returns roll angle in degrees.
      */
     inline float getRoll() final_mockable { return validateReading(mahonyAlgorithm.getRoll()); }
-
-    /**
-     * Returns the magnetometer head in the xy plane.
-     */
-    inline float getMagneticHeading() mockable
-    {
-        return validateReading(modm::toDegree(atan2f(raw.magnetometer.y, raw.magnetometer.x)));
-    }
 
     mockable inline uint32_t getPrevIMUDataReceivedTime() const { return prevIMUDataReceivedTime; }
 
@@ -351,8 +378,6 @@ private:
     RawData raw;
 
     Mahony mahonyAlgorithm;
-    Mahony balonyAlgorithm;
-    Madgwick madgwickAlgorithm;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -377,7 +402,7 @@ private:
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
-    float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 4000;
+    static constexpr float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 2500;
 
     // Functions for interacting with hardware directly.
 
@@ -424,45 +449,9 @@ private:
 
     void writeIST8310Register(uint8_t reg, uint8_t data);
 
-    inline void normalizeMagnetometerReading()
-    {
+    bool requestCalibrationFlagDebug = false;
 
-        normalizedMagnetometer = raw.magnetometer - raw.magnetometerOffset;
-
-        if (raw.magnetometerOffset.x != 0)
-        {
-            normalizedMagnetometer.x /= raw.magnetometerOffset.x;
-        } else {
-            normalizedMagnetometer.x /= calibrationMaxReading.x - raw.magnetometerOffset.x;
-        }
-
-        if (raw.magnetometerOffset.y != 0)
-        {
-            normalizedMagnetometer.y /= raw.magnetometerOffset.y;
-        } else {
-            normalizedMagnetometer.y /= calibrationMaxReading.y - raw.magnetometerOffset.y;
-        }
-
-        if (raw.magnetometerOffset.z != 0)
-        {
-            normalizedMagnetometer.z /= raw.magnetometerOffset.z;
-        } else {
-            normalizedMagnetometer.z /= calibrationMaxReading.z - raw.magnetometerOffset.z;
-        }
-    }
-
-    float gravityMagnitude = 0.0f;
-    bool reset = 0;
-
-    float mahonyYaw = 0.0f;
-    float balonyYaw = 0.0f;
-    float madgwickYaw = 0.0f;
-
-    int magDelay = 5000;
-    tap::arch::MicroTimeout readRegistersMagTimeout;
-    int balonyUpdateCount = 0;
-    float offsetForMahony = 0.0f;
-
+    float heading;
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
