@@ -132,11 +132,14 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
 /* define command mappings --------------------------------------------------*/
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
+void initializeSubsystems() { chassis.initialize(); }
 
 // note: some stubs commented out because CI screams about unused parameters
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(Drivers *drivers) { drivers = drivers; }
+void registerSentrySubsystems(Drivers *drivers)
+{
+    drivers->commandScheduler.registerSubsystem(&chassis);
+}
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *) { drivers = drivers; }
