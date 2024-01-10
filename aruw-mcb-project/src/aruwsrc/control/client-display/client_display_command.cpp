@@ -83,7 +83,9 @@ ClientDisplayCommand::ClientDisplayCommand(
 
 void ClientDisplayCommand::initialize()
 {
-    this->restarting = true; // We cannot reset the thread from here because there might be locked resources that we need to finish first
+    // We cannot reset the thread from here because there might be locked 
+    // resources that we need to finish first.
+    this->restarting = true;
 }
 
 void ClientDisplayCommand::restartHud() {
@@ -94,16 +96,21 @@ void ClientDisplayCommand::restartHud() {
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
 
-    this->restarting = false; // We can successfully restart the thread
+    // We can successfully restart the thread
+    this->restarting = false;
 }
 
 void ClientDisplayCommand::execute() { run(); }
 
 bool ClientDisplayCommand::run()
 {
-    if (!this->isRunning()) { // The thread has exited the loop, meaning that there are no locked resources
-        restart(); // Restart the thread
-        this->restartHud(); // Reset the HUD elements
+    // The thread has exited the loop, meaning that there are no locked resources
+    if (!this->isRunning()) 
+    {
+        // Restart the thread
+        restart();
+        // Reset the HUD elements
+        this->restartHud();
     }
 
     PT_BEGIN();
@@ -116,7 +123,8 @@ bool ClientDisplayCommand::run()
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
-    while (!this->restarting) // If we try to restart the hud, break out of the loop
+    // If we try to restart the hud, break out of the loop
+    while (!this->restarting)
     {
         PT_CALL(booleanHudIndicators.update());
         PT_CALL(chassisOrientationIndicator.update());
@@ -125,7 +133,9 @@ bool ClientDisplayCommand::run()
         PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }
-    PT_END(); // Breaking out of the loop successfully calls this method, allowing us to know that all execution is over.
+    // Breaking out of the loop successfully calls this method, 
+    // allowing us to know that all execution is over.
+    PT_END();
 }
 
 }  // namespace aruwsrc::control::client_display
