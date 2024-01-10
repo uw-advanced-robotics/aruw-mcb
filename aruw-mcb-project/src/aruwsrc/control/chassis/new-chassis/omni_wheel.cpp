@@ -31,7 +31,7 @@ namespace chassis
         float vy,
         float vr) {
 
-        }
+}
 
 void executeWheelVelocity(float vx, float vy) {
     
