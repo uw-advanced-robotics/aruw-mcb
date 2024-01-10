@@ -48,7 +48,7 @@ protected:
         ON_CALL(turretMinorRight.yawMotor, isOnline).WillByDefault(Return(true));
     }
 };
-
+ 
 
 //  !(turretMCB->isConnected()); issue, figure out how to fix. turretMCB?
 TEST_F(SentryChassisWorldYawObserverTest, isOnline){
