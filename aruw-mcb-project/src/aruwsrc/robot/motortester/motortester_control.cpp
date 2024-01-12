@@ -44,7 +44,7 @@ namespace motortester_control
 {
 
 tap::algorithms::SmoothPidConfig m2006PidConfig =
-    {.kp = 3000.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 tap::algorithms::SmoothPidConfig rm3508PidConfig =
     {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
