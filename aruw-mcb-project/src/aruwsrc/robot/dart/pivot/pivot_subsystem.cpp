@@ -28,12 +28,14 @@ PivotSubsystem::PivotSubsystem(
     const tap::algorithms::SmoothPidConfig& pidParams,
     aruwsrc::control::MotorStallTrigger& trigger1,
     aruwsrc::control::MotorStallTrigger& trigger2)
-    : aruwsrc::control::TwoSidedBoundedSubsystemInterface(drivers, trigger1, trigger2),
-      drivers(drivers),
+    : drivers(drivers),
       pivotMotor(pivotMotor),
       pivotDeadMotor(pivotDeadMotor),
       pid(pidParams),
-      pidParams(pidParams)
+      pidParams(pidParams),
+      trigger1(trigger1),
+      trigger2(trigger2),
+      aruwsrc::control::TwoSidedBoundedSubsystemInterface(drivers, trigger1, trigger2)
 {
 }
 
