@@ -46,6 +46,7 @@ namespace aruwsrc::control::turret::sentry
 class TurretMajorSentryControlCommand : public tap::control::Command
 {
 public:
+    float lastYawSetPoint = 0.0f;
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] turretMajorSubsystem Pointer to the sentry turret to control.

@@ -181,6 +181,8 @@ float SentryControlOperatorInterface::getTurretMajorYawVelocity()
 {
     if (!isTurretControlMode()) return DEFAULT_TURRET_MAJOR_VELOCITY;
 
+    lastWheelVal = drivers->remote.getChannel(Remote::Channel::WHEEL);
+
     return drivers->remote.getChannel(Remote::Channel::WHEEL);
 }
 

@@ -86,7 +86,11 @@ HoldCommandMapping manualRightSwitchDown(
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { turretMajor.initialize(); }
+void initializeSubsystems()
+{
+    turretMajor.initialize();
+    majorController.initialize();  // usually handled by imucalibrate command
+}
 
 // note: some stubs commented out because CI screams about unused parameters
 /* register subsystems here -------------------------------------------------*/
@@ -104,7 +108,7 @@ void startSentryCommands(Drivers *drivers) { drivers = drivers; }
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&autoRightSwitchDown);
+    drivers->commandMapper.addMap(&manualRightSwitchDown);
 }
 }  // namespace sentry_control
 
@@ -117,6 +121,7 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::setDefaultSentryCommands(drivers);
     sentry_control::startSentryCommands(drivers);
     sentry_control::registerSentryIoMappings(drivers);
+    ;
 }
 }  // namespace aruwsrc::sentry
 
