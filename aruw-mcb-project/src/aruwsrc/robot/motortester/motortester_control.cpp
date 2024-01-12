@@ -44,10 +44,13 @@ namespace motortester_control
 {
 
 tap::algorithms::SmoothPidConfig m2006PidConfig =
-    {.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+    {.kp = 3000.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-tap::algorithms::SmoothPidConfig m3508PidConfig =
+tap::algorithms::SmoothPidConfig rm3508PidConfig =
     {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+
+tap::algorithms::SmoothPidConfig gm6020PidConfig =
+    {.kp = 1000.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 // unfinished 2006
 tap::motor::DjiMotor leftChannelMotor(
@@ -65,13 +68,27 @@ tap::motor::DjiMotor rightChannelMotor(
     false,
     "RMotor");
 
-MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, m2006PidConfig, 1.0f);
+// 6020
+tap::motor::DjiMotor wheelChannelMotor(
+    drivers(),
+    tap::motor::MOTOR7,          // id 3
+    tap::can::CanBus::CAN_BUS1,  // bus 1
+    false,
+    "WMotor");
+
+MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, m2006PidConfig, (1.0f / 36.0f));
 
 MotorSubsystem rightMotorSubsystem(
     drivers(),
     rightChannelMotor,
-    m3508PidConfig,
+    rm3508PidConfig,
     (187.0f / 3591.0f));  // internal gearbox ratio
+
+MotorSubsystem wheelMotorSubsystem(
+    drivers(),
+    wheelChannelMotor,
+    gm6020PidConfig,
+    (1.0f));  // internal gearbox ratio
 
 // Commands
 
@@ -83,13 +100,19 @@ StickRpmCommand leftManual(
     500.0f);
 ConstantRpmCommand leftSwitchDownRpm(&leftMotorSubsystem, 187.5f);
 
-ConstantRpmCommand rightSwitchUpRpm(&rightMotorSubsystem, 30.0f, 32.0f / 110.0f);
+ConstantRpmCommand rightSwitchUpRpm(&rightMotorSubsystem, 180.0f);  // 32.0f / 110.0f
 StickRpmCommand rightManual(
     &rightMotorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
     482.0f);
-ConstantRpmCommand rightSwitchDownRpm(&rightMotorSubsystem, 15.0f, 32.0f / 152.0f);
+ConstantRpmCommand rightSwitchDownRpm(&rightMotorSubsystem, 150.0f);  // 32.0f / 152.0f
+
+StickRpmCommand wheelManual(
+    &wheelMotorSubsystem,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::WHEEL,
+    320.0f);
 
 // command mappings
 
@@ -139,24 +162,29 @@ tap::control::HoldCommandMapping rightSwitchDown(
 
 void initializeSubsystems()
 {
-    // leftMotorSubsystem.initialize();
+    leftMotorSubsystem.initialize();
     rightMotorSubsystem.initialize();
+    wheelMotorSubsystem.initialize();
 }
 
 void registerSubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
 }
 
 void registerIoMappings(Drivers *drivers)
 {
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchMid);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchMid);
+
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchMid);
+
+    wheelMotorSubsystem.setDefaultCommand(&wheelManual);
 }
 
 }  // namespace motortester_control
