@@ -23,6 +23,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control;

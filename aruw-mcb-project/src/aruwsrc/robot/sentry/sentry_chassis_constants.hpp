@@ -30,7 +30,7 @@
 
 namespace aruwsrc::chassis
 {
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
+// static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
 
 /**
  * "Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -39,13 +39,14 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
  * high values."
  * TODO: this may have actually been used in comp...? get actual values
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
+// static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1,
+// 8'000}};
 
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
+// static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
+//     CHASSIS_POWER_TO_MAX_SPEED_LUT,
+//     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
-}  // namespace aruwsrc::chassis
+// }  // namespace aruwsrc::chassis
 
 namespace aruwsrc::sentry::chassis
 {
