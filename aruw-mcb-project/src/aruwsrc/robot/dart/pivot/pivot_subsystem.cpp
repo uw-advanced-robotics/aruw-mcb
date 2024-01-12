@@ -75,6 +75,38 @@ void PivotSubsystem::setSetpoint(uint64_t setpoint)
 void PivotSubsystem::stop() { pivotMotor->setDesiredOutput(0); }
 
 /** Homing functions */
+bool homedAndBounded() {
+    // TODO: what do here?
+}
 
+uint64_t PivotSubsystem::getUpperBound() const {
+    return upperBound;
+}
+
+uint64_t PivotSubsystem::getLowerBound() const {
+    return lowerBound;
+}
+
+void PivotSubsystem::stopDuringHoming() { stop(); }
+
+void PivotSubsystem::setLowerBound(uint64_t encoderPosition) {
+    lowerBound = encoderPosition;
+}
+
+void PivotSubsystem::setUpperBound(uint64_t encoderPosition) {
+    lowerBound = encoderPosition;
+}
+
+void PivotSubsystem::setHome(uint64_t encoderPosition) {
+    home = encoderPosition;
+}
+
+void PivotSubsystem::moveTowardLowerBound() {
+    pivotMotor->setDesiredOutput(0); // TODO: change value
+}
+
+void PivotSubsystem::moveTowardUpperBound() {
+    pivotMotor->setDesiredOutput(0); // TODO: change value
+}
 
 }  // namespace aruwsrc::robot::dart

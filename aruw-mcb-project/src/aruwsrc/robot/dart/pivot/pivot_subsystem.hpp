@@ -115,6 +115,11 @@ private:
     uint32_t prevTime = 0;
     bool isUsingPID = false;
     uint64_t setpoint = 0;
+
+    /** Homing Fields **/
+    uint64_t lowerBound = 0;
+    uint64_t upperBound = 0;
+    uint64_t home = 0;
 };
 }  // namespace aruwsrc::robot::dart
 
