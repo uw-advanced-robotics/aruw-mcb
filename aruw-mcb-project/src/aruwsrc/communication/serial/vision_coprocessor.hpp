@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,8 +29,10 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -257,6 +259,37 @@ public:
         turretOrientationInterfaces[turretID] = turretOrientationInterface;
     }
 
+    /**
+     * Use a standard and hero transormer to compute odometry data & send to vision
+     *
+     * @param[in] transformer The transormer that provides turret information to the
+     * vision coprocessor
+     */
+    inline void attachStandardAndHerotransformer(
+        aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transformer)
+    {
+        // #if defined(ALL_STADARDS) || defined(TARGET_HERO_CYCLONE)
+        this->standardAndHeroTransformer = &transformer;
+        // #else
+        // #error "don't attach this transormer for anything other than standard or hero"
+        // #endif
+    }
+
+    /**
+     * Use a sentry transormer to compute odometry data & send to vision
+     *
+     * @param[in] transformer The transormer that provides turret information to the
+     * vision coprocessor
+     */
+    inline void attachSentryTransormer(aruwsrc::sentry::SentryTransforms& transformer)
+    {
+        // #if defined(TARGET_SENTRY_BEEHIVE)
+        this->sentryTransformer = &transformer;
+        // #else
+        // #error "don't attach this transormer for anything other than sentry"
+        // #endif
+    }
+
     mockable void sendShutdownMessage();
 
     mockable void sendRebootMessage();
@@ -325,6 +358,10 @@ private:
 
     aruwsrc::control::turret::TurretOrientationInterface*
         turretOrientationInterfaces[control::turret::NUM_TURRETS];
+
+    aruwsrc::algorithms::transforms::StandardAndHeroTransformer* standardAndHeroTransformer;
+
+    aruwsrc::sentry::SentryTransforms* sentryTransformer;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
