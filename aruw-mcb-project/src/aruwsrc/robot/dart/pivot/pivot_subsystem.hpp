@@ -29,6 +29,7 @@
 #include "aruwsrc/control/bounded-subsystem/two_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
 
+
 namespace aruwsrc::robot::dart
 {
 /**
@@ -41,6 +42,8 @@ public:
      * @param drivers The drivers object.
      * @param pivotMotor The pivot motor.
      * @param pivotDeadMotor The motor on the pivot axis being used for its encoder
+     * @param trigger1 The MotorStallTrigger associated with the (TODO: lower?) limit of the pivot
+     * @param trigger2 The MotorStallTrigger associated with the (TODO: upper?) limit of the pivot
      */
     PivotSubsystem(
         tap::Drivers* drivers,
@@ -109,17 +112,23 @@ private:
     tap::algorithms::SmoothPid pid;
     const tap::algorithms::SmoothPidConfig& pidParams;
 
-    aruwsrc::control::MotorStallTrigger& trigger1;
-    aruwsrc::control::MotorStallTrigger& trigger2;
-
     uint32_t prevTime = 0;
     bool isUsingPID = false;
     uint64_t setpoint = 0;
 
     /** Homing Fields **/
-    uint64_t lowerBound = 0;
-    uint64_t upperBound = 0;
-    uint64_t home = 0;
+    // TODO: rename triggers
+    aruwsrc::control::MotorStallTrigger& trigger1;
+    aruwsrc::control::MotorStallTrigger& trigger2;
+
+    // first bit is if lowerBound is homed, second bit is if upperBound is homed
+    constexpr static uint8_t kLowerBoundHomedMask = 0b01;
+    constexpr static uint8_t kUpperBoundHomedMask = 0b10;
+    uint8_t isHomedVector;
+
+    uint64_t lowerBound;
+    uint64_t upperBound;
+    uint64_t home;
 };
 }  // namespace aruwsrc::robot::dart
 
