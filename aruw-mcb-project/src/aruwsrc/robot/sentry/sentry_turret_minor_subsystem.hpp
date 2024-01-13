@@ -35,9 +35,9 @@ public:
     };
 
     SentryTurretMinorSubsystem(
-        tap::Drivers* drivers,
-        tap::motor::MotorInterface* pitchMotor,
-        tap::motor::MotorInterface* yawMotor,
+        tap::Drivers& drivers,
+        tap::motor::MotorInterface& pitchMotor,
+        tap::motor::MotorInterface& yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
         const aruwsrc::can::TurretMCBCanComm* turretMCB,

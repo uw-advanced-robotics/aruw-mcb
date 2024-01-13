@@ -26,6 +26,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
 
@@ -43,9 +44,6 @@ static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
-
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr float TURRET_CG_X = 8.14f;
 static constexpr float TURRET_CG_Z = 14.45f;
@@ -123,8 +121,13 @@ static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.8f;
 namespace turretLeft
 {
 
-static constexpr uint8_t turretID = 0;
+static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID turretID =
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID::TURRET_ID_ZERO;
+
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -178,8 +181,13 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 namespace turretRight
 {
-static constexpr uint8_t turretID = 1;
+static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID turretID =
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID::TURRET_ID_ONE;
+
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
