@@ -24,7 +24,6 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -62,14 +61,15 @@ tap::motor::DoubleDjiMotor turretMajorYawMotor(
     "Major Yaw Turret 1",
     "Major Yaw Turret 2");
 
-TurretMotor turretMajorYawTurretMotor(&turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
-
 /* define subsystems --------------------------------------------------------*/
-ChassisFrameYawTurretController majorController(
-    turretMajorYawTurretMotor,
-    turretMajor::YAW_POS_PID_CONFIG);
-
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
+
+/* define controllers --------------------------------------------------------*/
+
+// @note: this should be replaced with a world-relative controller, just for manual testing now
+ChassisFrameYawTurretController majorController(
+    turretMajor.getMotor(),
+    turretMajor::chassisFrameController::YAW_POS_PID_CONFIG);
 
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
@@ -89,7 +89,8 @@ HoldCommandMapping manualRightSwitchDown(
 void initializeSubsystems()
 {
     turretMajor.initialize();
-    majorController.initialize();  // usually handled by imucalibrate command
+    majorController
+        .initialize();  // usually handled by imucalibrate command, so need to bring that in here..
 }
 
 // note: some stubs commented out because CI screams about unused parameters
