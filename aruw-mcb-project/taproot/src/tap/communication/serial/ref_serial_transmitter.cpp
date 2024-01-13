@@ -32,7 +32,6 @@
 
 namespace tap::communication::serial
 {
-
 RefSerialTransmitter::RefSerialTransmitter(Drivers* drivers) : drivers(drivers) {}
 
 void RefSerialTransmitter::configGraphicGenerics(
@@ -189,7 +188,7 @@ void RefSerialTransmitter::configCharacterMsg(
  * @param[in] robotId the id of the robot received from the referee system
  *      to get the client_id of.
  * @return the client_id of the robot requested.
- * 
+ *
  * @todo general send() method which acquires semaphore and does uart write?
  */
 static uint16_t getRobotClientID(RefSerialTransmitter::RobotId robotId)
@@ -246,7 +245,7 @@ modm::ResumableResult<void> RefSerialTransmitter::deleteGraphicLayer(
  * header and whether or not the actually send the message. This helper function is needed because
  * the sendGraphic functions all send messages the same way with only minor differences.
  */
-template<typename GRAPHIC>
+template <typename GRAPHIC>
 modm::ResumableResult<void> RefSerialTransmitter::sendGraphic_(
     GRAPHIC* graphicMsg,
     uint16_t messageId,
