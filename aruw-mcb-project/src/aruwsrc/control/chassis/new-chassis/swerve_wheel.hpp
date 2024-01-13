@@ -25,7 +25,7 @@ namespace aruwsrc
 namespace chassis
 {
 
-struct AzimuthConfig
+struct SwerveAzimuthConfig
 {
     float azimuthZeroOffset;
     float azimuthMotorGearing;
@@ -39,7 +39,7 @@ SwerveWheel(
         Motor& driveMotor,
         Motor& azimuthMotor,
         WheelConfig& config,
-        AzimuthConfig& azimuthConfig,
+        SwerveAzimuthConfig& azimuthConfig,
         SmoothPid drivePid,
         SmoothPid azimuthPid);
 modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr) override;
@@ -53,7 +53,7 @@ float getAngularVelocity() const;
 float getAngle() const;
 
 private:
-    AzimuthConfig& azimuthConfig;
+    SwerveAzimuthConfig& azimuthConfig;
     Motor& driveMotor;
     Motor& azimuthMotor;
 
@@ -71,6 +71,7 @@ private:
     // multiple of PI)
     float rotationOffset{0};
 
+    //TODO: use wrappedFloat once merged in 
     inline float wrapAngle(float angle, float denomination)
     {
         return fmod(

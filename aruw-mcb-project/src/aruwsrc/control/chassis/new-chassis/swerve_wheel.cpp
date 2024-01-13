@@ -9,7 +9,7 @@ SwerveWheel::SwerveWheel(
     Motor& driveMotor,
     Motor& azimuthMotor,
     WheelConfig& config,
-    AzimuthConfig& azimuthConfig,
+    SwerveAzimuthConfig& azimuthConfig,
     SmoothPid drivePid,
     SmoothPid azimuthPid)
     : Wheel(driveMotor, config),

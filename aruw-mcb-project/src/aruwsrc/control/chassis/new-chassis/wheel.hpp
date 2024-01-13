@@ -37,9 +37,9 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    float diameter;
-    float gearRatio;
-    float motorGearRatio;
+    float diameter;       // considering shoving these into DjiMotor in the future
+    float gearRatio;      // considering shoving these into DjiMotor in the future
+    float motorGearRatio; // considering shoving these into DjiMotor in the future
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
 };
