@@ -37,36 +37,27 @@ namespace aruwsrc::control
 class BoundedSubsystemInterface : public tap::control::Subsystem
 {
 public:
-    BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+    BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers), lowerBound(0), upperBound(0), home(0) {}
 
     /**
      * Starts the calibration. Sets CalibrationState to CALIBRATING_LOWER_BOUND.
      * The actual calibrating logic occurs in refresh() of the base class.
      */
-    void startCalibrate() { calibrationState = CalibrationState::CALIBRATING_LOWER_BOUND; }
+    virtual void startCalibrate() { calibrationState = CalibrationState::BEGIN_CALIBRATION; }
 
     /**
      * Returns whether or not the home and bounds have been set.
      */
-    virtual bool homedAndBounded() const = 0;
-
-    /**
-     * Returns the upper bound in motor encoder ticks.
-     */
-    virtual uint64_t getUpperBound() const = 0;
-
-    /**
-     * Returns the lower bound in motor encoder ticks.
-     */
-    virtual uint64_t getLowerBound() const = 0;
-
+    virtual bool homedAndBounded() const { return calibrationState == CalibrationState::CALIBRATION_COMPLETE; }
+    
 protected:
     /**
      * Specifies the current calibration state that command is in. Use in refresh() of child class.
      */
     enum class CalibrationState
     {
-        AWAITING_CALIBRATE,  // not yet calibrating: call startCalibrate() to start.
+        AWAITING_CALIBRATION,  // not yet calibrating: call startCalibrate() to start.
+        BEGIN_CALIBRATION,
         CALIBRATING_LOWER_BOUND,
         CALIBRATING_UPPER_BOUND,  // one-sided does not use this
         CALIBRATION_COMPLETE      // calibration done
@@ -82,17 +73,26 @@ protected:
     /**
      * Sets the lower bound of this bounded subsystem to the given encoder position.
      */
-    virtual void setLowerBound(uint64_t encoderPosition) = 0;
+    virtual void setLowerBound(uint64_t encoderPosition)
+    {
+        lowerBound = encoderPosition;
+    }
 
     /**
      * Sets the upper bound of this bounded subsystem to the given encoder position.
      */
-    virtual void setUpperBound(uint64_t encoderPosition) = 0;
+    virtual void setUpperBound(uint64_t encoderPosition) { upperBound = encoderPosition; } 
 
     /**
      * Sets the given motor encoder position to be the "home" of the subsystem's motor.
      */
-    virtual void setHome(uint64_t encoderPosition) = 0;
+    virtual void setHome(uint64_t encoderPosition) {
+        home = encoderPosition;
+    }
+
+    int64_t lowerBound;
+    int64_t upperBound;
+    int64_t home;
 };  // class HomeableSubsystemInterface
 }  // namespace aruwsrc::control
 

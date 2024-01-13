@@ -26,40 +26,41 @@ PivotSubsystem::PivotSubsystem(
     tap::motor::DjiMotor* pivotMotor,
     tap::motor::DjiMotor* pivotDeadMotor,
     const tap::algorithms::SmoothPidConfig& pidParams,
-    aruwsrc::control::MotorStallTrigger& trigger1,
-    aruwsrc::control::MotorStallTrigger& trigger2)
-    : aruwsrc::control::TwoSidedBoundedSubsystemInterface(drivers, trigger1, trigger2),
+    aruwsrc::control::MotorStallTrigger& lowerTrigger,
+    aruwsrc::control::MotorStallTrigger& upperTrigger)
+    : aruwsrc::control::TwoSidedBoundedSubsystemInterface(drivers, lowerTrigger, upperTrigger),
       drivers(drivers),
       pivotMotor(pivotMotor),
       pivotDeadMotor(pivotDeadMotor),
       pid(pidParams),
       pidParams(pidParams),
-      trigger1(trigger1),
-      trigger2(trigger2),
-      isHomedVector(0),
-      lowerBound(0),
-      upperBound(0),
-      home(0)
+      lowerTrigger(lowerTrigger),
+      upperTrigger(upperTrigger)
 {
 }
 
 void PivotSubsystem::refresh()
 {
     switch(calibrationState) {
-        case CalibrationState::AWAITING_CALIBRATE:
+        case CalibrationState::AWAITING_CALIBRATION:
+            break;
+        case CalibrationState::BEGIN_CALIBRATION:
+            moveTowardLowerBound();
+            calibrationState = CalibrationState::CALIBRATING_LOWER_BOUND;
             break;
         case CalibrationState::CALIBRATING_LOWER_BOUND:
-            // TODO: move towards lower bound, with PID?
-            if (trigger1.isTriggered()) {
-                calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
+            if (lowerTrigger.isTriggered()) {
+                setLowerBound(pivotDeadMotor->getEncoderUnwrapped());
                 stopDuringHoming();
+                moveTowardUpperBound();
+                calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
             }
             break;
         case CalibrationState::CALIBRATING_UPPER_BOUND:
-            // TODO: move towards upper bound, with PID?
-            if (trigger2.isTriggered()) {
-                calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+            if (upperTrigger.isTriggered()) {
+                setUpperBound(pivotDeadMotor->getEncoderUnwrapped());
                 stopDuringHoming();
+                calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             }
             break;
         case CalibrationState::CALIBRATION_COMPLETE:
@@ -103,37 +104,8 @@ void PivotSubsystem::setSetpoint(uint64_t setpoint)
 void PivotSubsystem::stop() { pivotMotor->setDesiredOutput(0); }
 
 /** Homing functions */
-bool PivotSubsystem::homedAndBounded() const {
-    uint8_t lowerBoundHomed = isHomedVector & kLowerBoundHomedMask;
-    uint8_t upperBoundHomed = isHomedVector & kUpperBoundHomedMask;
-    return lowerBoundHomed && upperBoundHomed;
-}
-
-uint64_t PivotSubsystem::getUpperBound() const {
-    return upperBound;
-}
-
-uint64_t PivotSubsystem::getLowerBound() const {
-    return lowerBound;
-}
 
 void PivotSubsystem::stopDuringHoming() { stop(); }
-
-void PivotSubsystem::setLowerBound(uint64_t encoderPosition) {
-    if (isHomedVector & kLowerBoundHomedMask) return;
-    lowerBound = encoderPosition;
-    isHomedVector |= kLowerBoundHomedMask;
-}
-
-void PivotSubsystem::setUpperBound(uint64_t encoderPosition) {
-    if (isHomedVector & kUpperBoundHomedMask) return;
-    upperBound = encoderPosition;
-    isHomedVector |= kUpperBoundHomedMask;
-}
-
-void PivotSubsystem::setHome(uint64_t encoderPosition) {
-    home = encoderPosition;
-}
 
 void PivotSubsystem::moveTowardLowerBound() {
     pivotMotor->setDesiredOutput(0); // TODO: change value, maybe velocity PID?

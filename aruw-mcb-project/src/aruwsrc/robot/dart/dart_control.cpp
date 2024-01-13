@@ -34,6 +34,7 @@
 #include "aruwsrc/robot/dart/loader/manual_loader_command.hpp"
 #include "aruwsrc/robot/dart/pivot/manual_pivot_command.hpp"
 #include "aruwsrc/robot/dart/pivot/pivot_subsystem.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -120,6 +121,8 @@ LauncherPullSubsystem launcherPullSubsystem(
 LauncherReleaseSubsystem launcherReleaseSubsystem(
     drivers(),
     &launcherLinearActuator);
+
+
 
 PivotSubsystem pivotSubsystem(
     drivers(),

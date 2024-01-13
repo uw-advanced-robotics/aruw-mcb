@@ -85,19 +85,7 @@ public:
 
     /**************** Inherited Homing functions ********************/
 
-    bool homedAndBounded() const override;
-
-    uint64_t getUpperBound() const override;
-
-    uint64_t getLowerBound() const override;
-
     void stopDuringHoming() override;
-
-    void setLowerBound(uint64_t encoderPosition) override;
-
-    void setUpperBound(uint64_t encoderPosition) override;
-
-    void setHome(uint64_t encoderPosition) override;
 
     void moveTowardLowerBound() override;
 
@@ -118,17 +106,8 @@ private:
 
     /** Homing Fields **/
     // TODO: rename triggers
-    aruwsrc::control::MotorStallTrigger& trigger1;
-    aruwsrc::control::MotorStallTrigger& trigger2;
-
-    // first bit is if lowerBound is homed, second bit is if upperBound is homed
-    constexpr static uint8_t kLowerBoundHomedMask = 0b01;
-    constexpr static uint8_t kUpperBoundHomedMask = 0b10;
-    uint8_t isHomedVector;
-
-    uint64_t lowerBound;
-    uint64_t upperBound;
-    uint64_t home;
+    aruwsrc::control::MotorStallTrigger& lowerTrigger;
+    aruwsrc::control::MotorStallTrigger& upperTrigger;
 };
 }  // namespace aruwsrc::robot::dart
 

@@ -18,16 +18,15 @@
  */
 
 #include "aruwsrc\robot\dart\pivot\pivot_homing_command.hpp"
+#
 
 namespace aruwsrc::robot::dart
 {
-PivotSubsystem(PivotSubsystem& pivotSubsystem)
+PivotHomingCommand(PivotSubsystem& pivotSubsystem)
     : HomingCommand(pivotSubsystem) 
 {
 };
 
-void execute() {
-    
-}
+
 
 } //namespace aruwsrc::robot::dart
