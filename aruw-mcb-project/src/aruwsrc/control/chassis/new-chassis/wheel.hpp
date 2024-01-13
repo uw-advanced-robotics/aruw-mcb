@@ -50,7 +50,7 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(Motor& driveMotor, WheelConfig& config);
+    Wheel(WheelConfig& config);
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -88,10 +88,6 @@ public:
     }
 
 private:
-    // Motor that drives the wheel
-    Motor& motor;
-    // PID used to control the driving motor
-    SmoothPid velocityPid;
     // Whether or not the wheel is driven
     WheelConfig config;
 
