@@ -197,7 +197,15 @@ TurretMinorSentryControlCommand turretRightManualCommand(
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping manualRightSwitchDown(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
+    {
+        &majorManualCommand
+        /*
+        // @note: minor commands commented out so I can test major control first
+        ,
+         &turretLeftManualCommand,
+         &turretRightManualCommand
+        */
+    },
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 /* initialize subsystems ----------------------------------------------------*/
