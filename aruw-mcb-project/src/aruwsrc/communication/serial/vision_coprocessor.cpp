@@ -208,6 +208,9 @@ void VisionCoprocessor::computeSentryOdometryData(OdometryData* data)
     // will do nothing for now
 
     // assert(this->sentryTransformer != nullptr);
+
+    // @note: this line is just here so pipeline doesn't complain
+    data->chassisOdometry.timestamp = getTimeMicroseconds();
 }
 /**
  * Uses the standard and hero transformer to place world-relative odometry information into the
