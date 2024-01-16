@@ -268,11 +268,9 @@ public:
     inline void attachStandardAndHerotransformer(
         aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transformer)
     {
-        // #if defined(ALL_STADARDS) || defined(TARGET_HERO_CYCLONE)
+        // @todo: find a way to have this throw a compiler error when called with non standard or
+        // hero build target
         this->standardAndHeroTransformer = &transformer;
-        // #else
-        // #error "don't attach this transormer for anything other than standard or hero"
-        // #endif
     }
 
     /**
@@ -283,11 +281,9 @@ public:
      */
     inline void attachSentryTransormer(aruwsrc::sentry::SentryTransforms& transformer)
     {
-        // #if defined(TARGET_SENTRY_BEEHIVE)
+        // @todo: find a way to have this throw a compiler error when called with non sentry
+        // build target
         this->sentryTransformer = &transformer;
-        // #else
-        // #error "don't attach this transormer for anything other than sentry"
-        // #endif
     }
 
     mockable void sendShutdownMessage();
@@ -391,6 +387,11 @@ public:
 #endif
 
     void sendOdometryData();
+
+    void computeSentryOdometryData(OdometryData* data);
+    void computeStandardAndHeroOdometryData(OdometryData* data);
+    void computeDefaultOdometryData(OdometryData* data);
+
     void sendRefereeRealtimeData();
     void sendRefereeCompetitionResult();
     void sendRefereeWarning();
