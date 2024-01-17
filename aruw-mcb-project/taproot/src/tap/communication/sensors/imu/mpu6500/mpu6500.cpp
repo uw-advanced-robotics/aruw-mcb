@@ -247,6 +247,10 @@ bool Mpu6500::read()
 
         raw.temperature = rxBuff[6] << 8 | rxBuff[7];
 
+        magnetometerXFilter.update(raw.magnetometer.x);
+        magnetometerYFilter.update(raw.magnetometer.y);
+        magnetometerZFilter.update(raw.magnetometer.z);
+
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
     }
     PT_END();

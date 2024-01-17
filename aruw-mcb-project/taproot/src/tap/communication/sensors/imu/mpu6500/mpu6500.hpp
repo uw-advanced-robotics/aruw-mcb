@@ -33,6 +33,7 @@
 #include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
+#include "modm/math/filter/moving_average.hpp"
 
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
@@ -257,7 +258,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (raw.magnetometer.y - raw.magnetometerOffset.y) /
+            (magnetometerYFilter.getValue() - raw.magnetometerOffset.y) /
             (calibrationMaxReading.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
     }
 
@@ -269,7 +270,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (raw.magnetometer.x - raw.magnetometerOffset.x) /
+            (magnetometerXFilter.getValue() - raw.magnetometerOffset.x) /
             (calibrationMaxReading.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
     }
 
@@ -279,7 +280,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (raw.magnetometer.z - raw.magnetometerOffset.z) /
+            (magnetometerZFilter.getValue() - raw.magnetometerOffset.z) /
             (calibrationMaxReading.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
     }
 
@@ -452,6 +453,9 @@ private:
     bool requestCalibrationFlagDebug = false;
 
     float heading;
+
+    modm::filter::MovingAverage<float, 30> magnetometerXFilter, magnetometerYFilter, magnetometerZFilter;
+
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
