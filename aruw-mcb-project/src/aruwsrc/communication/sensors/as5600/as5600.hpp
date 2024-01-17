@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,27 +17,38 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TESTBED_DRIVERS_HPP_
-#define TESTBED_DRIVERS_HPP_
+#ifndef AS5600_HPP_
+#define AS5600_HPP_
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/sensors/as5600/as5600.hpp"
-
-namespace aruwsrc::testbed
+namespace aruwsrc::communication::sensors::as5600
 {
-class Drivers : public tap::Drivers
-{
-    friend class DriversSingleton;
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers(), encoder(this, tap::gpio::Analog::Pin::S) {}
+class AS5600
+{ 
 
 public:
-    aruwsrc::communication::sensors::as5600::AS5600 encoder;
-};  // class aruwsrc::StandardDrivers
-}  // namespace aruwsrc::testbed
+AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin);
 
-#endif  // STANDARD_DRIVERS_HPP_
+// Reads the sensor value and stores the value in measurement
+void read();
+
+// Returns the position in degrees
+float getPosition();
+
+private:
+tap::Drivers* drivers;
+tap::gpio::Analog::Pin pin;
+
+float measurement;
+int16_t raw_measurement;
+
+static constexpr int MAX_READ_VOLTAGE = 4096;
+
+
+};
+
+}
+
+#endif // AS5600_HPP_

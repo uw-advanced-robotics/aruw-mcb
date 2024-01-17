@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,27 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TESTBED_DRIVERS_HPP_
-#define TESTBED_DRIVERS_HPP_
+#include "as5600.hpp"
 
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/communication/sensors/as5600/as5600.hpp"
-
-namespace aruwsrc::testbed
+namespace aruwsrc::communication::sensors::as5600
 {
-class Drivers : public tap::Drivers
+
+AS5600::AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin) : drivers(drivers), pin(pin) {}
+
+void AS5600::read()
 {
-    friend class DriversSingleton;
+	this->raw_measurement = this->drivers->analog.read(this->pin);
+    this->measurement = (this->raw_measurement * 1.0f / 4096.0f) * 360.0f;
+}
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers(), encoder(this, tap::gpio::Analog::Pin::S) {}
+float AS5600::getPosition() { return measurement; }
 
-public:
-    aruwsrc::communication::sensors::as5600::AS5600 encoder;
-};  // class aruwsrc::StandardDrivers
-}  // namespace aruwsrc::testbed
-
-#endif  // STANDARD_DRIVERS_HPP_
+}  // namespace aruwsrc::communication::sensors::as5600

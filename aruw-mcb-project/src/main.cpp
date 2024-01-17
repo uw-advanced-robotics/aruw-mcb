@@ -119,6 +119,10 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
+
+#if defined(TARGET_TESTBED)
+            PROFILE(drivers->profiler, drivers->encoder.read, ());
+#endif
         }
         modm::delay_us(10);
     }
