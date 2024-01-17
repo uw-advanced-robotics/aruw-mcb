@@ -27,7 +27,7 @@ namespace chassis
 
 struct SwerveAzimuthConfig
 {
-    float azimuthZeroOffset;
+    int azimuthZeroOffset;
     float azimuthMotorGearing;
 };
 
