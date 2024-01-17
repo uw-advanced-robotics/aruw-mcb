@@ -39,6 +39,7 @@ struct WheelConfig
     float wheelOrientationChassisRelative;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
+    float maxWheelRPM;
 };
 
 class Wheel
@@ -48,6 +49,9 @@ public:
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
     Wheel(Motor& driveMotor, WheelConfig& config);
+
+    // Config parameters for the individual wheel
+    WheelConfig config;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -83,8 +87,6 @@ private:
     Motor& motor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
-    // Whether or not the wheel is driven
-    WheelConfig config;
 
 };  // class Wheel
 }  // namespace chassis

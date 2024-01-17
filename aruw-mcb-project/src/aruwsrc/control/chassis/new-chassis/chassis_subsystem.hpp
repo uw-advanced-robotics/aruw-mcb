@@ -187,14 +187,6 @@ public:
 
     virtual void limitChassisPower() = 0;
 
-    /**
-     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
-     */
-    inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
-    {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
-        return mat * ratio;
-    }
 
 private:
     double prevTime = 0.0;

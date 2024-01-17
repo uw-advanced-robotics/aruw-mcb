@@ -95,13 +95,19 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
+    float tempMax = 0;
+    modm::Pair<float, float> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        modm::Pair<float, float> desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
+        desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
             rotationTranslationGain * x,
             rotationTranslationGain * y,
             r);
-        wheels[i].executeWheelVelocity(desiredWheelVel.first, desiredWheelVel.second);
+        tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
+    }
+    for (int i = 0; i < getNumChassisWheels(); i++) {
+        float coeff = std::min(wheels[i].config.maxWheelRPM / tempMax, 1.0f);
+        wheels[i].executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
     }
 }
 
