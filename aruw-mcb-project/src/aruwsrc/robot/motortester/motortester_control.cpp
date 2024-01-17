@@ -21,16 +21,26 @@
 
 #include "tap/control/hold_command_mapping.hpp"
 // #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motortester/constant_rpm_command.hpp"
 #include "aruwsrc/robot/motortester/motor_subsystem.hpp"
+#include "aruwsrc/robot/motortester/motortester_constants.hpp"
 #include "aruwsrc/robot/motortester/motortester_drivers.hpp"
 #include "aruwsrc/robot/motortester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace aruwsrc::motortester;
+using namespace aruwsrc::motortester::constants;
+using namespace aruwsrc::agitator;
+using namespace tap::control::setpoint;
+// using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -43,22 +53,15 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motortester_control
 {
 
-tap::algorithms::SmoothPidConfig m2006PidConfig =
-    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-tap::algorithms::SmoothPidConfig rm3508PidConfig =
-    {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-tap::algorithms::SmoothPidConfig gm6020PidConfig =
-    {.kp = 1000.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-// unfinished 2006
+// // m2006
 tap::motor::DjiMotor leftChannelMotor(
     drivers(),
     tap::motor::MOTOR2,          // id 2
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
     "LMotor");
+
+VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
 // 3508
 tap::motor::DjiMotor rightChannelMotor(
@@ -76,21 +79,27 @@ tap::motor::DjiMotor wheelChannelMotor(
     false,
     "WMotor");
 
-MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, m2006PidConfig, (1.0f / 36.0f));
+MotorSubsystem leftMotorSubsystem(
+    drivers(),
+    leftChannelMotor,
+    m2006VelocityPidConfig,
+    (1.0f / 36.0f));
 
 MotorSubsystem rightMotorSubsystem(
     drivers(),
     rightChannelMotor,
-    rm3508PidConfig,
+    rm3508VelocityPidConfig,
     (187.0f / 3591.0f));  // internal gearbox ratio
 
 MotorSubsystem wheelMotorSubsystem(
     drivers(),
     wheelChannelMotor,
-    gm6020PidConfig,
+    gm6020VelocityPidConfig,
     (1.0f));  // internal gearbox ratio
 
+// ----------
 // Commands
+// ----------
 
 ConstantRpmCommand leftSwitchUpRpm(&leftMotorSubsystem, 225.0f);
 StickRpmCommand leftManual(
@@ -114,11 +123,24 @@ StickRpmCommand wheelManual(
     tap::communication::serial::Remote::Channel::WHEEL,
     320.0f);
 
+// base rotate/unjam commands
+MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
+
+UnjamIntegralCommand unjamAgitator(agitator, AGITATOR_UNJAM_CONFIG);
+
+MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
+    *drivers(),
+    agitator,
+    rotateAgitator,
+    unjamAgitator);
+
+// ------------------
 // command mappings
+// ------------------
 
 tap::control::HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&leftSwitchUpRpm},
+    {&rotateAndUnjamAgitator},
     tap::control::RemoteMapState(
         tap::communication::serial::Remote::Switch::LEFT_SWITCH,
         tap::communication::serial::Remote::SwitchState::UP));
@@ -167,14 +189,14 @@ void initializeSubsystems()
     wheelMotorSubsystem.initialize();
 }
 
-void registerSubsystems(Drivers *drivers)
+void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
 }
 
-void registerIoMappings(Drivers *drivers)
+void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
@@ -191,7 +213,7 @@ void registerIoMappings(Drivers *drivers)
 
 namespace aruwsrc::motortester
 {
-void initSubsystemCommands(aruwsrc::motortester::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::motortester::Drivers* drivers)
 {
     motortester_control::registerSubsystems(drivers);
     motortester_control::initializeSubsystems();
