@@ -24,6 +24,8 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
+
 namespace aruwsrc::control::turret
 {
 /** Motor IDs */
@@ -80,9 +82,12 @@ static constexpr tap::algorithms::SmoothPidConfig loaderPID = {
     .errorDerivativeFloor = 0.0f,
 };
 
-// TODO: change these values
-static constexpr int16_t maxPivotStallRPM = 0;
-static constexpr int16_t minPivotStallTorque = 0;
+static constexpr int32_t pivotHomingDesiredOutput = 0;
+
+static constexpr aruwsrc::control::MotorStallConfig pivotHoming = {
+    .maxRPM = 0,
+    .minTorque = 0,
+};
 
 }  // namespace aruwsrc::control::turret
 #endif

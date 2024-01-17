@@ -20,6 +20,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 
 #include "aruwsrc/control/pneumatic/gpio_double_solenoid.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -35,6 +36,7 @@
 #include "aruwsrc/robot/dart/pivot/manual_pivot_command.hpp"
 #include "aruwsrc/robot/dart/pivot/pivot_subsystem.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
+#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -109,6 +111,15 @@ tap::motor::DjiMotor loaderBottomMotor(
     false,
     "Loader Bottom Motor");
 
+aruwsrc::control::MotorStallTrigger lowerPivotTrigger(
+    pivotMotor,
+    aruwsrc::control::turret::pivotHoming.maxRPM,
+    aruwsrc::control::turret::pivotHoming.minTorque);
+    
+aruwsrc::control::MotorStallTrigger upperPivotTrigger(
+    pivotMotor,
+    aruwsrc::control::turret::pivotHoming.maxRPM,
+    aruwsrc::control::turret::pivotHoming.minTorque);
 /** Subsystems here */
 
 LauncherPullSubsystem launcherPullSubsystem(
@@ -128,7 +139,9 @@ PivotSubsystem pivotSubsystem(
     drivers(),
     &pivotMotor,
     &pivotDeadMotor,
-    pivotPID);
+    pivotPID,
+    lowerPivotTrigger,
+    upperPivotTrigger);
 
 LoaderSubsystem loaderSubsystem(
     drivers(),
@@ -160,8 +173,14 @@ ManualPivotCommand manualPivotCommand(
     &pivotSubsystem,
     Remote::Channel::RIGHT_HORIZONTAL);
 
-/** Do mapping here */
+HomingCommand pivotHomingCommand(
+    pivotSubsystem);
 
+/** Do mapping here */
+PressCommandMapping rightSwitchUp(
+    drivers(),
+    {&pivotHomingCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -182,7 +201,7 @@ void registerDartSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&loaderSubsystem);
 }
 
-void setDefaultDartCommands(Drivers* drivers)
+void setDefaultDartCommands(Drivers* )
 {
     pivotSubsystem.setDefaultCommand(&manualPivotCommand);
     loaderSubsystem.setDefaultCommand(&manualLoaderCommand);
@@ -190,12 +209,13 @@ void setDefaultDartCommands(Drivers* drivers)
     launcherPullSubsystem.setDefaultCommand(&manualLauncherPullCommand);
 }
 
-void startDartCommands(Drivers* drivers)
+void startDartCommands(Drivers* )
 {
 }
 
 void registerDartIoMappings(Drivers* drivers)
 { 
+    drivers->commandMapper.addMap(&rightSwitchUp);
 }
 
 }  // namespace dart_control

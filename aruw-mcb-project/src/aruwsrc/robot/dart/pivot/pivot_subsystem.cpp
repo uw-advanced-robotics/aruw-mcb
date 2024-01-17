@@ -18,6 +18,9 @@
  */
 
 #include "pivot_subsystem.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
+#include "tap/architecture/timeout.hpp"
 
 namespace aruwsrc::robot::dart
 {
@@ -33,9 +36,7 @@ PivotSubsystem::PivotSubsystem(
       pivotMotor(pivotMotor),
       pivotDeadMotor(pivotDeadMotor),
       pid(pidParams),
-      pidParams(pidParams),
-      lowerTrigger(lowerTrigger),
-      upperTrigger(upperTrigger)
+      pidParams(pidParams)
 {
 }
 
@@ -50,20 +51,34 @@ void PivotSubsystem::refresh()
             break;
         case CalibrationState::CALIBRATING_LOWER_BOUND:
             if (lowerTrigger.isTriggered()) {
+                calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
+                calibrationTimer.restart(3000);
+            }
+            break;
+        case CalibrationState::SETTING_LOWER_BOUND:
+            stopDuringHoming();
+            if(calibrationTimer.isExpired()) {
                 setLowerBound(pivotDeadMotor->getEncoderUnwrapped());
-                stopDuringHoming();
                 moveTowardUpperBound();
                 calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
             }
             break;
         case CalibrationState::CALIBRATING_UPPER_BOUND:
             if (upperTrigger.isTriggered()) {
+                calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+                calibrationTimer.restart(3000);
+            }
+            break;
+        case CalibrationState::SETTING_UPPER_BOUND:
+            stopDuringHoming();
+            if(calibrationTimer.isExpired()) {
                 setUpperBound(pivotDeadMotor->getEncoderUnwrapped());
                 stopDuringHoming();
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             }
             break;
         case CalibrationState::CALIBRATION_COMPLETE:
+            /*
             if (isUsingPID) {
                 const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
                 const uint32_t dt = curTime - prevTime;
@@ -75,10 +90,8 @@ void PivotSubsystem::refresh()
                 float output = pid.getOutput();
 
                 pivotMotor->setDesiredOutput(output);
-            }
+            } */
             break;
-        default:
-            //TODO: error
     }
 }
 
@@ -108,11 +121,11 @@ void PivotSubsystem::stop() { pivotMotor->setDesiredOutput(0); }
 void PivotSubsystem::stopDuringHoming() { stop(); }
 
 void PivotSubsystem::moveTowardLowerBound() {
-    pivotMotor->setDesiredOutput(0); // TODO: change value, maybe velocity PID?
+    pivotMotor->setDesiredOutput(-aruwsrc::control::turret::pivotHomingDesiredOutput); // TODO: velocity PID?
 }
 
 void PivotSubsystem::moveTowardUpperBound() {
-    pivotMotor->setDesiredOutput(0); // TODO: change value, maybe velocity PID?
+    pivotMotor->setDesiredOutput(aruwsrc::control::turret::pivotHomingDesiredOutput); // TODO: velocity PID?
 }
 
 }  // namespace aruwsrc::robot::dart

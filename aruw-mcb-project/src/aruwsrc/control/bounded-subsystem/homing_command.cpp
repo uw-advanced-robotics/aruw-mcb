@@ -29,4 +29,6 @@ void HomingCommand::initialize() { subsystem.startCalibrate(); }
 
 bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
 
+void HomingCommand::end(bool) { subsystem.refreshSafeDisconnect(); }
+
 }  // namespace aruwsrc::control

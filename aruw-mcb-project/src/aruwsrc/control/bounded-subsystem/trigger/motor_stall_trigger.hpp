@@ -26,6 +26,12 @@
 
 namespace aruwsrc::control
 {
+
+struct MotorStallConfig{
+    int16_t maxRPM;
+    int16_t minTorque;
+};
+
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
  * through the stalling of the motor when it is at an end of its axis.

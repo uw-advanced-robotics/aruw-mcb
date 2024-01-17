@@ -25,9 +25,11 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/architecture/timeout.hpp"
 
 #include "aruwsrc/control/bounded-subsystem/two_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
+
 
 
 namespace aruwsrc::robot::dart
@@ -42,16 +44,14 @@ public:
      * @param drivers The drivers object.
      * @param pivotMotor The pivot motor.
      * @param pivotDeadMotor The motor on the pivot axis being used for its encoder
-     * @param trigger1 The MotorStallTrigger associated with the (TODO: lower?) limit of the pivot
-     * @param trigger2 The MotorStallTrigger associated with the (TODO: upper?) limit of the pivot
      */
     PivotSubsystem(
         tap::Drivers* drivers,
         tap::motor::DjiMotor* pivotMotor,
         tap::motor::DjiMotor* pivotDeadMotor,
         const tap::algorithms::SmoothPidConfig& pidParams,
-        aruwsrc::control::MotorStallTrigger& trigger1,
-        aruwsrc::control::MotorStallTrigger& trigger2);
+        aruwsrc::control::MotorStallTrigger& lowerTrigger,
+        aruwsrc::control::MotorStallTrigger& upperTrigger);
 
     void initialize() override;
 
@@ -104,10 +104,7 @@ private:
     bool isUsingPID = false;
     uint64_t setpoint = 0;
 
-    /** Homing Fields **/
-    // TODO: rename triggers
-    aruwsrc::control::MotorStallTrigger& lowerTrigger;
-    aruwsrc::control::MotorStallTrigger& upperTrigger;
+    tap::arch::MilliTimeout calibrationTimer;
 };
 }  // namespace aruwsrc::robot::dart
 

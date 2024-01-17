@@ -42,6 +42,12 @@ public:
 
     bool isFinished() const override;
 
+    const char* getName() const override {return "Homing command";}
+
+    void execute() override {}
+
+    void end(bool interrupted) override;
+
 protected:
     aruwsrc::control::BoundedSubsystemInterface& subsystem;
 };  // class HomingCommand
