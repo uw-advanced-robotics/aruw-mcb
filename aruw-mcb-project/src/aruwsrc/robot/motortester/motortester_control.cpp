@@ -184,14 +184,16 @@ tap::control::HoldCommandMapping rightSwitchDown(
 
 void initializeSubsystems()
 {
-    leftMotorSubsystem.initialize();
+    agitator.initialize();
+    // leftMotorSubsystem.initialize();
     rightMotorSubsystem.initialize();
     wheelMotorSubsystem.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
 }
@@ -199,8 +201,8 @@ void registerSubsystems(Drivers* drivers)
 void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchMid);
+    // drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchMid);
 
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&rightSwitchDown);
