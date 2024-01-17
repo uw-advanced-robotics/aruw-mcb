@@ -77,12 +77,12 @@ public:
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
 
-    inline float Wheel::mpsToRpm(float mps) const
+    inline float mpsToRpm(float mps) const
     {
         return (mps / (config.diameter * M_PI)) / config.motorGearRatio * 60.0f / config.gearRatio;
     }
 
-    inline float Wheel::rpmToMps(float rpm) const
+    inline float rpmToMps(float rpm) const
     {
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
