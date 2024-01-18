@@ -20,7 +20,7 @@
 #if defined(TARGET_MOTOR_TESTER)
 
 #include "tap/control/hold_command_mapping.hpp"
-// #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -138,12 +138,13 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // command mappings
 // ------------------
 
-tap::control::HoldCommandMapping leftSwitchUp(
+tap::control::HoldRepeatCommandMapping leftSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitator},
     tap::control::RemoteMapState(
         tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
+        tap::communication::serial::Remote::SwitchState::UP),
+    true);
 
 tap::control::HoldCommandMapping leftSwitchMid(
     drivers(),

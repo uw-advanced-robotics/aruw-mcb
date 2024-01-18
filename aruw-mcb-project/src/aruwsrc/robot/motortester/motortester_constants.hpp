@@ -41,12 +41,12 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 7;    // 10;   // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 20.0f;  // balls per second
+static constexpr int AGITATOR_NUM_POCKETS = 8;    // 10;   // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR1,
+    .agitatorMotorId = tap::motor::MOTOR2,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
@@ -54,7 +54,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 200,  // Fudge factor because it's unjamming more than it should; used to be 100
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
