@@ -454,7 +454,7 @@ private:
 
     float heading;
 
-    modm::filter::MovingAverage<float, 30> magnetometerXFilter, magnetometerYFilter, magnetometerZFilter;
+    modm::filter::MovingAverage<float, 15> magnetometerXFilter, magnetometerYFilter, magnetometerZFilter;
 
 };
 
