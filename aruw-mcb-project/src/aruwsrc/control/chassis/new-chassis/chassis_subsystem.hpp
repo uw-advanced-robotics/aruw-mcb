@@ -187,7 +187,6 @@ public:
 
     virtual void limitChassisPower() = 0;
 
-
 private:
     double prevTime = 0.0;
 };  // class ChassisSubsystem

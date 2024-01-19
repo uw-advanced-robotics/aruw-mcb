@@ -105,7 +105,8 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
             r);
         tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
     }
-    for (int i = 0; i < getNumChassisWheels(); i++) {
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
         float coeff = std::min(wheels[i].config.maxWheelRPM / tempMax, 1.0f);
         wheels[i].executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
     }
