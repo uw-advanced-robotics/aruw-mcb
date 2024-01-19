@@ -25,7 +25,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 class OmniWheel : public Wheel
 {
 public:
@@ -36,6 +35,10 @@ public:
 
     const double WHEEL_RELATIVE_ROLLER_ANGLE = M_PI_2;
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
+
+    void executeWheelVelocity(float vx, float vy) override;
+    modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr) override;
+
 private:
     // Motor that drives the wheel
     tap::motor::DjiMotor& motor;
@@ -43,9 +46,12 @@ private:
     tap::algorithms::SmoothPid velocityPid;
     // config for the wheel PID controller
     WheelConfig config;
-    //matrices 1 and 2 in equation on Swerve! Notion
-    tap::algorithms::CMSISMat<2, 2> mat1;
-    tap::algorithms::CMSISMat<2, 2> mat2;
+    // product of matrices 1 and 2 in equation on Swerve! Notion
+    tap::algorithms::CMSISMat<2, 2> productMat;
+    // matrix containing distances from wheel to chassis center
+    tap::algorithms::CMSISMat<2, 3> distanceMat;
+    // time tracker for smoothpid
+    double prevTime = 0;
 };  // class OmniWheel
 }  // namespace chassis
 }  // namespace aruwsrc
