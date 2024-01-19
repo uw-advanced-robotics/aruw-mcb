@@ -217,30 +217,30 @@ void initializeSubsystems()
     // move this stuff into there once imu calibrate integrated
     majorController.initialize();
 
-    turretLeftControllers.pitchController.initialize();
-    turretLeftControllers.yawController.initialize();
+    // turretLeftControllers.pitchController.initialize();
+    // turretLeftControllers.yawController.initialize();
 
-    turretRightControllers.pitchController.initialize();
-    turretRightControllers.yawController.initialize();
+    // turretRightControllers.pitchController.initialize();
+    // turretRightControllers.yawController.initialize();
 
-    turretLeft.initialize();
-    turretRight.initialize();
+    // turretLeft.initialize();
+    // turretRight.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&turretMajor);
-    drivers->commandScheduler.registerSubsystem(&turretLeft);
-    drivers->commandScheduler.registerSubsystem(&turretRight);
+    // drivers->commandScheduler.registerSubsystem(&turretLeft);
+    // drivers->commandScheduler.registerSubsystem(&turretRight);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
     turretMajor.setDefaultCommand(&majorManualCommand);
-    turretLeft.setDefaultCommand(&turretLeftManualCommand);
-    turretRight.setDefaultCommand(&turretRightManualCommand);
+    // turretLeft.setDefaultCommand(&turretLeftManualCommand);
+    // turretRight.setDefaultCommand(&turretRightManualCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
