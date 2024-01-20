@@ -120,7 +120,7 @@ void VelocityAgitatorSubsystem::runVelocityPidControl()
     prevTime = curTime;
 
     const float velocityError = velocitySetpoint - getCurrentValue();
-
+    drivers->leds.set(drivers->leds.A, fabs(velocityError) < velocityError * 0.05);
     velocityPid.runControllerDerivateError(velocityError, dt);
 
     agitatorMotor.setDesiredOutput(
