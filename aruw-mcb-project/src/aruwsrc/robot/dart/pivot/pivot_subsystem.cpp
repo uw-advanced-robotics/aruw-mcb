@@ -48,32 +48,21 @@ void PivotSubsystem::refresh()
         case CalibrationState::BEGIN_CALIBRATION:
             moveTowardLowerBound();
             calibrationState = CalibrationState::CALIBRATING_LOWER_BOUND;
+            calibrationTimer.restart(3000);
             break;
         case CalibrationState::CALIBRATING_LOWER_BOUND:
-            if (lowerTrigger.isTriggered()) {
-                calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
-                calibrationTimer.restart(3000);
-            }
-            break;
-        case CalibrationState::SETTING_LOWER_BOUND:
-            stopDuringHoming();
-            if(calibrationTimer.isExpired()) {
+            if (lowerTrigger.isTriggered() && calibrationTimer.isExpired()) {
+                stopDuringHoming();
                 setLowerBound(pivotDeadMotor->getEncoderUnwrapped());
                 moveTowardUpperBound();
                 calibrationState = CalibrationState::CALIBRATING_UPPER_BOUND;
-            }
-            break;
-        case CalibrationState::CALIBRATING_UPPER_BOUND:
-            if (upperTrigger.isTriggered()) {
-                calibrationState = CalibrationState::CALIBRATION_COMPLETE;
                 calibrationTimer.restart(3000);
             }
             break;
-        case CalibrationState::SETTING_UPPER_BOUND:
-            stopDuringHoming();
-            if(calibrationTimer.isExpired()) {
-                setUpperBound(pivotDeadMotor->getEncoderUnwrapped());
+        case CalibrationState::CALIBRATING_UPPER_BOUND:
+            if (upperTrigger.isTriggered() && calibrationTimer.isExpired()) {
                 stopDuringHoming();
+                setUpperBound(pivotDeadMotor->getEncoderUnwrapped());
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             }
             break;

@@ -59,9 +59,7 @@ protected:
         AWAITING_CALIBRATION,  // not yet calibrating: call startCalibrate() to start.
         BEGIN_CALIBRATION,
         CALIBRATING_LOWER_BOUND,
-        SETTING_LOWER_BOUND,
         CALIBRATING_UPPER_BOUND,  // one-sided does not use this
-        SETTING_UPPER_BOUND,
         CALIBRATION_COMPLETE      // calibration done
     };
 

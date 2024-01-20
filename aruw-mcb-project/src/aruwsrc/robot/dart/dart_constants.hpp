@@ -82,11 +82,11 @@ static constexpr tap::algorithms::SmoothPidConfig loaderPID = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr int32_t pivotHomingDesiredOutput = 0;
+static constexpr int32_t pivotHomingDesiredOutput = SHRT_MAX / 128;
 
 static constexpr aruwsrc::control::MotorStallConfig pivotHoming = {
-    .maxRPM = 0,
-    .minTorque = 0,
+    .maxRPM = 5,
+    .minTorque = 500,
 };
 
 }  // namespace aruwsrc::control::turret
