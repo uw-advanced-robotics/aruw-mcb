@@ -21,32 +21,13 @@
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-// #include "sentry_beyblade_command.hpp"  //TODO: uncomment this stuff when command is created
 
-// Do not include this file directly: use chassis_constants.hpp instead.
-#ifndef CHASSIS_CONSTANTS_HPP_
-#error "Do not include this file directly! Use chassis_constants.hpp instead."
-#endif
+// #include "sentry_beyblade_command.hpp"
 
-using namespace aruwsrc::chassis;
-//{
+namespace aruwsrc::chassis
+{
 // static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
-
-/**
- * "Maps max power (in Watts) to max chassis wheel speed (RPM).
- *
- * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
- * high values."
- * TODO: this may have actually been used in comp...? get actual values
- */
-// static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1,
-// 8'000}};
-
-// static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-//     CHASSIS_POWER_TO_MAX_SPEED_LUT,
-//     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
-
-// }  // namespace aruwsrc::chassis
+}
 
 namespace aruwsrc::sentry::chassis
 {
@@ -77,8 +58,7 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
 
-// static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig
-// {
+// static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
 //     .beybladeRotationalSpeedFractionOfMax = 0.45f,
 //     .beybladeTranslationalSpeedMultiplier = 0.1f,
 //     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
@@ -87,7 +67,7 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
 // };
 
 // todo: hopefullly these can live as constants here soon :)
-SwerveModuleConfig leftFrontSwerveConfig = {
+aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
     // .azimuthZeroOffset = 7888,
     .azimuthZeroOffset = 3753,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -96,7 +76,7 @@ SwerveModuleConfig leftFrontSwerveConfig = {
     .driveMotorInverted = true,
 };
 
-SwerveModuleConfig rightFrontSwerveConfig = {
+aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
     .azimuthZeroOffset = 356,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -105,7 +85,7 @@ SwerveModuleConfig rightFrontSwerveConfig = {
     .driveMotorInverted = true,
 };
 
-SwerveModuleConfig leftBackSwerveConfig = {
+aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,
     .azimuthZeroOffset = 3093,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
@@ -114,7 +94,7 @@ SwerveModuleConfig leftBackSwerveConfig = {
     .driveMotorInverted = true,
 };
 
-SwerveModuleConfig rightBackSwerveConfig = {
+aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
     // .azimuthZeroOffset = 7878,
     .azimuthZeroOffset = 3679,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,

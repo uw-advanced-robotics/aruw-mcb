@@ -17,22 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#if defined(TARGET_SENTRY_BEEHIVE)
+// #if defined(TARGET_SENTRY_BEEHIVE)
 
-#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/swerve_module.hpp"
+#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/swerve_module.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
-#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::virtualMCB;
-
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -132,9 +131,13 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackAzimuthMotor,
     aruwsrc::sentry::chassis::rightBackSwerveConfig);
 
-aruwsrc::chassis::SwerveChassisSubsystem chassis(drivers(), &drivers()->mcbLite.currentSensor,
-    &leftFrontSwerveModule, &rightFrontSwerveModule, 
-    &leftBackSwerveModule, &rightBackSwerveModule, 
+aruwsrc::chassis::SwerveChassisSubsystem chassis(
+    drivers(),
+    &drivers()->mcbLite.currentSensor,
+    &leftFrontSwerveModule,
+    &rightFrontSwerveModule,
+    &leftBackSwerveModule,
+    &rightBackSwerveModule,
     aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
 
 /* define commands ----------------------------------------------------------*/
@@ -159,9 +162,7 @@ void registerSentrySubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(Drivers *) { 
-    chassis.setDefaultCommand(&chassisDriveCommand);
-}
+void setDefaultSentryCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers) { drivers = drivers; }
@@ -173,7 +174,7 @@ void registerSentryIoMappings(Drivers *drivers) { drivers = drivers; }
 namespace aruwsrc::sentry
 {
 void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
-{     
+{
     drivers->commandScheduler.setSafeDisconnectFunction(
         &sentry_control::remoteSafeDisconnectFunction);
     sentry_control::initializeSubsystems();
@@ -181,7 +182,7 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::setDefaultSentryCommands(drivers);
     sentry_control::startSentryCommands(drivers);
     sentry_control::registerSentryIoMappings(drivers);
- }
+}
 }  // namespace aruwsrc::sentry
 
-//#endif
+// #endif
