@@ -41,9 +41,9 @@ private:
     double prevTime = 0;
     const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
-    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0,
+    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0f,
                                                 sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
-                                                config.diameter / 2,
+                                                (float) config.diameter / 2,
                                                 cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)})
                                     .inverse();
     const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(AXLE_TO_ROBOT_FRONT),
