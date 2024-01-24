@@ -22,7 +22,8 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(driveMotor, config) {}
+MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(driveMotor, config),
+velocityPid(SmoothPid(config.velocityPidConfig)) {}
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
@@ -31,6 +32,12 @@ void MecanumWheel::executeWheelVelocity(float vx, float vy)
     double error = desiredMat.data[0] - motor.getShaftRPM();
     motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));
     prevTime = currentTime;
+}
+
+void MecanumWheel::initialize() {
+    if (config.isPowered) {
+        motor.initialize();
+    }
 }
 
 }  // namespace chassis

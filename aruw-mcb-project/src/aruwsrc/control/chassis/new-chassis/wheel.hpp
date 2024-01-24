@@ -83,13 +83,11 @@ public:
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
 
+    virtual void initialize();
+
 protected:
     // Motor that drives the wheel
     Motor& motor;
-    // PID used to control the driving motor
-    SmoothPid velocityPid;
-    // Whether or not the wheel is driven
-    WheelConfig config;
     /// matrix containing distances from wheel to chassis center
     tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
         {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
