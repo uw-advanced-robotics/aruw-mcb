@@ -39,20 +39,20 @@ public:
 private:
     /// time tracker for smoothpid
     double prevTime = 0;
-    double wheelRelativeRollerAngle = M_PI_4;
-    double axleToRobotFront = M_PI_2;
+    const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
+    const double AXLE_TO_ROBOT_FRONT = M_PI_2;
     const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0,
-                                                sin(wheelRelativeRollerAngle),
+                                                sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
                                                 config.diameter / 2,
-                                                cos(wheelRelativeRollerAngle)})
+                                                cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)})
                                     .inverse();
-    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(axleToRobotFront),
-                                                -sin(axleToRobotFront),
-                                                sin(axleToRobotFront),
-                                                cos(axleToRobotFront)})
+    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(AXLE_TO_ROBOT_FRONT),
+                                                -sin(AXLE_TO_ROBOT_FRONT),
+                                                sin(AXLE_TO_ROBOT_FRONT),
+                                                cos(AXLE_TO_ROBOT_FRONT)})
                                     .inverse();
     /// product of matrices 1 and 2 in equation on Swerve! Notion
-    tap::algorithms::CMSISMat<2, 2> productMat = MAT1 * MAT2;
+    const CMSISMat<2, 2> productMat = MAT1 * MAT2;
 };  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc

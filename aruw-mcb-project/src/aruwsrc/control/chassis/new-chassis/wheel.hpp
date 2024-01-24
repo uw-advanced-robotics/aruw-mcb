@@ -38,8 +38,7 @@ struct WheelConfig
 {
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
-    float wheelOrientationChassisRelative;  // config struct for each type of wheel but not for
-                                            // wheel config
+    float wheelOrientationChassisRelative;
     float diameter;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
