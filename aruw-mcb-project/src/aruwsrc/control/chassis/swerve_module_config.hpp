@@ -54,7 +54,7 @@ struct SwerveModuleConfig
     float distanceFromChassisCenter = 0.2f / M_SQRT2;
 
     // Whether any motor is inverted
-    const bool driveMotorInverted = false;
+    const bool driveMotorInverted;
     const bool azimuthMotorInverted =
         true;  // @todo doesn't quite make sense to put here bc the motors are instantiated before
                // the swerve modules (see main sentry control)
