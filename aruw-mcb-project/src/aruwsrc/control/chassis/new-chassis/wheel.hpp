@@ -38,7 +38,8 @@ struct WheelConfig
 {
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
-    float wheelOrientationChassisRelative; //config struct for each type of wheel but not for wheel config
+    float wheelOrientationChassisRelative;  // config struct for each type of wheel but not for
+                                            // wheel config
     float diameter;
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
@@ -64,14 +65,12 @@ public:
      *         in the x direction and the second value containing the desired velocity
      *         of the wheel in the y direction. Units: m/s. Might change type later???
      */
-    inline modm::Pair<float, float> calculateDesiredWheelVelocity(
-        float vx,
-        float vy,
-        float vr) {
-            CMSISMat<3, 1> chassisVel = tap::algorithms::CMSISMat<3, 1>({vx, vy, vr});
-            CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
-            return {wheelVel.data[0], wheelVel.data[1]};
-        }
+    inline modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr)
+    {
+        CMSISMat<3, 1> chassisVel = tap::algorithms::CMSISMat<3, 1>({vx, vy, vr});
+        CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
+        return {wheelVel.data[0], wheelVel.data[1]};
+    }
 
     /**
      * Updates the desired wheel RPM based on passed in x and y components of desired
@@ -89,8 +88,8 @@ protected:
     // Whether or not the wheel is driven
     WheelConfig config;
     /// matrix containing distances from wheel to chassis center
-    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>({1, 0, -config.wheelPositionChassisRelativeY,
-                                                                0, 1, config.wheelPositionChassisRelativeX});  
+    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
+        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc

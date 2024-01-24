@@ -19,8 +19,9 @@
 #ifndef MECANUM_WHEEL_HPP_
 #define MECANUM_WHEEL_HPP_
 
-#include "wheel.hpp"
 #include "tap\architecture\clock.hpp"
+
+#include "wheel.hpp"
 
 namespace aruwsrc
 {
@@ -30,19 +31,26 @@ class MecanumWheel : public Wheel
 {
 public:
     /* Creates an mecanum wheel object using given motor, wheel config, and smoothpid config
-    */
+     */
     MecanumWheel(Motor& driveMotor, WheelConfig& config);
 
     void executeWheelVelocity(float vx, float vy) override;
+
 private:
     /// time tracker for smoothpid
     double prevTime = 0;
     double wheelRelativeRollerAngle = M_PI_4;
     double axleToRobotFront = M_PI_2;
-    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0, sin(wheelRelativeRollerAngle), 
-                                                config.diameter / 2, cos(wheelRelativeRollerAngle)}).inverse();
-    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(axleToRobotFront), -sin(axleToRobotFront), 
-                                                sin(axleToRobotFront), cos(axleToRobotFront)}).inverse();
+    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0,
+                                                sin(wheelRelativeRollerAngle),
+                                                config.diameter / 2,
+                                                cos(wheelRelativeRollerAngle)})
+                                    .inverse();
+    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(axleToRobotFront),
+                                                -sin(axleToRobotFront),
+                                                sin(axleToRobotFront),
+                                                cos(axleToRobotFront)})
+                                    .inverse();
     /// product of matrices 1 and 2 in equation on Swerve! Notion
     tap::algorithms::CMSISMat<2, 2> productMat = MAT1 * MAT2;
 };  // class MecanumWheel
