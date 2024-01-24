@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -26,7 +26,7 @@ namespace aruwsrc
 namespace chassis
 {
 SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
-    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.DRIVE_MOTOR_GEARBOX_RATIO),
+    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.gearboxRatio),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
       config(config),

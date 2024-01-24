@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
-#define SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
+#ifndef SENTRY_TURRET_CONSTANTS_HPP_
+#define SENTRY_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -219,4 +219,4 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 }  // namespace world_rel_turret_imu
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
+#endif  // SENTRY_TURRET_CONSTANTS_HPP_
