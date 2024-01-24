@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_BEEHIVE_AGITATOR_CONSTANTS_HPP_
-#define SENTRY_BEEHIVE_AGITATOR_CONSTANTS_HPP_
+#ifndef SENTRY_AGITATOR_CONSTANTS_HPP_
+#define SENTRY_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"

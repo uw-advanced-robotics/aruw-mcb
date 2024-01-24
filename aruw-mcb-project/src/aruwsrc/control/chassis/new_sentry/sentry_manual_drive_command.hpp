@@ -32,7 +32,6 @@ namespace aruwsrc
 {
 namespace control::sentry
 {
-
 /**
  * A command that controls chassis-relative mecanum drive.
  */
