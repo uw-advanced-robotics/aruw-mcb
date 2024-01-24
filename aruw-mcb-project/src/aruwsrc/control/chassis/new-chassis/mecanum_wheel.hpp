@@ -19,7 +19,7 @@
 #ifndef MECANUM_WHEEL_HPP_
 #define MECANUM_WHEEL_HPP_
 
-#include "tap\architecture\clock.hpp"
+#include "tap/architecture/clock.hpp"
 
 #include "wheel.hpp"
 
