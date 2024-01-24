@@ -31,16 +31,17 @@ using namespace tap::communication::serial;
 class HandlerMock
 {
 public:
-    MOCK_METHOD0(selectNewRobotMessageHandlerCallback, void());
-    MOCK_METHOD0(targetNewQuadrantMessageHandlerCallback, void());
+    MOCK_METHOD0(noStrategyHandlerMock, void());
+    MOCK_METHOD0(goToFriendlyBaseHandlerMock, void());
 };
 
 class SentryRequestHandlerTest : public Test
 {
 protected:
     SentryRequestHandlerTest() : handler(&drivers) { i = 0; }
-    static void selectNewRobotMessageHandlerCallback() { i++; };
-    static void targetNewQuadrantMessageHandlerCallback() { i++; };
+
+    static void noStrategyHandlerMock() { i++; };
+    static void goToFriendlyBaseHandlerMock() { i++; };
 
     tap::Drivers drivers;
     tap::communication::serial::DJISerial::ReceivedSerialMessage message{};
@@ -65,8 +66,8 @@ TEST_F(SentryRequestHandlerTest, callback_called_invalid_message_id_raises_error
 
 TEST_F(SentryRequestHandlerTest, callback_called_message_handlers_invoked)
 {
-    handler.attachSelectNewRobotMessageHandler(selectNewRobotMessageHandlerCallback);
-    handler.attachTargetNewQuadrantMessageHandler(targetNewQuadrantMessageHandlerCallback);
+    handler.attachNoStrategyHandler(noStrategyHandlerMock);
+    handler.attachGoToFriendlyBaseHandler(goToFriendlyBaseHandlerMock);
     message.data[sizeof(RefSerialData::Tx::InteractiveHeader)] = 0;
     handler(message);
     EXPECT_EQ(1, i);
