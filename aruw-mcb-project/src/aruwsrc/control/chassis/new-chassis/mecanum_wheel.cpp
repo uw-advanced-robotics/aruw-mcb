@@ -22,42 +22,17 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config, SmoothPidConfig& wheelPIDConfig)
-    : Wheel(driveMotor, config),
-      motor(driveMotor),
-      config(config),
-      velocityPid(SmoothPid(wheelPIDConfig))
+MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config)
+    : Wheel(driveMotor, config)
 {
-    tap::algorithms::CMSISMat<2, 2> mat1 =
-        tap::algorithms::CMSISMat<2, 2>({0.0, 1.0, config.diameter / 2, 0.0});
-    mat1 = mat1.inverse();
-    tap::algorithms::CMSISMat<2, 2> mat2 = tap::algorithms::CMSISMat<2, 2>({0.0, -1.0, 1.0, 0.0});
-    mat2 = mat2.inverse();
-    productMat = mat1 * mat2;
-    distanceMat = tap::algorithms::CMSISMat<2, 3>(
-        {1,
-         0,
-         -1 * config.wheelPositionChassisRelativeY,
-         0,
-         1,
-         config.wheelPositionChassisRelativeX});
-}
-
-modm::Pair<float, float> MecanumWheel::calculateDesiredWheelVelocity(float vx, float vy, float vr)
-{
-    tap::algorithms::CMSISMat<3, 1> chassisVel = tap::algorithms::CMSISMat<3, 1>({vx, vy, vr});
-    tap::algorithms::CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
-    return {wheelVel.data[0], wheelVel.data[1]};
 }
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
-    tap::algorithms::CMSISMat<2, 1> desiredMat =
-        productMat * tap::algorithms::CMSISMat<2, 1>({vx, vy});
+    CMSISMat<2, 1> desiredMat = productMat * CMSISMat<2, 1>({vx, vy});
     double currentTime = tap::arch::clock::getTimeMicroseconds();
-    motor.setDesiredOutput(velocityPid.runControllerDerivateError(
-        desiredMat.data[0] - motor.getShaftRPM(),
-        currentTime - prevTime));
+    double error = desiredMat.data[0] - motor.getShaftRPM();
+    motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));
     prevTime = currentTime;
 }
 
