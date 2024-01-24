@@ -43,7 +43,7 @@ private:
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
     const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0f,
                                                 sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
-                                                (float) config.diameter / 2,
+                                                config.diameter / 2,
                                                 cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)})
                                     .inverse();
     const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(AXLE_TO_ROBOT_FRONT),
