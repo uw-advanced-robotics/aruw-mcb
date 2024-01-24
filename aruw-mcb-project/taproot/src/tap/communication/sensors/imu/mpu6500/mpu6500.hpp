@@ -31,13 +31,12 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_config.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
+#include "tap/communication/sensors/imu/random-algorithms/tamu/nxp_fusion.hpp"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
-
-#include "tap/communication/sensors/imu/random-algorithms/tamu/nxp_fusion.hpp"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -259,8 +258,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (raw.magnetometer.y - raw.magnetometerOffset.y) /
-            (calibrationMaxReading.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
+            (raw.magnetometer.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
     }
 
     /**
@@ -271,8 +269,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (raw.magnetometer.x - raw.magnetometerOffset.x) /
-            (calibrationMaxReading.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
+            (raw.magnetometer.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
     }
 
     /**
@@ -281,8 +278,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (raw.magnetometer.z - raw.magnetometerOffset.z) /
-            (calibrationMaxReading.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
+            (raw.magnetometer.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
     }
 
     /**

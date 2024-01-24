@@ -43,7 +43,7 @@
 #define FQVA_9DOF_GBY_KALMAN 2E-6F              // accelerometer noise g^2 so 1.4mg RMS
 #define FQVM_9DOF_GBY_KALMAN 0.1F               // magnetometer noise uT^2
 #define FQVG_9DOF_GBY_KALMAN 0.3F               // gyro noise (deg/s)^2
-#define FQWB_9DOF_GBY_KALMAN 1E-2F              // gyro offset drift (deg/s)^2: 1E-9 implies 0.09deg/s max at 50Hz
+#define FQWB_9DOF_GBY_KALMAN 1E-9F              // gyro offset drift (deg/s)^2: 1E-9 implies 0.09deg/s max at 50Hz
 #define FQWA_9DOF_GBY_KALMAN 1E-4F              // linear acceleration drift g^2 (increase slows convergence to g but reduces sensitivity to shake)
 #define FQWD_9DOF_GBY_KALMAN 0.5F               // magnetic disturbance drift uT^2 (increase slows convergence to B but reduces sensitivity to magnet)
 // initialization of Qw covariance matrix
@@ -228,11 +228,13 @@ void NXPSensorFusion::update(float gx, float gy, float gz, float ax, float ay, f
 	// *********************************************************************************
 	// initial orientation lock to accelerometer and magnetometer eCompass orientation
 	// *********************************************************************************
-	if (fabsf(mx) >= 20.0f && fabsf(my) >= 20.0f && fabsf(mz) >= 20.0f) {
-		ValidMagCal = 1;
-	} else {
-		ValidMagCal = 0;
-	}
+	// if (fabsf(mx) >= 20.0f && fabsf(my) >= 20.0f && fabsf(mz) >= 20.0f) {
+	// 	ValidMagCal = 1;
+	// } else {
+	// 	ValidMagCal = 0;
+	// }
+
+	ValidMagCal = 1;
 	
 	// do a once-only orientation lock after the first valid magnetic calibration
 	if (ValidMagCal && !FirstOrientationLock) {
