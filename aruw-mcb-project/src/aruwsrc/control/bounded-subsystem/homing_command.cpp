@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,21 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_request_subsystem.hpp"
+#include "homing_command.hpp"
 
-#include "tap/drivers.hpp"
-
-namespace aruwsrc::communication::serial
+namespace aruwsrc::control
 {
-SentryRequestSubsystem::SentryRequestSubsystem(tap::Drivers *drivers)
-    : tap::control::Subsystem(drivers),
-      sentryRequestTransmitter{
-          *drivers,
-          {tap::communication::serial::RefSerialData::RobotId::BLUE_SENTINEL},
-          SENTRY_REQUEST_ROBOT_ID}
-{
-}
+/**
+ * Once the subsystem's calibration is finished, homedAndBounded will be true, and the subsystem's
+ * motor will be at rest.
+ */
+void HomingCommand::initialize() { subsystem.startCalibrate(); }
 
-void SentryRequestSubsystem::refresh() { sentryRequestTransmitter.sendQueued(); }
+bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
 
-}  // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::control
