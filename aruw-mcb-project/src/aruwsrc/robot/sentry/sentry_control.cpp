@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// #if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -185,4 +185,4 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }
 }  // namespace aruwsrc::sentry
 
-// #endif
+#endif
