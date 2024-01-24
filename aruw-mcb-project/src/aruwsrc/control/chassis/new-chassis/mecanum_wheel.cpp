@@ -26,7 +26,7 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(drive
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
-    CMSISMat<2, 1> desiredMat = productMat * CMSISMat<2, 1>({vx, vy});
+    CMSISMat<2, 1> desiredMat = PRODUCT_MAT * CMSISMat<2, 1>({vx, vy});
     double currentTime = tap::arch::clock::getTimeMicroseconds();
     double error = desiredMat.data[0] - motor.getShaftRPM();
     motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));

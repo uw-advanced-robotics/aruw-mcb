@@ -52,7 +52,7 @@ private:
                                                 cos(AXLE_TO_ROBOT_FRONT)})
                                     .inverse();
     /// product of matrices 1 and 2 in equation on Swerve! Notion
-    const CMSISMat<2, 2> productMat = MAT1 * MAT2;
+    const CMSISMat<2, 2> PRODUCT_MAT = MAT1 * MAT2;
 };  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc
