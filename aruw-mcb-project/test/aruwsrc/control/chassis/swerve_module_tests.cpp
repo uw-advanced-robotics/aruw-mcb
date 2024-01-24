@@ -54,7 +54,7 @@ protected:
     }
 
     tap::Drivers drivers;
-    SwerveModuleConfig TEST_SWERVE_CONFIG{.driveMotorInverted=false};
+    SwerveModuleConfig TEST_SWERVE_CONFIG{.driveMotorInverted = false};
     NiceMock<tap::mock::DjiMotorMock> driveMock;
     NiceMock<tap::mock::DjiMotorMock> azimuthMock;
     SwerveModule module;
