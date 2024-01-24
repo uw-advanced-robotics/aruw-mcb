@@ -33,10 +33,11 @@
 #include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
-#include "modm/math/filter/moving_average.hpp"
 
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
+
+#include "tap/communication/sensors/imu/random-algorithms/tamu/nxp_fusion.hpp"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -258,7 +259,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (magnetometerYFilter.getValue() - raw.magnetometerOffset.y) /
+            (raw.magnetometer.y - raw.magnetometerOffset.y) /
             (calibrationMaxReading.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
     }
 
@@ -270,7 +271,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (magnetometerXFilter.getValue() - raw.magnetometerOffset.x) /
+            (raw.magnetometer.x - raw.magnetometerOffset.x) /
             (calibrationMaxReading.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
     }
 
@@ -280,7 +281,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (magnetometerZFilter.getValue() - raw.magnetometerOffset.z) /
+            (raw.magnetometer.z - raw.magnetometerOffset.z) /
             (calibrationMaxReading.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
     }
 
@@ -452,10 +453,9 @@ private:
 
     bool requestCalibrationFlagDebug = false;
 
+    utils::NXPSensorFusion nxpSensorFusion;
     float heading;
-
-    modm::filter::MovingAverage<float, 15> magnetometerXFilter, magnetometerYFilter, magnetometerZFilter;
-
+    float mahonyHeading;
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500

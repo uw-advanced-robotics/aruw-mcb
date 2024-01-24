@@ -145,6 +145,7 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
+    nxpSensorFusion.begin(sampleFrequency);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
@@ -170,7 +171,18 @@ void Mpu6500::periodicIMUUpdate()
             getMy(),
             getMz());
         tiltAngleCalculated = false;
-        heading = modm::toDegree(mahonyAlgorithm.getPitch());
+        nxpSensorFusion.update(
+            getGx(),
+            getGy(),
+            getGz(),
+            getAx(),
+            getAy(),
+            getAz(),
+            raw.magnetometer.y,
+            raw.magnetometer.x,
+            raw.magnetometer.y);
+            heading = nxpSensorFusion.getYaw();
+            mahonyHeading = mahonyAlgorithm.getYaw();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else if (imuState == ImuState::IMU_CALIBRATING)
@@ -218,6 +230,7 @@ void Mpu6500::periodicIMUUpdate()
 
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
+            nxpSensorFusion.begin(500);
         }
     }
 
@@ -246,10 +259,6 @@ bool Mpu6500::read()
         (*processRawMpu6500DataFn)(rxBuff, raw.accel, raw.gyro, raw.magnetometer);
 
         raw.temperature = rxBuff[6] << 8 | rxBuff[7];
-
-        magnetometerXFilter.update(raw.magnetometer.x);
-        magnetometerYFilter.update(raw.magnetometer.y);
-        magnetometerZFilter.update(raw.magnetometer.z);
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
     }
