@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -140,7 +140,9 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 void VisionCoprocessor::sendMessage()
 {
+#if not defined(TARGET_SENTRY_BEEHIVE)
     sendOdometryData();
+#endif
     sendRobotTypeData();
     sendHealthMessage();
     sendRefereeRealtimeData();
