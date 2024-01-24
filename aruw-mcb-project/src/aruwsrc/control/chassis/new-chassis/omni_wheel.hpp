@@ -19,6 +19,8 @@
 #ifndef OMNI_WHEEL_HPP_
 #define OMNI_WHEEL_HPP_
 
+#include "tap/architecture/clock.hpp"
+
 #include "wheel.hpp"
 
 namespace aruwsrc
@@ -28,32 +30,31 @@ namespace chassis
 class OmniWheel : public Wheel
 {
 public:
-    /* Creates an omni wheel object using given motorId, x-direction distance from chassis center,
-        y-direction distance from chassis center, wheel orientation, if wheel is powered
-    */
-    OmniWheel(Motor& driveMotor, WheelConfig& config, SmoothPidConfig& wheelPIDConfig);
-
-    const double WHEEL_RELATIVE_ROLLER_ANGLE = M_PI_2;
-    const double AXLE_TO_ROBOT_FRONT = M_PI_2;
+    /* Creates an mecanum wheel object using given motor, wheel config, and smoothpid config
+     */
+    OmniWheel(Motor& driveMotor, WheelConfig& config);
 
     void executeWheelVelocity(float vx, float vy) override;
-    modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr) override;
 
 private:
-    // Motor that drives the wheel
-    tap::motor::DjiMotor& motor;
-    // PID used to control the driving motor
-    tap::algorithms::SmoothPid velocityPid;
-    // config for the wheel PID controller
-    WheelConfig config;
-    // product of matrices 1 and 2 in equation on Swerve! Notion
-    tap::algorithms::CMSISMat<2, 2> productMat;
-    // matrix containing distances from wheel to chassis center
-    tap::algorithms::CMSISMat<2, 3> distanceMat;
-    // time tracker for smoothpid
+    /// time tracker for smoothpid
     double prevTime = 0;
-};  // class OmniWheel
+    const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
+    const double AXLE_TO_ROBOT_FRONT = M_PI_2;
+    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0,
+                                                sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+                                                config.diameter / 2,
+                                                cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)})
+                                    .inverse();
+    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({cos(AXLE_TO_ROBOT_FRONT),
+                                                -sin(AXLE_TO_ROBOT_FRONT),
+                                                sin(AXLE_TO_ROBOT_FRONT),
+                                                cos(AXLE_TO_ROBOT_FRONT)})
+                                    .inverse();
+    /// product of matrices 1 and 2 in equation on Swerve! Notion
+    const CMSISMat<2, 2> PRODUCT_MAT = MAT1 * MAT2;
+};  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc
 
-#endif  // OMNI_WHEEL_HPP_
+#endif  // MECANUM_WHEEL_HPP_
