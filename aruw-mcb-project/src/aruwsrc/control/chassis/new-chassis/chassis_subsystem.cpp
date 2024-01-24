@@ -115,7 +115,7 @@ void ChassisSubsystem::initialize()
 
 void ChassisSubsystem::refresh()
 {
-   for (int i = 0; i < getNumChassisWheels(); i++)
+    for (int i = 0; i < getNumChassisWheels(); i++)
     {
         float coeff = std::min(wheels[i].config.maxWheelRPM / tempMax, 1.0f);
         wheels[i].executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);

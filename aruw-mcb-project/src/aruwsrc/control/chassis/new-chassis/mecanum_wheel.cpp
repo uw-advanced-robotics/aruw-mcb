@@ -22,8 +22,11 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(driveMotor, config),
-velocityPid(SmoothPid(config.velocityPidConfig)) {}
+MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config)
+    : Wheel(driveMotor, config),
+      velocityPid(SmoothPid(config.velocityPidConfig))
+{
+}
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
@@ -34,8 +37,10 @@ void MecanumWheel::executeWheelVelocity(float vx, float vy)
     prevTime = currentTime;
 }
 
-void MecanumWheel::initialize() {
-    if (config.isPowered) {
+void MecanumWheel::initialize()
+{
+    if (config.isPowered)
+    {
         motor.initialize();
     }
 }
