@@ -19,9 +19,9 @@
 #ifndef WHEEL_HPP_
 #define WHEEL_HPP_
 
+#include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "tap/algorithms/cmsis_mat.hpp"
 
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
