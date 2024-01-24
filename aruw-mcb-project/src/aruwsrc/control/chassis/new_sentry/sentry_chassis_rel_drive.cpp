@@ -22,8 +22,8 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace tap::algorithms;
 
@@ -50,7 +50,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
-    
+
     *chassisXDesiredWheelspeed = limitVal(
         operatorInterface->getChassisXVelocity(),
         -rotationLimitedMaxTranslationalSpeed,
@@ -85,4 +85,4 @@ void SentryChassisRelDrive::onExecute(
         chassisYDesiredWheelspeed,
         chassisRotationDesiredWheelspeed);
 }
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::sentry

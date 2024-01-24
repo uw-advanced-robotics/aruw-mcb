@@ -4,8 +4,8 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::sentry;
 
@@ -46,8 +46,8 @@ private:
     chassis::HolonomicChassisSubsystem* chassis;
 };  // class SentryManualDriveCommand
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace control::sentry
 
 }  // namespace aruwsrc
 
-#endif // SENTRY_MANUAL_DRIVE_COMMAND_HPP_
+#endif  // SENTRY_MANUAL_DRIVE_COMMAND_HPP_

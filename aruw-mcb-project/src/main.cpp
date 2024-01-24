@@ -149,9 +149,7 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_SENTRY_BEEHIVE)
     ((Drivers *)drivers)->mcbLite.initialize();
 #endif
-
 }
-
 
 static void updateIo(tap::Drivers *drivers)
 {

@@ -27,7 +27,6 @@
 
 namespace aruwsrc::control::sentry
 {
-
 /**
  * A helper object that performs the computations necessary for chassis relative driving
  * on the sentry.
@@ -53,4 +52,3 @@ public:
 }  // namespace aruwsrc::control::sentry
 
 #endif  // SENTRY_CHASSIS_REL_DRIVE_HPP_
-

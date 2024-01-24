@@ -22,16 +22,8 @@
 
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
-// #include "sentry_beyblade_command.hpp"
-
-namespace aruwsrc::chassis
-{
-// static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
-}
-
 namespace aruwsrc::sentry::chassis
 {
-
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
