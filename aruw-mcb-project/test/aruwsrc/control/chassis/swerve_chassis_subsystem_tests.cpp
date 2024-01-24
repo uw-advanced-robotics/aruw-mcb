@@ -51,6 +51,8 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.0,       0.25,      0.,        0.25,     0.,       0.25,      0.,       0.25,
     -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325};
 
+static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;
+
 class SwerveChassisSubsystemTest : public Test
 {
 protected:
@@ -69,7 +71,7 @@ protected:
           LBAz(&drivers, tap::motor::MOTOR6, CAN_BUS_MOTORS, false, "lb azimuth mock"),
           RBDr(&drivers, tap::motor::MOTOR7, CAN_BUS_MOTORS, false, "rb drive mock"),
           RBAz(&drivers, tap::motor::MOTOR8, CAN_BUS_MOTORS, false, "rb azimuth mock"),
-          moduleLF(LFDr, LFAz, DEFAULT_SWERVE_CONFIG),
+          moduleLF(LFDr, LFAz, j),
           moduleRF(RFDr, RFAz, DEFAULT_SWERVE_CONFIG),
           moduleLB(LBDr, LBAz, DEFAULT_SWERVE_CONFIG),
           moduleRB(RBDr, RBAz, DEFAULT_SWERVE_CONFIG),

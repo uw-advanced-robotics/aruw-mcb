@@ -46,9 +46,6 @@ struct SwerveModuleConfig
     tap::motor::MotorId azimuthMotorId = tap::motor::MOTOR5;
 
     // in meters, measured from center
-    // @todo why defaullllltttssss T.T
-    // @todo also, currently unused; see other todos in swerve drive and swerve module which suggest
-    // how to use them
     float positionWithinChassisX = 0.2f;
     float positionWithinChassisY = 0.2f;
 
@@ -57,8 +54,7 @@ struct SwerveModuleConfig
     float distanceFromChassisCenter = 0.2f / M_SQRT2;
 
     // Whether any motor is inverted
-    // @todo these should not be specified by default !!!
-    const bool driveMotorInverted;
+    const bool driveMotorInverted = false;
     const bool azimuthMotorInverted =
         true;  // @todo doesn't quite make sense to put here bc the motors are instantiated before
                // the swerve modules (see main sentry control)
