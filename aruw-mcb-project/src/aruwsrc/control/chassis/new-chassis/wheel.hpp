@@ -39,9 +39,9 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    float diameter;       // considering shoving these into DjiMotor in the future
-    float gearRatio;      // considering shoving these into DjiMotor in the future
-    float motorGearRatio; // considering shoving these into DjiMotor in the future
+    float diameter;        // considering shoving these into DjiMotor in the future
+    float gearRatio;       // considering shoving these into DjiMotor in the future
+    float motorGearRatio;  // considering shoving these into DjiMotor in the future
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
     float maxWheelRPM;
@@ -53,10 +53,11 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(WheelConfig& config);
+    Wheel(Motor& driveMotor, WheelConfig& config);
 
     // Config parameters for the individual wheel
     const WheelConfig config;
+    ;
 
     // PID used to control the driving motor
     const SmoothPid velocityPid;
@@ -109,12 +110,18 @@ public:
 
     virtual float getDriveRPM() const;
 
-
-
 protected:
-    /// matrix containing distances from wheel to chassis center
-    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
-        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
+    // Motor that drives the wheel
+    Motor& motor
+        /// matrix containing distances from wheel to chassis center
+        tap::algorithms::CMSISMat<2, 3>
+            distanceMat = CMSISMat<2, 3>(
+                {1,
+                 0,
+                 -config.wheelPositionChassisRelativeY,
+                 0,
+                 1,
+                 config.wheelPositionChassisRelativeX});
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc
