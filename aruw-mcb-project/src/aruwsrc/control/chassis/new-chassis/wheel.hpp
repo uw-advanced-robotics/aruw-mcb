@@ -112,16 +112,10 @@ public:
 
 protected:
     // Motor that drives the wheel
-    Motor& motor
-        /// matrix containing distances from wheel to chassis center
-        tap::algorithms::CMSISMat<2, 3>
-            distanceMat = CMSISMat<2, 3>(
-                {1,
-                 0,
-                 -config.wheelPositionChassisRelativeY,
-                 0,
-                 1,
-                 config.wheelPositionChassisRelativeX});
+    Motor& motor;
+    /// matrix containing distances from wheel to chassis center
+    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
+        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc
