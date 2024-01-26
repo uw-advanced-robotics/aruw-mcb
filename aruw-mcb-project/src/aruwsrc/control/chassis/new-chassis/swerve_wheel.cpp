@@ -42,7 +42,6 @@ SwerveWheel::SwerveWheel(
     speedSetpointRPM = 0;
 }
 
-
 void SwerveWheel::executeWheelVelocity(float vx, float vy)
 {
     moveVectorX = vx;
@@ -91,8 +90,6 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
     rotationSetpoint = preScaledRotationSetpoint;
 }
 
-
-
 void SwerveWheel::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
@@ -111,7 +108,8 @@ float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 float SwerveWheel::getAngle() const
 {
     return modm::toRadian(
-        azimuthMotor.encoderToDegrees(azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
+        azimuthMotor.encoderToDegrees(
+            azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
         azimuthConfig.azimuthMotorGearing);
 }
 
@@ -128,7 +126,8 @@ bool SwerveWheel::allMotorsOnline() const
 
 float SwerveWheel::getAngularVelocity() const
 {
-    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * (azimuthConfig.azimuthMotorGearing);
+    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) *
+           (azimuthConfig.azimuthMotorGearing);
 }
 
 }  // namespace chassis

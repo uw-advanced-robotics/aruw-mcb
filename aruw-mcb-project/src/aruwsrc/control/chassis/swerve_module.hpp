@@ -69,7 +69,7 @@ public:
      * @return pre-scaled module speed in rpm
      */
     float calculate(float x, float y, float r);
-    
+
     /**
      * Returns the signed speed of the drive wheel in m/s
      */
