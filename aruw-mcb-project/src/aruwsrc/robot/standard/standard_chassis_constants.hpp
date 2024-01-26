@@ -24,6 +24,8 @@
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
@@ -76,6 +78,13 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
+static const SmoothPidConfig MOTOR_PID_CONFIG = {
+    aruwsrc::chassis::VELOCITY_PID_KP,
+    aruwsrc::chassis::VELOCITY_PID_KI,
+    aruwsrc::chassis::VELOCITY_PID_KD,
+    aruwsrc::chassis::VELOCITY_PID_MAX_ERROR_SUM,
+    aruwsrc::chassis::VELOCITY_PID_MAX_OUTPUT};
+
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
@@ -96,6 +105,11 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m).
  */
 static constexpr float WHEEL_RADIUS = 0.076;
+
+/*
+* Wheel orientation (chassis relative) (rad)
+*/
+static constexpr float WHEEL_ORIENTATION_CHASSIS_RELATIVE = 0.0f;
 
 #ifdef TARGET_STANDARD_WOODY
 /**
@@ -119,6 +133,34 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #endif
 
+static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+     WIDTH_BETWEEN_WHEELS_Y / 2,
+     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+     WHEEL_RADIUS * 2,
+     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     1000.0f,
+     true};
+static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+     -WIDTH_BETWEEN_WHEELS_Y / 2,
+     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+     WHEEL_RADIUS * 2,
+     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     1000.0f,
+     false};
+static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+     WIDTH_BETWEEN_WHEELS_Y / 2,
+     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+     WHEEL_RADIUS * 2,
+     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     1000.0f,
+     true};
+static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+     -WIDTH_BETWEEN_WHEELS_Y / 2,
+     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+     WHEEL_RADIUS * 2,
+     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     1000.0f,
+     false};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1
