@@ -56,7 +56,7 @@ public:
     Wheel(WheelConfig& config);
 
     // Config parameters for the individual wheel
-    WheelConfig config;
+    const WheelConfig config;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -95,8 +95,6 @@ public:
     }
 
 private:
-    // Whether or not the wheel is driven
-    WheelConfig config;
 
     virtual void initialize();
 
