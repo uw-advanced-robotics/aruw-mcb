@@ -42,7 +42,7 @@ SwerveWheel(
         SwerveAzimuthConfig& azimuthConfig,
         SmoothPid drivePid,
         SmoothPid azimuthPid);
-modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr) override;
+void executeWheelVelocity(float vx, float vy) override;
 void refresh() override;
 void initialize() override;
 void setZeroRPM() override;

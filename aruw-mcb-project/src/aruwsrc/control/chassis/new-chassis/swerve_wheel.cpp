@@ -26,10 +26,10 @@ SwerveWheel::SwerveWheel(
 }
 
 
-modm::Pair<float, float> SwerveWheel::calculateDesiredWheelVelocity(float vx, float vy, float vr)
+void SwerveWheel::executeWheelVelocity(float vx, float vy)
 {
-    moveVectorX = vx + vr * rotationVectorX;
-    moveVectorY = vy + vr * rotationVectorY;
+    moveVectorX = vx;
+    moveVectorY = vy;
 
     if (compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
@@ -70,8 +70,11 @@ modm::Pair<float, float> SwerveWheel::calculateDesiredWheelVelocity(float vx, fl
         if (compareFloatClose(wrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1))
             preScaledSpeedSetpoint *= -1;
     }
-    return modm::Pair<float, float>(preScaledSpeedSetpoint, preScaledRotationSetpoint);
+    speedSetpointRPM = preScaledSpeedSetpoint;
+    rotationSetpoint = preScaledRotationSetpoint;
 }
+
+
 
 void SwerveWheel::refresh()
 {
