@@ -189,6 +189,8 @@ public:
 
 private:
     double prevTime = 0.0;
+    modm::Pair<float, float> desiredWheelVel;
+    float tempMax = 0;
 };  // class ChassisSubsystem
 
 }  // namespace chassis
