@@ -39,7 +39,9 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    float diameter;
+    float diameter;        // considering shoving these into DjiMotor in the future
+    float gearRatio;       // considering shoving these into DjiMotor in the future
+    float motorGearRatio;  // considering shoving these into DjiMotor in the future
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
     float maxWheelRPM;
@@ -54,7 +56,11 @@ public:
     Wheel(Motor& driveMotor, WheelConfig& config);
 
     // Config parameters for the individual wheel
-    WheelConfig config;
+    const WheelConfig config;
+    ;
+
+    // PID used to control the driving motor
+    const SmoothPid velocityPid;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -82,8 +88,27 @@ public:
      * @param[in] vy The desired velocity of the wheel to move in the y direction in m/s
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
+    inline float mpsToRpm(float mps) const
+    {
+        return (mps / (config.diameter * M_PI)) / config.motorGearRatio * 60.0f / config.gearRatio;
+    }
+
+    inline float rpmToMps(float rpm) const
+    {
+        return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
+    }
 
     virtual void initialize();
+
+    virtual void refresh();
+
+    virtual void setZeroRPM();
+
+    virtual bool allMotorsOnline() const;
+
+    virtual float getDriveVelocity() const;
+
+    virtual float getDriveRPM() const;
 
 protected:
     // Motor that drives the wheel
