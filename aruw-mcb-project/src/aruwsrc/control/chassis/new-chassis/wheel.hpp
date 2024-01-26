@@ -58,6 +58,9 @@ public:
     // Config parameters for the individual wheel
     const WheelConfig config;
 
+    // PID used to control the driving motor
+    const SmoothPid velocityPid;
+
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
      * components of the chassis velocity
@@ -94,8 +97,6 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
-private:
-
     virtual void initialize();
 
     virtual void refresh();
@@ -109,14 +110,6 @@ private:
     virtual float getDriveRPM() const;
 
 
-
-
-    // Motor that drives the wheel
-    Motor& motor;
-    // PID used to control the driving motor
-    SmoothPid velocityPid;
-    // Whether or not the wheel is driven
-    WheelConfig config;
 
 protected:
     /// matrix containing distances from wheel to chassis center
