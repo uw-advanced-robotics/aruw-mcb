@@ -27,7 +27,6 @@
 #include "tap/motor/m3508_constants.hpp"
 
 #include "../swerve_module_config.hpp"
-#include "aruwsrc/algorithms/wheel.hpp"
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
