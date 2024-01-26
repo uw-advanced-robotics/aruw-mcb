@@ -147,78 +147,65 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-DjiMotor leftFrontDriveMotor(
+SmoothPidConfig motorPidConfig = {
+    aruwsrc::chassis::VELOCITY_PID_KP,
+    aruwsrc::chassis::VELOCITY_PID_KI,
+    aruwsrc::chassis::VELOCITY_PID_KD,
+    aruwsrc::chassis::VELOCITY_PID_MAX_ERROR_SUM,
+    aruwsrc::chassis::VELOCITY_PID_MAX_OUTPUT};
+
+tap::motor::DjiMotor leftFrontDriveMotor(
     drivers(),
     LEFT_FRONT_MOTOR_ID,
     CAN_BUS_MOTORS,
     true,
     "Left Front Drive Motor");
-DjiMotor rightFrontDriveMotor(
+tap::motor::DjiMotor rightFrontDriveMotor(
     drivers(),
     RIGHT_FRONT_MOTOR_ID,
     CAN_BUS_MOTORS,
     true,
     "Right Front Drive Motor");
-DjiMotor leftBackDriveMotor(
+tap::motor::DjiMotor leftBackDriveMotor(
     drivers(),
     LEFT_BACK_MOTOR_ID,
     CAN_BUS_MOTORS,
     false,
     "Left Back Drive Motor");
-DjiMotor rightBackDriveMotor(
+tap::motor::DjiMotor rightBackDriveMotor(
     drivers(),
     RIGHT_BACK_MOTOR_ID CAN_BUS_MOTORS,
     false,
     "Right Back Drive Motor");
 
-MecanumWheel leftFrontMecanumWheel(
+aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
     leftFrontDriveMotor,
     {WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      0,
      WHEEL_RADIUS * 2,
-     SmoothPidConfig(
-         {VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT})});
-MecanumWheel rightFrontMecanumWheel(
+     SmoothPidConfig(motorPidConfig)});
+aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
     rightFrontDriveMotor,
     {WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      0,
      WHEEL_RADIUS * 2,
-     SmoothPidConfig(
-         {VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT})});
-MecanumWheel leftBackMecanumWheel(
+     SmoothPidConfig(motorPidConfig)});
+aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
     leftBackDriveMotor,
     {-WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      0,
      WHEEL_RADIUS * 2,
-     SmoothPidConfig(
-         {VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT})});
-MecanumWheel rightBackMecanumWheel(
+     SmoothPidConfig(motorPidConfig)});
+aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     rightBackDriveMotor,
     {-WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      0,
      WHEEL_RADIUS * 2,
-     SmoothPidConfig(
-         {VELOCITY_PID_KP,
-          VELOCITY_PID_KI,
-          VELOCITY_PID_KD,
-          VELOCITY_PID_MAX_ERROR_SUM,
-          VELOCITY_PID_MAX_OUTPUT})});
+     SmoothPidConfig(motorPidConfig)});
 aruwsrc::chassis::ChassisSubsystem chassis(
     *drivers(),
     {leftFrontMecanumWheel, rightFrontMecanumWheel, leftBackMecanumWheel, rightBackMecanumWheel},
