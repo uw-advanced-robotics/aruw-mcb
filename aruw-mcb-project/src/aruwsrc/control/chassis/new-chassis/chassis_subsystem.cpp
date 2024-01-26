@@ -98,8 +98,8 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,
-            rotationTranslationGain * y,
+            rotationTranslationGain * x,  // change
+            rotationTranslationGain * y,  // change
             r);
         tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
     }

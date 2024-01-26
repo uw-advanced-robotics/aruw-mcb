@@ -39,6 +39,7 @@ public:
     void initialize() override;
 
 private:
+    Motor& driveMotor;
     /// time tracker for smoothpid
     double prevTime = 0;
     // PID used to control the driving motor

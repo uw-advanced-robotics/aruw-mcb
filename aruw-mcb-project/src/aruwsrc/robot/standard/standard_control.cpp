@@ -53,6 +53,8 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -145,7 +147,82 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
+DjiMotor leftFrontDriveMotor(
+    drivers(),
+    LEFT_FRONT_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Left Front Drive Motor");
+DjiMotor rightFrontDriveMotor(
+    drivers(),
+    RIGHT_FRONT_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Right Front Drive Motor");
+DjiMotor leftBackDriveMotor(
+    drivers(),
+    LEFT_BACK_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    false,
+    "Left Back Drive Motor");
+DjiMotor rightBackDriveMotor(
+    drivers(),
+    RIGHT_BACK_MOTOR_ID CAN_BUS_MOTORS,
+    false,
+    "Right Back Drive Motor");
+
+MecanumWheel leftFrontMecanumWheel(
+    leftFrontDriveMotor,
+    {WIDTH_BETWEEN_WHEELS_X / 2,
+     WIDTH_BETWEEN_WHEELS_Y / 2,
+     0,
+     WHEEL_RADIUS * 2,
+     SmoothPidConfig(
+         {VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT})});
+MecanumWheel rightFrontMecanumWheel(
+    rightFrontDriveMotor,
+    {WIDTH_BETWEEN_WHEELS_X / 2,
+     -WIDTH_BETWEEN_WHEELS_Y / 2,
+     0,
+     WHEEL_RADIUS * 2,
+     SmoothPidConfig(
+         {VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT})});
+MecanumWheel leftBackMecanumWheel(
+    leftBackDriveMotor,
+    {-WIDTH_BETWEEN_WHEELS_X / 2,
+     WIDTH_BETWEEN_WHEELS_Y / 2,
+     0,
+     WHEEL_RADIUS * 2,
+     SmoothPidConfig(
+         {VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT})});
+MecanumWheel rightBackMecanumWheel(
+    rightBackDriveMotor,
+    {-WIDTH_BETWEEN_WHEELS_X / 2,
+     -WIDTH_BETWEEN_WHEELS_Y / 2,
+     0,
+     WHEEL_RADIUS * 2,
+     SmoothPidConfig(
+         {VELOCITY_PID_KP,
+          VELOCITY_PID_KI,
+          VELOCITY_PID_KD,
+          VELOCITY_PID_MAX_ERROR_SUM,
+          VELOCITY_PID_MAX_OUTPUT})});
+aruwsrc::chassis::ChassisSubsystem chassis(
+    *drivers(),
+    {leftFrontMecanumWheel, rightFrontMecanumWheel, leftBackMecanumWheel, rightBackMecanumWheel},
+    &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 

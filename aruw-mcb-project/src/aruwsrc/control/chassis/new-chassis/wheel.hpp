@@ -41,8 +41,8 @@ struct WheelConfig
     float wheelOrientationChassisRelative;
     float diameter;
     SmoothPidConfig& velocityPidConfig;
-    bool isPowered = true;
     float maxWheelRPM;
+    bool isPowered = true;
 };
 
 class Wheel
@@ -51,7 +51,7 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(Motor& driveMotor, WheelConfig& config);
+    Wheel(WheelConfig& config);
 
     // Config parameters for the individual wheel
     WheelConfig config;
