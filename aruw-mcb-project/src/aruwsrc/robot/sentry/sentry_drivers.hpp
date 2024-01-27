@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -33,6 +33,7 @@
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/serial_mcb_lite.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -54,7 +55,8 @@ public:
           oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          mcbLite(this, tap::communication::serial::Uart::Uart8)
     {
     }
 
@@ -73,6 +75,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    aruwsrc::virtualMCB::SerialMCBLite mcbLite;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

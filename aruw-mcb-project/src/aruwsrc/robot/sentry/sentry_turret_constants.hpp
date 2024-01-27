@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
-#define SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
+#ifndef SENTRY_TURRET_CONSTANTS_HPP_
+#define SENTRY_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -241,4 +241,4 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 }  // namespace turretRight
 }  // namespace  aruwsrc::control::turret
 
-#endif  // SENTRY_BEEHIVE_TURRET_CONSTANTS_HPP_
+#endif  // SENTRY_TURRET_CONSTANTS_HPP_
