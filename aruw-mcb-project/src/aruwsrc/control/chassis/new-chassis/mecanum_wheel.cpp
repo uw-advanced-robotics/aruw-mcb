@@ -32,19 +32,43 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config)
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
     CMSISMat<2, 1> desiredMat = PRODUCT_MAT * CMSISMat<2, 1>({vx, vy});
-    double currentTime = tap::arch::clock::getTimeMicroseconds();
-    double error = desiredMat.data[0] - motor.getShaftRPM();
-    motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));
-    prevTime = currentTime;
+    driveSetPoint = desiredMat.data[0];
 }
 
 void MecanumWheel::initialize()
 {
     if (config.isPowered)
     {
-        motor.initialize();
+        driveMotor.initialize();
     }
 }
 
+void MecanumWheel::refresh() {
+    if (config.isPowered) {
+        driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(driveSetPoint - driveMotor.getShaftRPM(), 2.0f));
+    }
+}
+
+void MecanumWheel::setZeroRPM() {
+    if (config.isPowered) {
+        executeWheelVelocity(0,0);
+    }
+}
+
+bool MecanumWheel::allMotorsOnline() const {
+    return config.isPowered? driveMotor.isMotorOnline() : false;
+}
+
+int MecanumWheel::getNumMotors() const {
+    return 1;
+}
+
+float MecanumWheel::getDriveVelocity() const {
+    return config.isPowered? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
+}
+
+float MecanumWheel::getDriveRPM() const {
+    return config.isPowered? driveMotor.getShaftRPM() : 0.0f;
+}
 }  // namespace chassis
 }  // namespace aruwsrc

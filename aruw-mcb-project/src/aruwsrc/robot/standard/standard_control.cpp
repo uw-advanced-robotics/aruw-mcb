@@ -177,34 +177,17 @@ aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
     aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG);
 aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
     rightFrontDriveMotor,
-    {aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X / 2,
-     -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y / 2,
-     0,
-     aruwsrc::chassis::WHEEL_RADIUS * 2,
-     SmoothPidConfig(motorPidConfig),
-     1000.0f,
-     true});
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG);
 aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
     leftBackDriveMotor,
-    {-aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X / 2,
-     aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y / 2,
-     0,
-     aruwsrc::chassis::WHEEL_RADIUS * 2,
-     SmoothPidConfig(motorPidConfig),
-     1000.0f,
-     true});
+     aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG);
 aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     rightBackDriveMotor,
-    {-aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X / 2,
-     -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y / 2,
-     0,
-     aruwsrc::chassis::WHEEL_RADIUS * 2,
-     SmoothPidConfig(motorPidConfig),
-     1000.0f,
-     true});
+     aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG);
+std::vector<aruwsrc::chassis::Wheel*> wheels = {&leftFrontMecanumWheel, &rightFrontMecanumWheel, &leftBackMecanumWheel, &rightBackMecanumWheel};
 aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
-    {leftFrontMecanumWheel, rightFrontMecanumWheel, leftBackMecanumWheel, rightBackMecanumWheel},
+    &wheels,
     &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));

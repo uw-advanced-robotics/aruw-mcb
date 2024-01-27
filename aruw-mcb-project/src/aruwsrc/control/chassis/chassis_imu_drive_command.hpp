@@ -75,7 +75,7 @@ public:
     ChassisImuDriveCommand(
         tap::Drivers* drivers,
         aruwsrc::control::ControlOperatorInterface* operatorInterface,
-        HolonomicChassisSubsystem* chassis,
+        ChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor);
 
     void initialize() override;
@@ -91,7 +91,7 @@ public:
 private:
     tap::Drivers* drivers;
     aruwsrc::control::ControlOperatorInterface* operatorInterface;
-    HolonomicChassisSubsystem* chassis;
+    ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     tap::algorithms::ContiguousFloat rotationSetpoint;
     bool imuSetpointInitialized = false;

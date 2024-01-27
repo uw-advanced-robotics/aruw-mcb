@@ -39,8 +39,10 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    float diameter;
-    const SmoothPidConfig& velocityPidConfig;
+    float diameter;        // considering shoving these into DjiMotor in the future
+    float gearRatio;       // considering shoving these into DjiMotor in the future
+    float motorGearRatio;  // considering shoving these into DjiMotor in the future
+    SmoothPidConfig& velocityPidConfig;
     float maxWheelRPM;
     bool isPowered = true;
 };
@@ -54,7 +56,7 @@ public:
     Wheel(WheelConfig& config);
 
     // Config parameters for the individual wheel
-    WheelConfig config;
+    const WheelConfig config;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -82,12 +84,31 @@ public:
      * @param[in] vy The desired velocity of the wheel to move in the y direction in m/s
      */
     virtual void executeWheelVelocity(float vx, float vy) = 0;
+    inline float mpsToRpm(float mps) const
+    {
+        return (mps / (config.diameter * M_PI)) / config.motorGearRatio * 60.0f / config.gearRatio;
+    }
+
+    inline float rpmToMps(float rpm) const
+    {
+        return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
+    }
 
     virtual void initialize();
 
+    virtual void refresh();
+
+    virtual void setZeroRPM();
+
+    virtual bool allMotorsOnline() const;
+
+    virtual float getDriveVelocity() const;
+
+    virtual float getDriveRPM() const;
+
+    virtual int getNumMotors() const;
+
 protected:
-    // Motor that drives the wheel
-    Motor& motor;
     /// matrix containing distances from wheel to chassis center
     tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
         {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});

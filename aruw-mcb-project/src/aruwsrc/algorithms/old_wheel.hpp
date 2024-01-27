@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef WHEEL_HPP_
-#define WHEEL_HPP_
+#ifndef OLD_WHEEL_HPP_
+#define OLD_WHEEL_HPP_
 
 #include "modm/math/geometry/angle.hpp"
 

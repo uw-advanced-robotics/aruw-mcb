@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wheel.hpp"
+#include "old_wheel.hpp"
 
 namespace aruwsrc
 {

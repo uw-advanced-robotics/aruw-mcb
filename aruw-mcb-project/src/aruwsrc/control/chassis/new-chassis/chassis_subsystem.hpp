@@ -60,7 +60,7 @@ class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 public:
     ChassisSubsystem(
         tap::Drivers* drivers,
-        std::vector<Wheel>* wheels,
+        std::vector<Wheel*>* wheels,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     /**
@@ -115,6 +115,16 @@ public:
 
     void refreshSafeDisconnect() { setZeroRPM(); }
 
+    bool allMotorsOnline() const override;
+
+    inline int getNumChassisMotors() const override{
+        int motorCount = 0;
+        for (int i = 0 ; i < getNumChassisWheels(); i++) {
+            motorCount += wheels[i]->getNumMotors();
+        }
+        return motorCount;
+    }
+
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
@@ -123,7 +133,7 @@ public:
     {
         for (int i = 0; i < getNumChassisWheels(); i++)
         {
-            wheels[i].executeWheelVelocity(0.0, 0.0);
+            wheels[i]->executeWheelVelocity(0.0, 0.0);
         }
     }
 
@@ -156,7 +166,7 @@ public:
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -177,7 +187,7 @@ public:
 
     float desiredRotation = 0;
 
-    std::vector<Wheel>& wheels;
+    const std::vector<Wheel*>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
@@ -185,12 +195,10 @@ public:
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
-    virtual void limitChassisPower() = 0;
+    void limitChassisPower();
 
 private:
     double prevTime = 0.0;
-    modm::Pair<float, float> desiredWheelVel;
-    float tempMax = 0;
 };  // class ChassisSubsystem
 
 }  // namespace chassis

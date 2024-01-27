@@ -37,11 +37,16 @@ public:
     void executeWheelVelocity(float vx, float vy) override;
 
     void initialize() override;
+    void refresh() override;
+    void setZeroRPM() override;
+    bool allMotorsOnline() const override;
+    float getDriveVelocity() const override;
+    float getDriveRPM() const override;
+    int getNumMotors() const override;
 
 private:
+    float driveSetPoint;
     Motor& driveMotor;
-    /// time tracker for smoothpid
-    double prevTime = 0;
     // PID used to control the driving motor
     SmoothPid velocityPid;
     const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;

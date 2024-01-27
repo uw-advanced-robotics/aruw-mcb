@@ -78,7 +78,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
-static const SmoothPidConfig MOTOR_PID_CONFIG = {
+SmoothPidConfig MOTOR_PID_CONFIG = {
     aruwsrc::chassis::VELOCITY_PID_KP,
     aruwsrc::chassis::VELOCITY_PID_KI,
     aruwsrc::chassis::VELOCITY_PID_KD,
@@ -105,7 +105,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m).
  */
 static constexpr float WHEEL_RADIUS = 0.076;
-
+static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 /*
 * Wheel orientation (chassis relative) (rad)
 */
@@ -133,31 +133,39 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #endif
 
-static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
+     1.0f,
+     CHASSIS_GEARBOX_RATIO,
      MOTOR_PID_CONFIG,
      1000.0f,
      true};
-static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
+     1.0f,
+     CHASSIS_GEARBOX_RATIO,
      MOTOR_PID_CONFIG,
      1000.0f,
      false};
-static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
+     1.0f,
+     CHASSIS_GEARBOX_RATIO,
      MOTOR_PID_CONFIG,
      1000.0f,
      true};
-static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
+     1.0f,
+     CHASSIS_GEARBOX_RATIO,
      MOTOR_PID_CONFIG,
      1000.0f,
      false};
@@ -174,7 +182,6 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 /**
  * Fraction of max chassis speed that will be applied to rotation when beyblading

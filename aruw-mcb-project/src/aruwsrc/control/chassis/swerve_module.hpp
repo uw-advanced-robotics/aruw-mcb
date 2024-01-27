@@ -25,7 +25,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/m3508_constants.hpp"
 
-#include "aruwsrc/algorithms/wheel.hpp"
+#include "aruwsrc/algorithms/old_wheel.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #include "swerve_module_config.hpp"
@@ -38,7 +38,7 @@ using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
 using Motor = tap::motor::DjiMotor;
 #endif
 
-using Wheel = aruwsrc::algorithms::Wheel;
+// using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
@@ -126,7 +126,7 @@ public:
     // in rpm
     inline float getSpeedSetpoint() { return speedSetpointRPM; }
 
-    const Wheel wheel;
+    const aruwsrc::algorithms::Wheel wheel;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     Motor& driveMotor;
