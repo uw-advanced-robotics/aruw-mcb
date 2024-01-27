@@ -126,8 +126,8 @@ static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID 
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -186,8 +186,8 @@ static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID 
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,

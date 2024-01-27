@@ -127,8 +127,8 @@ SentryTurretMinorSubsystem turretLeft(
     *drivers(),
     turretLeftMotors.pitchMotor,
     turretLeftMotors.yawMotor,
-    turretLeftMotors.yawMotorConfig,
     turretLeftMotors.pitchMotorConfig,
+    turretLeftMotors.yawMotorConfig,
     &drivers()->turretMCBCanCommBus2,  // @todo: figure out how to put this in config
     turretLeft::turretID);
 
@@ -136,17 +136,33 @@ SentryTurretMinorSubsystem turretRight(
     *drivers(),
     turretRightMotors.pitchMotor,
     turretRightMotors.yawMotor,
-    turretRightMotors.yawMotorConfig,
     turretRightMotors.pitchMotorConfig,
+    turretRightMotors.yawMotorConfig,
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
 /* define controllers --------------------------------------------------------*/
 
 // @note: this should be replaced with a world-relative controller, just for manual testing now
-ChassisFrameYawTurretController majorController(
-    turretMajor.getMotor(),
-    turretMajor::chassisFrameController::YAW_POS_PID_CONFIG);
+// ChassisFrameYawTurretController majorController(
+//     turretMajor.getMotor(),
+//     turretMajor::chassisFrameController::YAW_POS_PID_CONFIG);
+
+// tap::algorithms::SmoothPid turretMajorYawPosPid(
+//     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+// tap::algorithms::SmoothPid turretMajorYawVelPid(
+//     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+
+// algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  // @todo rename
+//     sentryTransforms.getWorldToChassis(),
+//     chassis,
+//     turretMajor.getMotor(),
+//     turretMinorGirlboss,
+//     turretMinorMalewife,
+//     turretMajorYawPosPid,
+//     turretMajorYawVelPid,
+//     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
+//     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
 
 struct TurretMinorControllers
 {
@@ -273,12 +289,12 @@ aruwsrc::chassis::SwerveChassisSubsystem chassis(
     aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
 
 /* define commands ----------------------------------------------------------*/
-TurretMajorSentryControlCommand majorManualCommand(
-    drivers(),
-    drivers()->controlOperatorInterface,
-    turretMajor,
-    majorController,
-    MAJOR_USER_YAW_INPUT_SCALAR);
+// TurretMajorSentryControlCommand majorManualCommand(
+//     drivers(),
+//     drivers()->controlOperatorInterface,
+//     turretMajor,
+//     majorController,
+//     MAJOR_USER_YAW_INPUT_SCALAR);
 
 TurretMinorSentryControlCommand turretLeftManualCommand(
     drivers(),
@@ -297,6 +313,7 @@ TurretMinorSentryControlCommand turretRightManualCommand(
     turretRightControllers.pitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
+
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &(drivers()->controlOperatorInterface),
@@ -305,54 +322,49 @@ aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping manualRightSwitchDown(
     drivers(),
-    {
-        &majorManualCommand
-        /*
-        // @note: minor commands commented out so I can test major control first
-        ,
-         &turretLeftManualCommand,
-         &turretRightManualCommand
-        */
-    },
+    {// &majorManualCommand
+     &turretLeftManualCommand,
+     &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    turretMajor.initialize();
+    // turretMajor.initialize();
 
     // @note: initialization of controllers usually handled by imu calibrate, so
     // move this stuff into there once imu calibrate integrated
-    majorController.initialize();
+    // majorController.initialize();
     chassis.initialize();
 
+    turretLeft.initialize();
+    turretRight.initialize();
     // turretLeftControllers.pitchController.initialize();
     // turretLeftControllers.yawController.initialize();
 
     // turretRightControllers.pitchController.initialize();
     // turretRightControllers.yawController.initialize();
 
-    // turretLeft.initialize();
     // turretRight.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&turretMajor);
+    // drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
-    // drivers->commandScheduler.registerSubsystem(&turretLeft);
-    // drivers->commandScheduler.registerSubsystem(&turretRight);
+    drivers->commandScheduler.registerSubsystem(&turretLeft);
+    drivers->commandScheduler.registerSubsystem(&turretRight);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    turretMajor.setDefaultCommand(&majorManualCommand);
+    // turretMajor.setDefaultCommand(&majorManualCommand);
     chassis.setDefaultCommand(&chassisDriveCommand);
-    // turretLeft.setDefaultCommand(&turretLeftManualCommand);
-    // turretRight.setDefaultCommand(&turretRightManualCommand);
+    turretLeft.setDefaultCommand(&turretLeftManualCommand);
+    turretRight.setDefaultCommand(&turretRightManualCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
