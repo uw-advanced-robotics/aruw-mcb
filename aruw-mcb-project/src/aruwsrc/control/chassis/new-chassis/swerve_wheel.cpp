@@ -16,49 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#include "swerve_module.hpp"
-
+#include "swerve_wheel.hpp"
 using namespace tap::algorithms;
-
 namespace aruwsrc
 {
 namespace chassis
 {
-SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
-    : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.gearboxRatio),
+SwerveWheel::SwerveWheel(
+    Motor& driveMotor,
+    Motor& azimuthMotor,
+    WheelConfig& config,
+    SwerveAzimuthConfig& azimuthConfig,
+    SmoothPid drivePid,
+    SmoothPid azimuthPid)
+    : Wheel(driveMotor, config),
+      azimuthConfig(azimuthConfig),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
-      config(config),
-      drivePid(config.drivePidConfig),
-      azimuthPid(config.azimuthPidConfig),
-      rotationVectorX(-config.positionWithinChassisY),
-      rotationVectorY(config.positionWithinChassisX),
-      angularBiasLUTInterpolator(
-          config.ANGULAR_POWER_FRAC_LUT,
-          MODM_ARRAY_SIZE(config.ANGULAR_POWER_FRAC_LUT))
+      drivePid(drivePid),
+      azimuthPid(azimuthPid),
+      rotationVectorX(-config.wheelPositionChassisRelativeY),
+      rotationVectorY(config.wheelPositionChassisRelativeX)
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
 }
 
-void SwerveModule::initialize()
+void SwerveWheel::executeWheelVelocity(float vx, float vy)
 {
-    driveMotor.initialize();
-    azimuthMotor.initialize();
-}
-
-void SwerveModule::setZeroRPM() { speedSetpointRPM = 0; }
-
-bool SwerveModule::allMotorsOnline() const
-{
-    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
-}
-
-float SwerveModule::calculate(float x, float y, float r)
-{
-    moveVectorX = x + r * rotationVectorX;
-    moveVectorY = y + r * rotationVectorY;
+    moveVectorX = vx;
+    moveVectorY = vy;
 
     if (compareFloatClose(0.0f, moveVectorX, 1E-1) && compareFloatClose(0.0f, moveVectorY, 1E-1))
     {
@@ -82,15 +69,16 @@ float SwerveModule::calculate(float x, float y, float r)
         // TODO: mechanical problem with the tension wheels in swerve module make this not work
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
-        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        // {
-        //     rotationOffset -=
-        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        // }
+        // TODO 2: Test again on this year's bot (2024)
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        {
+            rotationOffset -=
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
-            wheel.mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
+            mpsToRpm(sqrtf(moveVectorX * moveVectorX + moveVectorY * moveVectorY));
 
         // if offset isn't an integer multiple of 2pi, it means module is currently reversed so
         // speed must be negative
@@ -98,21 +86,11 @@ float SwerveModule::calculate(float x, float y, float r)
         if (compareFloatClose(wrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1))
             preScaledSpeedSetpoint *= -1;
     }
-    return preScaledSpeedSetpoint;
+    speedSetpointRPM = preScaledSpeedSetpoint;
+    rotationSetpoint = preScaledRotationSetpoint;
 }
 
-void SwerveModule::scaleAndSetDesiredState(float scaleCoeff)
-{
-    setDesiredState(scaleCoeff * preScaledSpeedSetpoint, preScaledRotationSetpoint);
-}
-
-void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
-{
-    speedSetpointRPM = driveRpm;
-    rotationSetpoint = radianTarget;
-}
-
-void SwerveModule::refresh()
+void SwerveWheel::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
     driveMotor.setDesiredOutput(drivePid.getOutput());
@@ -121,32 +99,37 @@ void SwerveModule::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
+float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
 
-float SwerveModule::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
 
-float SwerveModule::getAngle() const
+float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+
+float SwerveWheel::getAngle() const
 {
     return modm::toRadian(
         azimuthMotor.encoderToDegrees(
-            azimuthMotor.getEncoderUnwrapped() - config.azimuthZeroOffset) *
-        config.azimuthMotorGearing);
+            azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
+        azimuthConfig.azimuthMotorGearing);
 }
 
-float SwerveModule::getAngularVelocity() const
+void SwerveWheel::initialize()
 {
-    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * config.azimuthMotorGearing;
+    driveMotor.initialize();
+    azimuthMotor.initialize();
 }
 
-void SwerveModule::limitPower(float frac)
+bool SwerveWheel::allMotorsOnline() const
 {
-    driveMotor.setDesiredOutput(
-        driveMotor.getOutputDesired() * frac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(
-        azimuthMotor.getOutputDesired() * frac *
-        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
+}
+
+float SwerveWheel::getAngularVelocity() const
+{
+    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) *
+           (azimuthConfig.azimuthMotorGearing);
 }
 
 }  // namespace chassis
+
 }  // namespace aruwsrc
