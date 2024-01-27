@@ -145,9 +145,12 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
-    nxpSensorFusion.begin(sampleFrequency);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
+}
+
+void Mpu6500::setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi){
+    fasterMahonyAlgorithm.begin(hz, mahonyKp, mahonyKi);
 }
 
 void Mpu6500::periodicIMUUpdate()
@@ -171,18 +174,7 @@ void Mpu6500::periodicIMUUpdate()
             getMy(),
             getMz());
         tiltAngleCalculated = false;
-        nxpSensorFusion.update(
-            getGx(),
-            getGy(),
-            getGz(),
-            getAx(),
-            getAy(),
-            getAz(),
-            raw.magnetometer.y,
-            raw.magnetometer.x,
-            raw.magnetometer.y);
-            heading = nxpSensorFusion.getYaw();
-            mahonyHeading = mahonyAlgorithm.getYaw();
+        mahonyHeading = mahonyAlgorithm.getYaw();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else if (imuState == ImuState::IMU_CALIBRATING)
@@ -230,7 +222,7 @@ void Mpu6500::periodicIMUUpdate()
 
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
-            nxpSensorFusion.begin(500);
+            fasterMahonyAlgorithm.reset();
         }
     }
 
@@ -239,6 +231,28 @@ void Mpu6500::periodicIMUUpdate()
     imuHeater.runTemperatureController(getTemp());
 
     addValidationErrors();
+
+    gyroXFilter.update(raw.gyro.x);
+    gyroYFilter.update(raw.gyro.y);
+    gyroZFilter.update(raw.gyro.z);
+    accelXFilter.update(raw.accel.x);
+    accelYFilter.update(raw.accel.y);
+    accelZFilter.update(raw.accel.z);
+
+}
+
+void Mpu6500::runFasterSensorFusion(){
+    fasterMahonyAlgorithm.update(
+        getGx(),
+        getGy(),
+        getGz(),
+        getAx(),
+        getAy(),
+        getAz(),
+        getMx(),
+        getMy(),
+        getMz());
+    fasterMahonyHeading = fasterMahonyAlgorithm.getYaw();
 }
 
 bool Mpu6500::read()

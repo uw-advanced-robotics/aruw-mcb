@@ -49,6 +49,9 @@ static constexpr float MAHONY_KP = 25.0f;
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
+tap::arch::PeriodicMicroTimer runSensorFusionTimer(20);
+
+
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 static void initializeIo(tap::Drivers *drivers);
@@ -96,6 +99,11 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+        if(runSensorFusionTimer.execute())
+        {
+            PROFILE(drivers->profiler, drivers->mpu6500.runFasterSensorFusion, ());
+        }
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
@@ -142,6 +150,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->mpu6500.setSensorFusionRateHz(10000, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();
