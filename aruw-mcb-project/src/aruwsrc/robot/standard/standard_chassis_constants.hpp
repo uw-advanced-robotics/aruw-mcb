@@ -137,28 +137,28 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WI
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
-     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     MOTOR_PID_CONFIG,
      1000.0f,
      true};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
-     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     MOTOR_PID_CONFIG,
      1000.0f,
      false};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
-     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     MOTOR_PID_CONFIG,
      1000.0f,
      true};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
-     tap::algorithms::SmoothPidConfig(&MOTOR_PID_CONFIG),
+     MOTOR_PID_CONFIG,
      1000.0f,
      false};
 static constexpr float WHEELBASE_HYPOTENUSE =

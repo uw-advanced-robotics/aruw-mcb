@@ -40,7 +40,7 @@ struct WheelConfig
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
     float diameter;
-    SmoothPidConfig& velocityPidConfig;
+    const SmoothPidConfig& velocityPidConfig;
     float maxWheelRPM;
     bool isPowered = true;
 };
