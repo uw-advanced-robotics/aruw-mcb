@@ -258,7 +258,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (raw.magnetometer.y - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
+            (magYFilter.getValue() - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
     }
 
     /**
@@ -269,7 +269,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (raw.magnetometer.x - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
+            (magXFilter.getValue() - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
     }
 
     /**
@@ -278,7 +278,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (raw.magnetometer.z - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
+            (magZFilter.getValue() - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
     }
 
     /**
@@ -456,7 +456,10 @@ private:
     float mahonyHeading;
     float fasterMahonyHeading;
 
-    modm::filter::MovingAverage<float, 5> gyroXFilter, gyroYFilter, gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
+    // Filters to the sample rate align with the 100hz update of the mag
+    modm::filter::MovingAverage<float, (10000 / 100)> gyroXFilter, gyroYFilter, gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
+    // Hella slow down the IMU cuz its shit
+    modm::filter::MovingAverage<float, (10000 / 100)> magXFilter, magYFilter, magZFilter;
 
     
 };

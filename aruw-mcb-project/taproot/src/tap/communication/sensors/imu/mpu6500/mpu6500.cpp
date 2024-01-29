@@ -149,7 +149,8 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
 
-void Mpu6500::setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi){
+void Mpu6500::setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi)
+{
     fasterMahonyAlgorithm.begin(hz, mahonyKp, mahonyKi);
 }
 
@@ -231,27 +232,21 @@ void Mpu6500::periodicIMUUpdate()
     imuHeater.runTemperatureController(getTemp());
 
     addValidationErrors();
+}
 
+void Mpu6500::runFasterSensorFusion()
+{
     gyroXFilter.update(raw.gyro.x);
     gyroYFilter.update(raw.gyro.y);
     gyroZFilter.update(raw.gyro.z);
     accelXFilter.update(raw.accel.x);
     accelYFilter.update(raw.accel.y);
     accelZFilter.update(raw.accel.z);
-
-}
-
-void Mpu6500::runFasterSensorFusion(){
-    fasterMahonyAlgorithm.update(
-        getGx(),
-        getGy(),
-        getGz(),
-        getAx(),
-        getAy(),
-        getAz(),
-        getMx(),
-        getMy(),
-        getMz());
+    magXFilter.update(raw.magnetometer.x);
+    magYFilter.update(raw.magnetometer.y);
+    magZFilter.update(raw.magnetometer.z);
+    fasterMahonyAlgorithm
+        .update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), getMx(), getMy(), getMz());
     fasterMahonyHeading = fasterMahonyAlgorithm.getYaw();
 }
 
