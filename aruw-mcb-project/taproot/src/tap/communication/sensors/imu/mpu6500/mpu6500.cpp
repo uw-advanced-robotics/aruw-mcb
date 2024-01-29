@@ -221,6 +221,14 @@ void Mpu6500::periodicIMUUpdate()
             raw.magnetometerOffset.y = (calibrationMaxReading.y + calibrationMinReading.y) / 2.0f;
             raw.magnetometerOffset.z = (calibrationMaxReading.z + calibrationMinReading.z) / 2.0f;
 
+            avgMagAxisScale = raw.magnetometerOffset.x + raw.magnetometerOffset.y +
+                              raw.magnetometerOffset.z;
+            avgMagAxisScale /= 3.0f;
+
+            magAxisScale.x = avgMagAxisScale / raw.magnetometerOffset.x;
+            magAxisScale.y = avgMagAxisScale / raw.magnetometerOffset.y;
+            magAxisScale.z = avgMagAxisScale / raw.magnetometerOffset.z;
+
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
             fasterMahonyAlgorithm.reset();

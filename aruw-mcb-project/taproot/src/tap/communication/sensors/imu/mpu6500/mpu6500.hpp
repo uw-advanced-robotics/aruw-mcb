@@ -258,7 +258,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (magYFilter.getValue() - raw.magnetometerOffset.y) / IST8310_SENSITIVITY);
+            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y / IST8310_SENSITIVITY);
     }
 
     /**
@@ -269,7 +269,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (magXFilter.getValue() - raw.magnetometerOffset.x) / IST8310_SENSITIVITY);
+            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x / IST8310_SENSITIVITY);
     }
 
     /**
@@ -278,7 +278,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (magZFilter.getValue() - raw.magnetometerOffset.z) / IST8310_SENSITIVITY);
+            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z / IST8310_SENSITIVITY);
     }
 
     /**
@@ -399,7 +399,8 @@ private:
     modm::Vector3f calibrationMaxReading;
     modm::Vector3f calibrationMinReading;
 
-    modm::Vector3f normalizedMagnetometer;
+    float avgMagAxisScale = 0.0f;
+    modm::Vector3f magAxisScale;
 
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
