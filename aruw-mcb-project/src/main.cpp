@@ -49,7 +49,7 @@ static constexpr float MAHONY_KP = 25.0f;
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
-static constexpr float FUSION_LOOP_FREQUENCY = 10000.0f;
+static constexpr float FUSION_LOOP_FREQUENCY = tap::communication::sensors::imu::mpu6500::Mpu6500::FUSION_RATE_HZ;
 
 // million microseconds in a second
 tap::arch::PeriodicMicroTimer runSensorFusionTimer(1000000 / FUSION_LOOP_FREQUENCY);

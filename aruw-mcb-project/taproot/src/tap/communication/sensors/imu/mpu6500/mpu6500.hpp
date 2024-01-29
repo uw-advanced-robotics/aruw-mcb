@@ -34,9 +34,9 @@
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
+#include "modm/math/filter/moving_average.hpp"
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
-#include "modm/math/filter/moving_average.hpp"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -216,7 +216,7 @@ public:
     inline float getAz() final_mockable
     {
         return validateReading(
-            static_cast<float>(accelZFilter.getValue()- raw.accelOffset.z) * ACCELERATION_GRAVITY /
+            static_cast<float>(accelZFilter.getValue() - raw.accelOffset.z) * ACCELERATION_GRAVITY /
             ACCELERATION_SENSITIVITY);
     }
 
@@ -258,7 +258,8 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y / IST8310_SENSITIVITY);
+            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y /
+            IST8310_SENSITIVITY);
     }
 
     /**
@@ -269,7 +270,8 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x / IST8310_SENSITIVITY);
+            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x /
+            IST8310_SENSITIVITY);
     }
 
     /**
@@ -278,7 +280,8 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z / IST8310_SENSITIVITY);
+            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z /
+            IST8310_SENSITIVITY);
     }
 
     /**
@@ -331,6 +334,8 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
+    static const int FUSION_RATE_HZ = 50000;
+
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
@@ -343,6 +348,11 @@ private:
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
     float MPU6500_OFFSET_SAMPLES = 4000;
+
+    /**
+     * The number of samples we take while calibrating in order to determine the mag offsets.
+     */
+    float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 4000;
 
     /**
      * The time to read the registers in nonblocking mode, in microseconds.
@@ -399,13 +409,8 @@ private:
     modm::Vector3f calibrationMaxReading;
     modm::Vector3f calibrationMinReading;
 
-    float avgMagAxisScale = 0.0f;
+    float avgMagAxisScale = 1.0f;
     modm::Vector3f magAxisScale;
-
-    /**
-     * The number of samples we take while calibrating in order to determine the mpu offsets.
-     */
-    static constexpr float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 2500;
 
     // Functions for interacting with hardware directly.
 
@@ -457,12 +462,15 @@ private:
     float mahonyHeading;
     float fasterMahonyHeading;
 
-    // Filters to the sample rate align with the 100hz update of the mag
-    modm::filter::MovingAverage<float, (10000 / 100)> gyroXFilter, gyroYFilter, gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
-    // Hella slow down the IMU cuz its shit
-    modm::filter::MovingAverage<float, (10000 / 100)> magXFilter, magYFilter, magZFilter;
+    static constexpr int IMU_DLPF_HZ = 166;
+    static constexpr int MAG_DLPF_HZ = 10;
 
-    
+
+    // Filters to the sample rate align with the 100hz update of the mag
+    modm::filter::MovingAverage<float, (FUSION_RATE_HZ / IMU_DLPF_HZ)> gyroXFilter, gyroYFilter,
+        gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
+    // Hella slow down the IMU cuz its shit
+    modm::filter::MovingAverage<float, (FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter, magZFilter;
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
