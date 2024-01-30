@@ -221,13 +221,15 @@ void Mpu6500::periodicIMUUpdate()
             raw.magnetometerOffset.y = (calibrationMaxReading.y + calibrationMinReading.y) / 2.0f;
             raw.magnetometerOffset.z = (calibrationMaxReading.z + calibrationMinReading.z) / 2.0f;
 
-            avgMagAxisScale = raw.magnetometerOffset.x + raw.magnetometerOffset.y +
-                              raw.magnetometerOffset.z;
-            avgMagAxisScale /= 3.0f;
+            // avgMagAxisScale = std::fabs(raw.magnetometerOffset.x) +
+            //                   std::fabs(raw.magnetometerOffset.y) +
+            //                   std::fabs(raw.magnetometerOffset.z);
+            // avgMagAxisScale /= 3.0f;
 
-            magAxisScale.x = avgMagAxisScale / raw.magnetometerOffset.x;
-            magAxisScale.y = avgMagAxisScale / raw.magnetometerOffset.y;
-            magAxisScale.z = avgMagAxisScale / raw.magnetometerOffset.z;
+            avgMagAxisScale = 50;
+            magAxisScale.x = avgMagAxisScale / ((calibrationMaxReading.x + calibrationMinReading.x) / 2.0f);
+            magAxisScale.y = avgMagAxisScale / ((calibrationMaxReading.y + calibrationMinReading.y) / 2.0f);
+            magAxisScale.z = avgMagAxisScale / ((calibrationMaxReading.z + calibrationMinReading.z) / 2.0f);
 
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();

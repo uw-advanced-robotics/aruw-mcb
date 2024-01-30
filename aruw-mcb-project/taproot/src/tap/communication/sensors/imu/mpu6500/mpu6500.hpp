@@ -258,8 +258,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y /
-            IST8310_SENSITIVITY);
+            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y / IST8310_SENSITIVITY);
     }
 
     /**
@@ -270,8 +269,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x /
-            IST8310_SENSITIVITY);
+            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x / IST8310_SENSITIVITY);
     }
 
     /**
@@ -280,8 +278,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z /
-            IST8310_SENSITIVITY);
+            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z / IST8310_SENSITIVITY);
     }
 
     /**
@@ -334,7 +331,10 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
-    static const int FUSION_RATE_HZ = 50000;
+    static constexpr int IMU_DLPF_HZ = 250;
+    static constexpr float MAG_DLPF_HZ = 1;
+
+    static const int FUSION_RATE_HZ = IMU_DLPF_HZ * 40;
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
@@ -409,7 +409,7 @@ private:
     modm::Vector3f calibrationMaxReading;
     modm::Vector3f calibrationMinReading;
 
-    float avgMagAxisScale = 1.0f;
+    float avgMagAxisScale = 50.0f;
     modm::Vector3f magAxisScale;
 
     // Functions for interacting with hardware directly.
@@ -462,15 +462,12 @@ private:
     float mahonyHeading;
     float fasterMahonyHeading;
 
-    static constexpr int IMU_DLPF_HZ = 166;
-    static constexpr int MAG_DLPF_HZ = 10;
-
-
     // Filters to the sample rate align with the 100hz update of the mag
     modm::filter::MovingAverage<float, (FUSION_RATE_HZ / IMU_DLPF_HZ)> gyroXFilter, gyroYFilter,
         gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
     // Hella slow down the IMU cuz its shit
-    modm::filter::MovingAverage<float, (FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter, magZFilter;
+    modm::filter::MovingAverage<float, (int) (FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter,
+        magZFilter;
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
