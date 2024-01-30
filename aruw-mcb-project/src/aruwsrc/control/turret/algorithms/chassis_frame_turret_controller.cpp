@@ -58,7 +58,6 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
     float pidOutput =
         pid.runController(positionControllerError, turretMotor.getChassisFrameVelocity(), dt);
 
-    // turretMotor.setMotorOutput(0);
     turretMotor.setMotorOutput(pidOutput);
 }
 
@@ -115,8 +114,7 @@ void ChassisFramePitchTurretController::runController(
         -turretMotor.getAngleFromCenter(),
         GRAVITY_COMPENSATION_SCALAR);
 
-    // turretMotor.setMotorOutput(pidOutput);
-    turretMotor.setMotorOutput(0);
+    turretMotor.setMotorOutput(pidOutput);
 }
 
 void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)

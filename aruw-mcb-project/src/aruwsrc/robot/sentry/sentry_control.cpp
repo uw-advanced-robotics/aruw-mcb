@@ -35,6 +35,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
@@ -153,16 +154,16 @@ SentryTurretMinorSubsystem turretRight(
 // tap::algorithms::SmoothPid turretMajorYawVelPid(
 //     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
-// algorithms::WorldFrameTurretYawCascadePIDController turretMajorYawController(  // @todo rename
-//     sentryTransforms.getWorldToChassis(),
-//     chassis,
-//     turretMajor.getMotor(),
-//     turretMinorGirlboss,
-//     turretMinorMalewife,
-//     turretMajorYawPosPid,
-//     turretMajorYawVelPid,
-//     aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
-//     aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+algorithms::TurretMajorWorldFrameController turretMajorYawController(  // @todo rename
+    sentryTransforms.getWorldToChassis(),
+    chassis,
+    turretMajor.getMotor(),
+    turretMinorGirlboss,
+    turretMinorMalewife,
+    turretMajorYawPosPid,
+    turretMajorYawVelPid,
+    aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
+    aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
 
 struct TurretMinorControllers
 {
@@ -204,7 +205,6 @@ VirtualDjiMotor leftFrontDriveMotor(
 VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
     MOTOR6,
-    // MOTOR5,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
     aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
@@ -289,12 +289,12 @@ aruwsrc::chassis::SwerveChassisSubsystem chassis(
     aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
 
 /* define commands ----------------------------------------------------------*/
-// TurretMajorSentryControlCommand majorManualCommand(
-//     drivers(),
-//     drivers()->controlOperatorInterface,
-//     turretMajor,
-//     majorController,
-//     MAJOR_USER_YAW_INPUT_SCALAR);
+TurretMajorSentryControlCommand majorManualCommand(
+    drivers(),
+    drivers()->controlOperatorInterface,
+    turretMajor,
+    turretMajorYawController,
+    MAJOR_USER_YAW_INPUT_SCALAR);
 
 TurretMinorSentryControlCommand turretLeftManualCommand(
     drivers(),
