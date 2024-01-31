@@ -25,8 +25,8 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::sentry
 {
@@ -53,7 +53,11 @@ public:
     static constexpr float MAX_TURRET1_MINOR_PITCH_SPEED = 10;  // TODO: refine this
     static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10;  // TODO: refine this
 
-    SentryControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers), drivers(drivers) {}
+    SentryControlOperatorInterface(tap::Drivers *drivers)
+        : ControlOperatorInterface(drivers), 
+          drivers(drivers)
+    {
+    }
 
     // Drive mode functions
 
