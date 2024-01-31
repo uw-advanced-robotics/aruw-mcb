@@ -146,6 +146,7 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
     madgwick.begin(sampleFrequency);
+    madgwick.setBeta(50);
     nxpAlgo.begin(sampleFrequency);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
@@ -261,11 +262,11 @@ void Mpu6500::periodicIMUUpdate()
 
             avgMagAxisScale = 50;
             magAxisScale.x =
-                avgMagAxisScale / ((calibrationMaxReading.x + calibrationMinReading.x) / 2.0f);
+                avgMagAxisScale / ((calibrationMaxReading.x - calibrationMinReading.x) / 2.0f);
             magAxisScale.y =
-                avgMagAxisScale / ((calibrationMaxReading.y + calibrationMinReading.y) / 2.0f);
+                avgMagAxisScale / ((calibrationMaxReading.y - calibrationMinReading.y) / 2.0f);
             magAxisScale.z =
-                avgMagAxisScale / ((calibrationMaxReading.z + calibrationMinReading.z) / 2.0f);
+                avgMagAxisScale / ((calibrationMaxReading.z - calibrationMinReading.z) / 2.0f);
 
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();

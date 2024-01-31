@@ -260,7 +260,7 @@ public:
     inline float getMx() mockable
     {
         return validateReading(
-            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y / IST8310_SENSITIVITY);
+            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y);
     }
 
     /**
@@ -271,7 +271,7 @@ public:
     inline float getMy() mockable
     {
         return validateReading(
-            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x / IST8310_SENSITIVITY);
+            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x);
     }
 
     /**
@@ -280,7 +280,7 @@ public:
     inline float getMz() mockable
     {
         return validateReading(
-            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z / IST8310_SENSITIVITY);
+            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z);
     }
 
     /**
@@ -333,8 +333,8 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
-    static constexpr int IMU_DLPF_HZ = 500;
-    static constexpr float MAG_DLPF_HZ = 500;
+    static constexpr int IMU_DLPF_HZ = 250;
+    static constexpr float MAG_DLPF_HZ = 0.33;
 
     static const int FUSION_RATE_HZ = IMU_DLPF_HZ * 40;
 
