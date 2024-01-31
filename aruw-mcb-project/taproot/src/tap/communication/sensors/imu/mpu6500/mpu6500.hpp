@@ -31,8 +31,6 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_config.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
-#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_Madgwick.h"
-#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_NXPFusion.h"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
@@ -330,8 +328,8 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
-    static constexpr int IMU_DLPF_HZ = 200;
-    static constexpr float MAG_DLPF_HZ = 0.33;
+    static constexpr int IMU_DLPF_HZ = 100;
+    static constexpr float MAG_DLPF_HZ = 1;
 
     static const int FUSION_RATE_HZ = 50000;
 
@@ -346,12 +344,12 @@ private:
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
-    float MPU6500_OFFSET_SAMPLES = 4000;
+    float MPU6500_OFFSET_SAMPLES = 8000;
 
     /**
      * The number of samples we take while calibrating in order to determine the mag offsets.
      */
-    float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 4000;
+    float MPU6500_MAGNETOMETER_CALIBRATION_SAMPLES = 10000;
 
     /**
      * The time to read the registers in nonblocking mode, in microseconds.
