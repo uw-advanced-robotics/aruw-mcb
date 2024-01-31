@@ -26,7 +26,7 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
@@ -36,7 +36,7 @@ namespace aruwsrc::chassis
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
     aruwsrc::control::ControlOperatorInterface* operatorInterface,
-    HolonomicChassisSubsystem* chassis,
+    ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : drivers(drivers),
@@ -133,7 +133,7 @@ void ChassisAutorotateCommand::execute()
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 

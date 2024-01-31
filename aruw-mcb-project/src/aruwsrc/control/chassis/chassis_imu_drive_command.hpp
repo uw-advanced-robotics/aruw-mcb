@@ -30,7 +30,7 @@
 
 namespace aruwsrc::chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A command that allows the user to control the translation and rotation of the chassis. Can be

@@ -19,7 +19,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-// #ifdef ALL_STANDARDS
+#ifdef ALL_STANDARDS
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -52,7 +52,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
@@ -683,4 +683,4 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 }
 #endif
 
-// #endif
+#endif

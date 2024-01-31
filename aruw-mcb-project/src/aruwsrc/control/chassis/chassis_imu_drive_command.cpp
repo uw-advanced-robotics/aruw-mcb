@@ -26,7 +26,7 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 

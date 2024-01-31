@@ -29,7 +29,7 @@
 
 namespace aruwsrc::chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
@@ -39,7 +39,7 @@ class BeybladeCommand : public tap::control::Command
 public:
     BeybladeCommand(
         tap::Drivers* drivers,
-        HolonomicChassisSubsystem* chassis,
+        ChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
@@ -66,7 +66,7 @@ private:
     tap::algorithms::Ramp rotateSpeedRamp;
 
     tap::Drivers* drivers;
-    HolonomicChassisSubsystem* chassis;
+    ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 

@@ -31,7 +31,7 @@ namespace aruwsrc::control::imu
 ImuCalibrateCommand::ImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-    chassis::HolonomicChassisSubsystem *chassis)
+    chassis::ChassisSubsystem *chassis)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),

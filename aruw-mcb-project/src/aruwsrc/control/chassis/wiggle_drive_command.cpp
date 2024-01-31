@@ -27,7 +27,7 @@
 #include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -38,7 +38,7 @@ namespace chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
-    HolonomicChassisSubsystem* chassis,
+    ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),

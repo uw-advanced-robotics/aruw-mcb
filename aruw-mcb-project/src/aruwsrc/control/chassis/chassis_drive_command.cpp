@@ -24,7 +24,7 @@
 #include "tap/drivers.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 namespace aruwsrc
 {
@@ -33,7 +33,7 @@ namespace chassis
 ChassisDriveCommand::ChassisDriveCommand(
     tap::Drivers* drivers,
     aruwsrc::control::ControlOperatorInterface* operatorInterface,
-    HolonomicChassisSubsystem* chassis)
+    ChassisSubsystem* chassis)
     : drivers(drivers),
       operatorInterface(operatorInterface),
       chassis(chassis)

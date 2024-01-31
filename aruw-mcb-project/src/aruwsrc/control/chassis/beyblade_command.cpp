@@ -28,7 +28,7 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -39,7 +39,7 @@ namespace chassis
 {
 BeybladeCommand::BeybladeCommand(
     tap::Drivers* drivers,
-    HolonomicChassisSubsystem* chassis,
+    ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::ControlOperatorInterface& operatorInterface)
     : drivers(drivers),
@@ -83,7 +83,7 @@ void BeybladeCommand::execute()
         x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
         y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
