@@ -21,18 +21,16 @@
 
 /// @name Magnetic Calibration Constants
 ///@{
-#define MAGBUFFSIZEX 14  ///< x dimension in magnetometer buffer (12x24 equals 288 elements)
-#define MAGBUFFSIZEY \
-    (2 * MAGBUFFSIZEX)           ///< y dimension in magnetometer buffer (12x24 equals 288 elements)
+#define MAGBUFFSIZEX 25  ///< x dimension in magnetometer buffer (12x24 equals 288 elements)
+#define MAGBUFFSIZEY (2 * MAGBUFFSIZEX) ///< y dimension in magnetometer buffer (12x24 equals 288 elements)
 #define MINMEASUREMENTS4CAL 110  ///< minimum number of measurements for 4 element calibration
 #define MINMEASUREMENTS7CAL 220  ///< minimum number of measurements for 7 element calibration
 #define MINMEASUREMENTS10CAL 330  ///< minimum number of measurements for 10 element calibration
-#define MAXMEASUREMENTS 360       ///< maximum number of measurements used for calibration
-#define CAL_INTERVAL_SECS 300     ///< 300s or 5min interval for regular calibration checks
+#define MAXMEASUREMENTS 600      ///< maximum number of measurements used for calibration
+#define CAL_INTERVAL_SECS 30     ///< 300s or 5min interval for regular calibration checks
 #define MINBFITUT 10.0F  ///< minimum acceptable geomagnetic field B (uT) for valid calibration
 #define MAXBFITUT 90.0F  ///< maximum acceptable geomagnetic field B (uT) for valid calibration
-#define FITERRORAGINGSECS \
-    86400.0F                ///< 24 hours: time (s) for fit error to increase (age) by e=2.718
+#define FITERRORAGINGSECS 86400.0F ///< 24 hours: time (s) for fit error to increase (age) by e=2.718
 #define MESHDELTACOUNTS 50  ///< magnetic buffer mesh spacing in counts (here 5uT)
 #define DEFAULTB 50.0F      ///< default geomagnetic field (uT)
 ///@}
