@@ -77,7 +77,6 @@ enum MotorId : uint32_t
 class DjiMotor : public can::CanRxListener, public MotorInterface
 {
 public:
-    float lastDesiredOutput = 0.0f;
     // 0 - 8191 for dji motors
     static constexpr uint16_t ENC_RESOLUTION = 8192;
 

@@ -25,14 +25,14 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::algorithms::transforms;
+// using namespace tap::algorithms::transforms;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control::sentry;
 
 namespace aruwsrc::control::turret::algorithms
 {
 TurretMajorWorldFrameController::TurretMajorWorldFrameController(
-    const Transform& worldToChassis,
+    const transforms::Transform& worldToChassis,
     const HolonomicChassisSubsystem& chassis,
     TurretMotor& yawMotor,
     const SentryTurretMinorSubsystem& turretLeft,
@@ -44,12 +44,12 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     : TurretYawControllerInterface(yawMotor),
       worldToChassis(worldToChassis),
       chassis(chassis),
-      positionPid(positionPid),
-      velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
       yawMotor(yawMotor),
       turretLeft(turretLeft),
       turretRight(turretRight),
+      positionPid(positionPid),
+      velocityPid(velocityPid),
+      worldFrameSetpoint(0, 0.0, M_TWOPI),
       maxVelErrorInput(maxVelErrorInput),
       minorMajorTorqueRatio(minorMajorTorqueRatio)
 {
@@ -105,7 +105,7 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 
     turretMotor.setMotorOutput(
         velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
-        chassis.getActualVelocityChassisRelative()[3][0]);
+        chassis.getActualVelocityChassisRelative()[3][0]);  // ? what is this accessing?
 }
 
 // @todo what's the point of this; overridden by runController anyways?

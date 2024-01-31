@@ -34,7 +34,10 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
@@ -142,28 +145,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-/* define controllers --------------------------------------------------------*/
-
-// @note: this should be replaced with a world-relative controller, just for manual testing now
-// ChassisFrameYawTurretController majorController(
-//     turretMajor.getMotor(),
-//     turretMajor::chassisFrameController::YAW_POS_PID_CONFIG);
-
-// tap::algorithms::SmoothPid turretMajorYawPosPid(
-//     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
-// tap::algorithms::SmoothPid turretMajorYawVelPid(
-//     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
-
-algorithms::TurretMajorWorldFrameController turretMajorYawController(  // @todo rename
-    sentryTransforms.getWorldToChassis(),
-    chassis,
-    turretMajor.getMotor(),
-    turretMinorGirlboss,
-    turretMinorMalewife,
-    turretMajorYawPosPid,
-    turretMajorYawVelPid,
-    aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
-    aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+SentryChassisWorldYawObserver chassisYawObserver(turretMajor, turretLeft, turretRight);
 
 struct TurretMinorControllers
 {
@@ -288,6 +270,41 @@ aruwsrc::chassis::SwerveChassisSubsystem chassis(
     &rightBackSwerveModule,
     aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
 
+SentryKFOdometry2DSubsystem chassisOdometry(
+    *drivers(),
+    chassis,
+    chassisYawObserver,
+    drivers()->mcbLite.imu,
+    // modm::Location2D<float>(0., 0., M_PI * 0.75), // @todo: re-enable this behavior for better
+    // odometry
+    3.074f,
+    3.074f);  // TODO: this belongs in config
+
+SentryTransforms transformer(
+    chassisOdometry,
+    turretMajor,
+    turretLeft,
+    turretRight,
+    {.turretMinorOffset = 1.0f});
+
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+
+tap::algorithms::SmoothPid turretMajorYawPosPid(
+    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+tap::algorithms::SmoothPid turretMajorYawVelPid(
+    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+
+algorithms::TurretMajorWorldFrameController turretMajorYawController(  // @todo rename
+    transformer.getWorldToChassis(),
+    chassis,
+    turretMajor.getMotor(),
+    turretLeft,
+    turretRight,
+    turretMajorYawPosPid,
+    turretMajorYawVelPid,
+    aruwsrc::control::turret::turretMajor::MAX_VEL_ERROR_INPUT,
+    aruwsrc::control::turret::turretMajor::TURRET_MINOR_TORQUE_RATIO);
+
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -340,6 +357,8 @@ void initializeSubsystems()
 
     turretLeft.initialize();
     turretRight.initialize();
+    chassisOdometry.initialize();
+    transformerSubsystem.initialize();
     // turretLeftControllers.pitchController.initialize();
     // turretLeftControllers.yawController.initialize();
 

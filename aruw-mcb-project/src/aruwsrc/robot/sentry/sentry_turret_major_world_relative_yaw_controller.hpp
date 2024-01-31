@@ -107,6 +107,8 @@ private:
 
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
+    TurretMotor& yawMotor;
+
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
 
@@ -114,11 +116,8 @@ private:
     tap::algorithms::SmoothPid& velocityPid;
 
     tap::algorithms::ContiguousFloat worldFrameSetpoint;
-
     float positionPidOutput;
     float torqueCompensation = 0.0f;
-
-    TurretMotor& yawMotor;
 
     float maxVelErrorInput;
 
