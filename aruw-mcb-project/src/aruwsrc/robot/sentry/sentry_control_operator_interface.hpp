@@ -54,7 +54,7 @@ public:
     static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10;  // TODO: refine this
 
     SentryControlOperatorInterface(tap::Drivers *drivers)
-        : ControlOperatorInterface(drivers), 
+        : ControlOperatorInterface(drivers),
           drivers(drivers)
     {
     }
