@@ -37,6 +37,8 @@
 #include "modm/math/filter/moving_average.hpp"
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
+#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_Madgwick.h"
+#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_NXPFusion.h"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -331,8 +333,8 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
-    static constexpr int IMU_DLPF_HZ = 250;
-    static constexpr float MAG_DLPF_HZ = 1;
+    static constexpr int IMU_DLPF_HZ = 500;
+    static constexpr float MAG_DLPF_HZ = 500;
 
     static const int FUSION_RATE_HZ = IMU_DLPF_HZ * 40;
 
@@ -468,6 +470,17 @@ private:
     // Hella slow down the IMU cuz its shit
     modm::filter::MovingAverage<float, (int) (FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter,
         magZFilter;
+
+
+    float madgwickHeading, fusionHeading;
+    Adafruit_NXPSensorFusion nxpAlgo;
+    Adafruit_Madgwick madgwick;
+
+
+    modm::Vector3f calibratedAxisValues;
+
+
+
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500

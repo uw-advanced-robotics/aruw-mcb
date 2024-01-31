@@ -145,6 +145,8 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
+    madgwick.begin(sampleFrequency);
+    nxpAlgo.begin(sampleFrequency);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
@@ -176,6 +178,37 @@ void Mpu6500::periodicIMUUpdate()
             getMz());
         tiltAngleCalculated = false;
         mahonyHeading = mahonyAlgorithm.getYaw();
+
+        madgwick.update(
+            modm::toRadian(getGx()),
+            modm::toRadian(getGy()),
+            modm::toRadian(getGz()),
+            getAx(),
+            getAy(),
+            getAz(),
+            getMx(),
+            getMy(),
+            getMz());
+
+        madgwickHeading = madgwick.getYaw();
+
+        nxpAlgo.update(
+            getGx(),
+            getGy(),
+            getGz(),
+            getAx(),
+            getAy(),
+            getAz(),
+            getMx(),
+            getMy(),
+            getMz());
+
+        fusionHeading = nxpAlgo.getYaw();
+
+        calibratedAxisValues.x = getMx();
+        calibratedAxisValues.y = getMy();
+        calibratedAxisValues.z = getMz();
+
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else if (imuState == ImuState::IMU_CALIBRATING)
@@ -227,13 +260,19 @@ void Mpu6500::periodicIMUUpdate()
             // avgMagAxisScale /= 3.0f;
 
             avgMagAxisScale = 50;
-            magAxisScale.x = avgMagAxisScale / ((calibrationMaxReading.x + calibrationMinReading.x) / 2.0f);
-            magAxisScale.y = avgMagAxisScale / ((calibrationMaxReading.y + calibrationMinReading.y) / 2.0f);
-            magAxisScale.z = avgMagAxisScale / ((calibrationMaxReading.z + calibrationMinReading.z) / 2.0f);
+            magAxisScale.x =
+                avgMagAxisScale / ((calibrationMaxReading.x + calibrationMinReading.x) / 2.0f);
+            magAxisScale.y =
+                avgMagAxisScale / ((calibrationMaxReading.y + calibrationMinReading.y) / 2.0f);
+            magAxisScale.z =
+                avgMagAxisScale / ((calibrationMaxReading.z + calibrationMinReading.z) / 2.0f);
 
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
             fasterMahonyAlgorithm.reset();
+
+            nxpAlgo.resetflag = true;
+            madgwick.begin(500);
         }
     }
 
