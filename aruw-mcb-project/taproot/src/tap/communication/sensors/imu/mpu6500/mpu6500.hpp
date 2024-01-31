@@ -31,14 +31,14 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_config.hpp"
 #include "tap/communication/sensors/imu/ist8310/ist8310_reg.hpp"
+#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_Madgwick.h"
+#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_NXPFusion.h"
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
 #include "modm/math/filter/moving_average.hpp"
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
-#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_Madgwick.h"
-#include "tap/communication/sensors/imu/random-algorithms/adafruit/Adafruit_AHRS_NXPFusion.h"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -259,8 +259,7 @@ public:
      */
     inline float getMx() mockable
     {
-        return validateReading(
-            (magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y);
+        return validateReading((magYFilter.getValue() - raw.magnetometerOffset.y) * magAxisScale.y);
     }
 
     /**
@@ -270,8 +269,7 @@ public:
      */
     inline float getMy() mockable
     {
-        return validateReading(
-            (magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x);
+        return validateReading((magXFilter.getValue() - raw.magnetometerOffset.x) * magAxisScale.x);
     }
 
     /**
@@ -279,8 +277,7 @@ public:
      */
     inline float getMz() mockable
     {
-        return validateReading(
-            (magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z);
+        return validateReading((magZFilter.getValue() - raw.magnetometerOffset.z) * magAxisScale.z);
     }
 
     /**
@@ -333,10 +330,10 @@ public:
     void setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi);
     void runFasterSensorFusion();
 
-    static constexpr int IMU_DLPF_HZ = 250;
+    static constexpr int IMU_DLPF_HZ = 200;
     static constexpr float MAG_DLPF_HZ = 0.33;
 
-    static const int FUSION_RATE_HZ = IMU_DLPF_HZ * 40;
+    static const int FUSION_RATE_HZ = 50000;
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
@@ -389,9 +386,6 @@ private:
     uint8_t rx = 0;  ///< Byte used for reading data in the read protothread
 
     RawData raw;
-
-    Mahony mahonyAlgorithm;
-    Mahony fasterMahonyAlgorithm;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -459,28 +453,33 @@ private:
 
     void writeIST8310Register(uint8_t reg, uint8_t data);
 
-    bool requestCalibrationFlagDebug = false;
+    void update500hzFusion();
 
-    float mahonyHeading;
-    float fasterMahonyHeading;
+    bool requestCalibrationFlagDebug = false;
 
     // Filters to the sample rate align with the 100hz update of the mag
     modm::filter::MovingAverage<float, (FUSION_RATE_HZ / IMU_DLPF_HZ)> gyroXFilter, gyroYFilter,
         gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
     // Hella slow down the IMU cuz its shit
-    modm::filter::MovingAverage<float, (int) (FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter,
+    modm::filter::MovingAverage<float, (int)(FUSION_RATE_HZ / MAG_DLPF_HZ)> magXFilter, magYFilter,
         magZFilter;
 
+    Mahony mahonyAlgorithm;
+    Mahony mahonyMagBaseline;
+    Mahony mahonyMagBaselineNoFilter;
 
-    float madgwickHeading, fusionHeading;
-    Adafruit_NXPSensorFusion nxpAlgo;
-    Adafruit_Madgwick madgwick;
+    Mahony mahonyBaselineFast;
+    Mahony mahonyMagFast;
+    Mahony mahonyMagFastButPeriodic;
 
+    tap::arch::MilliTimeout magSampleTimeout;
+    int MAG_PERIODIC_UPDATE_HZ = 100;
+    float magTimeoutMs = 1000.0f / MAG_PERIODIC_UPDATE_HZ;
+
+    float mahonyBaselineHeading, mahonyMagBaselineHeading, mahonyMagBaselineNoFilterHeading, mahonyBaselineFastHeading,
+        mahonyMagFastHeading, mahonyMagFastButPeriodicHeading;
 
     modm::Vector3f calibratedAxisValues;
-
-
-
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500

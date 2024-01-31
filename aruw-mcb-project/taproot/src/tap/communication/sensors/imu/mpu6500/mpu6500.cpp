@@ -145,16 +145,19 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
 
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
-    madgwick.begin(sampleFrequency);
-    madgwick.setBeta(50);
-    nxpAlgo.begin(sampleFrequency);
+    mahonyMagBaseline.begin(sampleFrequency, mahonyKp, mahonyKi);
+    mahonyMagBaselineNoFilter.begin(sampleFrequency, mahonyKp, mahonyKi);
+
+    magSampleTimeout.restart(magTimeoutMs);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
 
 void Mpu6500::setSensorFusionRateHz(float hz, float mahonyKp, float mahonyKi)
 {
-    fasterMahonyAlgorithm.begin(hz, mahonyKp, mahonyKi);
+    mahonyBaselineFast.begin(hz, mahonyKp, mahonyKi);
+    mahonyMagFast.begin(hz, mahonyKp, mahonyKi);
+    mahonyMagFastButPeriodic.begin(hz, mahonyKp, mahonyKi);
 }
 
 void Mpu6500::periodicIMUUpdate()
@@ -167,44 +170,9 @@ void Mpu6500::periodicIMUUpdate()
 
     if (imuState == ImuState::IMU_NOT_CALIBRATED || imuState == ImuState::IMU_CALIBRATED)
     {
-        mahonyAlgorithm.update(
-            getGx(),
-            getGy(),
-            getGz(),
-            getAx(),
-            getAy(),
-            getAz(),
-            getMx(),
-            getMy(),
-            getMz());
+        update500hzFusion();
+
         tiltAngleCalculated = false;
-        mahonyHeading = mahonyAlgorithm.getYaw();
-
-        madgwick.update(
-            modm::toRadian(getGx()),
-            modm::toRadian(getGy()),
-            modm::toRadian(getGz()),
-            getAx(),
-            getAy(),
-            getAz(),
-            getMx(),
-            getMy(),
-            getMz());
-
-        madgwickHeading = madgwick.getYaw();
-
-        nxpAlgo.update(
-            getGx(),
-            getGy(),
-            getGz(),
-            getAx(),
-            getAy(),
-            getAz(),
-            getMx(),
-            getMy(),
-            getMz());
-
-        fusionHeading = nxpAlgo.getYaw();
 
         calibratedAxisValues.x = getMx();
         calibratedAxisValues.y = getMy();
@@ -255,12 +223,6 @@ void Mpu6500::periodicIMUUpdate()
             raw.magnetometerOffset.y = (calibrationMaxReading.y + calibrationMinReading.y) / 2.0f;
             raw.magnetometerOffset.z = (calibrationMaxReading.z + calibrationMinReading.z) / 2.0f;
 
-            // avgMagAxisScale = std::fabs(raw.magnetometerOffset.x) +
-            //                   std::fabs(raw.magnetometerOffset.y) +
-            //                   std::fabs(raw.magnetometerOffset.z);
-            // avgMagAxisScale /= 3.0f;
-
-            avgMagAxisScale = 50;
             magAxisScale.x =
                 avgMagAxisScale / ((calibrationMaxReading.x - calibrationMinReading.x) / 2.0f);
             magAxisScale.y =
@@ -269,11 +231,13 @@ void Mpu6500::periodicIMUUpdate()
                 avgMagAxisScale / ((calibrationMaxReading.z - calibrationMinReading.z) / 2.0f);
 
             imuState = ImuState::IMU_CALIBRATED;
-            mahonyAlgorithm.reset();
-            fasterMahonyAlgorithm.reset();
 
-            nxpAlgo.resetflag = true;
-            madgwick.begin(500);
+            mahonyAlgorithm.reset();
+            mahonyMagBaseline.reset();
+            mahonyMagBaselineNoFilter.reset();
+            mahonyBaselineFast.reset();
+            mahonyMagFast.reset();
+            mahonyMagFastButPeriodic.reset();
         }
     }
 
@@ -282,6 +246,23 @@ void Mpu6500::periodicIMUUpdate()
     imuHeater.runTemperatureController(getTemp());
 
     addValidationErrors();
+}
+
+void Mpu6500::update500hzFusion()
+{
+    mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+    mahonyMagBaseline
+        .update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), getMx(), getMy(), getMz());
+    
+    double mx = validateReading((raw.magnetometer.y - raw.magnetometerOffset.y) * magAxisScale.y);
+    double my = validateReading((raw.magnetometer.x - raw.magnetometerOffset.x) * magAxisScale.x);
+    double mz = validateReading((raw.magnetometer.z - raw.magnetometerOffset.z) * magAxisScale.z);
+
+    mahonyMagBaselineNoFilter.update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), mx, my, mz);
+    
+    mahonyBaselineHeading = mahonyAlgorithm.getYaw();
+    mahonyMagBaselineHeading = mahonyMagBaseline.getYaw();
+    mahonyMagBaselineNoFilterHeading = mahonyMagBaselineNoFilter.getYaw();
 }
 
 void Mpu6500::runFasterSensorFusion()
@@ -295,9 +276,23 @@ void Mpu6500::runFasterSensorFusion()
     magXFilter.update(raw.magnetometer.x);
     magYFilter.update(raw.magnetometer.y);
     magZFilter.update(raw.magnetometer.z);
-    fasterMahonyAlgorithm
-        .update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), getMx(), getMy(), getMz());
-    fasterMahonyHeading = fasterMahonyAlgorithm.getYaw();
+
+    mahonyBaselineFast.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+    mahonyMagFast.update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), getMx(), getMy(),
+                         getMz());
+    
+    if(magSampleTimeout.execute())
+    {
+        mahonyMagFastButPeriodic.update(getGx(), getGy(), getGz(), getAx(), getAy(), getAz(), getMx(), getMy(),
+                         getMz());
+        magSampleTimeout.restart(magTimeoutMs);
+    } else {
+        mahonyMagFastButPeriodic.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+    }
+
+    mahonyBaselineFastHeading = mahonyBaselineFast.getYaw();
+    mahonyMagFastHeading = mahonyMagFast.getYaw();
+    mahonyMagFastButPeriodicHeading = mahonyMagFastButPeriodic.getYaw();
 }
 
 bool Mpu6500::read()
