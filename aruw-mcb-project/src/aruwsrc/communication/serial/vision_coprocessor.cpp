@@ -80,13 +80,8 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-#if defined(TARGET_HERO_CYCLONE)
-    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
-    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
-#else
     drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 1'000'000>();
     drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 1'000'000>();
-#endif
 }
 
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
