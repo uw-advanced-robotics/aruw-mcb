@@ -41,7 +41,7 @@ public:
     SentryManualDriveCommand(
         tap::Drivers* drivers,
         SentryControlOperatorInterface* operatorInterface,
-        chassis::HolonomicChassisSubsystem* chassis);
+        chassis::ChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -61,7 +61,7 @@ public:
 private:
     tap::Drivers* drivers;
     SentryControlOperatorInterface* operatorInterface;
-    chassis::HolonomicChassisSubsystem* chassis;
+    chassis::ChassisSubsystem* chassis;
 };  // class SentryManualDriveCommand
 
 }  // namespace control::sentry

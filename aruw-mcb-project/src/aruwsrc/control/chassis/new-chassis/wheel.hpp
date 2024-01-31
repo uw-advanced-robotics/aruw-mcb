@@ -44,7 +44,8 @@ struct WheelConfig
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
     SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
-    float maxWheelRPM;
+    float maxWheelRPM = 1000;
+    bool inverted;
 };
 
 class Wheel

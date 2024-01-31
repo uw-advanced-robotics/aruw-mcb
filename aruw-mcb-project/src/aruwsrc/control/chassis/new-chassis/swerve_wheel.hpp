@@ -44,6 +44,8 @@ struct SwerveAzimuthConfig
 {
     int azimuthZeroOffset;
     float azimuthMotorGearing;
+    SmoothPidConfig& azimuthPidConfig;
+    bool inverted;
 };
 
 class SwerveWheel : public Wheel

@@ -24,6 +24,7 @@
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "../new-chassis/chassis_subsystem.hpp"
 
 namespace aruwsrc::control::sentry
 {
@@ -34,12 +35,14 @@ namespace aruwsrc::control::sentry
  * This will be used if you want to drive independently of the turret.
  */
 class SentryChassisRelDrive
+#include "../new-chassis/chassis_subsystem.hpp"
+
 {
 public:
     static void computeDesiredUserTranslation(
         SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        chassis::HolonomicChassisSubsystem *chassis,
+        chassis::ChassisSubsystem *chassis,
         float chassisRotation,
         float *chassisXDesiredWheelspeed,
         float *chassisYDesiredWheelspeed);
@@ -47,7 +50,7 @@ public:
     static void onExecute(
         SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        chassis::HolonomicChassisSubsystem *chassis);
+        chassis::ChassisSubsystem *chassis);
 };
 }  // namespace aruwsrc::control::sentry
 
