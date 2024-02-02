@@ -146,13 +146,17 @@ aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig
     );
 
+std::vector<Wheel> wheels = {
+    leftFrontSwerveModule,
+    rightFrontSwerveModule,
+    leftBackSwerveModule,
+    rightBackSwerveModule
+};
+
 aruwsrc::chassis::ChassisSubsystem chassis(
-    &drivers()->mcbLite.currentSensor,
-    {&leftFrontSwerveModule,
-    &rightFrontSwerveModule,
-    &leftBackSwerveModule,
-    &rightBackSwerveModule},
-    aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
+    drivers(),
+    &wheels,
+    &drivers()->mcbLite.currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
