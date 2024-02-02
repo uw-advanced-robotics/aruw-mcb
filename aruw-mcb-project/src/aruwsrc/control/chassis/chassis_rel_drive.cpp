@@ -22,7 +22,6 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/robot/control_operator_interface.hpp"
-
 #include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;

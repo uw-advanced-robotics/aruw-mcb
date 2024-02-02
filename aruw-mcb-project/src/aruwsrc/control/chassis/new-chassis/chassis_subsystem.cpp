@@ -24,6 +24,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
+
 #include "modm/math/matrix.hpp"
 
 using namespace tap::algorithms;
@@ -112,7 +113,6 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
         coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
         wheels[i]->executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
     }
-
 }
 
 void ChassisSubsystem::initialize()
@@ -131,21 +131,23 @@ void ChassisSubsystem::refresh()
     }
 }
 
-bool ChassisSubsystem::allMotorsOnline() const {
+bool ChassisSubsystem::allMotorsOnline() const
+{
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        if (!wheels[i]->allMotorsOnline()) {
+        if (!wheels[i]->allMotorsOnline())
+        {
             return false;
         }
     }
     return true;
 }
 
-modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const {
+modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
+{
     modm::Matrix<float, 3, 1> wheelVelocity;
     return wheelVelocity.zeroMatrix();
 }
-
 
 }  // namespace chassis
 

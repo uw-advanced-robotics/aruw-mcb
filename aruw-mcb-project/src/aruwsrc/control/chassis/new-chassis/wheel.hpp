@@ -53,9 +53,15 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(const WheelConfig& config) : config(config){
+    Wheel(const WheelConfig& config) : config(config)
+    {
         distanceMat = CMSISMat<2, 3>(
-        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
+            {1,
+             0,
+             -config.wheelPositionChassisRelativeY,
+             0,
+             1,
+             config.wheelPositionChassisRelativeX});
     }
 
     // Config parameters for the individual wheel
@@ -107,7 +113,7 @@ public:
 
     virtual float getDriveVelocity() const = 0;
 
-    virtual float getDriveRPM() const  = 0;
+    virtual float getDriveRPM() const = 0;
 
     virtual int getNumMotors() const = 0;
 

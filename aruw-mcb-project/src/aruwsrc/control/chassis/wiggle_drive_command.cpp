@@ -26,8 +26,9 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "chassis_rel_drive.hpp"
 #include "new-chassis/chassis_subsystem.hpp"
+
+#include "chassis_rel_drive.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;

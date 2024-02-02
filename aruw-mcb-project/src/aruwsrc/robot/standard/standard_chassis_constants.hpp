@@ -20,12 +20,12 @@
 #ifndef STANDARD_CHASSIS_CONSTANTS_HPP_
 #define STANDARD_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
-#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
@@ -107,8 +107,8 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 static constexpr float WHEEL_RADIUS = 0.076;
 static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 /*
-* Wheel orientation (chassis relative) (rad)
-*/
+ * Wheel orientation (chassis relative) (rad)
+ */
 static constexpr float WHEEL_ORIENTATION_CHASSIS_RELATIVE = 0.0f;
 
 #ifdef TARGET_STANDARD_WOODY
@@ -133,42 +133,46 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #endif
 
-static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
-     WIDTH_BETWEEN_WHEELS_Y / 2,
-     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
-     WHEEL_RADIUS * 2,
-     1.0f,
-     CHASSIS_GEARBOX_RATIO,
-     MOTOR_PID_CONFIG,
-     1000.0f,
-     true};
-static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
-     -WIDTH_BETWEEN_WHEELS_Y / 2,
-     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
-     WHEEL_RADIUS * 2,
-     1.0f,
-     CHASSIS_GEARBOX_RATIO,
-     MOTOR_PID_CONFIG,
-     1000.0f,
-     false};
-static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
-     WIDTH_BETWEEN_WHEELS_Y / 2,
-     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
-     WHEEL_RADIUS * 2,
-     1.0f,
-     CHASSIS_GEARBOX_RATIO,
-     MOTOR_PID_CONFIG,
-     1000.0f,
-     true};
-static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
-     -WIDTH_BETWEEN_WHEELS_Y / 2,
-     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
-     WHEEL_RADIUS * 2,
-     1.0f,
-     CHASSIS_GEARBOX_RATIO,
-     MOTOR_PID_CONFIG,
-     1000.0f,
-     false};
+static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
+    WIDTH_BETWEEN_WHEELS_X / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
+    WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+    WHEEL_RADIUS * 2,
+    1.0f,
+    CHASSIS_GEARBOX_RATIO,
+    MOTOR_PID_CONFIG,
+    1000.0f,
+    true};
+static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
+    WIDTH_BETWEEN_WHEELS_X / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+    WHEEL_RADIUS * 2,
+    1.0f,
+    CHASSIS_GEARBOX_RATIO,
+    MOTOR_PID_CONFIG,
+    1000.0f,
+    false};
+static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
+    -WIDTH_BETWEEN_WHEELS_X / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
+    WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+    WHEEL_RADIUS * 2,
+    1.0f,
+    CHASSIS_GEARBOX_RATIO,
+    MOTOR_PID_CONFIG,
+    1000.0f,
+    true};
+static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
+    -WIDTH_BETWEEN_WHEELS_X / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WHEEL_ORIENTATION_CHASSIS_RELATIVE,
+    WHEEL_RADIUS * 2,
+    1.0f,
+    CHASSIS_GEARBOX_RATIO,
+    MOTOR_PID_CONFIG,
+    1000.0f,
+    false};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1

@@ -180,15 +180,16 @@ aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
     aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG);
 aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
     leftBackDriveMotor,
-     aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG);
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG);
 aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     rightBackDriveMotor,
-     aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG);
-std::vector<aruwsrc::chassis::Wheel*> wheels = {&leftFrontMecanumWheel, &rightFrontMecanumWheel, &leftBackMecanumWheel, &rightBackMecanumWheel};
-aruwsrc::chassis::ChassisSubsystem chassis(
-    drivers(),
-    &wheels,
-    &currentSensor);
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG);
+std::vector<aruwsrc::chassis::Wheel *> wheels = {
+    &leftFrontMecanumWheel,
+    &rightFrontMecanumWheel,
+    &leftBackMecanumWheel,
+    &rightBackMecanumWheel};
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), &wheels, &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 

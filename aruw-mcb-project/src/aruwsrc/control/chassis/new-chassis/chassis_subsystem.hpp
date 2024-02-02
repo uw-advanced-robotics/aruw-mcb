@@ -23,8 +23,8 @@
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/gpio/analog.hpp"
-#include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
@@ -118,9 +118,11 @@ public:
 
     bool allMotorsOnline() const override;
 
-    inline int getNumChassisMotors() const override{
+    inline int getNumChassisMotors() const override
+    {
         int motorCount = 0;
-        for (int i = 0 ; i < getNumChassisWheels(); i++) {
+        for (int i = 0; i < getNumChassisWheels(); i++)
+        {
             motorCount += wheels[i]->getNumMotors();
         }
         return motorCount;

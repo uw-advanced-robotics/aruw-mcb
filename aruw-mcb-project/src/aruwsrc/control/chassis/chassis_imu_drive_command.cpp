@@ -24,9 +24,9 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "new-chassis/chassis_subsystem.hpp"
 
 #include "chassis_rel_drive.hpp"
-#include "new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 

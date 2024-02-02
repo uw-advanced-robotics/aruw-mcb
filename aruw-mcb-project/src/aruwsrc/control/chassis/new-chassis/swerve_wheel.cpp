@@ -116,9 +116,7 @@ float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaf
 
 float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
-int SwerveWheel::getNumMotors() const {
-    return 2;
-}
+int SwerveWheel::getNumMotors() const { return 2; }
 
 float SwerveWheel::getAngle() const
 {

@@ -27,18 +27,20 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config)
       driveMotor(driveMotor),
       velocityPid(SmoothPid(config.velocityPidConfig))
 {
-    MAT1 = CMSISMat<2, 2>({0.0f,
-                                                (float)sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
-                                                config.diameter / 2,
-                                                (float)cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+    MAT1 = CMSISMat<2, 2>(
+        {0.0f,
+         (float)sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+         config.diameter / 2,
+         (float)cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
     MAT1 = MAT1.inverse();
-    MAT2 = CMSISMat<2, 2>({(float)cos(AXLE_TO_ROBOT_FRONT),
-                                                (float)-sin(AXLE_TO_ROBOT_FRONT),
-                                                (float)sin(AXLE_TO_ROBOT_FRONT),
-                                                (float)cos(AXLE_TO_ROBOT_FRONT)});
+    MAT2 = CMSISMat<2, 2>(
+        {(float)cos(AXLE_TO_ROBOT_FRONT),
+         (float)-sin(AXLE_TO_ROBOT_FRONT),
+         (float)sin(AXLE_TO_ROBOT_FRONT),
+         (float)cos(AXLE_TO_ROBOT_FRONT)});
     MAT2 = MAT2.inverse();
-    PRODUCT_MAT = MAT1 * MAT2;   
-    PRODUCT_MAT =   CMSISMat<2, 2>({0.0f, 0.0f, 0.0f, 0.0f});                                                     
+    PRODUCT_MAT = MAT1 * MAT2;
+    PRODUCT_MAT = CMSISMat<2, 2>({0.0f, 0.0f, 0.0f, 0.0f});
 }
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
@@ -56,32 +58,38 @@ void MecanumWheel::initialize()
     }
 }
 
-void MecanumWheel::refresh() {
-    if (config.isPowered) {
-        driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(driveSetPoint - driveMotor.getShaftRPM(), 2.0f));
+void MecanumWheel::refresh()
+{
+    if (config.isPowered)
+    {
+        driveMotor.setDesiredOutput(
+            velocityPid.runControllerDerivateError(driveSetPoint - driveMotor.getShaftRPM(), 2.0f));
     }
 }
 
-void MecanumWheel::setZeroRPM() {
-    if (config.isPowered) {
-        executeWheelVelocity(0,0);
+void MecanumWheel::setZeroRPM()
+{
+    if (config.isPowered)
+    {
+        executeWheelVelocity(0, 0);
     }
 }
 
-bool MecanumWheel::allMotorsOnline() const {
-    return config.isPowered? driveMotor.isMotorOnline() : false;
+bool MecanumWheel::allMotorsOnline() const
+{
+    return config.isPowered ? driveMotor.isMotorOnline() : false;
 }
 
-float MecanumWheel::getDriveVelocity() const {
-    return config.isPowered? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
+float MecanumWheel::getDriveVelocity() const
+{
+    return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
 }
 
-float MecanumWheel::getDriveRPM() const {
-    return config.isPowered? driveMotor.getShaftRPM() : 0.0f;
+float MecanumWheel::getDriveRPM() const
+{
+    return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
 }
 
-int MecanumWheel::getNumMotors() const {
-    return 1;
-}
+int MecanumWheel::getNumMotors() const { return 1; }
 }  // namespace chassis
 }  // namespace aruwsrc
