@@ -42,7 +42,7 @@ struct WheelConfig
     float diameter;        // considering shoving these into DjiMotor in the future
     float gearRatio;       // considering shoving these into DjiMotor in the future
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
-    SmoothPidConfig& velocityPidConfig;
+    const SmoothPidConfig& velocityPidConfig;
     float maxWheelRPM;
     bool isPowered = true;
 };
@@ -53,7 +53,10 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(WheelConfig& config);
+    Wheel(const WheelConfig& config) : config(config){
+        distanceMat = CMSISMat<2, 3>(
+        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
+    }
 
     // Config parameters for the individual wheel
     const WheelConfig config;
@@ -72,7 +75,7 @@ public:
      */
     inline modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr)
     {
-        CMSISMat<3, 1> chassisVel = tap::algorithms::CMSISMat<3, 1>({vx, vy, vr});
+        CMSISMat<3, 1> chassisVel = CMSISMat<3, 1>({vx, vy, vr});
         CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
         return {wheelVel.data[0], wheelVel.data[1]};
     }
@@ -94,24 +97,23 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
-    virtual void initialize();
+    virtual void initialize() = 0;
 
-    virtual void refresh();
+    virtual void refresh() = 0;
 
-    virtual void setZeroRPM();
+    virtual void setZeroRPM() = 0;
 
-    virtual bool allMotorsOnline() const;
+    virtual bool allMotorsOnline() const = 0;
 
-    virtual float getDriveVelocity() const;
+    virtual float getDriveVelocity() const = 0;
 
-    virtual float getDriveRPM() const;
+    virtual float getDriveRPM() const  = 0;
 
-    virtual int getNumMotors() const;
+    virtual int getNumMotors() const = 0;
 
 protected:
     /// matrix containing distances from wheel to chassis center
-    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
-        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
+    tap::algorithms::CMSISMat<2, 3> distanceMat;
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc

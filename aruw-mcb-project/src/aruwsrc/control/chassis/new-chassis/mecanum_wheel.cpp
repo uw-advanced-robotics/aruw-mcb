@@ -22,16 +22,29 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config)
+MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config)
     : Wheel(config),
       driveMotor(driveMotor),
       velocityPid(SmoothPid(config.velocityPidConfig))
 {
+    MAT1 = CMSISMat<2, 2>({0.0f,
+                                                (float)sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+                                                config.diameter / 2,
+                                                (float)cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+    MAT1 = MAT1.inverse();
+    MAT2 = CMSISMat<2, 2>({(float)cos(AXLE_TO_ROBOT_FRONT),
+                                                (float)-sin(AXLE_TO_ROBOT_FRONT),
+                                                (float)sin(AXLE_TO_ROBOT_FRONT),
+                                                (float)cos(AXLE_TO_ROBOT_FRONT)});
+    MAT2 = MAT2.inverse();
+    PRODUCT_MAT = MAT1 * MAT2;   
+    PRODUCT_MAT =   CMSISMat<2, 2>({0.0f, 0.0f, 0.0f, 0.0f});                                                     
 }
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
-    CMSISMat<2, 1> desiredMat = PRODUCT_MAT * CMSISMat<2, 1>({vx, vy});
+    wheelMat = CMSISMat<2, 1>({vx, vy});
+    CMSISMat<2, 1> desiredMat = PRODUCT_MAT * wheelMat;
     driveSetPoint = desiredMat.data[0];
 }
 
@@ -59,16 +72,16 @@ bool MecanumWheel::allMotorsOnline() const {
     return config.isPowered? driveMotor.isMotorOnline() : false;
 }
 
-int MecanumWheel::getNumMotors() const {
-    return 1;
-}
-
 float MecanumWheel::getDriveVelocity() const {
     return config.isPowered? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
 }
 
 float MecanumWheel::getDriveRPM() const {
     return config.isPowered? driveMotor.getShaftRPM() : 0.0f;
+}
+
+int MecanumWheel::getNumMotors() const {
+    return 1;
 }
 }  // namespace chassis
 }  // namespace aruwsrc

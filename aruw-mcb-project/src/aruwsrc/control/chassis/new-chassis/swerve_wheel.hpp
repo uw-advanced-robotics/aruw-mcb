@@ -52,7 +52,7 @@ public:
     SwerveWheel(
         Motor& driveMotor,
         Motor& azimuthMotor,
-        WheelConfig& config,
+        const WheelConfig& config,
         SwerveAzimuthConfig& azimuthConfig,
         SmoothPid drivePid,
         SmoothPid azimuthPid);

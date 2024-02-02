@@ -25,7 +25,7 @@ namespace chassis
 SwerveWheel::SwerveWheel(
     Motor& driveMotor,
     Motor& azimuthMotor,
-    WheelConfig& config,
+    const WheelConfig& config,
     SwerveAzimuthConfig& azimuthConfig,
     SmoothPid drivePid,
     SmoothPid azimuthPid)
@@ -90,6 +90,12 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
     rotationSetpoint = preScaledRotationSetpoint;
 }
 
+void SwerveWheel::initialize()
+{
+    driveMotor.initialize();
+    azimuthMotor.initialize();
+}
+
 void SwerveWheel::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
@@ -99,15 +105,20 @@ void SwerveWheel::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
+void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
+
+bool SwerveWheel::allMotorsOnline() const
+{
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
+}
+
 float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
 
-void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
+float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
 int SwerveWheel::getNumMotors() const {
     return 2;
 }
-
-float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 
 float SwerveWheel::getAngle() const
 {
@@ -115,17 +126,6 @@ float SwerveWheel::getAngle() const
         azimuthMotor.encoderToDegrees(
             azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
         azimuthConfig.azimuthMotorGearing);
-}
-
-void SwerveWheel::initialize()
-{
-    driveMotor.initialize();
-    azimuthMotor.initialize();
-}
-
-bool SwerveWheel::allMotorsOnline() const
-{
-    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
 float SwerveWheel::getAngularVelocity() const

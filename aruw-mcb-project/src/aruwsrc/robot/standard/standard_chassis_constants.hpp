@@ -78,7 +78,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
-SmoothPidConfig MOTOR_PID_CONFIG = {
+static const SmoothPidConfig MOTOR_PID_CONFIG = {
     aruwsrc::chassis::VELOCITY_PID_KP,
     aruwsrc::chassis::VELOCITY_PID_KI,
     aruwsrc::chassis::VELOCITY_PID_KD,
@@ -133,7 +133,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #endif
 
-aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
@@ -142,7 +142,7 @@ aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_W
      MOTOR_PID_CONFIG,
      1000.0f,
      true};
-aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
+static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
@@ -151,7 +151,7 @@ aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {WIDTH_BETWEEN_
      MOTOR_PID_CONFIG,
      1000.0f,
      false};
-aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
@@ -160,7 +160,7 @@ aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_W
      MOTOR_PID_CONFIG,
      1000.0f,
      true};
-aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
+static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {-WIDTH_BETWEEN_WHEELS_X / 2,
      -WIDTH_BETWEEN_WHEELS_Y / 2,
      WHEEL_ORIENTATION_CHASSIS_RELATIVE,
      WHEEL_RADIUS * 2,
