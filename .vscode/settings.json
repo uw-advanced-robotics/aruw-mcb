@@ -75,8 +75,6 @@
         "concepts": "cpp",
         "ranges": "cpp",
         "stop_token": "cpp",
-        "numbers": "cpp",
-        "span": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
