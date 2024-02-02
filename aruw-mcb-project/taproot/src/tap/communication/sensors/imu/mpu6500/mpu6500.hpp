@@ -331,7 +331,7 @@ public:
     static constexpr int IMU_DLPF_HZ = 100;
     static constexpr float MAG_DLPF_HZ = 1;
 
-    static const int FUSION_RATE_HZ = 50000;
+    static const int FUSION_RATE_HZ = 10000;
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;

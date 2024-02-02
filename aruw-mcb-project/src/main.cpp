@@ -135,7 +135,6 @@ int main()
             {
                 drivers->mpu6500.requestCalibration();
             }
-            drivers->mpu6500.getYaw();
 #endif
         }
         modm::delay_us(10);
