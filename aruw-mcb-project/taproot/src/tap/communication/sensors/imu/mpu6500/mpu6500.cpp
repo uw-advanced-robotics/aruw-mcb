@@ -142,12 +142,6 @@ void Mpu6500::initializeCustomSensorFusion(float mahonyKp, float mahonyKi)
 
 void Mpu6500::periodicIMUUpdate()
 {
-    if (resetIMU)
-    {
-        requestCalibration();
-        resetIMU = false;
-    }
-
     if (imuState == ImuState::IMU_NOT_CALIBRATED || imuState == ImuState::IMU_CALIBRATED)
     {
         if (!enableCustomSensorFusionHz)
