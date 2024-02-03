@@ -376,8 +376,6 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    // turretMajor.initialize();
-
     // @note: initialization of controllers usually handled by imu calibrate, so
     // move this stuff into there once imu calibrate integrated
     // majorController.initialize();
