@@ -21,7 +21,8 @@
 
 #include "tap/architecture/clock.hpp"
 
-#include "wheel.hpp"
+// #include "wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 
 namespace aruwsrc
 {
@@ -37,6 +38,16 @@ public:
     void executeWheelVelocity(float vx, float vy) override;
 
     void initialize() override;
+
+    void refresh() override {}
+
+    void setZeroRPM() override {}
+
+    bool allMotorsOnline() const override { return false; }
+
+    float getDriveVelocity() const override { return 0.0f; }
+
+    float getDriveRPM() const override { return 0.0f; }
 
 private:
     /// time tracker for smoothpid
