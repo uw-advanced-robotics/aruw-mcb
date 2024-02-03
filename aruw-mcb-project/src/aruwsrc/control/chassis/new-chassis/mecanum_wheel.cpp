@@ -29,14 +29,15 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, bool in
       velocityPid(SmoothPid(config.velocityPidConfig))
 {
     int inverse = 1;
-    if (invertAngle) {
+    if (invertAngle)
+    {
         inverse = -1;
     }
     MAT1 = CMSISMat<2, 2>(
         {0.0f,
-         (float)sin(inverse*WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+         (float)sin(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
          config.diameter / 2,
-         (float)cos(inverse*WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+         (float)cos(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
     MAT1 = MAT1.inverse();
     MAT2 = CMSISMat<2, 2>(
         {(float)cos(AXLE_TO_ROBOT_FRONT),
@@ -47,11 +48,11 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, bool in
     PRODUCT_MAT = MAT1 * MAT2;
 }
 
-void MecanumWheel::executeWheelVelocity(float vx, float vy) //mps, mps of wheel
+void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of wheel
 {
     wheelMat = CMSISMat<2, 1>({vx, vy});
     CMSISMat<2, 1> desiredMat = PRODUCT_MAT * wheelMat;
-    driveSetPoint = desiredMat.data[0]; //rad/s
+    driveSetPoint = desiredMat.data[0];  // rad/s
 }
 
 void MecanumWheel::initialize()
@@ -66,8 +67,9 @@ void MecanumWheel::refresh()
 {
     if (config.isPowered)
     {
-        driveMotor.setDesiredOutput(
-            velocityPid.runControllerDerivateError(mpsToRpm(driveSetPoint) - driveMotor.getShaftRPM(), 2.0f)); 
+        driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(
+            mpsToRpm(driveSetPoint) - driveMotor.getShaftRPM(),
+            2.0f));
     }
 }
 

@@ -94,7 +94,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r) //mps, mps, rad/s
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps, rad/s
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;

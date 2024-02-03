@@ -33,8 +33,8 @@ void ChassisRelDrive::computeDesiredUserTranslation(
     tap::Drivers *drivers,
     ChassisSubsystem *chassis,
     float chassisRotation,
-    float *chassisXDesiredWheelspeed, //mps
-    float *chassisYDesiredWheelspeed) //mps
+    float *chassisXDesiredWheelspeed,  // mps
+    float *chassisYDesiredWheelspeed)  // mps
 {
     if (drivers == nullptr || operatorInterface == nullptr || chassis == nullptr ||
         chassisXDesiredWheelspeed == nullptr || chassisYDesiredWheelspeed == nullptr)
@@ -51,13 +51,13 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
-        operatorInterface->getChassisXInput(), //mps
+        operatorInterface->getChassisXInput(),  // mps
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
-        operatorInterface->getChassisYInput(), //mps
-        -rotationLimitedMaxTranslationalSpeed, //mps
+        operatorInterface->getChassisYInput(),  // mps
+        -rotationLimitedMaxTranslationalSpeed,  // mps
         rotationLimitedMaxTranslationalSpeed);
 }
 
@@ -66,7 +66,7 @@ void ChassisRelDrive::onExecute(
     tap::Drivers *drivers,
     ChassisSubsystem *chassis)
 {
-    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput(); //rad/s???????
+    float chassisRotationDesiredWheelspeed = operatorInterface->getChassisRInput();  // rad/s???????
 
     float chassisXDesiredWheelspeed = 0.0f;
     float chassisYDesiredWheelspeed = 0.0f;
@@ -80,8 +80,8 @@ void ChassisRelDrive::onExecute(
         &chassisYDesiredWheelspeed);
 
     chassis->setDesiredOutput(
-        chassisXDesiredWheelspeed, //mps
-        chassisYDesiredWheelspeed, //mps
-        chassisRotationDesiredWheelspeed); //rad/s
+        chassisXDesiredWheelspeed,          // mps
+        chassisYDesiredWheelspeed,          // mps
+        chassisRotationDesiredWheelspeed);  // rad/s
 }
 }  // namespace aruwsrc::chassis
