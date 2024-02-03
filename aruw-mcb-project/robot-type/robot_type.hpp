@@ -25,6 +25,6 @@
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_TESTBED
+#define TARGET_STANDARD_SPIDER
 
 #endif

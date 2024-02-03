@@ -49,6 +49,9 @@ static constexpr float MAHONY_KP = 0.1f;
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
+tap::arch::PeriodicMicroTimer imuSensorFusion(
+    1000000 / tap::communication::sensors::imu::mpu6500::Mpu6500::SENSOR_FUSION_RATE_HZ);
+
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 static void initializeIo(tap::Drivers *drivers);
@@ -74,6 +77,9 @@ using namespace aruwsrc::dart;
 using namespace aruwsrc::testbed;
 #endif
 
+float mcbHeading = 0;
+bool calibrate = false;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -96,6 +102,11 @@ int main()
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
 
+        if (imuSensorFusion.execute())
+        {
+            PROFILE(drivers->profiler, drivers->mpu6500.runSensorFusion, ());
+        }
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
@@ -109,6 +120,13 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+            mcbHeading = modm::toDegree(drivers->turretMCBCanCommBus1.getYaw());
+
+            if(calibrate){
+                drivers->turretMCBCanCommBus1.sendImuCalibrationRequest();
+                drivers->mpu6500.requestCalibration();
+                calibrate = false;
+            }
 #endif
 
 #if defined(TARGET_SENTRY_BEEHIVE)
@@ -135,6 +153,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->mpu6500.initializeCustomSensorFusion(MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
     drivers->terminalSerial.initialize();
     drivers->schedulerTerminalHandler.init();

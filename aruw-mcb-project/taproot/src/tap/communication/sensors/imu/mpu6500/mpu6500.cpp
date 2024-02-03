@@ -128,18 +128,41 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
     assert(delayBtwnCalcAndReadReg >= 0);
 
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
-
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
+    mahonyAlgorithmBaseline.begin(sampleFrequency, mahonyKp, mahonyKi);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
 
+void Mpu6500::initializeCustomSensorFusion(float mahonyKp, float mahonyKi)
+{
+    mahonyAlgorithm.begin(SENSOR_FUSION_RATE_HZ, mahonyKp, mahonyKi);
+    enableCustomSensorFusionHz = true;
+}
+
 void Mpu6500::periodicIMUUpdate()
 {
+    if (resetIMU)
+    {
+        requestCalibration();
+        resetIMU = false;
+    }
+
     if (imuState == ImuState::IMU_NOT_CALIBRATED || imuState == ImuState::IMU_CALIBRATED)
     {
-        mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        if (!enableCustomSensorFusionHz)
+        {
+            mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
+        }
+        mahonyAlgorithmBaseline.updateIMU(
+            gyroXFilter.getValue(),
+            gyroYFilter.getValue(),
+            gyroZFilter.getValue(),
+            accelXFilter.getValue(),
+            accelYFilter.getValue(),
+            accelZFilter.getValue());
         tiltAngleCalculated = false;
+        headingBaseline = mahonyAlgorithmBaseline.getYaw();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else
@@ -164,6 +187,7 @@ void Mpu6500::periodicIMUUpdate()
             raw.accelOffset.z /= MPU6500_OFFSET_SAMPLES;
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
+            mahonyAlgorithmBaseline.reset();
         }
     }
 
@@ -172,6 +196,29 @@ void Mpu6500::periodicIMUUpdate()
     imuHeater.runTemperatureController(getTemp());
 
     addValidationErrors();
+}
+
+void Mpu6500::runSensorFusion()
+{
+    if (enableCustomSensorFusionHz)
+    {
+        gyroXFilter.update(getGx());
+        gyroYFilter.update(getGy());
+        gyroZFilter.update(getGz());
+        accelXFilter.update(getAx());
+        accelYFilter.update(getAy());
+        accelZFilter.update(getAz());
+
+        mahonyAlgorithm.updateIMU(
+            gyroXFilter.getValue(),
+            gyroYFilter.getValue(),
+            gyroZFilter.getValue(),
+            accelXFilter.getValue(),
+            accelYFilter.getValue(),
+            accelZFilter.getValue());
+    }
+
+    heading = mahonyAlgorithm.getYaw();
 }
 
 bool Mpu6500::read()

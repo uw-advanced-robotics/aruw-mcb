@@ -32,6 +32,7 @@
 #include "tap/communication/sensors/imu_heater/imu_heater.hpp"
 #include "tap/util_macros.hpp"
 
+#include "modm/math/filter/moving_average.hpp"
 #include "modm/math/geometry.hpp"
 #include "modm/processing/protothread.hpp"
 
@@ -48,8 +49,8 @@ namespace tap::communication::sensors::imu::mpu6500
 /**
  * A class specifically designed for interfacing with the RoboMaster type A board Mpu6500.
  *
- * To use this class, call Remote::init() to properly initialize and calibrate
- * the MPU6500. Next, call Remote::read() to read acceleration, gyro, and temperature
+ * To use this class, call Mpu6500::init() to properly initialize and calibrate
+ * the MPU6500. Next, call Mpu6500::read() to read acceleration, gyro, and temperature
  * values from the imu. Use the getter methods to access imu information.
  *
  * @note if you are shaking the imu while it is initializing, the offsets will likely
@@ -111,11 +112,22 @@ public:
     mockable void init(float sampleFrequency, float mahonyKp, float mahonyKi);
 
     /**
+     * Setups up sensor fusion algorithm at custom sample rate.
+     */
+    mockable void initializeCustomSensorFusion(float mahonyKp, float mahonyKi);
+
+    /**
      * Calculates the IMU's pitch, roll, and yaw angles usign the Mahony AHRS algorithm.
      * Also runs a controller to keep the temperature constant.
      * Call at 500 hz for best performance.
      */
     mockable void periodicIMUUpdate();
+
+    /**
+     * Runs the sensor fusion algorithm.
+     * Call at fusion sample rate set
+     */
+    mockable void runSensorFusion();
 
     /**
      * Read data from the imu. This is a protothread that reads the SPI bus using
@@ -239,7 +251,7 @@ public:
      */
     inline float getTemp() final_mockable
     {
-        return validateReading(21.0f + static_cast<float>(raw.temperature) / 333.87f);
+        return 21.0f + static_cast<float>(raw.temperature) / 333.87f;
     }
 
     /**
@@ -277,6 +289,9 @@ public:
      */
     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
 
+    static constexpr int SENSOR_FUSION_RATE_HZ = 10000;
+    static constexpr int IMU_DLPF_HZ = 100;
+
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
@@ -288,7 +303,7 @@ private:
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.
      */
-    static constexpr float MPU6500_OFFSET_SAMPLES = 1000;
+    static constexpr float MPU6500_OFFSET_SAMPLES = 10000;
 
     /**
      * The time to read the registers in nonblocking mode, in microseconds.
@@ -325,6 +340,7 @@ private:
     RawData raw;
 
     Mahony mahonyAlgorithm;
+    Mahony mahonyAlgorithmBaseline;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -340,6 +356,15 @@ private:
     uint8_t errorState = 0;
 
     uint32_t prevIMUDataReceivedTime = 0;
+
+    bool enableCustomSensorFusionHz = false;
+
+    modm::filter::MovingAverage<float, SENSOR_FUSION_RATE_HZ / IMU_DLPF_HZ> gyroXFilter,
+        gyroYFilter, gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
+
+    float heading;
+    float headingBaseline;
+
 
     // Functions for interacting with hardware directly.
 
@@ -380,6 +405,8 @@ private:
         const uint8_t (&rxBuff)[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE],
         modm::Vector3f &accel,
         modm::Vector3f &gyro);
+
+    bool resetIMU = false;
 };
 
 }  // namespace tap::communication::sensors::imu::mpu6500
