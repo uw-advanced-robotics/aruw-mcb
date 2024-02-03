@@ -94,7 +94,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r) //mps, mps, rad/s
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
@@ -103,8 +103,8 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         desiredWheelVel = wheels[i]->calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,  // change
-            rotationTranslationGain * y,  // change
+            rotationTranslationGain * x,  // scaled rpm of raw motor
+            rotationTranslationGain * y,  // scaled rpm of raw motor
             r);
         tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
     }

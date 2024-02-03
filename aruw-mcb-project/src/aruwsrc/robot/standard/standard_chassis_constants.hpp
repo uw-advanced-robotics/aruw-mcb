@@ -92,7 +92,7 @@ static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
 static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f / 10;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -152,7 +152,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     1000.0f,
-    false};
+    true};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
     WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -172,7 +172,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     1000.0f,
-    false};
+    true};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1
