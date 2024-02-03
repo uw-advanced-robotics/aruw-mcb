@@ -45,6 +45,7 @@ public:
 
     float getMajorFrameYaw() const;
     float getMajorFramePitch() const;
+
     TurretID getTurretID() const { return this->turretID; };
 
 private:

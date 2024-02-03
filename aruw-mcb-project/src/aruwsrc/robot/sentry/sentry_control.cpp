@@ -36,6 +36,7 @@
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
@@ -290,7 +291,7 @@ SentryTransforms transformer(
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
 tap::algorithms::SmoothPid turretMajorYawPosPid(
-    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+    turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid turretMajorYawVelPid(
     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
@@ -336,12 +337,39 @@ aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
+imu::SentryImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {
+        {
+            &drivers()->turretMCBCanCommBus2,
+            turretLeft,
+            turretLeftControllers.yawController,
+            turretLeftControllers.pitchController,
+            true,
+        },
+        {
+            &drivers()->turretMCBCanCommBus1,
+            turretRight,
+            turretRightControllers.yawController,
+            turretRightControllers.pitchController,
+            true,
+        },
+    },
+    turretMajor,
+    turretMajorYawController,
+    chassis,
+    chassisYawObserver,
+    chassisOdometry);
+
 /* define command mappings --------------------------------------------------*/
+HoldCommandMapping manualRightSwitchUp(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
 HoldCommandMapping manualRightSwitchDown(
     drivers(),
-    {// &majorManualCommand
-     &turretLeftManualCommand,
-     &turretRightManualCommand},
+    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -357,21 +385,15 @@ void initializeSubsystems()
 
     turretLeft.initialize();
     turretRight.initialize();
+    turretMajor.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
-    // turretLeftControllers.pitchController.initialize();
-    // turretLeftControllers.yawController.initialize();
-
-    // turretRightControllers.pitchController.initialize();
-    // turretRightControllers.yawController.initialize();
-
-    // turretRight.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&turretMajor);
+    drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
@@ -380,19 +402,23 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
+    // chassis.setDefaultCommand(&chassisDriveCommand);
     // turretMajor.setDefaultCommand(&majorManualCommand);
-    chassis.setDefaultCommand(&chassisDriveCommand);
-    turretLeft.setDefaultCommand(&turretLeftManualCommand);
-    turretRight.setDefaultCommand(&turretRightManualCommand);
+    // turretLeft.setDefaultCommand(&turretLeftManualCommand);
+    // turretRight.setDefaultCommand(&turretRightManualCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(Drivers *drivers) { drivers = drivers; }  // @todo: imu calibrate command
+void startSentryCommands(Drivers *drivers)
+{
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+}  // @todo: imu calibrate command
 
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&manualRightSwitchDown);
+    drivers->commandMapper.addMap(&manualRightSwitchUp);
 }
 }  // namespace sentry_control
 

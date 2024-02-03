@@ -52,6 +52,8 @@ public:
 
     inline aruwsrc::control::turret::TurretMotor& getMotor() { return yawMotor; }
 
+    void refreshSafeDisconnect() override { yawMotor.setMotorOutput(0); }
+
 private:
     aruwsrc::control::turret::TurretMotor yawMotor;
 };  // class YawTurretSubsystem
