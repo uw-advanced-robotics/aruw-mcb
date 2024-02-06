@@ -129,7 +129,6 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
 
     readRegistersTimeout.restart(delayBtwnCalcAndReadReg);
     mahonyAlgorithm.begin(sampleFrequency, mahonyKp, mahonyKi);
-    mahonyAlgorithmBaseline.begin(sampleFrequency, mahonyKp, mahonyKi);
 
     imuState = ImuState::IMU_NOT_CALIBRATED;
 }
@@ -148,15 +147,7 @@ void Mpu6500::periodicIMUUpdate()
         {
             mahonyAlgorithm.updateIMU(getGx(), getGy(), getGz(), getAx(), getAy(), getAz());
         }
-        mahonyAlgorithmBaseline.updateIMU(
-            gyroXFilter.getValue(),
-            gyroYFilter.getValue(),
-            gyroZFilter.getValue(),
-            accelXFilter.getValue(),
-            accelYFilter.getValue(),
-            accelZFilter.getValue());
         tiltAngleCalculated = false;
-        headingBaseline = mahonyAlgorithmBaseline.getYaw();
         // Start reading registers in DELAY_BTWN_CALC_AND_READ_REG us
     }
     else
@@ -181,7 +172,6 @@ void Mpu6500::periodicIMUUpdate()
             raw.accelOffset.z /= MPU6500_OFFSET_SAMPLES;
             imuState = ImuState::IMU_CALIBRATED;
             mahonyAlgorithm.reset();
-            mahonyAlgorithmBaseline.reset();
         }
     }
 
@@ -211,8 +201,6 @@ void Mpu6500::runSensorFusion()
             accelYFilter.getValue(),
             accelZFilter.getValue());
     }
-
-    heading = mahonyAlgorithm.getYaw();
 }
 
 bool Mpu6500::read()

@@ -340,7 +340,6 @@ private:
     RawData raw;
 
     Mahony mahonyAlgorithm;
-    Mahony mahonyAlgorithmBaseline;
 
     imu_heater::ImuHeater imuHeater;
 
@@ -361,10 +360,6 @@ private:
 
     modm::filter::MovingAverage<float, SENSOR_FUSION_RATE_HZ / IMU_DLPF_HZ> gyroXFilter,
         gyroYFilter, gyroZFilter, accelXFilter, accelYFilter, accelZFilter;
-
-    float heading;
-    float headingBaseline;
-
 
     // Functions for interacting with hardware directly.
 
