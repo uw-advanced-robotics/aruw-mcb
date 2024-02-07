@@ -25,6 +25,8 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
+#include "modm/math/matrix.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -36,7 +38,7 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
-    std::vector<Wheel>* wheels,
+    std::vector<Wheel*>* wheels,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       wheels(*wheels),
@@ -95,13 +97,21 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
+    float tempMax = 0;
+    float coeff;
+    modm::Pair<float, float> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,
-            rotationTranslationGain * y,
+        desiredWheelVel = wheels[i]->calculateDesiredWheelVelocity(
+            rotationTranslationGain * x,  // change
+            rotationTranslationGain * y,  // change
             r);
         tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
+    }
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
+        wheels[i]->executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
     }
 }
 
@@ -109,7 +119,7 @@ void ChassisSubsystem::initialize()
 {
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        wheels[i].initialize();
+        wheels[i]->initialize();
     }
 }
 
@@ -117,9 +127,26 @@ void ChassisSubsystem::refresh()
 {
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        float coeff = std::min(wheels[i].config.maxWheelRPM / tempMax, 1.0f);
-        wheels[i].executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
+        wheels[i]->refresh();
     }
+}
+
+bool ChassisSubsystem::allMotorsOnline() const
+{
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        if (!wheels[i]->allMotorsOnline())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
+{
+    modm::Matrix<float, 3, 1> wheelVelocity;
+    return wheelVelocity.zeroMatrix();
 }
 
 }  // namespace chassis

@@ -32,31 +32,30 @@ class MecanumWheel : public Wheel
 public:
     /* Creates an mecanum wheel object using given motor, wheel config, and smoothpid config
      */
-    MecanumWheel(Motor& driveMotor, WheelConfig& config);
+    MecanumWheel(Motor& driveMotor, const WheelConfig& config);
 
     void executeWheelVelocity(float vx, float vy) override;
 
     void initialize() override;
+    void refresh() override;
+    void setZeroRPM() override;
+    bool allMotorsOnline() const override;
+    float getDriveVelocity() const override;
+    float getDriveRPM() const override;
+    int getNumMotors() const override;
 
 private:
-    /// time tracker for smoothpid
-    double prevTime = 0;
+    float driveSetPoint;
+    Motor& driveMotor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
     const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
-    const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0f,
-                                                (float)sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
-                                                config.diameter / 2,
-                                                (float)cos(WHEEL_RELATIVE_TO_ROLLER_ANGLE)})
-                                    .inverse();
-    const CMSISMat<2, 2> MAT2 = CMSISMat<2, 2>({(float)cos(AXLE_TO_ROBOT_FRONT),
-                                                (float)-sin(AXLE_TO_ROBOT_FRONT),
-                                                (float)sin(AXLE_TO_ROBOT_FRONT),
-                                                (float)cos(AXLE_TO_ROBOT_FRONT)})
-                                    .inverse();
+    CMSISMat<2, 2> MAT1;
+    CMSISMat<2, 2> MAT2;
     /// product of matrices 1 and 2 in equation on Swerve! Notion
-    const CMSISMat<2, 2> PRODUCT_MAT = MAT1 * MAT2;
+    CMSISMat<2, 2> PRODUCT_MAT;
+    CMSISMat<2, 1> wheelMat;
 };  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc

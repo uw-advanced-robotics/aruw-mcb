@@ -54,7 +54,7 @@ public:
     SwerveWheel(
         Motor& driveMotor,
         Motor& azimuthMotor,
-        WheelConfig& config,
+        const WheelConfig& config,
         SwerveAzimuthConfig& azimuthConfig,
         SmoothPid drivePid,
         SmoothPid azimuthPid);
@@ -65,6 +65,7 @@ public:
     bool allMotorsOnline() const override;
     float getDriveVelocity() const override;
     float getDriveRPM() const override;
+    int getNumMotors() const override;
     float getAngularVelocity() const;
     float getAngle() const;
 

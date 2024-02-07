@@ -23,14 +23,14 @@
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 
 namespace aruwsrc::chassis
 {
 ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
     tap::Drivers* drivers,
     aruwsrc::control::ControlOperatorInterface* operatorInterface,
-    HolonomicChassisSubsystem* chassis,
+    ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     ChassisSymmetry chassisSymmetry)
     : ChassisAutorotateCommand(drivers, operatorInterface, chassis, yawMotor, chassisSymmetry)

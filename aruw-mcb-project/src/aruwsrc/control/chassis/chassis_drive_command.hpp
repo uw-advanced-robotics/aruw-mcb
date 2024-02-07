@@ -29,7 +29,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A command that applies classic chassis-relative mecanum drive.
@@ -40,7 +40,7 @@ public:
     ChassisDriveCommand(
         tap::Drivers* drivers,
         aruwsrc::control::ControlOperatorInterface* operatorInterface,
-        HolonomicChassisSubsystem* chassis);
+        ChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -60,7 +60,7 @@ public:
 private:
     tap::Drivers* drivers;
     aruwsrc::control::ControlOperatorInterface* operatorInterface;
-    HolonomicChassisSubsystem* chassis;
+    ChassisSubsystem* chassis;
 };  // class ChassisDriveCommand
 
 }  // namespace chassis
