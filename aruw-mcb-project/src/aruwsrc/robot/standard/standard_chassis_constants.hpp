@@ -66,9 +66,9 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_KP = 20.0f /10;
+static constexpr float VELOCITY_PID_KI = 0.2f /10;
+static constexpr float VELOCITY_PID_KD = 0.0f /10;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -152,7 +152,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     1000.0f,
-    false};
+    true};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
     WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -172,7 +172,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     1000.0f,
-    false};
+    true};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1

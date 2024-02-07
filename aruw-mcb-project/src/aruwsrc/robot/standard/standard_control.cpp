@@ -174,16 +174,20 @@ tap::motor::DjiMotor rightBackDriveMotor(
 
 aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
     leftFrontDriveMotor,
-    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG);
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG,
+    false);
 aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
     rightFrontDriveMotor,
-    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG);
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG,
+    true);
 aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
     leftBackDriveMotor,
-    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG);
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG,
+    true);
 aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     rightBackDriveMotor,
-    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG);
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG,
+    false);
 std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &leftFrontMecanumWheel,
     &rightFrontMecanumWheel,
@@ -605,7 +609,7 @@ void registerStandardSubsystems(Drivers *drivers)
 void initializeSubsystems()
 {
     sentryRequestSubsystem.initialize();
-    turret.initialize();
+    // turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();

@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace control::sentry
 {
-// class HolonomicChassisSubsystem;
+// class ChassisSubsystem;
 
 SentryManualDriveCommand::SentryManualDriveCommand(
     tap::Drivers* drivers,

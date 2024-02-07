@@ -80,11 +80,19 @@ public:
      *         in the x direction and the second value containing the desired velocity
      *         of the wheel in the y direction. Units: m/s. Might change type later???
      */
-    inline modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr)
+    inline modm::Pair<float, float> calculateDesiredWheelVelocity(
+        float vx,
+        float vy,
+        float vr)  // chassis in mps, mps, rad/s
     {
         CMSISMat<3, 1> chassisVel = CMSISMat<3, 1>({vx, vy, vr});
         CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
-        return {wheelVel.data[0], wheelVel.data[1]};
+        return {
+            wheelVel.data[0],
+            wheelVel.data[1]};  // wheel speed in mps if lx and ly are meters in chassis frame
+                                // common interface -- multiply resulting matrix with the sin/cos
+                                // matrices too for
+                                // wheel relative speeds
     }
 
     /**
