@@ -35,15 +35,15 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, bool in
     }
     MAT1 = CMSISMat<2, 2>(
         {0.0f,
-         (float)sin(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+         sin(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
          config.diameter / 2,
-         (float)cos(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+         cos(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
     MAT1 = MAT1.inverse();
     MAT2 = CMSISMat<2, 2>(
-        {(float)cos(AXLE_TO_ROBOT_FRONT),
-         (float)-sin(AXLE_TO_ROBOT_FRONT),
-         (float)sin(AXLE_TO_ROBOT_FRONT),
-         (float)cos(AXLE_TO_ROBOT_FRONT)});
+        {cos(AXLE_TO_ROBOT_FRONT),
+         -sin(AXLE_TO_ROBOT_FRONT),
+         sin(AXLE_TO_ROBOT_FRONT),
+         cos(AXLE_TO_ROBOT_FRONT)});
     MAT2 = MAT2.inverse();
     PRODUCT_MAT = MAT1 * MAT2;
 }

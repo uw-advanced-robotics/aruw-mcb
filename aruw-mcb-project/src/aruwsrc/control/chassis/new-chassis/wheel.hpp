@@ -58,10 +58,10 @@ public:
         distanceMat = CMSISMat<2, 3>(
             {1,
              0,
-             -config.wheelPositionChassisRelativeY,
+             config.wheelPositionChassisRelativeY,
              0,
              1,
-             config.wheelPositionChassisRelativeX});
+             -config.wheelPositionChassisRelativeX});
     }
 
     // Config parameters for the individual wheel

@@ -134,8 +134,8 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 #endif
 
 static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
-    WIDTH_BETWEEN_WHEELS_X / 2,
-    WIDTH_BETWEEN_WHEELS_Y / 2,
+    -WIDTH_BETWEEN_WHEELS_X / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -145,7 +145,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     WIDTH_BETWEEN_WHEELS_X / 2,
-    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -155,7 +155,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     true};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
-    WIDTH_BETWEEN_WHEELS_Y / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -164,8 +164,8 @@ static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     1000.0f,
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
-    -WIDTH_BETWEEN_WHEELS_X / 2,
-    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WIDTH_BETWEEN_WHEELS_X / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,

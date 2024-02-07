@@ -50,8 +50,8 @@ private:
     Motor& driveMotor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
-    const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
-    const double AXLE_TO_ROBOT_FRONT = 0.0;
+    const float WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
+    const float AXLE_TO_ROBOT_FRONT = M_PI_2;
     CMSISMat<2, 2> MAT1;
     CMSISMat<2, 2> MAT2;
     /// product of matrices 1 and 2 in equation on Swerve! Notion
