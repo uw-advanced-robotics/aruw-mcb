@@ -75,7 +75,7 @@ aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
     .motorGearRatio = (1.0f / 19.0f),
     .velocityPidConfig = swerveCoinfig.drivePidConfig,
     // .driveMotorInverted = false,
-    .inverted = false,
+    .inverted = true,
 };
 
 aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
@@ -83,7 +83,7 @@ aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3753,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = false
+    .inverted = true
 };
 aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
@@ -103,7 +103,7 @@ aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = false
+    .inverted = true
 };
 
 aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
@@ -123,7 +123,7 @@ aruwsrc::chassis::SwerveAzimuthConfig leftBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3093,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = false,
+    .inverted = true,
 };
 
 aruwsrc::chassis::WheelConfig rightBackSwerveConfig = {
@@ -138,10 +138,10 @@ aruwsrc::chassis::WheelConfig rightBackSwerveConfig = {
 };
 
 aruwsrc::chassis::SwerveAzimuthConfig rightBackSwerveAzimuthConfig = {
-    .azimuthZeroOffset = 7878,
+    .azimuthZeroOffset = 3679,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = false,
+    .inverted = true,
 };
 
 }  // namespace aruwsrc::sentry::chassis
