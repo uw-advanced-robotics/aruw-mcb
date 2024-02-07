@@ -43,7 +43,6 @@ struct WheelConfig
     float gearRatio;       // considering shoving these into DjiMotor in the future
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
     const SmoothPidConfig& velocityPidConfig;
-    float maxWheelRPM;
     bool isPowered = true;
     float maxWheelRPM = 1000;
     bool inverted;

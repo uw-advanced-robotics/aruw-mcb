@@ -146,11 +146,11 @@ aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig
     );
 
-std::vector<Wheel> wheels = {
-    leftFrontSwerveModule,
-    rightFrontSwerveModule,
-    leftBackSwerveModule,
-    rightBackSwerveModule
+std::vector<Wheel*> wheels = {
+    &leftFrontSwerveModule,
+    &rightFrontSwerveModule,
+    &leftBackSwerveModule,
+    &rightBackSwerveModule
 };
 
 aruwsrc::chassis::ChassisSubsystem chassis(
