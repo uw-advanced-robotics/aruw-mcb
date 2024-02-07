@@ -99,6 +99,9 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps,
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
     float coeff;
+    x = wheels[0]->rpmToMps(x);
+    y = wheels[0]->rpmToMps(y);
+    r= wheels[0]->rpmToMps(r) / 0.205f; 
     modm::Pair<float, float> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {

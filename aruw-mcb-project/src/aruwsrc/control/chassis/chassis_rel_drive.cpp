@@ -51,13 +51,13 @@ void ChassisRelDrive::computeDesiredUserTranslation(
         chassis->calculateRotationTranslationalGain(chassisRotation) * maxWheelSpeed;
 
     *chassisXDesiredWheelspeed = limitVal(
-        operatorInterface->getChassisXInput(),  // mps
+        operatorInterface->getChassisXInput(),  // rpm
         -rotationLimitedMaxTranslationalSpeed,
         rotationLimitedMaxTranslationalSpeed);
 
     *chassisYDesiredWheelspeed = limitVal(
-        operatorInterface->getChassisYInput(),  // mps
-        -rotationLimitedMaxTranslationalSpeed,  // mps
+        operatorInterface->getChassisYInput(),  // rpm
+        -rotationLimitedMaxTranslationalSpeed,  // rpm
         rotationLimitedMaxTranslationalSpeed);
 }
 
@@ -80,8 +80,8 @@ void ChassisRelDrive::onExecute(
         &chassisYDesiredWheelspeed);
 
     chassis->setDesiredOutput(
-        chassisXDesiredWheelspeed,          // mps
-        chassisYDesiredWheelspeed,          // mps
+        chassisXDesiredWheelspeed,          // rpm
+        chassisYDesiredWheelspeed,          // rpm
         chassisRotationDesiredWheelspeed);  // rad/s
 }
 }  // namespace aruwsrc::chassis

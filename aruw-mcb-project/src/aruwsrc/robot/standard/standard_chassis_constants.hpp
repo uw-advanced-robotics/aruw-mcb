@@ -66,9 +66,9 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_KP = 20.0f /10;
+static constexpr float VELOCITY_PID_KI = 0.2f /10;
+static constexpr float VELOCITY_PID_KD = 0.0f /10;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -92,7 +92,7 @@ static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
 static constexpr float AUTOROTATION_PID_KD = 57.3f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f / 10;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
