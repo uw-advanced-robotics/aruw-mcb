@@ -146,6 +146,7 @@ aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig
     );
 
+//TODO: make this a std::array
 std::vector<Wheel*> wheels = {
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,

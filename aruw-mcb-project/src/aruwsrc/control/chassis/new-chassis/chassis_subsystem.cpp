@@ -101,20 +101,24 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps,
     float coeff;
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r= wheels[0]->rpmToMps(r) / 0.205f; 
-    modm::Pair<float, float> desiredWheelVel;
+    r = wheels[0]->rpmToMps(r) / 0.205f;
+
+    //TODO: make not magic number
+    std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        desiredWheelVel = wheels[i]->calculateDesiredWheelVelocity(
+        desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
             rotationTranslationGain * x,  // scaled rpm of raw motor
             rotationTranslationGain * y,  // scaled rpm of raw motor
             r);
-        tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
+        tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
-        wheels[i]->executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
+        wheels[i]->executeWheelVelocity(
+            desiredWheelVel[i].first * coeff,
+            desiredWheelVel[i].second);
     }
 }
 

@@ -199,9 +199,9 @@ public:
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
     void limitChassisPower();
-
 private:
     double prevTime = 0.0;
+
 };  // class ChassisSubsystem
 
 }  // namespace chassis
