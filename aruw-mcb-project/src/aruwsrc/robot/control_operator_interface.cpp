@@ -163,10 +163,11 @@ float ControlOperatorInterface::getChassisRInput()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power); //rpm
+        drivers->refSerial.getRobotData().chassis.power);  // rpm
 
-    float finalR = maxChassisSpeed *
-                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f); //rpm
+    float finalR =
+        maxChassisSpeed *
+        limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);  // rpm
 
     chassisRInputRamp.setTarget(finalR);
 

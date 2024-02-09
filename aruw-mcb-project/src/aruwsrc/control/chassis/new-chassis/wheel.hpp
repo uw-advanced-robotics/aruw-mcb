@@ -40,7 +40,8 @@ struct WheelConfig
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
     float diameter;        // considering shoving these into DjiMotor in the future
-    float gearRatio;       // considering shoving these into DjiMotor in the future
+    float gearRatio;       // considering shoving these into DjiMotor in the future 
+    //considering combining gearRatio and motorGearRatio into one
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
     const SmoothPidConfig& velocityPidConfig;
     float maxWheelRPM;
@@ -62,6 +63,12 @@ public:
              0,
              1,
              -config.wheelPositionChassisRelativeX});
+        wheelOrientationMat = CMSISMat<2, 2>(
+        {cos(config.wheelOrientationChassisRelative),
+         -sin(config.wheelOrientationChassisRelative),
+         sin(config.wheelOrientationChassisRelative),
+         cos(config.wheelOrientationChassisRelative)});
+        wheelOrientationMat = wheelOrientationMat.inverse();
     }
 
     // Config parameters for the individual wheel
@@ -85,7 +92,7 @@ public:
         float vr)  // chassis in mps, mps, rad/s
     {
         CMSISMat<3, 1> chassisVel = CMSISMat<3, 1>({vx, vy, vr});
-        CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
+        CMSISMat<2, 1> wheelVel = wheelOrientationMat * distanceMat * chassisVel;
         return {
             wheelVel.data[0],
             wheelVel.data[1]};  // wheel speed in mps if lx and ly are meters in chassis frame
@@ -128,6 +135,7 @@ public:
 protected:
     /// matrix containing distances from wheel to chassis center
     tap::algorithms::CMSISMat<2, 3> distanceMat;
+    tap::algorithms::CMSISMat<2, 2> wheelOrientationMat;
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc

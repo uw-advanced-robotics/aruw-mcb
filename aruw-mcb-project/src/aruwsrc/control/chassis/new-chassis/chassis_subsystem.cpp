@@ -101,14 +101,14 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps,
     float coeff;
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r= r * M_2_PI * 60.0f; //rad/s
+    r = r * M_2_PI * 60.0f;  // rad/s
     modm::Pair<float, float> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         desiredWheelVel = wheels[i]->calculateDesiredWheelVelocity(
             rotationTranslationGain * x,  // scaled mps
             rotationTranslationGain * y,  // scaled mps
-            r); //rad/s
+            r);                           // rad/s
         tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)

@@ -22,36 +22,24 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, bool invertAngle)
+MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, int invertAngleMultiplier)
     : Wheel(config),
-      invertAngle(invertAngle),
+      invertAngleMultiplier(invertAngleMultiplier),
       driveMotor(driveMotor),
       velocityPid(SmoothPid(config.velocityPidConfig))
 {
-    int inverse = 1;
-    if (invertAngle)
-    {
-        inverse = -1;
-    }
-    MAT1 = CMSISMat<2, 2>(
+    wheelVelocityTransformation = CMSISMat<2, 2>(
         {0.0f,
-         sin(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+         sin(invertAngleMultiplier * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
          config.diameter / 2,
-         cos(inverse * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
-    MAT1 = MAT1.inverse();
-    MAT2 = CMSISMat<2, 2>(
-        {cos(AXLE_TO_ROBOT_FRONT),
-         -sin(AXLE_TO_ROBOT_FRONT),
-         sin(AXLE_TO_ROBOT_FRONT),
-         cos(AXLE_TO_ROBOT_FRONT)});
-    MAT2 = MAT2.inverse();
-    PRODUCT_MAT = MAT1 * MAT2;
+         cos(invertAngleMultiplier * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+    wheelVelocityTransformation = wheelVelocityTransformation.inverse();
 }
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of wheel
 {
     wheelMat = CMSISMat<2, 1>({vx, vy});
-    CMSISMat<2, 1> desiredMat = PRODUCT_MAT * wheelMat;
+    CMSISMat<2, 1> desiredMat = wheelVelocityTransformation * wheelMat;
     driveSetPoint = desiredMat.data[0];  // rad/s
 }
 
@@ -68,7 +56,8 @@ void MecanumWheel::refresh()
     if (config.isPowered)
     {
         driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(
-            (driveSetPoint /(M_2_PI) / config.motorGearRatio / config.gearRatio) - driveMotor.getShaftRPM(),
+            (driveSetPoint / (M_2_PI) / config.motorGearRatio / config.gearRatio) -
+                driveMotor.getShaftRPM(),
             2.0f));
     }
 }

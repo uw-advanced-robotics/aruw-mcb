@@ -157,13 +157,13 @@ tap::motor::DjiMotor rightFrontDriveMotor(
     drivers(),
     aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    false, //true
+    false,  // true
     "Right Front Drive Motor");
 tap::motor::DjiMotor leftBackDriveMotor(
     drivers(),
     aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    true, // false
+    true,  // false
     "Left Back Drive Motor");
 tap::motor::DjiMotor rightBackDriveMotor(
     drivers(),
@@ -175,19 +175,19 @@ tap::motor::DjiMotor rightBackDriveMotor(
 aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
     leftFrontDriveMotor,
     aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG,
-    true);
+    -1);
 aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
     rightFrontDriveMotor,
     aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG,
-    false);
+    1);
 aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
     leftBackDriveMotor,
     aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG,
-    false);
+    1);
 aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     rightBackDriveMotor,
     aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG,
-    true);
+    -1);
 std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &rightFrontMecanumWheel,
     &leftFrontMecanumWheel,

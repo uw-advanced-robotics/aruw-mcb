@@ -32,7 +32,7 @@ class MecanumWheel : public Wheel
 public:
     /* Creates an mecanum wheel object using given motor, wheel config, and smoothpid config
      */
-    MecanumWheel(Motor& driveMotor, const WheelConfig& config, bool invertAngle);
+    MecanumWheel(Motor& driveMotor, const WheelConfig& config, int invertAngleMultiplier);
 
     void executeWheelVelocity(float vx, float vy) override;
 
@@ -46,16 +46,13 @@ public:
 
 private:
     float driveSetPoint;
-    bool invertAngle;
+    int invertAngleMultiplier;
     Motor& driveMotor;
     // PID used to control the driving motor
     SmoothPid velocityPid;
     const float WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     const float AXLE_TO_ROBOT_FRONT = M_PI_2;
-    CMSISMat<2, 2> MAT1;
-    CMSISMat<2, 2> MAT2;
-    /// product of matrices 1 and 2 in equation on Swerve! Notion
-    CMSISMat<2, 2> PRODUCT_MAT;
+    CMSISMat<2, 2> wheelVelocityTransformation;
     CMSISMat<2, 1> wheelMat;
 };  // class MecanumWheel
 }  // namespace chassis
