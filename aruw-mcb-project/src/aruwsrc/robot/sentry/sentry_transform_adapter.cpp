@@ -30,19 +30,19 @@ SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transform
 {
 }
 
-modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const 
+modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const
 {
     return transforms.getChassisOdometry().getCurrentLocation2D();
 }
 
-modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const 
+modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const
 {
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
 float SentryTransformAdapter::getYaw() const { return transforms.getChassisOdometry().getYaw(); }
 
-uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const 
+uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
 {
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
