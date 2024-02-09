@@ -47,6 +47,11 @@ public:
      */
     void updateTransforms();
 
+    inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
+    {
+        return chassisOdometry;
+    }
+
     // @note: In updating this transform we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked

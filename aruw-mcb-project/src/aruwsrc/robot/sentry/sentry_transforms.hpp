@@ -46,6 +46,11 @@ public:
 
     void updateTransforms();
 
+    inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const 
+    {
+        return chassisOdometry;
+    }
+
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
         return worldToChassis;
