@@ -66,9 +66,9 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_KP = 20.0f /10;
+static constexpr float VELOCITY_PID_KI = 0.2f /10;
+static constexpr float VELOCITY_PID_KD = 0.0f /10;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -88,11 +88,11 @@ static const SmoothPidConfig MOTOR_PID_CONFIG = {
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
-static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f /10;
+static constexpr float AUTOROTATION_PID_KD = 57.3f /10;
+static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f /10;
+static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f /10;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f /10;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -134,8 +134,8 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 #endif
 
 static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
-    -WIDTH_BETWEEN_WHEELS_X / 2,
-    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WIDTH_BETWEEN_WHEELS_X / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -145,7 +145,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     WIDTH_BETWEEN_WHEELS_X / 2,
-    WIDTH_BETWEEN_WHEELS_Y / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -155,7 +155,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     true};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
-    -WIDTH_BETWEEN_WHEELS_Y / 2,
+    WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,
@@ -164,8 +164,8 @@ static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     1000.0f,
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
-    WIDTH_BETWEEN_WHEELS_X / 2,
-    WIDTH_BETWEEN_WHEELS_Y / 2,
+    -WIDTH_BETWEEN_WHEELS_X / 2,
+    -WIDTH_BETWEEN_WHEELS_Y / 2,
     WHEEL_ORIENTATION_CHASSIS_RELATIVE,
     WHEEL_RADIUS * 2,
     1.0f,

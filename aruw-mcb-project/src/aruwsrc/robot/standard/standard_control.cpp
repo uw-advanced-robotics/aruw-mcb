@@ -189,8 +189,8 @@ aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
     aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG,
     -1);
 std::vector<aruwsrc::chassis::Wheel *> wheels = {
-    &rightFrontMecanumWheel,
     &leftFrontMecanumWheel,
+    &rightFrontMecanumWheel,
     &leftBackMecanumWheel,
     &rightBackMecanumWheel};
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), &wheels, &currentSensor);

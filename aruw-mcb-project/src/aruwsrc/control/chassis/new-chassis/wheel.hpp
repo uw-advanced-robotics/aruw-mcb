@@ -59,10 +59,10 @@ public:
         distanceMat = CMSISMat<2, 3>(
             {1,
              0,
-             config.wheelPositionChassisRelativeY,
+             -config.wheelPositionChassisRelativeY,
              0,
              1,
-             -config.wheelPositionChassisRelativeX});
+             config.wheelPositionChassisRelativeX});
         wheelOrientationMat = CMSISMat<2, 2>(
         {cos(config.wheelOrientationChassisRelative),
          -sin(config.wheelOrientationChassisRelative),
