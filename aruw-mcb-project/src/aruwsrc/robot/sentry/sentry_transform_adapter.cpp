@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "sentry_transform_adapter.hpp"
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -26,30 +25,26 @@
 
 namespace aruwsrc::sentry
 {
-SentryTransformAdapter::SentryTransformAdapter(
-    const SentryTransforms& transforms)
+SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transforms)
     : transforms(transforms)
 {
 }
 
-modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D () const {
+modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const 
+{
     return transforms.getChassisOdometry().getCurrentLocation2D();
 }
 
-modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D () const {
+modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const 
+{
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
-float SentryTransformAdapter::getYaw () const {
-    return transforms.getChassisOdometry().getYaw();
-}
+float SentryTransformAdapter::getYaw() const { return transforms.getChassisOdometry().getYaw(); }
 
-uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const {
+uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const 
+{
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-
-
 };  // namespace aruwsrc::sentry
-
-

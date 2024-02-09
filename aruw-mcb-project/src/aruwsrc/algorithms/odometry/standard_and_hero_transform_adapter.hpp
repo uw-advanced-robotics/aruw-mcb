@@ -21,16 +21,14 @@
 #define STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+
 #include "standard_and_hero_transformer.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
-
 class StandardAndHeroTransformAdapter : public tap::algorithms::odometry::Odometry2DInterface
 {
-    StandardAndHeroTransformAdapter(
-        const StandardAndHeroTransformer& transforms
-    );
+    StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
 
     virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
 
@@ -40,8 +38,8 @@ class StandardAndHeroTransformAdapter : public tap::algorithms::odometry::Odomet
 
     virtual uint32_t getLastComputedOdometryTime() const = 0;
 
-    private:
-        StandardAndHeroTransformer transforms;
+private:
+    StandardAndHeroTransformer transforms;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

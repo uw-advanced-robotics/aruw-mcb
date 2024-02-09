@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "standard_and_hero_transform_adapter.hpp"
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -32,24 +31,24 @@ StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
 {
 }
 
-modm::Location2D<float> StandardAndHeroTransformAdapter::getCurrentLocation2D () const {
+modm::Location2D<float> StandardAndHeroTransformAdapter::getCurrentLocation2D() const
+{
     return transforms.getChassisOdometry().getCurrentLocation2D();
 }
 
-modm::Vector2f StandardAndHeroTransformAdapter::getCurrentVelocity2D () const {
+modm::Vector2f StandardAndHeroTransformAdapter::getCurrentVelocity2D() const
+{
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
-float StandardAndHeroTransformAdapter::getYaw () const {
+float StandardAndHeroTransformAdapter::getYaw() const
+{
     return transforms.getChassisOdometry().getYaw();
 }
 
-uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const {
+uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
+{
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-
-
-};  // namespace aruwsrc::sentry
-
-
+};  // namespace namespace aruwsrc::algorithms::transforms

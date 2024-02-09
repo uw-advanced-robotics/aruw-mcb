@@ -21,16 +21,14 @@
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+
 #include "sentry_transforms.hpp"
 
 namespace aruwsrc::sentry
 {
-
 class SentryTransformAdapter : public tap::algorithms::odometry::Odometry2DInterface
 {
-    SentryTransformAdapter(
-        const SentryTransforms& transforms
-    );
+    SentryTransformAdapter(const SentryTransforms& transforms);
 
     virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
 
@@ -40,8 +38,8 @@ class SentryTransformAdapter : public tap::algorithms::odometry::Odometry2DInter
 
     virtual uint32_t getLastComputedOdometryTime() const = 0;
 
-    private:
-        const SentryTransforms& transforms;
+private:
+    const SentryTransforms& transforms;
 };
 
 }  // namespace aruwsrc::sentry
