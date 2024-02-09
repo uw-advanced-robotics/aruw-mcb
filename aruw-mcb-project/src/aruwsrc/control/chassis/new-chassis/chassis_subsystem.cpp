@@ -94,29 +94,34 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps, rpm
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, rpm
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
     float coeff;
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r = r * M_2_PI * 60.0f;  // rad/s
-    modm::Pair<float, float> desiredWheelVel;
+    r = wheels[0]->rpmToMps(r) / 0.205f; //rad/s
+
+    //TODO: make not magic number
+    std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        desiredWheelVel = wheels[i]->calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,  // scaled mps
-            rotationTranslationGain * y,  // scaled mps
-            r);                           // rad/s
-        tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
+        desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
+            rotationTranslationGain * x,  // scaled mps of raw motor
+            rotationTranslationGain * y,  // scaled mps of raw motor
+            r); //rad/s
+        tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
-        wheels[i]->executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
+        wheels[i]->executeWheelVelocity(
+            desiredWheelVel[i].first * coeff,
+            desiredWheelVel[i].second);
     }
 }
+
 
 void ChassisSubsystem::initialize()
 {

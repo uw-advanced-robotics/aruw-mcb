@@ -56,8 +56,7 @@ void MecanumWheel::refresh()
     if (config.isPowered)
     {
         driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(
-            (driveSetPoint / (M_2_PI) / config.motorGearRatio / config.gearRatio) -
-                driveMotor.getShaftRPM(),
+            driveSetPoint - (driveMotor.getShaftRPM() * M_2_PI * config.motorGearRatio * config.gearRatio),
             2.0f));
     }
 }

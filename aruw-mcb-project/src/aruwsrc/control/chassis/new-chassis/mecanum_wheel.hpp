@@ -51,7 +51,6 @@ private:
     // PID used to control the driving motor
     SmoothPid velocityPid;
     const float WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
-    const float AXLE_TO_ROBOT_FRONT = M_PI_2;
     CMSISMat<2, 2> wheelVelocityTransformation;
     CMSISMat<2, 1> wheelMat;
 };  // class MecanumWheel
