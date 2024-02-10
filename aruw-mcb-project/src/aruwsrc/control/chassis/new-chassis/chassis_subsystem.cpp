@@ -100,20 +100,13 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps,
     float tempMax = 0;
     float coeff;
     
-    //If non-symmetric wheel config this needs to be changed
-    x = wheels[0]->rpmToMps(x);
-    y = wheels[0]->rpmToMps(y);
-    r = wheels[0]->rpmToMps(r) / wheels[0]->config.distFromCenterToWheel;
-
     std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        
-
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,  // scaled rpm of raw motor
-            rotationTranslationGain * y,  // scaled rpm of raw motor
-            r);
+            rotationTranslationGain *  wheels[i]->rpmToMps(x),  // scaled rpm of raw motor
+            rotationTranslationGain * wheels[i]->rpmToMps(y),  // scaled rpm of raw motor
+            wheels[i]->rpmToMps(r) / maxDistFromCenterToWheel);
         tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)
@@ -139,6 +132,11 @@ void ChassisSubsystem::refresh()
     {
         wheels[i]->refresh();
     }
+    float max = 0.0;
+    for (int i = 0; i < getNumChassisWheels(); i++){
+        max = std::max(max, wheels[i]->config.distFromCenterToWheel);
+    }
+    maxDistFromCenterToWheel = max;
 }
 
 bool ChassisSubsystem::allMotorsOnline() const

@@ -200,7 +200,8 @@ public:
 
     void limitChassisPower();
 private:
-    double prevTime = 0.0;
+    double prevTime = 0.0;\
+    float maxDistFromCenterToWheel;
 
 };  // class ChassisSubsystem
 
