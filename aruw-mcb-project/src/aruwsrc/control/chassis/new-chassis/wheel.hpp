@@ -123,6 +123,11 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
+    inline float rpmToRadPerS(float rpm) const {
+        return rpm * M_2_PI / 60.0f * config.motorGearRatio * config.gearRatio;
+    }
+    
+
     virtual void initialize() = 0;
 
     virtual void refresh() = 0;
