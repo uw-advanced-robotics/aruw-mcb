@@ -103,10 +103,9 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
         torqueCompensation = 0;
     }
 
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
-
-    //  +
-    // chassis.getActualVelocityChassisRelative()[3][0]);  // ? what is this accessing?
+    turretMotor.setMotorOutput(
+        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
+        chassis.getActualVelocityChassisRelative()[3][0]);  // ? what is this accessing?
 }
 
 // @todo what's the point of this; overridden by runController anyways?
