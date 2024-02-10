@@ -108,8 +108,6 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, 
     std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        
-
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
             rotationTranslationGain * x,  // scaled mps of raw motor
             rotationTranslationGain * y,  // scaled mps of raw motor
