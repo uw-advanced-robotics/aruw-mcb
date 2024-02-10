@@ -101,7 +101,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, 
     float coeff;
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r = r * M_2_PI * 60.0f; //rad/s  // TODO: remove the magic 0.205f number in swerve subsystem
+    r = r * M_2_PI / 60.0f; //rad/s  // TODO: remove the magic 0.205f number in swerve subsystem
 
     //TODO: make not magic number
     std::array<modm::Pair<float, float>, 4> desiredWheelVel;
