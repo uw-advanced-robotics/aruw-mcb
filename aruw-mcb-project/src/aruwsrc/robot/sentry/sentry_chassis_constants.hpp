@@ -21,6 +21,8 @@
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
@@ -70,6 +72,7 @@ aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
     .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
@@ -91,6 +94,7 @@ aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
@@ -111,6 +115,7 @@ aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
     .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
@@ -130,6 +135,7 @@ aruwsrc::chassis::WheelConfig rightBackSwerveConfig = {
     .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
