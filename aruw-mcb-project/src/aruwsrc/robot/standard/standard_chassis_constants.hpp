@@ -66,8 +66,8 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f; 
+static constexpr float VELOCITY_PID_KP = 100.0f; //old 20.0f
+static constexpr float VELOCITY_PID_KI = 0.0f;  //old 0,2f
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
@@ -142,6 +142,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     1.0f,
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
+    true,
     1000.0f,
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
@@ -152,8 +153,9 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     1.0f,
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
+    true,
     1000.0f,
-    true};
+    false};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
     WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -162,6 +164,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     1.0f,
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
+    true,
     1000.0f,
     true};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
@@ -172,8 +175,9 @@ static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     1.0f,
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
+    true,
     1000.0f,
-    true};
+    false};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1

@@ -151,25 +151,25 @@ tap::motor::DjiMotor leftFrontDriveMotor(
     drivers(),
     aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    true,
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG.inverted,
     "Left Front Drive Motor");
 tap::motor::DjiMotor rightFrontDriveMotor(
     drivers(),
     aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    false,  // true
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG.inverted,  
     "Right Front Drive Motor");
 tap::motor::DjiMotor leftBackDriveMotor(
     drivers(),
     aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    true,  // false
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG.inverted,  
     "Left Back Drive Motor");
 tap::motor::DjiMotor rightBackDriveMotor(
     drivers(),
     aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
-    false,
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG.inverted,
     "Right Back Drive Motor");
 
 aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
