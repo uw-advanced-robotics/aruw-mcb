@@ -22,8 +22,8 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
-#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/swerve_module.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
@@ -50,7 +50,7 @@ VirtualDjiMotor leftFrontDriveMotor(
     MOTOR2,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::leftFrontSwerveConfig.driveMotorInverted,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.inverted,
     "Left Front Swerve Drive Motor");
 
 VirtualDjiMotor leftFrontAzimuthMotor(
@@ -59,7 +59,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
     // MOTOR5,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::leftFrontSwerveConfig.azimuthMotorInverted,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.inverted,
     "Left Front Swerve Azimuth Motor");
 
 VirtualDjiMotor rightFrontDriveMotor(
@@ -67,7 +67,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     MOTOR1,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig.driveMotorInverted,  // TODO: BRUHHH
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.inverted,  // TODO: BRUHHH
     "Right Front Swerve Drive Motor");
 
 VirtualDjiMotor rightFrontAzimuthMotor(
@@ -75,7 +75,7 @@ VirtualDjiMotor rightFrontAzimuthMotor(
     MOTOR5,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig.azimuthMotorInverted,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.inverted,
     "Right Front Swerve Azimuth Motor");
 
 VirtualDjiMotor leftBackDriveMotor(
@@ -83,7 +83,7 @@ VirtualDjiMotor leftBackDriveMotor(
     MOTOR3,
     tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::leftBackSwerveConfig.driveMotorInverted,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.inverted,
     "Left Back Swerve Drive Motor");
 
 VirtualDjiMotor leftBackAzimuthMotor(
@@ -91,7 +91,7 @@ VirtualDjiMotor leftBackAzimuthMotor(
     MOTOR7,
     tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::leftBackSwerveConfig.azimuthMotorInverted,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.inverted,
     "Left Back Swerve Azimuth Motor");
 
 VirtualDjiMotor rightBackDriveMotor(
@@ -99,7 +99,7 @@ VirtualDjiMotor rightBackDriveMotor(
     MOTOR4,
     tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightBackSwerveConfig.driveMotorInverted,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.inverted,
     "Right Back Swerve Drive Motor");
 
 VirtualDjiMotor rightBackAzimuthMotor(
@@ -107,38 +107,57 @@ VirtualDjiMotor rightBackAzimuthMotor(
     MOTOR8,
     tap::can::CanBus::CAN_BUS2,
     &(drivers()->mcbLite),
-    aruwsrc::sentry::chassis::rightBackSwerveConfig.azimuthMotorInverted,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.inverted,
     "Right Back Swerve Azimuth Motor");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
-aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
+aruwsrc::chassis::SwerveWheel leftFrontSwerveModule(
     leftFrontDriveMotor,
     leftFrontAzimuthMotor,
-    aruwsrc::sentry::chassis::leftFrontSwerveConfig);
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig,
+    aruwsrc::sentry::chassis::leftFrontSwerveAzimuthConfig,
+    aruwsrc::sentry::chassis::leftFrontSwerveConfig.velocityPidConfig,
+    aruwsrc::sentry::chassis::leftFrontSwerveAzimuthConfig.azimuthPidConfig
+    );
 
-aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
+aruwsrc::chassis::SwerveWheel rightFrontSwerveModule(
     rightFrontDriveMotor,
     rightFrontAzimuthMotor,
-    aruwsrc::sentry::chassis::rightFrontSwerveConfig);
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig,
+    aruwsrc::sentry::chassis::rightFrontSwerveAzimuthConfig,
+    aruwsrc::sentry::chassis::rightFrontSwerveConfig.velocityPidConfig,
+    aruwsrc::sentry::chassis::rightFrontSwerveAzimuthConfig.azimuthPidConfig);
 
-aruwsrc::chassis::SwerveModule leftBackSwerveModule(
+aruwsrc::chassis::SwerveWheel leftBackSwerveModule(
     leftBackDriveMotor,
     leftBackAzimuthMotor,
-    aruwsrc::sentry::chassis::leftBackSwerveConfig);
+    aruwsrc::sentry::chassis::leftBackSwerveConfig,
+    aruwsrc::sentry::chassis::leftBackSwerveAzimuthConfig,
+    aruwsrc::sentry::chassis::leftBackSwerveConfig.velocityPidConfig,
+    aruwsrc::sentry::chassis::leftBackSwerveAzimuthConfig.azimuthPidConfig
+    );
 
-aruwsrc::chassis::SwerveModule rightBackSwerveModule(
+aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     rightBackDriveMotor,
     rightBackAzimuthMotor,
-    aruwsrc::sentry::chassis::rightBackSwerveConfig);
+    aruwsrc::sentry::chassis::rightBackSwerveConfig,
+    aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig,
+    aruwsrc::sentry::chassis::rightBackSwerveConfig.velocityPidConfig,
+    aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig
+    );
 
-aruwsrc::chassis::SwerveChassisSubsystem chassis(
-    drivers(),
-    &drivers()->mcbLite.currentSensor,
+//TODO: make this a std::array
+std::vector<Wheel*> wheels = {
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
-    &rightBackSwerveModule,
-    aruwsrc::sentry::chassis::SWERVE_FORWARD_MATRIX);
+    &rightBackSwerveModule
+};
+
+aruwsrc::chassis::ChassisSubsystem chassis(
+    drivers(),
+    &wheels,
+    &drivers()->mcbLite.currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(

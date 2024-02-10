@@ -70,11 +70,11 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
         // TODO 2: Test again on this year's bot (2024)
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        {
-            rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        }
+        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        // {
+        //     rotationOffset -=
+        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        // }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =

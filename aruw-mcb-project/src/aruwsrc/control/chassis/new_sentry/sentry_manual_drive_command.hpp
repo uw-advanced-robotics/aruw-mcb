@@ -25,7 +25,7 @@
 
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 using namespace aruwsrc::control::sentry;
 
 namespace aruwsrc

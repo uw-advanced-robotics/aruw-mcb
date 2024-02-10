@@ -44,6 +44,8 @@ struct SwerveAzimuthConfig
 {
     int azimuthZeroOffset;
     float azimuthMotorGearing;
+    SmoothPidConfig& azimuthPidConfig;
+    bool inverted;
 };
 
 class SwerveWheel : public Wheel
@@ -67,6 +69,8 @@ public:
     float getAngularVelocity() const;
     float getAngle() const;
 
+    float moveVectorX, moveVectorY, rotationVectorX, rotationVectorY;
+
 private:
     SwerveAzimuthConfig& azimuthConfig;
     Motor& driveMotor;
@@ -75,12 +79,10 @@ private:
     SmoothPid drivePid;
     SmoothPid azimuthPid;
 
-    const float rotationVectorX, rotationVectorY;
+    // const float rotationVectorX, rotationVectorY;
     float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
-        newRotationSetpointRadians, moveVectorX,
-
-        moveVectorY;
+        newRotationSetpointRadians;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)
