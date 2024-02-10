@@ -84,6 +84,5 @@ float MecanumWheel::getDriveRPM() const
     return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
 }
 
-int MecanumWheel::getNumMotors() const { return 1; }
 }  // namespace chassis
 }  // namespace aruwsrc

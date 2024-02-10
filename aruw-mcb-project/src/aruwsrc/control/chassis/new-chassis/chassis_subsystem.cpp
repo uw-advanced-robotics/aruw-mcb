@@ -104,9 +104,9 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, 
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
-            rotationTranslationGain *  wheels[i]->rpmToMps(x),  // scaled rpm of raw motor
-            rotationTranslationGain * wheels[i]->rpmToMps(y),  // scaled rpm of raw motor
-            wheels[i]->rpmToMps(r) / maxDistFromCenterToWheel);
+            rotationTranslationGain *  wheels[i]->rpmToMps(x),  
+            rotationTranslationGain * wheels[i]->rpmToMps(y),  
+            wheels[i]->rpmToMps(r) / maxDistFromCenterToWheel); 
         tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)
@@ -125,6 +125,11 @@ void ChassisSubsystem::initialize()
     {
         wheels[i]->initialize();
     }
+    float max = 0.0;
+    for (int i = 0; i < getNumChassisWheels(); i++){
+        max = std::max(max, wheels[i]->config.distFromCenterToWheel);
+    }
+    maxDistFromCenterToWheel = max;
 }
 
 void ChassisSubsystem::refresh()
@@ -133,11 +138,6 @@ void ChassisSubsystem::refresh()
     {
         wheels[i]->refresh();
     }
-    float max = 0.0;
-    for (int i = 0; i < getNumChassisWheels(); i++){
-        max = std::max(max, wheels[i]->config.distFromCenterToWheel);
-    }
-    maxDistFromCenterToWheel = max;
 }
 
 bool ChassisSubsystem::allMotorsOnline() const
