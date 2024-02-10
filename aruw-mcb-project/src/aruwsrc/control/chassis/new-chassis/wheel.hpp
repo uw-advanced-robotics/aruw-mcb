@@ -39,6 +39,10 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
+    // Check that this is the correct value for any arbitrary wheel placement
+    // In a configuration with the wheels at non standrd distances to the center, 
+    // this should the maximum of all four.
+    float distFromCenterToWheel; 
     float diameter;        // considering shoving these into DjiMotor in the future
     float gearRatio;       // considering shoving these into DjiMotor in the future
     float motorGearRatio;  // considering shoving these into DjiMotor in the future

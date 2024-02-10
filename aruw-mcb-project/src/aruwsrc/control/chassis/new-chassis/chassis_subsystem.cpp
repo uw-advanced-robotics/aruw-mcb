@@ -94,19 +94,22 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps, rad/s
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // mps, mps, rpm
 {
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
     float coeff;
+    
+    //If non-symmetric wheel config this needs to be changed
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r = wheels[0]->rpmToMps(r) / 0.205f;
+    r = wheels[0]->rpmToMps(r) / wheels[0]->config.distFromCenterToWheel;
 
-    //TODO: make not magic number
     std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
+        
+
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
             rotationTranslationGain * x,  // scaled rpm of raw motor
             rotationTranslationGain * y,  // scaled rpm of raw motor
