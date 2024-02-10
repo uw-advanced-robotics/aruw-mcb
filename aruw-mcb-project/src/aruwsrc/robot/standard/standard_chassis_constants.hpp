@@ -66,9 +66,9 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f /10;
-static constexpr float VELOCITY_PID_KI = 0.2f /10;
-static constexpr float VELOCITY_PID_KD = 0.0f /10;
+static constexpr float VELOCITY_PID_KP = 20.0f;
+static constexpr float VELOCITY_PID_KI = 0.2f; 
+static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -76,7 +76,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f * 10;
 
 static const SmoothPidConfig MOTOR_PID_CONFIG = {
     aruwsrc::chassis::VELOCITY_PID_KP,
@@ -88,11 +88,11 @@ static const SmoothPidConfig MOTOR_PID_CONFIG = {
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f /10;
-static constexpr float AUTOROTATION_PID_KD = 57.3f /10;
-static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f /10;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f /10;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f /10;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -125,6 +125,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
+static const float HYPOTENUSE = sqrt(WIDTH_BETWEEN_WHEELS_X * WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y * WIDTH_BETWEEN_WHEELS_Y);
 
 #elif defined(TARGET_STANDARD_SPIDER)
 

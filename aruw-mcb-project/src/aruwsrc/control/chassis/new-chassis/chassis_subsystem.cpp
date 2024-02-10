@@ -101,7 +101,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, 
     float coeff;
     x = wheels[0]->rpmToMps(x);
     y = wheels[0]->rpmToMps(y);
-    r = r * M_2_PI / 60.0f; //rad/s  // TODO: remove the magic 0.205f number in swerve subsystem
+    r = wheels[0]->rpmToMps(r) / HYPOTENUSE; //mps of chassis
 
     //TODO: make not magic number
     std::array<modm::Pair<float, float>, 4> desiredWheelVel;
@@ -110,7 +110,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, 
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
             rotationTranslationGain * x,  // scaled mps of raw motor
             rotationTranslationGain * y,  // scaled mps of raw motor
-            r); //rad/s
+            r); //mps of chassis
         tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
     }
     for (int i = 0; i < getNumChassisWheels(); i++)
