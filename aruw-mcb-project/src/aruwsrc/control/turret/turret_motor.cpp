@@ -102,17 +102,14 @@ void TurretMotor::updateMotorAngle()
 void TurretMotor::setMotorOutput(float out)
 {
     out = limitVal(out, -MAX_OUT_6020, MAX_OUT_6020);
-    lastMotorOutput = out;
 
     if (motor->isMotorOnline())
     {
         motor->setDesiredOutput(out);
-        badBranch = 0;
     }
     else
     {
         motor->setDesiredOutput(0);
-        badBranch = 1;
     }
 }
 

@@ -25,7 +25,6 @@
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-// #define TARGET_TESTBED
-#define TARGET_SENTRY_BEEHIVE
+#define TARGET_TESTBED
 
 #endif

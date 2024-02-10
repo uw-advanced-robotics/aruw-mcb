@@ -43,8 +43,6 @@ namespace aruwsrc::control::turret
 class TurretMotor
 {
 public:
-    float lastMotorOutput = 0.0f;
-    short badBranch = 0;
     /// Maximum output, voltage control between [-24, 24] volts scaled up to [-30,000, 30,000] units
     static constexpr float MAX_OUT_6020 = 30'000;
 
