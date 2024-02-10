@@ -147,6 +147,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
     ((Drivers *)drivers)->mcbLite.initialize();
 #endif
 }
