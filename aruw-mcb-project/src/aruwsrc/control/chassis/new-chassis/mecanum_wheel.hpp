@@ -42,9 +42,8 @@ public:
     bool allMotorsOnline() const override;
     float getDriveVelocity() const override;
     float getDriveRPM() const override;
-    inline int getNumMotors() const override {
-        return 1;
-    }
+    int getNumMotors() const override;
+    void zeroMotors() const override;
 
 private:
     float driveSetPoint;

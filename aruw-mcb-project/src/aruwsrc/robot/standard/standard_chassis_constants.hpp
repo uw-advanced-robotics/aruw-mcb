@@ -67,7 +67,7 @@ static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
 static constexpr float VELOCITY_PID_KP = 20.0f; //old 20.0f
-static constexpr float VELOCITY_PID_KI = 0.2f;  //old 0,2f
+static constexpr float VELOCITY_PID_KI = 0.0f;  //old 0,2f
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
@@ -125,7 +125,6 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
-static const float HYPOTENUSE = sqrt(pow(WIDTH_BETWEEN_WHEELS_X/2, 2) + pow(WIDTH_BETWEEN_WHEELS_Y/2, 2));
 
 #elif defined(TARGET_STANDARD_SPIDER)
 
@@ -133,6 +132,8 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
 #endif
+
+static const float HYPOTENUSE = sqrt(pow(WIDTH_BETWEEN_WHEELS_X/2, 2) + pow(WIDTH_BETWEEN_WHEELS_Y/2, 2));
 
 static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     WIDTH_BETWEEN_WHEELS_X / 2,
