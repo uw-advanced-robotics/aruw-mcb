@@ -23,8 +23,8 @@ namespace aruwsrc
 namespace chassis
 {
 MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config)
-    : Wheel(driveMotor, config),
-      velocityPid(SmoothPid(config.velocityPidConfig))
+    : Wheel(driveMotor, config)
+      //velocityPid(SmoothPid(config.velocityPidConfig))
 {
 }
 
