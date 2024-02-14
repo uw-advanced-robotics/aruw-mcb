@@ -37,7 +37,6 @@
 
 namespace aruwsrc::control::turret
 {
-
 static constexpr uint8_t NUM_TURRETS = 2;
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
@@ -120,7 +119,6 @@ static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.8f;
 
 namespace turretLeft
 {
-
 static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID turretID =
     aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID::TURRET_ID_ZERO;
 
@@ -211,7 +209,6 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 
 namespace pidConfigs
 {
-
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 68'000.0f,
     .ki = 370.0f,

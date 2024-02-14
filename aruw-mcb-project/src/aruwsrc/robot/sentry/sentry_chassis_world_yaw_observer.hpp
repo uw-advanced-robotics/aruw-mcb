@@ -78,6 +78,11 @@ private:
     const aruwsrc::control::turret::TurretSubsystem& turretLeft;
     const aruwsrc::control::turret::TurretSubsystem& turretRight;
 
+    mutable bool updateBranch = false;
+    mutable bool turretMCBonline = false;
+    mutable bool minorMotorOnline = false;
+    mutable bool majorMotorOnline = false;
+
     // error factor since we don't know how to reset the imu to some non-zero value outright
     float offset = 0.0f;
 };

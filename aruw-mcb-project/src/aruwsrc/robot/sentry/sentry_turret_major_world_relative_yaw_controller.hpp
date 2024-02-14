@@ -97,10 +97,15 @@ public:
     // @todo see todo in interface class
     float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
     {
+        controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
         return 0.0;
     };
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final { return 0.0; };
+    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    {
+        chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
+        return 0.0;
+    };
 
 private:
     const tap::algorithms::transforms::Transform& worldToChassis;

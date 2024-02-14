@@ -65,7 +65,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
-
 tap::motor::DoubleDjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR7,
@@ -124,6 +123,11 @@ TurretMinorMotors turretRightMotors{
     .pitchMotorConfig = turretRight::PITCH_MOTOR_CONFIG
 
 };
+
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
 
 /* define subsystems --------------------------------------------------------*/
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);

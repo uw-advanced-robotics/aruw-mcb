@@ -147,6 +147,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
     ((Drivers *)drivers)->mcbLite.initialize();
 #endif
 }
