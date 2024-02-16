@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 #ifndef SENTRY_TURRET_MAJOR_WORLD_RELATIVE_YAW_CONTROLLER_HPP_
 #define SENTRY_TURRET_MAJOR_WORLD_RELATIVE_YAW_CONTROLLER_HPP_
 
