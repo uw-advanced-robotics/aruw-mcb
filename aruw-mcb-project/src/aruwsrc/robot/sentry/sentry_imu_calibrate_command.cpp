@@ -16,7 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+// @todo: this sentry-specific imu calibrate command adds odometry reset functionality, which
+// should be incorporated into the regular imu calibrate command. After incorporating, this class
+// can be deleted
 #include "sentry_imu_calibrate_command.hpp"
 
 #include "tap/drivers.hpp"

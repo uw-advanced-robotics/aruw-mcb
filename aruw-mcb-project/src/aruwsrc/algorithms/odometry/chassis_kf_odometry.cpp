@@ -28,8 +28,8 @@ ChassisKFOdometry::ChassisKFOdometry(
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
-    : chassisSubsystem(chassisSubsystem),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+    : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+      chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
