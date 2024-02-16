@@ -73,61 +73,61 @@ AgitatorSubsystemMock::AgitatorSubsystemMock(
 }
 AgitatorSubsystemMock::~AgitatorSubsystemMock() {}
 
-BeybladeCommandMock::BeybladeCommandMock(
-    tap::Drivers *drivers,
-    chassis::MecanumChassisSubsystem *chassis,
-    aruwsrc::control::turret::TurretMotor *yawMotor,
-    aruwsrc::control::ControlOperatorInterface &operatorInterface)
-    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
-{
-}
-BeybladeCommandMock::~BeybladeCommandMock() {}
+// BeybladeCommandMock::BeybladeCommandMock(
+//     tap::Drivers *drivers,
+//     chassis::MecanumChassisSubsystem *chassis,
+//     aruwsrc::control::turret::TurretMotor *yawMotor,
+//     aruwsrc::control::ControlOperatorInterface &operatorInterface)
+//     : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
+// {
+// }
+// BeybladeCommandMock::~BeybladeCommandMock() {}
 
-ChassisDriveCommandMock::ChassisDriveCommandMock(
-    tap::Drivers *d,
-    aruwsrc::control::ControlOperatorInterface *operatorInterface,
-    chassis::MecanumChassisSubsystem *cs)
-    : chassis::ChassisDriveCommand(d, operatorInterface, cs)
-{
-}
-ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
+// ChassisDriveCommandMock::ChassisDriveCommandMock(
+//     tap::Drivers *d,
+//     aruwsrc::control::ControlOperatorInterface *operatorInterface,
+//     chassis::MecanumChassisSubsystem *cs)
+//     : chassis::ChassisDriveCommand(d, operatorInterface, cs)
+// {
+// }
+// ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
-MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
-    tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
-{
-}
-MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
+// MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
+//     tap::Drivers *drivers,
+//     tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
+//     : MecanumChassisSubsystem(drivers, currentSensor)
+// {
+// }
+// MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
-XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
-    tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
-{
-}
-XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
+// XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
+//     tap::Drivers *drivers,
+//     tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
+//     : XDriveChassisSubsystem(drivers, currentSensor)
+// {
+// }
+// XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
 
-SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
-    tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
-    testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rb)
-    : SwerveChassisSubsystem(drivers, currentSensor, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
-{
-}
-SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
+// SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
+//     tap::Drivers *drivers,
+//     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+//     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
+//     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
+//     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
+//     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rb)
+//     : SwerveChassisSubsystem(drivers, currentSensor, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
+// {
+// }
+// SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
 
-SwerveModuleMock::SwerveModuleMock(
-    testing::NiceMock<tap::mock::DjiMotorMock> &driMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &aziMotor,
-    aruwsrc::chassis::SwerveModuleConfig &config)
-    : SwerveModule(aziMotor, driMotor, config)
-{
-}
-SwerveModuleMock::~SwerveModuleMock() {}
+// SwerveModuleMock::SwerveModuleMock(
+//     testing::NiceMock<tap::mock::DjiMotorMock> &driMotor,
+//     testing::NiceMock<tap::mock::DjiMotorMock> &aziMotor,
+//     aruwsrc::chassis::SwerveModuleConfig &config)
+//     : SwerveModule(aziMotor, driMotor, config)
+// {
+// }
+// SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
     : FrictionWheelSubsystem(

@@ -21,11 +21,18 @@
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/motor/dji_motor.hpp"
 
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "tap/mock/dji_motor_mock.hpp"
+using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+#include "tap/motor/dji_motor.hpp"
 using Motor = tap::motor::DjiMotor;
+#endif
+
 using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 using namespace tap::algorithms;

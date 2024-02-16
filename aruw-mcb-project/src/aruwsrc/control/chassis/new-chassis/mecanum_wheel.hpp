@@ -35,6 +35,7 @@ public:
     MecanumWheel(Motor& driveMotor, const WheelConfig& config, int invertAngleMultiplier);
 
     void executeWheelVelocity(float vx, float vy) override;
+    float getSetpoint();
 
     void initialize() override;
     void refresh() override;

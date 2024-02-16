@@ -189,6 +189,8 @@ public:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     float desiredRotation = 0;
+    
+    modm::Matrix<float, 3, 1> lastDesiredVelocity;
 
     const std::vector<Wheel*>& wheels;
 

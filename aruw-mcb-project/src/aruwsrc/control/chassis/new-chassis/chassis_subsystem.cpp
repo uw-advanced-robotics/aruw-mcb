@@ -96,6 +96,9 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
 
 void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  //rpm, rpm, rpm
 {
+    lastDesiredVelocity[0][0] = x;
+    lastDesiredVelocity[1][0] = y;
+    lastDesiredVelocity[2][0] = r;
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
     float coeff;
@@ -156,6 +159,11 @@ modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() c
 {
     modm::Matrix<float, 3, 1> wheelVelocity;
     return wheelVelocity.zeroMatrix();
+}
+
+modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return lastDesiredVelocity;
 }
 
 }  // namespace chassis

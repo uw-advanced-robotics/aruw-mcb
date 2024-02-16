@@ -32,7 +32,7 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "wheel.hpp"
-using Motor = tap::motor::DjiMotor;
+// using Motor = tap::motor::DjiMotor;
 using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 

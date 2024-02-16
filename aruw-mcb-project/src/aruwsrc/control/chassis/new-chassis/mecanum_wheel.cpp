@@ -43,6 +43,10 @@ void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of whee
     driveSetPoint = desiredMat.data[0];  // rad/s
 }
 
+float MecanumWheel::getSetpoint() {
+    return driveSetPoint;
+}
+
 void MecanumWheel::initialize()
 {
     if (config.isPowered)
