@@ -47,12 +47,12 @@ struct WheelConfig
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
     // Check that this is the correct value for any arbitrary wheel placement
-    // In a configuration with the wheels at non standrd distances to the center, 
+    // In a configuration with the wheels at non standrd distances to the center,
     // this should the maximum of all four.
-    float distFromCenterToWheel; 
-    float diameter;        // considering shoving these into DjiMotor in the future
-    float gearRatio;       // considering shoving these into DjiMotor in the future 
-    //considering combining gearRatio and motorGearRatio into one
+    float distFromCenterToWheel;
+    float diameter;   // considering shoving these into DjiMotor in the future
+    float gearRatio;  // considering shoving these into DjiMotor in the future
+    // considering combining gearRatio and motorGearRatio into one
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
     const SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
@@ -76,10 +76,10 @@ public:
              1,
              config.wheelPositionChassisRelativeX});
         wheelOrientationMat = CMSISMat<2, 2>(
-        {cos(config.wheelOrientationChassisRelative),
-         -sin(config.wheelOrientationChassisRelative),
-         sin(config.wheelOrientationChassisRelative),
-         cos(config.wheelOrientationChassisRelative)});
+            {cos(config.wheelOrientationChassisRelative),
+             -sin(config.wheelOrientationChassisRelative),
+             sin(config.wheelOrientationChassisRelative),
+             cos(config.wheelOrientationChassisRelative)});
         wheelOrientationMat = wheelOrientationMat.inverse();
     }
 
@@ -130,10 +130,10 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
-    inline float rpmToRadPerS(float rpm) const {
+    inline float rpmToRadPerS(float rpm) const
+    {
         return rpm * M_2_PI / 60.0f * config.motorGearRatio * config.gearRatio;
     }
-    
 
     virtual void initialize() = 0;
 

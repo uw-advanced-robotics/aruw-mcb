@@ -189,7 +189,7 @@ public:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     float desiredRotation = 0;
-    
+
     modm::Matrix<float, 3, 1> lastDesiredVelocity;
 
     const std::vector<Wheel*>& wheels;
@@ -201,8 +201,9 @@ public:
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
     void limitChassisPower();
+
 private:
-    double prevTime = 0.0;\
+    double prevTime = 0.0;
     float maxDistFromCenterToWheel;
 
 };  // class ChassisSubsystem

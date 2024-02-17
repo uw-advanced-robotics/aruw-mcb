@@ -43,9 +43,7 @@ void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of whee
     driveSetPoint = desiredMat.data[0];  // rad/s
 }
 
-float MecanumWheel::getSetpoint() {
-    return driveSetPoint;
-}
+float MecanumWheel::getSetpoint() { return driveSetPoint; }
 
 void MecanumWheel::initialize()
 {
@@ -60,7 +58,7 @@ void MecanumWheel::refresh()
     if (config.isPowered)
     {
         driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(
-            driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()), 
+            driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
             2.0f));
     }
 }
@@ -87,9 +85,7 @@ float MecanumWheel::getDriveRPM() const
 {
     return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
 }
-void MecanumWheel::zeroMotors() const {
-    driveMotor.setDesiredOutput(0.0f);
-}
+void MecanumWheel::zeroMotors() const { driveMotor.setDesiredOutput(0.0f); }
 
 int MecanumWheel::getNumMotors() const { return 1; }
 }  // namespace chassis

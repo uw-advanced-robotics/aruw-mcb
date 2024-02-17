@@ -21,8 +21,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
-#include "../new-chassis/chassis_subsystem.hpp"
 
+#include "../new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace tap::algorithms;

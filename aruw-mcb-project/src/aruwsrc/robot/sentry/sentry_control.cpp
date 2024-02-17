@@ -21,9 +21,9 @@
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
+#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
@@ -117,8 +117,7 @@ aruwsrc::chassis::SwerveWheel leftFrontSwerveModule(
     aruwsrc::sentry::chassis::leftFrontSwerveConfig,
     aruwsrc::sentry::chassis::leftFrontSwerveAzimuthConfig,
     aruwsrc::sentry::chassis::leftFrontSwerveConfig.velocityPidConfig,
-    aruwsrc::sentry::chassis::leftFrontSwerveAzimuthConfig.azimuthPidConfig
-    );
+    aruwsrc::sentry::chassis::leftFrontSwerveAzimuthConfig.azimuthPidConfig);
 
 aruwsrc::chassis::SwerveWheel rightFrontSwerveModule(
     rightFrontDriveMotor,
@@ -134,8 +133,7 @@ aruwsrc::chassis::SwerveWheel leftBackSwerveModule(
     aruwsrc::sentry::chassis::leftBackSwerveConfig,
     aruwsrc::sentry::chassis::leftBackSwerveAzimuthConfig,
     aruwsrc::sentry::chassis::leftBackSwerveConfig.velocityPidConfig,
-    aruwsrc::sentry::chassis::leftBackSwerveAzimuthConfig.azimuthPidConfig
-    );
+    aruwsrc::sentry::chassis::leftBackSwerveAzimuthConfig.azimuthPidConfig);
 
 aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     rightBackDriveMotor,
@@ -143,21 +141,16 @@ aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     aruwsrc::sentry::chassis::rightBackSwerveConfig,
     aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig,
     aruwsrc::sentry::chassis::rightBackSwerveConfig.velocityPidConfig,
-    aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig
-    );
+    aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig);
 
-//TODO: make this a std::array
-std::vector<Wheel*> wheels = {
+// TODO: make this a std::array
+std::vector<Wheel *> wheels = {
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
-    &rightBackSwerveModule
-};
+    &rightBackSwerveModule};
 
-aruwsrc::chassis::ChassisSubsystem chassis(
-    drivers(),
-    &wheels,
-    &drivers()->mcbLite.currentSensor);
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), &wheels, &drivers()->mcbLite.currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(

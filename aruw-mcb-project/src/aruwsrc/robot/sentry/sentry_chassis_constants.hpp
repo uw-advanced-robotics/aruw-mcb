@@ -20,9 +20,9 @@
 #ifndef SENTRY_CHASSIS_CONSTANTS_HPP_
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
-#include "aruwsrc/control/chassis/swerve_module_config.hpp"
-#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
+#include "aruwsrc/control/chassis/swerve_module_config.hpp"
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
@@ -59,7 +59,7 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
 //     .beybladeRampRate = 45,
 // };
 
-//Using same azimuth and pid config for all swerve modules
+// Using same azimuth and pid config for all swerve modules
 aruwsrc::chassis::SwerveModuleConfig swerveCoinfig = {
     .driveMotorInverted = false,
 
@@ -68,7 +68,7 @@ aruwsrc::chassis::SwerveModuleConfig swerveCoinfig = {
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
     // .azimuthZeroOffset = 7888,
-    
+
     .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
@@ -86,11 +86,10 @@ aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3753,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = true
-};
+    .inverted = true};
 aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
-    
+
     .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .wheelOrientationChassisRelative = 0,
@@ -107,8 +106,7 @@ aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
-    .inverted = true
-};
+    .inverted = true};
 
 aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,
