@@ -62,21 +62,21 @@ public:
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 10'000.0f;
-    static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_X = 10'000.0f / 5; //changed
+    static constexpr float MAX_DECELERATION_X = 20'000.0f / 5; //changed
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the y direction
      */
-    static constexpr float MAX_ACCELERATION_Y = 9'000.0f;
-    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_Y = 9'000.0f / 5; //changed
+    static constexpr float MAX_DECELERATION_Y = 20'000.0f / 5; //changed
 #endif
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the r direction
      */
-    static constexpr float MAX_ACCELERATION_R = 40'000.0f;
-    static constexpr float MAX_DECELERATION_R = 50'000.0f;
+    static constexpr float MAX_ACCELERATION_R = 40'000.0f / 5; //changed
+    static constexpr float MAX_DECELERATION_R = 50'000.0f / 5; //changed
 
     ControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)

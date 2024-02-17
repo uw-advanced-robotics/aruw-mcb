@@ -73,6 +73,8 @@ static inline void applyAccelerationToRamp(
     }
 }
 
+//range of values for getChassisXInput(), getChassisYInput(), getChassisRInput() is 0-500
+
 float ControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
@@ -95,6 +97,7 @@ float ControlOperatorInterface::getChassisXInput()
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+    
 
     chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
 
@@ -177,7 +180,7 @@ float ControlOperatorInterface::getChassisRInput()
         MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
-    return chassisRInputRamp.getValue();
+   return chassisRInputRamp.getValue(); 
 }
 
 float ControlOperatorInterface::getTurretYawInput(uint8_t turretID)
