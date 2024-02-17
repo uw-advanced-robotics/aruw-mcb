@@ -51,8 +51,14 @@ class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
                                     public aruwsrc::algorithms::odometry::ChassisKFOdometry
 {
 public:
-    // @note: should add an imuToChassisCenter vector to transform
-    // readings (otherwise readings will just be bad :O)
+    /**
+     * @brief Kalman Filter-based odometry class for the Otto vision system on the sentry.
+     *
+     * User is responsible for registering this subsystem with the command scheduler, or using some
+     * other mechanism to call the `refresh` function periodically.
+     *
+     * @see ChassisKFOdometry
+     */
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         tap::control::chassis::ChassisSubsystemInterface &chassis,

@@ -77,8 +77,7 @@ private:
     tap::Drivers *drivers;
     aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface;
 
-    aruwsrc::control::sentry::SentryTurretMinorSubsystem
-        &turretMinorSubsystem;  // @todo: sort out namespaces later
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretMinorSubsystem;
 
     uint32_t prevTime = 0;
 

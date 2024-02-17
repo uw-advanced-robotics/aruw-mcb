@@ -57,9 +57,6 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     for (auto &config : turretsAndControllers)
     {
         assert(config.turretMCBCanComm != nullptr);
-        // assert(config.turret != nullptr);
-        // assert(config.yawController != nullptr);
-        // assert(config.pitchController != nullptr);
 
         addSubsystemRequirement(&config.turret);
     }
@@ -91,8 +88,8 @@ void SentryImuCalibrateCommand::initialize()
     }
 
     // initialize major
-    turretMajor.getMotor().setChassisFrameSetpoint(
-        turretMajor.getMotor()
+    turretMajor.getMutableMotor().setChassisFrameSetpoint(
+        turretMajor.getReadOnlyMotor()
             .getConfig()
             .startAngle);  // @todo really sus interdependency with imu
                            // drift because assumes world controller
@@ -130,11 +127,11 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
     // return true;
     return compareFloatClose(
                0.0f,
-               turret.getMotor().getChassisFrameVelocity(),
+               turret.getReadOnlyMotor().getChassisFrameVelocity(),
                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
            compareFloatClose(
                0.0f,
-               turret.getMotor().getAngleFromCenter(),
+               turret.getReadOnlyMotor().getAngleFromCenter(),
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
@@ -229,12 +226,12 @@ void SentryImuCalibrateCommand::execute()
 
     turretMajorController.runController(
         dt,
-        turretMajor.getMotor().getChassisFrameSetpoint() + odometryInterface.getYaw());
+        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint() + odometryInterface.getYaw());
 }
 
 void SentryImuCalibrateCommand::end(bool)
 {
-    // TODO: this bing commented out causes turrets to hold position when this deschedules
+    // TODO: this being commented out causes turrets to hold position when this deschedules
     // change if you want
     // for (auto &config : turretsAndControllers)
     // {

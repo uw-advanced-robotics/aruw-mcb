@@ -67,7 +67,7 @@ bool TurretMajorSentryControlCommand::isFinished() const { return !yawController
 
 void TurretMajorSentryControlCommand::end(bool)
 {
-    turretMajorSubsystem.getMotor().setMotorOutput(0);
+    turretMajorSubsystem.getMutableMotor().setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::sentry

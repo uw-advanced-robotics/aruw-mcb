@@ -40,21 +40,18 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     auto turretMCB = turretRight.getTurretMCB();
     assert(turretMCB != nullptr);
 
-    turretMCBonline = turretMCB->isConnected();
-    minorMotorOnline = turretRight.yawMotor.isOnline();
-    majorMotorOnline = turretMajor.getMotor().isOnline();
+    auto& turretMajorMotor = turretMajor.getReadOnlyMotor();
 
     if (!turretMCB->isConnected() || !turretRight.yawMotor.isOnline() ||
-        !turretMajor.getMotor().isOnline())
+        !turretMajorMotor.isOnline())
     {
         return false;
     }
     else
     {
-        updateBranch = true;
         float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
         float turretMinorMajorYawRadians = turretRight.yawMotor.getAngleFromCenter();
-        float turretMajorChassisYawRadians = turretMajor.getMotor().getAngleFromCenter();
+        float turretMajorChassisYawRadians = turretMajorMotor.getAngleFromCenter();
 
         *output = modm::Angle::normalize(
             turretWorldYawRadians - turretMinorMajorYawRadians - turretMajorChassisYawRadians +
