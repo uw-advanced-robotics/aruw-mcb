@@ -150,7 +150,7 @@ std::vector<Wheel *> wheels = {
     &leftBackSwerveModule,
     &rightBackSwerveModule};
 
-aruwsrc::chassis::ChassisSubsystem chassis(drivers(), &wheels, &drivers()->mcbLite.currentSensor);
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &drivers()->mcbLite.currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(

@@ -61,7 +61,7 @@ class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 public:
     ChassisSubsystem(
         tap::Drivers* drivers,
-        std::vector<Wheel*>* wheels,
+        std::vector<Wheel*>& wheels,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     /**
