@@ -136,7 +136,7 @@ public:
     {
         for (int i = 0; i < getNumChassisWheels(); i++)
         {
-            wheels[i]->zeroMotors();
+            wheels[i]->setZeroRPM();
         }
     }
 

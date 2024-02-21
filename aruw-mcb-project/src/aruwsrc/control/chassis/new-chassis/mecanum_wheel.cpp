@@ -67,7 +67,7 @@ void MecanumWheel::setZeroRPM()
 {
     if (config.isPowered)
     {
-        executeWheelVelocity(0, 0);
+        driveMotor.setDesiredOutput(0.0f);
     }
 }
 
@@ -85,7 +85,6 @@ float MecanumWheel::getDriveRPM() const
 {
     return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
 }
-void MecanumWheel::zeroMotors() const { driveMotor.setDesiredOutput(0.0f); }
 
 int MecanumWheel::getNumMotors() const { return 1; }
 }  // namespace chassis

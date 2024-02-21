@@ -32,7 +32,6 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "wheel.hpp"
-// using Motor = tap::motor::DjiMotor;
 using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 
@@ -69,17 +68,14 @@ public:
     float getAngularVelocity() const;
     float getAngle() const;
 
-    float moveVectorX, moveVectorY, rotationVectorX, rotationVectorY;
-
 private:
-    SwerveAzimuthConfig& azimuthConfig;
     Motor& driveMotor;
     Motor& azimuthMotor;
-
+    SwerveAzimuthConfig& azimuthConfig;
     SmoothPid drivePid;
     SmoothPid azimuthPid;
 
-    // const float rotationVectorX, rotationVectorY;
+    float rotationVectorX, rotationVectorY, moveVectorX, moveVectorY;
     float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians;

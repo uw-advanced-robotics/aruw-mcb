@@ -149,8 +149,6 @@ public:
 
     virtual int getNumMotors() const = 0;
 
-    virtual void zeroMotors() const = 0;
-
 protected:
     /// matrix containing distances from wheel to chassis center
     tap::algorithms::CMSISMat<2, 3> distanceMat;

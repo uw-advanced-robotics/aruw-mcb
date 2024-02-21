@@ -44,7 +44,6 @@ public:
     float getDriveVelocity() const override;
     float getDriveRPM() const override;
     int getNumMotors() const override;
-    void zeroMotors() const override;
 
 private:
     float driveSetPoint;
