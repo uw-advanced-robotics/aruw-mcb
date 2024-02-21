@@ -66,9 +66,9 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static float VELOCITY_PID_KP = 16000.0f;  //constexpr
-static float VELOCITY_PID_KI = 0.0f;   //const
-static float VELOCITY_PID_KD = 0.0f;   //const
+static float VELOCITY_PID_KP = 16000.0f;  // constexpr
+static float VELOCITY_PID_KI = 0.0f;      // const
+static float VELOCITY_PID_KD = 0.0f;      // const
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -76,7 +76,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static float VELOCITY_PID_MAX_OUTPUT = 16'000.0f; //const
+static float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;  // const
 
 static const SmoothPidConfig MOTOR_PID_CONFIG = {
     aruwsrc::chassis::VELOCITY_PID_KP,
