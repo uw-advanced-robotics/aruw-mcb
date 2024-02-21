@@ -20,23 +20,26 @@
 #ifndef SENTRY_TRANSFORM_ADAPTER_HPP_
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "sentry_transforms.hpp"
 
 namespace aruwsrc::sentry
 {
-class SentryTransformAdapter : public tap::algorithms::odometry::Odometry2DInterface
+class SentryTransformAdapter : public aruwsrc::algorithms::transforms::TransformerInterface
 {
     SentryTransformAdapter(const SentryTransforms& transforms);
 
-    virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
+    modm::Location2D<float> getCurrentLocation2D() const = 0;
 
-    virtual modm::Vector2f getCurrentVelocity2D() const = 0;
+    modm::Vector2f getCurrentVelocity2D() const = 0;
 
-    virtual float getYaw() const = 0;
+    float getYaw() const = 0;
 
-    virtual uint32_t getLastComputedOdometryTime() const = 0;
+    uint32_t getLastComputedOdometryTime() const = 0;
+
+    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const = 0;
+
+    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const = 0;
 
 private:
     const SentryTransforms& transforms;

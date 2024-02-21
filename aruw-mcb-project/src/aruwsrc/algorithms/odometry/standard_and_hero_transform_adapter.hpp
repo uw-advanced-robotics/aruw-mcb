@@ -20,23 +20,28 @@
 #ifndef STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
 #define STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
 #include "standard_and_hero_transformer.hpp"
+#include "transformer_interface.hpp"
+#include "tap/algorithms/cmsis_mat.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
-class StandardAndHeroTransformAdapter : public tap::algorithms::odometry::Odometry2DInterface
+class StandardAndHeroTransformAdapter : public TransformerInterface
 {
+
     StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
 
-    virtual modm::Location2D<float> getCurrentLocation2D() const = 0;
+    modm::Location2D<float> getCurrentLocation2D() const = 0;
 
-    virtual modm::Vector2f getCurrentVelocity2D() const = 0;
+    modm::Vector2f getCurrentVelocity2D() const = 0;
 
-    virtual float getYaw() const = 0;
+    float getYaw() const = 0;
 
-    virtual uint32_t getLastComputedOdometryTime() const = 0;
+    uint32_t getLastComputedOdometryTime() const = 0;
+
+    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const = 0;
+
+    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const = 0;
 
 private:
     StandardAndHeroTransformer transforms;

@@ -22,14 +22,15 @@
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
+using namespace aruwsrc::control::sentry;
 
 namespace aruwsrc::sentry
 {
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
-    const TurretSubsystem& turretMinorGirlboss,
-    const TurretSubsystem& turretMinorMalewife,
+    const SentryTurretMinorSubsystem& turretMinorGirlboss,
+    const SentryTurretMinorSubsystem& turretMinorMalewife,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),

@@ -19,9 +19,10 @@
 
 #include "standard_and_hero_transform_adapter.hpp"
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "transformer_interface.hpp"
 
 #include "standard_and_hero_transformer.hpp"
+#include "tap/algorithms/cmsis_mat.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
@@ -33,7 +34,8 @@ StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
 
 modm::Location2D<float> StandardAndHeroTransformAdapter::getCurrentLocation2D() const
 {
-    return transforms.getChassisOdometry().getCurrentLocation2D();
+    const tap::algorithms::transforms::Transform worldToChassis = transforms.getWorldToChassis();
+    return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
 }
 
 modm::Vector2f StandardAndHeroTransformAdapter::getCurrentVelocity2D() const
@@ -43,12 +45,33 @@ modm::Vector2f StandardAndHeroTransformAdapter::getCurrentVelocity2D() const
 
 float StandardAndHeroTransformAdapter::getYaw() const
 {
-    return transforms.getChassisOdometry().getYaw();
+    return transforms.getWorldToChassis().getYaw();
 }
 
 uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
 {
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
+
+tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretLocation(int turretID) const
+{
+    //Irrelevant Parameter in standard, gets rid of warning
+    turretID = turretID;
+    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret();
+    const float positionData[3 * 1] = {worldToTurret.getX(), worldToTurret.getY(), worldToTurret.getZ()};
+    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    return positionInCMS;
+
+}
+
+tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretOrientation(int turretID) const
+{
+    //Irrelevant Parameter in standard, gets rid of warning
+    turretID = turretID;
+    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret();
+    const float positionData[3 * 1] = {worldToTurret.getRoll(), worldToTurret.getYaw(), worldToTurret.getPitch()};
+    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    return positionInCMS;
+};
 
 };  // namespace aruwsrc::algorithms::transforms

@@ -19,9 +19,8 @@
 
 #include "sentry_transform_adapter.hpp"
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
 #include "sentry_transforms.hpp"
+#include "modm/math/geometry/location_2d.hpp"
 
 namespace aruwsrc::sentry
 {
@@ -32,7 +31,8 @@ SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transform
 
 modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const
 {
-    return transforms.getChassisOdometry().getCurrentLocation2D();
+    tap::algorithms::transforms::Transform worldToChassis = transforms.getWorldToChassis();
+    return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
 }
 
 modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const
@@ -40,11 +40,28 @@ modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
-float SentryTransformAdapter::getYaw() const { return transforms.getChassisOdometry().getYaw(); }
+float SentryTransformAdapter::getYaw() const { return transforms.getWorldToChassis().getYaw(); }
 
 uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
 {
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
+
+tap::algorithms::CMSISMat<3,1> SentryTransformAdapter::getTurretLocation(int turretID) const
+{
+    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret(turretID);
+    const float positionData[3 * 1] = {worldToTurret.getX(), worldToTurret.getY(), worldToTurret.getZ()};
+    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    return positionInCMS;
+
+}
+
+tap::algorithms::CMSISMat<3,1> SentryTransformAdapter::getTurretOrientation(int turretID) const
+{
+    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret(turretID);
+    const float positionData[3 * 1] = {worldToTurret.getRoll(), worldToTurret.getYaw(), worldToTurret.getPitch()};
+    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    return positionInCMS;
+};
 
 };  // namespace aruwsrc::sentry

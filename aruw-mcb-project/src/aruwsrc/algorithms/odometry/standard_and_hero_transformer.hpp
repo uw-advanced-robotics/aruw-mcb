@@ -32,10 +32,11 @@ namespace aruwsrc::algorithms::transforms
 /**
  * @brief transform provider for both the standard and hero
  * Use the StandardAndHeroTransformerSubsystem as a convenience class to
- * update the transformer each loop
+ * update the transformer each loop 
  */
 class StandardAndHeroTransformer
 {
+friend class StandardAndHeroTransformAdapter;
 public:
     StandardAndHeroTransformer(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
@@ -47,29 +48,30 @@ public:
      */
     void updateTransforms();
 
-    inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
-    {
-        return chassisOdometry;
-    }
-
     // @note: In updating this transform we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
-    inline const tap::algorithms::transforms::Transform& getWorldToChassis()
+    inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
         return worldToChassis;
     }
 
-    inline const tap::algorithms::transforms::Transform& getWorldToTurret()
+    inline const tap::algorithms::transforms::Transform& getWorldToTurret() const
     {
         return worldToTurret;
     }
 
-    inline const tap::algorithms::transforms::Transform& getChassisToTurret()
+    inline const tap::algorithms::transforms::Transform& getChassisToTurret() const
     {
         return chassisToTurret;
     }
 
+protected:
+    inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
+    {
+        return chassisOdometry;
+    }
+    
 private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::RobotTurretSubsystem& turret;
