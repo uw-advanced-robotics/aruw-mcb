@@ -30,9 +30,9 @@ SwerveWheel::SwerveWheel(
     SmoothPid drivePid,
     SmoothPid azimuthPid)
     : Wheel(config),
-      azimuthConfig(azimuthConfig),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
+      azimuthConfig(azimuthConfig),
       drivePid(drivePid),
       azimuthPid(azimuthPid),
       rotationVectorX(-config.wheelPositionChassisRelativeY),
