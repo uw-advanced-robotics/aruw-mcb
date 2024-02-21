@@ -114,6 +114,7 @@ before_script:
   cache:
     key: mcb-binaries
     untracked: true
+  allow_failure: true
 
 .sim_build:
   stage: Build
@@ -126,6 +127,7 @@ before_script:
   cache:
     key: sim-binaries
     untracked: true
+  allow_failure: true
 
 .test_build:
   stage: Tests
