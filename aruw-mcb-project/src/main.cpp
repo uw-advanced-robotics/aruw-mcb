@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -113,6 +113,7 @@ int main()
 
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+            PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
@@ -145,6 +146,9 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
+#if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->mcbLite.initialize();
+#endif
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -163,6 +167,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 #ifdef TARGET_SENTRY_BEEHIVE
+    ((Drivers *)drivers)->mcbLite.updateSerial();
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif

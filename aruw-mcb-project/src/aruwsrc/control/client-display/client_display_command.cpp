@@ -78,23 +78,42 @@ ClientDisplayCommand::ClientDisplayCommand(
       visionHudIndicators(visionCoprocessor, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
+    this->restartHud();
 }
 
 void ClientDisplayCommand::initialize()
 {
+    // We cannot reset the thread from here because there might be locked
+    // resources that we need to finish first.
+    this->restarting = true;
+}
+
+void ClientDisplayCommand::restartHud()
+{
     HudIndicator::resetGraphicNameGenerator();
-    restart();  // restart protothread
     booleanHudIndicators.initialize();
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+
+    // We can successfully restart the thread
+    this->restarting = false;
 }
 
 void ClientDisplayCommand::execute() { run(); }
 
 bool ClientDisplayCommand::run()
 {
+    // The thread has exited the loop, meaning that there are no locked resources
+    if (!this->isRunning())
+    {
+        // Restart the thread
+        restart();
+        // Reset the HUD elements
+        this->restartHud();
+    }
+
     PT_BEGIN();
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
@@ -105,7 +124,8 @@ bool ClientDisplayCommand::run()
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
-    while (true)
+    // If we try to restart the hud, break out of the loop
+    while (!this->restarting)
     {
         PT_CALL(booleanHudIndicators.update());
         PT_CALL(chassisOrientationIndicator.update());
@@ -114,6 +134,8 @@ bool ClientDisplayCommand::run()
         PT_CALL(visionHudIndicators.update());
         PT_YIELD();
     }
+    // Breaking out of the loop successfully calls this method,
+    // allowing us to know that all execution is over.
     PT_END();
 }
 

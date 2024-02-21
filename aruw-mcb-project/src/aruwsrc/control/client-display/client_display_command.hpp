@@ -136,7 +136,10 @@ private:
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
 
+    bool restarting = true;
+
     bool run();
+    void restartHud();
 };
 }  // namespace aruwsrc::control::client_display
 

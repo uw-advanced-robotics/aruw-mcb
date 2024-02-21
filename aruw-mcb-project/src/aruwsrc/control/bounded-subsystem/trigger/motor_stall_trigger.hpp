@@ -22,7 +22,7 @@
 
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/homeable-subsystem/trigger/trigger_interface.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
 
 namespace aruwsrc::control
 {

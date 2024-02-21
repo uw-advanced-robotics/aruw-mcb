@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -29,7 +29,7 @@
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_turret_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_DART)
 #include "aruwsrc/robot/dart/dart_turret_constants.hpp"
 #elif defined(TARGET_TESTBED)
