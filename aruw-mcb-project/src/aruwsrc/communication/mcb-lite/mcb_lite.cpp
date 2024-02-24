@@ -35,6 +35,8 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
       currentSensor(),
       imu(),
       analog(),
+      digital(),
+      leds(),
       port(port),
       currentIMUData()
 {
@@ -98,7 +100,7 @@ void MCBLite::sendData()
             imu.sendIMUCalibrationMessage = false;
         }
 
-        if(digital.hasNewData)
+        if (digital.hasNewData)
         {
             drivers->uart.write(
                 port,
@@ -109,6 +111,15 @@ void MCBLite::sendData()
                 reinterpret_cast<uint8_t*>(&(digital.pinModeMessage)),
                 sizeof(digital.pinModeMessage));
             digital.hasNewData = false;
+        }
+
+        if (leds.hasNewData)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(leds.ledStateMessage)),
+                sizeof(leds.ledStateMessage));
+            leds.hasNewData = false;
         }
     }
 }
