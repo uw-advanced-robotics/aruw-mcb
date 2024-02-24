@@ -315,10 +315,17 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
 {
-    //TODO: make one of these negative ?????????? REMOVE THIS COMMENT LATER
+
     const float chassisFramePitch = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+
+    #ifdef TARGET_HERO_CYCLONE
+    // because the hero turret IMU is rotated 180 degrees yaw
+    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
+    const float worldFramePitchVelocity = -turretMCBCanComm.getPitchVelocity();
+    #else
     const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
     const float worldFramePitchVelocity = turretMCBCanComm.getPitchVelocity();
+    #endif
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
