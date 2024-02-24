@@ -22,8 +22,12 @@
 
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+
+#include "messsage_types.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
+using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
@@ -32,7 +36,11 @@ class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterfac
     friend class SerialMCBLite;
 
 public:
-    VirtualIMUInterface() {}
+    VirtualIMUInterface() : calibrateIMUMessage()
+    {
+        calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU_MESSAGE;
+        calibrateIMUMessage.setCRC16();
+    }
 
     float getPitch() override { return pitch; }
     float getRoll() override { return roll; }
@@ -45,14 +53,34 @@ public:
     float getAz() override { return Az; }
     float getTemp() override { return temperature; }
     Mpu6500::ImuState getImuState() { return imuState; }
-    virtual inline const char* getName() const { return "Virtual IMU"; }
+    virtual inline const char* getName() const { return "Virtual MPU6500"; }
+    void requestCalibration() { sendIMUCalibrationMessage = true; }
 
 private:
+    void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
+    {
+        IMUMessage* imuMessage = (IMUMessage*)completeMessage.data;
+        pitch = imuMessage->pitch;
+        roll = imuMessage->roll;
+        yaw = imuMessage->yaw;
+        Gx = imuMessage->Gx;
+        Gy = imuMessage->Gy;
+        Gz = imuMessage->Gz;
+        Ax = imuMessage->Ax;
+        Ay = imuMessage->Ay;
+        Az = imuMessage->Az;
+        imuState = imuMessage->imuState;
+        temperature = imuMessage->temperature;
+    }
+
     float pitch, roll, yaw;
     float Gx, Gy, Gz;
     float Ax, Ay, Az;
     Mpu6500::ImuState imuState;
     float temperature;
+
+    DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
+    bool sendIMUCalibrationMessage = false;
 };
 
 }  // namespace aruwsrc::virtualMCB

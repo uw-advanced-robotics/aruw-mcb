@@ -20,6 +20,7 @@
 #ifndef SERIAL_MCB_LITE_HPP_
 #define SERIAL_MCB_LITE_HPP_
 
+#include "message_types.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
@@ -31,33 +32,12 @@
 
 #include "virtual_current_sensor.hpp"
 #include "virtual_imu_interface.hpp"
+#include "virtual_analog.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::virtualMCB
 {
-enum MessageTypes : uint8_t
-{
-    CANBUS1_MESSAGE = 0,
-    CANBUS2_MESSAGE = 1,
-    IMU_MESSAGE = 2,
-    CURRENT_SENSOR_MESSAGE = 3,
-    CALIBRATE_IMU = 4
-};
-
-struct IMUMessage
-{
-    float pitch, roll, yaw;
-    float Gx, Gy, Gz;
-    float Ax, Ay, Az;
-    Mpu6500::ImuState imuState;
-    float temperature;
-} modm_packed;
-
-struct CurrentSensorMessage
-{
-    float current;
-} modm_packed;
 
 /**
  * This class is used to communicate with the the virtual MCB using the UART port.
@@ -75,8 +55,6 @@ public:
 
     void sendData();
 
-    void calibrateIMU();
-
     void initialize();
 
     constexpr static int UART_BAUDRATE = 500'000;
@@ -85,23 +63,20 @@ public:
     VirtualDJIMotorTxHandler motorTxHandler;
     VirtualCurrentSensor currentSensor;
     VirtualIMUInterface imu;
+    VirtualAnalog analog;
+
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
-
-    void processIMUMessage(const ReceivedSerialMessage& completeMessage);
 
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
     tap::communication::serial::Uart::UartPort port;
 
-    tap::communication::serial::DJISerial::DJISerial::SerialMessage<0> calibrateIMUMessage;
-    bool sendIMUCalibrationMessage = false;
-
     IMUMessage currentIMUData;
-    CurrentSensorMessage currentCurrentSensorData;
     uint8_t can1Data[64];
     uint8_t can2Data[64];
+    AnalogInputPinMessage analogData;
 };
 }  // namespace aruwsrc::virtualMCB
 
