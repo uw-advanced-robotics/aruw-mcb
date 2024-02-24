@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_mcb_lite.hpp"
+#include "mcb_lite.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
@@ -28,7 +28,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
-SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
+MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
       canRxHandler(VirtualCanRxHandler(drivers)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
@@ -40,7 +40,7 @@ SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::
 {
 }
 
-void SerialMCBLite::initialize()
+void MCBLite::initialize()
 {
     switch (this->port)
     {
@@ -67,7 +67,7 @@ void SerialMCBLite::initialize()
     }
 }
 
-void SerialMCBLite::sendData()
+void MCBLite::sendData()
 {
     if (drivers->uart.isWriteFinished(port))
     {
@@ -100,7 +100,7 @@ void SerialMCBLite::sendData()
     }
 }
 
-void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
+void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     switch (completeMessage.messageType)
     {
@@ -119,16 +119,16 @@ void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& complete
                 memcpy(&analogData, completeMessage.data, sizeof(analogData));
                 analog.processAnalogMessage(completeMessage);
                 break;
-            case MessageTypes::CURRENT_SENSOR_MESSAGE:
-                processCurrentSensorMessage(completeMessage);
-                break;
+            // case MessageTypes::CURRENT_SENSOR_MESSAGE:
+                // processCurrentSensorMessage(completeMessage);
+                // break;
             default:
                 break;
         }
     }
 }
 
-void SerialMCBLite::processCanMessage(
+void MCBLite::processCanMessage(
     const ReceivedSerialMessage& completeMessage,
     tap::can::CanBus canbus)
 {

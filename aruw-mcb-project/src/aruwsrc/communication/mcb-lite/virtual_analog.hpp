@@ -31,7 +31,7 @@ namespace aruwsrc::virtualMCB
 {
 class VirtualAnalog : public tap::gpio::Analog
 {
-    friend class SerialMCBLite;
+    friend class MCBLite;
 
 public:
     VirtualAnalog() {}

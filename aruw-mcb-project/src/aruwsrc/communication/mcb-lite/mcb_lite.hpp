@@ -46,10 +46,10 @@ namespace aruwsrc::virtualMCB
  * Afterwards, call updateSerial() as fast as possible to process receiving data as fast as
  * possible. Call sendData per loop to send motor desired outputs at a consistent rate.
  */
-class SerialMCBLite : public tap::communication::serial::DJISerial
+class MCBLite : public tap::communication::serial::DJISerial
 {
 public:
-    SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+    MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
     void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
 
