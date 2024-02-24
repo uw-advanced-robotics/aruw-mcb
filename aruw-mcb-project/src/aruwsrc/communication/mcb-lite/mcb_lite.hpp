@@ -33,6 +33,7 @@
 #include "virtual_current_sensor.hpp"
 #include "virtual_imu_interface.hpp"
 #include "virtual_analog.hpp"
+#include "virtual_digital.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -64,7 +65,7 @@ public:
     VirtualCurrentSensor currentSensor;
     VirtualIMUInterface imu;
     VirtualAnalog analog;
-
+    VirtualDigital digital;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
@@ -77,6 +78,7 @@ private:
     uint8_t can1Data[64];
     uint8_t can2Data[64];
     AnalogInputPinMessage analogData;
+    DigitalInputPinMessage digitalData;
 };
 }  // namespace aruwsrc::virtualMCB
 

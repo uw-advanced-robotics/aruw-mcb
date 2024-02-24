@@ -97,6 +97,19 @@ void MCBLite::sendData()
                 sizeof(imu.calibrateIMUMessage));
             imu.sendIMUCalibrationMessage = false;
         }
+
+        if(digital.hasNewData)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
+                sizeof(digital.outputPinMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.pinModeMessage)),
+                sizeof(digital.pinModeMessage));
+            digital.hasNewData = false;
+        }
     }
 }
 
@@ -119,9 +132,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 memcpy(&analogData, completeMessage.data, sizeof(analogData));
                 analog.processAnalogMessage(completeMessage);
                 break;
-            // case MessageTypes::CURRENT_SENSOR_MESSAGE:
-                // processCurrentSensorMessage(completeMessage);
-                // break;
+            case MessageTypes::DIGITAL_PID_READ_MESSAGE:
+                digital.processDigitalMessage(completeMessage);
+                break;
             default:
                 break;
         }
