@@ -22,7 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::serial;
@@ -92,7 +92,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
@@ -127,7 +127,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 

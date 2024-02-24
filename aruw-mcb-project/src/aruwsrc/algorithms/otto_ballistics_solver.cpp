@@ -24,7 +24,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"

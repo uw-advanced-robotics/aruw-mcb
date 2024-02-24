@@ -32,7 +32,7 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A command that continuously attempts to rotate the chasis so that the turret is
@@ -46,7 +46,7 @@ public:
     ChassisDiagonalDriveCommand(
         tap::Drivers* drivers,
         aruwsrc::control::ControlOperatorInterface* operatorInterface,
-        HolonomicChassisSubsystem* chassis,
+        ChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         ChassisSymmetry chassisSymmetry);
 

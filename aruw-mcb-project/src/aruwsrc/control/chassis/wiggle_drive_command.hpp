@@ -31,7 +31,7 @@ namespace aruwsrc
 {
 namespace chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A command that automatically rotates the chassis back and forth, following
@@ -43,7 +43,7 @@ class WiggleDriveCommand : public tap::control::Command
 public:
     WiggleDriveCommand(
         tap::Drivers* drivers,
-        HolonomicChassisSubsystem* chassis,
+        ChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface);
 
@@ -93,7 +93,7 @@ private:
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
 
     tap::Drivers* drivers;
-    HolonomicChassisSubsystem* chassis;
+    ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
