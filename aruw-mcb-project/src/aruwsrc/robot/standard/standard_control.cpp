@@ -193,7 +193,7 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &rightFrontMecanumWheel,
     &leftBackMecanumWheel,
     &rightBackMecanumWheel};
-aruwsrc::chassis::ChassisSubsystem chassis(drivers(), &wheels, &currentSensor);
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
