@@ -26,7 +26,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
@@ -106,7 +106,7 @@ public:
     ImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        chassis::HolonomicChassisSubsystem *chassis);
+        chassis::ChassisSubsystem *chassis);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -144,7 +144,7 @@ private:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
-    chassis::HolonomicChassisSubsystem *chassis;
+    chassis::ChassisSubsystem *chassis;
 
     CalibrationState calibrationState;
 

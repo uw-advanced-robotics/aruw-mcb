@@ -20,8 +20,9 @@
 #ifndef SENTRY_CHASSIS_CONSTANTS_HPP_
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
+#include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
@@ -58,41 +59,93 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
 //     .beybladeRampRate = 45,
 // };
 
+// Using same azimuth and pid config for all swerve modules
+aruwsrc::chassis::SwerveModuleConfig swerveCoinfig = {
+    .driveMotorInverted = false,
+
+};
+
 // todo: hopefullly these can live as constants here soon :)
-aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
+aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
+    // .azimuthZeroOffset = 7888,
+
+    .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.076,
+    .gearRatio = 23.0 / 12.0,
+    .motorGearRatio = (1.0f / 19.0f),
+    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    // .driveMotorInverted = false,
+    .inverted = true,
+};
+
+aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     // .azimuthZeroOffset = 7888,
     .azimuthZeroOffset = 3753,
-    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
-    .driveMotorInverted = true,
-};
-
-aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
+    .azimuthMotorGearing = 1.0,
+    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .inverted = true};
+aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
+
+    .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.076,
+    .gearRatio = 23.0 / 12.0,
+    .motorGearRatio = (1.0f / 19.0f),
+    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    // .driveMotorInverted = false,
+    .inverted = true,
+};
+
+aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
-    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
-    .driveMotorInverted = true,
-};
+    .azimuthMotorGearing = 1.0,
+    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .inverted = true};
 
-aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
+aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,
-    .azimuthZeroOffset = 3093,
-    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.076,
+    .gearRatio = 23.0 / 12.0,
+    .motorGearRatio = (1.0f / 19.0f),
+    .velocityPidConfig = swerveCoinfig.drivePidConfig,
     // .driveMotorInverted = false,
-    .driveMotorInverted = true,
+    .inverted = true,
 };
 
-aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    // .azimuthZeroOffset = 7878,
+aruwsrc::chassis::SwerveAzimuthConfig leftBackSwerveAzimuthConfig = {
+    .azimuthZeroOffset = 3093,
+    .azimuthMotorGearing = 1.0,
+    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .inverted = true,
+};
+
+aruwsrc::chassis::WheelConfig rightBackSwerveConfig = {
+    .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.076,
+    .gearRatio = 23.0 / 12.0,
+    .motorGearRatio = (1.0f / 19.0f),
+    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    .inverted = true,
+};
+
+aruwsrc::chassis::SwerveAzimuthConfig rightBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3679,
-    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
-    .driveMotorInverted = true,
+    .azimuthMotorGearing = 1.0,
+    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .inverted = true,
 };
 
 }  // namespace aruwsrc::sentry::chassis

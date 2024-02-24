@@ -26,7 +26,7 @@
 
 namespace aruwsrc::chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 
 /**
  * A helper object that performs the computations necessary for chassis relative driving.
@@ -39,7 +39,7 @@ public:
     static void computeDesiredUserTranslation(
         aruwsrc::control::ControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        HolonomicChassisSubsystem *chassis,
+        ChassisSubsystem *chassis,
         float chassisRotation,
         float *chassisXDesiredWheelspeed,
         float *chassisYDesiredWheelspeed);
@@ -47,7 +47,7 @@ public:
     static void onExecute(
         aruwsrc::control::ControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        HolonomicChassisSubsystem *chassis);
+        ChassisSubsystem *chassis);
 };
 }  // namespace aruwsrc::chassis
 
