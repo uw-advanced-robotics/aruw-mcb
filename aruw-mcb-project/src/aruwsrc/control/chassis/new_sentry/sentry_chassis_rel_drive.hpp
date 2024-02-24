@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "../new-chassis/chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 namespace aruwsrc::control::sentry

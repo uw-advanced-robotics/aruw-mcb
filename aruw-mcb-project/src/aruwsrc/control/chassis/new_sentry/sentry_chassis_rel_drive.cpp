@@ -43,7 +43,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
         return;
     }
 
-    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxWheelSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 

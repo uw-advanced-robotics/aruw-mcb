@@ -26,7 +26,7 @@
 
 namespace aruwsrc::chassis
 {
-class HolonomicChassisSubsystem;
+class ChassisSubsystem;
 }
 
 namespace aruwsrc::control::turret
