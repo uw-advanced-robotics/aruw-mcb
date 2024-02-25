@@ -20,8 +20,8 @@
 #ifndef TRANSFORMER_INTERFACE_HPP_
 #define TRANSFORMER_INTERFACE_HPP_
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/cmsis_mat.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
 #include "modm/math/geometry/location_2d.hpp"
 

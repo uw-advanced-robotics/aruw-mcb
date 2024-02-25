@@ -26,7 +26,6 @@
 
 #include "sentry_turret_minor_subsystem.hpp"
 
-
 namespace aruwsrc::sentry
 {
 class SentryTransforms

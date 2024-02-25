@@ -26,7 +26,8 @@
 
 namespace aruwsrc::algorithms::transforms
 {
-StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms)
+StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
+    const StandardAndHeroTransformer& transforms)
     : transforms(transforms)
 {
 }
