@@ -22,14 +22,16 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+
+#include "sentry_turret_minor_subsystem.hpp"
+
 
 namespace aruwsrc::sentry
 {
 class SentryTransforms
 {
-friend class SentryTransformAdapter;
+    friend class SentryTransformAdapter;
 
 public:
     struct SentryTransformConfig
@@ -65,12 +67,15 @@ public:
         return worldToTurretRight;
     };
 
-    //If you pass a wrong turretID, the right turret will automatically be returned.
+    // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
     {
-        if(turretID == turretMinorGirlboss.getTurretID()){
+        if (turretID == turretMinorGirlboss.getTurretID())
+        {
             return worldToTurretLeft;
-        }else {
+        }
+        else
+        {
             return worldToTurretRight;
         }
     }

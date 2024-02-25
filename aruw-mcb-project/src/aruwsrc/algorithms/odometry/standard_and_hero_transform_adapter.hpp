@@ -20,15 +20,15 @@
 #ifndef STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
 #define STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
 
+#include "tap/algorithms/cmsis_mat.hpp"
+
 #include "standard_and_hero_transformer.hpp"
 #include "transformer_interface.hpp"
-#include "tap/algorithms/cmsis_mat.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
 class StandardAndHeroTransformAdapter : public TransformerInterface
 {
-
     StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
 
     modm::Location2D<float> getCurrentLocation2D() const;
@@ -39,12 +39,12 @@ class StandardAndHeroTransformAdapter : public TransformerInterface
 
     uint32_t getLastComputedOdometryTime() const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const;
+    tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const;
+    tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const;
 
 private:
-    StandardAndHeroTransformer& transforms;
+    const aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transforms;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

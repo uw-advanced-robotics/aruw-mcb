@@ -19,8 +19,10 @@
 
 #include "sentry_transform_adapter.hpp"
 
-#include "sentry_transforms.hpp"
 #include "modm/math/geometry/location_2d.hpp"
+
+#include "sentry_transforms.hpp"
+
 
 namespace aruwsrc::sentry
 {
@@ -31,7 +33,7 @@ SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transform
 
 modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const
 {
-    tap::algorithms::transforms::Transform& worldToChassis = transforms.getWorldToChassis();
+    const tap::algorithms::transforms::Transform& worldToChassis = transforms.getWorldToChassis();
     return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
 }
 
@@ -47,20 +49,26 @@ uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-tap::algorithms::CMSISMat<3,1> SentryTransformAdapter::getTurretLocation(int turretID) const
+tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretLocation(int turretID) const
 {
-    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret(turretID);
-    const float positionData[3 * 1] = {worldToTurret.getX(), worldToTurret.getY(), worldToTurret.getZ()};
-    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret(turretID);
+    const float positionData[3 * 1] = {
+        worldToTurret.getX(),
+        worldToTurret.getY(),
+        worldToTurret.getZ()};
+    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
     return positionInCMS;
 
 }
 
-tap::algorithms::CMSISMat<3,1> SentryTransformAdapter::getTurretOrientation(int turretID) const
+tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretOrientation(int turretID) const
 {
-    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret(turretID);
-    const float positionData[3 * 1] = {worldToTurret.getRoll(), worldToTurret.getYaw(), worldToTurret.getPitch()};
-    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret(turretID);
+    const float positionData[3 * 1] = {
+        worldToTurret.getRoll(),
+        worldToTurret.getYaw(),
+        worldToTurret.getPitch()};
+    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
     return positionInCMS;
 };
 

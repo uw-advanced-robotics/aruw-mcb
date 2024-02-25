@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRANSFORMER_INTERFACE
-#define TRANSFORMER_INTERFACE
-
-#include "modm/math/geometry/location_2d.hpp"
+#ifndef TRANSFORMER_INTERFACE_HPP_
+#define TRANSFORMER_INTERFACE_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/cmsis_mat.hpp"
+
+#include "modm/math/geometry/location_2d.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
@@ -50,9 +50,9 @@ public:
      */
     virtual uint32_t getLastComputedOdometryTime() const = 0;
 
-    virtual tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const = 0;
+    virtual tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const = 0;
 
-    virtual tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const = 0;
+    virtual tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

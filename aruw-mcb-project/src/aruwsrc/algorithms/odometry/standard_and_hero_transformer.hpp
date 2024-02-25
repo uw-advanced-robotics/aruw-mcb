@@ -32,11 +32,12 @@ namespace aruwsrc::algorithms::transforms
 /**
  * @brief transform provider for both the standard and hero
  * Use the StandardAndHeroTransformerSubsystem as a convenience class to
- * update the transformer each loop 
+ * update the transformer each loop
  */
 class StandardAndHeroTransformer
 {
-friend class StandardAndHeroTransformAdapter;
+    friend class StandardAndHeroTransformAdapter;
+
 public:
     StandardAndHeroTransformer(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
@@ -71,7 +72,7 @@ protected:
     {
         return chassisOdometry;
     }
-    
+
 private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::RobotTurretSubsystem& turret;

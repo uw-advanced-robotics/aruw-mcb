@@ -21,6 +21,7 @@
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+
 #include "sentry_transforms.hpp"
 
 namespace aruwsrc::sentry
@@ -37,11 +38,11 @@ class SentryTransformAdapter : public aruwsrc::algorithms::transforms::Transform
 
     uint32_t getLastComputedOdometryTime() const;
 
-    //If you pass a wrong turretID, the right turret will automatically be returned.
-    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const;
+    // If you pass a wrong turretID, the right turret will automatically be returned.
+    tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const;
 
-    //If you pass a wrong turretID, the right turret will automatically be returned.
-    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const;
+    // If you pass a wrong turretID, the right turret will automatically be returned.
+    tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const;
 
 private:
     const SentryTransforms& transforms;

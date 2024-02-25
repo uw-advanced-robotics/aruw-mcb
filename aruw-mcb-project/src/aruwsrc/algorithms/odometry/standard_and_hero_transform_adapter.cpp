@@ -19,15 +19,14 @@
 
 #include "standard_and_hero_transform_adapter.hpp"
 
-#include "transformer_interface.hpp"
+#include "tap/algorithms/cmsis_mat.hpp"
 
 #include "standard_and_hero_transformer.hpp"
-#include "tap/algorithms/cmsis_mat.hpp"
+#include "transformer_interface.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
-StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
-    const StandardAndHeroTransformer& transforms)
+StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms)
     : transforms(transforms)
 {
 }
@@ -53,24 +52,31 @@ uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretLocation(int turretID) const
+tap::algorithms::CMSISMat<3, 1> StandardAndHeroTransformAdapter::getTurretLocation(
+    int turretID) const
 {
-    //Irrelevant Parameter in standard, gets rid of warning
+    // Irrelevant Parameter in standard, gets rid of warning
     turretID = turretID;
-    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
-    const float positionData[3 * 1] = {worldToTurret.getX(), worldToTurret.getY(), worldToTurret.getZ()};
-    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
+    const float positionData[3 * 1] = {
+        worldToTurret.getX(),
+        worldToTurret.getY(),
+        worldToTurret.getZ()};
+    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
     return positionInCMS;
-
 }
 
-tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretOrientation(int turretID) const
+tap::algorithms::CMSISMat<3, 1> StandardAndHeroTransformAdapter::getTurretOrientation(
+    int turretID) const
 {
-    //Irrelevant Parameter in standard, gets rid of warning
+    // Irrelevant Parameter in standard, gets rid of warning
     turretID = turretID;
-    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
-    const float positionData[3 * 1] = {worldToTurret.getRoll(), worldToTurret.getYaw(), worldToTurret.getPitch()};
-    tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
+    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
+    const float positionData[3 * 1] = {
+        worldToTurret.getRoll(),
+        worldToTurret.getYaw(),
+        worldToTurret.getPitch()};
+    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
     return positionInCMS;
 };
 
