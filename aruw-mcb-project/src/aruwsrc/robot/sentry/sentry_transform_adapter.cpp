@@ -50,7 +50,7 @@ uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
 
 tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretLocation(int turretID) const
 {
-    const tap::algorithms::transforms::Transform& worldToTurret = 
+    const tap::algorithms::transforms::Transform& worldToTurret =
         transforms.getWorldToTurret(turretID);
     const float positionData[3 * 1] = {
         worldToTurret.getX(),
@@ -62,7 +62,7 @@ tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretLocation(int tu
 
 tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretOrientation(int turretID) const
 {
-    const tap::algorithms::transforms::Transform& worldToTurret = 
+    const tap::algorithms::transforms::Transform& worldToTurret =
         transforms.getWorldToTurret(turretID);
     const float positionData[3 * 1] = {
         worldToTurret.getRoll(),
