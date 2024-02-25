@@ -31,20 +31,20 @@ class StandardAndHeroTransformAdapter : public TransformerInterface
 
     StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
 
-    modm::Location2D<float> getCurrentLocation2D() const = 0;
+    modm::Location2D<float> getCurrentLocation2D() const;
 
-    modm::Vector2f getCurrentVelocity2D() const = 0;
+    modm::Vector2f getCurrentVelocity2D() const;
 
-    float getYaw() const = 0;
+    float getYaw() const;
 
-    uint32_t getLastComputedOdometryTime() const = 0;
+    uint32_t getLastComputedOdometryTime() const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const = 0;
+    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const = 0;
+    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const;
 
 private:
-    StandardAndHeroTransformer transforms;
+    StandardAndHeroTransformer& transforms;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

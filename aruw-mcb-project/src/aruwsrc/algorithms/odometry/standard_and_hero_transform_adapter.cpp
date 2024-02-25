@@ -34,7 +34,7 @@ StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
 
 modm::Location2D<float> StandardAndHeroTransformAdapter::getCurrentLocation2D() const
 {
-    const tap::algorithms::transforms::Transform worldToChassis = transforms.getWorldToChassis();
+    const tap::algorithms::transforms::Transform& worldToChassis = transforms.getWorldToChassis();
     return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
 }
 
@@ -57,7 +57,7 @@ tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretLocatio
 {
     //Irrelevant Parameter in standard, gets rid of warning
     turretID = turretID;
-    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret();
+    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
     const float positionData[3 * 1] = {worldToTurret.getX(), worldToTurret.getY(), worldToTurret.getZ()};
     tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
     return positionInCMS;
@@ -68,7 +68,7 @@ tap::algorithms::CMSISMat<3,1> StandardAndHeroTransformAdapter::getTurretOrienta
 {
     //Irrelevant Parameter in standard, gets rid of warning
     turretID = turretID;
-    tap::algorithms::transforms::Transform worldToTurret = transforms.getWorldToTurret();
+    tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
     const float positionData[3 * 1] = {worldToTurret.getRoll(), worldToTurret.getYaw(), worldToTurret.getPitch()};
     tap::algorithms::CMSISMat<3,1> positionInCMS (positionData);
     return positionInCMS;

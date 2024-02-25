@@ -65,9 +65,9 @@ public:
         return worldToTurretRight;
     };
 
+    //If you pass a wrong turretID, the right turret will automatically be returned.
     inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
     {
-        //If you pass a wrong turretID, the right turret will automatically be returned.
         if(turretID == turretMinorGirlboss.getTurretID()){
             return worldToTurretLeft;
         }else {

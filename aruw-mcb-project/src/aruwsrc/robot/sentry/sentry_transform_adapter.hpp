@@ -29,17 +29,19 @@ class SentryTransformAdapter : public aruwsrc::algorithms::transforms::Transform
 {
     SentryTransformAdapter(const SentryTransforms& transforms);
 
-    modm::Location2D<float> getCurrentLocation2D() const = 0;
+    modm::Location2D<float> getCurrentLocation2D() const;
 
-    modm::Vector2f getCurrentVelocity2D() const = 0;
+    modm::Vector2f getCurrentVelocity2D() const;
 
-    float getYaw() const = 0;
+    float getYaw() const;
 
-    uint32_t getLastComputedOdometryTime() const = 0;
+    uint32_t getLastComputedOdometryTime() const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const = 0;
+    //If you pass a wrong turretID, the right turret will automatically be returned.
+    tap::algorithms::CMSISMat<3,1> getTurretLocation(int turretID) const;
 
-    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const = 0;
+    //If you pass a wrong turretID, the right turret will automatically be returned.
+    tap::algorithms::CMSISMat<3,1> getTurretOrientation(int turretID) const;
 
 private:
     const SentryTransforms& transforms;
