@@ -29,14 +29,14 @@ namespace aruwsrc::sentry
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
-    const SentryTurretMinorSubsystem& turretMinorGirlboss,
-    const SentryTurretMinorSubsystem& turretMinorMalewife,
+    const SentryTurretMinorSubsystem& turretLeft,
+    const SentryTurretMinorSubsystem& turretRight,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
-      turretMinorGirlboss(turretMinorGirlboss),
-      turretMinorMalewife(turretMinorMalewife),
+      turretLeft(turretLeft),
+      turretRight(turretRight),
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
@@ -60,12 +60,12 @@ void SentryTransforms::updateTransforms()
     // Turret Major to Minors
     turretMajorToTurretLeft.updateRotation(
         0.,
-        turretMinorGirlboss.pitchMotor.getAngleFromCenter(),
-        turretMinorGirlboss.yawMotor.getAngleFromCenter());
+        turretLeft.pitchMotor.getAngleFromCenter(),
+        turretLeft.yawMotor.getAngleFromCenter());
     turretMajorToTurretRight.updateRotation(
         0.,
-        turretMinorMalewife.pitchMotor.getAngleFromCenter(),
-        turretMinorMalewife.yawMotor.getAngleFromCenter());
+        turretRight.pitchMotor.getAngleFromCenter(),
+        turretRight.yawMotor.getAngleFromCenter());
 
     // World transforms
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
