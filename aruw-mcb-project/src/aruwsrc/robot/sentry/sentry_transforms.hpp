@@ -69,7 +69,7 @@ public:
     // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
     {
-        if (turretID == turretMinorGirlboss.getTurretID())
+        if (turretID == turretLeft.getTurretID())
         {
             return worldToTurretLeft;
         }
@@ -100,8 +100,8 @@ private:
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretMinorGirlboss;
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretMinorMalewife;
+    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
+    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;
