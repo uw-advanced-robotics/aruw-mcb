@@ -63,7 +63,6 @@ public:
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
-    VirtualCurrentSensor currentSensor;
     VirtualIMUInterface imu;
     VirtualAnalog analog;
     VirtualDigital digital;

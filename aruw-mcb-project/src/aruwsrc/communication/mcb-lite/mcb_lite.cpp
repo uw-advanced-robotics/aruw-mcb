@@ -32,11 +32,11 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
     : DJISerial(drivers, port),
       canRxHandler(VirtualCanRxHandler(drivers)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
-      currentSensor(),
       imu(),
       analog(),
       digital(),
       leds(),
+      pwm(),
       port(port),
       currentIMUData()
 {

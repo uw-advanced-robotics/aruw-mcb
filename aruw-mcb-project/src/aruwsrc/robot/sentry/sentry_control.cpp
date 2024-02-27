@@ -131,9 +131,16 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackAzimuthMotor,
     aruwsrc::sentry::chassis::rightBackSwerveConfig);
 
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->mcbLite.analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
 aruwsrc::chassis::SwerveChassisSubsystem chassis(
     drivers(),
-    &drivers()->mcbLite.currentSensor,
+    &currentSensor,
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
