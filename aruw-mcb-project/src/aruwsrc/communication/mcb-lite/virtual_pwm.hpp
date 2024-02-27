@@ -34,7 +34,12 @@ class VirtualPWM : public tap::gpio::Pwm
     friend class MCBLite;
 
 public:
-    VirtualPWM() {}
+    VirtualPWM()
+    {
+        pinDutyMessage.messageType = MessageTypes::PWM_PIN_DUTY_MESSAGE;
+        pwmTimerFrequencyMessage.messageType = MessageTypes::PWM_TIMER_FREQUENCY_MESSAGE;
+        pwmTimerStartMessage.messageType = MessageTypes::PWM_TIMER_STARTED_MESSAGE;
+    }
 
     void writeAllZeros() { memset(pinDuty, 0, sizeof(pinDuty)); }
 
@@ -62,6 +67,10 @@ private:
     float pinDuty[6];
     uint32_t timerFrequency[3];
     bool timerStarted[3];
+
+    DJISerial::DJISerial::SerialMessage<sizeof(PWMPinDutyMessage)> pinDutyMessage;
+    DJISerial::DJISerial::SerialMessage<sizeof(PWNTimerFrequencyMessage)> pwmTimerFrequencyMessage;
+    DJISerial::DJISerial::SerialMessage<sizeof(PWMTimerStartedMessage)> pwmTimerStartMessage;
 
     bool hasNewData = false;
 };

@@ -36,10 +36,7 @@ class VirtualAnalog : public tap::gpio::Analog
 public:
     VirtualAnalog() {}
 
-    uint16_t read(Pin pin) const
-    {
-        return pinValues[pin];
-    }
+    uint16_t read(Pin pin) const { return pinValues[pin]; }
 
 private:
     void processAnalogMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
