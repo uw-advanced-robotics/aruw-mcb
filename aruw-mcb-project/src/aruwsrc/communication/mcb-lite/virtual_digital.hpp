@@ -57,7 +57,6 @@ public:
 private:
     void processDigitalMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
-        DigitalInputPinMessage* digitalMessage = (DigitalInputPinMessage*)(completeMessage.data);
         memcpy(inputPinValue, completeMessage.data, sizeof(inputPinValue));
     }
 

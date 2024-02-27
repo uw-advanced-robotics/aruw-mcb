@@ -31,7 +31,6 @@
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
-#include "virtual_current_sensor.hpp"
 #include "virtual_digital.hpp"
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
