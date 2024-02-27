@@ -35,6 +35,7 @@
 #include "virtual_digital.hpp"
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
+#include "virtual_pwm.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -67,6 +68,7 @@ public:
     VirtualAnalog analog;
     VirtualDigital digital;
     VirtualLEDs leds;
+    VirtualPWM pwm;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);

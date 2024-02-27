@@ -74,6 +74,7 @@ void MCBLite::sendData()
     if (drivers->uart.isWriteFinished(port))
     {
         motorTxHandler.encodeAndSendCanData();
+        // 100 bytes of CAN data
         drivers->uart.write(
             port,
             reinterpret_cast<uint8_t*>(&(motorTxHandler.can1MessageLowSend)),
@@ -93,6 +94,7 @@ void MCBLite::sendData()
 
         if (imu.sendIMUCalibrationMessage)
         {
+            // 10 bytes of IMU
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
@@ -102,6 +104,7 @@ void MCBLite::sendData()
 
         if (digital.hasNewData)
         {
+            // 27 bytes of digital
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
@@ -115,11 +118,30 @@ void MCBLite::sendData()
 
         if (leds.hasNewData)
         {
+            // 19 bytes of LED
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(leds.ledStateMessage)),
                 sizeof(leds.ledStateMessage));
             leds.hasNewData = false;
+        }
+
+        if (pwm.hasNewData)
+        {
+            // 66 bytes of PWM
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pinDutyMessage)),
+                sizeof(pwm.pinDutyMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pwmTimerFrequencyMessage)),
+                sizeof(pwm.pwmTimerFrequencyMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pwmTimerStartMessage)),
+                sizeof(pwm.pwmTimerStartMessage));
+            pwm.hasNewData = false;
         }
     }
 }
@@ -144,6 +166,7 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 analog.processAnalogMessage(completeMessage);
                 break;
             case MessageTypes::DIGITAL_PID_READ_MESSAGE:
+                memcpy(&digitalData, completeMessage.data, sizeof(digitalData));
                 digital.processDigitalMessage(completeMessage);
                 break;
             default:
