@@ -20,4 +20,51 @@
 #ifndef VIRTUAL_PWM_HPP_
 #define VIRTUAL_PWM_HPP_
 
+#include "tap/communication/gpio/pwm.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
+
+#include "message_types.hpp"
+
+using namespace tap::communication::serial;
+
+namespace aruwsrc::virtualMCB
+{
+class VirtualPWM : public tap::gpio::Pwm
+{
+    friend class MCBLite;
+
+public:
+    VirtualPWM() {}
+
+    void writeAllZeros() { memset(pinDuty, 0, sizeof(pinDuty)); }
+
+    void setTimerFrequency(Timer timer, uint32_t frequency)
+    {
+        timerFrequency[timer] = frequency;
+        updateMessages();
+    }
+
+    void start(Timer timer)
+    {
+        timerStarted[timer] = true;
+        updateMessages();
+    }
+
+    void pause(Timer timer)
+    {
+        timerStarted[timer] = false;
+        updateMessages();
+    }
+
+private:
+    void updateMessages();
+
+    float pinDuty[6];
+    uint32_t timerFrequency[3];
+    bool timerStarted[3];
+
+    bool hasNewData = false;
+};
+}  // namespace aruwsrc::virtualMCB
+
 #endif  // VIRTUAL_PWM_HPP_

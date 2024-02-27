@@ -38,35 +38,16 @@ public:
 
     uint16_t read(Pin pin) const
     {
-        switch (pin)
-        {
-            case Pin::S:
-                return SPinValue;
-            case Pin::T:
-                return TPinValue;
-            case Pin::U:
-                return UPinValue;
-            case Pin::V:
-                return VPinValue;
-            case Pin::OledJoystick:
-                return OLEDPinValue;
-            default:
-                return 0;
-        }
+        return pinValues[pin];
     }
 
 private:
     void processAnalogMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
-        AnalogInputPinMessage* analogMessage = (AnalogInputPinMessage*)(completeMessage.data);
-        SPinValue = analogMessage->SPinValue;
-        TPinValue = analogMessage->TPinValue;
-        UPinValue = analogMessage->UPinValue;
-        VPinValue = analogMessage->VPinValue;
-        OLEDPinValue = analogMessage->OLEDPinValue;
+        memcpy(pinValues, completeMessage.data, sizeof(pinValues));
     }
 
-    uint16_t SPinValue, TPinValue, UPinValue, VPinValue, OLEDPinValue;
+    uint16_t pinValues[5];
 };
 
 }  // namespace aruwsrc::virtualMCB

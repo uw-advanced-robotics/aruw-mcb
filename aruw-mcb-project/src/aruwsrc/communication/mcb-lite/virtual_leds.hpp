@@ -41,65 +41,19 @@ public:
 
     void set(LedPin pin, bool isSet)
     {
-        switch (pin)
-        {
-            case LedPin::A:
-                ALEDState = isSet;
-                break;
-            case LedPin::B:
-                BLEDState = isSet;
-                break;
-            case LedPin::C:
-                CLEDState = isSet;
-                break;
-            case LedPin::D:
-                DLEDState = isSet;
-                break;
-            case LedPin::E:
-                ELEDState = isSet;
-                break;
-            case LedPin::F:
-                FLEDState = isSet;
-                break;
-            case LedPin::G:
-                GLEDState = isSet;
-                break;
-            case LedPin::H:
-                HLEDState = isSet;
-                break;
-            case LedPin::Green:
-                GreenLEDState = isSet;
-                break;
-            case LedPin::Red:
-                RedLEDState = isSet;
-                break;
-            default:
-                break;
-        }
+        ledState[pin] = isSet;
         updateMessage();
     }
 
 private:
     void updateMessage()
     {
-        LEDControlMessage ledControlMessage;
-        ledControlMessage.ALedOn = ALEDState;
-        ledControlMessage.BLedOn = BLEDState;
-        ledControlMessage.CLedOn = CLEDState;
-        ledControlMessage.DLedOn = DLEDState;
-        ledControlMessage.ELedOn = ELEDState;
-        ledControlMessage.FLedOn = FLEDState;
-        ledControlMessage.GLedOn = GLEDState;
-        ledControlMessage.HLedOn = HLEDState;
-        ledControlMessage.GreenLedOn = GreenLEDState;
-        ledControlMessage.RedLedOn = RedLEDState;
-        memcpy(ledStateMessage.data, &ledControlMessage, sizeof(LEDControlMessage));
+        memcpy(ledStateMessage.data, &ledState, sizeof(LEDControlMessage));
         ledStateMessage.setCRC16();
         hasNewData = true;
     }
 
-    bool ALEDState, BLEDState, CLEDState, DLEDState, ELEDState, FLEDState, GLEDState, HLEDState,
-        GreenLEDState, RedLEDState;
+    bool ledState[10];
     DJISerial::DJISerial::SerialMessage<sizeof(LEDControlMessage)> ledStateMessage;
     bool hasNewData = false;
 };

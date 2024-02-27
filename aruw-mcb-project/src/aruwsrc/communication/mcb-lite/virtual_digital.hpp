@@ -42,103 +42,39 @@ public:
 
     void configureInputPullMode(InputPin pin, InputPullMode mode)
     {
-        switch (pin)
-        {
-            case InputPin::B:
-                BPinMode = mode;
-                break;
-            case InputPin::C:
-                CPinMode = mode;
-                break;
-            case InputPin::D:
-                DPinMode = mode;
-                break;
-            case InputPin::Button:
-                ButtonPinMode = mode;
-                break;
-            default:
-                break;
-        }
+        pinMode[pin] = mode;
         updateMessages();
     }
 
     void set(OutputPin pin, bool isSet)
     {
-        switch (pin)
-        {
-            case OutputPin::E:
-                EPinValue = isSet;
-                break;
-            case OutputPin::F:
-                FPinValue = isSet;
-                break;
-            case OutputPin::G:
-                GPinValue = isSet;
-                break;
-            case OutputPin::H:
-                HPinValue = isSet;
-                break;
-            case OutputPin::Laser:
-                LaserPinValue = isSet;
-                break;
-            default:
-                break;
-        }
+        outputPinValue[pin] = isSet;
         updateMessages();
     }
 
-    bool read(InputPin pin) const
-    {
-        switch (pin)
-        {
-            case InputPin::B:
-                return BPinValue;
-            case InputPin::C:
-                return CPinValue;
-            case InputPin::D:
-                return DPinValue;
-            case InputPin::Button:
-                return ButtonPinValue;
-            default:
-                return false;
-        }
-    }
+    bool read(InputPin pin) const { return inputPinValue[pin]; }
 
 private:
     void processDigitalMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
         DigitalInputPinMessage* digitalMessage = (DigitalInputPinMessage*)(completeMessage.data);
-        BPinValue = digitalMessage->BPinValue;
-        CPinValue = digitalMessage->CPinValue;
-        DPinValue = digitalMessage->DPinValue;
-        ButtonPinValue = digitalMessage->ButtonPinValue;
+        memcpy(inputPinValue, completeMessage.data, sizeof(inputPinValue));
     }
 
     void updateMessages()
     {
-        DigitalOutputPinMessage outputPinMessageData;
-        outputPinMessageData.EPinValue = EPinValue;
-        outputPinMessageData.FPinValue = FPinValue;
-        outputPinMessageData.GPinValue = GPinValue;
-        outputPinMessageData.HPinValue = HPinValue;
-        outputPinMessageData.LaserPinValue = LaserPinValue;
-        memcpy(outputPinMessage.data, &outputPinMessageData, sizeof(DigitalOutputPinMessage));
+        memcpy(outputPinMessage.data, outputPinValue, sizeof(DigitalOutputPinMessage));
         outputPinMessage.setCRC16();
 
-        DigitalPinModeMessage pinModeMessageData;
-        pinModeMessageData.BPinMode = (uint8_t)BPinMode;
-        pinModeMessageData.CPinMode = (uint8_t)CPinMode;
-        pinModeMessageData.DPinMode = (uint8_t)DPinMode;
-        pinModeMessageData.ButtonPinMode = (uint8_t)ButtonPinMode;
-        memcpy(pinModeMessage.data, &pinModeMessageData, sizeof(DigitalPinModeMessage));
+        memcpy(pinModeMessage.data, pinMode, sizeof(DigitalPinModeMessage));
         pinModeMessage.setCRC16();
 
         hasNewData = true;
     }
 
-    InputPullMode BPinMode, CPinMode, DPinMode, ButtonPinMode;
-    bool BPinValue, CPinValue, DPinValue, ButtonPinValue;
-    bool EPinValue, FPinValue, GPinValue, HPinValue, LaserPinValue;
+    bool inputPinValue[4];
+    InputPullMode pinMode[4];
+    bool outputPinValue[5];
 
     DJISerial::DJISerial::SerialMessage<sizeof(DigitalOutputPinMessage)> outputPinMessage;
     DJISerial::DJISerial::SerialMessage<sizeof(DigitalPinModeMessage)> pinModeMessage;
