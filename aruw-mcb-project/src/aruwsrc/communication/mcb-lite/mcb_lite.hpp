@@ -20,7 +20,6 @@
 #ifndef SERIAL_MCB_LITE_HPP_
 #define SERIAL_MCB_LITE_HPP_
 
-#include "message_types.hpp"
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
@@ -30,17 +29,17 @@
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
 
-#include "virtual_current_sensor.hpp"
-#include "virtual_imu_interface.hpp"
+#include "message_types.hpp"
 #include "virtual_analog.hpp"
+#include "virtual_current_sensor.hpp"
 #include "virtual_digital.hpp"
+#include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::virtualMCB
 {
-
 /**
  * This class is used to communicate with the the virtual MCB using the UART port.
  * This class handles the sending and receiving of motor data, as well as receiving

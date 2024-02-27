@@ -20,12 +20,11 @@
 #ifndef VIRTUAL_IMU_INTERFACE_HPP_
 #define VIRTUAL_IMU_INTERFACE_HPP_
 
-#include "message_types.hpp"
-
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
+#include "message_types.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;

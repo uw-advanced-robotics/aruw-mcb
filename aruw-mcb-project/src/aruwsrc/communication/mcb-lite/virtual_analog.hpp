@@ -58,7 +58,7 @@ public:
 private:
     void processAnalogMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
-        AnalogInputPinMessage* analogMessage = (AnalogInputPinMessage*) (completeMessage.data);
+        AnalogInputPinMessage* analogMessage = (AnalogInputPinMessage*)(completeMessage.data);
         SPinValue = analogMessage->SPinValue;
         TPinValue = analogMessage->TPinValue;
         UPinValue = analogMessage->UPinValue;
@@ -67,7 +67,6 @@ private:
     }
 
     uint16_t SPinValue, TPinValue, UPinValue, VPinValue, OLEDPinValue;
-
 };
 
 }  // namespace aruwsrc::virtualMCB
