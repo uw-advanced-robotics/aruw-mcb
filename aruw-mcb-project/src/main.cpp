@@ -114,10 +114,17 @@ int main()
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->currentSensor.update, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+
+#if defined(TARGET_TESTBED)
+        ((Drivers *)drivers)->mcbLite.leds.set(tap::gpio::Leds::A, false);
+        ((Drivers *)drivers)->mcbLite.leds.set(tap::gpio::Leds::B, true);
+        ((Drivers *)drivers)->mcbLite.digital.set(tap::gpio::Digital::E, true);
 #endif
         }
         modm::delay_us(10);
@@ -152,6 +159,9 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
     ((Drivers *)drivers)->mcbLite.initialize();
 #endif
+#ifdef TARGET_TESTBED
+    ((Drivers *)drivers)->mcbLite.initialize();
+#endif
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -173,5 +183,9 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->mcbLite.updateSerial();
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#ifdef TARGET_TESTBED
+    ((Drivers *)drivers)->mcbLite.updateSerial();
+    ((Drivers *)drivers)->mcbLite.sendData();
 #endif
 }

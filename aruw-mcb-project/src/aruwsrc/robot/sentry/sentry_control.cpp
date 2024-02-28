@@ -27,6 +27,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control;
@@ -131,7 +132,7 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackAzimuthMotor,
     aruwsrc::sentry::chassis::rightBackSwerveConfig);
 
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->mcbLite.analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
