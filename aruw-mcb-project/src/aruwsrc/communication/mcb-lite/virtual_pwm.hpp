@@ -43,6 +43,12 @@ public:
 
     void writeAllZeros() { memset(pinDuty, 0, sizeof(pinDuty)); }
 
+    void write(float duty, Pin pin)
+    {
+        pinDuty[pin] = duty;
+        updateMessages();
+    }
+
     void setTimerFrequency(Timer timer, uint32_t frequency)
     {
         timerFrequency[timer] = frequency;
@@ -62,7 +68,16 @@ public:
     }
 
 private:
-    void updateMessages();
+    void updateMessages(){
+        memcpy(pinDutyMessage.data, pinDuty, sizeof(pinDuty));
+        memcpy(pwmTimerFrequencyMessage.data, timerFrequency, sizeof(timerFrequency));
+        memcpy(pwmTimerStartMessage.data, timerStarted, sizeof(timerStarted));
+
+        pinDutyMessage.setCRC16();
+        pwmTimerFrequencyMessage.setCRC16();
+        pwmTimerStartMessage.setCRC16();
+        hasNewData = true;
+    }
 
     float pinDuty[6];
     uint32_t timerFrequency[3];
