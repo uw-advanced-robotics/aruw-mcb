@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTRY_BEEHIVE)
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
@@ -27,7 +28,6 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control;

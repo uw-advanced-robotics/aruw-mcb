@@ -68,7 +68,8 @@ public:
     }
 
 private:
-    void updateMessages(){
+    void updateMessages()
+    {
         memcpy(pinDutyMessage.data, pinDuty, sizeof(pinDuty));
         memcpy(pwmTimerFrequencyMessage.data, timerFrequency, sizeof(timerFrequency));
         memcpy(pwmTimerStartMessage.data, timerStarted, sizeof(timerStarted));
