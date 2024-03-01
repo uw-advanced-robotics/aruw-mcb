@@ -22,6 +22,8 @@
 
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
+#include "sentry_beyblade_command.hpp"
+
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
@@ -52,13 +54,13 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
 
-// static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
-//     .beybladeRotationalSpeedFractionOfMax = 0.45f,
-//     .beybladeTranslationalSpeedMultiplier = 0.1f,
-//     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
-//     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
-//     .beybladeRampRate = 45,
-// };
+static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
+    .beybladeRotationalSpeedFractionOfMax = 0.45f,
+    .beybladeTranslationalSpeedMultiplier = 0.1f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 45,
+};
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
