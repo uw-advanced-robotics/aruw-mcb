@@ -27,8 +27,8 @@ namespace aruwsrc::sentry
 {
 SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::Drivers &drivers,
-    tap::control::chassis::ChassisSubsystemInterface &chassis,
-    SentryChassisWorldYawObserver &yawObserver,
+    const tap::control::chassis::ChassisSubsystemInterface &chassis,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
     float initialYPos)
