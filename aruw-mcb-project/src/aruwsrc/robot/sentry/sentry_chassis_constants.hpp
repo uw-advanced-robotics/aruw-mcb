@@ -23,6 +23,7 @@
 #include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
 #include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
@@ -65,6 +66,11 @@ aruwsrc::chassis::SwerveModuleConfig swerveCoinfig = {
 
 };
 
+modm::Pair<float, float> angular_power_frac_LUT[2] = {
+        {0.0f, 0.2f},
+        {M_PI_2, 0.75f},
+    };
+
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
     // .azimuthZeroOffset = 7888,
@@ -86,6 +92,10 @@ aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3753,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .angular_power_frac_LUT = {
+        angular_power_frac_LUT[0],
+        angular_power_frac_LUT[1],
+    },
     .inverted = true};
 aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
@@ -106,6 +116,10 @@ aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .angular_power_frac_LUT = {
+        angular_power_frac_LUT[0],
+        angular_power_frac_LUT[1],
+    },
     .inverted = true};
 
 aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
@@ -126,6 +140,10 @@ aruwsrc::chassis::SwerveAzimuthConfig leftBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3093,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .angular_power_frac_LUT = {
+        angular_power_frac_LUT[0],
+        angular_power_frac_LUT[1],
+    },
     .inverted = true,
 };
 
@@ -145,6 +163,10 @@ aruwsrc::chassis::SwerveAzimuthConfig rightBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3679,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .angular_power_frac_LUT = {
+        angular_power_frac_LUT[0],
+        angular_power_frac_LUT[1],
+    },
     .inverted = true,
 };
 

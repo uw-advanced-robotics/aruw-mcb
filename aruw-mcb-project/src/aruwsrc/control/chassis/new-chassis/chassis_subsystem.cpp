@@ -141,6 +141,24 @@ void ChassisSubsystem::refresh()
     {
         wheels[i]->refresh();
     }
+    limitPower();
+}
+
+void ChassisSubsystem::limitPower()
+{
+    currentSensor->update();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // short circuit if power limiting doesn't need to be applied
+    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    {
+        return;
+    }
+
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        wheels[i]->limitPower(powerLimitFrac);
+    }
 }
 
 bool ChassisSubsystem::allMotorsOnline() const

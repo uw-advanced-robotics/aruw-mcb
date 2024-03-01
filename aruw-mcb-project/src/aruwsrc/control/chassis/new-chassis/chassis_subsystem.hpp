@@ -114,6 +114,8 @@ public:
 
     void refresh();
 
+    void limitPower();
+
     void refreshSafeDisconnect() { setZeroRPM(); }
 
     bool allMotorsOnline() const override;

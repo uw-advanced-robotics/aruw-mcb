@@ -39,6 +39,7 @@ public:
 
     void initialize() override;
     void refresh() override;
+    void limitPower(float powerLimitFrac) override;
     void setZeroRPM() override;
     bool allMotorsOnline() const override;
     float getDriveVelocity() const override;

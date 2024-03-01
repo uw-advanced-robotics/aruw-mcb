@@ -36,7 +36,10 @@ SwerveWheel::SwerveWheel(
       drivePid(drivePid),
       azimuthPid(azimuthPid),
       rotationVectorX(-config.wheelPositionChassisRelativeY),
-      rotationVectorY(config.wheelPositionChassisRelativeX)
+      rotationVectorY(config.wheelPositionChassisRelativeX),
+      angularBiasLUTInterpolator(
+          azimuthConfig.angular_power_frac_LUT,
+        MODM_ARRAY_SIZE(azimuthConfig.angular_power_frac_LUT))
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
@@ -96,13 +99,19 @@ void SwerveWheel::initialize()
     azimuthMotor.initialize();
 }
 
+void SwerveWheel::limitPower(float powerLimitFrac) {
+    driveMotor.setDesiredOutput(
+        driveMotor.getOutputDesired() * powerLimitFrac *
+        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+    azimuthMotor.setDesiredOutput(
+        azimuthMotor.getOutputDesired() * powerLimitFrac *
+        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+}
+
 void SwerveWheel::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    driveMotor.setDesiredOutput(drivePid.getOutput());
-
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
 void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
