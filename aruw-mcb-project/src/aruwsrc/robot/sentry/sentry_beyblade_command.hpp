@@ -90,7 +90,7 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
-    const SentryBeybladeConfig config;
+    
 
     float rotationDirection;
 
@@ -101,6 +101,7 @@ private:
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
     const tap::algorithms::transforms::Transform& worldToChassis;
+    const SentryBeybladeConfig config;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::sentry
