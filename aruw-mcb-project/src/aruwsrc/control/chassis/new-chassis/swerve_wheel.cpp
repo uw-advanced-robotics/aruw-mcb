@@ -99,7 +99,7 @@ void SwerveWheel::initialize()
     azimuthMotor.initialize();
 }
 
-void SwerveWheel::limitPower(float powerLimitFrac) 
+void SwerveWheel::limitPower(float powerLimitFrac)
 {
     driveMotor.setDesiredOutput(
         driveMotor.getOutputDesired() * powerLimitFrac *

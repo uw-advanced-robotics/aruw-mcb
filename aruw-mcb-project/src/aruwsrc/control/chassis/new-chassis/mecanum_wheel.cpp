@@ -63,7 +63,7 @@ void MecanumWheel::refresh()
     }
 }
 
-void MecanumWheel::limitPower(float powerLimitFrac) 
+void MecanumWheel::limitPower(float powerLimitFrac)
 {
     driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * powerLimitFrac);
 }

@@ -92,7 +92,7 @@ aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3753,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveConfig.azimuthPidConfig,
-    .angular_power_frac_LUT = 
+    .angular_power_frac_LUT =
         {
             angular_power_frac_LUT[0],
             angular_power_frac_LUT[1],
@@ -117,7 +117,7 @@ aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveConfig.azimuthPidConfig,
-    .angular_power_frac_LUT = 
+    .angular_power_frac_LUT =
         {
             angular_power_frac_LUT[0],
             angular_power_frac_LUT[1],
@@ -142,7 +142,7 @@ aruwsrc::chassis::SwerveAzimuthConfig leftBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3093,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveConfig.azimuthPidConfig,
-    .angular_power_frac_LUT = 
+    .angular_power_frac_LUT =
         {
             angular_power_frac_LUT[0],
             angular_power_frac_LUT[1],
@@ -166,7 +166,7 @@ aruwsrc::chassis::SwerveAzimuthConfig rightBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3679,
     .azimuthMotorGearing = 1.0,
     .azimuthPidConfig = swerveConfig.azimuthPidConfig,
-    .angular_power_frac_LUT = 
+    .angular_power_frac_LUT =
         {
             angular_power_frac_LUT[0],
             angular_power_frac_LUT[1],
