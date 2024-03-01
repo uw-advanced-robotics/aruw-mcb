@@ -39,7 +39,7 @@ SwerveWheel::SwerveWheel(
       rotationVectorY(config.wheelPositionChassisRelativeX),
       angularBiasLUTInterpolator(
           azimuthConfig.angular_power_frac_LUT,
-        MODM_ARRAY_SIZE(azimuthConfig.angular_power_frac_LUT))
+          MODM_ARRAY_SIZE(azimuthConfig.angular_power_frac_LUT))
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
@@ -99,7 +99,8 @@ void SwerveWheel::initialize()
     azimuthMotor.initialize();
 }
 
-void SwerveWheel::limitPower(float powerLimitFrac) {
+void SwerveWheel::limitPower(float powerLimitFrac) 
+{
     driveMotor.setDesiredOutput(
         driveMotor.getOutputDesired() * powerLimitFrac *
         angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
