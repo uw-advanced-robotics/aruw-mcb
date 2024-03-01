@@ -61,8 +61,7 @@ void SentryChassisWorldYawObserver::overrideChassisYaw(float newYaw)
     float currYaw;
     if (getChassisWorldYaw(&currYaw))
     {
-        // change offset
-        offset += newYaw - currYaw;  // normalize?
+        offset += newYaw - currYaw;  // no need to normalize, done in getChassisWorldYaw
     }
 }
 
