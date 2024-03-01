@@ -90,8 +90,6 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
-    
-
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;
