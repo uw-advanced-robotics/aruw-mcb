@@ -20,12 +20,12 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
@@ -58,11 +58,19 @@ public:
      * other mechanism to call the `refresh` function periodically.
      *
      * @see ChassisKFOdometry
+     *
+     * @param[in] drivers reference to tap drivers
+     * @param[in] chassis const reference to chassis subsystem
+     * @param[in] yawObserver reference to a SentryChassisWorldYawObserver, which provides world
+     * relative yaw of the chassis @see OttoChassisWorldYawObserver for how it is used
+     * @param[in] imu reference to the chassis-mounted IMU
+     * @param[in] initialXPos initial world-frame x position of the chassis
+     * @param[in] initialYPos initial world-frame y position of the chassis
      */
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        tap::control::chassis::ChassisSubsystemInterface &chassis,
-        SentryChassisWorldYawObserver &yawObserver,
+        const tap::control::chassis::ChassisSubsystemInterface &chassis,
+        tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos);
