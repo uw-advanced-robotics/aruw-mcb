@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "sentry_beyblade_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
@@ -26,10 +25,9 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-#include "aruwsrc/robot/sentry/sentry_chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_rel_drive.hpp"
 
 using namespace tap::algorithms;
 
@@ -71,7 +69,7 @@ void SentryBeybladeCommand::execute()
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        //float turretYawAngle = yawMotor->getAngleFromCenter();
+        // float turretYawAngle = yawMotor->getAngleFromCenter();
 
         float worldYawAngle = -worldToChassis.getYaw();
 
@@ -129,7 +127,6 @@ void SentryBeybladeCommand::execute()
 }
 
 void SentryBeybladeCommand::end(bool) { chassis->setZeroRPM(); }
-}  // namespace chassis
+}  // namespace sentry
 
 }  // namespace aruwsrc
-

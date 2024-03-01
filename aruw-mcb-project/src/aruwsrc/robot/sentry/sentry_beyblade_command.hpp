@@ -24,17 +24,13 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-
-#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-
-
 
 namespace aruwsrc::sentry
 {
-
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
@@ -56,13 +52,14 @@ public:
          */
         const float beybladeRotationalSpeedMultiplierWhenTranslating;
         /**
-         * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
-         * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
+         * Threshold, a fraction of the maximum translational speed that is used to determine if
+         * beyblade speed should be reduced (when translating at an appreciable speed beyblade speed
+         * is reduced).
          */
         const float translationalSpeedThresholdMultiplierForRotationSpeedDecrease;
         /**
-         * Rotational speed to update the beyblade ramp target by each iteration until final rotation
-         * setpoint reached, in RPM.
+         * Rotational speed to update the beyblade ramp target by each iteration until final
+         * rotation setpoint reached, in RPM.
          */
         const float beybladeRampRate;
     };
@@ -106,6 +103,6 @@ private:
     const tap::algorithms::transforms::Transform& worldToChassis;
 };  // class BeybladeCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::sentry
 
 #endif  // BEYBLADE_COMMAND_HPP_

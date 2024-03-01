@@ -21,9 +21,8 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
-
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 using namespace tap::algorithms;
 
@@ -85,4 +84,4 @@ void SentryChassisRelDrive::onExecute(
         chassisYDesiredWheelspeed,
         chassisRotationDesiredWheelspeed);
 }
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::sentry
