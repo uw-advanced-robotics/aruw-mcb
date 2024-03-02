@@ -55,6 +55,7 @@ private:
     const float WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     CMSISMat<2, 2> wheelVelocityTransformation;
     CMSISMat<2, 1> wheelMat;
+    float motorPowerLimitFrac;
 };  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc

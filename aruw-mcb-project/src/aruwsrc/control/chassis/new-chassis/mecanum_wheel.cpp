@@ -57,15 +57,18 @@ void MecanumWheel::refresh()
 {
     if (config.isPowered)
     {
-        velocityPid.runControllerDerivateError(
+        driveMotor.setDesiredOutput(motorPowerLimitFrac * velocityPid.runControllerDerivateError(
             driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
-            2.0f);
+            2.0f));
     }
 }
 
 void MecanumWheel::limitPower(float powerLimitFrac)
 {
-    driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * powerLimitFrac);
+    if (config.isPowered)
+    {
+    motorPowerLimitFrac = driveMotor.getOutputDesired() * powerLimitFrac;
+    }
 }
 
 void MecanumWheel::setZeroRPM()

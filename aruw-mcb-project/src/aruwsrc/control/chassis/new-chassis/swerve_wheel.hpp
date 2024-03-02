@@ -82,6 +82,9 @@ private:
     float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians;
+    float drivePowerLimitFrac;
+    float azimuthPowerLimitFrac;
+    float powerLimit;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)

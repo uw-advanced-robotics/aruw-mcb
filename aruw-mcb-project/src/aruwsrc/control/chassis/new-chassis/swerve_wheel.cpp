@@ -101,21 +101,49 @@ void SwerveWheel::initialize()
 
 void SwerveWheel::limitPower(float powerLimitFrac)
 {
-    driveMotor.setDesiredOutput(
-        driveMotor.getOutputDesired() * powerLimitFrac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(
-        azimuthMotor.getOutputDesired() * powerLimitFrac *
-        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    powerLimit= powerLimitFrac;
+    drivePowerLimitFrac = powerLimitFrac *
+        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle());
+    azimuthPowerLimitFrac = powerLimitFrac *
+        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+    
+    // driveMotor.setDesiredOutput(
+    //     driveMotor.getOutputDesired() * powerLimitFrac *
+    //     angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+    // azimuthMotor.setDesiredOutput(
+    //     azimuthMotor.getOutputDesired() * powerLimitFrac *
+    //     (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+
 }
 
 void SwerveWheel::refresh()
 {
-    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
+    if (drivePowerLimitFrac != 0 && azimuthPowerLimitFrac != 0) {
+        // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+        // driveMotor.setDesiredOutput(drivePowerLimitFrac * drivePid.getOutput());
+        // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
+        // azimuthMotor.setDesiredOutput(azimuthPowerLimitFrac * azimuthPid.getOutput());
+        driveMotor.setDesiredOutput(drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+        azimuthMotor.setDesiredOutput(azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+    } else {
+        // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+        // driveMotor.setDesiredOutput(drivePid.getOutput());
+        // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
+        // azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+        driveMotor.setDesiredOutput(drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+        azimuthMotor.setDesiredOutput(azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+    }
+    
+    
+    // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+    // driveMotor.setDesiredOutput(drivePid.getOutput());
+
+    // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
+    // azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+
 }
 
-void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
+void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; } //sluggish start and stop
 
 bool SwerveWheel::allMotorsOnline() const
 {
