@@ -25,14 +25,14 @@ namespace chassis
 SwerveWheel::SwerveWheel(
     Motor& driveMotor,
     Motor& azimuthMotor,
-    WheelConfig& config,
+    const WheelConfig& config,
     SwerveAzimuthConfig& azimuthConfig,
     SmoothPid drivePid,
     SmoothPid azimuthPid)
-    : Wheel(driveMotor, config),
-      azimuthConfig(azimuthConfig),
+    : Wheel(config),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
+      azimuthConfig(azimuthConfig),
       drivePid(drivePid),
       azimuthPid(azimuthPid),
       rotationVectorX(-config.wheelPositionChassisRelativeY),
@@ -70,11 +70,11 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
         // TODO 2: Test again on this year's bot (2024)
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        {
-            rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        }
+        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        // {
+        //     rotationOffset -=
+        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        // }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
@@ -90,6 +90,12 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
     rotationSetpoint = preScaledRotationSetpoint;
 }
 
+void SwerveWheel::initialize()
+{
+    driveMotor.initialize();
+    azimuthMotor.initialize();
+}
+
 void SwerveWheel::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
@@ -99,11 +105,18 @@ void SwerveWheel::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
-
 void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
 
+bool SwerveWheel::allMotorsOnline() const
+{
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
+}
+
+float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
+
 float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+
+int SwerveWheel::getNumMotors() const { return 2; }
 
 float SwerveWheel::getAngle() const
 {
@@ -111,17 +124,6 @@ float SwerveWheel::getAngle() const
         azimuthMotor.encoderToDegrees(
             azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
         azimuthConfig.azimuthMotorGearing);
-}
-
-void SwerveWheel::initialize()
-{
-    driveMotor.initialize();
-    azimuthMotor.initialize();
-}
-
-bool SwerveWheel::allMotorsOnline() const
-{
-    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
 float SwerveWheel::getAngularVelocity() const

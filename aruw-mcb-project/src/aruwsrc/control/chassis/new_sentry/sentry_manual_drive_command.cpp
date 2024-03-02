@@ -20,7 +20,6 @@
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::sentry;
@@ -29,12 +28,12 @@ namespace aruwsrc
 {
 namespace control::sentry
 {
-// class HolonomicChassisSubsystem;
+// class ChassisSubsystem;
 
 SentryManualDriveCommand::SentryManualDriveCommand(
     tap::Drivers* drivers,
     SentryControlOperatorInterface* operatorInterface,
-    chassis::HolonomicChassisSubsystem* chassis)
+    chassis::ChassisSubsystem* chassis)
     : drivers(drivers),
       operatorInterface(operatorInterface),
       chassis(chassis)

@@ -52,7 +52,9 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -145,7 +147,53 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
+tap::motor::DjiMotor leftFrontDriveMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG.inverted,
+    "Left Front Drive Motor");
+tap::motor::DjiMotor rightFrontDriveMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG.inverted,
+    "Right Front Drive Motor");
+tap::motor::DjiMotor leftBackDriveMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG.inverted,
+    "Left Back Drive Motor");
+tap::motor::DjiMotor rightBackDriveMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG.inverted,
+    "Right Back Drive Motor");
+
+aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
+    leftFrontDriveMotor,
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG,
+    -1);
+aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
+    rightFrontDriveMotor,
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG,
+    1);
+aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
+    leftBackDriveMotor,
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG,
+    1);
+aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
+    rightBackDriveMotor,
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG,
+    -1);
+std::vector<aruwsrc::chassis::Wheel *> wheels = {
+    &leftFrontMecanumWheel,
+    &rightFrontMecanumWheel,
+    &leftBackMecanumWheel,
+    &rightBackMecanumWheel};
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
@@ -561,7 +609,7 @@ void registerStandardSubsystems(Drivers *drivers)
 void initializeSubsystems()
 {
     sentryRequestSubsystem.initialize();
-    turret.initialize();
+    // turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();

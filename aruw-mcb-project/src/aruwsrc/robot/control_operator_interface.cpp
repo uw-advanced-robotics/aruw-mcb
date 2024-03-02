@@ -23,7 +23,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 using namespace tap::algorithms;
@@ -73,6 +73,8 @@ static inline void applyAccelerationToRamp(
     }
 }
 
+// range of values for getChassisXInput(), getChassisYInput(), getChassisRInput() is 0-500
+
 float ControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
@@ -89,7 +91,7 @@ float ControlOperatorInterface::getChassisXInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
@@ -125,7 +127,7 @@ float ControlOperatorInterface::getChassisYInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.power);
 
@@ -161,12 +163,13 @@ float ControlOperatorInterface::getChassisRInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        drivers->refSerial.getRobotData().chassis.power);  // rpm
 
-    float finalR = maxChassisSpeed *
-                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+    float finalR =
+        maxChassisSpeed *
+        limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);  // rpm
 
     chassisRInputRamp.setTarget(finalR);
 

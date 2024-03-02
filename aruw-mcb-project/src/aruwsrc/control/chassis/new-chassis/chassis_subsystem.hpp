@@ -23,6 +23,7 @@
 #include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
@@ -30,7 +31,7 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
-#include "../constants/chassis_constants.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
@@ -60,7 +61,7 @@ class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 public:
     ChassisSubsystem(
         tap::Drivers* drivers,
-        std::vector<Wheel>* wheels,
+        std::vector<Wheel*>& wheels,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
 
     /**
@@ -115,6 +116,18 @@ public:
 
     void refreshSafeDisconnect() { setZeroRPM(); }
 
+    bool allMotorsOnline() const override;
+
+    inline int getNumChassisMotors() const override
+    {
+        int motorCount = 0;
+        for (int i = 0; i < getNumChassisWheels(); i++)
+        {
+            motorCount += wheels[i]->getNumMotors();
+        }
+        return motorCount;
+    }
+
     /**
      * Zeros out the desired motor RPMs for all motors, but importantly doesn't zero out any other
      * chassis state information like desired rotation.
@@ -123,7 +136,7 @@ public:
     {
         for (int i = 0; i < getNumChassisWheels(); i++)
         {
-            wheels[i].executeWheelVelocity(0.0, 0.0);
+            wheels[i]->setZeroRPM();
         }
     }
 
@@ -156,7 +169,7 @@ public:
      *      where vz is rotational velocity. This is the velocity calculated from the chassis's
      *      encoders. Units: m/s
      */
-    virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
     /**
      * @return The desired chassis velocity in chassis relative frame, as a vector <vx, vy, vz>,
@@ -177,7 +190,9 @@ public:
 
     float desiredRotation = 0;
 
-    std::vector<Wheel>& wheels;
+    modm::Matrix<float, 3, 1> lastDesiredVelocity;
+
+    const std::vector<Wheel*>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
@@ -185,12 +200,12 @@ public:
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
 
-    virtual void limitChassisPower() = 0;
+    void limitChassisPower();
 
 private:
     double prevTime = 0.0;
-    modm::Pair<float, float> desiredWheelVel;
-    float tempMax = 0;
+    float maxDistFromCenterToWheel;
+
 };  // class ChassisSubsystem
 
 }  // namespace chassis

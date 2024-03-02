@@ -32,7 +32,6 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "wheel.hpp"
-using Motor = tap::motor::DjiMotor;
 using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 
@@ -44,6 +43,8 @@ struct SwerveAzimuthConfig
 {
     int azimuthZeroOffset;
     float azimuthMotorGearing;
+    SmoothPidConfig& azimuthPidConfig;
+    bool inverted;
 };
 
 class SwerveWheel : public Wheel
@@ -52,7 +53,7 @@ public:
     SwerveWheel(
         Motor& driveMotor,
         Motor& azimuthMotor,
-        WheelConfig& config,
+        const WheelConfig& config,
         SwerveAzimuthConfig& azimuthConfig,
         SmoothPid drivePid,
         SmoothPid azimuthPid);
@@ -63,23 +64,21 @@ public:
     bool allMotorsOnline() const override;
     float getDriveVelocity() const override;
     float getDriveRPM() const override;
+    int getNumMotors() const override;
     float getAngularVelocity() const;
     float getAngle() const;
 
 private:
-    SwerveAzimuthConfig& azimuthConfig;
     Motor& driveMotor;
     Motor& azimuthMotor;
-
+    SwerveAzimuthConfig& azimuthConfig;
     SmoothPid drivePid;
     SmoothPid azimuthPid;
 
-    const float rotationVectorX, rotationVectorY;
+    float rotationVectorX, rotationVectorY, moveVectorX, moveVectorY;
     float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
-        newRotationSetpointRadians, moveVectorX,
-
-        moveVectorY;
+        newRotationSetpointRadians;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)
