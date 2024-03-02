@@ -82,7 +82,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "Hopper"; }
+    const char *getName() const override { return "Hopper"; }
 
 private:
     tap::motor::Servo hopper;

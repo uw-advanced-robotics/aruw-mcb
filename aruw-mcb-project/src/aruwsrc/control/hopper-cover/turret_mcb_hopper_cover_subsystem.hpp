@@ -66,7 +66,7 @@ public:
 
     void onHardwareTestComplete() override {}
 
-    const char *getName() override { return "turret MCB hopper"; }
+    const char *getName() const override { return "turret MCB hopper"; }
 
     bool getIsHopperOpen() const { return hopperOpen; }
 
