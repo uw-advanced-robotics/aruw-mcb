@@ -102,4 +102,14 @@
         ]
     },
     "git.autoRepositoryDetection": false,
+    "auto-snippets.snippets": [
+        {
+            "pattern": "**/*_command.hpp",
+            "snippet": "declare-command"
+        },
+        {
+            "pattern": "**/*_subsystem.hpp",
+            "snippet": "declare-subsystem"
+        },
+    ]
 }

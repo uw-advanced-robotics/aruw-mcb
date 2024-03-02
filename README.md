@@ -86,6 +86,9 @@ scons build
 scons run-tests
 ```
 
+### VSCode extensions that we use
+Go to the VSCode extension marketplace and install "Auto Snippets" by andreasxp. This will help with creating new files in our codebase.
+
 ### Returning to the development environment
 
 **You will need to run `pipenv shell` from this directory _every time_ you open a new terminal,
