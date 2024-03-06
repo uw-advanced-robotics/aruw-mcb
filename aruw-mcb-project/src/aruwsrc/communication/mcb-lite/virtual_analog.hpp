@@ -49,4 +49,4 @@ private:
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif // VIRTUAL_ANALOG_HPP
+#endif  // VIRTUAL_ANALOG_HPP

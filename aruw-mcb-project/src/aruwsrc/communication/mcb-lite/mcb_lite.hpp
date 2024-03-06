@@ -85,5 +85,4 @@ private:
 };
 }  // namespace aruwsrc::virtualMCB
 
-#endif // MCB_LITE_HPP_
-
+#endif  // MCB_LITE_HPP_
