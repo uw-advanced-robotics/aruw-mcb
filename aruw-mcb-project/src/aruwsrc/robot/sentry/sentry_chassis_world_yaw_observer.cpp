@@ -47,14 +47,12 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     {
         return false;
     }
-
     float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
     float turretMinorMajorYawRadians = turretRight.yawMotor.getAngleFromCenter();
     float turretMajorChassisYawRadians = turretMajorMotor.getAngleFromCenter();
 
     *output = modm::Angle::normalize(
         turretWorldYawRadians - turretMinorMajorYawRadians - turretMajorChassisYawRadians + offset);
-    lastGottenYaw = *output;
     return true;
 }
 
