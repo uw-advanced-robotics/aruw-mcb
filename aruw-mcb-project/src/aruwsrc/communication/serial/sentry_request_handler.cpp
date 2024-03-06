@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "sentry_request_message_types.hpp"
+#include "sentry_strategy_message_types.hpp"
 
 namespace aruwsrc::communication::serial
 {
@@ -32,38 +32,70 @@ void SentryRequestHandler::operator()(
     const tap::communication::serial::DJISerial::ReceivedSerialMessage &message)
 {
     // The message type we sent came directly after the interactive header
+    // SentryRequestMessageType type = signalReceiver.parse(message);
     SentryRequestMessageType type = static_cast<SentryRequestMessageType>(
         message.data[sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader)]);
 
     switch (type)
     {
-        case SentryRequestMessageType::SELECT_NEW_ROBOT:
-            if (selectNewRobotMessageHandler != nullptr)
+        case SentryRequestMessageType::NONE:
+            if (noStrategyHandler != nullptr)
             {
-                selectNewRobotMessageHandler();
+                noStrategyHandler();
             }
             break;
-        case SentryRequestMessageType::TARGET_NEW_QUADRANT:
-            if (targetNewQuadrantMessageHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_FRIENDLY_BASE:
+            if (goToFriendlyBaseHandler != nullptr)
             {
-                targetNewQuadrantMessageHandler();
+                goToFriendlyBaseHandler();
             }
             break;
-        case SentryRequestMessageType::TOGGLE_DRIVE_MOVEMENT:
-            if (toggleDriveMovementMessageHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_ENEMY_BASE:
+            if (goToEnemyBaseHandler != nullptr)
             {
-                toggleDriveMovementMessageHandler();
+                goToEnemyBaseHandler();
             }
             break;
-        case SentryRequestMessageType::PAUSE_PROJECTILE_LAUNCHING:
-            if (pauseProjectileLaunchingHandler != nullptr)
+        case SentryRequestMessageType::GO_TO_FRIENDLY_SUPPLIER_ZONE:
+            if (goToSupplierZoneHandler != nullptr)
             {
-                pauseProjectileLaunchingHandler();
+                goToSupplierZoneHandler();
+            }
+            break;
+        case SentryRequestMessageType::GO_TO_ENEMY_SUPPLIER_ZONE:
+            if (goToEnemySupplierZoneHandler != nullptr)
+            {
+                goToEnemySupplierZoneHandler();
+            }
+            break;
+        case SentryRequestMessageType::GO_TO_CENTER_POINT:
+            if (goToCenterPointHandler != nullptr)
+            {
+                goToCenterPointHandler();
+            }
+            break;
+        case SentryRequestMessageType::HOLD_FIRE:
+            if (holdFireHandler != nullptr)
+            {
+                holdFireHandler();
+            }
+            break;
+        case SentryRequestMessageType::TOGGLE_MOVEMENT:
+            if (toggleMovementHandler != nullptr)
+            {
+                toggleMovementHandler();
+            }
+            break;
+        case SentryRequestMessageType::TOGGLE_BEYBLADE:
+            if (toggleBeybladeHandler != nullptr)
+            {
+                toggleBeybladeHandler();
             }
             break;
         default:
-            RAISE_ERROR(drivers, "invalid message sentry request message type");
+            RAISE_ERROR(drivers, "invalid sentry request message type");
             break;
     }
 }
+
 }  // namespace aruwsrc::communication::serial

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -26,8 +26,6 @@
 #include "tap/motor/m3508_constants.hpp"
 
 #include "aruwsrc/algorithms/wheel.hpp"
-#include "constants/chassis_constants.hpp"
-#include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 #include "swerve_module_config.hpp"
@@ -44,11 +42,6 @@ using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
-class Drivers;
-}
-
-namespace aruwsrc
-{
 namespace chassis
 {
 /**
@@ -59,10 +52,7 @@ namespace chassis
 class SwerveModule
 {
 public:
-    SwerveModule(
-        Motor& driveMotor,
-        Motor& azimuthMotor,
-        SwerveModuleConfig& swerveModuleConfig = DEFAULT_SWERVE_CONFIG);
+    SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& swerveModuleConfig);
 
     /**
      * uses the internally stored values from calculate() to update
@@ -167,7 +157,7 @@ private:
 
     const SwerveModuleConfig config;
 
-    modm::Pid<float> drivePid;
+    tap::algorithms::SmoothPid drivePid;
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;

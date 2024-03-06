@@ -38,6 +38,8 @@ public:
 
     void windUp();
 
+    void refreshSafeDisconnect() override { stop(); }
+
     void stop();
 
 private:

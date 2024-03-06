@@ -81,6 +81,12 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override
+    {
+        yawMotor.setMotorOutput(0);
+        pitchMotor.setMotorOutput(0);
+    }
+
     const char* getName() override { return "Turret"; }
 
     void onHardwareTestStart() override;

@@ -33,6 +33,8 @@ namespace aruwsrc::drone
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart
+#elif defined(TARGET_TESTBED)
+namespace aruwsrc::testbed
 #endif
 {
 /**

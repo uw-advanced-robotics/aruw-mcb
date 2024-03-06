@@ -77,6 +77,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override { agitatorMotor.setDesiredOutput(0); }
+
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;

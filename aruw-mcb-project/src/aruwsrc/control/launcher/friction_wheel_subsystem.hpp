@@ -92,6 +92,12 @@ public:
      */
     void refresh() override;
 
+    void refreshSafeDisconnect() override
+    {
+        leftWheel.setDesiredOutput(0);
+        rightWheel.setDesiredOutput(0);
+    }
+
     void runHardwareTests() override;
 
     void onHardwareTestStart() override;

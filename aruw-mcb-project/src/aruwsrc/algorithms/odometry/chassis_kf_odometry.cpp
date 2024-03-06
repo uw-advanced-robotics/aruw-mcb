@@ -26,16 +26,23 @@ namespace aruwsrc::algorithms::odometry
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-    tap::communication::sensors::imu::ImuInterface& imu)
+    tap::communication::sensors::imu::ImuInterface& imu,
+    const modm::Vector2f initPos)
     : chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
+      initPos(initPos),
       kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    float initialX[int(OdomState::NUM_STATES)] = {};
+    reset();
+}
+
+void ChassisKFOdometry::reset()
+{
+    float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
     kf.init(initialX);
 }
 

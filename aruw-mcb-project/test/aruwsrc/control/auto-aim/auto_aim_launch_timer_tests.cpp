@@ -222,9 +222,9 @@ TEST_P(
 
         .timing =
             {
-                .duration{params.aimData.timing.duration},
-                .pulseInterval{params.aimData.timing.pulseInterval},
                 .offset{params.aimData.timing.offset},
+                .pulseInterval{params.aimData.timing.pulseInterval},
+                .duration{params.aimData.timing.duration},
                 .updated{params.aimData.timing.updated},
             },
     };

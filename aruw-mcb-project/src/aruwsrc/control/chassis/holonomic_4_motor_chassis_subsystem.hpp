@@ -52,10 +52,10 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
+    virtual inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
+    virtual inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
+    virtual inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
+    virtual inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
@@ -64,8 +64,6 @@ public:
     void setDesiredOutput(float x, float y, float r) override;
 
     void limitChassisPower() override;
-
-    void refresh() override;
 
     inline void setZeroRPM() override { desiredWheelRPM = desiredWheelRPM.zeroMatrix(); }
 
@@ -79,6 +77,16 @@ public:
         LB = 2,
         RB = 3,
     };
+
+    void refresh() override;
+
+    void refreshSafeDisconnect() override
+    {
+        for (int i = 0; i < getNumChassisMotors(); i++)
+        {
+            motors[i]->setDesiredOutput(0);
+        }
+    }
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 

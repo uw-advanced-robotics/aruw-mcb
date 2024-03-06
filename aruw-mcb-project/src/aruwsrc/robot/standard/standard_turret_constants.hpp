@@ -77,7 +77,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 1363,
+    .startEncoderValue = 375,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -209,7 +209,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .maxICumulative = 0.0f,
     .maxOutput = 32'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 30.0f,
+    .tRDerivativeKalman = 70.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,

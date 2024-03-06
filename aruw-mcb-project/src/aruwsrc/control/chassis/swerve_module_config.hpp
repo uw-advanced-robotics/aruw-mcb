@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -34,10 +34,12 @@ namespace aruwsrc::chassis
 {
 struct SwerveModuleConfig
 {
-    const float WHEEL_DIAMETER_M = 0.076f;
+    // @todo not really generic over future swerve designs?
+    const float WHEEL_DIAMETER_M = 0.1016f;
     const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
-    // in encoder clicks
+    // in encoder clicks, defines "forward" direction of the module
+    // @todo why does this default?
     const int64_t azimuthZeroOffset = 0;
 
     tap::motor::MotorId driveMotorId = tap::motor::MOTOR1;
@@ -47,22 +49,34 @@ struct SwerveModuleConfig
     float positionWithinChassisX = 0.2f;
     float positionWithinChassisY = 0.2f;
 
-    // Whether any motor is inverted
-    const bool driveMotorInverted = false, azimuthMotorInverted = false;
-    // Gear ratios for motors
-    const float driveMotorGearing = 23.0f / 12.0f, azimuthMotorGearing = 1;
+    // @todo defaults and the number of fields makes it hard to make this auto-generated via
+    // constructor; resolve in another MR
+    float distanceFromChassisCenter = 0.2f / M_SQRT2;
 
-    const float drivePidKp = 10.0f;
-    const float drivePidKi = 0.0f;
-    const float drivePidKd = 0.0f;
-    const float drivePidMaxIntegralErrorSum = 0.0f;
-    const float drivePidMaxOutput = 16'384.0f;
-    const float drivePidFeedForwardConstant = 0.0f;
+    // Whether any motor is inverted
+    const bool driveMotorInverted;
+    const bool azimuthMotorInverted =
+        true;  // @todo doesn't quite make sense to put here bc the motors are instantiated before
+               // the swerve modules (see main sentry control)
+    // Gear ratios for motors
+    const float driveMotorGearing = 23.0f / 12.0f;
+    const float azimuthMotorGearing = 1;
+
+    tap::algorithms::SmoothPidConfig drivePidConfig = {
+        .kp = 7.0f,
+        .ki = 0.0f,
+        .kd = -80.0f,
+        .maxICumulative = 0.0f,
+        .maxOutput = 16'000.0f,
+        .tRDerivativeKalman = 100.0f,
+        .tRProportionalKalman = 100.0f,
+        .errDeadzone = 0.0f,
+        .errorDerivativeFloor = 0.0f};
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 8000.0f,
+        .kp = 15000.0f,  // 10000.0f
         .ki = 0.0f,
-        .kd = 1.0f,
+        .kd = 0.0f,  // 12.0f
         .maxICumulative = 0.0f,
         .maxOutput = 16'000.0f,
         .errDeadzone = 0.0f,
@@ -73,9 +87,9 @@ struct SwerveModuleConfig
         {0.0f, 0.2f},
         {M_PI_2, 0.75f},
     };
-};
 
-static SwerveModuleConfig DEFAULT_SWERVE_CONFIG;
+    const float gearboxRatio = (1.0f / 19.0f);
+};
 
 }  // namespace aruwsrc::chassis
 #endif  // SWERVE_MODULE_CONFIG_HPP_

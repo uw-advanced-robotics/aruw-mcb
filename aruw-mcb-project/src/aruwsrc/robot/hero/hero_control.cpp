@@ -163,7 +163,7 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis);
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -179,12 +179,16 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::ToggleDriveMovementCommand sentryToggleDriveMovementCommand(
+
+// @todo: keybindings
+aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::TargetNewQuadrantCommand sentryTargetNewQuadrantCommand(
+aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
     sentryRequestSubsystem);
-aruwsrc::communication::serial::
-    PauseProjectileLaunchingCommand sentryPauseProjectileLaunchingCommand(sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
+    sentryRequestSubsystem);
+aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
+    sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -408,19 +412,6 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// Keyboard/Mouse related mappings
-PressCommandMapping cPressed(
-    drivers(),
-    {&sentryToggleDriveMovementCommand},
-    RemoteMapState({Remote::Key::C}));
-PressCommandMapping gPressedCtrlNotPressed(
-    drivers(),
-    {&sentryTargetNewQuadrantCommand},
-    RemoteMapState({Remote::Key::G}, {Remote::Key::CTRL}));
-PressCommandMapping gCtrlPressed(
-    drivers(),
-    {&sentryPauseProjectileLaunchingCommand},
-    RemoteMapState({Remote::Key::G, Remote::Key::CTRL}));
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
@@ -547,9 +538,9 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&gCtrlPressed);
+    // drivers->commandMapper.addMap(&cPressed);
+    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
+    // drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control

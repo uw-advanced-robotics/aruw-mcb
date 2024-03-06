@@ -80,13 +80,17 @@ private:
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+
+protected:
+    NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
+
+private:
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
 
 protected:
     tap::Drivers drivers;
-    NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
-    NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
+    NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
     AutoAimFireRateReselectionManager fireRateManager;
     VisionCoprocessor::TurretAimData aimData = {};
 };

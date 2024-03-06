@@ -38,6 +38,9 @@ class ClientDisplaySubsystem : public tap::control::Subsystem
 public:
     ClientDisplaySubsystem(tap::Drivers* drivers);
     virtual ~ClientDisplaySubsystem() {}
+
+    void refreshSafeDisconnect() override {}
+
     const char* getName() override { return "client display"; }
 };
 }  // namespace aruwsrc::control::client_display
