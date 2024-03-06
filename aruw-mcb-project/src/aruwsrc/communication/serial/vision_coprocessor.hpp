@@ -32,6 +32,8 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
+#include "sentry_strategy_message_types.hpp"
+
 namespace aruwsrc::control::turret
 {
 class TurretOrientationInterface;
@@ -268,6 +270,16 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    bool* writeToMotionStrategy(aruwsrc::communication::serial::SentryVisionMessageType type)
+    {
+        return &sentryMotionStrategy[static_cast<uint8_t>(type)];
+    }
+
+    bool readFromMotionStrategy(aruwsrc::communication::serial::SentryVisionMessageType type) const
+    {
+        return sentryMotionStrategy[static_cast<uint8_t>(type)];
+    }
+
 private:
     enum TxMessageTypes
     {
@@ -349,6 +361,9 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
@@ -360,6 +375,7 @@ public:
     void sendRobotTypeData();
     void sendHealthMessage();
     void sendTimeSyncMessage();
+    void sendSentryMotionStrategy();
 };
 }  // namespace serial
 }  // namespace aruwsrc
