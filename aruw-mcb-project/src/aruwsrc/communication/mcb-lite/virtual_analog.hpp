@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_ANALOG_HPP
-#define VIRTUAL_ANALOG_HPP
+#ifndef VIRTUAL_ANALOG_HPP_
+#define VIRTUAL_ANALOG_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -49,4 +49,4 @@ private:
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif // VIRTUAL_ANALOG_HPP

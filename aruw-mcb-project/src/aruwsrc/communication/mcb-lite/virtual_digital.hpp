@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DIGITAL_HPP
-#define VIRTUAL_DIGITAL_HPP
+#ifndef VIRTUAL_DIGITAL_HPP_
+#define VIRTUAL_DIGITAL_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -83,4 +83,4 @@ private:
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif  // VIRTUAL_DIGITAL_HPP
+#endif  // VIRTUAL_DIGITAL_HPP_

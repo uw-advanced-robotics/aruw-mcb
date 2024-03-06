@@ -44,6 +44,7 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
 
 void MCBLite::initialize()
 {
+    initialized = true;
     switch (this->port)
     {
         case Uart::UartPort::Uart1:

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SERIAL_MCB_LITE_HPP_
-#define SERIAL_MCB_LITE_HPP_
+#ifndef MCB_LITE_HPP_
+#define MCB_LITE_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -85,4 +85,5 @@ private:
 };
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif // MCB_LITE_HPP_
+

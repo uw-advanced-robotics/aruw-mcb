@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_LED_HPP_
-#define VIRTUAL_LED_HPP_
+#ifndef VIRTUAL_LEDS_HPP_
+#define VIRTUAL_LEDS_HPP_
 
 #include "tap/communication/gpio/leds.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -59,4 +59,4 @@ private:
 };
 
 }  // namespace aruwsrc::virtualMCB
-#endif  // VIRTUAL_LED_HPP_
+#endif  // VIRTUAL_LEDS_HPP_
