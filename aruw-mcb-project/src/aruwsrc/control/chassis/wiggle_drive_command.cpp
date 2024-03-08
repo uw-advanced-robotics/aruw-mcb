@@ -40,11 +40,13 @@ WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface& operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface,
+    float turretPlateOffset)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       operatorInterface(operatorInterface),
+      turretPlateOffset(turretPlateOffset),
       rotationSpeedRamp(0)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -65,10 +67,10 @@ void WiggleDriveCommand::execute()
     // We only wiggle when the turret is online.
     if (yawMotor->isOnline())
     {
-        const float turretYawFromCenter = modm::Angle::normalize(yawMotor->getAngleFromCenter() + OFFSET_FROM_TURRET);
+        const float turretYawFromCenter = yawMotor->getAngleFromCenter();
         const WiggleParams& wiggleParams = getWiggleParams();
 
-        if (turretYawFromCenter > wiggleParams.turnaroundAngle)
+        if (turretYawFromCenter > wiggleParams.turnaroundAngle + turretPlateOffset)
         {
             if (rotationSign < 0)
             {
@@ -76,7 +78,7 @@ void WiggleDriveCommand::execute()
                 rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
             }
         }
-        else if (turretYawFromCenter < -wiggleParams.turnaroundAngle)
+        else if (turretYawFromCenter < -wiggleParams.turnaroundAngle + turretPlateOffset)
         {
             if (rotationSign > 0)
             {

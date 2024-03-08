@@ -46,7 +46,8 @@ public:
         tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::ControlOperatorInterface& operatorInterface);
+        aruwsrc::control::ControlOperatorInterface& operatorInterface, 
+        float turretPlateOffset = 0);
 
     void initialize() override;
 
@@ -92,13 +93,12 @@ private:
 
     static constexpr float WIGGLE_ROTATE_KP = -300.0f;
     static constexpr float TRANSLATIONAL_SPEED_FRACTION_WHILE_WIGGLING = 0.5f;
-    static constexpr float OFFSET_FROM_TURRET = M_PI_4;
-
 
     tap::Drivers* drivers;
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
+    float turretPlateOffset;
 
     tap::algorithms::Ramp rotationSpeedRamp;
 
