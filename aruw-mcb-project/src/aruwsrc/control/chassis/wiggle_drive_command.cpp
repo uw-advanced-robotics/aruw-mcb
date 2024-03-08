@@ -65,7 +65,7 @@ void WiggleDriveCommand::execute()
     // We only wiggle when the turret is online.
     if (yawMotor->isOnline())
     {
-        const float turretYawFromCenter = yawMotor->getAngleFromCenter();
+        const float turretYawFromCenter = modm::Angle::normalize(yawMotor->getAngleFromCenter() + OFFSET_FROM_TURRET);
         const WiggleParams& wiggleParams = getWiggleParams();
 
         if (turretYawFromCenter > wiggleParams.turnaroundAngle)

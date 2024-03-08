@@ -418,7 +418,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&wiggleCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
