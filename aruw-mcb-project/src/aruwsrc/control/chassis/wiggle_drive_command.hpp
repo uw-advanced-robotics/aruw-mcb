@@ -81,7 +81,7 @@ private:
     /**
      * Use these wiggle parameters if power consumption limit is within (45, 60] W
      */
-    static constexpr WiggleParams WIGGLE_PARAMS_60W_CUTOFF = {3500, modm::toRadian(15), 100};
+    static constexpr WiggleParams WIGGLE_PARAMS_60W_CUTOFF = {3500, modm::toRadian(20), 100};
     /**
      * Use these wiggle parameters if power consumption limit is within (60, 80] W
      */
