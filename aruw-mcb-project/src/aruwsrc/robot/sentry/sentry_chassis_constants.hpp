@@ -30,6 +30,9 @@ namespace aruwsrc::sentry::chassis
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
+// initial position of the robot in the field (meters)
+static constexpr float INITIAL_CHASSIS_POSITION_X = 3.074f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
 // @todo generate this using the position offsets in the swerve module configs
 /**
  * Calculated by solving for the pseudo-inverse of the following kinematics matrix
