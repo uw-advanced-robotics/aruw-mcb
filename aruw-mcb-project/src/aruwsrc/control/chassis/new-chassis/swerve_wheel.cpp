@@ -110,22 +110,12 @@ void SwerveWheel::limitPower(float powerLimitFrac)
 
 void SwerveWheel::refresh()
 {
-    if (drivePowerLimitFrac != 0 && azimuthPowerLimitFrac != 0)
-    {
-        driveMotor.setDesiredOutput(
-            drivePowerLimitFrac *
-            drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
-        azimuthMotor.setDesiredOutput(
-            azimuthPowerLimitFrac *
-            azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
-    }
-    else
-    {
-        driveMotor.setDesiredOutput(
-            drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
-        azimuthMotor.setDesiredOutput(
-            azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
-    }
+    driveMotor.setDesiredOutput(
+        drivePowerLimitFrac *
+        drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+    azimuthMotor.setDesiredOutput(
+        azimuthPowerLimitFrac *
+        azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
 }
 
 void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }  // sluggish start and stop
