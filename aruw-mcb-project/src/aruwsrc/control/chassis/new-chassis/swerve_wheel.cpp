@@ -108,7 +108,8 @@ void SwerveWheel::limitPower(float powerLimitFrac)
         (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
 }
 
-void SwerveWheel::refresh()
+void SwerveWheel::refresh()  // currently default is limiting swerve outputs by the LUT, not sure if
+                             // this is wanted. Behavior seemed the same?
 {
     driveMotor.setDesiredOutput(
         drivePowerLimitFrac *
