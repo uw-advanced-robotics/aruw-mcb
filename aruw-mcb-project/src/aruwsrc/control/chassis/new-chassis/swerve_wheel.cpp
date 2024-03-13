@@ -101,45 +101,21 @@ void SwerveWheel::initialize()
 
 void SwerveWheel::limitPower(float powerLimitFrac)
 {
-    powerLimit= powerLimitFrac;
     drivePowerLimitFrac = powerLimitFrac *
         angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle());
     azimuthPowerLimitFrac = powerLimitFrac *
         (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    
-    // driveMotor.setDesiredOutput(
-    //     driveMotor.getOutputDesired() * powerLimitFrac *
-    //     angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    // azimuthMotor.setDesiredOutput(
-    //     azimuthMotor.getOutputDesired() * powerLimitFrac *
-    //     (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
-
 }
 
 void SwerveWheel::refresh()
 {
     if (drivePowerLimitFrac != 0 && azimuthPowerLimitFrac != 0) {
-        // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-        // driveMotor.setDesiredOutput(drivePowerLimitFrac * drivePid.getOutput());
-        // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-        // azimuthMotor.setDesiredOutput(azimuthPowerLimitFrac * azimuthPid.getOutput());
-        driveMotor.setDesiredOutput(drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
-        azimuthMotor.setDesiredOutput(azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+        driveMotor.setDesiredOutput(drivePowerLimitFrac * drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+        azimuthMotor.setDesiredOutput(azimuthPowerLimitFrac * azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
     } else {
-        // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-        // driveMotor.setDesiredOutput(drivePid.getOutput());
-        // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-        // azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
         driveMotor.setDesiredOutput(drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
         azimuthMotor.setDesiredOutput(azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
     }
-    
-    
-    // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    // driveMotor.setDesiredOutput(drivePid.getOutput());
-
-    // azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    // azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 
 }
 

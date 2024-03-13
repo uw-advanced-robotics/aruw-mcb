@@ -84,7 +84,6 @@ private:
         newRotationSetpointRadians;
     float drivePowerLimitFrac;
     float azimuthPowerLimitFrac;
-    float powerLimit;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)
