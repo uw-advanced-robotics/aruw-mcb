@@ -57,14 +57,18 @@ void MecanumWheel::refresh()
 {
     if (config.isPowered)
     {
-        if (motorPowerLimitFrac != 0) {
-            driveMotor.setDesiredOutput(motorPowerLimitFrac * velocityPid.runControllerDerivateError(
-            driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
-            2.0f));
-        } else {
+        if (motorPowerLimitFrac != 0)
+        {
+            driveMotor.setDesiredOutput(
+                motorPowerLimitFrac * velocityPid.runControllerDerivateError(
+                                          driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
+                                          2.0f));
+        }
+        else
+        {
             driveMotor.setDesiredOutput(velocityPid.runControllerDerivateError(
-            driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
-            2.0f));
+                driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
+                2.0f));
         }
     }
 }
@@ -73,7 +77,7 @@ void MecanumWheel::limitPower(float powerLimitFrac)
 {
     if (config.isPowered)
     {
-    motorPowerLimitFrac = powerLimitFrac;
+        motorPowerLimitFrac = powerLimitFrac;
     }
 }
 

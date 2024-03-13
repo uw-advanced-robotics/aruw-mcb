@@ -101,25 +101,34 @@ void SwerveWheel::initialize()
 
 void SwerveWheel::limitPower(float powerLimitFrac)
 {
-    drivePowerLimitFrac = powerLimitFrac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle());
-    azimuthPowerLimitFrac = powerLimitFrac *
+    drivePowerLimitFrac =
+        powerLimitFrac * angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle());
+    azimuthPowerLimitFrac =
+        powerLimitFrac *
         (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
 }
 
 void SwerveWheel::refresh()
 {
-    if (drivePowerLimitFrac != 0 && azimuthPowerLimitFrac != 0) {
-        driveMotor.setDesiredOutput(drivePowerLimitFrac * drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
-        azimuthMotor.setDesiredOutput(azimuthPowerLimitFrac * azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
-    } else {
-        driveMotor.setDesiredOutput(drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
-        azimuthMotor.setDesiredOutput(azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+    if (drivePowerLimitFrac != 0 && azimuthPowerLimitFrac != 0)
+    {
+        driveMotor.setDesiredOutput(
+            drivePowerLimitFrac *
+            drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+        azimuthMotor.setDesiredOutput(
+            azimuthPowerLimitFrac *
+            azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
     }
-
+    else
+    {
+        driveMotor.setDesiredOutput(
+            drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+        azimuthMotor.setDesiredOutput(
+            azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+    }
 }
 
-void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; } //sluggish start and stop
+void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }  // sluggish start and stop
 
 bool SwerveWheel::allMotorsOnline() const
 {
