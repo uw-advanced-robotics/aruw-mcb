@@ -25,7 +25,6 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -41,10 +40,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::HolonomicChassisSubsystem &chassis,
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-    aruwsrc::sentry::SentryKFOdometry2DSubsystem
-        &odometryInterface)  // @todo tried to create separate command for resetting kf; for some
-                             // reason it never got fucking scheduled; so we're resorting to this
-                             // instead
+    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
