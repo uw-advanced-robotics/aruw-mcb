@@ -119,8 +119,7 @@ static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.8f;
 
 namespace turretLeft
 {
-static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID turretID =
-    aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID::TURRET_ID_ZERO;
+static constexpr uint8_t turretID = 0;
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
@@ -179,8 +178,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 namespace turretRight
 {
-static constexpr aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID turretID =
-    aruwsrc::control::sentry::SentryTurretMinorSubsystem::TurretID::TURRET_ID_ONE;
+static constexpr uint8_t turretID = 1;
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 

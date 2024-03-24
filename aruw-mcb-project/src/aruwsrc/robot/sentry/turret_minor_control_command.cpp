@@ -64,12 +64,12 @@ void TurretMinorSentryControlCommand::execute()
     float yawInput;
     switch (turretMinorSubsystem.getTurretID())
     {
-        case SentryTurretMinorSubsystem::TurretID::TURRET_ID_ZERO:
+        case 0:
             pitchInput = controlOperatorInterface.getTurretMinor1PitchVelocity();
             yawInput = controlOperatorInterface.getTurretMinor1YawVelocity();
 
             break;
-        case SentryTurretMinorSubsystem::TurretID::TURRET_ID_ONE:
+        case 1:
             pitchInput = controlOperatorInterface.getTurretMinor2PitchVelocity();
             yawInput = controlOperatorInterface.getTurretMinor2YawVelocity();
             break;
