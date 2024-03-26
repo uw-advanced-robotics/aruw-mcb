@@ -48,20 +48,15 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
             break;
         case NO_HEATING:
             timesToReschedule = -1;
-            if (drivers->refSerial.getRobotData().turret.launchMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
+            if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 != 0)
             {
                 fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 / 10.0f;
             }
-            else if (
-                drivers->refSerial.getRobotData().turret.launchMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2)
+            else if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 != 0)
             {
                 fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 / 10.0f;
             }
-            else if (
-                drivers->refSerial.getRobotData().turret.launchMechanismID ==
-                tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM)
+            else if (drivers->refSerial.getRobotData().turret.heatCoolingRate42 != 0)
             {
                 fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
             }
