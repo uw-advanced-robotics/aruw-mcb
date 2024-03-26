@@ -23,6 +23,7 @@
 #include <float.h>
 
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc::control::agitator
 {
@@ -43,7 +44,7 @@ public:
         float rotationVelocity)
         : tap::control::setpoint::MoveIntegralCommand(
               integrableSetpointSubsystem,
-              {FLT_MAX, rotationVelocity, 0.1})
+              {FLT_MAX * tap::algorithms::getSign(rotationVelocity), rotationVelocity, 0.1})
     {
     }
 
