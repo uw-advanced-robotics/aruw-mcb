@@ -26,29 +26,34 @@ namespace aruwsrc::communication::sensors::as5600
 {
 
 class AS5600
-{ 
-
+{
 public:
-AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin);
+    struct Config
+    {
+        tap::gpio::Analog* analog;
+        tap::gpio::Analog::Pin pin;
+        int min_millivolt;
+        int max_millivolt;
+    };
 
-// Reads the sensor value and stores the value in measurement
-void read();
+    AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin);
 
-// Returns the position in degrees
-float getPosition();
+    // Reads the sensor value and stores the value in measurement
+    void read();
+
+    // Returns the position in degrees
+    float getPosition();
 
 private:
-tap::Drivers* drivers;
-tap::gpio::Analog::Pin pin;
+    tap::Drivers* drivers;
+    tap::gpio::Analog::Pin pin;
 
-float measurement;
-int16_t raw_measurement;
+    float measurement;
+    int16_t raw_measurement;
 
-static constexpr int MAX_READ_VOLTAGE = 4096;
-
-
+    static constexpr int MAX_READ_VOLTAGE = 4096;
 };
 
-}
+}  // namespace aruwsrc::communication::sensors::as5600
 
-#endif // AS5600_HPP_
+#endif  // AS5600_HPP_
