@@ -195,7 +195,7 @@ void VisionCoprocessor::sendOdometryData()
     tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
 
     // chassis odometry
-    odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
+    odometryData->timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = location.getX();
     odometryData->chassisOdometry.yPos = location.getY();
     odometryData->chassisOdometry.zPos = 0.0f;
@@ -216,10 +216,9 @@ void VisionCoprocessor::sendOdometryData()
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
         assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].timestamp =
-            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
         odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
         odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
+        odometryData->turretOdometry[i].yaw = 0.f;  // @note setting to 0 until transforms come in
     }
 
     odometryMessage.setCRC16();
