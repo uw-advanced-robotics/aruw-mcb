@@ -22,8 +22,8 @@
 
 #include <float.h>
 
-#include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
 
 namespace aruwsrc::control::agitator
 {
@@ -41,15 +41,42 @@ class ConstantVelocityAgitatorCommand : public tap::control::setpoint::MoveInteg
 public:
     ConstantVelocityAgitatorCommand(
         tap::control::setpoint::IntegrableSetpointSubsystem& integrableSetpointSubsystem,
-        float rotationVelocity)
-        : tap::control::setpoint::MoveIntegralCommand(
-              integrableSetpointSubsystem,
-              {FLT_MAX * tap::algorithms::getSign(rotationVelocity), rotationVelocity, 0.1})
+        const Config& config)
+        : tap::control::setpoint::MoveIntegralCommand(integrableSetpointSubsystem, config),
+          subsystem(integrableSetpointSubsystem)
     {
     }
 
     const char* getName() const override { return "Constant velocity agitator command"; }
 
+    void end(bool interrupted) override
+    {
+        if (useSingleShotMode || interrupted)
+        {
+            subsystem.setSetpoint(0);
+        }
+    };
+
+    bool isFinished() const
+    {
+        // The subsystem is jammed or offline or it is within the setpoint tolerance
+        return subsystem.isJammed() || !subsystem.isOnline() || (useSingleShotMode && targetIntegralReached());
+    };
+
+    void setConstantRotation(bool constantRotation)
+    {
+        useSingleShotMode = !constantRotation;
+        if(useSingleShotMode){
+            while(finalTargetIntegralSetpoint < subsystem.getCurrentValueIntegral()){
+                finalTargetIntegralSetpoint += config.targetIntegralChange;
+            }
+        }
+    }
+
+
+    tap::control::setpoint::IntegrableSetpointSubsystem& subsystem;
+
+    bool useSingleShotMode = true;
 };
 
 }  // namespace aruwsrc::control::agitator

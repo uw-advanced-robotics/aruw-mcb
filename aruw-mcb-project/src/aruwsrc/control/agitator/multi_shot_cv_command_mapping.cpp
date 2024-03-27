@@ -26,10 +26,12 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
-    governor::CvOnTargetGovernor &cvOnTargetGovernor)
+    governor::CvOnTargetGovernor &cvOnTargetGovernor,
+    ConstantVelocityAgitatorCommand &command)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
-      cvOnTargetGovernor(cvOnTargetGovernor)
+      cvOnTargetGovernor(cvOnTargetGovernor),
+      command(command)
 {
 }
 
@@ -45,6 +47,7 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
         case SINGLE:
             timesToReschedule = 1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            command.setConstantRotation(false);
             break;
         case NO_HEATING:
             timesToReschedule = -1;
@@ -60,14 +63,17 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
             {
                 fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
             }
+            command.setConstantRotation(false);
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
+            command.setConstantRotation(false);
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            command.setConstantRotation(true);
             break;
         default:
             assert(false);
@@ -82,5 +88,8 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     setMaxTimesToSchedule(timesToReschedule);
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
+    if(!held){
+        command.setConstantRotation(false);
+    }
 }
 }  // namespace aruwsrc::control::agitator

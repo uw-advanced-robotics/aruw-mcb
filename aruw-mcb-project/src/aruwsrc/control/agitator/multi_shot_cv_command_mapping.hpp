@@ -27,6 +27,7 @@
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 
 #include "manual_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 
 namespace aruwsrc
 {
@@ -79,7 +80,8 @@ public:
         tap::control::Command &launchCommand,
         const tap::control::RemoteMapState &rms,
         std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
-        governor::CvOnTargetGovernor &cvOnTargetGovernor);
+        governor::CvOnTargetGovernor &cvOnTargetGovernor,
+        ConstantVelocityAgitatorCommand &command);
 
     void setShooterState(LaunchMode mode)
     {
@@ -98,6 +100,7 @@ private:
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
     LaunchMode launchMode = SINGLE;
+    ConstantVelocityAgitatorCommand &command;
 };
 
 }  // namespace aruwsrc::control::agitator
