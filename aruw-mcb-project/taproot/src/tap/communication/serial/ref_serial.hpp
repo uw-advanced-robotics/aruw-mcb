@@ -146,24 +146,12 @@ public:
         RobotToRobotMessageHandler* handler);
 
     /**
-     * Used by `RefSerialTransmitter`. Attempts to acquire transmission semaphore.
-     *
-     * @note should be called only using RF_WAIT_UNTIL to block until acquiring semaphore.
+     * Used by `RefSerialTransmitter`. It is necessary to acquire this lock to coordinate sending
+     * ref serial data from different protothreads.
      */
-    mockable bool acquireTransmissionSemaphore()
-    {
-        if (transmissionDelayTimer.isExpired() || transmissionDelayTimer.isStopped())
-        {
-            return transmissionSemaphore.acquire();
-        }
-        return false;
-    }
+    mockable void acquireTransmissionSemaphore() { transmissionSemaphore.acquire(); }
 
-    mockable void releaseTransmissionSemaphore(uint32_t sentMsgLen)
-    {
-        transmissionSemaphore.release();
-        transmissionDelayTimer.restart(sentMsgLen * 1'000 / Tx::MAX_TRANSMIT_SPEED_BYTES_PER_S);
-    }
+    mockable void releaseTransmissionSemaphore() { transmissionSemaphore.release(); }
 
     /**
      * @return True if the robot operator is blinded, false otherwise. Also return false if the
@@ -187,7 +175,6 @@ private:
     arch::MilliTimeout refSerialOfflineTimeout;
     std::unordered_map<uint16_t, RobotToRobotMessageHandler*> msgIdToRobotToRobotHandlerMap;
     modm::pt::Semaphore transmissionSemaphore;
-    tap::arch::MilliTimeout transmissionDelayTimer;
 
     /**
      * Decodes ref serial message containing the game stage and time remaining

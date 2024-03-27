@@ -89,8 +89,6 @@ public:
         /// The type of game the robot is competing in.
         enum class GameType : uint8_t
         {
-            UNKNOWN = 0,                  ///< Unknown competition type (most likely disconnected
-                                          ///< from server).
             ROBOMASTER_COMPETITIONS = 1,  ///< Generic robomaster competition (none of the below
                                           ///< comps).
             ROBOMASTER_RMUTC = 2,         ///< RoboMaster technical challenge.
@@ -482,15 +480,13 @@ public:
         static constexpr uint32_t MAX_TRANSMIT_SPEED_BYTES_PER_S = 1280;
 
         /**
-         * Get the min wait time after which you can send more data to the client. Sending faster
+         * Get the max wait time after which you can send more data to the client. Sending faster
          * than this time may cause dropped packets.
          *
          * Pass a pointer to some graphic message. For example, if you have a `Graphic1Message`
          * called `msg`, you can call `getWaitTimeAfterGraphicSendMs(&msg)`.
          *
-         * @tparam T The type of the graphic message that was just been sent.
-         *
-         * @todo @deprecated
+         * @tparam T The type of the graphic message that jas just been sent.
          */
         template <typename T>
         static constexpr uint32_t getWaitTimeAfterGraphicSendMs(T *)
@@ -503,7 +499,8 @@ public:
                     std::is_same<T, Graphic2Message>::value ||
                     std::is_same<T, Graphic5Message>::value ||
                     std::is_same<T, Graphic7Message>::value ||
-                    std::is_same<T, GraphicCharacterMessage>::value,
+                    std::is_same<T, GraphicCharacterMessage>::value ||
+                    std::is_same<T, RobotToRobotMessage>::value,
                 "Invalid type, getWaitTimeAfterGraphicSendMs only takes in ref serial message "
                 "types.");
 
