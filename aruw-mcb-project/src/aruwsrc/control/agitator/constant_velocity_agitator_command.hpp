@@ -42,40 +42,32 @@ public:
     ConstantVelocityAgitatorCommand(
         tap::control::setpoint::IntegrableSetpointSubsystem& integrableSetpointSubsystem,
         const Config& config)
-        : tap::control::setpoint::MoveIntegralCommand(integrableSetpointSubsystem, config),
-          subsystem(integrableSetpointSubsystem)
+        : tap::control::setpoint::MoveIntegralCommand(integrableSetpointSubsystem, config)
     {
     }
 
     const char* getName() const override { return "Constant velocity agitator command"; }
 
-    void end(bool interrupted) override
-    {
-        if (useSingleShotMode || interrupted)
-        {
-            subsystem.setSetpoint(0);
-        }
-    };
-
     bool isFinished() const
     {
         // The subsystem is jammed or offline or it is within the setpoint tolerance
-        return subsystem.isJammed() || !subsystem.isOnline() || (useSingleShotMode && targetIntegralReached());
+        return integrableSetpointSubsystem.isJammed() || !integrableSetpointSubsystem.isOnline() ||
+               (useSingleShotMode && targetIntegralReached());
     };
 
-    void setConstantRotation(bool constantRotation)
+    void enableConstantRotation(bool constantRotation)
     {
         useSingleShotMode = !constantRotation;
-        if(useSingleShotMode){
-            while(finalTargetIntegralSetpoint < subsystem.getCurrentValueIntegral()){
+        if (useSingleShotMode)
+        {
+            while (finalTargetIntegralSetpoint < integrableSetpointSubsystem.getCurrentValueIntegral())
+            {
                 finalTargetIntegralSetpoint += config.targetIntegralChange;
             }
         }
     }
 
-
-    tap::control::setpoint::IntegrableSetpointSubsystem& subsystem;
-
+protected:
     bool useSingleShotMode = true;
 };
 

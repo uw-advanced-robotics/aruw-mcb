@@ -47,33 +47,22 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
         case SINGLE:
             timesToReschedule = 1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            command.setConstantRotation(false);
+            command.enableConstantRotation(false);
             break;
         case NO_HEATING:
             timesToReschedule = -1;
-            if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 != 0)
-            {
-                fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 / 10.0f;
-            }
-            else if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 != 0)
-            {
-                fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 / 10.0f;
-            }
-            else if (drivers->refSerial.getRobotData().turret.heatCoolingRate42 != 0)
-            {
-                fireRate = drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
-            }
-            command.setConstantRotation(false);
+            fireRate = getCurrentBarrelCoolingRate();
+            command.enableConstantRotation(false);
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
-            command.setConstantRotation(false);
+            command.enableConstantRotation(false);
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            command.setConstantRotation(true);
+            command.enableConstantRotation(true);
             break;
         default:
             assert(false);
@@ -88,8 +77,10 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     setMaxTimesToSchedule(timesToReschedule);
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
+    
     if(!held){
-        command.setConstantRotation(false);
+        command.enableConstantRotation(false);
     }
 }
+
 }  // namespace aruwsrc::control::agitator

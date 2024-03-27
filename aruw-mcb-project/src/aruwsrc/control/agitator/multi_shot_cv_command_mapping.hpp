@@ -24,10 +24,10 @@
 
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 
 #include "manual_fire_rate_reselection_manager.hpp"
-#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 
 namespace aruwsrc
 {
@@ -101,6 +101,26 @@ private:
 
     LaunchMode launchMode = SINGLE;
     ConstantVelocityAgitatorCommand &command;
+
+    int getCurrentBarrelCoolingRate() const
+    {
+        if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 / 10.0f;
+        }
+        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 / 10.0f;
+        }
+        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate42 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
+        }
+        else
+        {
+            return ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+        }
+    }
 };
 
 }  // namespace aruwsrc::control::agitator
