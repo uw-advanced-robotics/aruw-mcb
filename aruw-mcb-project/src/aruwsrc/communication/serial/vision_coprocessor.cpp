@@ -274,10 +274,9 @@ void VisionCoprocessor::computeDefaultOdometryData(OdometryData* data)
     for (size_t i = 0; i < MODM_ARRAY_SIZE(data->turretOdometry); i++)
     {
         assert(turretOrientationInterfaces[i] != nullptr);
-        data->turretOdometry[i].timestamp =
-            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
         data->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
         data->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
+        data->turretOdometry[i].roll = 0.f;
     }
 }
 
