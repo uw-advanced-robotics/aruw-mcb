@@ -181,6 +181,7 @@ void VisionCoprocessor::sendRebootMessage()
 
 void VisionCoprocessor::sendOdometryData()
 {
+    // @todo: redo
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
@@ -206,6 +207,7 @@ void VisionCoprocessor::sendOdometryData()
 
 void VisionCoprocessor::computeSentryOdometryData(OdometryData* data)
 {
+    // @todo: redo
     // @todo: note that sentry odometry scheme follows refactored odometry message protocol, so this
     // will do nothing for now
 
@@ -221,6 +223,7 @@ void VisionCoprocessor::computeSentryOdometryData(OdometryData* data)
  */
 void VisionCoprocessor::computeStandardAndHeroOdometryData(OdometryData* data)
 {
+    // @todo: redo
     assert(this->standardAndHeroTransformer != nullptr);
 
     const Transform& worldToChassis = standardAndHeroTransformer->getWorldToChassis();
@@ -245,6 +248,7 @@ void VisionCoprocessor::computeStandardAndHeroOdometryData(OdometryData* data)
 
 void VisionCoprocessor::computeDefaultOdometryData(OdometryData* data)
 {
+    // @todo: redo (maybe)
     assert(this->odometryInterface != nullptr);
 
     modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();

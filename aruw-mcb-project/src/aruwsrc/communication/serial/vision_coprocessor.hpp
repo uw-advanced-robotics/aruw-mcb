@@ -30,6 +30,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
@@ -260,30 +261,15 @@ public:
     }
 
     /**
-     * Use a standard and hero transormer to compute odometry data & send to vision
+     * Attach a transformer to use for odometry information
      *
      * @param[in] transformer The transormer that provides turret information to the
      * vision coprocessor
      */
-    inline void attachStandardAndHerotransformer(
-        aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transformer)
+    inline void attachTransformerInterface(
+        aruwsrc::algorithms::transforms::TransformerInterface& transformer)
     {
-        // @todo: find a way to have this throw a compiler error when called with non standard or
-        // hero build target
-        this->standardAndHeroTransformer = &transformer;
-    }
-
-    /**
-     * Use a sentry transormer to compute odometry data & send to vision
-     *
-     * @param[in] transformer The transormer that provides turret information to the
-     * vision coprocessor
-     */
-    inline void attachSentryTransormer(aruwsrc::sentry::SentryTransforms& transformer)
-    {
-        // @todo: find a way to have this throw a compiler error when called with non sentry
-        // build target
-        this->sentryTransformer = &transformer;
+        this->transformer = &transformer;
     }
 
     mockable void sendShutdownMessage();
@@ -355,9 +341,7 @@ private:
     aruwsrc::control::turret::TurretOrientationInterface*
         turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
-    aruwsrc::algorithms::transforms::StandardAndHeroTransformer* standardAndHeroTransformer;
-
-    aruwsrc::sentry::SentryTransforms* sentryTransformer;
+    aruwsrc::algorithms::transforms::TransformerInterface* transformer;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
