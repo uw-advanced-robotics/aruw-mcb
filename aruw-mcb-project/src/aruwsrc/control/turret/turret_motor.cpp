@@ -83,7 +83,7 @@ void TurretMotor::updateMotorAngle()
                 M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
             config.startAngle;
 
-        chassisFrameMeasuredAngle.setValue(chassisFrameUnwrappedMeasurement);
+        chassisFrameMeasuredAngle.setWrappedValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
@@ -95,7 +95,7 @@ void TurretMotor::updateMotorAngle()
         lastUpdatedEncoderValue = config.startEncoderValue;
         startEncoderOffset = INT16_MIN;
 
-        chassisFrameMeasuredAngle.setValue(config.startAngle);
+        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
     }
 }
 
@@ -132,7 +132,7 @@ float TurretMotor::getValidChassisMeasurementErrorWrapped() const
 {
     // equivalent to this - other
     return WrappedFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI)
-        .minDifference(chassisFrameSetpoint).getValue();
+        .minDifference(chassisFrameSetpoint);
 }
 
 float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
@@ -146,17 +146,14 @@ float TurretMotor::getValidMinError(const float setpoint, const float measuremen
     {
         // the error can be wrapped around the unit circle
         // equivalent to this - other
-        return WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint).getValue();
+        return WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
     }
 }
 
 float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
 {
-    return WrappedFloat(
-               WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint).getValue(),
-               -M_PI,
-               M_PI)
-               .getValue() +
+    return WrappedFloat(WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint), -M_PI, M_PI)
+               .getWrappedValue() +
            measurement;
 }
 

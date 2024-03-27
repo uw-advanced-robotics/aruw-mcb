@@ -124,10 +124,10 @@ public:
     mockable inline float getAngleFromCenter() const
     {
         return tap::algorithms::WrappedFloat(
-                   chassisFrameMeasuredAngle.getValue() - config.startAngle,
+                   chassisFrameMeasuredAngle.getWrappedValue() - config.startAngle,
                    -M_PI,
                    M_PI)
-            .getValue();
+            .getWrappedValue();
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)

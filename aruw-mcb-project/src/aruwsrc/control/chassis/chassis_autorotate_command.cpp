@@ -79,7 +79,7 @@ float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
     float maxAngleFromCenter)
 {
     return WrappedFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
-        .getValue();
+        .getWrappedValue();
 }
 
 void ChassisAutorotateCommand::execute()

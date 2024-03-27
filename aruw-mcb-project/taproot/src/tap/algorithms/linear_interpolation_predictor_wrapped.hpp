@@ -21,8 +21,8 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_CONTIGUOUS_HPP_
-#define TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_CONTIGUOUS_HPP_
+#ifndef TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_WRAPPED_HPP_
+#define TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_WRAPPED_HPP_
 
 #include <cstdint>
 
@@ -71,10 +71,10 @@ public:
     {
         return WrappedFloat(
                    slope * static_cast<float>(currTime - lastUpdateCallTime) +
-                       previousValue.getValue(),
+                       previousValue.getWrappedValue(),
                    previousValue.getLowerBound(),
                    previousValue.getUpperBound())
-            .getValue();
+            .getWrappedValue();
     }
 
     /**
@@ -90,11 +90,11 @@ public:
     void reset(float initialValue, uint32_t initialTime);
 
 private:
-    uint32_t lastUpdateCallTime;    ///< The previous timestamp from when update was called.
-    WrappedFloat previousValue;  ///< The previous data value.
+    uint32_t lastUpdateCallTime;  ///< The previous timestamp from when update was called.
+    WrappedFloat previousValue;   ///< The previous data value.
     float slope;  ///< The current slope, calculated using the previous and most current data.
 };                // class LinearInterpolationPredictorWrapped
 
 }  // namespace tap::algorithms
 
-#endif  // TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_CONTIGUOUS_HPP_
+#endif  // TAPROOT_LINEAR_INTERPOLATION_PREDICTOR_WRAPPED_HPP_

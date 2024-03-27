@@ -42,11 +42,11 @@ SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
 
 float SentryTurretMinorSubsystem::getMajorFramePitch() const
 {
-    return this->pitchMotor.getChassisFrameMeasuredAngle().getValue();
+    return this->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 float SentryTurretMinorSubsystem::getMajorFrameYaw() const
 {
-    return this->yawMotor.getChassisFrameMeasuredAngle().getValue();
+    return this->yawMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 
 }  // namespace aruwsrc::control::sentry

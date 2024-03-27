@@ -56,7 +56,7 @@ void ChassisImuDriveCommand::initialize()
     if (imuSetpointInitialized)
     {
         const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
-        rotationSetpoint.setValue(yaw);
+        rotationSetpoint.setWrappedValue(yaw);
     }
 
     prevTime = tap::arch::clock::getTimeMicroseconds();
@@ -77,7 +77,7 @@ void ChassisImuDriveCommand::execute()
         else
         {
             const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
-            angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw).getValue();
+            angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
             // angle. This way if the chassis is picked up and rotated, it won't try and spin around
@@ -90,7 +90,7 @@ void ChassisImuDriveCommand::execute()
                 // compared to just shifting the value, so only do this when you actually have to
                 // (which is a very small amount in reality).
                 int status = 0;
-                rotationSetpoint.setValue(
+                rotationSetpoint.setWrappedValue(
                     tap::algorithms::WrappedFloat::limitValue(
                         rotationSetpoint,
                         yaw - MAX_ROTATION_ERR,
@@ -100,7 +100,7 @@ void ChassisImuDriveCommand::execute()
             }
             else
             {
-                rotationSetpoint.shiftUp(chassisRInput);
+                rotationSetpoint += chassisRInput;
             }
 
             uint32_t currTime = tap::arch::clock::getTimeMicroseconds();
@@ -110,7 +110,7 @@ void ChassisImuDriveCommand::execute()
             float targetVelocity = (dt == 0) ? 0.0f : chassisRInput * 1'000'000.0f / dt;
 
             // compute error again now that user input has been updated
-            angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw).getValue();
+            angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw);
 
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(

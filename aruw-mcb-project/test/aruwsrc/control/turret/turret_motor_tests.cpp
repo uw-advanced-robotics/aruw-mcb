@@ -137,7 +137,7 @@ TEST_F(TurretMotorTest, getChassisFrameMeasuredAngle__returns_default_when_yaw_m
 
     EXPECT_NEAR(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue(),
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
         1E-3);
 }
 
@@ -161,7 +161,7 @@ TEST_F(
     {
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
-        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle).getValue(), 1E-3);
+        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle), 1E-3);
     }
 }
 
@@ -230,7 +230,7 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
                 1,
             0,
             DjiMotor::ENC_RESOLUTION)
-            .getValue();
+            .getWrappedValue();
 
     uint16_t maxEncoderValue =
         WrappedFloat(
@@ -240,7 +240,7 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
                 1,
             0,
             DjiMotor::ENC_RESOLUTION)
-            .getValue();
+            .getWrappedValue();
 
     InSequence seq;
     EXPECT_CALL(motor, setDesiredOutput(-1000));
@@ -265,7 +265,7 @@ TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_of
 
     EXPECT_NE(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue());
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue());
 
     // Now turret offline
     motorOnline = false;
@@ -274,7 +274,7 @@ TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_of
 
     EXPECT_NEAR(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue(),
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
         1E-3);
 }
 
@@ -517,12 +517,10 @@ TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_no_turret_controller)
 
 TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_chassis_frame_controller)
 {
-    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
-        return value;
-    });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
-        return value;
-    });
+    ON_CALL(turretController, convertChassisAngleToControllerFrame)
+        .WillByDefault([](float value) { return value; });
+    ON_CALL(turretController, convertControllerAngleToChassisFrame)
+        .WillByDefault([](float value) { return value; });
 
     tm.attachTurretController(&turretController);
 
@@ -531,12 +529,10 @@ TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_chassis_frame_controller)
 
 TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_rotated_frame_controller)
 {
-    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
-        return value + M_PI;
-    });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
-        return value - M_PI;
-    });
+    ON_CALL(turretController, convertChassisAngleToControllerFrame)
+        .WillByDefault([](float value) { return value + M_PI; });
+    ON_CALL(turretController, convertControllerAngleToChassisFrame)
+        .WillByDefault([](float value) { return value - M_PI; });
 
     tm.attachTurretController(&turretController);
 

@@ -90,9 +90,8 @@ void TurretCVCommand::execute()
         yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
-        auto differenceWrapped = [](float measurement, float setpoint) {
-            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint).getValue();
-        };
+        auto differenceWrapped = [](float measurement, float setpoint)
+        { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
             differenceWrapped(yawController->getMeasurement(), yawSetpoint),
