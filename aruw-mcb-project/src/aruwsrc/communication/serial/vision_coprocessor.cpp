@@ -218,7 +218,7 @@ void VisionCoprocessor::sendOdometryData()
         assert(turretOrientationInterfaces[i] != nullptr);
         odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
         odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
-        odometryData->turretOdometry[i].yaw = 0.f;  // @note setting to 0 until transforms come in
+        odometryData->turretOdometry[i].roll = 0.f;  // @note setting to 0 until transforms come in
     }
 
     odometryMessage.setCRC16();
