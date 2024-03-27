@@ -375,8 +375,7 @@ public:
 
     void sendOdometryData();
 
-    void computeSentryOdometryData(OdometryData* data);
-    void computeStandardAndHeroOdometryData(OdometryData* data);
+    void computeTransformerOdometryData(OdometryData* data);
     void computeDefaultOdometryData(OdometryData* data);
 
     void sendRefereeRealtimeData();

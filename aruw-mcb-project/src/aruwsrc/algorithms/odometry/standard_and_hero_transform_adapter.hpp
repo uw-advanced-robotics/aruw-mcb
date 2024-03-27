@@ -41,6 +41,7 @@ class StandardAndHeroTransformAdapter : public TransformerInterface
 
     tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const;
 
+    // returns <roll, pitch, yaw> of the turret orientation
     tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const;
 
 private:

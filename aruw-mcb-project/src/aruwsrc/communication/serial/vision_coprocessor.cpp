@@ -181,16 +181,13 @@ void VisionCoprocessor::sendRebootMessage()
 
 void VisionCoprocessor::sendOdometryData()
 {
-    // @todo: redo
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
-#if defined(ALL_SENTRIES)
-    computeSentryOdometryData(odometryData);
-#elif defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE)
-    computeStandardAndHeroOdometryData(odometryData);
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(ALL_SENTRIES)
+    computeTransformerOdometryData(odometryData);
 #else
     computeDefaultOdometryData(odometryData);
 #endif
@@ -205,45 +202,32 @@ void VisionCoprocessor::sendOdometryData()
 #endif
 }
 
-void VisionCoprocessor::computeSentryOdometryData(OdometryData* data)
-{
-    // @todo: redo
-    // @todo: note that sentry odometry scheme follows refactored odometry message protocol, so this
-    // will do nothing for now
-
-    // assert(this->sentryTransformer != nullptr);
-
-    // @note: this line is just here so pipeline doesn't complain
-    data->chassisOdometry.timestamp = getTimeMicroseconds();
-}
-/**
- * Uses the standard and hero transformer to place world-relative odometry information into the
+/* Uses the transformer interface to place world-relative odometry information into the
  * OdometryData struct
  * @modifies data
  */
-void VisionCoprocessor::computeStandardAndHeroOdometryData(OdometryData* data)
+void VisionCoprocessor::computeTransformerOdometryData(OdometryData* data)
 {
-    // @todo: redo
-    assert(this->standardAndHeroTransformer != nullptr);
+    // @todo: hmm this shares quite a bit with the below.. could reduce
+    assert(this->transformer != nullptr);
 
-    const Transform& worldToChassis = standardAndHeroTransformer->getWorldToChassis();
+    // const Transform& worldToChassis = transformer->getWorldToChassis();
+    modm::Location2D<float> chassisLocation = transformer->getCurrentLocation2D();
 
-    data->chassisOdometry.timestamp = getTimeMicroseconds();
-    data->chassisOdometry.xPos = worldToChassis.getX();
-    data->chassisOdometry.yPos = worldToChassis.getY();
-    data->chassisOdometry.zPos = worldToChassis.getZ();
+    data->timestamp = getTimeMicroseconds();
+    data->chassisOdometry.xPos = chassisLocation.getX();
+    data->chassisOdometry.yPos = chassisLocation.getY();
+    data->chassisOdometry.zPos = 0.f;
 
     data->numTurrets = control::turret::NUM_TURRETS;
 
-    const Transform& worldToTurret = standardAndHeroTransformer->getWorldToTurret();
-
-    // hardcode a single turret
-    // we make an assertion on the properties of the robot!!!
-    data->turretOdometry[0].timestamp =
-        getTimeMicroseconds();  // @todo: why second timestamp?? (#693)
-
-    data->turretOdometry[0].pitch = worldToTurret.getPitch();
-    data->turretOdometry[0].yaw = worldToTurret.getYaw();
+    for (uint8_t i = 0; i < MODM_ARRAY_SIZE(data->turretOdometry); i++)
+    {
+        auto turretOrientation = this->transformer->getTurretOrientation(i);
+        data->turretOdometry[i].roll = turretOrientation.data[0];
+        data->turretOdometry[i].pitch = turretOrientation.data[1];
+        data->turretOdometry[i].yaw = turretOrientation.data[2];
+    }
 }
 
 void VisionCoprocessor::computeDefaultOdometryData(OdometryData* data)
@@ -259,7 +243,7 @@ void VisionCoprocessor::computeDefaultOdometryData(OdometryData* data)
     tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
 
     // chassis odometry
-    data->chassisOdometry.timestamp = getTimeMicroseconds();
+    data->timestamp = getTimeMicroseconds();
     data->chassisOdometry.xPos = location.getX();
     data->chassisOdometry.yPos = location.getY();
     data->chassisOdometry.zPos = 0.0f;
