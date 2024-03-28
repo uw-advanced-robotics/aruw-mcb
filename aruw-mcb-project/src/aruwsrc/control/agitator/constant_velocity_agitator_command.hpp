@@ -27,7 +27,6 @@
 
 namespace aruwsrc::control::agitator
 {
-
 /**
  * A command that aims to keep the agitator at a constant velocity. At the end of this command,
  * the agitator will move to a specified setpoint, as to give a consistent starting point for each
@@ -61,7 +60,8 @@ public:
         useSingleShotMode = !constantRotation;
         if (useSingleShotMode && !previousMode)
         {
-            while (finalTargetIntegralSetpoint < integrableSetpointSubsystem.getCurrentValueIntegral())
+            while (finalTargetIntegralSetpoint <
+                   integrableSetpointSubsystem.getCurrentValueIntegral())
             {
                 finalTargetIntegralSetpoint += config.targetIntegralChange;
             }

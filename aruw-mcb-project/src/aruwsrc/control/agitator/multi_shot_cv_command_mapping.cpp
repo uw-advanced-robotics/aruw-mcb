@@ -77,8 +77,9 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     setMaxTimesToSchedule(timesToReschedule);
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
-    
-    if(!held){
+
+    if (!held)
+    {
         command.enableConstantRotation(false);
     }
 }
