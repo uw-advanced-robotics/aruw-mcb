@@ -81,7 +81,7 @@ public:
         const tap::control::RemoteMapState &rms,
         std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
         governor::CvOnTargetGovernor &cvOnTargetGovernor,
-        std::optional<ConstantVelocityAgitatorCommand &> command = std::nullopt);
+        std::optional<ConstantVelocityAgitatorCommand *> command = std::nullopt);
 
     void setShooterState(LaunchMode mode)
     {
@@ -100,7 +100,7 @@ private:
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
     LaunchMode launchMode = SINGLE;
-    std::optional<ConstantVelocityAgitatorCommand &> command;
+    std::optional<ConstantVelocityAgitatorCommand *> command;
 
     int getCurrentBarrelCoolingRate() const
     {

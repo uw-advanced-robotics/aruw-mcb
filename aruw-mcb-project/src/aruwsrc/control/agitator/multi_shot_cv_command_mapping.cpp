@@ -27,7 +27,7 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor,
-    std::optional<ConstantVelocityAgitatorCommand &> command)
+    std::optional<ConstantVelocityAgitatorCommand *> command)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
       cvOnTargetGovernor(cvOnTargetGovernor),
@@ -69,7 +69,7 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
 
     if (command.has_value())
     {
-        command.value().enableConstantRotation(enableConstantRotation);
+        command.value()->enableConstantRotation(enableConstantRotation);
     }
 
     if (fireRateReselectionManager.has_value())
@@ -83,7 +83,10 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
 
     if (!held)
     {
-        command.enableConstantRotation(false);
+        if (command.has_value())
+        {
+            command.value()->enableConstantRotation(false);
+        }
     }
 }
 
