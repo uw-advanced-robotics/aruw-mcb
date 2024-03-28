@@ -22,8 +22,6 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/sensors/as5600/as5600.hpp"
-
 namespace aruwsrc::testbed
 {
 class Drivers : public tap::Drivers
@@ -33,10 +31,9 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), encoder(this, tap::gpio::Analog::Pin::S) {}
+    Drivers() : tap::Drivers() {}
 
 public:
-    aruwsrc::communication::sensors::as5600::AS5600 encoder;
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
 
