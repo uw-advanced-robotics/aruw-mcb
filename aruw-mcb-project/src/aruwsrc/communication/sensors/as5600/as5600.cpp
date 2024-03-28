@@ -22,12 +22,21 @@
 namespace aruwsrc::communication::sensors::as5600
 {
 
-AS5600::AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin) : drivers(drivers), pin(pin) {}
-
-void AS5600::read()
+AS5600::AS5600( Config &config) : config(config)
 {
-	this->raw_measurement = this->drivers->analog.read(this->pin);
-    this->measurement = (this->raw_measurement * 1.0f / 4096.0f) * 360.0f;
+}
+
+void AS5600::update()
+{
+	raw_measurement = config.analog->read(config.pin);
+    if(raw_measurement < config.min_millivolt){
+        config.min_millivolt = raw_measurement;
+    } else if (raw_measurement > config.max_millivolt){
+        config.max_millivolt = raw_measurement;
+    }
+    measurement = raw_measurement - config.min_millivolt; // Have it read 0 if min
+    measurement = measurement / (config.max_millivolt - config.min_millivolt); // Normalize
+    measurement = measurement * 360; // Convert to degrees
 }
 
 float AS5600::getPosition() { return measurement; }

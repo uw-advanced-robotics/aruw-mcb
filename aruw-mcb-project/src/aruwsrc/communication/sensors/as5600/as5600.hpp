@@ -21,11 +21,12 @@
 #define AS5600_HPP_
 
 #include "tap/drivers.hpp"
+#include "tap/communication/sensors/sensor_interface.hpp"
 
 namespace aruwsrc::communication::sensors::as5600
 {
 
-class AS5600
+class AS5600 : public tap::communication::sensors::SensorInterface
 {
 public:
     struct Config
@@ -36,22 +37,19 @@ public:
         int max_millivolt;
     };
 
-    AS5600(tap::Drivers* drivers, tap::gpio::Analog::Pin pin);
+    AS5600(Config &config);
 
-    // Reads the sensor value and stores the value in measurement
-    void read();
+    // Reads the sensor value and updates the encoder measurement
+    void update();
 
     // Returns the position in degrees
     float getPosition();
 
 private:
-    tap::Drivers* drivers;
-    tap::gpio::Analog::Pin pin;
+    Config& config;
 
     float measurement;
     int16_t raw_measurement;
-
-    static constexpr int MAX_READ_VOLTAGE = 4096;
 };
 
 }  // namespace aruwsrc::communication::sensors::as5600
