@@ -20,12 +20,11 @@
 #ifndef AS5600_HPP_
 #define AS5600_HPP_
 
-#include "tap/drivers.hpp"
 #include "tap/communication/sensors/sensor_interface.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::communication::sensors::as5600
 {
-
 class AS5600 : public tap::communication::sensors::SensorInterface
 {
 public:
@@ -37,7 +36,7 @@ public:
         int max_millivolt;
     };
 
-    AS5600(Config &config);
+    AS5600(Config& config);
 
     // Reads the sensor value and updates the encoder measurement
     void update();

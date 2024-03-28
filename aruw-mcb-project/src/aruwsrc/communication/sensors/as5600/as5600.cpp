@@ -21,22 +21,22 @@
 
 namespace aruwsrc::communication::sensors::as5600
 {
-
-AS5600::AS5600( Config &config) : config(config)
-{
-}
+AS5600::AS5600(Config &config) : config(config) {}
 
 void AS5600::update()
 {
-	raw_measurement = config.analog->read(config.pin);
-    if(raw_measurement < config.min_millivolt){
+    raw_measurement = config.analog->read(config.pin);
+    if (raw_measurement < config.min_millivolt)
+    {
         config.min_millivolt = raw_measurement;
-    } else if (raw_measurement > config.max_millivolt){
+    }
+    else if (raw_measurement > config.max_millivolt)
+    {
         config.max_millivolt = raw_measurement;
     }
-    measurement = raw_measurement - config.min_millivolt; // Have it read 0 if min
-    measurement = measurement / (config.max_millivolt - config.min_millivolt); // Normalize
-    measurement = measurement * 360; // Convert to degrees
+    measurement = raw_measurement - config.min_millivolt;  // Have it read 0 if min
+    measurement = measurement / (config.max_millivolt - config.min_millivolt);  // Normalize
+    measurement = measurement * 360;  // Convert to degrees
 }
 
 float AS5600::getPosition() { return measurement; }
