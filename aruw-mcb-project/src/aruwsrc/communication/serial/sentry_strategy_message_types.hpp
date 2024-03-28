@@ -69,9 +69,9 @@ enum class SentryResponseMessageType : uint16_t
 enum class SentryVisionMessageType : uint8_t
 {
     NONE = 0,
-    GO_CRAZY,
-    GO_STUPID,
-    AHHHHH,
+    RUSH_MID,
+    GO_HEAL,
+    RUSH_BASE,
     NUM_MESSAGE_TYPES,
 };
 }  // namespace aruwsrc::communication::serial

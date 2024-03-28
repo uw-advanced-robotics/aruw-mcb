@@ -35,6 +35,7 @@
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
 #include "turret_mcb_menu.hpp"
+#include "sentry_strategy_menu.hpp"
 
 namespace aruwsrc
 {
@@ -78,6 +79,7 @@ private:
     TurretMCBMenu turretStatusMenuBus1;
     TurretMCBMenu turretStatusMenuBus2;
     AboutMenu aboutMenu;
+    SentryStrategyMenu sentryStrategyMenu;
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
@@ -94,6 +96,7 @@ private:
     void addTurretMCBMenuBus1Callback();
     void addTurretMCBMenuBus2Callback();
     void addAboutMenuCallback();
+    void addSentryStrategyMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

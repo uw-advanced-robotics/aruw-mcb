@@ -28,7 +28,9 @@
 using namespace aruwsrc::serial;
 using namespace aruwsrc::communication::serial;
 
-
+/**
+ * Menu to setup menu options to go send to the sentry through vision coprocessor options
+ */
 namespace aruwsrc::display
 {
 class SentryStrategyMenu
@@ -40,17 +42,32 @@ public:
         VisionCoprocessor *visionCoprocessor)
         : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
               vs,
-              SENTRY_STRATEGY_MENU_ID),
+              SENTRY_STRATEGY_MENU_ID,
+              getMenuName()),
           visionCoprocessor(visionCoprocessor)
     {
-        this->setTitle("Sentry Strategy Menu");
-        addEntry("None", visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::NONE));
-        addEntry("Go crazy", visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::GO_CRAZY));
-        addEntry("Go stupid", visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::GO_STUPID));
-        addEntry("AAH", visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::AHHHHH));
+        addEntry(
+            "None",
+            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::NONE),
+            true);
+        addEntry(
+            "Go crazy",
+            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::RUSH_BASE),
+            false);
+        addEntry(
+            "Go stupid",
+            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::GO_HEAL),
+            false);
+        addEntry(
+            "AAH",
+            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::RUSH_MID),
+            false);
     }
 
     void openNextScreen() override {}
+
+    static const char *getMenuName() { return "Sentry Strategy Menu"; }
+
 
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
