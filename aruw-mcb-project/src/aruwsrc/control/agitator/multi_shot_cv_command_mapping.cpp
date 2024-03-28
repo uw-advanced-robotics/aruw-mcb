@@ -27,7 +27,7 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor,
-    ConstantVelocityAgitatorCommand &command)
+    std::optional<ConstantVelocityAgitatorCommand &> command)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
       cvOnTargetGovernor(cvOnTargetGovernor),
@@ -42,31 +42,34 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     float fireRate = 0.0f;
 
     auto launchMode = cvOnTargetGovernor.inShotTimingMode() ? FULL_AUTO : this->launchMode;
+    bool enableConstantRotation = false;
     switch (launchMode)
     {
         case SINGLE:
             timesToReschedule = 1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            command.enableConstantRotation(false);
             break;
         case NO_HEATING:
             timesToReschedule = -1;
             fireRate = getCurrentBarrelCoolingRate();
-            command.enableConstantRotation(false);
             break;
         case FULL_AUTO_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
-            command.enableConstantRotation(false);
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            command.enableConstantRotation(true);
+            enableConstantRotation = true;
             break;
         default:
             assert(false);
             break;
+    }
+
+    if (command.has_value())
+    {
+        command.value().enableConstantRotation(enableConstantRotation);
     }
 
     if (fireRateReselectionManager.has_value())
