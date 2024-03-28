@@ -62,6 +62,18 @@ enum class SentryResponseMessageType : uint16_t
     BEYBLADE_DISABLED,
     NUM_MESSAGE_TYPES,
 };
+
+/**
+ * Messages sent from MCB to vision
+*/
+enum class SentryVisionMessageType : uint8_t
+{
+    NONE = 0,
+    RUSH_MID,
+    GO_HEAL,
+    RUSH_BASE,
+    NUM_MESSAGE_TYPES,
+};
 }  // namespace aruwsrc::communication::serial
 
 #endif  //  SENTRY_STRATEGY_MESSAGE_TYPES_HPP_

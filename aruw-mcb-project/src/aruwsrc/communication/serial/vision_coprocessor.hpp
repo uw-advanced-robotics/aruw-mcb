@@ -352,6 +352,10 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    // Current motion strategy for sentry
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
