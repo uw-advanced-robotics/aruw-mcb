@@ -34,11 +34,17 @@ void AS5600::update()
     {
         config.max_millivolt = raw_measurement;
     }
+    prevMeasurement = measurement;
     measurement = raw_measurement - config.min_millivolt;  // Have it read 0 if min
     measurement = measurement / (config.max_millivolt - config.min_millivolt);  // Normalize
     measurement = measurement * 360;  // Convert to degrees
 }
 
-float AS5600::getPosition() { return measurement; }
+float AS5600::getPositionDegree() { return measurement; }
+
+float AS5600::getPositionRad() { return modm::toRadian(measurement); }
+
+float AS5600::getEncoderVelocity() { return (measurement - prevMeasurement) / config.measurement_reading_dt; }
+
 
 }  // namespace aruwsrc::communication::sensors::as5600

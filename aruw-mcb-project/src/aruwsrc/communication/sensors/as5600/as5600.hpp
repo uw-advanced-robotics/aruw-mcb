@@ -20,8 +20,11 @@
 #ifndef AS5600_HPP_
 #define AS5600_HPP_
 
+#include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/sensor_interface.hpp"
-#include "tap/drivers.hpp"
+#include "tap/communication/gpio/analog.hpp"
+
+#include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::communication::sensors::as5600
 {
@@ -32,8 +35,9 @@ public:
     {
         tap::gpio::Analog* analog;
         tap::gpio::Analog::Pin pin;
-        int min_millivolt;
-        int max_millivolt;
+        int min_millivolt = 5000;
+        int max_millivolt = 0;
+        float measurement_reading_dt = 0.002;
     };
 
     AS5600(Config& config);
@@ -42,13 +46,21 @@ public:
     void update();
 
     // Returns the position in degrees
-    float getPosition();
+    float getPositionDegree();
+
+    // Returns the position in radians
+    float getPositionRad();
+
+    // Returns the measurement in degrees per second
+    float getEncoderVelocity();
 
 private:
     Config& config;
 
     float measurement;
     int16_t raw_measurement;
+
+    float prevMeasurement;
 };
 
 }  // namespace aruwsrc::communication::sensors::as5600
