@@ -57,8 +57,9 @@ public:
 
     void enableConstantRotation(bool constantRotation)
     {
+        bool previousMode = useSingleShotMode;
         useSingleShotMode = !constantRotation;
-        if (useSingleShotMode)
+        if (useSingleShotMode && !previousMode)
         {
             while (finalTargetIntegralSetpoint < integrableSetpointSubsystem.getCurrentValueIntegral())
             {
