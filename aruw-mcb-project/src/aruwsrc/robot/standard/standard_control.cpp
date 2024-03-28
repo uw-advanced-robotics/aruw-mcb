@@ -480,7 +480,7 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,
-    rotateAgitator);
+    &rotateAgitator);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
