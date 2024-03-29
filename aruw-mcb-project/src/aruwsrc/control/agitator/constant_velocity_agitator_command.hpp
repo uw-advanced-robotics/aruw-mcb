@@ -20,10 +20,10 @@
 #ifndef CONSTANT_VELOCITY_AGITATOR_COMMAND_HPP_
 #define CONSTANT_VELOCITY_AGITATOR_COMMAND_HPP_
 
-#include <float.h>
-
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::agitator
 {
@@ -56,14 +56,25 @@ public:
 
     void enableConstantRotation(bool constantRotation)
     {
-        bool previousMode = useSingleShotMode;
+        bool previousModeWasConstantRotation = !useSingleShotMode;
         useSingleShotMode = !constantRotation;
-        if (useSingleShotMode && !previousMode)
+        if (useSingleShotMode && previousModeWasConstantRotation)
         {
-            while (finalTargetIntegralSetpoint <
-                   integrableSetpointSubsystem.getCurrentValueIntegral())
+            if (getSign(config.targetIntegralChange) == -1)
             {
-                finalTargetIntegralSetpoint += config.targetIntegralChange;
+                while (finalTargetIntegralSetpoint >
+                       integrableSetpointSubsystem.getCurrentValueIntegral())
+                {
+                    finalTargetIntegralSetpoint -= config.targetIntegralChange;
+                }
+            }
+            else
+            {
+                while (finalTargetIntegralSetpoint <
+                       integrableSetpointSubsystem.getCurrentValueIntegral())
+                {
+                    finalTargetIntegralSetpoint += config.targetIntegralChange;
+                }
             }
         }
     }
