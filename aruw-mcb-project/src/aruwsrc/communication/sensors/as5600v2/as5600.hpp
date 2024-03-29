@@ -20,33 +20,66 @@
 #ifndef AS5600_HPP_
 #define AS5600_HPP_
 
-#include "modm/processing/protothread/protothread.hpp"
-#include "modm/processing/resumable.hpp"
+#include "tap/board/board.hpp"
+
 #include "modm/architecture/interface/i2c_device.hpp"
+#include "modm/processing/resumable.hpp"
+
 #include "as5600_register.hpp"
 
-namespace aruwsrc::communication::sensors::as5600v2 {
-
-template<class I2cMaster>
-class AS5600 : public modm::I2cDevice<I2cMaster>, modm::pt::Protothread {
-
+namespace aruwsrc::communication::sensors::as5600v2
+{
+class AS5600 : public modm::I2cDevice<Board::I2CMaster>
+{
 public:
-AS5600() : modm::I2cDevice<I2cMaster>(AS5600_ADDRESS), modm::pt::Protothread() {};
+    AS5600() : modm::I2cDevice<Board::I2CMaster>(AS5600_ADDRESS){};
 
+    // This will setup the I2C master?? TAMU initalizes the i2c here. I think i do this in the
+    // multiplexer Do config here
+    void init();
 
-// This will setup the I2C master?? TAMU initalizes the i2c here. I think i do this in the multiplexer
-// Do config here
-void init();
+    void read();
 
-void read();
+    void getPosition();
 
-void getPosition();
+    void getVelocity();
 
-void getVelocity()
+private:
+    uint8_t raw_data_buffer[2];
 
+    inline modm::ResumableResult<bool> readRegister(uint8_t reg, int length)
+    {
+        RF_BEGIN();
+        if (length > 2)
+        {
+            length = 2;
+        }
 
+        raw_data_buffer[0] = reg;
+        while (!transaction.configureWriteRead(raw_data_buffer, 1, raw_data_buffer, length))
+        {
+        };
+
+        RF_END_RETURN_CALL(runTransaction());
+    };
+
+    modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
+    {
+        RF_BEGIN();
+
+        raw_data_buffer[0] = reg;
+        raw_data_buffer[1] = data;
+
+        while (!transaction.configureWrite(raw_data_buffer, 2))
+        {
+        };
+
+        RF_END_RETURN_CALL(runTransaction());
+    };
+
+    float currentPosition;
+    float previousPosition;
 };
-
 
 }  // namespace aruwsrc::communication::sensors::as5600v2
 

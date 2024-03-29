@@ -22,9 +22,7 @@
 
 namespace aruwsrc::communication::sensors::as5600v2
 {
-
 #define AS5600_ADDRESS 0x36
-#define AS5600_READ_BIT 0x8
 
 // Configuration registers
 #define AS5600_REG_ZMCO 0x00       // How many times the BURN command has been executed
@@ -72,10 +70,10 @@ namespace aruwsrc::communication::sensors::as5600v2
 #define AS5600_PWM_FREQUENCY_460HZ 0x02
 #define AS5600_PWM_FREQUENCY_920HZ 0x03
 
-#define AS5600_SLOW_FILTER_16X 0x00
-#define AS5600_SLOW_FILTER_8X 0x01
-#define AS5600_SLOW_FILTER_4X 0x02
-#define AS5600_SLOW_FILTER_2X 0x03
+#define AS5600_SLOW_FILTER_16X 0x00  // 2.2 ms
+#define AS5600_SLOW_FILTER_8X 0x01   // 1.1 ms
+#define AS5600_SLOW_FILTER_4X 0x02   // 0.55 ms
+#define AS5600_SLOW_FILTER_2X 0x03   // 0.286 ms
 
 #define AS5600_FAST_FILTER_OFF 0x00
 #define AS5600_FAST_FILTER_6LSB 0x01
@@ -98,11 +96,10 @@ namespace aruwsrc::communication::sensors::as5600v2
 #define AS5600_MANG_LOW_CONFIG 0xFF
 
 #define AS5600_CONF_HIGH_CONFIG \
-    ((AS5600_WATCHDOG_OFF << 5) | (AS5600_FAST_FILTER_OFF << 2) | AS5600_SLOW_FILTER_16X)
+    ((AS5600_WATCHDOG_OFF << 5) | (AS5600_FAST_FILTER_OFF << 2) | AS5600_SLOW_FILTER_8X)
 #define AS5600_CONF_LOW_CONFIG                                                    \
     ((AS5600_PWM_FREQUENCY_115HZ << 6) | (AS5600_OUTPUT_STAGE_ANALOG_FULL << 4) | \
      (AS5600_HYSTERESIS_OFF << 2) | AS5600_POWER_MODE_NORMAL)
-
 
 }  // namespace aruwsrc::communication::sensors::as5600v2
 

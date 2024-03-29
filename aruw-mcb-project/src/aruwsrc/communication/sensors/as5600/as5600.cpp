@@ -46,13 +46,14 @@ float AS5600::getPositionDegree() { return measurement; }
 
 float AS5600::getPositionRad() { return modm::toRadian(measurement); }
 
-float AS5600::getEncoderVelocity() { 
+float AS5600::getEncoderVelocity()
+{
     float difference;
-    if(measurement < 90 && prevMeasurement > 270)
+    if (measurement < 90 && prevMeasurement > 270)
     {
         difference = 360 - prevMeasurement + measurement;
     }
-    else if(measurement > 270 && prevMeasurement < 90)
+    else if (measurement > 270 && prevMeasurement < 90)
     {
         difference = 360 - measurement + prevMeasurement;
     }
@@ -60,8 +61,8 @@ float AS5600::getEncoderVelocity() {
     {
         difference = measurement - prevMeasurement;
     }
-    
-    return difference / config.measurement_reading_dt; }
 
+    return difference / config.measurement_reading_dt;
+}
 
 }  // namespace aruwsrc::communication::sensors::as5600

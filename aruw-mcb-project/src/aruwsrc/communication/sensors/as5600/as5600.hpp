@@ -21,8 +21,8 @@
 #define AS5600_HPP_
 
 #include "tap/architecture/clock.hpp"
-#include "tap/communication/sensors/sensor_interface.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/sensors/sensor_interface.hpp"
 
 #include "modm/math/geometry/angle.hpp"
 
@@ -64,7 +64,6 @@ private:
 
     float rawValue = 0;
     int count = 0;
-
 };
 
 }  // namespace aruwsrc::communication::sensors::as5600

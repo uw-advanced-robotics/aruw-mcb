@@ -38,8 +38,7 @@ public:
 public:
     aruwsrc::communication::sensors::as5600::AS5600::Config config = {
         .analog = &(this->analog),
-        .pin = tap::gpio::Analog::Pin::U
-    };
+        .pin = tap::gpio::Analog::Pin::U};
 
     aruwsrc::communication::sensors::as5600::AS5600 as5600;
 

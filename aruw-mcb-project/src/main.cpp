@@ -123,10 +123,9 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED)
-       ((Drivers *)drivers)->as5600.update();
-       vel = ((Drivers *)drivers)->as5600.getEncoderVelocity();
-#endif 
-
+            ((Drivers *)drivers)->as5600.update();
+            vel = ((Drivers *)drivers)->as5600.getEncoderVelocity();
+#endif
         }
         modm::delay_us(10);
     }
