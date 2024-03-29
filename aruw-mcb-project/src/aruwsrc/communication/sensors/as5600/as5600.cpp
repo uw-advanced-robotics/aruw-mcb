@@ -25,7 +25,9 @@ AS5600::AS5600(Config &config) : config(config) {}
 
 void AS5600::update()
 {
+    count++;
     raw_measurement = config.analog->read(config.pin);
+    rawValue = config.analog->read(config.pin);
     if (raw_measurement < config.min_millivolt)
     {
         config.min_millivolt = raw_measurement;
@@ -44,7 +46,22 @@ float AS5600::getPositionDegree() { return measurement; }
 
 float AS5600::getPositionRad() { return modm::toRadian(measurement); }
 
-float AS5600::getEncoderVelocity() { return (measurement - prevMeasurement) / config.measurement_reading_dt; }
+float AS5600::getEncoderVelocity() { 
+    float difference;
+    if(measurement < 90 && prevMeasurement > 270)
+    {
+        difference = 360 - prevMeasurement + measurement;
+    }
+    else if(measurement > 270 && prevMeasurement < 90)
+    {
+        difference = 360 - measurement + prevMeasurement;
+    }
+    else
+    {
+        difference = measurement - prevMeasurement;
+    }
+    
+    return difference / config.measurement_reading_dt; }
 
 
 }  // namespace aruwsrc::communication::sensors::as5600

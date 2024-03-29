@@ -61,6 +61,10 @@ private:
     int16_t raw_measurement;
 
     float prevMeasurement;
+
+    float rawValue = 0;
+    int count = 0;
+
 };
 
 }  // namespace aruwsrc::communication::sensors::as5600

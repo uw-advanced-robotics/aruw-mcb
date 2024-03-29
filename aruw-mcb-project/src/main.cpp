@@ -74,6 +74,8 @@ using namespace aruwsrc::dart;
 using namespace aruwsrc::testbed;
 #endif
 
+float vel;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -119,6 +121,12 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
+
+#if defined(TARGET_TESTBED)
+       ((Drivers *)drivers)->as5600.update();
+       vel = ((Drivers *)drivers)->as5600.getEncoderVelocity();
+#endif 
+
         }
         modm::delay_us(10);
     }
