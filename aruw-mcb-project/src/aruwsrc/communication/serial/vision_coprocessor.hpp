@@ -304,6 +304,9 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    // @debug: remove after testing
+    OdometryData lastOdomData;
+
 private:
     enum TxMessageTypes
     {

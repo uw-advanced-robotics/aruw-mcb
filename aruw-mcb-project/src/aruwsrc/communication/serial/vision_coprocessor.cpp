@@ -215,6 +215,7 @@ void VisionCoprocessor::sendOdometryData()
     }
 
     // @debug write into a class-variable for debugging, don't actually send to vision
+    memcpy(&lastOdomData, odometryData, sizeof(OdometryData));
 
     // odometryMessage.setCRC16();
 
