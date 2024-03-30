@@ -21,7 +21,6 @@
 
 #include "tap/architecture/clock.hpp"
 
-// #include "wheel.hpp"
 #include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 
 namespace aruwsrc
@@ -53,7 +52,6 @@ private:
     /// time tracker for smoothpid
     double prevTime = 0;
     // PID used to control the driving motor
-    // SmoothPid velocityPid;
     const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     const double AXLE_TO_ROBOT_FRONT = M_PI_2;
     const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0f,
