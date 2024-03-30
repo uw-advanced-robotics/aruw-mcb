@@ -330,62 +330,64 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
-
-            checkHeaderAndTail<DATA_LEN>(msg);
-            EXPECT_EQ(1, msg.messageType);
-
-            float cx, cy, cz, pitch, yaw, roll;
-            uint32_t cTime;
-
-            // chassis odometry
-            convertFromLittleEndian(&cTime, msg.data);
-            convertFromLittleEndian(&cx, msg.data + 4);
-            convertFromLittleEndian(&cy, msg.data + 8);
-            convertFromLittleEndian(&cz, msg.data + 12);
-            convertFromLittleEndian(&pitch, msg.data + 16);
-            convertFromLittleEndian(&yaw, msg.data + 20);
-            convertFromLittleEndian(&roll, msg.data + 24);
-
-            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
-            EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
-            EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
-            EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
-            EXPECT_EQ(odometryData.chassisOdometry.pitch, pitch);
-            EXPECT_EQ(odometryData.chassisOdometry.yaw, yaw);
-            EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
-
-            uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
-            EXPECT_EQ(NUM_TURRETS, numTurrets);
-
-            // turret odometry
-            const uint32_t startIndex = sizeof(VisionCoprocessor::ChassisOdometryData) + 1;
-            std::array<std::tuple<uint32_t, float, float>, NUM_TURRETS> turretOdom;
-            for (size_t i = 0; i < turretOdom.size(); i++)
+        .WillOnce(
+            [&](tap::communication::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
             {
-                auto &odom = turretOdom[i];
+                DJISerial::SerialMessage<DATA_LEN> msg;
+                memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-                convertFromLittleEndian(
-                    &std::get<0>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData));
-                convertFromLittleEndian(
-                    &std::get<1>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 4);
-                convertFromLittleEndian(
-                    &std::get<2>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 8);
+                checkHeaderAndTail<DATA_LEN>(msg);
+                EXPECT_EQ(1, msg.messageType);
 
-                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<0>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<1>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<2>(odom));
-            }
+                float cx, cy, cz, pitch, yaw, roll;
+                uint32_t cTime;
 
-            return length;
-        });
+                // chassis odometry
+                convertFromLittleEndian(&cTime, msg.data);
+                convertFromLittleEndian(&cx, msg.data + 4);
+                convertFromLittleEndian(&cy, msg.data + 8);
+                convertFromLittleEndian(&cz, msg.data + 12);
+                convertFromLittleEndian(&pitch, msg.data + 16);
+                convertFromLittleEndian(&yaw, msg.data + 20);
+                convertFromLittleEndian(&roll, msg.data + 24);
+
+                EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
+                EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
+                EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
+                EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
+                EXPECT_EQ(odometryData.chassisOdometry.pitch, pitch);
+                EXPECT_EQ(odometryData.chassisOdometry.yaw, yaw);
+                EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
+
+                uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
+                EXPECT_EQ(NUM_TURRETS, numTurrets);
+
+                // turret odometry
+                const uint32_t startIndex = sizeof(VisionCoprocessor::ChassisOdometryData) + 1;
+                std::array<std::tuple<uint32_t, float, float>, NUM_TURRETS> turretOdom;
+                for (size_t i = 0; i < turretOdom.size(); i++)
+                {
+                    auto &odom = turretOdom[i];
+
+                    convertFromLittleEndian(
+                        &std::get<0>(odom),
+                        msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData));
+                    convertFromLittleEndian(
+                        &std::get<1>(odom),
+                        msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                            4);
+                    convertFromLittleEndian(
+                        &std::get<2>(odom),
+                        msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                            8);
+
+                    EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<0>(odom));
+                    EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<1>(odom));
+                    EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<2>(odom));
+                }
+
+                return length;
+            });
 
     serial.sendOdometryData();
 }
@@ -421,23 +423,23 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .Times(1)
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+        .WillOnce(
+            [&](tap::communication::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
+            {
+                DJISerial::SerialMessage<DATA_LEN> msg;
+                memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-            checkHeaderAndTail<1>(msg);
-            EXPECT_EQ(6, msg.messageType);
+                checkHeaderAndTail<1>(msg);
+                EXPECT_EQ(6, msg.messageType);
 
-            uint8_t robotId;
+                uint8_t robotId;
 
-            convertFromLittleEndian(&robotId, msg.data);
+                convertFromLittleEndian(&robotId, msg.data);
 
-            EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), robotId);
+                EXPECT_EQ(static_cast<uint8_t>(robotData.robotId), robotId);
 
-            return length;
-        });
+                return length;
+            });
 
     clock.time = 10'000;
 
@@ -463,17 +465,17 @@ TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .Times(1)
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+        .WillOnce(
+            [&](tap::communication::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
+            {
+                DJISerial::SerialMessage<DATA_LEN> msg;
+                memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-            checkHeaderAndTail<1>(msg);
-            EXPECT_EQ(9, msg.messageType);
+                checkHeaderAndTail<1>(msg);
+                EXPECT_EQ(9, msg.messageType);
 
-            return length;
-        });
+                return length;
+            });
 
     serial.sendShutdownMessage();
 }
@@ -497,17 +499,17 @@ TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .Times(1)
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+        .WillOnce(
+            [&](tap::communication::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
+            {
+                DJISerial::SerialMessage<DATA_LEN> msg;
+                memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-            checkHeaderAndTail<1>(msg);
-            EXPECT_EQ(8, msg.messageType);
+                checkHeaderAndTail<1>(msg);
+                EXPECT_EQ(8, msg.messageType);
 
-            return length;
-        });
+                return length;
+            });
 
     serial.sendRebootMessage();
 }
@@ -527,18 +529,18 @@ TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
 
     EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
         .Times(1)
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+        .WillOnce(
+            [&](tap::communication::serial::Uart::UartPort, const uint8_t *data, std::size_t length)
+            {
+                DJISerial::SerialMessage<DATA_LEN> msg;
+                memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
 
-            checkHeaderAndTail<DATA_LEN>(msg);
-            EXPECT_EQ(msg.messageType, 11);
-            EXPECT_EQ(10'000'000, *reinterpret_cast<uint32_t *>(msg.data));
+                checkHeaderAndTail<DATA_LEN>(msg);
+                EXPECT_EQ(msg.messageType, 11);
+                EXPECT_EQ(10'000'000, *reinterpret_cast<uint32_t *>(msg.data));
 
-            return length;
-        });
+                return length;
+            });
 
     VisionCoprocessor::handleTimeSyncRequest();
 

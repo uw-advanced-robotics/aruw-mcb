@@ -265,11 +265,11 @@ public:
         return hasTarget;
     }
 
-    mockable inline void attachOdometryInterface(
-        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
-    {
-        this->odometryInterface = odometryInterface;
-    }
+    // mockable inline void attachOdometryInterface(
+    //     tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
+    // {
+    //     this->odometryInterface = odometryInterface;
+    // }
 
     inline void attachTransformer(
         aruwsrc::algorithms::transforms::TransformerInterface* transformer)
@@ -277,21 +277,23 @@ public:
         this->transformer = transformer;
     }
 
-    /**
-     * Specify the turret orientation for auto-aim to reference based on the target robot.
-     *
-     * @param[in] turretOrientationInterface The interface that provides turret information to the
-     * vision coprocessor
-     * @param[in] turretID The turret ID of the orientation interface that will be used to identify
-     * the turret.
-     */
-    mockable inline void attachTurretOrientationInterface(
-        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
-        uint8_t turretID)
-    {
-        assert(turretID < control::turret::NUM_TURRETS);
-        turretOrientationInterfaces[turretID] = turretOrientationInterface;
-    }
+    // /**
+    //  * Specify the turret orientation for auto-aim to reference based on the target robot.
+    //  *
+    //  * @param[in] turretOrientationInterface The interface that provides turret information to
+    //  the
+    //  * vision coprocessor
+    //  * @param[in] turretID The turret ID of the orientation interface that will be used to
+    //  identify
+    //  * the turret.
+    //  */
+    // mockable inline void attachTurretOrientationInterface(
+    //     aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
+    //     uint8_t turretID)
+    // {
+    //     assert(turretID < control::turret::NUM_TURRETS);
+    //     turretOrientationInterfaces[turretID] = turretOrientationInterface;
+    // }
 
     mockable void sendShutdownMessage();
 
