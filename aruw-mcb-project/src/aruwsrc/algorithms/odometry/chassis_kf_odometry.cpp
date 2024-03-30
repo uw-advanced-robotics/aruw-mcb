@@ -28,11 +28,11 @@ ChassisKFOdometry::ChassisKFOdometry(
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
-    : chassisSubsystem(chassisSubsystem),
+    : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+      chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
-      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))

@@ -53,14 +53,19 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(Motor& driveMotor, WheelConfig& config);
+    Wheel(Motor& driveMotor, WheelConfig& config)
+        : config(config),
+          velocityPid(config.velocityPidConfig),
+          motor(driveMotor)
+    {
+    }
 
     // Config parameters for the individual wheel
     const WheelConfig config;
     ;
 
     // PID used to control the driving motor
-    const SmoothPid velocityPid;
+    SmoothPid velocityPid;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -98,17 +103,17 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
-    virtual void initialize();
+    virtual void initialize() = 0;
 
-    virtual void refresh();
+    virtual void refresh() = 0;
 
-    virtual void setZeroRPM();
+    virtual void setZeroRPM() = 0;
 
-    virtual bool allMotorsOnline() const;
+    virtual bool allMotorsOnline() const = 0;
 
-    virtual float getDriveVelocity() const;
+    virtual float getDriveVelocity() const = 0;
 
-    virtual float getDriveRPM() const;
+    virtual float getDriveRPM() const = 0;
 
 protected:
     // Motor that drives the wheel
