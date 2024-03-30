@@ -29,6 +29,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -160,6 +161,16 @@ public:
         float roll;          ///< world frame roll of the chassis (in rad).
     } modm_packed;
 
+    struct NewChassisOdometryData
+    {
+        float xPos;   ///< x position of the chassis (in m).
+        float yPos;   ///< y position of the chassis (in m).
+        float zPos;   ///< z position of the chassis (in m).
+        float roll;   ///< world frame roll of the chassis (in rad).
+        float pitch;  ///< world frame pitch of the chassis (in rad).
+        float yaw;    ///< world frame yaw of the chassis (in rad).
+    } modm_packed;
+
     /**
      * Turret odometry data to send to Jetson.
      */
@@ -171,11 +182,27 @@ public:
         float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
     } modm_packed;
 
+    struct NewTurretOdometryData
+    {
+        float roll;   ///< roll of turret
+        float pitch;  ///< Pitch angle of turret relative to plane parallel to the ground (in
+                      ///< rad).
+        float yaw;    ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+    } modm_packed;
+
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
+    } modm_packed;
+
+    struct NewOdometryData
+    {
+        uint32_t timestamp;
+        NewChassisOdometryData chassisOdometry;
+        uint8_t numTurrets;
+        NewTurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -242,6 +269,12 @@ public:
         tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
     {
         this->odometryInterface = odometryInterface;
+    }
+
+    inline void attachTransformer(
+        aruwsrc::algorithms::transforms::TransformerInterface* transformer)
+    {
+        this->transformer = transformer;
     }
 
     /**
@@ -326,6 +359,8 @@ private:
 
     tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
 
+    aruwsrc::algorithms::transforms::TransformerInterface* transformer;
+
     aruwsrc::control::turret::TurretOrientationInterface*
         turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
@@ -352,11 +387,14 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    static inline bool useNewOdomProtocol = false;
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
 
     void sendOdometryData();
+    void sendOdometryDataNewProtocol();
     void sendRefereeRealtimeData();
     void sendRefereeCompetitionResult();
     void sendRefereeWarning();

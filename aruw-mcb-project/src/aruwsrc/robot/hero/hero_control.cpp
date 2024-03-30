@@ -34,6 +34,9 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -89,6 +92,7 @@ using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
+using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::hero;
 
 /*
@@ -164,6 +168,12 @@ HeroTurretSubsystem turret(
     &getTurretMCBCanComm());
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+
+// transforms
+StandardAndHeroTransformer transformer(odometrySubsystem, turret);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+
+StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -482,6 +492,7 @@ void initializeSubsystems()
     waterwheelAgitator.initialize();
     turret.initialize();
     buzzer.initialize();
+    transformSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -496,6 +507,7 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -513,8 +525,9 @@ void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
+    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,

@@ -23,6 +23,8 @@
 
 #include "sentry_transforms.hpp"
 
+using namespace tap::algorithms::transforms;
+
 namespace aruwsrc::sentry
 {
 SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transforms)
@@ -30,46 +32,33 @@ SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transform
 {
 }
 
-modm::Location2D<float> SentryTransformAdapter::getCurrentLocation2D() const
-{
-    const tap::algorithms::transforms::Transform& worldToChassis = transforms.getWorldToChassis();
-    return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
-}
-
-modm::Vector2f SentryTransformAdapter::getCurrentVelocity2D() const
+modm::Vector2f SentryTransformAdapter::getChassisVelocity2d() const
 {
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
-float SentryTransformAdapter::getYaw() const { return transforms.getWorldToChassis().getYaw(); }
-
 uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
 {
+    // @todo: move into transformer
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretLocation(int turretID) const
+const Transform& SentryTransformAdapter::getWorldToChassis() const
 {
-    const tap::algorithms::transforms::Transform& worldToTurret =
-        transforms.getWorldToTurret(turretID);
-    const float positionData[3 * 1] = {
-        worldToTurret.getX(),
-        worldToTurret.getY(),
-        worldToTurret.getZ()};
-    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
-    return positionInCMS;
+    return this->transforms.getWorldToChassis();
 }
 
-tap::algorithms::CMSISMat<3, 1> SentryTransformAdapter::getTurretOrientation(int turretID) const
+const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) const
 {
-    const tap::algorithms::transforms::Transform& worldToTurret =
-        transforms.getWorldToTurret(turretID);
-    const float positionData[3 * 1] = {
-        worldToTurret.getRoll(),
-        worldToTurret.getYaw(),
-        worldToTurret.getPitch()};
-    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
-    return positionInCMS;
-};
+    // todo: waiting for !646 to merge before can check ids correctly
+    if (turretID == 0)
+    {
+        return this->transforms.getWorldToTurretLeft();
+    }
+    else
+    {
+        return this->transforms.getWorldToTurretLeft();
+    }
+}
 
 };  // namespace aruwsrc::sentry

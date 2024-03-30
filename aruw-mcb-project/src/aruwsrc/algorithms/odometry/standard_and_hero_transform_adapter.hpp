@@ -29,22 +29,21 @@ namespace aruwsrc::algorithms::transforms
 {
 class StandardAndHeroTransformAdapter : public TransformerInterface
 {
+public:
     StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
 
-    modm::Location2D<float> getCurrentLocation2D() const;
-
-    modm::Vector2f getCurrentVelocity2D() const;
-
-    float getYaw() const;
+    modm::Vector2f getChassisVelocity2d() const;
 
     uint32_t getLastComputedOdometryTime() const;
+    const tap::algorithms::transforms::Transform& getWorldToChassis() const;
 
-    tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const;
+    const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
-    tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const;
+    inline uint8_t getNumTurrets() const { return numTurrets; };
 
 private:
     const aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transforms;
+    const uint8_t numTurrets = 1;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

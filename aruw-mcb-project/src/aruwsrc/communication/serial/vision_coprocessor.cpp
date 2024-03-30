@@ -180,54 +180,48 @@ void VisionCoprocessor::sendRebootMessage()
 
 void VisionCoprocessor::sendOdometryData()
 {
-    assert(odometryInterface != nullptr);
+    if (useNewOdomProtocol)
+    {
+        sendOdometryDataNewProtocol();
+        return;
+    }
+
+    assert(transformer != nullptr);
 
     DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
+    assert(transformer->getNumTurrets() == MODM_ARRAY_SIZE(odometryData->turretOdometry));
 
-    modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
-
-    float pitch = modm::toRadian(drivers->mpu6500.getPitch());
-    float roll = modm::toRadian(drivers->mpu6500.getRoll());
-    // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
+    auto& worldToChassis = transformer->getWorldToChassis();
 
     // chassis odometry
     odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
-    odometryData->chassisOdometry.xPos = location.getX();
-    odometryData->chassisOdometry.yPos = location.getY();
-    odometryData->chassisOdometry.zPos = 0.0f;
-#if defined(ALL_SENTRIES)
-    odometryData->chassisOdometry.pitch = 0;
-    odometryData->chassisOdometry.roll = 0;
-    odometryData->chassisOdometry.yaw = 0;
-#else
-    odometryData->chassisOdometry.pitch = pitch;
-    odometryData->chassisOdometry.roll = roll;
-    odometryData->chassisOdometry.yaw = location.getOrientation();
-#endif
-
-    // number of turrets
-    odometryData->numTurrets = control::turret::NUM_TURRETS;
+    odometryData->chassisOdometry.xPos = worldToChassis.getX();
+    odometryData->chassisOdometry.yPos = worldToChassis.getY();
+    odometryData->chassisOdometry.zPos = worldToChassis.getZ();
+    odometryData->chassisOdometry.pitch = worldToChassis.getPitch();
+    odometryData->chassisOdometry.roll = worldToChassis.getRoll();
+    odometryData->chassisOdometry.yaw = worldToChassis.getYaw();
 
     // turret odometry
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
-        assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].timestamp =
-            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
-        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
+        auto& worldToTurret = transformer->getWorldToTurret(i);
+        odometryData->turretOdometry[i].timestamp = transformer->getLastComputedOdometryTime();
+        odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
+        odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
     }
 
-    odometryMessage.setCRC16();
+    // @debug write into a class-variable for debugging, don't actually send to vision
 
-    drivers->uart.write(
-        VISION_COPROCESSOR_TX_UART_PORT,
-        reinterpret_cast<uint8_t*>(&odometryMessage),
-        sizeof(odometryMessage));
+    // odometryMessage.setCRC16();
+
+    // drivers->uart.write(
+    //     VISION_COPROCESSOR_TX_UART_PORT,
+    //     reinterpret_cast<uint8_t*>(&odometryMessage),
+    //     sizeof(odometryMessage));
 }
 
 void VisionCoprocessor::sendRobotTypeData()
@@ -243,6 +237,44 @@ void VisionCoprocessor::sendRobotTypeData()
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
     }
+}
+
+void VisionCoprocessor::sendOdometryDataNewProtocol()
+{
+    assert(transformer != nullptr);
+
+    DJISerial::SerialMessage<sizeof(NewOdometryData)> odometryMessage;
+    NewOdometryData* odometryData = reinterpret_cast<NewOdometryData*>(&odometryMessage.data);
+
+    odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
+    assert(transformer->getNumTurrets() == MODM_ARRAY_SIZE(odometryData->turretOdometry));
+
+    auto& worldToChassis = transformer->getWorldToChassis();
+
+    // chassis odometry
+    odometryData->timestamp = getTimeMicroseconds();
+    odometryData->chassisOdometry.xPos = worldToChassis.getX();
+    odometryData->chassisOdometry.yPos = worldToChassis.getY();
+    odometryData->chassisOdometry.zPos = worldToChassis.getZ();
+    odometryData->chassisOdometry.pitch = worldToChassis.getPitch();
+    odometryData->chassisOdometry.roll = worldToChassis.getRoll();
+    odometryData->chassisOdometry.yaw = worldToChassis.getYaw();
+
+    // turret odometry
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
+    {
+        auto& worldToTurret = transformer->getWorldToTurret(i);
+        odometryData->turretOdometry[i].pitch = worldToTurret.getRoll();
+        odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
+        odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
+    }
+
+    // @debug write into a class-variable for debugging, don't actually send to vision
+    // odometryMessage.setCRC16();
+    // drivers->uart.write(
+    //     VISION_COPROCESSOR_TX_UART_PORT,
+    //     reinterpret_cast<uint8_t*>(&odometryMessage),
+    //     sizeof(odometryMessage));
 }
 
 void VisionCoprocessor::sendHealthMessage()
