@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/as5600/as5600.hpp"
+#include "aruwsrc/communication/sensors/as5600v2/as5600.hpp"
 
 namespace aruwsrc::testbed
 {
@@ -41,6 +42,8 @@ public:
         .pin = tap::gpio::Analog::Pin::U};
 
     aruwsrc::communication::sensors::as5600::AS5600 as5600;
+
+    aruwsrc::communication::sensors::as5600v2::AS5600 as5600v2;
 
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed

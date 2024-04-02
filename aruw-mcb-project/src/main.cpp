@@ -125,6 +125,8 @@ int main()
 #if defined(TARGET_TESTBED)
             ((Drivers *)drivers)->as5600.update();
             vel = ((Drivers *)drivers)->as5600.getEncoderVelocity();
+            ((Drivers *)drivers)->as5600v2.read();
+
 #endif
         }
         modm::delay_us(10);
@@ -158,6 +160,10 @@ static void initializeIo(tap::Drivers *drivers)
     // dictates command length
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
     ((Drivers *)drivers)->mcbLite.initialize();
+#endif
+
+#if defined(TARGET_TESTBED)
+    ((Drivers *)drivers)->as5600v2.init();
 #endif
 }
 

@@ -26,12 +26,8 @@ namespace aruwsrc::communication::sensors::as5600v2
 void AS5600::init()
 {
     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>();
-    Board::I2CMaster::initialize<Board::SystemClock, 400000_Hz>();
+    Board::I2CMaster::initialize<Board::SystemClock, 360'000>();
 
-    // Wait to get a result
-    while (!readRegister(AS5600_REG_ANGLE_LOW, 2).getResult())
-        ;
-    modm::delay_ms(1);
     while (!writeRegister(AS5600_REG_ZPOS_LOW, AS5600_ZPOS_LOW_CONFIG).getResult())
         ;
     modm::delay_ms(1);

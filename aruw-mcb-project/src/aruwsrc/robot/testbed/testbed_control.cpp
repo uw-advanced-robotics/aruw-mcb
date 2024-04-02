@@ -43,7 +43,7 @@ void initializeSubsystems() {}
 
 namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::testbed::Drivers *)
 {
     testbed_control::initializeSubsystems();
 }

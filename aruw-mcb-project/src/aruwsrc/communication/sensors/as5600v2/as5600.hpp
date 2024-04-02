@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AS5600_HPP_
-#define AS5600_HPP_
+#ifndef AS5600_V2_HPP_
+#define AS5600_V2_HPP_
 
 #include "tap/board/board.hpp"
 
@@ -83,4 +83,4 @@ private:
 
 }  // namespace aruwsrc::communication::sensors::as5600v2
 
-#endif  // AS5600_HPP_
+#endif  // AS5600_V2HPP_
