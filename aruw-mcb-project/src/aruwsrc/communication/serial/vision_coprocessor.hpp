@@ -267,6 +267,8 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    mockable void sendSentryMotionStrategy();
+
     static inline void handleTimeSyncRequest()
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
