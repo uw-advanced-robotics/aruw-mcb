@@ -70,8 +70,8 @@ public:
     // TODO: config someplace
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    static constexpr float SCAN_GIRLBOSS_YAW = modm::toRadian(90.0f);
-    static constexpr float SCAN_MALEWIFE_YAW = modm::toRadian(-90.0f);
+    static constexpr float SCAN_LEFT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_RIGHT_YAW = modm::toRadian(-90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
@@ -110,21 +110,21 @@ public:
      */
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
-        SentryTurretMajorSubsystem &turretMajorSubsystem,
-        SentryTurretMinorSubsystem &turretMinorGirlbossSubsystem,
-        SentryTurretMinorSubsystem &turretMinorMalewifeSubsystem,
+        YawTurretSubsystem &turretMajorSubsystem,
+        aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretLeftSubsystem,
+        aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretRightSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface
-            &yawControllerGirlboss,  // TODO: painnn
+            &yawControllerLeft,  // TODO: painnn
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
+            &pitchControllerLeft,  // Do we still need a pitch controller if pitch is constant?
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerRight,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
-            &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
-            &malewifeBallisticsSolver,
+            &pitchControllerRight,
+        aruwsrc::algorithms::OttoBallisticsSolver
+            &leftBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver
+            &rightBallisticsSolver,
         aruwsrc::sentry::SentryTransforms
             &sentryTransforms);  // @todo: pass in needed transforms, not
 
@@ -143,36 +143,36 @@ public:
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
 
-    /**
+    /** TODO: make sure we don't need this
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
-    {
-        return turretID == girlboss::turretID ? withinAimingToleranceGirlboss
-                                              : withinAimingToleranceMalewife;
-    }
+    // bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
+    // {
+    //     return turretID == girlboss::turretID ? withinAimingToleranceLeft
+    //                                           : withinAimingToleranceRight;
+    // }
 
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
     // TODO: control turret major
     // TODO: uhh i don't think we actually ever use the subsystems themselves lol
-    SentryTurretMajorSubsystem &turretMajorSubsystem;
-    RobotTurretSubsystem &turretMinorGirlbossSubsystem;
-    RobotTurretSubsystem &turretMinorMalewifeSubsystem;
+    YawTurretSubsystem &turretMajorSubsystem;
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretLeftSubsystem;
+    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretRightSubsystem;
 
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerLeft;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerLeft;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerRight;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerRight;
 
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
-        &girlbossBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
-        &malewifeBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver
+        &leftBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver
+        &rightBallisticsSolver;
 
     aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
@@ -196,8 +196,8 @@ private:
 
     tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
-    bool withinAimingToleranceGirlboss = false;
-    bool withinAimingToleranceMalewife = false;
+    bool withinAimingToleranceLeft = false;
+    bool withinAimingToleranceRight = false;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
