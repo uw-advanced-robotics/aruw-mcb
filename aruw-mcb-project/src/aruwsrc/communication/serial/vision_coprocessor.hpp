@@ -274,8 +274,9 @@ public:
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
-    // This is for compatibility with the OLED menu 
-    bool* getMutableMotionStrategyPtr(aruwsrc::communication::serial::SentryVisionMessageType messageType)
+    // This is for compatibility with the OLED menu
+    bool* getMutableMotionStrategyPtr(
+        aruwsrc::communication::serial::SentryVisionMessageType messageType)
     {
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
