@@ -102,9 +102,9 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
     {
         torqueCompensation = 0;
     }
-
+    // @note: in case things look weird, try adding the chassis' rotational velocity to
+    // setMotorOutput
     turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
-    //  + chassis.getActualVelocityChassisRelative()[3][0]);  // @todo: sort out what this does
 }
 
 // @todo what's the point of this; overridden by runController anyways?
