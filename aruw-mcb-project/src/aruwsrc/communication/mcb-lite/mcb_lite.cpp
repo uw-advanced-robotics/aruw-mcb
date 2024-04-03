@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial_mcb_lite.hpp"
+#include "mcb_lite.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
@@ -28,21 +28,23 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
-SerialMCBLite::SerialMCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
+MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
       canRxHandler(VirtualCanRxHandler(drivers)),
       motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
-      currentSensor(),
       imu(),
+      analog(),
+      digital(),
+      leds(),
+      pwm(),
       port(port),
-      calibrateIMUMessage(),
-      currentIMUData(),
-      currentCurrentSensorData()
+      currentIMUData()
 {
 }
 
-void SerialMCBLite::initialize()
+void MCBLite::initialize()
 {
+    initialized = true;
     switch (this->port)
     {
         case Uart::UartPort::Uart1:
@@ -68,11 +70,12 @@ void SerialMCBLite::initialize()
     }
 }
 
-void SerialMCBLite::sendData()
+void MCBLite::sendData()
 {
     if (drivers->uart.isWriteFinished(port))
     {
         motorTxHandler.encodeAndSendCanData();
+        // 100 bytes of CAN data
         drivers->uart.write(
             port,
             reinterpret_cast<uint8_t*>(&(motorTxHandler.can1MessageLowSend)),
@@ -90,25 +93,61 @@ void SerialMCBLite::sendData()
             reinterpret_cast<uint8_t*>(&(motorTxHandler.can2MessageHighSend)),
             sizeof(motorTxHandler.can2MessageHighSend));
 
-        if (sendIMUCalibrationMessage)
+        if (imu.sendIMUCalibrationMessage)
         {
+            // 10 bytes of IMU
             drivers->uart.write(
                 port,
-                reinterpret_cast<uint8_t*>(&(calibrateIMUMessage)),
-                sizeof(calibrateIMUMessage));
-            sendIMUCalibrationMessage = false;
+                reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
+                sizeof(imu.calibrateIMUMessage));
+            imu.sendIMUCalibrationMessage = false;
+        }
+
+        if (digital.hasNewData)
+        {
+            // 27 bytes of digital
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
+                sizeof(digital.outputPinMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.pinModeMessage)),
+                sizeof(digital.pinModeMessage));
+            digital.hasNewData = false;
+        }
+
+        if (leds.hasNewData)
+        {
+            // 19 bytes of LED
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(leds.ledStateMessage)),
+                sizeof(leds.ledStateMessage));
+            leds.hasNewData = false;
+        }
+
+        if (pwm.hasNewData)
+        {
+            // 66 bytes of PWM
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pinDutyMessage)),
+                sizeof(pwm.pinDutyMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pwmTimerFrequencyMessage)),
+                sizeof(pwm.pwmTimerFrequencyMessage));
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(pwm.pwmTimerStartMessage)),
+                sizeof(pwm.pwmTimerStartMessage));
+            pwm.hasNewData = false;
         }
     }
 }
 
-void SerialMCBLite::calibrateIMU()
-{
-    calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU;
-    calibrateIMUMessage.setCRC16();
-    sendIMUCalibrationMessage = true;
-}
-
-void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
+void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     switch (completeMessage.messageType)
     {
@@ -120,10 +159,16 @@ void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& complete
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
             case MessageTypes::IMU_MESSAGE:
-                processIMUMessage(completeMessage);
+                memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
+                imu.processIMUMessage(completeMessage);
                 break;
-            case MessageTypes::CURRENT_SENSOR_MESSAGE:
-                processCurrentSensorMessage(completeMessage);
+            case MessageTypes::ANALOG_PIN_READ_MESSAGE:
+                memcpy(&analogData, completeMessage.data, sizeof(analogData));
+                analog.processAnalogMessage(completeMessage);
+                break;
+            case MessageTypes::DIGITAL_PID_READ_MESSAGE:
+                memcpy(&digitalData, completeMessage.data, sizeof(digitalData));
+                digital.processDigitalMessage(completeMessage);
                 break;
             default:
                 break;
@@ -131,7 +176,7 @@ void SerialMCBLite::messageReceiveCallback(const ReceivedSerialMessage& complete
     }
 }
 
-void SerialMCBLite::processCanMessage(
+void MCBLite::processCanMessage(
     const ReceivedSerialMessage& completeMessage,
     tap::can::CanBus canbus)
 {
@@ -150,28 +195,6 @@ void SerialMCBLite::processCanMessage(
             canRxHandler.refresh(canbus, msg);
         }
     }
-}
-
-void SerialMCBLite::processIMUMessage(const ReceivedSerialMessage& completeMessage)
-{
-    memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
-    imu.pitch = currentIMUData.pitch;
-    imu.roll = currentIMUData.roll;
-    imu.yaw = currentIMUData.yaw;
-    imu.Gx = currentIMUData.Gx;
-    imu.Gy = currentIMUData.Gy;
-    imu.Gz = currentIMUData.Gz;
-    imu.Ax = currentIMUData.Ax;
-    imu.Ay = currentIMUData.Ay;
-    imu.Az = currentIMUData.Az;
-    imu.imuState = currentIMUData.imuState;
-    imu.temperature = currentIMUData.temperature;
-}
-
-void SerialMCBLite::processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage)
-{
-    memcpy(&currentCurrentSensorData, completeMessage.data, sizeof(currentCurrentSensorData));
-    currentSensor.current = currentCurrentSensorData.current;
 }
 
 }  // namespace aruwsrc::virtualMCB
