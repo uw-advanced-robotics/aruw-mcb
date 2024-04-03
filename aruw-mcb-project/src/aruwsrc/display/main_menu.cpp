@@ -193,7 +193,8 @@ void MainMenu::addAboutMenuCallback()
     getViewStack()->push(abtm);
 }
 
-void MainMenu::addSentryStrategyMenuCallback(){
+void MainMenu::addSentryStrategyMenuCallback()
+{
     SentryStrategyMenu* ssm =
         new (&sentryStrategyMenu) SentryStrategyMenu(getViewStack(), visionCoprocessor);
     getViewStack()->push(ssm);

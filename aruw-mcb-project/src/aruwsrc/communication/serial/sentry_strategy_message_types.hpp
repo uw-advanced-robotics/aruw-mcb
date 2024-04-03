@@ -65,7 +65,7 @@ enum class SentryResponseMessageType : uint16_t
 
 /**
  * Messages sent from MCB to vision
-*/
+ */
 enum class SentryVisionMessageType : uint8_t
 {
     NONE = 0,

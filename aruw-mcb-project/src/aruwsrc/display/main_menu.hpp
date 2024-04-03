@@ -34,8 +34,8 @@
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
-#include "turret_mcb_menu.hpp"
 #include "sentry_strategy_menu.hpp"
+#include "turret_mcb_menu.hpp"
 
 namespace aruwsrc
 {

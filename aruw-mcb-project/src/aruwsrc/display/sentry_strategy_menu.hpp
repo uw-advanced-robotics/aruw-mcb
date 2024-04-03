@@ -68,7 +68,6 @@ public:
 
     static const char *getMenuName() { return "Sentry Strategy Menu"; }
 
-
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
