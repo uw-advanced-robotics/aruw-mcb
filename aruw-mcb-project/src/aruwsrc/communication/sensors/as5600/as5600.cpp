@@ -19,50 +19,64 @@
 
 #include "as5600.hpp"
 
+using namespace modm::literals;
+
 namespace aruwsrc::communication::sensors::as5600
 {
-AS5600::AS5600(Config &config) : config(config) {}
-
-void AS5600::update()
+void AS5600::init()
 {
-    count++;
-    raw_measurement = config.analog->read(config.pin);
-    rawValue = config.analog->read(config.pin);
-    if (raw_measurement < config.min_millivolt)
-    {
-        config.min_millivolt = raw_measurement;
-    }
-    else if (raw_measurement > config.max_millivolt)
-    {
-        config.max_millivolt = raw_measurement;
-    }
-    prevMeasurement = measurement;
-    measurement = raw_measurement - config.min_millivolt;  // Have it read 0 if min
-    measurement = measurement / (config.max_millivolt - config.min_millivolt);  // Normalize
-    measurement = measurement * 360;  // Convert to degrees
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>();
+    Board::I2CMaster::initialize<Board::SystemClock, 100'000>();
+
+    got_fucked += writeRegister(AS5600_REG_ZPOS_LOW, AS5600_ZPOS_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_ZPOS_LOW, AS5600_ZPOS_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult() * 2;
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult() * 2;
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult() * 4;
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult() * 4;
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult() * 8;
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult() * 8;
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult() * 16;
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult() * 16;
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult() * 32;
+    modm::delay_ms(100);
+    got_fucked += writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult() * 32;
+    modm::delay_ms(100);
+
+    got_fucked += writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult() * 64;
+    modm::delay_ms(5);
+    got_fucked += writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult() * 64;
+    modm::delay_ms(5);
+
+    got_fucked += writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult() * 128;
+    modm::delay_ms(5);
+    got_fucked += writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult() * 128;
+    modm::delay_ms(5);
 }
 
-float AS5600::getPositionDegree() { return measurement; }
-
-float AS5600::getPositionRad() { return modm::toRadian(measurement); }
-
-float AS5600::getEncoderVelocity()
+void AS5600::read()
 {
-    float difference;
-    if (measurement < 90 && prevMeasurement > 270)
-    {
-        difference = 360 - prevMeasurement + measurement;
-    }
-    else if (measurement > 270 && prevMeasurement < 90)
-    {
-        difference = 360 - measurement + prevMeasurement;
-    }
-    else
-    {
-        difference = measurement - prevMeasurement;
-    }
+    readRegister(AS5600_REG_ZMCO, 1).getResult();
+    memcpy(&zmco_count, raw_data_buffer, 1);
+    readRegister(AS5600_REG_RAW_ANGLE_HIGH, 2);
+    memcpy(&val, raw_data_buffer, 2);
 
-    return difference / config.measurement_reading_dt;
+    actual_val = (zmco_count & 0xF) << 8 | (val >> 8);
 }
 
-}  // namespace aruwsrc::communication::sensors::as5600
+};  // namespace aruwsrc::communication::sensors::as5600

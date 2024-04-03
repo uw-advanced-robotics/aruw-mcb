@@ -20,52 +20,77 @@
 #ifndef AS5600_HPP_
 #define AS5600_HPP_
 
-#include "tap/architecture/clock.hpp"
-#include "tap/communication/gpio/analog.hpp"
-#include "tap/communication/sensors/sensor_interface.hpp"
+#include "tap/board/board.hpp"
 
-#include "modm/math/geometry/angle.hpp"
+#include "modm/architecture/interface/i2c_device.hpp"
+#include "modm/processing/resumable.hpp"
+
+#include "as5600_register.hpp"
 
 namespace aruwsrc::communication::sensors::as5600
 {
-class AS5600 : public tap::communication::sensors::SensorInterface
+class AS5600 : public modm::I2cDevice<Board::I2CMaster>
 {
 public:
-    struct Config
-    {
-        tap::gpio::Analog* analog;
-        tap::gpio::Analog::Pin pin;
-        int min_millivolt = 5000;
-        int max_millivolt = 0;
-        float measurement_reading_dt = 0.002;
-    };
+    AS5600() : modm::I2cDevice<Board::I2CMaster>(AS5600_ADDRESS){};
 
-    AS5600(Config& config);
+    // This will setup the I2C master?? TAMU initalizes the i2c here. I think i do this in the
+    // multiplexer Do config here
+    void init();
 
-    // Reads the sensor value and updates the encoder measurement
-    void update();
+    void read();
 
-    // Returns the position in degrees
-    float getPositionDegree();
+    void getPosition();
 
-    // Returns the position in radians
-    float getPositionRad();
-
-    // Returns the measurement in degrees per second
-    float getEncoderVelocity();
+    void getVelocity();
 
 private:
-    Config& config;
+    uint8_t raw_data_buffer[2];
 
-    float measurement;
-    int16_t raw_measurement;
+    inline modm::ResumableResult<bool> readRegister(uint8_t reg, int length)
+    {
+        RF_BEGIN();
+        if (length > 2)
+        {
+            length = 2;
+        }
 
-    float prevMeasurement;
+        raw_data_buffer[0] = reg;
+        while (!transaction.configureWriteRead(raw_data_buffer, 1, raw_data_buffer, length))
+        {
+        };
 
-    float rawValue = 0;
-    int count = 0;
+        RF_END_RETURN_CALL(runTransaction());
+    };
+
+    modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
+    {
+        RF_BEGIN();
+
+        raw_data_buffer[0] = reg;
+        raw_data_buffer[1] = data;
+
+        while (!transaction.configureWrite(raw_data_buffer, 2))
+        {
+        };
+
+        RF_END_RETURN_CALL(runTransaction());
+    };
+
+    float currentPosition;
+    float previousPosition;
+
+    int position = 0;
+
+    int64_t val;
+    int got_fucked = 0;
+    int zmco_count = 0;
+    int count;
+    int passed;
+
+    uint16_t actual_val;
 };
 
-}  // namespace aruwsrc::communication::sensors::as5600
+}  // namespace aruwsrc::communication::sensors::AS5600
 
 #endif  // AS5600_HPP_
