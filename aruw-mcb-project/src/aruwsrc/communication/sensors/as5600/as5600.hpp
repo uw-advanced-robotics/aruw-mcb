@@ -77,17 +77,9 @@ private:
         RF_END_RETURN_CALL(runTransaction());
     };
 
-    float currentPosition;
-    float previousPosition;
 
-    int position = 0;
-
-    int64_t val;
-    int got_fucked = 0;
-    int zmco_count = 0;
-    int count;
-    int passed;
-
+    uint16_t position_8_low_bits = 0;
+    uint8_t position_4_high_bits = 0; // ZMCO
     uint16_t actual_val;
 };
 

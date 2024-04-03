@@ -123,10 +123,7 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED)
-            ((Drivers *)drivers)->as5600.update();
-            vel = ((Drivers *)drivers)->as5600.getEncoderVelocity();
-            ((Drivers *)drivers)->as5600v2.read();
-
+            ((Drivers *)drivers)->as5600.read();
 #endif
         }
         modm::delay_us(10);
@@ -163,7 +160,7 @@ static void initializeIo(tap::Drivers *drivers)
 #endif
 
 #if defined(TARGET_TESTBED)
-    ((Drivers *)drivers)->as5600v2.init();
+    ((Drivers *)drivers)->as5600.init();
 #endif
 }
 
