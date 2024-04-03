@@ -273,8 +273,9 @@ public:
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
-    
-    bool* writeToMotionStrategy(aruwsrc::communication::serial::SentryVisionMessageType messageType){
+
+    bool* writeToMotionStrategy(aruwsrc::communication::serial::SentryVisionMessageType messageType)
+    {
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
@@ -359,7 +360,6 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
-
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
