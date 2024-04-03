@@ -50,6 +50,17 @@ public:
 
     float getChassisYaw() const;
 
+    // @note: these are here to differentiate between a client wants to control the motor vs. just
+    // read values from it. If we decide that we're fine using const / non-const references to the
+    // motor, these can be removed
+    inline aruwsrc::control::turret::TurretMotor& getMutableMotor() { return yawMotor; }
+    inline const aruwsrc::control::turret::TurretMotor& getReadOnlyMotor() const
+    {
+        return yawMotor;
+    }
+
+    void refreshSafeDisconnect() override { yawMotor.setMotorOutput(0); }
+
 private:
     aruwsrc::control::turret::TurretMotor yawMotor;
 };  // class YawTurretSubsystem
