@@ -29,6 +29,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -266,9 +267,18 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    mockable void sendSentryMotionStrategy();
+
     static inline void handleTimeSyncRequest()
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
+    }
+
+    // This is for compatibility with the OLED menu
+    bool* getMutableMotionStrategyPtr(
+        aruwsrc::communication::serial::SentryVisionMessageType messageType)
+    {
+        return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
 private:
@@ -284,6 +294,7 @@ private:
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
     };
 
     enum RxMessageTypes
@@ -351,6 +362,10 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
+
+    // Current motion strategy for sentry
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
 
 #ifdef ENV_UNIT_TESTS
 public:
