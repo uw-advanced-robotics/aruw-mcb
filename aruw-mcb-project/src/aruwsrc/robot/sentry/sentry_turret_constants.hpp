@@ -52,6 +52,8 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 8'000.0f;
 static modm::Vector3f OFFSET_TURRET_0_TO_TURRET_1 = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
 static constexpr float PITCH_YAW_OFFSET = 0.045f;
 
+static constexpr float TURRET_MINOR_OFFSET = 0.145f;
+
 namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -64,7 +66,6 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 namespace chassisFrameController
 {
-// @todo: tune this
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10000,
     .ki = 0.0002f,

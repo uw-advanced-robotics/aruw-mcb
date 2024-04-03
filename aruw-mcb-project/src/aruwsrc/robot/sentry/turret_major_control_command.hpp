@@ -64,7 +64,7 @@ public:
 
     bool isReady() override;
 
-    const char *getName() const override { return "User turret control"; }
+    const char *getName() const override { return "User turret major control"; }
 
     void initialize() override;
 

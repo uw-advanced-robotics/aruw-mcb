@@ -148,8 +148,7 @@ private:
      * until it gives up. Should never (and has never) happen but is a safety precaution to avoid
      * getting stuck in calibration forever.
      */
-    // static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
-    static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 100000;
+    static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;

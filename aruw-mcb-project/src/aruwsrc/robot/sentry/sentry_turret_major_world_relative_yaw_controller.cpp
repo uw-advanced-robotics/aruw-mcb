@@ -120,7 +120,6 @@ float TurretMajorWorldFrameController::getMeasurement() const
     return yawMotor.getChassisFrameMeasuredAngle().getValue() + worldToChassis.getYaw();
 }
 
-// @todo ask benjamin about this (benjamin go look at your tracking sheet)
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
 
 }  // namespace aruwsrc::control::turret::algorithms

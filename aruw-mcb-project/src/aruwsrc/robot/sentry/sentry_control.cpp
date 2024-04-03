@@ -203,7 +203,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     MOTOR1,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->mcbLite),
-    rightFrontSwerveConfig.driveMotorInverted,  // TODO: BRUHHH
+    rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor");
 
 VirtualDjiMotor rightFrontAzimuthMotor(
@@ -289,7 +289,7 @@ SentryTransforms transformer(
     turretMajor,
     turretLeft,
     turretRight,
-    {.turretMinorOffset = 1.0f});
+    {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 

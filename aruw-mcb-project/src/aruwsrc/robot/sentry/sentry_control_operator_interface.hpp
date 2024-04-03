@@ -33,7 +33,6 @@ namespace aruwsrc::control::sentry
 class SentryControlOperatorInterface : public ControlOperatorInterface
 {
 public:
-    float lastWheelVal = 0.0f;
     float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
     float DEFAULT_CHASSIS_Y_VELOCITY = 0.f;
     float DEFAULT_CHASSIS_YAW_VELOCITY = 0.f;
