@@ -39,11 +39,11 @@ public:
 public:
     aruwsrc::communication::sensors::as5600::AS5600::Config config = {
         .analog = &(this->analog),
-        .pin = tap::gpio::Analog::Pin::U};
+        .pin = tap::gpio::Analog::Pin::T};
 
     aruwsrc::communication::sensors::as5600::AS5600 as5600;
 
-    aruwsrc::communication::sensors::as5600v2::AS5600 as5600v2;
+    aruwsrc::communication::sensors::as5600v2::AS5600V2 as5600v2;
 
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed

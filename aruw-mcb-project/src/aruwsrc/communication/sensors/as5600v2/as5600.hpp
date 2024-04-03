@@ -29,10 +29,10 @@
 
 namespace aruwsrc::communication::sensors::as5600v2
 {
-class AS5600 : public modm::I2cDevice<Board::I2CMaster>
+class AS5600V2 : public modm::I2cDevice<Board::I2CMaster>
 {
 public:
-    AS5600() : modm::I2cDevice<Board::I2CMaster>(AS5600_ADDRESS){};
+    AS5600V2() : modm::I2cDevice<Board::I2CMaster>(AS5600_ADDRESS){};
 
     // This will setup the I2C master?? TAMU initalizes the i2c here. I think i do this in the
     // multiplexer Do config here
@@ -79,6 +79,16 @@ private:
 
     float currentPosition;
     float previousPosition;
+
+    int position = 0;
+
+    int64_t val;
+    int got_fucked = 0;
+    int zmco_count = 0;
+    int count;
+    int passed;
+
+    uint16_t actual_val;
 };
 
 }  // namespace aruwsrc::communication::sensors::as5600v2
