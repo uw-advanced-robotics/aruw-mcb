@@ -48,19 +48,19 @@ public:
     {
         addEntry(
             "None",
-            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::NONE),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
             true);
         addEntry(
             "Go crazy",
-            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::RUSH_BASE),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
             false);
         addEntry(
             "Go stupid",
-            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::GO_HEAL),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
             false);
         addEntry(
             "AAH",
-            visionCoprocessor->writeToMotionStrategy(SentryVisionMessageType::RUSH_MID),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
             false);
     }
 
