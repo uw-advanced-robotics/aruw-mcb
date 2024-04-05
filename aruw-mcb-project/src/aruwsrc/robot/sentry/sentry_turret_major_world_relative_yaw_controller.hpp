@@ -21,11 +21,13 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 // @todo primarily here to avoid namespace pain
 #include "tap/algorithms/transforms/transform.hpp"
@@ -119,7 +121,7 @@ private:
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
 
-    tap::algorithms::ContiguousFloat worldFrameSetpoint;
+    tap::algorithms::WrappedFloat worldFrameSetpoint;
     float positionPidOutput;
     float torqueCompensation = 0.0f;
 
