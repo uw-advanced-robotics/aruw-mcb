@@ -25,6 +25,8 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
@@ -268,9 +270,16 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackAzimuthMotor,
     rightBackSwerveConfig);
 
+aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
+    {&drivers()->mcbLite.analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
 aruwsrc::chassis::SwerveChassisSubsystem chassis(
     drivers(),
-    &drivers()->mcbLite.currentSensor,
+    &currentSensor,
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
