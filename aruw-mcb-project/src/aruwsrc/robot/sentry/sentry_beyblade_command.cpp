@@ -59,7 +59,6 @@ void SentryBeybladeCommand::initialize()
     rotationDirection = 1;
 #else
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
-    // rotationDirection = -1;
 #endif
     rotateSpeedRamp.reset(chassis->getDesiredRotation());
 }
