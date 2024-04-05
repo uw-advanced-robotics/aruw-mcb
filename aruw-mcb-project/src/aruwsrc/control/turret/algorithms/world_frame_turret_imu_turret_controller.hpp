@@ -22,8 +22,8 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 

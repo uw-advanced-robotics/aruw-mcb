@@ -521,10 +521,12 @@ TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_no_turret_controller)
 
 TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_chassis_frame_controller)
 {
-    ON_CALL(turretController, convertChassisAngleToControllerFrame)
-        .WillByDefault([](float value) { return value; });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame)
-        .WillByDefault([](float value) { return value; });
+    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
+        return value;
+    });
+    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
+        return value;
+    });
 
     tm.attachTurretController(&turretController);
 
@@ -533,10 +535,12 @@ TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_chassis_frame_controller)
 
 TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_rotated_frame_controller)
 {
-    ON_CALL(turretController, convertChassisAngleToControllerFrame)
-        .WillByDefault([](float value) { return value + M_PI; });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame)
-        .WillByDefault([](float value) { return value - M_PI; });
+    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
+        return value + M_PI;
+    });
+    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
+        return value - M_PI;
+    });
 
     tm.attachTurretController(&turretController);
 
