@@ -123,7 +123,7 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED)
-            ((Drivers *)drivers)->as5600.read();
+            ((Drivers *)drivers)->as5600.readEverything();
 #endif
         }
         modm::delay_us(10);

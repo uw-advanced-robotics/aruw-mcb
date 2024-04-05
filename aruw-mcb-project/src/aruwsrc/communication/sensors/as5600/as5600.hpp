@@ -44,19 +44,16 @@ public:
 
     void getVelocity();
 
-private:
-    uint8_t raw_data_buffer[2];
+    void readEverything();
 
+private:
     inline modm::ResumableResult<bool> readRegister(uint8_t reg, int length)
     {
         RF_BEGIN();
-        if (length > 2)
-        {
-            length = 2;
-        }
 
         raw_data_buffer[0] = reg;
-        while (!transaction.configureWriteRead(raw_data_buffer, 1, raw_data_buffer, length))
+
+        while (!transaction.configureWriteRead(raw_data_buffer, 1, everything_possible_potentially, length))
         {
         };
 
@@ -77,12 +74,15 @@ private:
         RF_END_RETURN_CALL(runTransaction());
     };
 
-
     uint16_t position_8_low_bits = 0;
-    uint8_t position_4_high_bits = 0; // ZMCO
+    uint8_t position_4_high_bits = 0;  // ZMCO
     uint16_t actual_val;
+
+    uint8_t raw_data_buffer[2];
+
+    uint8_t everything_possible_potentially[28];
 };
 
-}  // namespace aruwsrc::communication::sensors::AS5600
+}  // namespace aruwsrc::communication::sensors::as5600
 
 #endif  // AS5600_HPP_

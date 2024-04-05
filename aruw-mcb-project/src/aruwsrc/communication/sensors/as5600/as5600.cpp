@@ -33,40 +33,40 @@ void AS5600::init()
     writeRegister(AS5600_REG_ZPOS_LOW, AS5600_ZPOS_LOW_CONFIG).getResult();
     modm::delay_ms(100);
 
-    writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult() * 2;
+    writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult();
     modm::delay_ms(100);
-    writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult() * 2;
-    modm::delay_ms(100);
-
-    writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult() * 4;
-    modm::delay_ms(100);
-    writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult() * 4;
+    writeRegister(AS5600_REG_ZPOS_HIGH, AS5600_ZPOS_HIGH_CONFIG).getResult();
     modm::delay_ms(100);
 
-    writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult() * 8;
+    writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult();
     modm::delay_ms(100);
-    writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult() * 8;
-    modm::delay_ms(100);
-
-    writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult() * 16;
-    modm::delay_ms(100);
-    writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult() * 16;
+    writeRegister(AS5600_REG_MPOS_LOW, AS5600_MPOS_LOW_CONFIG).getResult();
     modm::delay_ms(100);
 
-    writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult() * 32;
+    writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult();
     modm::delay_ms(100);
-    writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult() * 32;
+    writeRegister(AS5600_REG_MPOS_HIGH, AS5600_MPOS_HIGH_CONFIG).getResult();
     modm::delay_ms(100);
 
-    writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult() * 64;
-    modm::delay_ms(5);
-    writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult() * 64;
-    modm::delay_ms(5);
+    writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
+    writeRegister(AS5600_REG_CONF_LOW, AS5600_CONF_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
 
-    writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult() * 128;
-    modm::delay_ms(5);
-    writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult() * 128;
-    modm::delay_ms(5);
+    writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult();
+    modm::delay_ms(100);
+    writeRegister(AS5600_REG_CONF_HIGH, AS5600_CONF_HIGH_CONFIG).getResult();
+    modm::delay_ms(100);
+
+    writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult();
+    modm::delay_ms(100);
+    writeRegister(AS5600_REG_MANG_HIGH, AS5600_MANG_HIGH_CONFIG).getResult();
+    modm::delay_ms(100);
+
+    writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
+    writeRegister(AS5600_REG_MANG_LOW, AS5600_MANG_LOW_CONFIG).getResult();
+    modm::delay_ms(100);
 }
 
 void AS5600::read()
@@ -79,4 +79,10 @@ void AS5600::read()
     actual_val = (position_4_high_bits & 0xF) << 8 | (position_8_low_bits >> 8);
 }
 
-};  // namespace aruwsrc::communication::sensors::as5600
+void AS5600::readEverything()
+{
+    readRegister(AS5600_REG_ZMCO, 28);
+    actual_val = (everything_possible_potentially[12] & 0xF) << 8 | everything_possible_potentially[13];
+}
+
+}  // namespace aruwsrc::communication::sensors::as5600
