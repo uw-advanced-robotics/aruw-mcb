@@ -178,14 +178,13 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-     struct AutoNavSetpointData
+    struct AutoNavSetpointData
     {
         bool pathFound;
         float x;
         float y;
         long long timestamp;
     } modm_packed;
-
 
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
@@ -227,7 +226,10 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const { return lastSetpointData; }
+    mockable inline const AutoNavSetpointData& getLastSetpointData() const
+    {
+        return lastSetpointData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {

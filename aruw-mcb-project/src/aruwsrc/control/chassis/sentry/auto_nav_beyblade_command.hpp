@@ -21,15 +21,15 @@
 #define AUTO_NAV_BEYBLADE_COMMAND_HPP_
 
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -61,15 +61,9 @@ public:
 
     bool isFinished() const override { return false; }
 
-    inline void toggleBeyblade()
-    {
-        beybladeEnabled = !beybladeEnabled;
-    };
+    inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
 
-    inline void toggleMovement()
-    {
-        movementEnabled = !movementEnabled;
-    };
+    inline void toggleMovement() { movementEnabled = !movementEnabled; };
 
     const char* getName() const override { return "autonav beyblade"; }
 
@@ -99,5 +93,5 @@ private:
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis
-   
+
 #endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_

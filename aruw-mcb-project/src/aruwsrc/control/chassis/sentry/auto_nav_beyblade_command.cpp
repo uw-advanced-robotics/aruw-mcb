@@ -22,9 +22,9 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
-#include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -74,8 +74,6 @@ void AutoNavBeybladeCommand::initialize()
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
     yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
-
-   
 }
 
 void AutoNavBeybladeCommand::execute()
@@ -96,13 +94,17 @@ void AutoNavBeybladeCommand::execute()
 
         float rampTarget = 0.0;
 
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData = visionCoprocessor.getLastSetpointData();
-        const tap::communication::serial::RefSerialData::Rx::GameType& gametype =  drivers.refSerial.getGameData().gameType;
+        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
+            visionCoprocessor.getLastSetpointData();
+        const tap::communication::serial::RefSerialData::Rx::GameType& gametype =
+            drivers.refSerial.getGameData().gameType;
 
         float x = 0.0f;
         float y = 0.0f;
-        
-        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && setpointData.pathFound && visionCoprocessor.isCvOnline() && movementEnabled)
+
+        if ((int(gametype) == 0 ||
+             (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) &&
+            setpointData.pathFound && visionCoprocessor.isCvOnline() && movementEnabled)
         {
             xRamp.setTarget(setpointData.x);
             yRamp.setTarget(setpointData.y);
@@ -115,23 +117,31 @@ void AutoNavBeybladeCommand::execute()
             float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
             if (mag > 0.01)
             {
-                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier *
+                    maxWheelSpeed;
+                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier *
+                    maxWheelSpeed;
             }
         }
-        
-        // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-        // float y = yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) * config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-        if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) && beybladeEnabled)
+        // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) *
+        // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed; float y =
+        // yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) *
+        // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+        if ((int(gametype) == 0 ||
+             (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) &&
+            beybladeEnabled)
         {
-            // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
-            // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
+            // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
+            // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
+            // maxWheelSpeed)
             const float translationalSpeedThreshold =
                 config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
                 config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-            rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+            rampTarget =
+                rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
             // reduce the beyblade rotation when translating to allow for better translational speed
             // (otherwise it is likely that you will barely move unless

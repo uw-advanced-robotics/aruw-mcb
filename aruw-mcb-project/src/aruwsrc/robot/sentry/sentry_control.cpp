@@ -146,7 +146,7 @@ aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
-//TODO: DEFINE MORE COMMANDS
+// TODO: DEFINE MORE COMMANDS
 
 /* define command mappings --------------------------------------------------*/
 
