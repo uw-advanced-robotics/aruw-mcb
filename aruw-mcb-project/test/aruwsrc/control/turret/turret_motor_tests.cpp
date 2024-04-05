@@ -497,7 +497,11 @@ protected:
             controllerFrameExpectedTarget = turretController.convertChassisAngleToControllerFrame(
                 tm.getSetpointWithinTurretRange(chassisFrameExpectedTarget));
 
-            EXPECT_NEAR(controllerFrameExpectedTarget, unwrappedTargetAngle, 1e-5f);
+            EXPECT_NEAR(
+                0.0f,
+                WrappedFloat(unwrappedTargetAngle, 0, M_TWOPI)
+                    .minDifference(controllerFrameExpectedTarget),
+                1e-5f);
         }
         else
         {
