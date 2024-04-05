@@ -22,12 +22,11 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 namespace aruwsrc::sentry
 {
-
 /**
  * A helper object that performs the computations necessary for chassis relative driving.
  * Call the function of the object in a chassis command's "execute" phase.
@@ -49,6 +48,6 @@ public:
         tap::Drivers *drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem *chassis);
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::sentry
 
-#endif  // CHASSIS_REL_DRIVE_HPP_
+#endif  // SENTRY_CHASSIS_REL_DRIVE_HPP_
