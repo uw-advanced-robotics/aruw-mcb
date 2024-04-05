@@ -152,17 +152,6 @@ public:
      */
     struct ChassisOdometryData
     {
-        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
-        float xPos;          ///< x position of the chassis (in m).
-        float yPos;          ///< y position of the chassis (in m).
-        float zPos;          ///< z position of the chassis (in m).
-        float pitch;         ///< world frame pitch of the chassis (in rad).
-        float yaw;           ///< world frame yaw of the chassis (in rad).
-        float roll;          ///< world frame roll of the chassis (in rad).
-    } modm_packed;
-
-    struct NewChassisOdometryData
-    {
         float xPos;   ///< x position of the chassis (in m).
         float yPos;   ///< y position of the chassis (in m).
         float zPos;   ///< z position of the chassis (in m).
@@ -176,14 +165,6 @@ public:
      */
     struct TurretOdometryData
     {
-        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
-        float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
-                             ///< rad).
-        float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
-    } modm_packed;
-
-    struct NewTurretOdometryData
-    {
         float roll;   ///< roll of turret
         float pitch;  ///< Pitch angle of turret relative to plane parallel to the ground (in
                       ///< rad).
@@ -192,17 +173,10 @@ public:
 
     struct OdometryData
     {
+        uint32_t timestamp;
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
-    } modm_packed;
-
-    struct NewOdometryData
-    {
-        uint32_t timestamp;
-        NewChassisOdometryData chassisOdometry;
-        uint8_t numTurrets;
-        NewTurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -264,12 +238,6 @@ public:
         }
         return hasTarget;
     }
-
-    // mockable inline void attachOdometryInterface(
-    //     tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
-    // {
-    //     this->odometryInterface = odometryInterface;
-    // }
 
     inline void attachTransformer(
         aruwsrc::algorithms::transforms::TransformerInterface* transformer)

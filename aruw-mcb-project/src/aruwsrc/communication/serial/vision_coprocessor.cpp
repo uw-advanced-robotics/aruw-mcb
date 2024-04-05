@@ -179,53 +179,6 @@ void VisionCoprocessor::sendRebootMessage()
         sizeof(rebootMessage));
 }
 
-void VisionCoprocessor::sendOdometryData()
-{
-    if (useNewOdomProtocol)
-    {
-        sendOdometryDataNewProtocol();
-        return;
-    }
-
-    assert(transformer != nullptr);
-
-    DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
-    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
-
-    odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
-    assert(transformer->getNumTurrets() == MODM_ARRAY_SIZE(odometryData->turretOdometry));
-
-    auto& worldToChassis = transformer->getWorldToChassis();
-
-    // chassis odometry
-    odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
-    odometryData->chassisOdometry.xPos = worldToChassis.getX();
-    odometryData->chassisOdometry.yPos = worldToChassis.getY();
-    odometryData->chassisOdometry.zPos = worldToChassis.getZ();
-    odometryData->chassisOdometry.pitch = worldToChassis.getPitch();
-    odometryData->chassisOdometry.roll = worldToChassis.getRoll();
-    odometryData->chassisOdometry.yaw = worldToChassis.getYaw();
-
-    // turret odometry
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
-    {
-        auto& worldToTurret = transformer->getWorldToTurret(i);
-        odometryData->turretOdometry[i].timestamp = transformer->getLastComputedOdometryTime();
-        odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
-        odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
-    }
-
-    // @debug write into a class-variable for debugging, don't actually send to vision
-    memcpy(&lastOdomData, odometryData, sizeof(OdometryData));
-
-    // odometryMessage.setCRC16();
-
-    // drivers->uart.write(
-    //     VISION_COPROCESSOR_TX_UART_PORT,
-    //     reinterpret_cast<uint8_t*>(&odometryMessage),
-    //     sizeof(odometryMessage));
-}
-
 void VisionCoprocessor::sendRobotTypeData()
 {
     if (sendRobotIdTimeout.execute())
@@ -241,12 +194,12 @@ void VisionCoprocessor::sendRobotTypeData()
     }
 }
 
-void VisionCoprocessor::sendOdometryDataNewProtocol()
+void VisionCoprocessor::sendOdometryData()
 {
     assert(transformer != nullptr);
 
-    DJISerial::SerialMessage<sizeof(NewOdometryData)> odometryMessage;
-    NewOdometryData* odometryData = reinterpret_cast<NewOdometryData*>(&odometryMessage.data);
+    DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
+    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
     assert(transformer->getNumTurrets() == MODM_ARRAY_SIZE(odometryData->turretOdometry));
@@ -262,14 +215,18 @@ void VisionCoprocessor::sendOdometryDataNewProtocol()
     odometryData->chassisOdometry.roll = worldToChassis.getRoll();
     odometryData->chassisOdometry.yaw = worldToChassis.getYaw();
 
+    odometryData->numTurrets = aruwsrc::control::turret::NUM_TURRETS;
+
     // turret odometry
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
         auto& worldToTurret = transformer->getWorldToTurret(i);
-        odometryData->turretOdometry[i].pitch = worldToTurret.getRoll();
+        odometryData->turretOdometry[i].roll = worldToTurret.getRoll();
         odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
         odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
     }
+
+    memcpy(&lastOdomData, odometryData, sizeof(OdometryData));
 
     // @debug write into a class-variable for debugging, don't actually send to vision
     // odometryMessage.setCRC16();
