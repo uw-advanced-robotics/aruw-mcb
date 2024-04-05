@@ -30,7 +30,7 @@ VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
-    SerialMCBLite* motorHandler,
+    MCBLite* motorHandler,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
