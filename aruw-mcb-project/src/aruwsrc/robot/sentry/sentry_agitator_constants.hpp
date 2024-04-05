@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -44,13 +44,13 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-namespace turret0
+namespace turretRight
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
-    .isAgitatorInverted = false,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,  // @todo: check
     /**
      * The jamming constants. Agitator is considered jammed if difference between setpoint
      * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
@@ -66,13 +66,13 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 }
 
-namespace turret1
+namespace turretLeft
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .isAgitatorInverted = false,  // @todo: check
     /**
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
