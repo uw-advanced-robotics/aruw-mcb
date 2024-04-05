@@ -26,7 +26,7 @@
 #include "modm/ui/menu/choice_menu.hpp"
 
 using namespace aruwsrc::serial;
-using namespace aruwsrc::communication::serial;
+// using namespace aruwsrc::communication::serial;
 
 /**
  * Menu to setup menu options to go send to the sentry through vision coprocessor options

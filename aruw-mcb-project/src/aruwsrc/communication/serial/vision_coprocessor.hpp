@@ -179,14 +179,6 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
-    struct AutoNavSetpointData
-    {
-        bool pathFound;
-        float x;
-        float y;
-        long long timestamp;
-    } modm_packed;
-
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
@@ -225,11 +217,6 @@ public:
     {
         assert(turretID < control::turret::NUM_TURRETS);
         return lastAimData[turretID];
-    }
-
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    {
-        return lastSetpointData;
     }
 
     mockable inline bool getSomeTurretHasTarget() const
@@ -343,8 +330,6 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
-
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     // CV online variables.
     /// Timer for determining if serial is offline.
