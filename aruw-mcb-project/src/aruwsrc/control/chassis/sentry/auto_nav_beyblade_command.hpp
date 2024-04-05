@@ -30,8 +30,6 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
-#include "aruwsrc/robot/sentry/sentry_response_transmitter.hpp"
-#include "aruwsrc/robot/sentry/sentry_response_message_types.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -76,8 +74,6 @@ public:
     const char* getName() const override { return "autonav beyblade"; }
 
 private:
-    const aruwsrc::sentry::SentryBeybladeConfig config;
-
     float rotationDirection;
 
     tap::algorithms::Ramp rotateSpeedRamp;
@@ -90,17 +86,18 @@ private:
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
 
+    const aruwsrc::sentry::SentryBeybladeConfig config;
+
+    bool autoNavOnlyInGame;
     tap::algorithms::SmoothPid xPid;
     tap::algorithms::SmoothPid yPid;
 
     uint32_t prevTime = 0;
-
-    bool autoNavOnlyInGame;
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis
-
+   
 #endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_

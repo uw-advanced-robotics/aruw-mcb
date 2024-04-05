@@ -83,7 +83,7 @@ void AutoNavBeybladeCommand::execute()
     if (yawMotor.isOnline())
     {
         uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        uint32_t dt = currTime - prevTime;
+        // uint32_t dt = currTime - prevTime;
         prevTime = currTime;
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
