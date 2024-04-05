@@ -589,8 +589,6 @@ void startStandardCommands(Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-    // drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    // drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
