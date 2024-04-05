@@ -203,7 +203,6 @@ void VisionCoprocessor::sendOdometryData()
     OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
-    assert(transformer->getNumTurrets() == MODM_ARRAY_SIZE(odometryData->turretOdometry));
 
     auto& worldToChassis = transformer->getWorldToChassis();
 
