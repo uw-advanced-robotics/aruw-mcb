@@ -147,6 +147,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_SENTRY_BEEHIVE)
+    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
