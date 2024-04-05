@@ -39,11 +39,8 @@ public:
 
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
-    inline uint8_t getNumTurrets() const { return numTurrets; };
-
 private:
     const SentryTransforms& transforms;
-    const uint8_t numTurrets = 2;
 };
 
 }  // namespace aruwsrc::sentry
