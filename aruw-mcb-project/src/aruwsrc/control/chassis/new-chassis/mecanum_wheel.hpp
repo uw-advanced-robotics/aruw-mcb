@@ -21,7 +21,7 @@
 
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
+#include "wheel.hpp"
 
 namespace aruwsrc
 {
