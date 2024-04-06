@@ -126,11 +126,39 @@ float SwerveWheel::getAngle() const
         azimuthConfig.azimuthMotorGearing);
 }
 
+std::vector<float> SwerveWheel::getMMat(){
+    float r = config.diameter / 2;
+    float omega = getDriveVelocity();
+    float beta = getAngle();
+    float xDot = r * omega * cos(beta);
+    float yDot = r * omega * sin(beta);
+    return std::vector<float>({xDot, yDot});
+}
+
+std::vector<float> SwerveWheel::getHMat()
+{
+    return std::vector<float>({
+        0,
+        0,
+        0,
+        Wheel::distanceMat.data[0],
+        Wheel::distanceMat.data[1],
+        Wheel::distanceMat.data[2],
+        0,
+        0,
+        0,
+        Wheel::distanceMat.data[3],
+        Wheel::distanceMat.data[4],
+        Wheel::distanceMat.data[5]});
+}
+
 float SwerveWheel::getAngularVelocity() const
 {
     return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) *
            (azimuthConfig.azimuthMotorGearing);
 }
+
+
 
 }  // namespace chassis
 

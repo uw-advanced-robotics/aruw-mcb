@@ -67,6 +67,8 @@ public:
     int getNumMotors() const override;
     float getAngularVelocity() const;
     float getAngle() const;
+    std::vector<float> getMMat() override;
+    std::vector<float> getHMat() override;
 
 private:
     Motor& driveMotor;

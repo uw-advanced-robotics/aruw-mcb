@@ -81,11 +81,20 @@ float MecanumWheel::getDriveVelocity() const
     return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
 }
 
-float MecanumWheel::getDriveRPM() const
-{
-    return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
+std::vector<float> MecanumWheel::getHMat(){
+    CMSISMat<2,3> calcedMat =  wheelVelocityTransformation * Wheel::wheelOrientationMat * Wheel::distanceMat;
+    return std::vector<float>({
+        0,
+        0,
+        0,
+        calcedMat.data[0],
+        calcedMat.data[1],
+        calcedMat.data[2]}
+    );
 }
-
-int MecanumWheel::getNumMotors() const { return 1; }
+ 
+std::vector<float> MecanumWheel::getMMat(){
+    return std::vector<float>({getDriveVelocity()});
+}
 }  // namespace chassis
 }  // namespace aruwsrc

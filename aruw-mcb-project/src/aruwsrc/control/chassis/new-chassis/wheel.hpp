@@ -37,6 +37,7 @@ using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 using namespace tap::algorithms;
 namespace aruwsrc
+
 {
 namespace chassis
 {
@@ -58,6 +59,11 @@ struct WheelConfig
     bool isPowered = true;
     float maxWheelRPM = 1000;
     bool inverted;
+    // Used by odometry to determine the confidence of the wheel's velocity
+    // Defaults to zero (no error in the sensor)
+    float rConfidence = 0.0f; 
+    float initalPValue = 1E3;
+    float initalQValue = 1E2;
 };
 
 class Wheel
@@ -134,6 +140,11 @@ public:
     {
         return rpm * M_2_PI / 60.0f * config.motorGearRatio * config.gearRatio;
     }
+    
+    inline float getWheelVelocityChassisRelative() const
+    {
+        return getDriveVelocity();
+    }
 
     virtual void initialize() = 0;
 
@@ -148,6 +159,12 @@ public:
     virtual float getDriveRPM() const = 0;
 
     virtual int getNumMotors() const = 0;
+
+    virtual std::vector<float> getMMat() = 0;
+
+    virtual std::vector<float> getHMat() = 0;
+
+    inline float getRConfidence() {return config.rConfidence;}
 
 protected:
     /// matrix containing distances from wheel to chassis center

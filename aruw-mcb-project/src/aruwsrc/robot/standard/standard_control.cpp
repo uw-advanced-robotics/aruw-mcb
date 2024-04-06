@@ -21,6 +21,8 @@
 
 #ifdef ALL_STANDARDS
 
+#include "aruwsrc/control/chassis/new-chassis/new_chassis_odo.hpp"
+
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
@@ -194,6 +196,12 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &leftBackMecanumWheel,
     &rightBackMecanumWheel};
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
+
+// aruwsrc::chassis::ChassisOdometry<0,4> odometry =  aruwsrc::chassis::ChassisOdometry<0,4>::constructChassisOdometry(
+//         wheels,
+//         turret,
+//         *drivers(),
+//         modm::Vector2f(0, 0));
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 

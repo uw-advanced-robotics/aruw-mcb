@@ -44,6 +44,8 @@ public:
     float getDriveVelocity() const override;
     float getDriveRPM() const override;
     int getNumMotors() const override;
+    std::vector<float> getHMat() override;
+    std::vector<float> getMMat() override;
 
 private:
     float driveSetPoint;
