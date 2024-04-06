@@ -47,8 +47,7 @@ VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),
-      odometryInterface(nullptr),
-      turretOrientationInterfaces{}
+      transformer(nullptr)
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -140,10 +139,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 void VisionCoprocessor::sendMessage()
 {
-    // #if not defined(TARGET_SENTRY_BEEHIVE)
-    // @debug aaa
     sendOdometryData();
-    // #endif
     sendRobotTypeData();
     sendHealthMessage();
     sendRefereeRealtimeData();
@@ -229,11 +225,11 @@ void VisionCoprocessor::sendOdometryData()
     memcpy(&lastOdomData, odometryData, sizeof(OdometryData));
 
     // @debug write into a class-variable for debugging, don't actually send to vision
-    // odometryMessage.setCRC16();
-    // drivers->uart.write(
-    //     VISION_COPROCESSOR_TX_UART_PORT,
-    //     reinterpret_cast<uint8_t*>(&odometryMessage),
-    //     sizeof(odometryMessage));
+    odometryMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&odometryMessage),
+        sizeof(odometryMessage));
 }
 
 void VisionCoprocessor::sendHealthMessage()

@@ -240,29 +240,11 @@ public:
         return hasTarget;
     }
 
-    inline void attachTransformer(
+    mockable inline void attachTransformer(
         aruwsrc::algorithms::transforms::TransformerInterface* transformer)
     {
         this->transformer = transformer;
     }
-
-    // /**
-    //  * Specify the turret orientation for auto-aim to reference based on the target robot.
-    //  *
-    //  * @param[in] turretOrientationInterface The interface that provides turret information to
-    //  the
-    //  * vision coprocessor
-    //  * @param[in] turretID The turret ID of the orientation interface that will be used to
-    //  identify
-    //  * the turret.
-    //  */
-    // mockable inline void attachTurretOrientationInterface(
-    //     aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
-    //     uint8_t turretID)
-    // {
-    //     assert(turretID < control::turret::NUM_TURRETS);
-    //     turretOrientationInterfaces[turretID] = turretOrientationInterface;
-    // }
 
     mockable void sendShutdownMessage();
 
@@ -340,12 +322,7 @@ private:
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
-
     aruwsrc::algorithms::transforms::TransformerInterface* transformer;
-
-    aruwsrc::control::turret::TurretOrientationInterface*
-        turretOrientationInterfaces[control::turret::NUM_TURRETS];
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
