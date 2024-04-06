@@ -21,7 +21,7 @@
 
 #include "tap/architecture/clock.hpp"
 
-#include "wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 
 namespace aruwsrc
 {
@@ -39,6 +39,7 @@ public:
 
     void initialize() override;
     void refresh() override;
+    void limitPower(float powerLimitFrac) override;
     void setZeroRPM() override;
     bool allMotorsOnline() const override;
     float getDriveVelocity() const override;
@@ -56,6 +57,7 @@ private:
     const float WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
     CMSISMat<2, 2> wheelVelocityTransformation;
     CMSISMat<2, 1> wheelMat;
+    float motorPowerLimitFrac;
 };  // class MecanumWheel
 }  // namespace chassis
 }  // namespace aruwsrc

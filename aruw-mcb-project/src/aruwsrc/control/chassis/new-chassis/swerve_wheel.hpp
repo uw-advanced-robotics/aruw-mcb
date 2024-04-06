@@ -30,6 +30,7 @@
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 #include "wheel.hpp"
 using SmoothPid = tap::algorithms::SmoothPid;
@@ -44,6 +45,7 @@ struct SwerveAzimuthConfig
     int azimuthZeroOffset;
     float azimuthMotorGearing;
     SmoothPidConfig& azimuthPidConfig;
+    modm::Pair<float, float> angular_power_frac_LUT[2];
     bool inverted;
 };
 
@@ -59,6 +61,7 @@ public:
         SmoothPid azimuthPid);
     void executeWheelVelocity(float vx, float vy) override;
     void refresh() override;
+    void limitPower(float powerLimitFrac) override;
     void initialize() override;
     void setZeroRPM() override;
     bool allMotorsOnline() const override;
@@ -81,10 +84,14 @@ private:
     float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians;
+    float drivePowerLimitFrac;
+    float azimuthPowerLimitFrac;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)
     float rotationOffset{0};
+
+    modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;
 
     // TODO: use wrappedFloat once merged in
     inline float wrapAngle(float angle, float denomination)

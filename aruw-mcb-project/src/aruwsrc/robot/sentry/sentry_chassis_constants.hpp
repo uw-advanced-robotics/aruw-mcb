@@ -23,11 +23,16 @@
 #include "aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp"
 #include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.205;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+
+// Initial position of the chassis in the field (meters)
+static constexpr float INITIAL_CHASSIS_POSITION_X = 3.074f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
 
 // @todo generate this using the position offsets in the swerve module configs
 /**
@@ -60,9 +65,14 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
 // };
 
 // Using same azimuth and pid config for all swerve modules
-aruwsrc::chassis::SwerveModuleConfig swerveCoinfig = {
+aruwsrc::chassis::SwerveModuleConfig swerveConfig = {
     .driveMotorInverted = false,
 
+};
+
+modm::Pair<float, float> angular_power_frac_LUT[2] = {
+    {0.0f, 0.2f},
+    {M_PI_2, 0.75f},
 };
 
 // todo: hopefullly these can live as constants here soon :)
@@ -76,7 +86,7 @@ aruwsrc::chassis::WheelConfig leftFrontSwerveConfig = {
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
-    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    .velocityPidConfig = swerveConfig.drivePidConfig,
     // .driveMotorInverted = false,
     .inverted = true,
 };
@@ -85,7 +95,12 @@ aruwsrc::chassis::SwerveAzimuthConfig leftFrontSwerveAzimuthConfig = {
     // .azimuthZeroOffset = 7888,
     .azimuthZeroOffset = 3753,
     .azimuthMotorGearing = 1.0,
-    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .azimuthPidConfig = swerveConfig.azimuthPidConfig,
+    .angular_power_frac_LUT =
+        {
+            angular_power_frac_LUT[0],
+            angular_power_frac_LUT[1],
+        },
     .inverted = true};
 aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
@@ -97,7 +112,7 @@ aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
-    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    .velocityPidConfig = swerveConfig.drivePidConfig,
     // .driveMotorInverted = false,
     .inverted = true,
 };
@@ -105,7 +120,12 @@ aruwsrc::chassis::WheelConfig rightFrontSwerveConfig = {
 aruwsrc::chassis::SwerveAzimuthConfig rightFrontSwerveAzimuthConfig = {
     .azimuthZeroOffset = 356,
     .azimuthMotorGearing = 1.0,
-    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .azimuthPidConfig = swerveConfig.azimuthPidConfig,
+    .angular_power_frac_LUT =
+        {
+            angular_power_frac_LUT[0],
+            angular_power_frac_LUT[1],
+        },
     .inverted = true};
 
 aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
@@ -117,7 +137,7 @@ aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
-    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    .velocityPidConfig = swerveConfig.drivePidConfig,
     // .driveMotorInverted = false,
     .inverted = true,
 };
@@ -125,7 +145,12 @@ aruwsrc::chassis::WheelConfig leftBackSwerveConfig = {
 aruwsrc::chassis::SwerveAzimuthConfig leftBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3093,
     .azimuthMotorGearing = 1.0,
-    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .azimuthPidConfig = swerveConfig.azimuthPidConfig,
+    .angular_power_frac_LUT =
+        {
+            angular_power_frac_LUT[0],
+            angular_power_frac_LUT[1],
+        },
     .inverted = true,
 };
 
@@ -137,14 +162,19 @@ aruwsrc::chassis::WheelConfig rightBackSwerveConfig = {
     .diameter = 0.076,
     .gearRatio = 23.0 / 12.0,
     .motorGearRatio = (1.0f / 19.0f),
-    .velocityPidConfig = swerveCoinfig.drivePidConfig,
+    .velocityPidConfig = swerveConfig.drivePidConfig,
     .inverted = true,
 };
 
 aruwsrc::chassis::SwerveAzimuthConfig rightBackSwerveAzimuthConfig = {
     .azimuthZeroOffset = 3679,
     .azimuthMotorGearing = 1.0,
-    .azimuthPidConfig = swerveCoinfig.azimuthPidConfig,
+    .azimuthPidConfig = swerveConfig.azimuthPidConfig,
+    .angular_power_frac_LUT =
+        {
+            angular_power_frac_LUT[0],
+            angular_power_frac_LUT[1],
+        },
     .inverted = true,
 };
 

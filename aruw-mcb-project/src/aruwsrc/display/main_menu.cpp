@@ -46,6 +46,7 @@ MainMenu::MainMenu(
       turretStatusMenuBus1(stack, turretMCBCanCommBus1),
       turretStatusMenuBus2(stack, turretMCBCanCommBus2),
       aboutMenu(stack),
+      sentryStrategyMenu(stack, visionCoprocessor),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
       turretMCBCanCommBus2(turretMCBCanCommBus2)
@@ -107,6 +108,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addAboutMenuCallback));
+    addEntry(
+        SentryStrategyMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addSentryStrategyMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -186,6 +192,14 @@ void MainMenu::addAboutMenuCallback()
     AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
     getViewStack()->push(abtm);
 }
+
+void MainMenu::addSentryStrategyMenuCallback()
+{
+    SentryStrategyMenu* ssm =
+        new (&sentryStrategyMenu) SentryStrategyMenu(getViewStack(), visionCoprocessor);
+    getViewStack()->push(ssm);
+}
+
 }  // namespace display
 
 }  // namespace aruwsrc
