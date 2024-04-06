@@ -138,16 +138,13 @@ public:
     virtual void initialize() = 0;
 
     virtual void refresh() = 0;
-    virtual void refresh() = 0;
 
     virtual void setZeroRPM() = 0;
 
     virtual void limitPower(float powerLimitFrac) = 0;
 
     virtual bool allMotorsOnline() const = 0;
-    virtual bool allMotorsOnline() const = 0;
 
-    virtual float getDriveVelocity() const = 0;
     virtual float getDriveVelocity() const = 0;
 
     virtual float getDriveRPM() const = 0;
