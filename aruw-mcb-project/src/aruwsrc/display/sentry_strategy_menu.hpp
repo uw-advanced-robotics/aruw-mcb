@@ -20,12 +20,13 @@
 #ifndef SENTRY_STRATEGY_MENU_HPP_
 #define SENTRY_STRATEGY_MENU_HPP_
 
+#include <aruwsrc/communication/serial/sentry_strategy_message_types.hpp>
+
 #include "tap/display/dummy_allocator.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/choice_menu.hpp"
 
-using namespace aruwsrc::serial;
 using namespace aruwsrc::communication::serial;
 
 /**
@@ -39,7 +40,7 @@ class SentryStrategyMenu
 public:
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        VisionCoprocessor *visionCoprocessor)
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
         : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
               vs,
               SENTRY_STRATEGY_MENU_ID,
@@ -71,7 +72,7 @@ public:
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
-    VisionCoprocessor *visionCoprocessor;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
 };
 }  // namespace aruwsrc::display
 
