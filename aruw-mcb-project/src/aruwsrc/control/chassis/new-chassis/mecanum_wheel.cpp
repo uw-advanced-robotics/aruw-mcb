@@ -22,24 +22,79 @@ namespace aruwsrc
 {
 namespace chassis
 {
-MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(driveMotor, config) {}
-
-void MecanumWheel::executeWheelVelocity(float vx, float vy)
+MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, int invertAngleMultiplier)
+    : Wheel(config),
+      invertAngleMultiplier(invertAngleMultiplier),
+      driveMotor(driveMotor),
+      velocityPid(SmoothPid(config.velocityPidConfig))
 {
-    CMSISMat<2, 1> desiredMat = PRODUCT_MAT * CMSISMat<2, 1>({vx, vy});
-    double currentTime = tap::arch::clock::getTimeMicroseconds();
-    double error = desiredMat.data[0] - motor.getShaftRPM();
-    motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));
-    prevTime = currentTime;
+    wheelVelocityTransformation = CMSISMat<2, 2>(
+        {0.0f,
+         sin(invertAngleMultiplier * WHEEL_RELATIVE_TO_ROLLER_ANGLE),
+         config.diameter / 2,
+         cos(invertAngleMultiplier * WHEEL_RELATIVE_TO_ROLLER_ANGLE)});
+    wheelVelocityTransformation = wheelVelocityTransformation.inverse();
 }
+
+void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of wheel
+{
+    wheelMat = CMSISMat<2, 1>({vx, vy});
+    CMSISMat<2, 1> desiredMat = wheelVelocityTransformation * wheelMat;
+    driveSetPoint = desiredMat.data[0];  // rad/s
+}
+
+float MecanumWheel::getSetpoint() { return driveSetPoint; }
 
 void MecanumWheel::initialize()
 {
     if (config.isPowered)
     {
-        motor.initialize();
+        driveMotor.initialize();
     }
 }
 
+void MecanumWheel::refresh()
+{
+    if (config.isPowered)
+    {
+        driveMotor.setDesiredOutput(
+            motorPowerLimitFrac * velocityPid.runControllerDerivateError(
+                                      driveSetPoint - rpmToRadPerS(driveMotor.getShaftRPM()),
+                                      2.0f));
+    }
+}
+
+void MecanumWheel::limitPower(float powerLimitFrac)
+{
+    if (config.isPowered)
+    {
+        motorPowerLimitFrac = powerLimitFrac;
+    }
+}
+
+void MecanumWheel::setZeroRPM()
+{
+    if (config.isPowered)
+    {
+        driveMotor.setDesiredOutput(0.0f);
+    }
+}
+
+bool MecanumWheel::allMotorsOnline() const
+{
+    return config.isPowered ? driveMotor.isMotorOnline() : false;
+}
+
+float MecanumWheel::getDriveVelocity() const
+{
+    return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
+}
+
+float MecanumWheel::getDriveRPM() const
+{
+    return config.isPowered ? driveMotor.getShaftRPM() : 0.0f;
+}
+
+int MecanumWheel::getNumMotors() const { return 1; }
 }  // namespace chassis
 }  // namespace aruwsrc
