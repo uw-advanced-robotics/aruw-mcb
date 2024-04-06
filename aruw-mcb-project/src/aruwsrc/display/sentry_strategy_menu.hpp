@@ -20,6 +20,8 @@
 #ifndef SENTRY_STRATEGY_MENU_HPP_
 #define SENTRY_STRATEGY_MENU_HPP_
 
+#include <aruwsrc/communication/serial/sentry_strategy_message_types.hpp>
+
 #include "tap/display/dummy_allocator.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
@@ -48,19 +50,23 @@ public:
     {
         addEntry(
             "None",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
+            visionCoprocessor->getMutableMotionStrategyPtr(
+                aruwsrc::communication::serial::SentryVisionMessageType::NONE),
             true);
         addEntry(
             "Go crazy",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
+            visionCoprocessor->getMutableMotionStrategyPtr(
+                aruwsrc::communication::serial::SentryVisionMessageType::RUSH_BASE),
             false);
         addEntry(
             "Go stupid",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
+            visionCoprocessor->getMutableMotionStrategyPtr(
+                aruwsrc::communication::serial::SentryVisionMessageType::GO_HEAL),
             false);
         addEntry(
             "AAH",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
+            visionCoprocessor->getMutableMotionStrategyPtr(
+                aruwsrc::communication::serial::SentryVisionMessageType::RUSH_MID),
             false);
     }
 
