@@ -43,6 +43,7 @@
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -358,7 +359,7 @@ cv::TurretCVCommand turretCVCommand(
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // base rotate/unjam commands
-MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
 UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
@@ -526,7 +527,8 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
-    cvOnTargetGovernor);
+    cvOnTargetGovernor,
+    &rotateAgitator);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),

@@ -137,9 +137,27 @@ void ChassisSubsystem::initialize()
 
 void ChassisSubsystem::refresh()
 {
+    limitPower();
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         wheels[i]->refresh();
+    }
+}
+
+void ChassisSubsystem::limitPower()
+{
+    currentSensor->update();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // don't power limit if power limiting doesn't need to be applied
+    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    {
+        powerLimitFrac = 1;
+    }
+
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        wheels[i]->limitPower(powerLimitFrac);
     }
 }
 

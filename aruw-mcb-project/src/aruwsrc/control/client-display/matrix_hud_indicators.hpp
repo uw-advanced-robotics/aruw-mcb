@@ -163,7 +163,7 @@ private:
             {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
 #if defined(DISPLAY_FIRING_MODE)
-            {"FIRE", "SNGL\n10Hz\n20Hz"},
+            {"FIRE", "SNGL\nCONST\n10Hz\n20Hz"},
 #endif
             {"CV  ", "GATE\nNOGT\nOFFL"}
         };
