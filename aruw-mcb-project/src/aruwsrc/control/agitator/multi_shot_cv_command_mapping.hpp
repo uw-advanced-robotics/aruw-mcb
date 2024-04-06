@@ -24,6 +24,7 @@
 
 #include "tap/control/hold_repeat_command_mapping.hpp"
 
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 
 #include "manual_fire_rate_reselection_manager.hpp"
@@ -57,6 +58,7 @@ public:
     enum LaunchMode : uint8_t
     {
         SINGLE = 0,
+        NO_HEATING,
         FULL_AUTO_10HZ,
         FULL_AUTO,
         NUM_SHOOTER_STATES,
@@ -78,7 +80,8 @@ public:
         tap::control::Command &launchCommand,
         const tap::control::RemoteMapState &rms,
         std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
-        governor::CvOnTargetGovernor &cvOnTargetGovernor);
+        governor::CvOnTargetGovernor &cvOnTargetGovernor,
+        std::optional<ConstantVelocityAgitatorCommand *> command = std::nullopt);
 
     void setShooterState(LaunchMode mode)
     {
@@ -97,6 +100,27 @@ private:
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
     LaunchMode launchMode = SINGLE;
+    std::optional<ConstantVelocityAgitatorCommand *> command;
+
+    int getCurrentBarrelCoolingRate() const
+    {
+        if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 / 10.0f;
+        }
+        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 / 10.0f;
+        }
+        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate42 != 0)
+        {
+            return drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
+        }
+        else
+        {
+            return ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+        }
+    }
 };
 
 }  // namespace aruwsrc::control::agitator

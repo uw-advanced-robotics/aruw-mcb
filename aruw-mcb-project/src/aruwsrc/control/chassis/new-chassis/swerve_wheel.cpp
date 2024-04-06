@@ -118,7 +118,10 @@ void SwerveWheel::refresh()
         azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
 }
 
-void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }  // sluggish start and stop
+void SwerveWheel::setZeroRPM() { 
+    driveMotor.setDesiredOutput(0.0f);
+    azimuthMotor.setDesiredOutput(0.0f);
+}
 
 bool SwerveWheel::allMotorsOnline() const
 {

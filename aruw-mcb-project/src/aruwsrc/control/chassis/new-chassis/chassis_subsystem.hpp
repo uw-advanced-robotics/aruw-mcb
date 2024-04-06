@@ -180,7 +180,6 @@ public:
      * @note Equations slightly modified from this paper:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
-    mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     const char* getName() override { return "Chassis"; }
 

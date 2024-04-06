@@ -16,26 +16,65 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VIRTUAL_CURRENT_SENSOR_HPP_
 #define VIRTUAL_CURRENT_SENSOR_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+
+#include "virtual_analog.hpp"
 
 namespace aruwsrc::virtualMCB
 {
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
-    friend class SerialMCBLite;
+    /**
+     * Parameters for the analog current sensor.
+     */
+    struct Config
+    {
+        const VirtualAnalog *analogDriver;
+        const tap::gpio::Analog::Pin analogSensorPin;
+        /**
+         * The conversion factor from millivolts (read in by the analog driver) to current in
+         * milliamps
+         *
+         * The sensor returns an analog reading in mV. `currentSensorMaPerMv` has units mA/mV, so
+         * multiplying the analog reading by `currentSensorMaPerMv` results in a value in mV.
+         */
+        const float currentSensorMaPerMv;
+        /**
+         * When zero milliamps are being read, the raw analog value that the sensor reports in
+         * millivolts
+         */
+        const float currentSensorZeroMv;
+        /**
+         * Alpha gain to be used to low pass filter the raw analog data.
+         */
+        const float currentSensorLowPassAlpha;
+    };
 
 public:
-    VirtualCurrentSensor() {}
-    void update() override {}
-    float getCurrentMa() const override { return current; }
+    VirtualCurrentSensor(const Config &config) : config(config) {}
+
+    float getCurrentMa() const { return current; }
+
+    void update()
+    {
+        current = tap::algorithms::lowPassFilter(
+            current,
+            abs(static_cast<float>(config.analogDriver->read(config.analogSensorPin)) -
+                config.currentSensorZeroMv) *
+                config.currentSensorMaPerMv,
+            config.currentSensorLowPassAlpha);
+    }
 
 private:
-    float current;
-};
+    const Config config;
 
+    float current = 0;
+};
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif  // VIRTUAL_CURRENT_SENSOR_HPP_

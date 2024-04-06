@@ -29,9 +29,9 @@ class SentryTurretMinorSubsystem final : public aruwsrc::control::turret::Turret
 {
 public:
     SentryTurretMinorSubsystem(
-        tap::Drivers* drivers,
-        tap::motor::MotorInterface* pitchMotor,
-        tap::motor::MotorInterface* yawMotor,
+        tap::Drivers& drivers,
+        tap::motor::MotorInterface& pitchMotor,
+        tap::motor::MotorInterface& yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
         const aruwsrc::can::TurretMCBCanComm* turretMCB,
@@ -39,16 +39,11 @@ public:
 
     float getMajorFrameYaw() const;
     float getMajorFramePitch() const;
+
     uint8_t getTurretID() const { return this->turretID; };
 
-    enum class TurretID
-    {
-        TURRET_ID_ZERO = 0,
-        TURRET_ID_ONE = 1,
-    };
-
 private:
-    uint8_t turretID = 0;
+    uint8_t turretID;
 };
 
 }  // namespace aruwsrc::control::sentry
