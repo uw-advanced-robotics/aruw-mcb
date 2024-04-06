@@ -38,6 +38,13 @@ public:
     float getSetpoint();
 
     void initialize() override;
+    void refresh() override;
+    void limitPower(float powerLimitFrac) override;
+    void setZeroRPM() override;
+    bool allMotorsOnline() const override;
+    float getDriveVelocity() const override;
+    float getDriveRPM() const override;
+    int getNumMotors() const override;
 
 private:
     float driveSetPoint;
