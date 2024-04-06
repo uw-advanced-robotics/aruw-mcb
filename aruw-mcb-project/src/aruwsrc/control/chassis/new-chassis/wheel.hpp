@@ -160,7 +160,7 @@ public:
 
     virtual float getDriveRPM() const = 0;
 
-    virtual int getNumMotors() const = 0;
+    virtual int getNumMotors() const = 0; // todo make static
 
     virtual std::vector<float> getMMat() = 0;
 
