@@ -27,8 +27,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/choice_menu.hpp"
 
-using namespace aruwsrc::serial;
-// using namespace aruwsrc::communication::serial;
+using namespace aruwsrc::communication::serial;
 
 /**
  * Menu to setup menu options to go send to the sentry through vision coprocessor options
@@ -41,7 +40,7 @@ class SentryStrategyMenu
 public:
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        VisionCoprocessor *visionCoprocessor)
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
         : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
               vs,
               SENTRY_STRATEGY_MENU_ID,
@@ -50,23 +49,19 @@ public:
     {
         addEntry(
             "None",
-            visionCoprocessor->getMutableMotionStrategyPtr(
-                aruwsrc::communication::serial::SentryVisionMessageType::NONE),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
             true);
         addEntry(
             "Go crazy",
-            visionCoprocessor->getMutableMotionStrategyPtr(
-                aruwsrc::communication::serial::SentryVisionMessageType::RUSH_BASE),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
             false);
         addEntry(
             "Go stupid",
-            visionCoprocessor->getMutableMotionStrategyPtr(
-                aruwsrc::communication::serial::SentryVisionMessageType::GO_HEAL),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
             false);
         addEntry(
             "AAH",
-            visionCoprocessor->getMutableMotionStrategyPtr(
-                aruwsrc::communication::serial::SentryVisionMessageType::RUSH_MID),
+            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
             false);
     }
 
@@ -77,7 +72,7 @@ public:
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
-    VisionCoprocessor *visionCoprocessor;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
 };
 }  // namespace aruwsrc::display
 

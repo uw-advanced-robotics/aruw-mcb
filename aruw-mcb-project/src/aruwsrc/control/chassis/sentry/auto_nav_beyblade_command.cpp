@@ -69,7 +69,6 @@ void AutoNavBeybladeCommand::initialize()
     rotationDirection = 1;
 #else
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
-    // rotationDirection = -1;
 #endif
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
@@ -81,7 +80,6 @@ void AutoNavBeybladeCommand::execute()
     if (yawMotor.isOnline())
     {
         uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        // uint32_t dt = currTime - prevTime;
         prevTime = currTime;
         // Gets current chassis yaw angle
         float currentX = odometryInterface.getCurrentLocation2D().getX();
