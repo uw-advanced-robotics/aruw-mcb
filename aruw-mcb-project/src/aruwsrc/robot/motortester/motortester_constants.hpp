@@ -34,7 +34,7 @@ namespace aruwsrc::motortester::constants
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 5'000.0f,
-    .ki = 0.0f,
+    .ki = 0.0001f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16'000.0f,
@@ -60,19 +60,19 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = 1.150f * (M_TWOPI / AGITATOR_NUM_POCKETS), // Tells how far to rotate forward per agitate command.
+    .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS), // Tells how far to rotate forward per agitate command.
     .desiredSetpoint =
         225.0f / 60.0f * M_TWOPI,  // AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f, // Tells how far to rotate backwards per unjam instance.
-    .unjamSetpoint = 0.25f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.6, // Tells how far to rotate backwards per unjam instance.
+    .unjamSetpoint = 0.1f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds.Convert to ms, Add 100 ms extra tolerance.
     .maxWaitTime = static_cast<uint32_t>(
-                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.25f * AGITATOR_MAX_ROF *
+                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.2f * AGITATOR_MAX_ROF *
                        (M_TWOPI / AGITATOR_NUM_POCKETS)) +
                    100,
     .targetCycleCount = 3,
