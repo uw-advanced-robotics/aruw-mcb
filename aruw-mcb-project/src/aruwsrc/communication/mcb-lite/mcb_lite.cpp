@@ -170,6 +170,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 memcpy(&digitalData, completeMessage.data, sizeof(digitalData));
                 digital.processDigitalMessage(completeMessage);
                 break;
+            case MessageTypes::ENCODER_MESSAGE:
+                processEncoderMessage(completeMessage);
+                break;
             default:
                 break;
         }
@@ -195,6 +198,15 @@ void MCBLite::processCanMessage(
             canRxHandler.refresh(canbus, msg);
         }
     }
+}
+
+void MCBLite::processEncoderMessage(const ReceivedSerialMessage& completeMessage)
+{
+    memcpy(&encoderData, completeMessage.data, sizeof(encoderData));
+    rightWheelEncoder.positionDegree = encoderData.encoder1Position;
+    rightWheelEncoder.velocity = encoderData.encoder1Velocity;
+    leftWheelEncoder.positionDegree = encoderData.encoder2Position;
+    leftWheelEncoder.velocity = encoderData.encoder2Velocity;
 }
 
 }  // namespace aruwsrc::virtualMCB

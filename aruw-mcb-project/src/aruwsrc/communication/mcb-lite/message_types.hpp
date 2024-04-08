@@ -39,7 +39,8 @@ enum MessageTypes : uint8_t
     PWM_PIN_DUTY_MESSAGE = 8,
     PWM_TIMER_FREQUENCY_MESSAGE = 9,
     PWM_TIMER_STARTED_MESSAGE = 10,
-    LED_CONTROL_MESSAGE = 11
+    LED_CONTROL_MESSAGE = 11,
+    ENCODER_MESSAGE = 12
 };
 
 // IMU message Lite -> MCB
@@ -133,6 +134,14 @@ struct LEDControlMessage
     bool HLedOn;
     bool GreenLedOn;
     bool RedLedOn;
+} modm_packed;
+
+// Encoder messages Lite -> MCB
+struct EncoderMessage{
+    float encoder1Position;
+    float encoder1Velocity;
+    float encoder2Position;
+    float encoder2Velocity;
 } modm_packed;
 
 }  // namespace aruwsrc::virtualMCB

@@ -35,6 +35,7 @@
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
+#include "virtual_as5600.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -67,11 +68,12 @@ public:
     VirtualDigital digital;
     VirtualLEDs leds;
     VirtualPWM pwm;
+    VirtualAS5600 rightWheelEncoder, leftWheelEncoder;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
 
-    void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
+    void processEncoderMessage(const ReceivedSerialMessage& completeMessage);
 
     tap::communication::serial::Uart::UartPort port;
 
@@ -80,6 +82,7 @@ private:
     uint8_t can2Data[64];
     AnalogInputPinMessage analogData;
     DigitalInputPinMessage digitalData;
+    EncoderMessage encoderData;
 
     bool initialized = false;
 };
