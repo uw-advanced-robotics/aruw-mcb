@@ -238,33 +238,27 @@ public:
     }
     void update()
     {
-        try
-        {
-            if (!chassisYawObserver->getChassisWorldYaw(&chassisYaw))
+  
+            if (chassisYawObserver != nullptr && !chassisYawObserver->getChassisWorldYaw(&chassisYaw))
             {
                 chassisYaw = 0;
-                return;
+                // return;
             }
-        }
-        catch (const std::exception& e)
-        {
-            chassisYaw = 0;
-            // return;
-        }
+        
         float z[(numSwerve * 2) + numOther] = {};
 
         for (int i = 0; i < ((numSwerve * 2) + numOther); ++i)
         {
-            for (auto entry : wheels[i]->getHMat())
+            for (auto entry : wheels[i]->getMMat())
             {
                 z[i] = entry;
-                if (wheels[i]->getHMat().size() > 1)
+                if (wheels[i]->getMMat().size() > 1)
                 {
                     i++;
                 }
             }
         }
-
+        
         // perform the update, after this update a new state matrix is now available
         kf.performUpdate(z);
     }

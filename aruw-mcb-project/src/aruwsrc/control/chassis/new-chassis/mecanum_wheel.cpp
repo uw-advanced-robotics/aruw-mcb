@@ -87,7 +87,7 @@ bool MecanumWheel::allMotorsOnline() const
 
 float MecanumWheel::getDriveVelocity() const
 {
-    return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
+    return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : rpmToMps(driveMotor.getShaftRPM());
 }
 
 int MecanumWheel::getNumMotors() const { return 1; }

@@ -39,10 +39,14 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel*>& wheels,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor
+    // ,
+    // aruwsrc::chassis::ChassisOdometry<0, 4> odometrySubsystem
+    )
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       wheels(wheels),
       currentSensor(currentSensor),
+    //   odometrySubsystem(odometrySubsystem),
       chasisSpeedRotationPID({
           AUTOROTATION_PID_KP,
           0.0f,
@@ -142,6 +146,7 @@ void ChassisSubsystem::refresh()
     {
         wheels[i]->refresh();
     }
+    // odometrySubsystem.update();
 }
 
 void ChassisSubsystem::limitPower()

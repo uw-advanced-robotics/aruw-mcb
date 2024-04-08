@@ -37,6 +37,7 @@
 #include "modm/math/matrix.hpp"
 
 #include "wheel.hpp"
+#include "new_chassis_odo.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -62,7 +63,10 @@ public:
     ChassisSubsystem(
         tap::Drivers* drivers,
         std::vector<Wheel*>& wheels,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor
+        // ,
+        // aruwsrc::chassis::ChassisOdometry<0,4> odometrySubsystem 
+        );
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -196,6 +200,8 @@ public:
     const std::vector<Wheel*>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
+
+    // aruwsrc::chassis::ChassisOdometry<0,4> odometrySubsystem;
 
     tap::algorithms::SmoothPid chasisSpeedRotationPID;
 
