@@ -198,13 +198,14 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &rightBackMecanumWheel};
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
-// aruwsrc::chassis::ChassisOdometry<0,4> odometry =  aruwsrc::chassis::ChassisOdometry<0,4>::constructChassisOdometry(
-//         wheels,
-//         turret,
-//         *drivers(),
-//         modm::Vector2f(0, 0));
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+
+aruwsrc::chassis::ChassisOdometry odometrySubsystem =  aruwsrc::chassis::ChassisOdometry<0,4>::ChassisOdometryBuilder::constructChassisOdometry(
+        wheels,
+        *drivers(),
+        modm::Vector2f(0, 0));
+
+// OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

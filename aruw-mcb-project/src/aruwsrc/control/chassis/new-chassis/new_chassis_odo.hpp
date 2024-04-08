@@ -26,9 +26,9 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -38,18 +38,21 @@ namespace aruwsrc
 namespace chassis
 {
 template <uint8_t numSwerve, uint8_t numOther>
-class ChassisOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class ChassisOdometry : public tap::algorithms::odometry::Odometry2DInterface,
+                        public tap::control::Subsystem
 {
 public:
     ChassisOdometry(
+        tap::Drivers* drivers,
         std::vector<Wheel*>& wheels,
-        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f initPos,
-        float cMat[],
-        float qMat[],
-        float rMat[])
-        : wheels(wheels),
+        const modm::Vector2f& initPos,
+        const float (&cMat)[6 * (numSwerve * 2 + numOther)],
+        const float (&qMat)[6 * 6],
+        const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)],
+        const tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver)
+        : Subsystem(drivers),
+          wheels(wheels),
           chassisYawObserver(chassisYawObserver),
           imu(imu),
           initPos(initPos),
@@ -57,73 +60,164 @@ public:
     {
         reset();
     }
-
-    static ChassisOdometry constructChassisOdometry(
+    ChassisOdometry(
+        tap::Drivers* drivers,
         std::vector<Wheel*>& wheels,
-        const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::Drivers& drivers,
-        const modm::Vector2f initPos)
+        tap::communication::sensors::imu::ImuInterface& imu,
+        const modm::Vector2f& initPos,
+        const float (&cMat)[6 * (numSwerve * 2 + numOther)],
+        const float (&qMat)[6 * 6],
+        const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)])
+        : Subsystem(drivers),
+          wheels(wheels),
+          chassisYawObserver(nullptr),
+          imu(imu),
+          initPos(initPos),
+          kf(KF_A, cMat, qMat, rMat, KF_P0)
     {
-        std::vector<float> CMat;
-        std::vector<float> QMat;
-        std::vector<float> P0Mat;
-        std::vector<float> RMat;
-        int totalSize = numSwerve * 2 + numOther;
-        for (const auto& wheel : wheels)
-        {
-            CMat.insert(CMat.end(), wheel->getHMat().begin(), wheel->getHMat().end());
-        }
-        for (int i = 0; i < totalSize * totalSize; ++i)
-        {
-            int row = i / totalSize;
-            int col = i % totalSize;
-            if (row == col)
-            {
-                RMat[i] = wheels[i]->config.rConfidence;
-            }
-            else
-            {
-                RMat[i] = 0.0;
-            }
-        }
-        for (int i = 0; i < totalSize * totalSize; ++i)
-        {
-            int row = i / totalSize;
-            int col = i % totalSize;
-            if (row == col)
-            {
-                QMat[i] = wheels[i]->config.initalQValue;
-            }
-            else
-            {
-                QMat[i] = 0.0;
-            }
-        }
-
-        float cMatArray[CMat.size()];
-        float qMatArray[QMat.size()];
-        float rMatArray[RMat.size()];
-        for (int i = 0; i < CMat.size(); ++i)
-        {
-            cMatArray[i] = CMat[i];
-        }
-        for (int i = 0; i < QMat.size(); ++i)
-        {
-            qMatArray[i] = QMat[i];
-        }
-        for (int i = 0; i < RMat.size(); ++i)
-        {
-            rMatArray[i] = RMat[i];
-        }
-        return ChassisOdometry(
-            wheels,
-            turret,
-            drivers.mpu6500,
-            initPos,
-            cMatArray,
-            qMatArray,
-            rMatArray);
+        reset();
     }
+
+    // void refresh() { update(); }
+
+    class ChassisOdometryBuilder
+    {
+    public:
+        static ChassisOdometry constructChassisOdometry(
+            std::vector<Wheel*>& wheels,
+            tap::Drivers& drivers,
+            const modm::Vector2f initPos,
+            const tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver)
+        {
+            std::vector<float> CMat;
+            std::vector<float> QMat;
+            std::vector<float> P0Mat;
+            std::vector<float> RMat;
+            int totalSize = numSwerve * 2 + numOther;
+            for (const auto& wheel : wheels)
+            {
+                CMat.insert(CMat.end(), wheel->getHMat().begin(), wheel->getHMat().end());
+            }
+            for (int i = 0; i < totalSize * totalSize; ++i)
+            {
+                int row = i / totalSize;
+                int col = i % totalSize;
+                if (row == col)
+                {
+                    RMat[i] = wheels[i]->config.rConfidence;
+                }
+                else
+                {
+                    RMat[i] = 0.0;
+                }
+            }
+            for (int i = 0; i < totalSize * totalSize; ++i)
+            {
+                int row = i / totalSize;
+                int col = i % totalSize;
+                if (row == col)
+                {
+                    QMat[i] = wheels[i]->config.initalQValue;
+                }
+                else
+                {
+                    QMat[i] = 0.0;
+                }
+            }
+
+            float(cMatArray)[6 * (numSwerve * 2 + numOther)];
+            float(qMatArray)[6 * 6];
+            float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
+            for (u_int8_t i = 0; i < CMat.size(); ++i)
+            {
+                cMatArray[i] = CMat[i];
+            }
+            for (u_int8_t i = 0; i < QMat.size(); ++i)
+            {
+                qMatArray[i] = QMat[i];
+            }
+            for (u_int8_t i = 0; i < RMat.size(); ++i)
+            {
+                rMatArray[i] = RMat[i];
+            }
+
+            return ChassisOdometry<numSwerve, numOther>(
+                &drivers,
+                wheels,
+                drivers.mpu6500,
+                initPos,
+                cMatArray,
+                qMatArray,
+                rMatArray,
+                chassisYawObserver);
+        }
+        static ChassisOdometry constructChassisOdometry(
+            std::vector<Wheel*>& wheels,
+            tap::Drivers& drivers,
+            const modm::Vector2f initPos)
+        {
+            std::vector<float> CMat;
+            std::vector<float> QMat;
+            std::vector<float> P0Mat;
+            std::vector<float> RMat;
+            int totalSize = numSwerve * 2 + numOther;
+            for (const auto& wheel : wheels)
+            {
+                CMat.insert(CMat.end(), wheel->getHMat().begin(), wheel->getHMat().end());
+            }
+            for (int i = 0; i < totalSize * totalSize; ++i)
+            {
+                int row = i / totalSize;
+                int col = i % totalSize;
+                if (row == col)
+                {
+                    RMat[i] = wheels[i]->config.rConfidence;
+                }
+                else
+                {
+                    RMat[i] = 0.0;
+                }
+            }
+            for (int i = 0; i < totalSize * totalSize; ++i)
+            {
+                int row = i / totalSize;
+                int col = i % totalSize;
+                if (row == col)
+                {
+                    QMat[i] = wheels[i]->config.initalQValue;
+                }
+                else
+                {
+                    QMat[i] = 0.0;
+                }
+            }
+
+            float(cMatArray)[6 * (numSwerve * 2 + numOther)];
+            float(qMatArray)[6 * 6];
+            float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
+            for (u_int8_t i = 0; i < CMat.size(); ++i)
+            {
+                cMatArray[i] = CMat[i];
+            }
+            for (u_int8_t i = 0; i < QMat.size(); ++i)
+            {
+                qMatArray[i] = QMat[i];
+            }
+            for (u_int8_t i = 0; i < RMat.size(); ++i)
+            {
+                rMatArray[i] = RMat[i];
+            }
+
+            return ChassisOdometry<numSwerve, numOther>(
+                &drivers,
+                wheels,
+                drivers.mpu6500,
+                initPos,
+                cMatArray,
+                qMatArray,
+                rMatArray);
+        }
+    };
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -144,10 +238,18 @@ public:
     }
     void update()
     {
-        if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+        try
+        {
+            if (!chassisYawObserver->getChassisWorldYaw(&chassisYaw))
+            {
+                chassisYaw = 0;
+                return;
+            }
+        }
+        catch (const std::exception& e)
         {
             chassisYaw = 0;
-            return;
+            // return;
         }
         float z[(numSwerve * 2) + numOther] = {};
 
@@ -241,20 +343,17 @@ private:
     static constexpr float MAX_ACCELERATION = 8.0f;
 
     static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 1E0},
-            {MAX_ACCELERATION, 1E2}
-        };
+        {{0, 1E0}, {MAX_ACCELERATION, 1E2}};
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     std::vector<Wheel*>& wheels;
 
     const modm::Vector2f initPos;
 
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(numSwerve * 2 + numOther)> kf;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;

@@ -90,6 +90,10 @@ float MecanumWheel::getDriveVelocity() const
     return config.isPowered ? rpmToMps(driveMotor.getShaftRPM()) : 0.0f;
 }
 
+int MecanumWheel::getNumMotors() const { return 1; }
+
+float MecanumWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+
 std::vector<float> MecanumWheel::getHMat(){
     CMSISMat<2,3> calcedMat =  wheelVelocityTransformation * Wheel::wheelOrientationMat * Wheel::distanceMat;
     return std::vector<float>({
