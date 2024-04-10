@@ -25,6 +25,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
@@ -281,13 +282,20 @@ aruwsrc::chassis::SwerveWheel rightBackSwerveModule(
     aruwsrc::sentry::chassis::rightBackSwerveAzimuthConfig.azimuthPidConfig);
 
 // TODO: make this a std::array
-std::vector<Wheel *> wheels = {
+std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
     &rightBackSwerveModule};
 
-aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &drivers()->mcbLite.currentSensor);
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(

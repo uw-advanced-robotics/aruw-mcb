@@ -45,7 +45,7 @@ public:
 
     AutoNavBeybladeCommand(
         tap::Drivers& drivers,
-        HolonomicChassisSubsystem& chassis,
+        ChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
         const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
@@ -75,7 +75,7 @@ private:
     tap::algorithms::Ramp yRamp;
 
     tap::Drivers& drivers;
-    HolonomicChassisSubsystem& chassis;
+    ChassisSubsystem& chassis;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;

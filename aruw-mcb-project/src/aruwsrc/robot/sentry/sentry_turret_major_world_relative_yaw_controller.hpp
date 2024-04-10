@@ -30,7 +30,7 @@
 // @todo primarily here to avoid namespace pain
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
@@ -64,7 +64,7 @@ public:
      */
     TurretMajorWorldFrameController(
         const tap::algorithms::transforms::Transform& worldToChassis,
-        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        const aruwsrc::chassis::ChassisSubsystem& chassis,
         TurretMotor& yawMotor,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
@@ -109,7 +109,7 @@ public:
 private:
     const tap::algorithms::transforms::Transform& worldToChassis;
 
-    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    const aruwsrc::chassis::ChassisSubsystem& chassis;
 
     TurretMotor& yawMotor;
 
