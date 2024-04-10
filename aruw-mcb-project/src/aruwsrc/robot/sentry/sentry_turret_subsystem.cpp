@@ -22,6 +22,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
+// @todo: this class should be deprecated
 namespace aruwsrc::control::turret
 {
 SentryTurretSubsystem::SentryTurretSubsystem(

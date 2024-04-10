@@ -17,42 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_HPP_
-#define VIRTUAL_DJI_MOTOR_HPP_
+#ifndef VIRTUAL_ANALOG_HPP_
+#define VIRTUAL_ANALOG_HPP_
 
-#include "tap/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
+#include "tap/communication/gpio/analog.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 
-#include "../mcb_lite.hpp"
+#include "message_types.hpp"
 
-using namespace tap::motor;
+using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
-/**
- * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
- */
-class VirtualDjiMotor : public tap::motor::DjiMotor
+class VirtualAnalog : public tap::gpio::Analog
 {
+    friend class MCBLite;
+
 public:
-    VirtualDjiMotor(
-        tap::Drivers* drivers,
-        MotorId desMotorIdentifier,
-        tap::can::CanBus motorCanBus,
-        MCBLite* motorHandler,
-        bool isInverted,
-        const char* name,
-        uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
-        int64_t encoderRevolutions = 0);
+    VirtualAnalog() {}
 
-    void initialize() override;
-
-    void attachSelfToRxHandler();
+    uint16_t read(Pin pin) const { return pinValues[pin]; }
 
 private:
-    MCBLite* motorHandler;
+    void processAnalogMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
+    {
+        memcpy(pinValues, completeMessage.data, sizeof(pinValues));
+    }
+
+    uint16_t pinValues[5];
 };
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif  // VIRTUAL_ANALOG_HPP

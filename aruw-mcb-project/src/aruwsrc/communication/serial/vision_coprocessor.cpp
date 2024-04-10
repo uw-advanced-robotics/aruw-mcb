@@ -99,9 +99,20 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT:
+        {
+            decodeToAutoNavSetpointData(completeMessage);
+            return;
+        }
         default:
             return;
     }
+}
+
+bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
+{
+    memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
+    return true;
 }
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
@@ -149,6 +160,7 @@ void VisionCoprocessor::sendMessage()
     sendRefereeCompetitionResult();
     sendRefereeWarning();
     sendTimeSyncMessage();
+    sendSentryMotionStrategy();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -378,4 +390,22 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
         sizeof(selectNewTargetMessage));
+}
+
+void VisionCoprocessor::sendSentryMotionStrategy()
+{
+    const int num_motion_strat = sizeof(sentryMotionStrategy);
+    DJISerial::SerialMessage<num_motion_strat> sentryMotionStrategyMessage;
+    sentryMotionStrategyMessage.messageType = CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY;
+
+    for (int i = 0; i < num_motion_strat; i++)
+    {
+        sentryMotionStrategyMessage.data[i] = sentryMotionStrategy[i];
+    }
+
+    sentryMotionStrategyMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&sentryMotionStrategyMessage),
+        sizeof(sentryMotionStrategyMessage));
 }
