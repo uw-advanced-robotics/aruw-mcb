@@ -532,7 +532,7 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    // chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     turretMajor.setDefaultCommand(&majorManualCommand);
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
@@ -545,6 +545,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -553,7 +554,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
     drivers->commandMapper.addMap(&leftDownRightUp);   // imu calibrate command
     drivers->commandMapper.addMap(&leftMidRightMid);   // chassis drive
-    drivers->commandMapper.addMap(&shoot); // Shoot
+    //drivers->commandMapper.addMap(&shoot); // Shoot
 }
 }  // namespace sentry_control
 
