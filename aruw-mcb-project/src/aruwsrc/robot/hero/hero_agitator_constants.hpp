@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef HERO_AGITATOR_CONSTANTS_HPP_
 #define HERO_AGITATOR_CONSTANTS_HPP_
 
