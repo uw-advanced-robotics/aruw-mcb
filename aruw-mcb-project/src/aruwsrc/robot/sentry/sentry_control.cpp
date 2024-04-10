@@ -297,6 +297,28 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
+SentryKFOdometry2DSubsystem chassisOdometry(
+    *drivers(),
+    chassis,
+    chassisYawObserver,
+    drivers()->mcbLite.imu,
+    INITIAL_CHASSIS_POSITION_X,
+    INITIAL_CHASSIS_POSITION_Y);
+
+SentryTransforms transformer(
+    chassisOdometry,
+    turretMajor,
+    turretLeft,
+    turretRight,
+    {.turretMinorOffset = TURRET_MINOR_OFFSET});
+
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+
+tap::algorithms::SmoothPid turretMajorYawPosPid(
+    turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
+tap::algorithms::SmoothPid turretMajorYawVelPid(
+    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+
 algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToChassis(),
     chassis,
