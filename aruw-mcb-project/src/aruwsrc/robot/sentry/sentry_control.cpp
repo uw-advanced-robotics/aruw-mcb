@@ -297,6 +297,17 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
+algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
+    transformer.getWorldToChassis(),
+    chassis,
+    turretMajor.getMutableMotor(),
+    turretLeft,
+    turretRight,
+    turretMajorYawPosPid,
+    turretMajorYawVelPid,
+    turretMajor::MAX_VEL_ERROR_INPUT,
+    turretMajor::TURRET_MINOR_TORQUE_RATIO);
+
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
