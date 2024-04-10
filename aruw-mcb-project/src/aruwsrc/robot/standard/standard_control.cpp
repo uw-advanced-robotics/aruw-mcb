@@ -36,7 +36,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+// #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
@@ -84,6 +84,9 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/odometry_2d_subsystem.hpp"
+#include "tap/control/subsystem.hpp"
+
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -199,18 +202,17 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
 
 
 
-// aruwsrc::chassis::ChassisOdometry odometrySubsystem =  aruwsrc::chassis::ChassisOdometry<0,4>::ChassisOdometryBuilder::constructChassisOdometry(
-//         wheels,
-//         *drivers(),
-//         modm::Vector2f(0, 0));
+aruwsrc::chassis::ChassisOdometry odometryKF =  aruwsrc::chassis::ChassisOdometry<0,4>::ChassisOdometryBuilder::constructChassisOdometry(
+        wheels,
+        *drivers(),
+        modm::Vector2f(0, 0));
 
 // OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
-
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+aruwsrc::chassis::Odometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0), odometryKF);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

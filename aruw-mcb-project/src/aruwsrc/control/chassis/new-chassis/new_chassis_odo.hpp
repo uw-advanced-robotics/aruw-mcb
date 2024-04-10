@@ -38,8 +38,7 @@ namespace aruwsrc
 namespace chassis
 {
 template <uint8_t numSwerve, uint8_t numOther>
-class ChassisOdometry : public tap::algorithms::odometry::Odometry2DInterface,
-                        public tap::control::Subsystem
+class ChassisOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     ChassisOdometry(
@@ -51,8 +50,7 @@ public:
         const float (&qMat)[6 * 6],
         const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)],
         const tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver)
-        : Subsystem(drivers),
-          wheels(wheels),
+        : wheels(wheels),
           chassisYawObserver(chassisYawObserver),
           imu(imu),
           initPos(initPos),
@@ -68,8 +66,7 @@ public:
         const float (&cMat)[6 * (numSwerve * 2 + numOther)],
         const float (&qMat)[6 * 6],
         const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)])
-        : Subsystem(drivers),
-          wheels(wheels),
+        : wheels(wheels),
           chassisYawObserver(nullptr),
           imu(imu),
           initPos(initPos),
@@ -238,13 +235,12 @@ public:
     }
     void update()
     {
-  
-            if (chassisYawObserver != nullptr && !chassisYawObserver->getChassisWorldYaw(&chassisYaw))
-            {
-                chassisYaw = 0;
-                // return;
-            }
-        
+        if (chassisYawObserver != nullptr && !chassisYawObserver->getChassisWorldYaw(&chassisYaw))
+        {
+            chassisYaw = 0;
+            // return;
+        }
+
         float z[(numSwerve * 2) + numOther] = {};
 
         for (int i = 0; i < ((numSwerve * 2) + numOther); ++i)
@@ -258,9 +254,11 @@ public:
                 }
             }
         }
-        
+
         // perform the update, after this update a new state matrix is now available
         kf.performUpdate(z);
+
+        updateChassisStateFromKF(chassisYaw);
     }
 
     void updateChassisStateFromKF(float chassisYaw)
