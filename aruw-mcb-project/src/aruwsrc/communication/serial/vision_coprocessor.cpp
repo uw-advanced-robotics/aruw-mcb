@@ -173,7 +173,6 @@ void VisionCoprocessor::sendRebootMessage()
         sizeof(rebootMessage));
 }
 
-
 void VisionCoprocessor::sendOdometryData()
 {
     assert(odometryInterface != nullptr);
@@ -214,11 +213,11 @@ void VisionCoprocessor::sendOdometryData()
         assert(turretOrientationInterfaces[i] != nullptr);
         odometryData->turretOdometry[i].timestamp =
             turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        #ifdef TARGET_HERO_CYCLONE
+#ifdef TARGET_HERO_CYCLONE
         odometryData->turretOdometry[i].pitch = -turretOrientationInterfaces[i]->getWorldPitch();
-        #else
+#else
         odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
-        #endif
+#endif
         odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
     }
 

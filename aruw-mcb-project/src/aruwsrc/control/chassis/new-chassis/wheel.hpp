@@ -53,11 +53,12 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(Motor& driveMotor, WheelConfig& config) :
-      config(config),
-      velocityPid(config.velocityPidConfig),
-      motor(driveMotor)
-    {}
+    Wheel(Motor& driveMotor, WheelConfig& config)
+        : config(config),
+          velocityPid(config.velocityPidConfig),
+          motor(driveMotor)
+    {
+    }
 
     // Config parameters for the individual wheel
     const WheelConfig config;

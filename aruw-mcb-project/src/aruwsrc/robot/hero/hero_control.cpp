@@ -145,12 +145,7 @@ tap::motor::DjiMotor pitchMotor(
     CAN_BUS_PITCH_MOTOR,
     true,
     "Pitch Turret");
-tap::motor::DjiMotor yawMotor(
-    drivers(), 
-    YAW_MOTOR_ID, 
-    CAN_BUS_YAW_MOTOR, 
-    true, 
-    "Yaw Turret");
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -428,7 +423,10 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zShiftNotPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
+PressCommandMapping zShiftNotPressed(
+    drivers(),
+    {&turretUTurnCommand},
+    RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
