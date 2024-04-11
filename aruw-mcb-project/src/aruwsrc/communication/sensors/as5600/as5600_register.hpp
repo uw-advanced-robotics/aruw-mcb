@@ -20,7 +20,7 @@
 #ifndef AS5600_REGISTER_HPP_
 #define AS5600_REGISTER_HPP_
 
-namespace aruwsrc::communication::sensors::as5600v2
+namespace aruwsrc::communication::sensors::as5600
 {
 #define AS5600_ADDRESS 0x36
 
