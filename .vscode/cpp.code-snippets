@@ -46,6 +46,7 @@
 			"",
 			"}  // ${1:NAMESPACE}",
 			"#endif  // ${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_HPP_",
+			"",
 		]
 	}
 	"declare-subsystem": {
@@ -94,6 +95,7 @@
 			"",
 			"}  // ${1:NAMESPACE}",
 			"#endif  // ${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_HPP_",
+			"",
 		]
 	}
 }
