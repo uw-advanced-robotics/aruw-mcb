@@ -108,6 +108,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
         case CV_MESSAGE_TYPE_ARUCO_RESET:
         {
             decodeToArucoResetData(completeMessage);
+            return;
         }
         default:
             return;
