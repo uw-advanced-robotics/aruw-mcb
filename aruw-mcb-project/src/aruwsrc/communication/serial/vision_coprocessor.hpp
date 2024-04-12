@@ -356,7 +356,6 @@ public:
 #endif
 
     void sendOdometryData();
-    void sendOdometryDataNewProtocol();
     void sendRefereeRealtimeData();
     void sendRefereeCompetitionResult();
     void sendRefereeWarning();
