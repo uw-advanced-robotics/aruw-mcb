@@ -26,6 +26,8 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
