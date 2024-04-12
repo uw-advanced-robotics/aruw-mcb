@@ -36,7 +36,7 @@ void YawTurretSubsystem::initialize() { yawMotor.initialize(); }
 
 float YawTurretSubsystem::getChassisYaw() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getValue();
+    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 
 }  // namespace aruwsrc::control::turret
