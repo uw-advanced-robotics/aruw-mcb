@@ -21,6 +21,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
@@ -486,6 +487,12 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
+HoldRepeatCommandMapping leftUpRightUp (
+    drivers(), 
+    {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
+
 HoldCommandMapping shoot(
     drivers(),
     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
@@ -500,8 +507,6 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    turretLeftAgitator.initialize();
-    turretRightAgitator.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
@@ -554,7 +559,9 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
     drivers->commandMapper.addMap(&leftDownRightUp);   // imu calibrate command
     drivers->commandMapper.addMap(&leftMidRightMid);   // chassis drive
-    //drivers->commandMapper.addMap(&shoot); // Shoot
+
+    drivers->commandMapper.addMap(&leftUpRightUp);
+    drivers->commandMapper.addMap(&shoot); // Shoot
 }
 }  // namespace sentry_control
 
