@@ -330,7 +330,7 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajor::MAX_VEL_ERROR_INPUT,
     turretMajor::TURRET_MINOR_TORQUE_RATIO);
 
-//Friction Wheels
+// Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheelsTurretLeft(
@@ -427,12 +427,13 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictio
     false,
     turretLeft::barrelID);
 
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
-    drivers(),
-    &frictionWheelsTurretLeft,
-    0.0f,
-    true,
-    turretLeft::barrelID);
+aruwsrc::control::launcher::
+    FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
+        drivers(),
+        &frictionWheelsTurretLeft,
+        0.0f,
+        true,
+        turretLeft::barrelID);
 
 // Agitator commands (turret left)
 MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -442,7 +443,6 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftAgitator,
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
-
 
 // RIGHT shooting ======================
 
@@ -454,22 +454,26 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFricti
     false,
     turretRight::barrelID);
 
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopTurretRightFrictionWheelSpinCommand(
-    drivers(),
-    &frictionWheelsTurretRight,
-    0.0f,
-    true,
-    turretRight::barrelID);
+aruwsrc::control::launcher::
+    FrictionWheelSpinRefLimitedCommand stopTurretRightFrictionWheelSpinCommand(
+        drivers(),
+        &frictionWheelsTurretRight,
+        0.0f,
+        true,
+        turretRight::barrelID);
 
 // Agitator commands (turret Right)
-MoveIntegralCommand turretRightRotateAgitator(turretRightAgitator, constants::AGITATOR_ROTATE_CONFIG);
-UnjamIntegralCommand turretRightUnjamAgitator(turretRightAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveIntegralCommand turretRightRotateAgitator(
+    turretRightAgitator,
+    constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand turretRightUnjamAgitator(
+    turretRightAgitator,
+    constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     *drivers(),
     turretRightAgitator,
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
-
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
@@ -487,8 +491,8 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldRepeatCommandMapping leftUpRightUp (
-    drivers(), 
+HoldRepeatCommandMapping leftUpRightUp(
+    drivers(),
     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
     true);
@@ -497,7 +501,6 @@ HoldCommandMapping shoot(
     drivers(),
     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -510,7 +513,7 @@ void initializeSubsystems()
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
-    //turret
+    // turret
     frictionWheelsTurretLeft.initialize();
     turretLeftAgitator.initialize();
     frictionWheelsTurretRight.initialize();
@@ -531,7 +534,6 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
-
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -550,7 +552,6 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -561,7 +562,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightMid);   // chassis drive
 
     drivers->commandMapper.addMap(&leftUpRightUp);
-    drivers->commandMapper.addMap(&shoot); // Shoot
+    drivers->commandMapper.addMap(&shoot);  // Shoot
 }
 }  // namespace sentry_control
 

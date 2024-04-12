@@ -63,7 +63,6 @@ static constexpr float DESIRED_LAUNCH_SPEED = 30.0f;
 
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 60'000;
 
-}  // namespace aruwsrc::robot::sentry
+}  // namespace aruwsrc::robot::sentry::launcher
 
 #endif  // SENTRY_LAUNCHER_CONSTANTS_HPP_
-
