@@ -407,10 +407,7 @@ private:
      * This signals that the message has been consumed and should not be used
      * for future resets.
      */
-    inline void VisionCoprocessor::invalidateArucoResetData()
-    {
-        this->lastArucoData.updated = false;
-    }
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
