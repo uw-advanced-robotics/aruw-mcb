@@ -180,6 +180,20 @@ public:
         long long timestamp;
     } modm_packed;
 
+    struct ArucoResetData
+    {
+        float x;
+        float y;
+        float z;
+        float quatW;
+        float quatX;
+        float quatY;
+        float quatZ;
+        long long timestamp;
+        uint8_t turretId;
+        bool updated;  // whether or not this was received on the current cycle
+    } modm_packed;
+
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
@@ -231,6 +245,8 @@ public:
     {
         return lastSetpointData;
     }
+
+    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -313,6 +329,7 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
     };
 
@@ -347,6 +364,8 @@ private:
 
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
+    ArucoResetData lastArucoData{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, false};
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -380,6 +399,18 @@ private:
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void VisionCoprocessor::invalidateArucoResetData()
+    {
+        this->lastArucoData.updated = false;
+    }
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
