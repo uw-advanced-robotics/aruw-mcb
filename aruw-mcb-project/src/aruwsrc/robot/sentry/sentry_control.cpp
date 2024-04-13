@@ -390,7 +390,7 @@ VisionCoprocessor visionCoprocessor(drivers());
 odometry::SentryTurretCVCommand(visionCoprocessor, turretMajor, turretLeft, turretRight,
 turretMajorWorldYawController, turretLeftControllers.yawController, turretLeftControllers.pitchController,
 turretRightControllers.yawController, turretRightControllers.pitchController, //need otto ballistics solver
-)
+);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
