@@ -91,7 +91,7 @@ void TurretCVCommand::execute()
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         auto differenceWrapped = [](float measurement, float setpoint) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
         };
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
