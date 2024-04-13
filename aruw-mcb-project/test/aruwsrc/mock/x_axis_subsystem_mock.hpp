@@ -34,7 +34,7 @@ class XAxisSubsystemMock : public engineer::XAxisSubsystem
     MOCK_METHOD(void, setExtended, (bool), (override));
     MOCK_METHOD(bool, isExtended, (), (const override));
     MOCK_METHOD(void, runHardwareTests, (), (override));
-    MOCK_METHOD(const char *, getName, (), (override));
+    MOCK_METHOD(const char *, getName, (), (const override));
 };
 }  // namespace aruwsrc::mock
 
