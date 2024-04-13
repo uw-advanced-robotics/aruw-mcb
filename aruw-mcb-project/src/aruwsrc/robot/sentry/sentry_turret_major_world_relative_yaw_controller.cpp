@@ -33,7 +33,7 @@ namespace aruwsrc::control::turret::algorithms
 {
 TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToChassis,
-    const HolonomicChassisSubsystem& chassis,
+    const ChassisSubsystem& chassis,
     TurretMotor& yawMotor,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,

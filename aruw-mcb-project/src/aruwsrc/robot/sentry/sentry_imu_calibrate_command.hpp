@@ -26,7 +26,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -112,7 +112,7 @@ public:
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
-        chassis::HolonomicChassisSubsystem &chassis,
+        chassis::ChassisSubsystem &chassis,
         aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
         aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface);
 
@@ -154,7 +154,7 @@ private:
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController;
-    chassis::HolonomicChassisSubsystem &chassis;
+    chassis::ChassisSubsystem &chassis;
 
     CalibrationState calibrationState;
 
