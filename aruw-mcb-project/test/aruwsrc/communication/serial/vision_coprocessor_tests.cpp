@@ -279,7 +279,7 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
     serial.attachTransformer(&transformerInterface);
     VisionCoprocessor::OdometryData odometryData;
 
-    tap::algorithms::transforms::Transform turretPose(0.0, 0.0, 0.0, M_PI_2, M_PI_4, M_PI);
+    tap::algorithms::transforms::Transform turretPose(1.0, 2.0, 3.0, M_PI_2, M_PI_4, M_PI);
 
     odometryData.timestamp = 132'000;
     odometryData.chassisOdometry.xPos = 10;
@@ -386,10 +386,26 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
                     &std::get<2>(odom),
                     msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
                         2 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<3>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        3 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<4>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        4 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<5>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        5 * sizeof(float));
 
-                EXPECT_NEAR(turretPose.getRoll(), std::get<0>(odom), 0.01);
-                EXPECT_NEAR(turretPose.getPitch(), std::get<1>(odom), 0.01);
-                EXPECT_NEAR(turretPose.getYaw(), std::get<2>(odom), 0.01);
+
+                EXPECT_NEAR(turretPose.getX(), std::get<0>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getY(), std::get<1>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getZ(), std::get<2>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getRoll(), std::get<3>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getPitch(), std::get<4>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getYaw(), std::get<5>(odom), 0.01);
             }
 
             return length;
