@@ -123,7 +123,8 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
 
 bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
 {
-    memcpy(&lastArucoData, &message.data, sizeof(ArucoResetData));
+    // copy packet into data field
+    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
     lastArucoData.updated = true;
     return true;
 }

@@ -180,7 +180,7 @@ public:
         long long timestamp;
     } modm_packed;
 
-    struct ArucoResetData
+    struct ArucoResetPacket
     {
         float x;
         float y;
@@ -191,6 +191,11 @@ public:
         float quatZ;
         long long timestamp;
         uint8_t turretId;
+    } modm_packed;
+
+    struct ArucoResetData
+    {
+        ArucoResetPacket data;
         bool updated;  // whether or not this was received on the current cycle
     } modm_packed;
 
@@ -364,7 +369,10 @@ private:
 
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
-    ArucoResetData lastArucoData{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, false};
+    ArucoResetData lastArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
 
     // CV online variables.
     /// Timer for determining if serial is offline.
