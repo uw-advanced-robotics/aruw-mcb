@@ -386,8 +386,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     chassisOdometry);
 
-VisionCoprocessor visionCoprocessor(drivers());
-odometry::SentryTurretCVCommand(visionCoprocessor, turretMajor, turretLeft, turretRight,
+aruwsrc::serial::VisionCoprocessor visionCoprocessor(drivers());
+SentryTurretCVCommand sentryTurretCVCommand(visionCoprocessor, turretMajor, turretLeft, turretRight,
 turretMajorWorldYawController, turretLeftControllers.yawController, turretLeftControllers.pitchController,
 turretRightControllers.yawController, turretRightControllers.pitchController, //need otto ballistics solver
 );
