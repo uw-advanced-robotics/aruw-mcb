@@ -29,6 +29,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -171,6 +172,33 @@ public:
         float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
     } modm_packed;
 
+    struct AutoNavSetpointData
+    {
+        bool pathFound;
+        float x;
+        float y;
+        long long timestamp;
+    } modm_packed;
+
+    struct ArucoResetPacket
+    {
+        float x;
+        float y;
+        float z;
+        float quatW;
+        float quatX;
+        float quatY;
+        float quatZ;
+        long long timestamp;
+        uint8_t turretId;
+    } modm_packed;
+
+    struct ArucoResetData
+    {
+        ArucoResetPacket data;
+        bool updated;  // whether or not this was received on the current cycle
+    } modm_packed;
+
     struct OdometryData
     {
         ChassisOdometryData chassisOdometry;
@@ -217,6 +245,13 @@ public:
         assert(turretID < control::turret::NUM_TURRETS);
         return lastAimData[turretID];
     }
+
+    mockable inline const AutoNavSetpointData& getLastSetpointData() const
+    {
+        return lastSetpointData;
+    }
+
+    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -266,9 +301,18 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    mockable void sendSentryMotionStrategy();
+
     static inline void handleTimeSyncRequest()
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
+    }
+
+    // This is for compatibility with the OLED menu
+    bool* getMutableMotionStrategyPtr(
+        aruwsrc::communication::serial::SentryVisionMessageType messageType)
+    {
+        return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
 private:
@@ -284,11 +328,14 @@ private:
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -319,6 +366,13 @@ private:
 
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
+
+    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+
+    ArucoResetData lastArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
 
     // CV online variables.
     /// Timer for determining if serial is offline.
@@ -351,6 +405,21 @@ private:
      *      otherwise.
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
+
+    bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
+    // Current motion strategy for sentry
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
 
 #ifdef ENV_UNIT_TESTS
 public:

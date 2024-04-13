@@ -17,42 +17,46 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_HPP_
-#define VIRTUAL_DJI_MOTOR_HPP_
+#ifndef VIRTUAL_LEDS_HPP_
+#define VIRTUAL_LEDS_HPP_
 
-#include "tap/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
+#include "tap/communication/gpio/leds.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 
-#include "../mcb_lite.hpp"
+#include "message_types.hpp"
 
-using namespace tap::motor;
+using namespace tap::communication::serial;
 
 namespace aruwsrc::virtualMCB
 {
-/**
- * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
- */
-class VirtualDjiMotor : public tap::motor::DjiMotor
+class VirtualLEDs : public tap::gpio::Leds
 {
+    friend class MCBLite;
+
 public:
-    VirtualDjiMotor(
-        tap::Drivers* drivers,
-        MotorId desMotorIdentifier,
-        tap::can::CanBus motorCanBus,
-        MCBLite* motorHandler,
-        bool isInverted,
-        const char* name,
-        uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
-        int64_t encoderRevolutions = 0);
+    VirtualLEDs() : ledStateMessage()
+    {
+        ledStateMessage.messageType = MessageTypes::LED_CONTROL_MESSAGE;
+    }
 
-    void initialize() override;
-
-    void attachSelfToRxHandler();
+    void set(LedPin pin, bool isSet)
+    {
+        ledState[pin] = isSet;
+        updateMessage();
+    }
 
 private:
-    MCBLite* motorHandler;
+    void updateMessage()
+    {
+        memcpy(ledStateMessage.data, &ledState, sizeof(LEDControlMessage));
+        ledStateMessage.setCRC16();
+        hasNewData = true;
+    }
+
+    bool ledState[10];
+    DJISerial::DJISerial::SerialMessage<sizeof(LEDControlMessage)> ledStateMessage;
+    bool hasNewData = false;
 };
 
 }  // namespace aruwsrc::virtualMCB
-
-#endif
+#endif  // VIRTUAL_LEDS_HPP_
