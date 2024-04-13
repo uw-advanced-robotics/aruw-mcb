@@ -34,7 +34,7 @@ class DartSubsystem : public tap::control::Subsystem
 public:
     DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor);
 
-    const char* getName() override { return "Dart"; }
+    const char* getName() const override { return "Dart"; }
 
     void windUp();
 
