@@ -217,14 +217,18 @@ void VisionCoprocessor::sendOdometryData()
     for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
     {
         auto& worldToTurret = transformer->getWorldToTurret(i);
+
+        odometryData->turretOdometry[i].xPos = worldToTurret.getX();
+        odometryData->turretOdometry[i].yPos = worldToTurret.getY();
+        odometryData->turretOdometry[i].zPos = worldToTurret.getZ();
         odometryData->turretOdometry[i].roll = worldToTurret.getRoll();
         odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
         odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
     }
 
+    // @debug write into a class-variable for debugging, don't actually send to vision
     memcpy(&lastOdomData, odometryData, sizeof(OdometryData));
 
-    // @debug write into a class-variable for debugging, don't actually send to vision
     odometryMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,

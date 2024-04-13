@@ -153,9 +153,9 @@ public:
      */
     struct ChassisOdometryData
     {
-        float xPos;   ///< x position of the chassis (in m).
-        float yPos;   ///< y position of the chassis (in m).
-        float zPos;   ///< z position of the chassis (in m).
+        float xPos;   ///< x position of the chassis in the world frame (in m).
+        float yPos;   ///< y position of the chassis in the world frame (in m).
+        float zPos;   ///< z position of the chassis in the world frame (in m).
         float roll;   ///< world frame roll of the chassis (in rad).
         float pitch;  ///< world frame pitch of the chassis (in rad).
         float yaw;    ///< world frame yaw of the chassis (in rad).
@@ -166,6 +166,9 @@ public:
      */
     struct TurretOdometryData
     {
+        float xPos;   ///< x position of the turret in the world frame (in m).
+        float yPos;   ///< y position of the turret in the world frame (in m).
+        float zPos;   ///< z position of the turret in the world frame (in m).
         float roll;   ///< roll of turret
         float pitch;  ///< Pitch angle of turret relative to plane parallel to the ground (in
                       ///< rad).
