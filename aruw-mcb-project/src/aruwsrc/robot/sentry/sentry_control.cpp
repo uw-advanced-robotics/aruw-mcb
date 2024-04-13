@@ -46,6 +46,9 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -382,6 +385,12 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     chassisOdometry);
+
+VisionCoprocessor visionCoprocessor(drivers());
+odometry::SentryTurretCVCommand(visionCoprocessor, turretMajor, turretLeft, turretRight,
+turretMajorWorldYawController, turretLeftControllers.yawController, turretLeftControllers.pitchController,
+turretRightControllers.yawController, turretRightControllers.pitchController, //need otto ballistics solver
+)
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(

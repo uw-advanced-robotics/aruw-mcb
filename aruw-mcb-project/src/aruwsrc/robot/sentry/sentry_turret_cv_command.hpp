@@ -31,8 +31,8 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
+#include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
@@ -119,12 +119,9 @@ public:
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
             &pitchControllerLeft,  // Do we still need a pitch controller if pitch is constant?
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerRight,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchControllerRight,
-        aruwsrc::algorithms::OttoBallisticsSolver
-            &leftBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver
-            &rightBallisticsSolver,
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerRight,
+        aruwsrc::algorithms::OttoBallisticsSolver &leftBallisticsSolver,
+        aruwsrc::algorithms::OttoBallisticsSolver &rightBallisticsSolver,
         aruwsrc::sentry::SentryTransforms
             &sentryTransforms);  // @todo: pass in needed transforms, not
 
@@ -169,10 +166,8 @@ private:
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerRight;
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerRight;
 
-    aruwsrc::algorithms::OttoBallisticsSolver
-        &leftBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver
-        &rightBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &leftBallisticsSolver;
+    aruwsrc::algorithms::OttoBallisticsSolver &rightBallisticsSolver;
 
     aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
@@ -186,15 +181,15 @@ private:
 
     // scan direction
     static constexpr int SCAN_CLOCKWISE = -1;
-    static constexpr int SCAN_COUNTER_CLOCKWISE = 1; 
+    static constexpr int SCAN_COUNTER_CLOCKWISE = 1;
     int scanDir = 1;
-
 
     // scan between 90 and 270 to avoid any silliness from wrapping
     static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(45.0f);
     static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
 
-    tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    tap::algorithms::WrappedFloat majorScanValue =
+        tap::algorithms::WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceLeft = false;
     bool withinAimingToleranceRight = false;
