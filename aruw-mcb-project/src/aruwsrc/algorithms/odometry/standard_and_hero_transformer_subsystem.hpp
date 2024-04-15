@@ -42,7 +42,7 @@ public:
 
     inline void initialize() override{};
     inline void refresh() override { transformer.updateTransforms(); };
-    const char* getName() { return "Standard and hero transformer subsystem"; }
+    const char* getName() const { return "Standard and hero transformer subsystem"; }
 
 private:
     StandardAndHeroTransformer& transformer;
