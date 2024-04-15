@@ -100,41 +100,44 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
+        // time in microseconds to project the target position ahead by to account for message
+        // lag
+        int64_t projectForwardTimeDt =
+            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+            static_cast<int64_t>(aimData.timestamp);
+
+        // project the target position forward in time s.t. we are computing a ballistics
+        // solution for a target "now" rather than whenever the camera saw the target
+        auto projectedAimPosData = aimData.pva.projectForward(projectForwardTimeDt / 1E6f);
+
         // consider each of the tracked robot's plates and determine which will be closest at time
-        // of impact
+        // of impact (ToF is smallest)
         lastComputedSolution = std::nullopt;
         for (int i = 0; i < 4; i++)
         {
             // target state, frame whose axis is at the turret center and z is up
             // assume acceleration of the chassis is 0 since we don't measure it
 
+            float currRadius = (i % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
+            float currTheta = projectedAimPosData.theta + M_PI_2 * i;
             ballistics::MeasuredKinematicState targetState = {
                 .position =
-                    {aimData.pva.xPos - turretPosition.x,
-                     aimData.pva.yPos - turretPosition.y,
-                     aimData.pva.zPos + aimData.pva.plateHeights[i] - turretPosition.z},
+                    {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
+                     projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
+                     projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
+                         turretPosition.z},
                 .velocity =
-                    {aimData.pva.xVel - chassisVel.x,
-                     aimData.pva.yVel - chassisVel.y,
-                     aimData.pva.zVel},
+                    {projectedAimPosData.xVel - chassisVel.x,
+                     projectedAimPosData.yVel - chassisVel.y,
+                     projectedAimPosData.zVel},
                 .acceleration =
-                    {aimData.pva.xAcc,
-                     aimData.pva.yAcc,
-                     aimData.pva.zAcc},  // TODO consider using chassis acceleration from IMU
-                .theta = aimData.pva.theta + M_PI_2 * i,
-                .omega = aimData.pva.omega,
-                .radius = (i % 2 == 0) ? aimData.pva.rad0 : aimData.pva.rad1};
-
-            // time in microseconds to project the target position ahead by to account for message
-            // lag
-            // TODO: this could be done on the robot as a whole rather than each target individually
-            int64_t projectForwardTimeDt =
-                static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-                static_cast<int64_t>(aimData.timestamp);
-
-            // project the target position forward in time s.t. we are computing a ballistics
-            // solution for a target "now" rather than whenever the camera saw the target
-            targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+                    {projectedAimPosData.xAcc,
+                     projectedAimPosData.yAcc,
+                     projectedAimPosData
+                         .zAcc},  // TODO consider using chassis acceleration from IMU
+                .radius = currRadius,
+                .theta = currTheta,
+                .omega = projectedAimPosData.omega};
 
             BallisticsSolution currentSolution = BallisticsSolution();
             currentSolution.distance = targetState.position.getLength();

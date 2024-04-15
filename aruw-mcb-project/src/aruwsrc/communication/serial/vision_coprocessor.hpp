@@ -22,6 +22,7 @@
 
 #include <cassert>
 
+#include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
@@ -32,6 +33,8 @@
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
@@ -140,6 +143,27 @@ public:
 
         bool updated;  ///< whether or not this came from the most recent message
 
+        inline PositionData projectForward(float dt) const
+        {
+            PositionData projected = *this;
+            projected.xPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+                dt,
+                xPos,
+                xVel,
+                xAcc);
+            projected.yPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+                dt,
+                yPos,
+                yVel,
+                yAcc);
+            projected.zPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+                dt,
+                zPos,
+                zVel,
+                zAcc);
+            projected.theta += omega * dt;
+            return projected;
+        }
     } modm_packed;
 
     struct TimingData
@@ -154,9 +178,9 @@ public:
 
     struct TurretAimData
     {
-        struct PositionData pva;
+        PositionData pva;
         uint32_t timestamp;  ///< timestamp in microseconds
-        struct TimingData timing;
+        TimingData timing;
     } modm_packed;
 
     /**
