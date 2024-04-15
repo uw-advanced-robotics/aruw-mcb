@@ -100,47 +100,58 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
-        // target state, frame whose axis is at the turret center and z is up
-        // assume acceleration of the chassis is 0 since we don't measure it
-
-        ballistics::MeasuredKinematicState targetState = {
-            .position =
-                {aimData.pva.xPos - turretPosition.x,
-                 aimData.pva.yPos - turretPosition.y,
-                 aimData.pva.zPos - turretPosition.z},
-            .velocity =
-                {aimData.pva.xVel - chassisVel.x,
-                 aimData.pva.yVel - chassisVel.y,
-                 aimData.pva.zVel},
-            .acceleration =
-                {aimData.pva.xAcc,
-                 aimData.pva.yAcc,
-                 aimData.pva.zAcc},  // TODO consider using chassis
-                                     // acceleration from IMU
-        };
-
-        // time in microseconds to project the target position ahead by
-        int64_t projectForwardTimeDt =
-            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-            static_cast<int64_t>(aimData.timestamp);
-
-        // project the target position forward in time s.t. we are computing a ballistics solution
-        // for a target "now" rather than whenever the camera saw the target
-        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
-
-        lastComputedSolution = BallisticsSolution();
-        lastComputedSolution->distance = targetState.position.getLength();
-
-        if (!ballistics::findTargetProjectileIntersection(
-                targetState,
-                launchSpeed,
-                3,
-                &lastComputedSolution->pitchAngle,
-                &lastComputedSolution->yawAngle,
-                &lastComputedSolution->timeOfFlight,
-                turretSubsystem.getPitchOffset()))
+        // consider each of the tracked robot's plates and determine which will be closest at time
+        // of impact
+        lastComputedSolution = std::nullopt;
+        for (int i = 0; i < 4; i++)
         {
-            lastComputedSolution = std::nullopt;
+            // target state, frame whose axis is at the turret center and z is up
+            // assume acceleration of the chassis is 0 since we don't measure it
+
+            ballistics::MeasuredKinematicState targetState = {
+                .position =
+                    {aimData.pva.xPos - turretPosition.x,
+                     aimData.pva.yPos - turretPosition.y,
+                     aimData.pva.zPos + aimData.pva.plateHeights[i] - turretPosition.z},
+                .velocity =
+                    {aimData.pva.xVel - chassisVel.x,
+                     aimData.pva.yVel - chassisVel.y,
+                     aimData.pva.zVel},
+                .acceleration =
+                    {aimData.pva.xAcc,
+                     aimData.pva.yAcc,
+                     aimData.pva.zAcc},  // TODO consider using chassis acceleration from IMU
+                .theta = aimData.pva.theta + M_PI_2 * i,
+                .omega = aimData.pva.omega,
+                .radius = (i % 2 == 0) ? aimData.pva.rad0 : aimData.pva.rad1};
+
+            // time in microseconds to project the target position ahead by to account for message
+            // lag
+            // TODO: this could be done on the robot as a whole rather than each target individually
+            int64_t projectForwardTimeDt =
+                static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+                static_cast<int64_t>(aimData.timestamp);
+
+            // project the target position forward in time s.t. we are computing a ballistics
+            // solution for a target "now" rather than whenever the camera saw the target
+            targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+
+            BallisticsSolution currentSolution = BallisticsSolution();
+            currentSolution.distance = targetState.position.getLength();
+
+            if (ballistics::findTargetProjectileIntersection(
+                    targetState,
+                    launchSpeed,
+                    3,
+                    &currentSolution.pitchAngle,
+                    &currentSolution.yawAngle,
+                    &currentSolution.timeOfFlight,
+                    turretSubsystem.getPitchOffset()) &&
+                (!lastComputedSolution ||
+                 currentSolution.timeOfFlight < lastComputedSolution->timeOfFlight))
+            {
+                lastComputedSolution = currentSolution;
+            }
         }
     }
 

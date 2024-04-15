@@ -98,7 +98,7 @@ public:
         FLAGS_BYTES = 1,
         TIMESTAMP_BYTES = 4,
         FIRERATE_BYTES = 1,
-        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
+        TARGET_DATA_BYTES = 69,  // (nice) 17 floats and 1 byte (from firerate)
         SHOT_TIMING_BYTES = 12,
     };
 
@@ -107,24 +107,36 @@ public:
         messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
 
     /**
-     * AutoAim data to receive from Jetson.
+     * AutoAim data to receive from Jetson. Describes a rectangular robot with separate z offsets
+     * for each plate. Stores linear pos, vel, acc of robot center as well as angular position and
+     * velocity of the entire robot.
+     *
+     * Plate indices are assumed to be 0 for the plate referred to by the angular
+     * position, and incrementing counterclockwise.
      */
 
     struct PositionData
     {
         FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
-        float xPos;  ///< x position of the target (in m).
-        float yPos;  ///< y position of the target (in m).
-        float zPos;  ///< z position of the target (in m).
+        float xPos;  ///< x position of the robot center (in m).
+        float yPos;  ///< y position of the robot center (in m).
+        float zPos;  ///< z position of the robot center (in m).
 
-        float xVel;  ///< x velocity of the target (in m/s).
-        float yVel;  ///< y velocity of the target (in m/s).
-        float zVel;  ///< z velocity of the target (in m/s).
+        float xVel;  ///< x velocity of the robot center (in m/s).
+        float yVel;  ///< y velocity of the robot center (in m/s).
+        float zVel;  ///< z velocity of the robot center (in m/s).
 
-        float xAcc;  ///< x acceleration of the target (in m/s^2).
-        float yAcc;  ///< y acceleration of the target (in m/s^2).
-        float zAcc;  ///< z acceleration of the target (in m/s^2).
+        float xAcc;  ///< x acceleration of the robot center (in m/s^2).
+        float yAcc;  ///< y acceleration of the robot center (in m/s^2).
+        float zAcc;  ///< z acceleration of the robot center (in m/s^2).
+
+        float theta;  ///< angular position of the robot
+        float omega;  ///< angular velocity of the robot
+
+        float rad0;             ///< distance from center to plates 0 and 2
+        float rad1;             ///< distance from center to plates 1 and 3
+        float plateHeights[4];  ///< height of each plate off the robot center
 
         bool updated;  ///< whether or not this came from the most recent message
 
