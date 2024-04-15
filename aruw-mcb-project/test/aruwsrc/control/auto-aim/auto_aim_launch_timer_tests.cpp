@@ -216,6 +216,13 @@ TEST_P(
                 .yAcc{0},
                 .zAcc{0},
 
+                .theta{0},
+                .omega{0},
+
+                .rad0{0},
+                .rad1{0},
+                .plateHeights{0, 0, 0, 0},
+
                 .updated{params.aimData.pva.updated},
             },
         .timestamp{params.aimData.timestamp},
