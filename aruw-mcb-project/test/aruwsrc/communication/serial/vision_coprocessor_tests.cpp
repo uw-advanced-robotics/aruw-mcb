@@ -369,7 +369,8 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
             const uint32_t startIndex = sizeof(timestamp) +
                                         sizeof(VisionCoprocessor::ChassisOdometryData) +
                                         sizeof(numTurrets);
-            std::array<std::tuple<float, float, float, float, float, float>, NUM_TURRETS> turretOdom;
+            std::array<std::tuple<float, float, float, float, float, float>, NUM_TURRETS>
+                turretOdom;
             for (size_t i = 0; i < turretOdom.size(); i++)
             {
                 auto &odom = turretOdom[i];
@@ -398,7 +399,6 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
                     &std::get<5>(odom),
                     msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
                         5 * sizeof(float));
-
 
                 EXPECT_NEAR(turretPose.getX(), std::get<0>(odom), 0.01);
                 EXPECT_NEAR(turretPose.getY(), std::get<1>(odom), 0.01);
