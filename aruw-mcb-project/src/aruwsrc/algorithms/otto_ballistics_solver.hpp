@@ -23,6 +23,7 @@
 #include <optional>
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -106,8 +107,8 @@ public:
     }
 
     /**
-     * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] visionCoprocessor for getting target data
+     * @param[in] transformer Transformer for getting chassis and turret odometry
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
@@ -117,8 +118,9 @@ public:
      */
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        // const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        // const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const aruwsrc::algorithms::transforms::TransformerInterface & transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -137,8 +139,9 @@ public:
 
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
+    const aruwsrc::algorithms::transforms::TransformerInterface & transformer;
+    // const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
+    // const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     modm::Vector3f turretOrigin;

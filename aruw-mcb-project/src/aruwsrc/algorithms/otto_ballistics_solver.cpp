@@ -22,6 +22,7 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -36,14 +37,16 @@ namespace aruwsrc::algorithms
 {
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    // const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    // const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
-      odometryInterface(odometryInterface),
-      turretSubsystem(turretSubsystem),
+      transformer(transformer),
+      //   odometryInterface(odometryInterface),
+      //   turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretID(turretID)
@@ -62,10 +65,10 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     }
 
     if (lastAimDataTimestamp != aimData.timestamp ||
-        lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
+        lastOdometryTimestamp != transformer.getLastComputedOdometryTime())
     {
         lastAimDataTimestamp = aimData.timestamp;
-        lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
+        lastOdometryTimestamp = transformer.getLastComputedOdometryTime();
 
         // if the friction wheel launch speed is 0, use a default launch speed so ballistics
         // gives a reasonable computation
@@ -77,8 +80,14 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // defines the turret where the chassis is, under the assumption that the chassis origin and
         // turret origin coincide
+        // const tap::algorithms::transforms::Transform &worldToTurret =
+        //     transformer.get
+
         modm::Vector3f turretPosition =
             modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
+
+        tap::algorithms::odometry modm::Vector3f turretWorldPos =
+            modm::Vector3f(transformer.getTurretLocation(turretID).data);
 
         // Puts turret in it's place in world frame
         // If no offset, skip all offsetting
