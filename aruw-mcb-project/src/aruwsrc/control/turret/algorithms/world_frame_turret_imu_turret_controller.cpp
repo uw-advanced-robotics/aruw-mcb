@@ -304,11 +304,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
     initializeWorldFrameTurretImuController(
         this,
-#ifdef TARGET_HERO_CYCLONE
-        -turretMCBCanComm.getPitchUnwrapped(),
-#else
         turretMCBCanComm.getPitchUnwrapped(),
-#endif
         turretMotor,
         positionPid,
         velocityPid,
@@ -321,14 +317,8 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
 {
     const float chassisFramePitch = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
 
-#ifdef TARGET_HERO_CYCLONE
-    // because the hero turret IMU is rotated 180 degrees yaw
-    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
-    const float worldFramePitchVelocity = -turretMCBCanComm.getPitchVelocity();
-#else
     const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
     const float worldFramePitchVelocity = turretMCBCanComm.getPitchVelocity();
-#endif
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -358,11 +348,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
 void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(float desiredSetpoint)
 {
     const float chassisFramePitch = turretMotor.getChassisFrameUnwrappedMeasuredAngle();
-#ifdef TARGET_HERO_CYCLONE
-    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
-#else
     const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
-#endif
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -379,11 +365,7 @@ float WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
 
 float WorldFramePitchTurretImuCascadePidTurretController::getMeasurement() const
 {
-#ifdef TARGET_HERO_CYCLONE
-    return -turretMCBCanComm.getPitchUnwrapped();
-#else
     return turretMCBCanComm.getPitchUnwrapped();
-#endif
 }
 
 bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
@@ -394,11 +376,7 @@ bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
 float WorldFramePitchTurretImuCascadePidTurretController::convertControllerAngleToChassisFrame(
     float controllerFrameAngle) const
 {
-#ifdef TARGET_HERO_CYCLONE
-    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
-#else
     const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
-#endif
 
     return transformWorldFrameValueToChassisFrame(
         turretMotor.getChassisFrameUnwrappedMeasuredAngle(),
@@ -409,11 +387,7 @@ float WorldFramePitchTurretImuCascadePidTurretController::convertControllerAngle
 float WorldFramePitchTurretImuCascadePidTurretController::convertChassisAngleToControllerFrame(
     float chassisFrameAngle) const
 {
-#ifdef TARGET_HERO_CYCLONE
-    const float worldFramePitchAngle = -turretMCBCanComm.getPitchUnwrapped();
-#else
     const float worldFramePitchAngle = turretMCBCanComm.getPitchUnwrapped();
-#endif
 
     return transformChassisFrameToWorldFrame(
         turretMotor.getChassisFrameUnwrappedMeasuredAngle(),
