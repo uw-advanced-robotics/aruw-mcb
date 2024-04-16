@@ -26,6 +26,7 @@
 
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -128,10 +129,10 @@ public:
         const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID,
         const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
         const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
-        const float turretDistFromBase);
+        const float turretDistFromBase,
+        const uint8_t turretID);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim

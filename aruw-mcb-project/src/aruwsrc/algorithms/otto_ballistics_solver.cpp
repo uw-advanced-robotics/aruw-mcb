@@ -38,19 +38,19 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const uint8_t turretID,
     // @todo: make this a config?
     const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
     const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
-    const float turretDistFromBase)
+    const float turretDistFromBase,
+    const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
-      turretID(turretID),
       worldToTurretBaseTransform(worldToTurretBaseTransform),
       turretBaseMotor(turretBaseMotor),
-      turretDistFromBase(turretDistFromBase)
+      turretDistFromBase(turretDistFromBase),
+      turretID(turretID)
 
 {
 }
