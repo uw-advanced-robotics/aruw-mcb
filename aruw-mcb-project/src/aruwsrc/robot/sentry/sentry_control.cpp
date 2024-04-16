@@ -41,6 +41,7 @@
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
@@ -303,6 +304,8 @@ SentryTransforms transformer(
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
+SentryTransformAdapter transformAdapter(transformer);
+
 tap::algorithms::SmoothPid turretMajorYawPosPid(
     turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid turretMajorYawVelPid(
@@ -426,6 +429,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRight);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
