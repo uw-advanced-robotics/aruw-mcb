@@ -175,19 +175,19 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
 
     float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
     desiredWheelRPM[LF][0] = limitVal(
-        y - x - chassisRotateTranslated * leftFrontRotationRatio,
+        -y + x - chassisRotateTranslated * leftFrontRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
     desiredWheelRPM[RF][0] = limitVal(
-        y + x - chassisRotateTranslated * rightFrontRotationRatio,
+        -y - x - chassisRotateTranslated * rightFrontRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
     desiredWheelRPM[LB][0] = limitVal(
-        -y - x - chassisRotateTranslated * leftBackRotationRatio,
+        y + x - chassisRotateTranslated * leftBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
     desiredWheelRPM[RB][0] = limitVal(
-        -y + x - chassisRotateTranslated * rightBackRotationRatio,
+        y - x - chassisRotateTranslated * rightBackRotationRatio,
         -maxWheelSpeed,
         maxWheelSpeed);
 
