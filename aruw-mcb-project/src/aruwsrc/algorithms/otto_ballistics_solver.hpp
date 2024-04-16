@@ -116,16 +116,17 @@ public:
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
-     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
-     * for, see the VisionCoprocessor for more information about this id.
-     * @param[in]
+     * @param[in] worldToTurretBaseTransform transform from the world to the point the turret
+     * rotates around (ex: transform to turret major for the sentry)
+     * @param[in] turretBaseMotor motor that rotates the base on which the turret is mounted (ex:
+     * motor of turret major for the sentry)
      * @param[in] turretDistFromBase the absolute distance of the turret from the point it spins
      * around. Should be 0 for standard and hero and nonzero for the dual-turret sentry.
+     * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
+     * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        // const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        // const control::turret::RobotTurretSubsystem &turretSubsystem,
         const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
