@@ -21,14 +21,12 @@
 
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace modm;
@@ -37,19 +35,23 @@ namespace aruwsrc::algorithms
 {
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    // const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    // const control::turret::RobotTurretSubsystem &turretSubsystem,
     const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const uint8_t turretID)
+    const uint8_t turretID,
+    // @todo: make this a config?
+    const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
+    const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
+    const float turretDistFromBase)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
-      //   odometryInterface(odometryInterface),
-      //   turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
-      turretID(turretID)
+      turretID(turretID),
+      worldToTurretBaseTransform(worldToTurretBaseTransform),
+      turretBaseMotor(turretBaseMotor),
+      turretDistFromBase(turretDistFromBase)
+
 {
 }
 
@@ -78,48 +80,27 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             launchSpeed = defaultLaunchSpeed;
         }
 
-        // defines the turret where the chassis is, under the assumption that the chassis origin and
-        // turret origin coincide
-        // const tap::algorithms::transforms::Transform &worldToTurret =
-        //     transformer.get
+        auto &worldToTurret = transformer.getWorldToTurret(turretID);
+        const Vector2f chassisVel = transformer.getChassisVelocity2d();
 
-        modm::Vector3f turretPosition =
-            modm::Vector3f(odometryInterface.getCurrentLocation2D().getPosition(), 0);
-
-        tap::algorithms::odometry modm::Vector3f turretWorldPos =
-            modm::Vector3f(transformer.getTurretLocation(turretID).data);
-
-        // Puts turret in it's place in world frame
-        // If no offset, skip all offsetting
-        if (turretSubsystem.getTurretOffset() != modm::Vector3f(0, 0, 0))
-        {
-            // make this in here to minimize resource usage I guess
-            modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
-            // yaw is 0, so chassis frame and world frame share orientation. They may not share
-            // translation, so we still need to add that.
-            if (compareFloatClose(odometryInterface.getYaw(), 0.0f, 1e-5f))
-            {
-                // Assume that z is parallel to yaw and needs not adjusting.
-                // This breaks if the robot rolls, but we'd need to implement 3D odometry anyways
-                // soooo not my problem! For now, skips 3D vector rotation.
-                rotateVector(&turretOffset.x, &turretOffset.y, odometryInterface.getYaw());
-            }
-            turretPosition += turretOffset;
-        }
-
-        const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
+        // chassis-relative velocity of the turret
+        modm::Vector2f turretChassisRelVelocity(
+            turretBaseMotor.getChassisFrameVelocity() *
+                std::cos(worldToTurretBaseTransform.getYaw()) * turretDistFromBase,
+            turretBaseMotor.getChassisFrameVelocity() *
+                std::sin(worldToTurretBaseTransform.getYaw()) * turretDistFromBase);
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
-
         ballistics::MeasuredKinematicState targetState = {
             .position =
-                {aimData.pva.xPos - turretPosition.x,
-                 aimData.pva.yPos - turretPosition.y,
-                 aimData.pva.zPos - turretPosition.z},
+                {aimData.pva.xPos - worldToTurret.getX(),
+                 aimData.pva.yPos - worldToTurret.getY(),
+                 aimData.pva.zPos - worldToTurret.getZ()},
             .velocity =
-                {aimData.pva.xVel - chassisVel.x,
-                 aimData.pva.yVel - chassisVel.y,
+                {aimData.pva.xVel -
+                     (chassisVel.x - turretChassisRelVelocity.x),  // someone pls check math
+                 aimData.pva.yVel - (chassisVel.y - turretChassisRelVelocity.y),
                  aimData.pva.zVel},
             .acceleration =
                 {aimData.pva.xAcc,
@@ -147,7 +128,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &lastComputedSolution->pitchAngle,
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,
-                turretSubsystem.getPitchOffset()))
+                worldToTurret.getPitch()))
         {
             lastComputedSolution = std::nullopt;
         }
