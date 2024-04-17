@@ -87,7 +87,7 @@ public:
         pitchMotor.setMotorOutput(0);
     }
 
-    const char* getName() override { return "Turret"; }
+    const char* getName() const override { return "Turret"; }
 
     void onHardwareTestStart() override;
 
