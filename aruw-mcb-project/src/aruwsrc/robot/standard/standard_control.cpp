@@ -21,8 +21,6 @@
 
 #ifdef ALL_STANDARDS
 
-#include "aruwsrc/control/chassis/new-chassis/new_chassis_odo.hpp"
-
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
@@ -35,6 +33,8 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/chassis/new-chassis/new_chassis_odo.hpp"
 
 // #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -56,8 +56,11 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 // #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "tap/control/subsystem.hpp"
+
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -84,9 +87,6 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/new-chassis/odometry_2d_subsystem.hpp"
-#include "tap/control/subsystem.hpp"
-
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -200,19 +200,23 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
     &leftBackMecanumWheel,
     &rightBackMecanumWheel};
 
-
-
-aruwsrc::chassis::ChassisOdometry odometryKF =  aruwsrc::chassis::ChassisOdometry<0,4>::ChassisOdometryBuilder::constructChassisOdometry(
+aruwsrc::chassis::ChassisOdometry odometryKF =
+    aruwsrc::chassis::ChassisOdometry<0, 4>::ChassisOdometryBuilder::constructChassisOdometry(
         wheels,
         *drivers(),
-        modm::Vector2f(0, 0));
+        modm::Vector2f(0, 0),
+        turret);
 
 // OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
-
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
-aruwsrc::chassis::Odometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0), odometryKF);
+aruwsrc::chassis::Odometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turret,
+    chassis,
+    modm::Vector2f(0, 0),
+    odometryKF);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

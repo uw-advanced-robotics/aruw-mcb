@@ -61,7 +61,7 @@ struct WheelConfig
     bool inverted;
     // Used by odometry to determine the confidence of the wheel's velocity
     // Defaults to zero (no error in the sensor)
-    float rConfidence = 0.0f; 
+    float rConfidence = 1.0f;
     float initalPValue = 1E3;
     float initalQValue = 1E2;
 };

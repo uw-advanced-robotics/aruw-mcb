@@ -147,7 +147,8 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     MOTOR_PID_CONFIG,
     true,
     1000.0f,
-    true};
+    true,
+    10};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     WIDTH_BETWEEN_WHEELS_X / 2,
     -WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -159,7 +160,8 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     MOTOR_PID_CONFIG,
     true,
     1000.0f,
-    false};
+    false,
+    10};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
     WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -171,7 +173,8 @@ static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     MOTOR_PID_CONFIG,
     true,
     1000.0f,
-    true};
+    true,
+    10};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     -WIDTH_BETWEEN_WHEELS_X / 2,
     -WIDTH_BETWEEN_WHEELS_Y / 2,
@@ -183,7 +186,8 @@ static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     MOTOR_PID_CONFIG,
     true,
     1000.0f,
-    false};
+    false,
+    10};
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1

@@ -32,6 +32,8 @@
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+
 #include "wheel.hpp"
 namespace aruwsrc
 {
@@ -41,6 +43,7 @@ template <uint8_t numSwerve, uint8_t numOther>
 class ChassisOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
+    float numbersTest[10];
     ChassisOdometry(
         tap::Drivers* drivers,
         std::vector<Wheel*>& wheels,
@@ -49,28 +52,16 @@ public:
         const float (&cMat)[6 * (numSwerve * 2 + numOther)],
         const float (&qMat)[6 * 6],
         const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)],
-        const tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver)
+        aruwsrc::control::turret::TurretSubsystem& turret)
         : wheels(wheels),
-          chassisYawObserver(chassisYawObserver),
           imu(imu),
           initPos(initPos),
-          kf(KF_A, cMat, qMat, rMat, KF_P0)
-    {
-        reset();
-    }
-    ChassisOdometry(
-        tap::Drivers* drivers,
-        std::vector<Wheel*>& wheels,
-        tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f& initPos,
-        const float (&cMat)[6 * (numSwerve * 2 + numOther)],
-        const float (&qMat)[6 * 6],
-        const float (&rMat)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)])
-        : wheels(wheels),
-          chassisYawObserver(nullptr),
-          imu(imu),
-          initPos(initPos),
-          kf(KF_A, cMat, qMat, rMat, KF_P0)
+          kf(KF_A, cMat, KF_Q, rMat, KF_P0),
+          orientationObserver(turret),
+          chassisYawObserver(&orientationObserver),
+          chassisAccelerationToMeasurementCovarianceInterpolator(
+            CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
+            MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
     {
         reset();
     }
@@ -84,59 +75,72 @@ public:
             std::vector<Wheel*>& wheels,
             tap::Drivers& drivers,
             const modm::Vector2f initPos,
-            const tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver)
+            aruwsrc::control::turret::TurretSubsystem& turret
+)
         {
             std::vector<float> CMat;
-            std::vector<float> QMat;
-            std::vector<float> P0Mat;
-            std::vector<float> RMat;
+            float(qMatArray)[6 * 6];
+            float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
             int totalSize = numSwerve * 2 + numOther;
+            // int totalSize = 4;
             for (const auto& wheel : wheels)
             {
                 CMat.insert(CMat.end(), wheel->getHMat().begin(), wheel->getHMat().end());
             }
-            for (int i = 0; i < totalSize * totalSize; ++i)
+            // for (int i = 0; i < totalSize * totalSize; i++)
+            // {
+            //     int row = i / totalSize;
+            //     int col = i % totalSize;
+            //     if (row == col)
+            //     {
+            //         rMatArray[i] = wheels[i]->config.rConfidence;
+            //         // RMat[i] = 1.0;
+            //     }
+            //     else
+            //     {
+            //         rMatArray[i] = 30.0;     
+            //     }
+            // }
+
+            
+
+            for (int i = 0; i < totalSize; i++)
             {
-                int row = i / totalSize;
-                int col = i % totalSize;
-                if (row == col)
+                for (int j = 0; j < totalSize; j++)
                 {
-                    RMat[i] = wheels[i]->config.rConfidence;
-                }
-                else
-                {
-                    RMat[i] = 0.0;
-                }
-            }
-            for (int i = 0; i < totalSize * totalSize; ++i)
-            {
-                int row = i / totalSize;
-                int col = i % totalSize;
-                if (row == col)
-                {
-                    QMat[i] = wheels[i]->config.initalQValue;
-                }
-                else
-                {
-                    QMat[i] = 0.0;
+                    if (i == j)
+                    {
+                        rMatArray[i * totalSize + j] = wheels[i]->config.rConfidence;
+                    }
+                    else
+                    {
+                        rMatArray[i * totalSize + j] = 0.0;
+                    }
                 }
             }
 
+            for (int i = 0; i < (6*6); i++){
+                qMatArray[i] = 1000.0;
+            }
+
+             
+
+
             float(cMatArray)[6 * (numSwerve * 2 + numOther)];
-            float(qMatArray)[6 * 6];
-            float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
-            for (u_int8_t i = 0; i < CMat.size(); ++i)
+            // float(qMatArray)[6 * 6];
+            // float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
+            for (u_int8_t i = 0; i < CMat.size(); i++)
             {
                 cMatArray[i] = CMat[i];
             }
-            for (u_int8_t i = 0; i < QMat.size(); ++i)
-            {
-                qMatArray[i] = QMat[i];
-            }
-            for (u_int8_t i = 0; i < RMat.size(); ++i)
-            {
-                rMatArray[i] = RMat[i];
-            }
+            // for (u_int8_t i = 0; i < QMat.size(); i++)
+            // {
+            //     qMatArray[i] = QMat[i];
+            // }
+            // for (u_int8_t i = 0; i < RMat.size(); i++)
+            // {
+            //     rMatArray[i] = RMat[i];
+            // }
 
             return ChassisOdometry<numSwerve, numOther>(
                 &drivers,
@@ -146,76 +150,9 @@ public:
                 cMatArray,
                 qMatArray,
                 rMatArray,
-                chassisYawObserver);
-        }
-        static ChassisOdometry constructChassisOdometry(
-            std::vector<Wheel*>& wheels,
-            tap::Drivers& drivers,
-            const modm::Vector2f initPos)
-        {
-            std::vector<float> CMat;
-            std::vector<float> QMat;
-            std::vector<float> P0Mat;
-            std::vector<float> RMat;
-            int totalSize = numSwerve * 2 + numOther;
-            for (const auto& wheel : wheels)
-            {
-                CMat.insert(CMat.end(), wheel->getHMat().begin(), wheel->getHMat().end());
-            }
-            for (int i = 0; i < totalSize * totalSize; ++i)
-            {
-                int row = i / totalSize;
-                int col = i % totalSize;
-                if (row == col)
-                {
-                    RMat[i] = wheels[i]->config.rConfidence;
-                }
-                else
-                {
-                    RMat[i] = 0.0;
-                }
-            }
-            for (int i = 0; i < totalSize * totalSize; ++i)
-            {
-                int row = i / totalSize;
-                int col = i % totalSize;
-                if (row == col)
-                {
-                    QMat[i] = wheels[i]->config.initalQValue;
-                }
-                else
-                {
-                    QMat[i] = 0.0;
-                }
-            }
-
-            float(cMatArray)[6 * (numSwerve * 2 + numOther)];
-            float(qMatArray)[6 * 6];
-            float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
-            for (u_int8_t i = 0; i < CMat.size(); ++i)
-            {
-                cMatArray[i] = CMat[i];
-            }
-            for (u_int8_t i = 0; i < QMat.size(); ++i)
-            {
-                qMatArray[i] = QMat[i];
-            }
-            for (u_int8_t i = 0; i < RMat.size(); ++i)
-            {
-                rMatArray[i] = RMat[i];
-            }
-
-            return ChassisOdometry<numSwerve, numOther>(
-                &drivers,
-                wheels,
-                drivers.mpu6500,
-                initPos,
-                cMatArray,
-                qMatArray,
-                rMatArray);
+                turret);
         }
     };
-
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
@@ -243,7 +180,7 @@ public:
 
         float z[(numSwerve * 2) + numOther] = {};
 
-        for (int i = 0; i < ((numSwerve * 2) + numOther); ++i)
+        for (int i = 0; i < ((numSwerve * 2) + numOther); i++)
         {
             for (auto entry : wheels[i]->getMMat())
             {
@@ -263,10 +200,10 @@ public:
 
     void updateChassisStateFromKF(float chassisYaw)
     {
-        const auto& x = kf.getStateVectorAsMatrix();
+        const std::array<float, 6> x = kf.getStateVectorAsMatrix();
 
         location.setOrientation(chassisYaw);
-        location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
+        location.setPosition(x[0], x[1]);
     }
 
 private:
@@ -289,6 +226,14 @@ private:
         VEL_THETA,
         NUM_INPUTS,
     };
+
+    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
+    /// frame
+    modm::Vector2f chassisMeasuredDeltaVelocity;
+
+    modm::interpolation::Linear<modm::Pair<float, float>>
+        chassisAccelerationToMeasurementCovarianceInterpolator;
+
 
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
@@ -327,7 +272,12 @@ private:
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     static float KF_C[INPUTS_MULT_STATES];
-    static float KF_R[INPUTS_SQUARED];
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1,
+    };
     // clang-format on
 
     /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
@@ -339,6 +289,7 @@ private:
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
+    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver orientationObserver;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface* chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     std::vector<Wheel*>& wheels;
@@ -358,7 +309,47 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
-    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+    void updateMeasurementCovariance(
+        const modm::Matrix<float, 3, 1>& chassisVelocity)
+    {
+        const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
+        const uint32_t dt = curTime - prevTime;
+        prevTime = curTime;
+
+        // return to avoid weird acceleration spike on startup
+        if (prevTime == 0)
+        {
+            return;
+        }
+
+        // compute acceleration
+
+        chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
+            chassisMeasuredDeltaVelocity.x,
+            chassisVelocity[0][0] - prevChassisVelocity[0][0],
+            CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+        chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
+            chassisMeasuredDeltaVelocity.y,
+            chassisVelocity[1][0] - prevChassisVelocity[1][0],
+            CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+        prevChassisVelocity = chassisVelocity;
+
+        // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units
+        // m/s^2, convert dt in microseconds to seconds
+        const float accelMagnitude =
+            chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
+
+        const float velocityCovariance =
+            chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
+
+        // set measurement covariance of chassis velocity as measured by the wheels because if
+        // acceleration is large, the likelihood of slippage is greater
+        kf.getMeasurementCovariance()[0] = velocityCovariance;
+        kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
+            velocityCovariance;
+    }
 };
 }  // namespace chassis
 }  // namespace aruwsrc
