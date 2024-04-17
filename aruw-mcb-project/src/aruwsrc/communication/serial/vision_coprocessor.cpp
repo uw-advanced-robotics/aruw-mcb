@@ -92,6 +92,7 @@ void VisionCoprocessor::initializeCV()
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+
     switch (completeMessage.messageType)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -99,9 +100,33 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT:
+        {
+            decodeToAutoNavSetpointData(completeMessage);
+            return;
+        }
+        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        {
+            decodeToArucoResetData(completeMessage);
+            return;
+        }
         default:
             return;
     }
+}
+
+bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
+{
+    memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
+    return true;
+}
+
+bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
+{
+    // copy packet into data field
+    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastArucoData.updated = true;
+    return true;
 }
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)

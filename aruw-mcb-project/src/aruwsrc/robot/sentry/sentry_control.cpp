@@ -41,6 +41,7 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -388,6 +389,15 @@ TurretMinorSentryControlCommand turretRightManualCommand(
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
+// Chassis beyblade
+aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
+    drivers(),
+    &chassis,
+    &turretMajor.getReadOnlyMotor(),
+    drivers()->controlOperatorInterface,
+    transformer.getWorldToChassis(),
+    aruwsrc::sentry::chassis::beybladeConfig);
+
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &(drivers()->controlOperatorInterface),
@@ -502,6 +512,11 @@ HoldCommandMapping shoot(
     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
+HoldCommandMapping leftDownRightDown(
+    drivers(),
+    {&beybladeCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -560,9 +575,11 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
     drivers->commandMapper.addMap(&leftDownRightUp);   // imu calibrate command
     drivers->commandMapper.addMap(&leftMidRightMid);   // chassis drive
+    drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
-    drivers->commandMapper.addMap(&leftUpRightUp);
+    drivers->commandMapper.addMap(&leftUpRightUp);  //Agitators
     drivers->commandMapper.addMap(&shoot);  // Shoot
+    
 }
 }  // namespace sentry_control
 
