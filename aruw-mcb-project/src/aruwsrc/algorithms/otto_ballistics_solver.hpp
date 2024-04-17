@@ -22,7 +22,11 @@
 
 #include <optional>
 
+#include "tap/algorithms/transforms/transform.hpp"
+
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -106,21 +110,29 @@ public:
     }
 
     /**
-     * @param[in] drivers Pointer to a global drivers object.
-     * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] visionCoprocessor for getting target data
+     * @param[in] transformer Transformer for getting chassis and turret odometry
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
+     * @param[in] worldToTurretBaseTransform transform from the world to the point the turret
+     * rotates around (ex: transform to turret major for the sentry)
+     * @param[in] turretBaseMotor motor that rotates the base on which the turret is mounted (ex:
+     * motor of turret major for the sentry)
+     * @param[in] turretDistFromBase the absolute distance of the turret from the point it spins
+     * around. Should be 0 for standard and hero and nonzero for the dual-turret sentry.
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
+        const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
+        const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
+        const float turretDistFromBase,
         const uint8_t turretID);
 
     /**
@@ -137,11 +149,12 @@ public:
 
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
+    const aruwsrc::algorithms::transforms::TransformerInterface &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    modm::Vector3f turretOrigin;
+    const tap::algorithms::transforms::Transform &worldToTurretBaseTransform;
+    const aruwsrc::control::turret::TurretMotor &turretBaseMotor;
+    const float turretDistFromBase;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
