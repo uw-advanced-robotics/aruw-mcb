@@ -21,10 +21,10 @@
 #define STANDARD_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
-#include "tap/motor/dji_motor.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
