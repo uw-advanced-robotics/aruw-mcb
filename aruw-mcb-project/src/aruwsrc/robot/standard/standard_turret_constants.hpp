@@ -42,23 +42,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-#ifdef TARGET_STANDARD_WOODY
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 6821,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = false,
-};
-
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 7500,
-    .minAngle = modm::toRadian(40),
-    .maxAngle = modm::toRadian(117),
-    .limitMotorAngles = true,
-};
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 1100,
