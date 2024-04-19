@@ -32,7 +32,7 @@ class BuzzerSubsystem : public tap::control::Subsystem
 public:
     BuzzerSubsystem(tap::Drivers* drivers);
 
-    const char* getName() override { return "Buzzer"; }
+    const char* getName() const override { return "Buzzer"; }
 
     void playNoise();
 

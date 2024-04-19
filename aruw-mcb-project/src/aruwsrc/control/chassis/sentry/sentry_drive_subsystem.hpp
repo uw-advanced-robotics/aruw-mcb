@@ -90,7 +90,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char* getName() override { return "Sentry Drive"; }
+    const char* getName() const override { return "Sentry Drive"; }
 
     inline int getNumChassisMotors() const override { return NUM_CHASSIS_MOTORS; }
 
