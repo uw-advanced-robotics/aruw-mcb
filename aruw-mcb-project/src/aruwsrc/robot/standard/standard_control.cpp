@@ -119,13 +119,19 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
-tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS,
+#if defined(TARGET_STANDARD_PHOBOS)
+true,
+#else
+ false,
+#endif
+ "Pitch Turret");
 
 tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_STANDARD_ELSA  // @todo: STANDARD_PHOBOS
+#if defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_PHOBOS)
     true,
 #else
     false,
