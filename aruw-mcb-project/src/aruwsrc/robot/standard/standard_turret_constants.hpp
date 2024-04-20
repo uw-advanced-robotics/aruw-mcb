@@ -93,7 +93,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 8140,
+    .startEncoderValue = 4098,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -210,11 +210,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 200'535.2f,
+    .kp = 12'500.0f,
     .ki = 0.0f,
-    .kd = 10'886.2f,
+    .kd = 2'000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 25'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
