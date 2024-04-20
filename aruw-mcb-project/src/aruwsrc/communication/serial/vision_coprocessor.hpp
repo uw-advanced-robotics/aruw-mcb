@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -345,6 +346,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    std::deque<AutoNavSetpointData> setpointData();
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     // CV online variables.
