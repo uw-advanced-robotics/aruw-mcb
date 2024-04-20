@@ -25,6 +25,6 @@
 #error "DON'T INCLUDE 'robot_type.hpp'!"
 #endif
 
-#define TARGET_TESTBED
+#include "robot_type_intellisense.hpp"
 
 #endif
