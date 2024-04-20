@@ -93,7 +93,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)  // @todo:
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 375,
+    .startEncoderValue = 8142,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -101,7 +101,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 7500,
+    .startEncoderValue = 6066,
     .minAngle = modm::toRadian(50),
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
