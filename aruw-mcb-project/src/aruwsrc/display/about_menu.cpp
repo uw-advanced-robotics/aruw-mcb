@@ -39,6 +39,7 @@ void AboutMenu::draw()
     display << "Robot Name: " << ROBOT_NAME << modm::endl;
     display << "Last User: " << LAST_USER << modm::endl;
     display << "Sha: " << LAST_SHA << modm::endl;
+    display << "Build Time: " << LAST_DATETIME << modm::endl;
     drawn = true;
 }
 

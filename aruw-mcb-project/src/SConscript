@@ -17,6 +17,7 @@
 
 import subprocess
 from os.path import abspath
+import datetime as dt
 
 Import("env")
 Import("args")
@@ -38,6 +39,7 @@ try:
 except subprocess.CalledProcessError as error:
     get_sha = "Unknown"
     print(error.output)
+get_datetime = dt.datetime.now()
 
 if args["TARGET_ENV"] == "tests":
     ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
@@ -48,6 +50,7 @@ env_cpy = env.Clone()
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_DATETIME=" + get_datetime])
 
 
 if args["COMPILE_SRC"]:
