@@ -22,6 +22,7 @@ from .parse_args import USAGE
 VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
                         "STANDARD_ELSA",
                         "STANDARD_SPIDER",
+                        "STANDARD_PHOBOS",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_BEEHIVE",

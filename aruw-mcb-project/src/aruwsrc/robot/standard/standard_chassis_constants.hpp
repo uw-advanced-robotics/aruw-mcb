@@ -117,6 +117,16 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
+#elif defined(TARGET_STANDARD_PHOBOS)
+
+// @todo:
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#else
+
+#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
+
 #endif
 
 static constexpr float WHEELBASE_HYPOTENUSE =

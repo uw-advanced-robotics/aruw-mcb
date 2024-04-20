@@ -125,7 +125,7 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_STANDARD_ELSA
+#ifdef TARGET_STANDARD_ELSA  // @todo: STANDARD_PHOBOS
     true,
 #else
     false,
@@ -412,11 +412,10 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldRepeatCommandMapping rightSwitchUp(
+HoldCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
