@@ -90,10 +90,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
 };
-#elif defined(TARGET_STANDARD_PHOBOS)  // @todo:
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 8142,
+    .startEncoderValue = 8140,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -101,16 +101,24 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 6066,
+    .startEncoderValue = 2167,
     .minAngle = modm::toRadian(50),
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
 };
 #endif
 
+#if defined(TARGET_STANDARD_PHOBOS)
+static constexpr float TURRET_CG_X = 55.76;
+static constexpr float TURRET_CG_Z = 52.25;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 9500
+;
+#else
 static constexpr float TURRET_CG_X = 30.17;
 static constexpr float TURRET_CG_Z = 34.02;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 7000;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 10000;
+#endif
+
 
 namespace world_rel_turret_imu
 {
@@ -232,6 +240,21 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+#if defined(TARGET_STANDARD_PHOBOS)
+static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+    .kp = 20000.0f,
+    .ki = 0.0f,
+    .kd = 1000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 32'000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 10.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 2.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+#else
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 229'183.1f,
     .ki = 0.0f,
@@ -245,6 +268,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+#endif
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret
 
