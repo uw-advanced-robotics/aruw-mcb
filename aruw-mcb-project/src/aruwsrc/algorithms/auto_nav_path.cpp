@@ -1,4 +1,5 @@
 #include "auto_nav_path.hpp"
+#include <deque>
 
 void AutoNavPath::addPoint(AutoNavSetpointData point) {
     setpointData().push_back(point);
@@ -38,18 +39,22 @@ float AutoNavPath::getDistanceToSegment(Position current, Position p1, Position 
 
 Position AutoNavPath::findInterpolatedPoint(Position closest) {
     float distanceRemaining = interpolationDistance;
-    for (int i = 0; i < setpointData().size()-1; i++) {
-        float distance = getDistance(setpointData.at(i), setpointData[i+1]);
+    distanceRemaining -= getDistance(closest, setpointData[0]);
+    for (int i = 0; i < setpointData.size()-1; i++) {
+        float distance = getDistance(setpointData[i], setpointData[i+1]);
         if (distance <= distanceRemaining) {
             distanceRemaining -= distance;
         } else {
-            //return remainingdistancealongcurrentsegment;
+            float ratio = distanceRemaining / distance;
+            float interpolatedX = setpointData[i].x + ratio * (setpointData[i+1].x - setpointData[i].x);
+            float interpolatedY = setpointData[i].y + ratio * (setpointData[i+1].y - setpointData[i].y);
+            return Position(interpolatedX, interpolatedY, 0);
         }
     }
-    return setpointData().back();
+    return Position(setpointData.back().x, setpointData.back().y, 0);
 }
 
-Position AutoNavPath::getDistance(AutoNavSetpointData p1, AutoNavSetpointData p2) {
+float AutoNavPath::getDistance(AutoNavSetpointData p1, AutoNavSetpointData p2) {
     return sqrt(p1.x*p1.x + p1.y*p1.y);
 }
 

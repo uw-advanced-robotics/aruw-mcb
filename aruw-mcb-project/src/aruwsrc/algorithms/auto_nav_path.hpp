@@ -17,7 +17,8 @@ struct AutoNavSetpointData
 class AutoNavPath {
 public:
     AutoNavPath(float distance):
-        interpolationDistance(distance) {}
+        interpolationDistance(distance),
+        setpointData() {}
     void addPoint(AutoNavSetpointData point);
     Position getSetPoint();
 
@@ -27,7 +28,7 @@ private:
     float getDistanceToSegment(Position current, Position p1, Position p2);
     float getDistance(AutoNavSetpointData p1, AutoNavSetpointData p2);
 
-    std::deque<AutoNavSetpointData> setpointData();
+    std::deque<AutoNavSetpointData> setpointData;
 
     float interpolationDistance;
     // The last setpoint used along the previous path
