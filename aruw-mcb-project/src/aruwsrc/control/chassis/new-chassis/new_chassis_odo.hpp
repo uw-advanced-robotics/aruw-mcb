@@ -56,7 +56,7 @@ public:
         : wheels(wheels),
           imu(imu),
           initPos(initPos),
-          kf(KF_A, cMat, KF_Q, rMat, KF_P0),
+          kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
           orientationObserver(turret),
           chassisYawObserver(&orientationObserver),
           chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -79,7 +79,15 @@ public:
 )
         {
             std::vector<float> CMat;
-            float(qMatArray)[6 * 6];
+            float(qMatArray)[6 * 6] ;
+    //= {
+    //     1E2, 0  , 0  , 0  , 0  , 0  ,
+    //     0  , 1E1, 0  , 0  , 0  , 0  ,
+    //     0  , 0  , 5E0, 0  , 0  , 0  ,
+    //     0  , 0  , 0  , 1E2, 0  , 0  ,
+    //     0  , 0  , 0  , 0  , 1E1, 0  ,
+    //     0  , 0  , 0  , 0  , 0  , 5E0,
+    // };
             float(rMatArray)[(numSwerve * 2 + numOther) * (numSwerve * 2 + numOther)];
             int totalSize = numSwerve * 2 + numOther;
             // int totalSize = 4;
@@ -119,12 +127,9 @@ public:
                 }
             }
 
-            for (int i = 0; i < (6*6); i++){
-                qMatArray[i] = 1000.0;
-            }
-
-             
-
+            // for (int i = 0; i < (6*6); i++){
+            //     qMatArray[i] = 1000.0;
+            // }
 
             float(cMatArray)[6 * (numSwerve * 2 + numOther)];
             // float(qMatArray)[6 * 6];
@@ -167,7 +172,7 @@ public:
 
     void reset()
     {
-        float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, initPos.y, 0.0f, 0.0f};
+        float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, initPos.y, 0.0f, 0.0f, 0.0f};
         kf.init(initialX);
     }
     void update()
@@ -207,34 +212,29 @@ public:
     }
 
 private:
-    enum class OdomState
+         enum class OdomState
     {
         POS_X = 0,
-        POS_Y,
-        POS_THETA,
         VEL_X,
+        ACC_X,
+        POS_Y,
         VEL_Y,
-        VEL_THETA,
+        ACC_Y,
         NUM_STATES,
     };
 
     enum class OdomInput
     {
         VEL_X = 0,
+        ACC_X,
         VEL_Y,
-        VEL_Z,
-        VEL_THETA,
+        ACC_Y,
         NUM_INPUTS,
     };
 
-    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
-    /// frame
-    modm::Vector2f chassisMeasuredDeltaVelocity;
+    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-    modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovarianceInterpolator;
-
-
+private:
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
@@ -246,14 +246,19 @@ private:
     static constexpr float DT = 0.002f;
 
     // clang-format off
-    // 6 by 6
     static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0 , 0 , 0 , 0 ,
-        0, 0 , 1 , DT, 0 , 0 ,
-        0, 0 , 0 , 0 , 1 , DT,
-        0, 1 , 0 , 0 , 0 , 0 ,
-        0, 0 , 0 , 1 , 0 , 0 ,
-        0, 0 , 0 , 0 , 0 , 1 ,
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
+        0, 1 , DT           , 0, 0 , 0            ,
+        0, 0 , 1            , 0, 0 , 0            ,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT,
+        0, 0 , 0            , 0, 1 , DT           ,
+        0, 0 , 0            , 0, 0 , 1            ,
+    };
+    static constexpr float KF_C[INPUTS_MULT_STATES] = {
+        0, 1, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
         1E2, 0  , 0  , 0  , 0  , 0  ,
@@ -263,6 +268,12 @@ private:
         0  , 0  , 0  , 0  , 1E1, 0  ,
         0  , 0  , 0  , 0  , 0  , 5E0,
     };
+    static constexpr float KF_R[INPUTS_SQUARED] = {
+        1.0, 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  ,
+        0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 1.2,
+    };
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E3, 0  , 0  , 0  , 0  , 0  ,
         0  , 1E3, 0  , 0  , 0  , 0  ,
@@ -271,14 +282,72 @@ private:
         0  , 0  , 0  , 0  , 1E3, 0  ,
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
-    static float KF_C[INPUTS_MULT_STATES];
-    static constexpr float KF_R[INPUTS_SQUARED] = {
-        1,1,1,1,
-        1,1,1,1,
-        1,1,1,1,
-        1,1,1,1,
-    };
     // clang-format on
+
+    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
+    /// frame
+    modm::Vector2f chassisMeasuredDeltaVelocity;
+
+    modm::interpolation::Linear<modm::Pair<float, float>>
+        chassisAccelerationToMeasurementCovarianceInterpolator;
+
+
+    // static constexpr int STATES_SQUARED =
+    //     static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
+    // static constexpr int INPUTS_SQUARED = 16;
+    //     // static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
+    // static constexpr int INPUTS_MULT_STATES =
+    //     // static_cast<int>(OdomInput::NUM_INPUTS) 
+    //     4 * static_cast<int>(OdomState::NUM_STATES);
+
+    /// Assumed time difference between calls to `update`, in seconds
+    // static constexpr float DT = 0.002f;
+
+    // // clang-format off
+    // // 6 by 6
+    // static constexpr float KF_A[STATES_SQUARED] = {
+    //     1, DT, 0 , 0 , 0 , 0 ,
+    //     0, 0 , 1 , DT, 0 , 0 ,
+    //     0, 0 , 0 , 0 , 1 , DT,
+    //     0, 1 , 0 , 0 , 0 , 0 ,
+    //     0, 0 , 0 , 1 , 0 , 0 ,
+    //     0, 0 , 0 , 0 , 0 , 1 ,
+    // };
+    // float KF_Q[6*6] = {
+    //     1E2, 0  , 0  , 0  , 0  , 0  ,
+    //     0  , 1E1, 0  , 0  , 0  , 0  ,
+    //     0  , 0  , 5E0, 0  , 0  , 0  ,
+    //     0  , 0  , 0  , 1E2, 0  , 0  ,
+    //     0  , 0  , 0  , 0  , 1E1, 0  ,
+    //     0  , 0  , 0  , 0  , 0  , 5E0,
+    // };
+    // static constexpr float KF_R[INPUTS_SQUARED] = {
+    //     1.0, 0  , 0  , 0  ,
+    //     0  , 1.2, 0  , 0  ,
+    //     0  , 0  , 1.0, 0  ,
+    //     0  , 0  , 0  , 1.2,
+    // };
+    // // float KF_Q[3*3] = {
+    // //     1E2, 0  , 0  ,
+    // //     0  , 1E1, 0  ,
+    // //     0  , 0  , 5E0,
+    // // };
+    // static constexpr float KF_P0[STATES_SQUARED] = {
+    //     1E3, 0  , 0  , 0  , 0  , 0  ,
+    //     0  , 1E3, 0  , 0  , 0  , 0  ,
+    //     0  , 0  , 1E3, 0  , 0  , 0  ,
+    //     0  , 0  , 0  , 1E3, 0  , 0  ,
+    //     0  , 0  , 0  , 0  , 1E3, 0  ,
+    //     0  , 0  , 0  , 0  , 0  , 1E3,
+    // };
+    // static float KF_C[INPUTS_MULT_STATES];
+    // // static constexpr float KF_R[INPUTS_SQUARED] = {
+    // //     1,1,1,1,
+    // //     1,1,1,1,
+    // //     1,1,1,1,
+    // //     1,1,1,1,
+    // // };
+    // // clang-format on
 
     /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
     /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
@@ -296,7 +365,7 @@ private:
 
     const modm::Vector2f initPos;
 
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(numSwerve * 2 + numOther)> kf;
+    // tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(numSwerve * 2 + numOther)> kf;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
