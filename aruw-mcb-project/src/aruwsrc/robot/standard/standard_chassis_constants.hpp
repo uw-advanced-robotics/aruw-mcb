@@ -100,17 +100,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076;
 
-#ifdef TARGET_STANDARD_WOODY
-/**
- * Distance from center of the two front wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;

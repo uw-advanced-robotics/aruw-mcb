@@ -42,9 +42,7 @@ namespace aruwsrc::display
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-#if defined(TARGET_STANDARD_WOODY)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_WOODY";
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
     static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ELSA";
 #elif defined(TARGET_DRONE)
     static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
