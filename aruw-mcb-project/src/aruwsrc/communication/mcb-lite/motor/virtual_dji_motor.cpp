@@ -52,9 +52,6 @@ void VirtualDjiMotor::initialize()
     attachSelfToRxHandler();
 }
 
-void VirtualDjiMotor::attachSelfToRxHandler()
-{
-    mcbLite->canRxHandler.attachReceiveHandler(this);
-}
+void VirtualDjiMotor::attachSelfToRxHandler() { mcbLite->canRxHandler.attachReceiveHandler(this); }
 
 }  // namespace aruwsrc::virtualMCB
