@@ -24,6 +24,9 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -66,6 +69,60 @@ using namespace aruwsrc::control;
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
+
+namespace aruwsrc::control::agitator::constants
+{
+static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
+    .kp = 3'000.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 5'000.0f,
+    .maxOutput = 16'000.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+namespace malewife
+{
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .isAgitatorInverted = false,
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between setpoint
+     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
+     *
+     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
+     *
+     * This should be positive or else weird behavior can occur
+     */
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+};
+}
+
+namespace girlboss
+{
+static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR4,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,  // @todo: check
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between the velocity
+     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
+     */
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
+    .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+};
+}
+
+}
 
 namespace sentry_control
 {
@@ -188,7 +245,7 @@ TurretMinorControllers turretRightControllers{
 VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR2,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.driveMotorInverted,
     "Left Front Swerve Drive Motor");
@@ -196,14 +253,14 @@ VirtualDjiMotor leftFrontDriveMotor(
 VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
     MOTOR6,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS1,  // yaw mech motor
     &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
 
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
-    MOTOR1,
+    MOTOR3,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
@@ -211,7 +268,7 @@ VirtualDjiMotor rightFrontDriveMotor(
 
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
-    MOTOR5,
+    MOTOR7,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
@@ -219,16 +276,16 @@ VirtualDjiMotor rightFrontAzimuthMotor(
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
-    MOTOR3,
-    tap::can::CanBus::CAN_BUS2,
+    MOTOR4,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
-    MOTOR7,
-    tap::can::CanBus::CAN_BUS2,
+    MOTOR8,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
@@ -243,8 +300,8 @@ VirtualDjiMotor rightBackDriveMotor(
 
 VirtualDjiMotor rightBackAzimuthMotor(
     drivers(),
-    MOTOR8,
-    tap::can::CanBus::CAN_BUS2,
+    MOTOR5,
+    tap::can::CanBus::CAN_BUS1,  // yaw mech motor
     &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
@@ -269,6 +326,42 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackDriveMotor,
     rightBackAzimuthMotor,
     rightBackSwerveConfig);
+
+// Friction wheels ---------------------------------------------------------------------------
+
+// Left
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheelsGirlboss(
+        drivers(),
+        tap::motor::MOTOR2,
+        tap::motor::MOTOR1,
+        tap::can::CanBus::CAN_BUS2,
+        &drivers()->turretMCBCanCommBus2,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+
+// Right
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheelsMalewife(
+        drivers(),
+        tap::motor::MOTOR2,
+        tap::motor::MOTOR1,
+        tap::can::CanBus::CAN_BUS1,
+        &drivers()->turretMCBCanCommBus1,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
+// Agitators
+aruwsrc::agitator::VelocityAgitatorSubsystem agitatorGirlboss(
+    drivers(),
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
+    aruwsrc::control::agitator::constants::girlboss::AGITATOR_CONFIG);
+
+aruwsrc::agitator::VelocityAgitatorSubsystem agitatorMalewife(
+    drivers(),
+    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
+    aruwsrc::control::agitator::constants::malewife::AGITATOR_CONFIG);
+
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
@@ -413,6 +506,10 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
+    frictionWheelsGirlboss.initialize();
+    frictionWheelsMalewife.initialize();
+    agitatorGirlboss.initialize();
+    agitatorMalewife.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 }
@@ -424,6 +521,10 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
+    drivers->commandScheduler.registerSubsystem(&agitatorGirlboss);
+    drivers->commandScheduler.registerSubsystem(&agitatorMalewife);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
 }
