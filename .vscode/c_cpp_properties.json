@@ -32,7 +32,7 @@
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "MCB Beehive",
+            "name": "MCB Sentry Beehive",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -45,7 +45,7 @@
             "defines": ["TARGET_SENTRY_BEEHIVE"]
         },
         {
-            "name": "MCB Spider",
+            "name": "MCB Standard Spider",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -58,7 +58,7 @@
             "defines": ["TARGET_STANDARD_SPIDER"]
         },
         {
-            "name": "MCB Elsa",
+            "name": "MCB Standard Elsa",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -123,7 +123,7 @@
             "defines": ["TARGET_TESTBED"]
         },
         {
-            "name": "MCB Cyclone",
+            "name": "MCB Hero Cyclone",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
