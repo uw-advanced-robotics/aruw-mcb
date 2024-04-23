@@ -154,7 +154,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(turretMajor, turretLeft, turretRight);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu);
 
 struct TurretMinorControllers
 {
