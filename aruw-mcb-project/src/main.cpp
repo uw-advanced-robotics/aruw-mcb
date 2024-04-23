@@ -112,7 +112,7 @@ int main()
 
 #if defined(TARGET_SENTRY_BEEHIVE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-            PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
@@ -146,7 +146,8 @@ static void initializeIo(tap::Drivers *drivers)
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
-    ((Drivers *)drivers)->mcbLite.initialize();
+    ((Drivers *)drivers)->chassisMcbLite.initialize();
+    ((Drivers *)drivers)->turretMajorMcbLite.initialize();
 #endif
 }
 
@@ -166,7 +167,8 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 #ifdef TARGET_SENTRY_BEEHIVE
-    ((Drivers *)drivers)->mcbLite.updateSerial();
+    ((Drivers *)drivers)->chassisMcbLite.updateSerial();
+    ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
