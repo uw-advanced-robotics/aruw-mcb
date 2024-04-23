@@ -34,7 +34,7 @@ public:
     mockable inline bool isOnline() const { return true; }
 
 private:
-    const aruwsrc::serial::VisionCoprocessor& vision;
+    aruwsrc::serial::VisionCoprocessor& vision;
     SentryChassisWorldYawObserver& yawObserver;
     SentryKFOdometry2DSubsystem& odometrySubsystem;
     const SentryTransforms& transforms;

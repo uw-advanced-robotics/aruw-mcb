@@ -33,6 +33,7 @@ void SentryArucoResetSubsystem::refresh()
         vision.getLastArucoResetData();
 
     if (!resetData.updated) return;
+    vision.invalidateArucoResetData();
 
     modm::Quaternion<float> q(
         resetData.data.quatW,
@@ -58,6 +59,9 @@ void SentryArucoResetSubsystem::refresh()
     float chassisY = resetData.data.y -
                      transforms.getWorldToTurret(resetData.data.turretId).getY() +
                      transforms.getWorldToChassis().getY();
+
+    setOrientation(newYaw, oldYaw);
+    setPosition(chassisX, chassisY)
 }
 
 void SentryArucoResetSubsystem::setOrientation(float newYaw, float oldYaw)
