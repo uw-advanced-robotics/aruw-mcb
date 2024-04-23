@@ -32,7 +32,7 @@
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "MCB",
+            "name": "MCB Beehive",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -41,7 +41,47 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
             ],
             "compilerPath": "arm-none-eabi-g++",
-            "intelliSenseMode": "gcc-arm"
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["TARGET_SENTRY_BEEHIVE"]
+        },
+        {
+            "name": "MCB Spider",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["TARGET_STANDARD_SPIDER"]
+        },
+        {
+            "name": "MCB Elsa",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["TARGET_STANDARD_ELSA"]
+        },
+        {
+            "name": "MCB Cyclone",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["TARGET_HERO_CYCLONE"]
         }
     ],
     "version": 4
