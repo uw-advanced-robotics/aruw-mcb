@@ -36,8 +36,8 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     bool isInvertedTwo,
     const char* nameOne,
     const char* nameTwo,
-    uint16_t encWrapped = DjiMotor::ENC_RESOLUTION / 2,
-    int64_t encRevolutions = 0)
+    uint16_t encWrapped,
+    int64_t encRevolutions)
     : DoubleDjiMotor(
           drivers,
           desMotorIdentifierOne,
