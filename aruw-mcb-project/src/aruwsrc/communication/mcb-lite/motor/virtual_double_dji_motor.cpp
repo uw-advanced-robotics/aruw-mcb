@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "virtual_dji_motor.hpp"
+#include "virtual_double_dji_motor.hpp"
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
@@ -25,36 +25,46 @@
 
 namespace aruwsrc::virtualMCB
 {
-VirtualDjiMotor::VirtualDjiMotor(
+VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     tap::Drivers* drivers,
-    MotorId desMotorIdentifier,
-    tap::can::CanBus motorCanBus,
     MCBLite* mcbLite,
-    bool isInverted,
-    const char* name,
-    uint16_t encoderWrapped,
-    int64_t encoderRevolutions)
-    : DjiMotor(
+    MotorId desMotorIdentifierOne,
+    MotorId desMotorIdentifierTwo,
+    tap::can::CanBus motorCanBusOne,
+    tap::can::CanBus motorCanBusTwo,
+    bool isInvertedOne,
+    bool isInvertedTwo,
+    const char* nameOne,
+    const char* nameTwo,
+    uint16_t encWrapped = DjiMotor::ENC_RESOLUTION / 2,
+    int64_t encRevolutions = 0)
+    : DoubleDjiMotor(
           drivers,
-          desMotorIdentifier,
-          motorCanBus,
-          isInverted,
-          name,
-          encoderWrapped,
-          encoderRevolutions),
+          desMotorIdentifierOne,
+          desMotorIdentifierTwo,
+          motorCanBusOne,
+          motorCanBusTwo,
+          isInvertedOne,
+          isInvertedTwo,
+          nameOne,
+          nameTwo,
+          encWrapped,
+          encRevolutions),
       mcbLite(mcbLite)
 {
 }
 
-void VirtualDjiMotor::initialize()
+void VirtualDoubleDjiMotor::initialize()
 {
-    mcbLite->motorTxHandler.addMotorToManager(this);
+    mcbLite->motorTxHandler.addMotorToManager(&motorOne);
+    mcbLite->motorTxHandler.addMotorToManager(&motorTwo);
     attachSelfToRxHandler();
 }
 
-void VirtualDjiMotor::attachSelfToRxHandler()
+void VirtualDoubleDjiMotor::attachSelfToRxHandler()
 {
-    mcbLite->canRxHandler.attachReceiveHandler(this);
+    mcbLite->canRxHandler.attachReceiveHandler(&motorOne);
+    mcbLite->canRxHandler.attachReceiveHandler(&motorTwo);
 }
 
 }  // namespace aruwsrc::virtualMCB
