@@ -315,6 +315,13 @@ public:
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
 private:
     enum TxMessageTypes
     {
@@ -409,13 +416,6 @@ private:
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
-
-    /**
-     * Sets the most recent aruco reset message's to updated field to false.
-     * This signals that the message has been consumed and should not be used
-     * for future resets.
-     */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
