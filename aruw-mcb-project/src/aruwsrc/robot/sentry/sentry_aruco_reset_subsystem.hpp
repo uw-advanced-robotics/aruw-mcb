@@ -7,9 +7,6 @@
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
-#include "modm/math/geometry/quaternion.hpp"
-#include "modm/math/geometry/vector3.hpp"
 
 namespace aruwsrc::sentry
 {
@@ -22,14 +19,13 @@ public:
         aruwsrc::serial::VisionCoprocessor& vision,
         aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver,
         aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometrySubsystem,
-        SentryTransforms& transforms,
-        aruwsrc::control::turret::algorithms::TurretMajorWorldFrameController& majorController);
+        SentryTransforms& transforms);
 
     void initialize() override {};
 
     void refresh() override;
 
-    const char* getName() override { return "Sentry Aruco Reset Subsystem"; }
+    const char* getName() const { return "Sentry Aruco Reset Subsystem"; }
 
     mockable inline bool isOnline() const { return true; }
 
@@ -38,7 +34,6 @@ private:
     SentryChassisWorldYawObserver& yawObserver;
     SentryKFOdometry2DSubsystem& odometrySubsystem;
     const SentryTransforms& transforms;
-    aruwsrc::control::turret::algorithms::TurretMajorWorldFrameController& majorController;
 
     void setOrientation(float newYaw, float oldYaw);
     void setPosition(float x, float y);

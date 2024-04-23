@@ -2,11 +2,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-// #include "aruwsrc/control/turret/algorithms/world_frame_turret_yaw_controller.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "modm/math/geometry/quaternion.hpp"
 #include "modm/math/geometry/vector2.hpp"
-#include "modm/math/geometry/vector3.hpp"
 
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::sentry;
@@ -16,14 +13,12 @@ SentryArucoResetSubsystem::SentryArucoResetSubsystem(
     aruwsrc::serial::VisionCoprocessor& vision,
     aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometrySubsystem,
-    SentryTransforms& transforms,
-    aruwsrc::control::turret::algorithms::TurretMajorWorldFrameController& majorController)
+    SentryTransforms& transforms)
     : tap::control::Subsystem(&drivers),
       vision(vision),
       yawObserver(yawObserver),
       odometrySubsystem(odometrySubsystem),
-      transforms(transforms),
-      majorController(majorController)
+      transforms(transforms)
 {
 }
 
@@ -61,7 +56,7 @@ void SentryArucoResetSubsystem::refresh()
                      transforms.getWorldToChassis().getY();
 
     setOrientation(newYaw, oldYaw);
-    setPosition(chassisX, chassisY)
+    setPosition(chassisX, chassisY);
 }
 
 void SentryArucoResetSubsystem::setOrientation(float newYaw, float oldYaw)

@@ -35,6 +35,7 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
@@ -303,6 +304,13 @@ SentryTransforms transformer(
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
+SentryArucoResetSubsystem arucoResetSubsystem(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    chassisYawObserver,
+    chassisOdometry,
+    transformer);
+
 tap::algorithms::SmoothPid turretMajorYawPosPid(
     turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid turretMajorYawVelPid(
@@ -409,12 +417,12 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     chassis.initialize();
-
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
+    arucoResetSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -426,6 +434,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRight);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
+    drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
