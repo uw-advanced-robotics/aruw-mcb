@@ -24,7 +24,7 @@
 
 #if defined(ALL_STANDARDS) || defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_HERO_MEGATRON)
+#elif defined(TARGET_HERO_KRONOS)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"

@@ -24,7 +24,7 @@
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
 #include "aruwsrc/robot/sentry/sentry_beehive_agitator_constants.hpp"
-#elif defined(TARGET_HERO_MEGATRON)
+#elif defined(TARGET_HERO_KRONOS)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
 #endif
 

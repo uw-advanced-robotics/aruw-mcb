@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_MEGATRON) && defined(PLATFORM_HOSTED)
+#if defined(TARGET_HERO_KRONOS) && defined(PLATFORM_HOSTED)
 
 #include "robot_sim.hpp"
 
