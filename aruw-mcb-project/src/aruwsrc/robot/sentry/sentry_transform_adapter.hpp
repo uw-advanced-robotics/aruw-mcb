@@ -28,21 +28,16 @@ namespace aruwsrc::sentry
 {
 class SentryTransformAdapter : public aruwsrc::algorithms::transforms::TransformerInterface
 {
+public:
     SentryTransformAdapter(const SentryTransforms& transforms);
 
-    modm::Location2D<float> getCurrentLocation2D() const;
-
-    modm::Vector2f getCurrentVelocity2D() const;
-
-    float getYaw() const;
+    modm::Vector2f getChassisVelocity2d() const;
 
     uint32_t getLastComputedOdometryTime() const;
 
-    // If you pass a wrong turretID, the right turret will automatically be returned.
-    tap::algorithms::CMSISMat<3, 1> getTurretLocation(int turretID) const;
+    const tap::algorithms::transforms::Transform& getWorldToChassis() const;
 
-    // If you pass a wrong turretID, the right turret will automatically be returned.
-    tap::algorithms::CMSISMat<3, 1> getTurretOrientation(int turretID) const;
+    const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
 private:
     const SentryTransforms& transforms;
