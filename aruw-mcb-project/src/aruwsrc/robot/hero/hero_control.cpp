@@ -404,7 +404,7 @@ HoldCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},  // &turretCVCommand
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
@@ -494,7 +494,7 @@ void setDefaultHeroCommands()
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    // waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
 }
 
@@ -527,11 +527,6 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&xNotShiftPressed);
     drivers->commandMapper.addMap(&rNotShiftPressed);
-
-    // drivers->commandMapper.addMap(&cPressed);
-    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    // drivers->commandMapper.addMap(&gCtrlPressed);
-    // drivers->commandMapper.addMap(&fShiftPressed);
 }
 }  // namespace hero_control
 
