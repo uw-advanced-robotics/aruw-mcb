@@ -381,7 +381,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorWorldYawController,
     chassis,
     chassisYawObserver,
-    chassisOdometry);
+    chassisOdometry,
+    {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
