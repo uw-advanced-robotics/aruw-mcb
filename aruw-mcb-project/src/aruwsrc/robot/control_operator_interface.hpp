@@ -46,7 +46,7 @@ public:
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO_CYCLONE)
+#if defined(TARGET_HERO_MEGATRON)
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */

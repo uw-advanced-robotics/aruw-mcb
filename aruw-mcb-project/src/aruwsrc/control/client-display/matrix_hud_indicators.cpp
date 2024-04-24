@@ -173,7 +173,7 @@ void MatrixHudIndicators::updateIndicatorState()
         {
             shooterState = ShooterState::LOADING;
         }
-#elif defined(TARGET_HERO_CYCLONE)
+#elif defined(TARGET_HERO_MEGATRON)
         auto turretMCB = turretSubsystem.getTurretMCB();
         assert(turretMCB != nullptr);
         if (!turretMCB->getLimitSwitchDepressed())

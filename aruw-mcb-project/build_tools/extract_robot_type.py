@@ -25,7 +25,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_BEEHIVE",
-                        "HERO_CYCLONE",
+                        "HERO_MEGATRON",
                         "DART",
                         "TESTBED" ]
 
