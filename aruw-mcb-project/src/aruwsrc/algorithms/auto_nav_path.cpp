@@ -1,63 +1,51 @@
 #include "auto_nav_path.hpp"
 #include <deque>
 
-void AutoNavPath::addPoint(AutoNavSetpointData point) {
-    setpointData().push_back(point);
+void AutoNavPath::pushPoint(AutoNavSetpointData point) {
+    setpointData.push_back(point);
 }
 
-Position AutoNavPath::getSetPoint() {
-
+Position AutoNavPath::getSetPoint() const {
+    return Position(currentSetpoint.x, currentSetpoint.y, 0);
 }
 
-float AutoNavPath::getDistanceToSegment(Position current, Position p1, Position p2) {
-//     function distanceToSegment( v, a, b ) --v is the point, a and b are the start and end points of the line
-//     local ab = b - a
-//     local av = v - a
-
-//     if (av:Dot(ab) <= 0) then -- Point is lagging behind start of the segment, so
-//         return av.Magnitude -- Use distance to start of segment instead.
-//     end
-
-//     local bv = v - b
-
-//     if (bv:Dot(ab) >= 0 ) then -- Point is advanced past the end of the segment, so
-//         return bv.Magnitude -- Use distance to end of the segment instead
-//     end
-
-//     return (ab:Cross(av)).Magnitude / ab.Magnitude -- Perpendicular distance of point to segment
-    float segmentLength = getDistance(p2 - p1);
-    float distance1 = getDistance(p1 - current);
-    if (dotprod(segmentLength, distance1) <= 0) {
-        return distance1.magnitude;
+Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Position p2) {
+    float distance1x = p2.x() - p1.x();
+    float distance1y = p2.y() - p1.y();
+    float distance2x = current.x() - p1.x();
+    float distance2y = current.y() - p1.y();
+    float dotprod = distance1x * distance2x + distance1y * distance2y;
+    float ratio = dotprod / (distance1x * distance1x + distance1y * distance1y);
+    if (ratio < 0) {
+        return p1;
+    } else if (ratio > 1) {
+        return p2;
+    } else {
+        return p1 + Position(distance1x * ratio, distance1y * ratio, 0);
     }
-    float distance2 = getDistance(p2 - current);
-    if (dotprod(segmentLength, distance2) > 0) {
-        return distance2.magnitude;
-    }
-
 }
 
-Position AutoNavPath::findInterpolatedPoint(Position closest) {
+Position AutoNavPath::findInterpolatedPoint(Position closest) const {
     float distanceRemaining = interpolationDistance;
-    distanceRemaining -= getDistance(closest, setpointData[0]);
-    for (int i = 0; i < setpointData.size()-1; i++) {
-        float distance = getDistance(setpointData[i], setpointData[i+1]);
+    distanceRemaining -= getDistance(closest, Position(setpointData[0].x, setpointData[0].y, 0));
+    for (size_t i = 0; i < setpointData.size()-1; i++) {
+        Position p1 = Position(setpointData[i].x, setpointData[i].y, 0);
+        Position p2 = Position(setpointData[i+1].x, setpointData[i+1].y, 0);
+        float distance = getDistance(p1, p2);
         if (distance <= distanceRemaining) {
             distanceRemaining -= distance;
         } else {
             float ratio = distanceRemaining / distance;
-            float interpolatedX = setpointData[i].x + ratio * (setpointData[i+1].x - setpointData[i].x);
-            float interpolatedY = setpointData[i].y + ratio * (setpointData[i+1].y - setpointData[i].y);
+            float interpolatedX = setpointData[i].x + ratio * (p2.x() - p1.x());
+            float interpolatedY = setpointData[i].y + ratio * (p2.y() - p1.y());
             return Position(interpolatedX, interpolatedY, 0);
         }
     }
     return Position(setpointData.back().x, setpointData.back().y, 0);
 }
 
-float AutoNavPath::getDistance(AutoNavSetpointData p1, AutoNavSetpointData p2) {
-    return sqrt(p1.x*p1.x + p1.y*p1.y);
+float AutoNavPath::getDistance(Position p1, Position p2) const {
+    float distanceX = p2.x() - p1.x();
+    float distanceY = p2.y() - p1.y();
+    return sqrt(distanceX * distanceX + distanceY * distanceY);
 }
-
-
-
-

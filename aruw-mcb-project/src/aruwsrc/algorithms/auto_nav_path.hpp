@@ -17,16 +17,17 @@ struct AutoNavSetpointData
 class AutoNavPath {
 public:
     AutoNavPath(float distance):
-        interpolationDistance(distance),
-        setpointData() {}
-    void addPoint(AutoNavSetpointData point);
-    Position getSetPoint();
+        setpointData(),
+        interpolationDistance(distance) {}
+    void pushPoint(AutoNavSetpointData point);
+    void popPoint();
+    Position getSetPoint() const;
 
 private:
-    Position findClosestPoint(Position current);
-    Position findInterpolatedPoint(Position closest);
-    float getDistanceToSegment(Position current, Position p1, Position p2);
-    float getDistance(AutoNavSetpointData p1, AutoNavSetpointData p2);
+    Position findClosestPoint(Position current) const;
+    Position findInterpolatedPoint(Position closest) const;
+    // TODO: should this be placed in Vector as magnitude()??... Should we even be using transforms library functions?!?!?!?!
+    float getDistance(Position p1, Position p2) const; 
 
     std::deque<AutoNavSetpointData> setpointData;
 
@@ -34,6 +35,11 @@ private:
     // The last setpoint used along the previous path
     AutoNavSetpointData oldSetpoint;
     AutoNavSetpointData currentSetpoint;
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+public:
+#endif
+    Position getClosestOnSegment(Position current, Position p1, Position p2);
 };
 
 #endif // AUTO_NAV_PATH_HPP_
