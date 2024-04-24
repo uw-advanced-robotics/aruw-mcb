@@ -579,7 +579,6 @@ void registerSentryIoMappings(Drivers *drivers)
 
     drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
     drivers->commandMapper.addMap(&shoot);          // Shoot
-    
 }
 }  // namespace sentry_control
 
