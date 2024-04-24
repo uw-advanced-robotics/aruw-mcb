@@ -177,6 +177,9 @@ public:
     }
     void update()
     {
+        numbersTest[0] = 99;
+
+
         if (chassisYawObserver != nullptr && !chassisYawObserver->getChassisWorldYaw(&chassisYaw))
         {
             chassisYaw = 0;
@@ -199,16 +202,18 @@ public:
 
         // perform the update, after this update a new state matrix is now available
         kf.performUpdate(z);
+    
 
         updateChassisStateFromKF(chassisYaw);
+
     }
 
     void updateChassisStateFromKF(float chassisYaw)
     {
         const std::array<float, 6> x = kf.getStateVectorAsMatrix();
 
-        location.setOrientation(chassisYaw);
-        location.setPosition(x[0], x[1]);
+        location.setOrientation(10);
+        location.setPosition(numbersTest[0] * 10, 10);
     }
 
 private:
@@ -255,10 +260,10 @@ private:
         0, 0 , 0            , 0, 0 , 1            ,
     };
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 1,
+        1,1,1,1,1,1,
+        1,1,1,1,1,1,
+        1,1,1,1,1,1,
+        1,1,1,1,1,1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
         1E2, 0  , 0  , 0  , 0  , 0  ,
