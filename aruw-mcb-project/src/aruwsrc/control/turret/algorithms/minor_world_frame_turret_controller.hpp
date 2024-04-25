@@ -22,8 +22,8 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
@@ -65,9 +65,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameTurretYawCascadePIDControllerMinor(
-        const tap::algorithms::transforms::Transform<
-            aruwsrc::sentry::WorldFrame,
-            aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform,
+        const tap::algorithms::transforms::Transform& worldToBaseTransform,
         TurretMotor& yawMotor,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
@@ -104,9 +102,7 @@ public:
     // void overWrite
 
 private:
-    const tap::algorithms::transforms::Transform<
-        aruwsrc::sentry::WorldFrame,
-        aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform;
+    const tap::algorithms::transforms::Transform& worldToBaseTransform;
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
@@ -142,9 +138,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameTurretPitchCascadePIDControllerMinor(
-        const tap::algorithms::transforms::Transform<
-            aruwsrc::sentry::WorldFrame,
-            aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform,
+        const tap::algorithms::transforms::Transform& worldToBaseTransform,
         TurretMotor& pitchMotor,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
@@ -182,9 +176,7 @@ public:
     // void overWrite
 
 private:
-    const tap::algorithms::transforms::Transform<
-        aruwsrc::sentry::WorldFrame,
-        aruwsrc::sentry::TurretMajorFrame>& worldToBaseTransform;
+    const tap::algorithms::transforms::Transform& worldToBaseTransform;
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;

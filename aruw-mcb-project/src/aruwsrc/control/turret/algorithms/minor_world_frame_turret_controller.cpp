@@ -17,13 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tap/algorithms/contiguous_float.hpp"
+#include "minor_world_frame_turret_controller.hpp"
 
 #include "../constants/turret_constants.hpp"
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-
-#include "minor_world_frame_turret_yaw_controller.hpp"
 
 using namespace tap::algorithms;
 
@@ -47,9 +45,7 @@ namespace aruwsrc::control::turret::algorithms
  */
 
 WorldFrameTurretYawCascadePIDControllerMinor::WorldFrameTurretYawCascadePIDControllerMinor(
-    const tap::algorithms::transforms::Transform<
-        aruwsrc::sentry::WorldFrame,
-        aruwsrc::sentry::TurretMajorFrame> &worldToBaseTransform,
+    const tap::algorithms::transforms::Transform &worldToBaseTransform,
     TurretMotor &yawMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid,
@@ -126,7 +122,8 @@ float WorldFrameTurretYawCascadePIDControllerMinor::getSetpoint() const
 
 float WorldFrameTurretYawCascadePIDControllerMinor::getMeasurement() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getValue() + worldToBaseTransform.getYaw();
+    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue() +
+           worldToBaseTransform.getYaw();
 }
 
 // @todo ask benjamin about this (benjamin go look at your tracking sheet)
@@ -149,9 +146,7 @@ bool WorldFrameTurretYawCascadePIDControllerMinor::isOnline() const { return yaw
  */
 
 WorldFrameTurretPitchCascadePIDControllerMinor::WorldFrameTurretPitchCascadePIDControllerMinor(
-    const tap::algorithms::transforms::Transform<
-        aruwsrc::sentry::WorldFrame,
-        aruwsrc::sentry::TurretMajorFrame> &worldToBaseTransform,
+    const tap::algorithms::transforms::Transform &worldToBaseTransform,
     TurretMotor &pitchMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid,
@@ -209,8 +204,8 @@ void WorldFrameTurretPitchCascadePIDControllerMinor::runController(
     float velocityPidOutput =
         velocityPid.runControllerDerivateError(positionPidOutput - worldVelocity, dt);
 
-    velocityPidOutput +=
-        computeGravitationalForceOffset(CG_X, CG_Z, turretMCB.getPitch(), G_COMPENSATION_SCALAR);
+    // velocityPidOutput +=
+    //     computeGravitationalForceOffset(CG_X, CG_Z, turretMCB.getPitch(), G_COMPENSATION_SCALAR);
 
     pitchMotor.setMotorOutput(velocityPidOutput);
 }
