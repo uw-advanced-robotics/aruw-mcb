@@ -42,9 +42,7 @@ namespace aruwsrc::display
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-#if defined(TARGET_STANDARD_WOODY)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_WOODY";
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
     static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ELSA";
 #elif defined(TARGET_DRONE)
     static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
@@ -62,6 +60,8 @@ public:
 
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
     static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
+    static constexpr char LAST_DATETIME[] = STRINGIFYMACRO(BUILD_DATETIME);
+    static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
 
     AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
     void draw() override;
