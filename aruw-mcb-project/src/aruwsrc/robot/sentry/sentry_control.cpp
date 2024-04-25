@@ -155,7 +155,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(turretMajor, turretLeft, turretRight);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu);
 
 struct TurretMinorControllers
 {
@@ -384,7 +384,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorWorldYawController,
     chassis,
     chassisYawObserver,
-    chassisOdometry);
+    chassisOdometry,
+    {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
