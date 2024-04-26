@@ -101,8 +101,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 2167,
-    .minAngle = modm::toRadian(50),
+    .startEncoderValue = 610,
+    .minAngle = modm::toRadian(0), //TODO: change back to 50
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
 };
@@ -111,8 +111,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #if defined(TARGET_STANDARD_PHOBOS)
 static constexpr float TURRET_CG_X = 55.76;
 static constexpr float TURRET_CG_Z = 52.25;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 9500
-;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -12'500;
 #else
 static constexpr float TURRET_CG_X = 30.17;
 static constexpr float TURRET_CG_Z = 34.02;
@@ -123,11 +122,11 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 10000;
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 32.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = -950.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = 60.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -137,11 +136,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 40.0f,
+    .kp = 32.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = -950.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = 60.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -151,11 +150,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 20'000.0f,
-    .ki = 100.0f,
+    .kp = 22'000.0f,
+    .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 25'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -179,11 +178,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 45.0f,
-    .ki = 0.6f,
-    .kd = 1.0f,
-    .maxICumulative = 0.5f,
-    .maxOutput = 10'000.0f,
+    .kp = 40.0f,
+    .ki = 0.25f,
+    .kd = -650.0f,
+    .maxICumulative = 1.0f,
+    .maxOutput = 7.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -193,11 +192,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 16'000.0f,
+    .kp = 12'500.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 16'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

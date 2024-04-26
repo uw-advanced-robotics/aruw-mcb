@@ -164,6 +164,7 @@ static inline void updateWorldFrameSetpoint(
  * @param[out] velocityPid Velocity PID controller.
  * @return desired PID output from running the position -> velocity cascade controller
  */
+float velocityPidIn = 0;
 static inline float runWorldFrameTurretImuController(
     const float worldFrameAngleSetpoint,
     const float worldFrameAngleMeasurement,
@@ -175,9 +176,11 @@ static inline float runWorldFrameTurretImuController(
 {
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameAngleSetpoint, worldFrameAngleMeasurement);
-    const float positionPidOutput =
-        positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
+    float positionPidOutput =
+        positionPid.runControllerDerivateError(positionControllerError, dt);
+        // positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
 
+    // positionPidOutput = velocityPidIn;
     const float velocityControllerError = positionPidOutput - worldFrameVelocityMeasured;
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
@@ -311,6 +314,9 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
         worldFrameSetpoint);
 }
 
+float turret_cg_x = TURRET_CG_X;
+float turret_cg_z = TURRET_CG_Z;
+float gravity_scalar = GRAVITY_COMPENSATION_SCALAR;
 void WorldFramePitchTurretImuCascadePidTurretController::runController(
     const uint32_t dt,
     const float desiredSetpoint)
@@ -336,10 +342,10 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         velocityPid);
 
     pidOut += computeGravitationalForceOffset(
-        TURRET_CG_X,
-        TURRET_CG_Z,
+        turret_cg_x,
+        turret_cg_z,
         -turretMotor.getAngleFromCenter(),
-        GRAVITY_COMPENSATION_SCALAR);
+        gravity_scalar);
 
     turretMotor.setMotorOutput(pidOut);
 }
