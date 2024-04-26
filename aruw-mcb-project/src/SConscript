@@ -17,6 +17,7 @@
 
 import subprocess
 from os.path import abspath
+import datetime as dt
 
 Import("env")
 Import("args")
@@ -28,16 +29,30 @@ IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/robot/**/*_control.cpp", "ar
 
 ignored_files = []
 ignored_dirs = []
+def get_output(command):
+    return (subprocess.check_output(command).decode('UTF-8')).strip()
 try:
-    get_user_name = ((subprocess.check_output(["git", "config", "user.name"]).decode('UTF-8'))).strip()
+    get_user_name = get_output(["git", "config", "user.name"])
 except subprocess.CalledProcessError as error:
     get_user_name = "Unknown"
     print(error.output)
 try:
-    get_sha = ((subprocess.check_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])).decode('UTF-8')).strip()
+    get_sha = get_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])
 except subprocess.CalledProcessError as error:
     get_sha = "Unknown"
     print(error.output)
+try:
+    now = dt.datetime.now()
+    get_datetime = f"{now.month:02}-{now.day:02} {now.hour:02}:{now.minute:02}"
+except subprocess.CalledProcessError as error:
+    get_datetime = "Unknown"
+    print(error.output)
+try:
+    get_branch_name = get_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+except subprocess.CalledProcessError as error:
+    get_branch_name = "Unknown"
+    print(error.output)
+
 
 if args["TARGET_ENV"] == "tests":
     ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
@@ -48,6 +63,8 @@ env_cpy = env.Clone()
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_DATETIME=" + get_datetime])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
 
 
 if args["COMPILE_SRC"]:
