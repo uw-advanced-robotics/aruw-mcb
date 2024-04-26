@@ -39,7 +39,7 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 2;
 
-static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
+static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.07f;
 
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
@@ -95,11 +95,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 14'500.0f,
-    .ki = 0.0f,
-    .kd = -180'000.0f,
-    .maxICumulative = 5'000.0f,
-    .maxOutput = 0.0f,
+    .kp = 18'500.0f,
+    .ki = 500.0f,
+    .kd = -580'000.0f,
+    .maxICumulative = 1'500.0f,
+    .maxOutput = 20'000.0f,
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do
                                       // anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
@@ -115,7 +115,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 // static constexpr boolean majorInverted = true;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
-static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.8f;
+static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
 }  // namespace turretMajor
 
 namespace turretLeft

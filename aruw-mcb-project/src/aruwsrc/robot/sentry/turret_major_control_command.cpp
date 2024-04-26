@@ -56,7 +56,7 @@ void TurretMajorSentryControlCommand::execute()
 
     const float yawSetpoint =
         yawController.getSetpoint() +
-        userYawInputScalar * controlOperatorInterface.getTurretMajorYawVelocity();
+        userYawInputScalar * controlOperatorInterface.getTurretMajorYawVelocity();  // @todo move scalars to controlOperatorInterface
 
     lastYawSetPoint = yawSetpoint;
 
