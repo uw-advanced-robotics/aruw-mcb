@@ -420,10 +420,11 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&stopFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-HoldCommandMapping rightSwitchUp(
+HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
