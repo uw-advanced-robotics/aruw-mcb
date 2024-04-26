@@ -140,8 +140,8 @@ aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     turretMajor::CAN_BUS_MOTOR_1,
     // turretMajor::CAN_BUS_MOTOR_1,
     // turretMajor::CAN_BUS_MOTOR_2,
-    true,
-    true,
+    false,
+    false,
     "Major Yaw Turret 1",
     "Major Yaw Turret 2");
 
@@ -559,10 +559,10 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
-    drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
-    drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
+    // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
+    // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
+    // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
+    // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 }
 }  // namespace sentry_control
 
