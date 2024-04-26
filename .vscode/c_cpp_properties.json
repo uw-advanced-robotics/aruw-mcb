@@ -42,7 +42,7 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_SENTRY_BEEHIVE"]
+            "defines": ["TARGET_SENTRY_HYDRA"]
         },
         {
             "name": "MCB Standard Spider",

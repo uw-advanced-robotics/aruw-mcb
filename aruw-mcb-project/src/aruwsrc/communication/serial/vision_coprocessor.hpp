@@ -70,7 +70,7 @@ public:
      */
     // MCB has power inlet facing forward
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#elif defined(TARGET_SENTRY_BEEHIVE)
+#elif defined(TARGET_SENTRY_HYDRA)
     // MCB is on a diagonal
     static constexpr float MCB_ROTATION_OFFSET = -3.0f * M_PI_4;
 #else

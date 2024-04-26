@@ -28,7 +28,7 @@
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_BEEHIVE)
+#elif defined(TARGET_SENTRY_HYDRA)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_DART)
 #include "aruwsrc/robot/dart/dart_turret_constants.hpp"

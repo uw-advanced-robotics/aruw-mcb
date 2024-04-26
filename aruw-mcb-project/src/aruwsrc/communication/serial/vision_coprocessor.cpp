@@ -165,7 +165,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 void VisionCoprocessor::sendMessage()
 {
-#if not defined(TARGET_SENTRY_BEEHIVE)
+#if not defined(TARGET_SENTRY_HYDRA)
     sendOdometryData();
 #endif
     sendRobotTypeData();

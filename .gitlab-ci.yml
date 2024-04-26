@@ -304,19 +304,19 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 "Sentry: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 "Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 # Dart Build
 
