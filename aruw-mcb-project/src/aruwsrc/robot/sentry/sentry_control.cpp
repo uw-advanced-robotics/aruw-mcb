@@ -23,6 +23,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -127,12 +128,18 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 
 namespace sentry_control
 {
-tap::motor::DoubleDjiMotor turretMajorYawMotor(
+// tap::motor::DoubleDjiMotor turretMajorYawMotor(
+aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     drivers(),
-    tap::motor::MOTOR7,
-    tap::motor::MOTOR7,
+    &drivers()->chassisMcbLite,
+    tap::motor::MOTOR5,
+    tap::motor::MOTOR6,
+    // tap::motor::MOTOR7,
+    // tap::motor::MOTOR7,
     turretMajor::CAN_BUS_MOTOR_1,
-    turretMajor::CAN_BUS_MOTOR_2,
+    turretMajor::CAN_BUS_MOTOR_1,
+    // turretMajor::CAN_BUS_MOTOR_1,
+    // turretMajor::CAN_BUS_MOTOR_2,
     true,
     true,
     "Major Yaw Turret 1",
@@ -246,7 +253,7 @@ TurretMinorControllers turretRightControllers{
 VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR2,
-    tap::can::CanBus::CAN_BUS2,
+    tap::can::CanBus::CAN_BUS2,  // not actually used but needs to be here to keep chassis happy
     &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.driveMotorInverted,
     "Left Front Swerve Drive Motor");
@@ -254,7 +261,7 @@ VirtualDjiMotor leftFrontDriveMotor(
 VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
     MOTOR6,
-    tap::can::CanBus::CAN_BUS1,  // yaw mech motor
+    tap::can::CanBus::CAN_BUS2,  // same as above
     &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
@@ -294,7 +301,7 @@ VirtualDjiMotor leftBackAzimuthMotor(
 VirtualDjiMotor rightBackDriveMotor(
     drivers(),
     MOTOR4,
-    tap::can::CanBus::CAN_BUS2,
+    tap::can::CanBus::CAN_BUS2,  // same as above
     &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.driveMotorInverted,
     "Right Back Swerve Drive Motor");
@@ -302,7 +309,7 @@ VirtualDjiMotor rightBackDriveMotor(
 VirtualDjiMotor rightBackAzimuthMotor(
     drivers(),
     MOTOR5,
-    tap::can::CanBus::CAN_BUS1,  // yaw mech motor
+    tap::can::CanBus::CAN_BUS2,  // same as above
     &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
