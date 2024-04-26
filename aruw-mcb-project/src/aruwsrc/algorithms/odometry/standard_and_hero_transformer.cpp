@@ -51,9 +51,7 @@ void StandardAndHeroTransformer::updateTransforms()
     float roll = 0.0f;
     const aruwsrc::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
 
-    // @note: must shift by PI / 3 since turret mcb roll is in the range [- PI / 2, PI / 2] while
-    // turret pitch and yaw are both in [0, PI]
-    if (turretMCB != nullptr) roll = turretMCB->getRoll() + M_PI_2;
+    if (turretMCB != nullptr) roll = turretMCB->getRoll();
 
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
 

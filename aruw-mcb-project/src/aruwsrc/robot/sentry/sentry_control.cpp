@@ -48,6 +48,7 @@
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_launcher_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
@@ -166,7 +167,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(turretMajor, turretLeft, turretRight);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu);
 
 struct TurretMinorControllers
 {
@@ -201,7 +202,7 @@ VirtualDjiMotor leftFrontDriveMotor(
     drivers(),
     MOTOR2,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.driveMotorInverted,
     "Left Front Swerve Drive Motor");
 
@@ -209,7 +210,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
     drivers(),
     MOTOR6,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     leftFrontSwerveConfig.azimuthMotorInverted,
     "Left Front Swerve Azimuth Motor");
 
@@ -217,7 +218,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR1,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor");
 
@@ -225,7 +226,7 @@ VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR5,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor");
 
@@ -233,7 +234,7 @@ VirtualDjiMotor leftBackDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS2,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
 
@@ -241,7 +242,7 @@ VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS2,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
 
@@ -249,7 +250,7 @@ VirtualDjiMotor rightBackDriveMotor(
     drivers(),
     MOTOR4,
     tap::can::CanBus::CAN_BUS2,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.driveMotorInverted,
     "Right Back Swerve Drive Motor");
 
@@ -257,7 +258,7 @@ VirtualDjiMotor rightBackAzimuthMotor(
     drivers(),
     MOTOR8,
     tap::can::CanBus::CAN_BUS2,
-    &(drivers()->mcbLite),
+    &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
 
@@ -283,7 +284,7 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
     rightBackSwerveConfig);
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
-    {&drivers()->mcbLite.analog,
+    {&drivers()->chassisMcbLite.analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
@@ -302,7 +303,7 @@ SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
     chassis,
     chassisYawObserver,
-    drivers()->mcbLite.imu,
+    drivers()->chassisMcbLite.imu,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y);
 
@@ -314,6 +315,8 @@ SentryTransforms transformer(
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+
+SentryTransformAdapter transformAdapter(transformer);
 
 tap::algorithms::SmoothPid turretMajorYawPosPid(
     turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
@@ -425,7 +428,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorWorldYawController,
     chassis,
     chassisYawObserver,
-    chassisOdometry);
+    chassisOdometry,
+    {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
 
 // LEFT shooting ======================
 
@@ -549,6 +553,7 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

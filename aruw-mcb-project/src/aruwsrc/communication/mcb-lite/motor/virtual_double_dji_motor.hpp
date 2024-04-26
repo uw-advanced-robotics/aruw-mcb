@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_DJI_MOTOR_HPP_
-#define VIRTUAL_DJI_MOTOR_HPP_
+#ifndef VIRTUAL_DOUBLE_DJI_MOTOR_HPP_
+#define VIRTUAL_DOUBLE_DJI_MOTOR_HPP_
 
 #include "tap/drivers.hpp"
-#include "tap/motor/dji_motor.hpp"
+#include "tap/motor/double_dji_motor.hpp"
 
 #include "../mcb_lite.hpp"
 
@@ -30,20 +30,24 @@ using namespace tap::motor;
 namespace aruwsrc::virtualMCB
 {
 /**
- * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
+ * This class builds off of DoubleDjiMotor, but changes motor communication to talk to a virtual MCB
  */
-class VirtualDjiMotor : public tap::motor::DjiMotor
+class VirtualDoubleDjiMotor : public tap::motor::DoubleDjiMotor
 {
 public:
-    VirtualDjiMotor(
+    VirtualDoubleDjiMotor(
         tap::Drivers* drivers,
-        MotorId desMotorIdentifier,
-        tap::can::CanBus motorCanBus,
         MCBLite* mcbLite,
-        bool isInverted,
-        const char* name,
-        uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
-        int64_t encoderRevolutions = 0);
+        MotorId desMotorIdentifierOne,
+        MotorId desMotorIdentifierTwo,
+        tap::can::CanBus motorCanBusOne,
+        tap::can::CanBus motorCanBusTwo,
+        bool isInvertedOne,
+        bool isInvertedTwo,
+        const char* nameOne,
+        const char* nameTwo,
+        uint16_t encWrapped = DjiMotor::ENC_RESOLUTION / 2,
+        int64_t encRevolutions = 0);
 
     void initialize() override;
 
