@@ -1,15 +1,28 @@
 #include "auto_nav_path.hpp"
 #include <deque>
 
+#include "tap\algorithms\transforms\vector.hpp"
+#include "tap\algorithms\transforms\position.hpp"
+
+using tap::algorithms::transforms::Position;
+
 void AutoNavPath::pushPoint(AutoNavSetpointData point) {
     setpointData.push_back(point);
+}
+
+void AutoNavPath::popPoint() {
+    setpointData.pop_front();
 }
 
 Position AutoNavPath::getSetPoint() const {
     return Position(currentSetpoint.x, currentSetpoint.y, 0);
 }
 
-Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Position p2) {
+Position AutoNavPath::findClosestPoint() const {
+    return Position(0,0,0);
+}
+
+Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Position p2) const {
     float distance1x = p2.x() - p1.x();
     float distance1y = p2.y() - p1.y();
     float distance2x = current.x() - p1.x();
@@ -21,7 +34,7 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
     } else if (ratio > 1) {
         return p2;
     } else {
-        return p1 + Position(distance1x * ratio, distance1y * ratio, 0);
+        return Position(p1.x() + distance1x * ratio, p1.y() + distance1y * ratio, 0);
     }
 }
 

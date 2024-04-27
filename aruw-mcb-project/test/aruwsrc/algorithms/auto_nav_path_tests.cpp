@@ -3,7 +3,6 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 
 using namespace testing;
-using namespace aruwsrc::algorithms;
 
 class AutoNavPathTest : public Test {
 protected:

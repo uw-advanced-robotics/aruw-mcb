@@ -24,7 +24,7 @@ public:
     Position getSetPoint() const;
 
 private:
-    Position findClosestPoint(Position current) const;
+    Position findClosestPoint() const;
     Position findInterpolatedPoint(Position closest) const;
     // TODO: should this be placed in Vector as magnitude()??... Should we even be using transforms library functions?!?!?!?!
     float getDistance(Position p1, Position p2) const; 
@@ -39,7 +39,7 @@ private:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif
-    Position getClosestOnSegment(Position current, Position p1, Position p2);
+    Position getClosestOnSegment(Position current, Position p1, Position p2) const;
 };
 
 #endif // AUTO_NAV_PATH_HPP_

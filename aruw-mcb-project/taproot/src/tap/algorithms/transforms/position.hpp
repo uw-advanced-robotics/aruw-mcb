@@ -58,7 +58,7 @@ public:
 
     inline Position operator+(const Position& vector) const;
 
-    inline Position operator=(const Position& other);
+    Position& operator=(const Position& other);
 
     inline CMSISMat<3, 1> coordinates() const { return this->coordinates_; }
 
