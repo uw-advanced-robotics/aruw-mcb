@@ -55,11 +55,8 @@ void SentryArucoResetSubsystem::refresh()
         resetData.data.quatY,
         resetData.data.quatZ);
 
-    const Transform& majorToMinor = transforms.getWorldToTurretMajor().getInverse().compose(
-        transforms.getWorldToTurret(resetData.data.turretId));
-
-    const Transform& chassisToMajor = transforms.getWorldToChassis().getInverse().compose(
-        transforms.getWorldToTurretMajor().getInverse());
+    const Transform& majorToMinor = transforms.getMajorToMinor(resetData.data.turretId);
+    const Transform& chassisToMajor = transforms.getChassisToMajor();
 
     float newYaw = tap::algorithms::eulerAnglesFromQuaternion(q).z - majorToMinor.getYaw() -
                    chassisToMajor.getYaw();
