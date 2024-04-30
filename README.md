@@ -193,5 +193,5 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
         - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
-            - STANDARD_WOODY, STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_KRONOS
+            - STANDARD_WOODY, STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_CYCLONE
 ```

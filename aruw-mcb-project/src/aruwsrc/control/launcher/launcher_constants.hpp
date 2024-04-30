@@ -28,13 +28,13 @@
 
 namespace aruwsrc::control::launcher
 {
-#if defined(TARGET_HERO_KRONOS)
+#if defined(TARGET_HERO_CYCLONE)
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
 
-#if defined(TARGET_HERO_KRONOS) || defined(ALL_SENTRIES)
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
@@ -62,7 +62,7 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#if defined(TARGET_HERO_KRONOS)
+#if defined(TARGET_HERO_CYCLONE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10, 3700.0f},
@@ -113,7 +113,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
-#elif defined(TARGET_HERO_KRONOS)
+#elif defined(TARGET_HERO_CYCLONE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
 #elif defined(TARGET_SENTRY_BEEHIVE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
