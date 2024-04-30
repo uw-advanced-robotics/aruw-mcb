@@ -269,7 +269,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor");
@@ -277,15 +277,15 @@ VirtualDjiMotor rightFrontDriveMotor(
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor");
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
-    MOTOR4,
-    tap::can::CanBus::CAN_BUS1,
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
@@ -293,7 +293,7 @@ VirtualDjiMotor leftBackDriveMotor(
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
     MOTOR8,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
@@ -313,6 +313,40 @@ VirtualDjiMotor rightBackAzimuthMotor(
     &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
+
+// NEW WHEELS
+
+VirtualDjiMotor frontDriveMotor(
+    drivers(),
+    MOTOR3,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Front Drive Motor");
+
+VirtualDjiMotor frontAzimuthMotor(
+    drivers(),
+    MOTOR7,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Front Azimuth Motor");
+
+VirtualDjiMotor backDriveMotor(
+    drivers(),
+    MOTOR4,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Back Drive Motor");
+
+VirtualDjiMotor backAzimuthMotor(
+    drivers(),
+    MOTOR8,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Back Azimuth Motor");
 
 // This is the one facing parallel to the frame
 VirtualDjiMotor rightOmni(
