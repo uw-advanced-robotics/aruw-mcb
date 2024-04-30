@@ -113,6 +113,7 @@ int main()
 #if defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA)
