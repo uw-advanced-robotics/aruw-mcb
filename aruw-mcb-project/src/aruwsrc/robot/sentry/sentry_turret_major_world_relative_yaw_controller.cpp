@@ -81,7 +81,7 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
         worldFrameSetpoint.getWrappedValue() - worldToChassis.getYaw(),
         localAngle.getWrappedValue());
 
-    // positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
+    positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
     const float velocityControllerError = limitVal(
         positionPidOutput - localVelocity - chassisVelocity,
