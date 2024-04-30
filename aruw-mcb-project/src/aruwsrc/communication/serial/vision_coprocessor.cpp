@@ -109,6 +109,10 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToArucoResetData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_MOTION_STRATEGY_OPTIONS:
+        {
+            decodeToMotionStrategyOptionsData(completeMessage);
+        }
         default:
             return;
     }
@@ -125,6 +129,12 @@ bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& mess
     // copy packet into data field
     memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
     lastArucoData.updated = true;
+    return true;
+}
+
+bool VisionCoprocessor::decodeToMotionStrategyOptionsData(const ReceivedSerialMessage& message)
+{
+    memcpy(&lastMotionStratOptionsData, &message.data, sizeof(MotionStrategyOptionsData));
     return true;
 }
 
