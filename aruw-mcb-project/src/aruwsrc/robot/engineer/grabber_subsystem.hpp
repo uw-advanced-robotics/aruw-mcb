@@ -53,7 +53,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "Grabber"; }
+    const char *getName() const override { return "Grabber"; }
 
 private:
     tap::gpio::Digital::OutputPin pin;

@@ -20,7 +20,7 @@
 #ifndef TURRET_MOTOR_HPP_
 #define TURRET_MOTOR_HPP_
 
-#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
@@ -96,7 +96,7 @@ public:
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const tap::algorithms::ContiguousFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const tap::algorithms::WrappedFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
@@ -123,11 +123,11 @@ public:
      */
     mockable inline float getAngleFromCenter() const
     {
-        return tap::algorithms::ContiguousFloat(
-                   chassisFrameMeasuredAngle.getValue() - config.startAngle,
+        return tap::algorithms::WrappedFloat(
+                   chassisFrameMeasuredAngle.getWrappedValue() - config.startAngle,
                    -M_PI,
                    M_PI)
-            .getValue();
+            .getWrappedValue();
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
@@ -272,7 +272,7 @@ private:
     float chassisFrameSetpoint;
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
-    tap::algorithms::ContiguousFloat chassisFrameMeasuredAngle;
+    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle;
 
     /// Unwrapped chassis frame measured angle. Units radians.
     float chassisFrameUnwrappedMeasurement;

@@ -41,7 +41,7 @@ public:
 
     void refreshSafeDisconnect() override {}
 
-    const char* getName() override { return "client display"; }
+    const char* getName() const override { return "client display"; }
 };
 }  // namespace aruwsrc::control::client_display
 

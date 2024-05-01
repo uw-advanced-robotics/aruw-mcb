@@ -38,7 +38,7 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
-    MOCK_METHOD(const char *, getName, (), (override));
+    MOCK_METHOD(const char *, getName, (), (const override));
     MOCK_METHOD(void, onHardwareTestStart, (), (override));
     MOCK_METHOD(bool, isOnline, (), (const override));
 

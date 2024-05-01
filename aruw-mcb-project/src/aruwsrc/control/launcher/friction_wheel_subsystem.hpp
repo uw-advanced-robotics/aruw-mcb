@@ -104,7 +104,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "Friction wheels"; }
+    const char *getName() const override { return "Friction wheels"; }
 
 protected:
     /// The maximum launch speed that the user can request. The launch speed is limited between [0,

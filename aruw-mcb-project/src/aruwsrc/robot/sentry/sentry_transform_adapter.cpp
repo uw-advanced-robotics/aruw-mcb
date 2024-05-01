@@ -50,7 +50,6 @@ const Transform& SentryTransformAdapter::getWorldToChassis() const
 
 const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) const
 {
-    // todo: waiting for !646 to merge before can check ids correctly
     if (turretID == 0)
     {
         return this->transforms.getWorldToTurretLeft();
