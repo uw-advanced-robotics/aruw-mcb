@@ -275,7 +275,7 @@ SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_
 
 TurretMinorWorldControllers turretRightWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
         turretRightWorldPitchVelPid,
@@ -284,7 +284,7 @@ TurretMinorWorldControllers turretRightWorldControllers{
         GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        drivers()->turretMCBCanCommBus1,
         turretRight.yawMotor,
         turretRightWorldYawPosPid,
         turretRightWorldYawVelPid)
@@ -293,8 +293,8 @@ TurretMinorWorldControllers turretRightWorldControllers{
 
 TurretMinorWorldControllers turretLeftWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.pitchMotor,
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
         turretLeftWorldPitchVelPid,
         TURRET_CG_X,
@@ -302,8 +302,8 @@ TurretMinorWorldControllers turretLeftWorldControllers{
         GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.yawMotor,
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.yawMotor,
         turretLeftWorldYawPosPid,
         turretLeftWorldYawVelPid)
 

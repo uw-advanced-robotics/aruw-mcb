@@ -183,10 +183,10 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .kp = 80'000.0f,
+    .ki = 100.0f,
+    .kd = 6'000.0f,
+    .maxICumulative = 2'000.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
@@ -209,10 +209,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 80'000.0f,
-    .ki = 100.0f,
-    .kd = 6'000.0f,
-    .maxICumulative = 2'000.0f,
+    .kp = 13'500.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
@@ -222,11 +222,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 0.0f,
+    .kp = 25.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -235,11 +235,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 0.0f,
+    .kp = 12'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxOutput = 28'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -248,11 +248,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 0.0f,
-    .ki = 0.0f,
+    .kp = 25.0f,
+    .ki = 1.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxICumulative = 0.1f,
+    .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
