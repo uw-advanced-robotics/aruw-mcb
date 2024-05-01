@@ -97,12 +97,12 @@ float MecanumWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
 std::vector<float> MecanumWheel::getHMat(){
     CMSISMat<2,3> calcedMat =  wheelVelocityTransformation * Wheel::wheelOrientationMat * Wheel::distanceMat;
     return std::vector<float>({
-        0,
-        0,
-        0,
         calcedMat.data[0],
         calcedMat.data[1],
-        calcedMat.data[2]}
+        calcedMat.data[2],
+        0,
+        0,
+        0}
     );
 }
  

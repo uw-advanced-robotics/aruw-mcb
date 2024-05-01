@@ -29,7 +29,8 @@ ChassisKFOdometry::ChassisKFOdometry(
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
-    : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+    : 
+      kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
@@ -57,16 +58,28 @@ void ChassisKFOdometry::update()
     }
 
     // get chassis frame velocity as measured by the motor encoders
-    auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
-        chassisVelocity,
-        chassisYaw);
+    // auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+    // tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
+    //     chassisVelocity,
+    //     chassisYaw);
 
-    auto a = wheels[0]->getHMat();
-    auto b = wheels[0]->getMMat();
+    for (int i = 0; i < 6; i++)
+    {
+        a[i] = wheels[0]->getHMat().at(i);
+        a[i+6] = wheels[1]->getHMat().at(i);
+        a[i+12] = wheels[2]->getHMat().at(i);
+        a[i+18] = wheels[3]->getHMat().at(i);
+    }
+
+    b[0] = wheels[0]->getMMat().at(0);
+    b[1] = wheels[1]->getMMat().at(0);
+    b[2] = wheels[2]->getMMat().at(0);
+    b[3] = wheels[3]->getMMat().at(0);
+    b[4] = imu.getAx();
+    b[5] = imu.getAy();
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(chassisVelocity);
+    // updateMeasurementCovariance(chassisVelocity);
 
     // assume 0 velocity/acceleration in z direction
     float y[int(OdomInput::NUM_INPUTS)] = {};
@@ -89,6 +102,7 @@ void ChassisKFOdometry::update()
     // update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromKF(chassisYaw);
 }
+
 
 void ChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 {

@@ -73,6 +73,33 @@ public:
 
     void update();
 
+    float a[36];
+    float b[6];
+class CMatrixBuilder {
+    static float* buildCMatrix(Wheel* wheel) {
+        float* c = new float[6];
+        for (int i = 0; i < 6; i++) {
+            c[i] = wheel->getHMat().at(i);
+            c[i+6] = wheel->getHMat().at(i);
+            c[i+12] = wheel->getHMat().at(i);
+            c[i+18] = wheel->getHMat().at(i);
+        }
+        c[24] = 0;
+        c[25] = 0;
+        c[26] = 0;
+        c[27] = 1;
+        c[28] = 0;
+        c[29] = 0;
+        c[30] = 0;
+        c[31] = 0;
+        c[32] = 0;
+        c[33] = 0;
+        c[34] = 0;
+        c[35] = 1;
+        return c;
+    }
+};
+
 protected:
     enum class OdomState
     {
@@ -128,12 +155,12 @@ private:
 
     // };
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0,
+        -13.1578932, 13.1578932, 4.94078922, 0, 0, 0,
+        -13.1578932, -13.1578932, -4.94078922, 0, 0, 0,
+        -13.1578932, -13.1578932, 4.94078922, 0, 0, 0,
+        -13.1578932, 13.1578932, -4.94078922, 0, 0, 0,
         0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 1,
 
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
