@@ -68,6 +68,40 @@ void SentryTurretCVCommand::initialize()
     visionCoprocessor.sendSelectNewTargetMessage();
 }
 
+void SentryTurretCVCommand::computeAimSetpoints(
+    TurretConfig &config,
+    aruwsrc::algorithms::OttoBallisticsSolver::BallisticsSolution &solution,
+    float *desiredYawSetpoint,
+    float *desiredPitchSetpoint,
+    bool *withinAimingTolerance)
+{
+    // Get world-relative setpoints
+    *desiredYawSetpoint = solution.yawAngle;
+    *desiredPitchSetpoint = solution.pitchAngle;
+
+    // convert world-relative setpoints to turret major frame
+    *desiredYawSetpoint = *desiredYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
+    *desiredPitchSetpoint =
+        *desiredPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
+
+    /**
+     * the setpoint returned by the ballistics solver is between [0, 2*PI)
+     * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
+     * that is closest to the unwrapped measured angle.
+     */
+    *desiredYawSetpoint = config.turretSubsystem.yawMotor.unwrapTargetAngle(*desiredYawSetpoint);
+    *desiredPitchSetpoint =
+        config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
+
+    auto differenceWrappedGirlboss = [](float measurement, float setpoint)
+    { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
+
+    *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
+        differenceWrappedGirlboss(config.yawController.getMeasurement(), *desiredYawSetpoint),
+        differenceWrappedGirlboss(config.pitchController.getMeasurement(), *desiredPitchSetpoint),
+        solution.distance);
+}
+
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
@@ -97,99 +131,41 @@ void SentryTurretCVCommand::execute()
 
         if (leftBallisticsSolution != std::nullopt)
         {
-            // Get world-relative setpoints
-            leftYawSetpoint = leftBallisticsSolution->yawAngle;
-            leftPitchSetpoint = leftBallisticsSolution->pitchAngle;
-
-            // convert world-relative setpoints to turret major frame setpoint
-            leftYawSetpoint = leftYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-            leftPitchSetpoint =
-                leftPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
-
-            /**
-             * the setpoint returned by the ballistics solver is between [0, 2*PI)
-             * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
-             * that is closest to the unwrapped measured angle.
-             */
-            leftYawSetpoint =
-                turretLeftConfig.turretSubsystem.yawMotor.unwrapTargetAngle(leftYawSetpoint);
-            leftPitchSetpoint =
-                turretLeftConfig.turretSubsystem.pitchMotor.unwrapTargetAngle(leftPitchSetpoint);
-
-            auto differenceWrappedGirlboss = [](float measurement, float setpoint) {
-                return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI)
-                    .minDifference(setpoint);
-            };
-
-            withinAimingToleranceLeft = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
-                differenceWrappedGirlboss(
-                    turretLeftConfig.yawController.getMeasurement(),
-                    leftYawSetpoint),
-                differenceWrappedGirlboss(
-                    pitchControllerGirlboss.getMeasurement(),
-                    girlbossPitchSetpoint),
-                girlbossBallisticsSolution->distance);
+            computeAimSetpoints(
+                turretLeftConfig,
+                leftBallisticsSolution.value(),
+                &leftYawSetpoint,
+                &leftPitchSetpoint,
+                &withinAimingToleranceLeft);
         }
 
-        if (malewifeBallisticsSolution != std::nullopt)
+        if (rightBallisticsSolution != std::nullopt)
         {
-            // Get world-relative setpoints
-            malewifeYawSetpoint = malewifeBallisticsSolution->yawAngle;
-            malewifePitchSetpoint = malewifeBallisticsSolution->pitchAngle;
-
-            // convert world-relative setpoints to respective turret frame setpoint
-            // hold on, is it minor frame or major frame that the controllers are running in?
-            // convert world-relative setpoints to turret major frame setpoint
-            malewifeYawSetpoint =
-                malewifeYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-            malewifePitchSetpoint =
-                malewifePitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
-
-            /**
-             * the setpoint returned by the ballistics solver is between [0, 2*PI)
-             * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
-             * that is closest to the unwrapped measured angle.
-             */
-            malewifeYawSetpoint =
-                turretMinorMalewifeSubsystem.yawMotor.unwrapTargetAngle(malewifeYawSetpoint);
-            malewifePitchSetpoint =
-                turretMinorMalewifeSubsystem.pitchMotor.unwrapTargetAngle(malewifePitchSetpoint);
-
-            auto differenceWrappedMalewife = [](float measurement, float setpoint) {
-                return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
-                    .difference(setpoint);
-            };
-
-            withinAimingToleranceMalewife = malewifeBallisticsSolver.withinAimingTolerance(
-                differenceWrappedMalewife(
-                    yawControllerMalewife.getMeasurement(),
-                    malewifeYawSetpoint),
-                differenceWrappedMalewife(
-                    pitchControllerMalewife.getMeasurement(),
-                    malewifePitchSetpoint),
-                malewifeBallisticsSolution->distance);
+            computeAimSetpoints(
+                turretRightConfig,
+                rightBallisticsSolution.value(),
+                &rightYawSetpoint,
+                &rightPitchSetpoint,
+                &withinAimingToleranceRight);
         }
 
-        WrappedFloat girlbossYawWrapped(girlbossBallisticsSolution->yawAngle, 0, M_TWOPI);
-        WrappedFloat malewifeYawWrapped(malewifeBallisticsSolution->yawAngle, 0, M_TWOPI);
+        // sus: one of these could be std::nullopt
+        WrappedFloat leftYawWrapped(leftBallisticsSolution->yawAngle, 0, M_TWOPI);
+        WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
 
         // major averaging
         auto &worldToChassisTransform = sentryTransforms.getWorldToChassis();
-        // conversion because otherwise divide by 2 doesn't work right otherwise
-        WrappedFloat majorYawWrapped = WrappedFloat(
-            girlbossYawWrapped.minDifference(malewifeYawWrapped).getValue(),
-            -M_PI,
-            M_PI);
-        majorYawWrapped /= -2.0f;
-        majorYawWrapped = WrappedFloat(majorYawWrapped.getValue(), 0, M_TWOPI);
-        majorYawWrapped += malewifeYawWrapped;
+        WrappedFloat majorYawWrapped(leftYawWrapped.minDifference(rightYawWrapped), -M_PI, M_PI);
 
-        majorSetpoint = majorYawWrapped.getValue();
+        majorYawWrapped = WrappedFloat(majorYawWrapped.getWrappedValue() / -2.0f, 0, M_TWOPI);
+        majorYawWrapped += rightYawWrapped;
+
+        majorSetpoint = majorYawWrapped.getWrappedValue();
     }
     else
     {
-        withinAimingToleranceGirlboss = false;
-        withinAimingToleranceMalewife = false;
+        withinAimingToleranceLeft = false;
+        withinAimingToleranceRight = false;
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -209,10 +185,7 @@ void SentryTurretCVCommand::execute()
 
             // scan logic: start at some default, scan 180deg clockwise, change direction
             // scan 180 ccw, change, etc.
-
-            // possibly use some ramping when switching directions,
-            // but we're pretty slow so who cares
-            float v = majorScanValue.getValue();
+            float v = majorScanValue.getWrappedValue();
             if (v >= CCW_TO_CW_WRAP_VALUE)
                 scanDir = SCAN_CLOCKWISE;  // decreases angle
             else if (v <= CW_TO_CCW_WRAP_VALUE)
@@ -220,12 +193,11 @@ void SentryTurretCVCommand::execute()
 
             majorScanValue += WrappedFloat(YAW_SCAN_DELTA_ANGLE * scanDir, 0.0f, M_TWOPI);
             majorSetpoint =
-                lowPassFilter(majorSetpoint, majorScanValue.getValue(), SCAN_LOW_PASS_ALPHA);
-            // majorSetpoint = majorScanValue.getValue();
-            girlbossPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
-            malewifePitchSetpoint = SCAN_TURRET_MINOR_PITCH;
-            girlbossYawSetpoint = SCAN_GIRLBOSS_YAW;
-            malewifeYawSetpoint = SCAN_MALEWIFE_YAW;
+                lowPassFilter(majorSetpoint, majorScanValue.getWrappedValue(), SCAN_LOW_PASS_ALPHA);
+            leftPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
+            rightPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
+            leftYawSetpoint = SCAN_TURRET_LEFT_YAW;
+            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW;
         }
     }
 
@@ -233,34 +205,35 @@ void SentryTurretCVCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    // updates the turret pitch/yaw setpoint, runs the PID controller,
-    // and sets the turret subsystem's desired pitch/yaw output
-
-    // TODO: need to transform these worldframe setpoints to major frame
-    // to transform to major frame: subtract out major yaw
-
     yawControllerMajor.runController(dt, majorSetpoint);
 
-    pitchControllerGirlboss.runController(dt, girlbossPitchSetpoint);
-    pitchControllerMalewife.runController(dt, malewifePitchSetpoint);
+    turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
+    turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
 
-    yawControllerGirlboss.runController(dt, girlbossYawSetpoint);
-    yawControllerMalewife.runController(dt, malewifeYawSetpoint);
+    turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
+    turretRightConfig.yawController.runController(dt, rightYawSetpoint);
 }
 
 bool SentryTurretCVCommand::isFinished() const
 {
-    return !yawControllerGirlboss.isOnline() || !pitchControllerGirlboss.isOnline() ||
-           !yawControllerMalewife.isOnline() || !pitchControllerMalewife.isOnline();
+    return !turretLeftConfig.pitchController.isOnline() ||
+           !turretLeftConfig.yawController.isOnline() ||
+           !turretRightConfig.pitchController.isOnline() ||
+           !turretRightConfig.yawController.isOnline();
 }
 
 void SentryTurretCVCommand::end(bool)
 {
-    turretMajorSubsystem.yawMotor.setMotorOutput(0);
-    turretMinorGirlbossSubsystem.pitchMotor.setMotorOutput(0);
-    turretMinorMalewifeSubsystem.pitchMotor.setMotorOutput(0);
-    withinAimingToleranceGirlboss = false;
-    withinAimingToleranceMalewife = false;
+    turretMajorSubsystem.getMutableMotor().setMotorOutput(0);
+
+    turretLeftConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
+    turretRightConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
+
+    turretLeftConfig.turretSubsystem.yawMotor.setMotorOutput(0);
+    turretRightConfig.turretSubsystem.yawMotor.setMotorOutput(0);
+
+    withinAimingToleranceLeft = false;
+    withinAimingToleranceRight = false;
     exitScanMode();
 }
 

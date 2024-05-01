@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -43,6 +44,7 @@
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
@@ -386,6 +388,46 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     chassisOdometry,
     {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
+
+aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
+    drivers()->visionCoprocessor,
+    transformer,
+    null,
+    30.f,
+    transformer.getWorldToTurretMajor(),
+    turretMajor.getReadOnlyMotor(),
+    TURRET_MINOR_OFFSET,
+    turretLeft.getTurretID());
+
+SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
+    turretLeft,
+    turretLeftControllers.yawController,
+    turretLeftControllers.pitchController,
+    turretLeftSolver);
+
+aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
+    drivers()->visionCoprocessor,
+    transformer,
+    null,
+    30.f,
+    transformer.getWorldToTurretMajor(),
+    turretMajor.getReadOnlyMotor(),
+    TURRET_MINOR_OFFSET,
+    turretRight.getTurretID());
+
+SentryTurretCVCommand::TurretConfig turretRightCVConfig(
+    turretRight,
+    turretRightControllers.yawController,
+    turretRightControllers.pitchController,
+    turretLetSolver);
+
+SentryTurretCVCommand(
+    drivers()->visionCoprocessor,
+    turretMajor,
+    turretMajorWorldYawController,
+    turretLeftCVConfig,
+    turretRightCVConfig,
+    transformer);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(

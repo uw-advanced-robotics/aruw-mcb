@@ -31,10 +31,9 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
 {
@@ -59,7 +58,6 @@ class LaunchSpeedPredictorInterface;
 namespace aruwsrc::control::sentry
 {
 
-
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turrets accordingly using a position PID controller.
@@ -70,21 +68,18 @@ namespace aruwsrc::control::sentry
 class SentryTurretCVCommand : public tap::control::Command
 {
 public:
-
-    struct TurretConfig {
+    struct TurretConfig
+    {
         SentryTurretMinorSubsystem &turretSubsystem;
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface
-            &yawController;
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchController;
-        aruwsrc::algorithms::OttoBallisticsSolver
-            &ballisticsSolver;
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
+        aruwsrc::algorithms::OttoBallisticsSolver &ballisticsSolver;
     };
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    static constexpr float SCAN_TURRET_1_YAW = modm::toRadian(90.0f);
-    static constexpr float SCAN_TURRET_1_YAW = modm::toRadian(-90.0f);
+    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
@@ -115,10 +110,9 @@ public:
         serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
-        TurretConfig& turretLeftConfig,
-        TurretConfig& turretRightConfig,
-        aruwsrc::sentry::SentryTransforms
-            &sentryTransforms);  
+        TurretConfig &turretLeftConfig,
+        TurretConfig &turretRightConfig,
+        aruwsrc::sentry::SentryTransforms &sentryTransforms);
 
     void initialize();
 
@@ -142,18 +136,30 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-        return turretID == turretLeftConfig.turretSubsystem.getTurretID() ? withinAimingToleranceLeft
-                                              : withinAimingToleranceRight;
+        return turretID == turretLeftConfig.turretSubsystem.getTurretID()
+                   ? withinAimingToleranceLeft
+                   : withinAimingToleranceRight;
     }
 
 private:
+    /**
+     * Converts the angles contained in the ballistics solution to the frame of the turret major,
+     * since chassis-frame controllers are used
+     */
+    void computeAimSetpoints(
+        TurretConfig &config,
+        aruwsrc::algorithms::OttoBallisticsSolver::BallisticsSolution &solution,
+        float *desiredYawSetpoint,
+        float *desiredPitchSetpoint,
+        bool *withinAimingTolerance);
+
     serial::VisionCoprocessor &visionCoprocessor;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
 
-    TurretConfig& turretLeftConfig;
-    TurretConfig& turretRightConfig;
+    TurretConfig &turretLeftConfig;
+    TurretConfig &turretRightConfig;
     aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
@@ -195,7 +201,6 @@ private:
     {
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        // @todo set function for wrapped float that retains bounds
         majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI);
     }
 
@@ -206,6 +211,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::sentry
 
 #endif  // SENTRY_TURRET_CV_COMMAND_HPP_
