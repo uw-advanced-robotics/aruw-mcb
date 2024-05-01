@@ -32,8 +32,9 @@
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_major_subsystem.hpp"
+
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
 namespace tap::control::odometry
 {
@@ -55,8 +56,10 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::sentry
 {
+
+
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turrets accordingly using a position PID controller.
@@ -67,7 +70,17 @@ namespace aruwsrc::control::turret
 class SentryTurretCVCommand : public tap::control::Command
 {
 public:
-    // TODO: config someplace
+
+    struct TurretConfig {
+        SentryTurretMinorSubsystem &turretSubsystem;
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+            &yawController;
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
+            &pitchController;
+        aruwsrc::algorithms::OttoBallisticsSolver
+            &ballisticsSolver;
+    };
+
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
     static constexpr float SCAN_TURRET_1_YAW = modm::toRadian(90.0f);
@@ -96,37 +109,16 @@ public:
      * Constructor.
      *
      * @param[in] visionCoprocessor Pointer to a global visionCoprocessor object.
-     * @param[in] turretSubsystem Pointer to the turret to control.
-     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
-     * axis of the turret.
-     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
-     * pitch axis of the turret.
-     * @param[in] firingCommand Pointer to command to schedule when this command deems it's time to
-     * shoot.
-     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
-     * solutions.
-     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
-     * for more information.
+     * # TODO: docstring
      */
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
-        SentryTurretMajorSubsystem &turretMajorSubsystem,
-        SentryTurretMinorSubsystem &turretMinorGirlbossSubsystem,
-        SentryTurretMinorSubsystem &turretMinorMalewifeSubsystem,
+        aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface
-            &yawControllerGirlboss,  // TODO: painnn
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchControllerGirlboss,  // Do we still need a pitch controller if pitch is constant?
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface
-            &pitchControllerMalewife,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
-            &girlbossBallisticsSolver,
-        aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
-            &malewifeBallisticsSolver,
+        TurretConfig& turretLeftConfig,
+        TurretConfig& turretRightConfig,
         aruwsrc::sentry::SentryTransforms
-            &sentryTransforms);  // @todo: pass in needed transforms, not
+            &sentryTransforms);  
 
     void initialize();
 
@@ -138,7 +130,7 @@ public:
 
     void end(bool);
 
-    const char *getName() const { return "sentry turret CV"; }
+    const char *getName() const { return "sentry turret CV command"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -150,30 +142,18 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-        return turretID == girlboss::turretID ? withinAimingToleranceGirlboss
-                                              : withinAimingToleranceMalewife;
+        return turretID == turretLeftConfig.turretSubsystem.getTurretID() ? withinAimingToleranceLeft
+                                              : withinAimingToleranceRight;
     }
 
 private:
     serial::VisionCoprocessor &visionCoprocessor;
 
-    // TODO: control turret major
-    // TODO: uhh i don't think we actually ever use the subsystems themselves lol
-    SentryTurretMajorSubsystem &turretMajorSubsystem;
-    RobotTurretSubsystem &turretMinorGirlbossSubsystem;
-    RobotTurretSubsystem &turretMinorMalewifeSubsystem;
-
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife;
 
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
-        &girlbossBallisticsSolver;
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
-        &malewifeBallisticsSolver;
-
+    TurretConfig& turretLeftConfig;
+    TurretConfig& turretRightConfig;
     aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
@@ -195,8 +175,8 @@ private:
 
     tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
-    bool withinAimingToleranceGirlboss = false;
-    bool withinAimingToleranceMalewife = false;
+    bool withinAimingToleranceLeft = false;
+    bool withinAimingToleranceRight = false;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target

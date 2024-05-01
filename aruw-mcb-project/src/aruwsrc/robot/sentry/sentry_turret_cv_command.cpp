@@ -36,75 +36,58 @@ using namespace tap::arch::clock;
 using namespace tap::algorithms;
 using namespace aruwsrc::algorithms;
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::control::sentry
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
     serial::VisionCoprocessor &visionCoprocessor,
-    aruwsrc::control::turret::SentryTurretMajorSubsystem &turretMajorSubsystem,
-    aruwsrc::control::turret::SentryTurretMinorSubsystem &turretMinorGirlbossSubsystem,
-    aruwsrc::control::turret::SentryTurretMinorSubsystem &turretMinorMalewifeSubsystem,
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerGirlboss,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerGirlboss,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMalewife,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchControllerMalewife,
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorGirlbossFrame>
-        &girlbossBallisticsSolver,
-    aruwsrc::algorithms::OttoBallisticsSolver<aruwsrc::sentry::TurretMinorMalewifeFrame>
-        &malewifeBallisticsSolver,
+    TurretConfig &turretLeftConfig,
+    TurretConfig &turretRightConfig,
     aruwsrc::sentry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       turretMajorSubsystem(turretMajorSubsystem),
-      turretMinorGirlbossSubsystem(turretMinorGirlbossSubsystem),
-      turretMinorMalewifeSubsystem(turretMinorMalewifeSubsystem),
       yawControllerMajor(yawControllerMajor),
-      yawControllerGirlboss(yawControllerGirlboss),
-      pitchControllerGirlboss(pitchControllerGirlboss),
-      yawControllerMalewife(yawControllerMalewife),
-      pitchControllerMalewife(pitchControllerMalewife),
-      girlbossBallisticsSolver(girlbossBallisticsSolver),
-      malewifeBallisticsSolver(malewifeBallisticsSolver),
+      turretLeftConfig(turretLeftConfig),
+      turretRightConfig(turretRightConfig),
       sentryTransforms(sentryTransforms)
 {
     this->addSubsystemRequirement(&turretMajorSubsystem);
-    this->addSubsystemRequirement(&turretMinorGirlbossSubsystem);
-    this->addSubsystemRequirement(&turretMinorMalewifeSubsystem);
+    this->addSubsystemRequirement(&turretLeftConfig.turretSubsystem);
+    this->addSubsystemRequirement(&turretRightConfig.turretSubsystem);
 }
 
 bool SentryTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentryTurretCVCommand::initialize()
 {
-    yawControllerGirlboss.initialize();
-    yawControllerMalewife.initialize();
+    turretLeftConfig.turretSubsystem.initialize();
+    turretRightConfig.turretSubsystem.initialize();
 
     prevTime = getTimeMilliseconds();
-
     visionCoprocessor.sendSelectNewTargetMessage();
-
-    // enterScanMode(yawControllerGirlboss.getSetpoint(), yawControllerMalewife.getSetpoint());
 }
 
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
     float majorSetpoint = yawControllerMajor.getSetpoint();
-    float girlbossYawSetpoint = yawControllerGirlboss.getSetpoint();
-    float malewifeYawSetpoint = yawControllerMalewife.getSetpoint();
-    float girlbossPitchSetpoint = pitchControllerGirlboss.getSetpoint();
-    float malewifePitchSetpoint = pitchControllerMalewife.getSetpoint();
+    float leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
+    float rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
+    float leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
+    float rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
     // world angles
-    auto girlbossAimData = visionCoprocessor.getLastAimData(0);
-    auto girlbossBallisticsSolution =
-        girlbossBallisticsSolver.computeTurretAimAngles(girlbossAimData);
+    auto leftAimData =
+        visionCoprocessor.getLastAimData(turretLeftConfig.turretSubsystem.getTurretID());
+    auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
 
-    auto malewifeAimData = visionCoprocessor.getLastAimData(1);
-    auto malewifeBallisticsSolution =
-        malewifeBallisticsSolver.computeTurretAimAngles(malewifeAimData);
+    auto rightAimData =
+        visionCoprocessor.getLastAimData(turretRightConfig.turretSubsystem.getTurretID());
+    auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
-    targetFound = visionCoprocessor.isCvOnline() && !(girlbossBallisticsSolution == std::nullopt &&
-                                                      malewifeBallisticsSolution == std::nullopt);
+    targetFound = visionCoprocessor.isCvOnline() && !(leftBallisticsSolution == std::nullopt &&
+                                                      rightBallisticsSolution == std::nullopt);
 
     // Turret minor control
     // If target spotted
@@ -112,37 +95,36 @@ void SentryTurretCVCommand::execute()
     {
         exitScanMode();
 
-        if (girlbossBallisticsSolution != std::nullopt)
+        if (leftBallisticsSolution != std::nullopt)
         {
             // Get world-relative setpoints
-            girlbossYawSetpoint = girlbossBallisticsSolution->yawAngle;
-            girlbossPitchSetpoint = girlbossBallisticsSolution->pitchAngle;
+            leftYawSetpoint = leftBallisticsSolution->yawAngle;
+            leftPitchSetpoint = leftBallisticsSolution->pitchAngle;
 
             // convert world-relative setpoints to turret major frame setpoint
-            girlbossYawSetpoint =
-                girlbossYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-            girlbossPitchSetpoint =
-                girlbossPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
+            leftYawSetpoint = leftYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
+            leftPitchSetpoint =
+                leftPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
 
             /**
              * the setpoint returned by the ballistics solver is between [0, 2*PI)
              * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
              * that is closest to the unwrapped measured angle.
              */
-            girlbossYawSetpoint =
-                turretMinorGirlbossSubsystem.yawMotor.unwrapTargetAngle(girlbossYawSetpoint);
-            girlbossPitchSetpoint =
-                turretMinorGirlbossSubsystem.pitchMotor.unwrapTargetAngle(girlbossPitchSetpoint);
+            leftYawSetpoint =
+                turretLeftConfig.turretSubsystem.yawMotor.unwrapTargetAngle(leftYawSetpoint);
+            leftPitchSetpoint =
+                turretLeftConfig.turretSubsystem.pitchMotor.unwrapTargetAngle(leftPitchSetpoint);
 
             auto differenceWrappedGirlboss = [](float measurement, float setpoint) {
-                return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI)
-                    .difference(setpoint);
+                return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI)
+                    .minDifference(setpoint);
             };
 
-            withinAimingToleranceGirlboss = girlbossBallisticsSolver.withinAimingTolerance(
+            withinAimingToleranceLeft = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
                 differenceWrappedGirlboss(
-                    yawControllerGirlboss.getMeasurement(),
-                    girlbossYawSetpoint),
+                    turretLeftConfig.yawController.getMeasurement(),
+                    leftYawSetpoint),
                 differenceWrappedGirlboss(
                     pitchControllerGirlboss.getMeasurement(),
                     girlbossPitchSetpoint),
@@ -284,4 +266,4 @@ void SentryTurretCVCommand::end(bool)
 
 void SentryTurretCVCommand::requestNewTarget() { visionCoprocessor.sendSelectNewTargetMessage(); }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::control::sentry
