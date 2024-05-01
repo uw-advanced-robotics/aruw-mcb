@@ -62,6 +62,9 @@ void ChassisKFOdometry::update()
         chassisVelocity,
         chassisYaw);
 
+    auto a = wheels[0]->getHMat();
+    auto b = wheels[0]->getMMat();
+
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity);
 

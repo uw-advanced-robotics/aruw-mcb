@@ -62,7 +62,7 @@
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
 #include "aruwsrc/control/chassis/new-chassis/odometry_subsystem.hpp"
-#include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
+// #include "aruwsrc/control/chassis/x_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -209,6 +209,8 @@ std::vector<aruwsrc::chassis::Wheel *> wheels = {
 //         turret);
 
 
+
+
 aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
 
 aruwsrc::chassis::OdometrySubsystem odometrySubsystem(*drivers(), turret, chassis, wheels, modm::Vector2f(0, 0));
@@ -296,11 +298,11 @@ aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+// aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
+//     drivers(),
+//     &chassis,
+//     &turret.yawMotor,
+//     (drivers()->controlOperatorInterface));
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
@@ -586,10 +588,10 @@ PressCommandMapping bCtrlPressed(
 // The user can press q or e to manually rotate the chassis left or right.
 // The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
-PressCommandMapping qEPressed(
-    drivers(),
-    {&wiggleCommand},
-    RemoteMapState({Remote::Key::Q, Remote::Key::E}));
+// PressCommandMapping qEPressed(
+//     drivers(),
+//     {&wiggleCommand},
+//     RemoteMapState({Remote::Key::Q, Remote::Key::E}));
 PressCommandMapping qNotEPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -636,7 +638,7 @@ void registerStandardSubsystems(Drivers *drivers)
 void initializeSubsystems()
 {
     sentryRequestSubsystem.initialize();
-    // turret.initialize();
+    turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
@@ -682,7 +684,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qEPressed);
+    // drivers->commandMapper.addMap(&qEPressed);
     drivers->commandMapper.addMap(&qNotEPressed);
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);

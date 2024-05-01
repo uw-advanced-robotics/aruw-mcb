@@ -118,6 +118,15 @@ private:
         0, 0 , 0            , 0, 1 , DT           ,
         0, 0 , 0            , 0, 0 , 1            ,
     };
+    // static constexpr float KF_C[INPUTS_MULT_STATES] = {
+    //     1,1,1,1,1,1,
+    //     1,1,1,1,1,1,
+    //     1,1,1,1,1,1,
+    //     1,1,1,1,1,1,
+    //     1,1,1,1,1,1,
+    //     1,1,1,1,1,1,
+
+    // };
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
         0, 1, 0, 0, 0, 0,
         0, 1, 0, 0, 0, 0,
@@ -136,10 +145,12 @@ private:
         0  , 0  , 0  , 0  , 0  , 5E0,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        1.0, 0  , 0  , 0  ,
-        0  , 1.2, 0  , 0  ,
-        0  , 0  , 1.0, 0  ,
-        0  , 0  , 0  , 1.2,
+        1.0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1.2, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1.0, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1.2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1.0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1.2,
     };
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E3, 0  , 0  , 0  , 0  , 0  ,
