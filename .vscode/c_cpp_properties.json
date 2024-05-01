@@ -32,7 +32,7 @@
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "MCB Sentry Beehive",
+            "name": "MCB Sentry Hydra",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",

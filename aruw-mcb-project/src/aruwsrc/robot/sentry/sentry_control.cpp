@@ -23,18 +23,18 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 
-#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -124,7 +124,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 }
 
-}
+}  // namespace aruwsrc::control::agitator::constants
 
 namespace sentry_control
 {
@@ -275,7 +275,7 @@ VirtualDjiMotor leftFrontAzimuthMotor(
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor");
@@ -283,15 +283,15 @@ VirtualDjiMotor rightFrontDriveMotor(
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor");
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
-    MOTOR4,
-    tap::can::CanBus::CAN_BUS1,
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor");
@@ -299,7 +299,7 @@ VirtualDjiMotor leftBackDriveMotor(
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
     MOTOR8,
-    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS2,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
@@ -319,6 +319,58 @@ VirtualDjiMotor rightBackAzimuthMotor(
     &(drivers()->chassisMcbLite),
     rightBackSwerveConfig.azimuthMotorInverted,
     "Right Back Swerve Azimuth Motor");
+
+// NEW WHEELS
+
+VirtualDjiMotor frontDriveMotor(
+    drivers(),
+    MOTOR3,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Front Drive Motor");
+
+VirtualDjiMotor frontAzimuthMotor(
+    drivers(),
+    MOTOR7,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Front Azimuth Motor");
+
+VirtualDjiMotor backDriveMotor(
+    drivers(),
+    MOTOR4,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Back Drive Motor");
+
+VirtualDjiMotor backAzimuthMotor(
+    drivers(),
+    MOTOR8,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Back Azimuth Motor");
+
+// This is the one facing parallel to the frame
+VirtualDjiMotor rightOmni(
+    drivers(),
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Right Omni Dead Wheel");
+
+// This is the one sticking out towards the frame
+VirtualDjiMotor leftOmni(
+    drivers(),
+    MOTOR2,
+    tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
+    false,
+    "Left Omni Dead Wheel");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
 aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
@@ -375,7 +427,6 @@ aruwsrc::agitator::VelocityAgitatorSubsystem agitatorMalewife(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::malewife::AGITATOR_CONFIG);
-
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
@@ -529,6 +580,9 @@ void initializeSubsystems()
     agitatorMalewife.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
+
+    rightOmni.initialize();
+    leftOmni.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
