@@ -64,21 +64,18 @@ private:
 
         const auto &robotData = drivers.refSerial.getRobotData();
 
-        uint16_t heat = 0, heatLimit = 0;
+        uint16_t heat = 0, heatLimit = robotData.turret.heatLimit;
 
         switch (firingSystemMechanismID)
         {
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
                 heat = robotData.turret.heat17ID1;
-                heatLimit = robotData.turret.heatLimit;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
                 heat = robotData.turret.heat17ID2;
-                heatLimit = robotData.turret.heatLimit;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
                 heat = robotData.turret.heat42;
-                heatLimit = robotData.turret.heatLimit;
                 break;
             default:
                 // don't perform heat limiting
