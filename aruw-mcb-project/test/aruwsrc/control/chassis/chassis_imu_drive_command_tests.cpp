@@ -189,7 +189,7 @@ TEST_P(
 
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     chassisImuDriveCommand.execute();
 }
@@ -204,10 +204,10 @@ TEST_P(
     imuYaw = 0;
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 90;
+    imuYaw += M_PI_2;
     chassisImuDriveCommand.execute();
 
-    imuYaw = 90 - modm::toDegree(ChassisImuDriveCommand::MAX_ROTATION_ERR);
+    imuYaw = M_PI_2 - ChassisImuDriveCommand::MAX_ROTATION_ERR;
     float rotation = INFINITY;
     ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
 
@@ -226,7 +226,7 @@ TEST_P(
 {
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     float xExpected = std::get<0>(GetParam());
     float yExpected = std::get<1>(GetParam());

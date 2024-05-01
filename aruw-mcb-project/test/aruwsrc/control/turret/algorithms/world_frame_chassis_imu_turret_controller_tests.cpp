@@ -51,7 +51,7 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
+        ON_CALL(drivers.mpu6500, getYawRadians).WillByDefault(ReturnPointee(&mpu6500Yaw));
         ON_CALL(turretMotor, getChassisFrameUnwrappedMeasuredAngle)
             .WillByDefault(ReturnPointee(&chassisFrameMeasured));
         ON_CALL(turretMotor, getChassisFrameSetpoint)
@@ -106,7 +106,7 @@ TEST_F(
     runYawPidController_chassis_frame_rotated_setpoint_actual_equal_0_output)
 {
     chassisFrameMeasured = 0;
-    mpu6500Yaw = 90;
+    mpu6500Yaw = M_PI_2;
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
