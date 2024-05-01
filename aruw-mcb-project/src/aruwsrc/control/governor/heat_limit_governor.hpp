@@ -70,15 +70,15 @@ private:
         {
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
                 heat = robotData.turret.heat17ID1;
-                heatLimit = robotData.turret.heatLimit17ID1;
+                heatLimit = robotData.turret.heatLimit;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
                 heat = robotData.turret.heat17ID2;
-                heatLimit = robotData.turret.heatLimit17ID2;
+                heatLimit = robotData.turret.heatLimit;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
                 heat = robotData.turret.heat42;
-                heatLimit = robotData.turret.heatLimit42;
+                heatLimit = robotData.turret.heatLimit;
                 break;
             default:
                 // don't perform heat limiting
