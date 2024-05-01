@@ -78,12 +78,6 @@ void SentryTurretCVCommand::computeAimSetpoints(
     // Get world-relative setpoints
     *desiredYawSetpoint = solution.yawAngle;
     *desiredPitchSetpoint = solution.pitchAngle;
-
-    // convert world-relative setpoints to turret major frame
-    *desiredYawSetpoint = *desiredYawSetpoint - sentryTransforms.getWorldToTurretMajor().getYaw();
-    *desiredPitchSetpoint =
-        *desiredPitchSetpoint - sentryTransforms.getWorldToTurretMajor().getPitch();
-
     /**
      * the setpoint returned by the ballistics solver is between [0, 2*PI)
      * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
