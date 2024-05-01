@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 using namespace tap::algorithms;
@@ -31,7 +31,7 @@ namespace aruwsrc::sentry
 void SentryChassisRelDrive::computeDesiredUserTranslation(
     aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
-    chassis::HolonomicChassisSubsystem *chassis,
+    chassis::ChassisSubsystem *chassis,
     float chassisRotation,
     float *chassisXDesiredWheelspeed,
     float *chassisYDesiredWheelspeed)
@@ -42,7 +42,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
         return;
     }
 
-    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxWheelSpeed = chassis::ChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
         drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
@@ -64,7 +64,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
 void SentryChassisRelDrive::onExecute(
     aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
-    chassis::HolonomicChassisSubsystem *chassis)
+    chassis::ChassisSubsystem *chassis)
 {
     float chassisRotationDesiredWheelspeed = operatorInterface->getChassisYawVelocity();
 

@@ -25,7 +25,7 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_rel_drive.hpp"
 
@@ -37,7 +37,7 @@ namespace sentry
 {
 SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
-    aruwsrc::chassis::SwerveChassisSubsystem* chassis,
+    aruwsrc::chassis::ChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
     const tap::algorithms::transforms::Transform& worldToChassis,
@@ -87,7 +87,7 @@ void SentryBeybladeCommand::execute()
         x *= config.beybladeTranslationalSpeedMultiplier;
         y *= config.beybladeTranslationalSpeedMultiplier;
 
-        const float maxWheelSpeed = aruwsrc::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = aruwsrc::chassis::ChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 

@@ -22,7 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 namespace aruwsrc::sentry
@@ -38,7 +38,7 @@ public:
     static void computeDesiredUserTranslation(
         aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem *chassis,
+        aruwsrc::chassis::ChassisSubsystem *chassis,
         float chassisRotation,
         float *chassisXDesiredWheelspeed,
         float *chassisYDesiredWheelspeed);
@@ -46,7 +46,7 @@ public:
     static void onExecute(
         aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem *chassis);
+        aruwsrc::chassis::ChassisSubsystem *chassis);
 };
 }  // namespace aruwsrc::sentry
 

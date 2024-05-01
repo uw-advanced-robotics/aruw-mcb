@@ -27,7 +27,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -40,7 +40,7 @@ namespace chassis
 {
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     tap::Drivers& drivers,
-    HolonomicChassisSubsystem& chassis,
+    ChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretMotor& yawMotor,
     const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
@@ -86,7 +86,7 @@ void AutoNavBeybladeCommand::execute()
         float currentY = odometryInterface.getCurrentLocation2D().getY();
         float chassisYawAngle = odometryInterface.getYaw();
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
             drivers.refSerial.getRefSerialReceivingData(),
             drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 

@@ -24,7 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
@@ -66,7 +66,7 @@ public:
 
     SentryBeybladeCommand(
         tap::Drivers* drivers,
-        aruwsrc::chassis::SwerveChassisSubsystem* chassis,
+        aruwsrc::chassis::ChassisSubsystem * chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
         const tap::algorithms::transforms::Transform& worldToChassis,
@@ -95,7 +95,7 @@ private:
     tap::algorithms::Ramp rotateSpeedRamp;
 
     tap::Drivers* drivers;
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
+    aruwsrc::chassis::ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
     const tap::algorithms::transforms::Transform& worldToChassis;
