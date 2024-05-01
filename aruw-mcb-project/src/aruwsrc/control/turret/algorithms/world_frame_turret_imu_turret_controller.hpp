@@ -122,7 +122,10 @@ public:
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        tap::algorithms::SmoothPid &velocityPid,
+        float turret_cg_x,
+        float turret_cg_z,
+        float gravity_compensation_scalar);
 
     void initialize() final;
 
@@ -155,6 +158,10 @@ private:
     tap::algorithms::SmoothPid &velocityPid;
 
     float worldFrameSetpoint;
+
+    float turret_cg_x;
+    float turret_cg_z;
+    float gravity_compensation_scalar;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

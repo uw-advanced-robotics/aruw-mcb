@@ -37,6 +37,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
@@ -221,38 +222,90 @@ SentryTurretMinorSubsystem turretRight(
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu, turretMajor);
 
-struct TurretMinorControllers
+struct TurretMinorChassisControllers
 {
     ChassisFramePitchTurretController pitchController;
     ChassisFrameYawTurretController yawController;
 };
 
 // @todo make controllers part of subsystem
-TurretMinorControllers turretLeftControllers{
+TurretMinorChassisControllers turretLeftChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretLeft.pitchMotor,
-        turretLeft::pidConfigs::PITCH_PID_CONFIG,
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = ChassisFrameYawTurretController(
         turretLeft.yawMotor,
-        turretLeft::pidConfigs::YAW_PID_CONFIG),
+        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 
 };
 
-TurretMinorControllers turretRightControllers{
+TurretMinorChassisControllers turretRightChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretRight.pitchMotor,
-        turretRight::pidConfigs::PITCH_PID_CONFIG,
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = ChassisFrameYawTurretController(
         turretRight.yawMotor,
-        turretRight::pidConfigs::YAW_PID_CONFIG)
+        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME)
+
+};
+
+struct TurretMinorWorldControllers
+{
+    WorldFramePitchTurretImuCascadePidTurretController pitchController;
+    WorldFrameYawTurretImuCascadePidTurretController yawController;
+};
+
+// @todo surely there's a better way to construct this
+SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+
+TurretMinorWorldControllers turretRightWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretRight.pitchMotor,
+        turretRightWorldPitchPosPid,
+        turretRightWorldPitchVelPid,
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretRight.yawMotor,
+        turretRightWorldYawPosPid,
+        turretRightWorldYawVelPid)
+
+};
+
+TurretMinorWorldControllers turretLeftWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.pitchMotor,
+        turretLeftWorldPitchPosPid,
+        turretLeftWorldPitchVelPid,
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.yawMotor,
+        turretLeftWorldYawPosPid,
+        turretLeftWorldYawVelPid)
 
 };
 
@@ -457,8 +510,8 @@ TurretMinorSentryControlCommand turretLeftManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretLeft,
-    turretLeftControllers.yawController,
-    turretLeftControllers.pitchController,
+    turretLeftWorldControllers.yawController,
+    turretLeftWorldControllers.pitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
@@ -466,8 +519,8 @@ TurretMinorSentryControlCommand turretRightManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretRight,
-    turretRightControllers.yawController,
-    turretRightControllers.pitchController,
+    turretRightWorldControllers.yawController,
+    turretRightWorldControllers.pitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 
@@ -491,15 +544,15 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
         {
             &drivers()->turretMCBCanCommBus2,
             turretLeft,
-            turretLeftControllers.yawController,
-            turretLeftControllers.pitchController,
+            turretLeftChassisControllers.yawController,
+            turretLeftChassisControllers.pitchController,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
             turretRight,
-            turretRightControllers.yawController,
-            turretRightControllers.pitchController,
+            turretRightChassisControllers.yawController,
+            turretRightChassisControllers.pitchController,
             true,
         },
     },
