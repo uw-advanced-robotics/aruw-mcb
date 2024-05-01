@@ -54,13 +54,16 @@ void FrictionWheelSpinRefLimitedCommand::execute()
         switch (barrel)
         {
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                maxBarrelSpeed = tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM;
+                maxBarrelSpeed =
+                    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                maxBarrelSpeed = tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM;
+                maxBarrelSpeed =
+                    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                maxBarrelSpeed = tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM;
+                maxBarrelSpeed =
+                    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM;
                 break;
         }
 
