@@ -178,11 +178,13 @@ TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
+    transformAdapter,
     frictionWheels,
     14.0f,  // defaultLaunchSpeed
-    0       // turretID
+    transformer.getWorldToChassis(),
+    turret.yawMotor,
+    0.0,
+    0  // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
