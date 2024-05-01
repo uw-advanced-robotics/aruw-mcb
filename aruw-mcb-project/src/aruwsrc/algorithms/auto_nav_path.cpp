@@ -4,9 +4,15 @@
 #include "tap\algorithms\transforms\vector.hpp"
 #include "tap\algorithms\transforms\position.hpp"
 
+#include "aruwsrc\communication\serial\vision_coprocessor.hpp"
+
 using tap::algorithms::transforms::Position;
 
-void AutoNavPath::pushPoint(AutoNavSetpointData point) {
+void AutoNavPath::pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point) {
+    setpointData.push_back(Position(point.x, point.y, 0));
+}
+
+void AutoNavPath::pushPoint(Position point) {
     setpointData.push_back(point);
 }
 
@@ -15,11 +21,7 @@ void AutoNavPath::popPoint() {
 }
 
 Position AutoNavPath::getSetPoint() const {
-    return Position(currentSetpoint.x, currentSetpoint.y, 0);
-}
-
-Position AutoNavPath::findClosestPoint() const {
-    return Position(0,0,0);
+    return currentSetpoint;
 }
 
 Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Position p2) const {
@@ -38,23 +40,55 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
     }
 }
 
-Position AutoNavPath::findInterpolatedPoint(Position closest) const {
-    float distanceRemaining = interpolationDistance;
-    distanceRemaining -= getDistance(closest, Position(setpointData[0].x, setpointData[0].y, 0));
-    for (size_t i = 0; i < setpointData.size()-1; i++) {
-        Position p1 = Position(setpointData[i].x, setpointData[i].y, 0);
-        Position p2 = Position(setpointData[i+1].x, setpointData[i+1].y, 0);
-        float distance = getDistance(p1, p2);
-        if (distance <= distanceRemaining) {
-            distanceRemaining -= distance;
-        } else {
-            float ratio = distanceRemaining / distance;
-            float interpolatedX = setpointData[i].x + ratio * (p2.x() - p1.x());
-            float interpolatedY = setpointData[i].y + ratio * (p2.y() - p1.y());
-            return Position(interpolatedX, interpolatedY, 0);
+Position AutoNavPath::findClosestPoint(Position current) {
+    printf("entered findClosestPoint\n");
+    float minDistance = F32_MAX;
+    size_t closestIndex = 0;
+    Position minClosest = Position(0,0,0);
+    for (size_t i = 0; i < setpointData.size() - 1; i++) {
+        Position p1 = setpointData[i];
+        Position p2 = setpointData[i+1];
+        Position closest = getClosestOnSegment(current, p1, p2);
+        printf("passed getClosestOnSegment\n");
+        if (getDistance(current, closest) < minDistance) {
+            minDistance = getDistance(current, closest);
+            minClosest = closest;
+            closestIndex = i;
+            nextPathPoint = p2;
         }
     }
-    return Position(setpointData.back().x, setpointData.back().y, 0);
+
+    // remove points behind where we currently are
+    for (size_t i = 0; i < closestIndex - 1; i++) {
+        popPoint();
+    }
+    return minClosest;
+}
+
+Position AutoNavPath::setInterpolatedPoint(Position current) {
+    printf("entered setInterpolatedPoint\n");
+    Position closest = findClosestPoint(current);
+    printf("passed findClosestPoint\n");
+    float offset = getDistance(setpointData[0], closest);
+    printf("passed getDistance\n");
+    float offsetDistance = offset + interpolationDistance;
+    size_t i = (size_t)offsetDistance; // floor of distance from first path point
+
+    if (i >= setpointData.size() - 1) {
+        return setpointData.back();
+    }
+
+    Position p1 = setpointData[i];
+    Position p2 = setpointData[i+1];
+    
+    float ratio = offsetDistance - i;
+    float interpolatedX = p1.x() + ratio * (p2.x() - p1.x());
+    float interpolatedY = p1.y() + ratio * (p2.y() - p1.y());
+
+    oldSetpoint = currentSetpoint;
+    currentSetpoint = Position(interpolatedX, interpolatedY, 0);
+
+    return currentSetpoint;
 }
 
 float AutoNavPath::getDistance(Position p1, Position p2) const {

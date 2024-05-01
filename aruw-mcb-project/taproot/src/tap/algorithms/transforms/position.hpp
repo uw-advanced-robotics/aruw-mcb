@@ -60,6 +60,8 @@ public:
 
     Position& operator=(const Position& other);
 
+    bool operator==(const Position& other) const;
+
     inline CMSISMat<3, 1> coordinates() const { return this->coordinates_; }
 
 private:

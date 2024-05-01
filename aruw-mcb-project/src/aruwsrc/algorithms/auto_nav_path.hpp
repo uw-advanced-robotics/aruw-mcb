@@ -3,38 +3,37 @@
 
 #include <deque>
 #include "tap\algorithms\transforms\position.hpp"
+#include "aruwsrc\communication\serial\vision_coprocessor.hpp"
+
 
 using namespace tap::algorithms::transforms;
-
-struct AutoNavSetpointData
-{
-    bool pathFound;
-    float x;
-    float y;
-    unsigned long long timestamp;
-};
 
 class AutoNavPath {
 public:
     AutoNavPath(float distance):
         setpointData(),
-        interpolationDistance(distance) {}
-    void pushPoint(AutoNavSetpointData point);
+        interpolationDistance(distance),
+        oldSetpoint(0,0,0),
+        currentSetpoint(0,0,0),
+        nextPathPoint(0,0,0) {}
+    void pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
+    void pushPoint(Position point);
     void popPoint();
     Position getSetPoint() const;
+    Position setInterpolatedPoint(Position current);
 
 private:
-    Position findClosestPoint() const;
-    Position findInterpolatedPoint(Position closest) const;
+    Position findClosestPoint(Position current);
     // TODO: should this be placed in Vector as magnitude()??... Should we even be using transforms library functions?!?!?!?!
     float getDistance(Position p1, Position p2) const; 
 
-    std::deque<AutoNavSetpointData> setpointData;
+    std::deque<Position> setpointData;
 
     float interpolationDistance;
     // The last setpoint used along the previous path
-    AutoNavSetpointData oldSetpoint;
-    AutoNavSetpointData currentSetpoint;
+    Position oldSetpoint;
+    Position currentSetpoint;
+    Position nextPathPoint;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
