@@ -55,7 +55,7 @@ void ChassisImuDriveCommand::initialize()
 
     if (imuSetpointInitialized)
     {
-        const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
+        const float yaw = drivers->mpu6500.getYawRadians();
         rotationSetpoint.setWrappedValue(yaw);
     }
 
@@ -76,7 +76,7 @@ void ChassisImuDriveCommand::execute()
         }
         else
         {
-            const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
+            const float yaw = drivers->mpu6500.getYawRadians();
             angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu

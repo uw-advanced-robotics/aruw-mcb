@@ -66,7 +66,7 @@ protected:
             return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d);
         });
 
-        ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
+        ON_CALL(drivers.mpu6500, getYawRadians).WillByDefault(ReturnPointee(&imuYaw));
         ON_CALL(drivers.mpu6500, getImuState).WillByDefault(ReturnPointee(&imuState));
     }
 

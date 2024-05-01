@@ -24,6 +24,8 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
+#include "modm/math/geometry.hpp"
+
 #include "message_types.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -42,9 +44,14 @@ public:
         calibrateIMUMessage.setCRC16();
     }
 
-    float getPitch() override { return pitch; }
-    float getRoll() override { return roll; }
-    float getYaw() override { return yaw; }
+    float getPitchDegrees() override { return pitch; }
+    float getRollDegrees() override { return roll; }
+    float getYawDegrees() override { return yaw; }
+
+    float getPitchRadians() override { return modm::toRadian(pitch); }
+    float getRollRadians() override { return modm::toRadian(roll); }
+    float getYawRadians() override { return modm::toRadian(yaw); }
+
     float getGx() override { return Gx; }
     float getGy() override { return Gy; }
     float getGz() override { return Gz; }

@@ -180,7 +180,7 @@ float WorldFrameYawChassisImuTurretController::getSetpoint() const { return worl
 
 float WorldFrameYawChassisImuTurretController::getMeasurement() const
 {
-    const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
+    const float chassisFrameImuYawAngle = drivers.mpu6500.getYawRadians();
 
     return transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,
@@ -196,7 +196,7 @@ bool WorldFrameYawChassisImuTurretController::isOnline() const
 float WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFrame(
     float controllerFrameAngle) const
 {
-    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+    const float chassisFrameImuYawAngle = drivers.mpu6500.getYawRadians();
 
     return transformWorldFrameYawToChassisFrame(
         chassisFrameInitImuYawAngle,
@@ -207,7 +207,7 @@ float WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFr
 float WorldFrameYawChassisImuTurretController::convertChassisAngleToControllerFrame(
     float chassisFrameAngle) const
 {
-    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+    const float chassisFrameImuYawAngle = drivers.mpu6500.getYawRadians();
 
     return transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,

@@ -101,7 +101,7 @@ private:
 
     float getMpu6500YawUnwrapped() const
     {
-        return modm::toRadian(drivers.mpu6500.getYaw()) + M_TWOPI * revolutions;
+        return drivers.mpu6500.getYawRadians() + M_TWOPI * revolutions;
     }
 
     /**
@@ -111,7 +111,7 @@ private:
      */
     void updateRevolutionCounter()
     {
-        const float newYaw = modm::toRadian(drivers.mpu6500.getYaw());
+        const float newYaw = drivers.mpu6500.getYawRadians();
         const float diff = newYaw - prevYaw;
         prevYaw = newYaw;
         if (diff < -M_PI)

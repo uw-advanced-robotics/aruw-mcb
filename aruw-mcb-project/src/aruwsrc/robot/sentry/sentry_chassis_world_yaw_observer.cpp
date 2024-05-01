@@ -31,7 +31,7 @@ SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
 bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
-    *output = modm::Angle::normalize(imu.getYaw() + offset);
+    *output = modm::Angle::normalize(imu.getYawRadians() + offset);
     return true;
 }
 
