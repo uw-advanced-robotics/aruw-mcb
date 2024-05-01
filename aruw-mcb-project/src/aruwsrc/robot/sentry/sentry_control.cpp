@@ -231,7 +231,10 @@ struct TurretMinorControllers
 TurretMinorControllers turretLeftControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretLeft.pitchMotor,
-        turretLeft::pidConfigs::PITCH_PID_CONFIG),
+        turretLeft::pidConfigs::PITCH_PID_CONFIG,
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = ChassisFrameYawTurretController(
         turretLeft.yawMotor,
@@ -242,7 +245,10 @@ TurretMinorControllers turretLeftControllers{
 TurretMinorControllers turretRightControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretRight.pitchMotor,
-        turretRight::pidConfigs::PITCH_PID_CONFIG),
+        turretRight::pidConfigs::PITCH_PID_CONFIG,
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR),
 
     .yawController = ChassisFrameYawTurretController(
         turretRight.yawMotor,

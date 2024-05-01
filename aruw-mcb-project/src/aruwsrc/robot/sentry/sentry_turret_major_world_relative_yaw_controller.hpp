@@ -58,6 +58,7 @@ class TurretMajorWorldFrameController final : public TurretYawControllerInterfac
 {
 public:
     /**
+     * @todo update docstring
      * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
      * information.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
