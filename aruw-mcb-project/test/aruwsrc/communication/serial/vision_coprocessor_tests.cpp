@@ -26,6 +26,7 @@
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 
@@ -273,56 +274,57 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
 
     tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
+    testing::NiceMock<aruwsrc::mock::TransformerInterface> transformerInterface;
 
-    testing::NiceMock<tap::mock::Odometry2DInterfaceMock> odometryInterface;
-    std::array<testing::NiceMock<aruwsrc::mock::TurretOrientationInterfaceMock>, NUM_TURRETS>
-        turretInterfaces;
-
-    serial.attachOdometryInterface(&odometryInterface);
-    for (size_t i = 0; i < turretInterfaces.size(); i++)
-    {
-        serial.attachTurretOrientationInterface(&turretInterfaces[i], i);
-    }
-
+    serial.attachTransformer(&transformerInterface);
     VisionCoprocessor::OdometryData odometryData;
 
+    tap::algorithms::transforms::Transform turretPose(1.0, 2.0, 3.0, M_PI_2, M_PI_4, M_PI);
+
+    odometryData.timestamp = 132'000;
     odometryData.chassisOdometry.xPos = 10;
     odometryData.chassisOdometry.yPos = -100;
     odometryData.chassisOdometry.zPos = 0;
-    odometryData.chassisOdometry.timestamp = 132'000;
     odometryData.chassisOdometry.pitch = 0;
     odometryData.chassisOdometry.yaw = 0;
     odometryData.chassisOdometry.roll = 0;
 
-    odometryData.turretOdometry[0].pitch = M_PI_4;
-    odometryData.turretOdometry[0].yaw = -M_PI;
-    odometryData.turretOdometry[0].timestamp = 456;
+    odometryData.turretOdometry[0].roll = turretPose.getRoll();
+    odometryData.turretOdometry[0].pitch = turretPose.getPitch();
+    odometryData.turretOdometry[0].yaw = turretPose.getYaw();
 
-    clock.time = odometryData.chassisOdometry.timestamp / 1000;
+    clock.time = odometryData.timestamp / 1000;
 
     for (size_t i = 1; i < MODM_ARRAY_SIZE(odometryData.turretOdometry); i++)
     {
         odometryData.turretOdometry[i] = odometryData.turretOdometry[i - 1];
         odometryData.turretOdometry[i].pitch++;
         odometryData.turretOdometry[i].yaw++;
-        odometryData.turretOdometry[i].timestamp++;
+        odometryData.turretOdometry[i].roll++;
     }
 
-    ON_CALL(odometryInterface, getCurrentLocation2D)
-        .WillByDefault(Return(modm::Location2D<float>(
-            odometryData.chassisOdometry.xPos,
-            odometryData.chassisOdometry.yPos,
-            0)));
+    tap::algorithms::transforms::Transform chassisPose(
+        odometryData.chassisOdometry.xPos,
+        odometryData.chassisOdometry.yPos,
+        odometryData.chassisOdometry.zPos,
+        odometryData.chassisOdometry.roll,
+        odometryData.chassisOdometry.pitch,
+        odometryData.chassisOdometry.yaw);
 
-    for (size_t i = 0; i < turretInterfaces.size(); i++)
-    {
-        ON_CALL(turretInterfaces[i], getWorldYaw)
-            .WillByDefault(Return(odometryData.turretOdometry[i].yaw));
-        ON_CALL(turretInterfaces[i], getWorldPitch)
-            .WillByDefault(Return(odometryData.turretOdometry[i].pitch));
-        ON_CALL(turretInterfaces[i], getLastMeasurementTimeMicros)
-            .WillByDefault(Return(odometryData.turretOdometry[i].timestamp));
-    }
+    ON_CALL(transformerInterface, getWorldToChassis).WillByDefault(ReturnRef(chassisPose));
+
+    std::vector<tap::algorithms::transforms::Transform> turretTransforms;
+
+    // for now, all turrets have same transform
+    // tap::algorithms::transforms::Transform turretPose(
+    //     0.0,
+    //     0.0,
+    //     0.0,
+    //     odometryData.turretOdometry[0].roll,
+    //     odometryData.turretOdometry[0].pitch,
+    //     odometryData.turretOdometry[0].yaw);
+
+    ON_CALL(transformerInterface, getWorldToTurret).WillByDefault(ReturnRef(turretPose));
 
     static constexpr int HEADER_LEN = 7;
     static constexpr int DATA_LEN = sizeof(VisionCoprocessor::OdometryData);
@@ -339,49 +341,71 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
             checkHeaderAndTail<DATA_LEN>(msg);
             EXPECT_EQ(1, msg.messageType);
 
-            float cx, cy, cz, pitch, yaw, roll;
-            uint32_t cTime;
+            float cx, cy, cz, roll, pitch, yaw;
+            uint32_t timestamp;
 
             // chassis odometry
-            convertFromLittleEndian(&cTime, msg.data);
+            convertFromLittleEndian(&timestamp, msg.data);
             convertFromLittleEndian(&cx, msg.data + 4);
             convertFromLittleEndian(&cy, msg.data + 8);
             convertFromLittleEndian(&cz, msg.data + 12);
-            convertFromLittleEndian(&pitch, msg.data + 16);
-            convertFromLittleEndian(&yaw, msg.data + 20);
-            convertFromLittleEndian(&roll, msg.data + 24);
+            convertFromLittleEndian(&roll, msg.data + 16);
+            convertFromLittleEndian(&pitch, msg.data + 20);
+            convertFromLittleEndian(&yaw, msg.data + 24);
 
-            EXPECT_EQ(odometryData.chassisOdometry.timestamp, cTime);
+            EXPECT_EQ(odometryData.timestamp, timestamp);
             EXPECT_EQ(odometryData.chassisOdometry.xPos, cx);
             EXPECT_EQ(odometryData.chassisOdometry.yPos, cy);
             EXPECT_EQ(odometryData.chassisOdometry.zPos, cz);
+            EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
             EXPECT_EQ(odometryData.chassisOdometry.pitch, pitch);
             EXPECT_EQ(odometryData.chassisOdometry.yaw, yaw);
-            EXPECT_EQ(odometryData.chassisOdometry.roll, roll);
 
-            uint8_t numTurrets = msg.data[sizeof(VisionCoprocessor::ChassisOdometryData)];
+            uint8_t numTurrets =
+                msg.data[sizeof(uint32_t) + sizeof(VisionCoprocessor::ChassisOdometryData)];
             EXPECT_EQ(NUM_TURRETS, numTurrets);
 
             // turret odometry
-            const uint32_t startIndex = sizeof(VisionCoprocessor::ChassisOdometryData) + 1;
-            std::array<std::tuple<uint32_t, float, float>, NUM_TURRETS> turretOdom;
+            const uint32_t startIndex = sizeof(timestamp) +
+                                        sizeof(VisionCoprocessor::ChassisOdometryData) +
+                                        sizeof(numTurrets);
+            std::array<std::tuple<float, float, float, float, float, float>, NUM_TURRETS>
+                turretOdom;
             for (size_t i = 0; i < turretOdom.size(); i++)
             {
                 auto &odom = turretOdom[i];
 
                 convertFromLittleEndian(
                     &std::get<0>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData));
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        0 * sizeof(float));
                 convertFromLittleEndian(
                     &std::get<1>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 4);
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        1 * sizeof(float));
                 convertFromLittleEndian(
                     &std::get<2>(odom),
-                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) + 8);
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        2 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<3>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        3 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<4>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        4 * sizeof(float));
+                convertFromLittleEndian(
+                    &std::get<5>(odom),
+                    msg.data + startIndex + i * sizeof(VisionCoprocessor::TurretOdometryData) +
+                        5 * sizeof(float));
 
-                EXPECT_EQ(odometryData.turretOdometry[i].timestamp, std::get<0>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].pitch, std::get<1>(odom));
-                EXPECT_EQ(odometryData.turretOdometry[i].yaw, std::get<2>(odom));
+                EXPECT_NEAR(turretPose.getX(), std::get<0>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getY(), std::get<1>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getZ(), std::get<2>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getRoll(), std::get<3>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getPitch(), std::get<4>(odom), 0.01);
+                EXPECT_NEAR(turretPose.getYaw(), std::get<5>(odom), 0.01);
             }
 
             return length;

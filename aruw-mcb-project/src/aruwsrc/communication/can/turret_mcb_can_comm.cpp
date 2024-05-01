@@ -85,7 +85,7 @@ void TurretMCBCanComm::sendData()
         modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
         txMsg.data[0] = txCommandMsgBitmask.value;
-        drivers->can.sendMessage(tap::can::CanBus::CAN_BUS1, txMsg);
+        drivers->can.sendMessage(canBus, txMsg);
 
         if (txCommandMsgBitmask.any(TxCommandMsgBitmask::RECALIBRATE_IMU))
         {

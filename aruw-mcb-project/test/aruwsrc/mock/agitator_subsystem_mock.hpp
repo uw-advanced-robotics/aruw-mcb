@@ -63,7 +63,7 @@ public:
 
     MOCK_METHOD(float, getVelocity, (), (override));
 
-    MOCK_METHOD(const char*, getName, (), (override));
+    MOCK_METHOD(const char*, getName, (), (const override));
 };  // class AgitatorSubsystemMock
 
 }  // namespace mock

@@ -106,7 +106,7 @@ void SentryTurretCVCommand::execute()
         pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
         auto differenceWrapped = [](float measurement, float setpoint) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
         };
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
@@ -169,7 +169,7 @@ void SentryTurretCVCommand::changeScanningQuadrant()
     float currentYawAngle = yawController->getSetpoint();
 
     float newSetpoint =
-        tap::algorithms::ContiguousFloat(currentYawAngle + M_PI, 0, M_TWOPI).getValue();
+        tap::algorithms::WrappedFloat(currentYawAngle + M_PI, 0, M_TWOPI).getWrappedValue();
     newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
     yawController->setSetpoint(newSetpoint);
     exitScanMode();
