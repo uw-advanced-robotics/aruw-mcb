@@ -40,7 +40,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::ChassisSubsystem &chassis,
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface)
+    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
+    const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
@@ -48,7 +49,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorController(turretMajorController),
       chassis(chassis),
       yawObserver(yawObserver),
-      odometryInterface(odometryInterface)
+      odometryInterface(odometryInterface),
+      mcbLite(mcbLite)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -182,6 +184,10 @@ void SentryImuCalibrateCommand::execute()
                 }
 
                 drivers->mpu6500.requestCalibration();
+                for (auto mcb : mcbLite)
+                {
+                    mcb->imu.requestCalibration();
+                }
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
 

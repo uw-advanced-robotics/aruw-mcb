@@ -185,7 +185,7 @@ public:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
-    const char* getName() override { return "Chassis"; }
+    const char* getName() const override { return "Chassis"; }
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 

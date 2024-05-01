@@ -18,12 +18,6 @@
  */
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
-#include "tap/algorithms/contiguous_float.hpp"
-
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
 using namespace tap::algorithms;
 // using namespace tap::algorithms::transforms;
 using namespace aruwsrc::chassis;
@@ -63,7 +57,8 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setValue(yawMotor.getChassisFrameSetpoint() + worldToChassis.getYaw());
+        worldFrameSetpoint.setWrappedValue(
+            yawMotor.getChassisFrameSetpoint() + worldToChassis.getYaw());
 
         yawMotor.attachTurretController(this);
     }
@@ -74,17 +69,17 @@ void TurretMajorWorldFrameController::initialize()
 //       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(const uint32_t dt, const float desiredSetpoint)
 {
-    ContiguousFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
+    WrappedFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
 
     const float localVelocity = yawMotor.getChassisFrameVelocity();
 
     const float chassisVelocity = *chassis.getActualVelocityChassisRelative()[2];
 
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 
     const float positionControllerError = turretMotor.getValidMinError(
-        worldFrameSetpoint.getValue() - worldToChassis.getYaw(),
-        localAngle.getValue());
+        worldFrameSetpoint.getWrappedValue() - worldToChassis.getYaw(),
+        localAngle.getWrappedValue());
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
@@ -110,14 +105,17 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 // @todo what's the point of this; overridden by runController anyways?
 void TurretMajorWorldFrameController::setSetpoint(float desiredSetpoint)
 {
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 }
 
-float TurretMajorWorldFrameController::getSetpoint() const { return worldFrameSetpoint.getValue(); }
+float TurretMajorWorldFrameController::getSetpoint() const
+{
+    return worldFrameSetpoint.getWrappedValue();
+}
 
 float TurretMajorWorldFrameController::getMeasurement() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getValue() + worldToChassis.getYaw();
+    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue() + worldToChassis.getYaw();
 }
 
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }

@@ -20,7 +20,7 @@
 #ifndef CHASSIS_IMU_DRIVE_COMMAND_HPP_
 #define CHASSIS_IMU_DRIVE_COMMAND_HPP_
 
-#include "tap/algorithms/contiguous_float.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
@@ -93,7 +93,7 @@ private:
     aruwsrc::control::ControlOperatorInterface* operatorInterface;
     ChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
-    tap::algorithms::ContiguousFloat rotationSetpoint;
+    tap::algorithms::WrappedFloat rotationSetpoint;
     bool imuSetpointInitialized = false;
     uint32_t prevTime = 0;
 };  // class ChassisImuDriveCommand

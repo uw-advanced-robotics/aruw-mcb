@@ -26,6 +26,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -114,7 +115,8 @@ public:
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
         chassis::ChassisSubsystem &chassis,
         aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-        aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface);
+        aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
+        const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -177,6 +179,8 @@ private:
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver;
 
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface;
+
+    const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
 }  // namespace aruwsrc::control::imu
 

@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/chassis/new-chassis/wheel.hpp"
 #include "modm/math/filter/pid.hpp"
@@ -31,6 +32,8 @@
 #ifndef CHASSIS_CONSTANTS_HPP_
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
+
+using tap::motor::DjiMotor;
 
 namespace aruwsrc::chassis
 {
@@ -76,7 +79,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;  // const
+static float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;  // const
 
 static const SmoothPidConfig MOTOR_PID_CONFIG = {
     aruwsrc::chassis::VELOCITY_PID_KP,
@@ -111,17 +114,7 @@ static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
  */
 static constexpr float WHEEL_ORIENTATION_CHASSIS_RELATIVE = M_PI_2;
 
-#ifdef TARGET_STANDARD_WOODY
-/**
- * Distance from center of the two front wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;

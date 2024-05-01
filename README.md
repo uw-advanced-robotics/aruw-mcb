@@ -86,6 +86,9 @@ scons build
 scons run-tests
 ```
 
+### VSCode extensions that we use
+Go to the VSCode extension marketplace and install "Auto Snippets" by andreasxp. This will help with creating new files in our codebase.
+
 ### Returning to the development environment
 
 **You will need to run `pipenv shell` from this directory _every time_ you open a new terminal,
@@ -193,5 +196,5 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
         - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
-            - STANDARD_WOODY, STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_CYCLONE
+            - STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_CYCLONE
 ```

@@ -39,7 +39,7 @@ public:
         tap::Drivers* drivers,
         MotorId desMotorIdentifier,
         tap::can::CanBus motorCanBus,
-        MCBLite* motorHandler,
+        MCBLite* mcbLite,
         bool isInverted,
         const char* name,
         uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
@@ -50,7 +50,7 @@ public:
     void attachSelfToRxHandler();
 
 private:
-    MCBLite* motorHandler;
+    MCBLite* mcbLite;
 };
 
 }  // namespace aruwsrc::virtualMCB

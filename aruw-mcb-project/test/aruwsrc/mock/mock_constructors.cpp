@@ -248,12 +248,12 @@ TurretMotorMock::TurretMotorMock(
 {
     ON_CALL(*this, getValidMinError)
         .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::ContiguousFloat(measurement, 0, M_TWOPI).difference(setpoint);
+            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
         });
     ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
         return getValidMinError(
             getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getValue());
+            getChassisFrameMeasuredAngle().getWrappedValue());
     });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
