@@ -39,7 +39,7 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 2;
 
-static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.07f;
+static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
@@ -138,8 +138,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 4780,
-    .minAngle = modm::toRadian(-9),
-    .maxAngle = modm::toRadian(45),
+    .minAngle = modm::toRadian(-13),
+    .maxAngle = modm::toRadian(35),
     .limitMotorAngles = true,
 };
 
@@ -197,8 +197,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 4780,
-    .minAngle = modm::toRadian(-9),
-    .maxAngle = modm::toRadian(45),
+    .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
+    .maxAngle = modm::toRadian(35),  // actual CAD limit 37
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
