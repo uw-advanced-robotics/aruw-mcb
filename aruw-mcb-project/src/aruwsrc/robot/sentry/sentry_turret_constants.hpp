@@ -83,9 +83,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 namespace worldFrameCascadeController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 3.9f,
+    .kp = 5.3f,
     .ki = 0.0002f,
-    .kd = -93.0f,
+    .kd = -143.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 500.0f,
     .tRDerivativeKalman = 40.0f,
@@ -99,7 +99,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 500.0f,
     .kd = -580'000.0f,
     .maxICumulative = 1'500.0f,
-    .maxOutput = 20'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 90'000.0f,  // Gain needs to be so high for the motors to actually do
                                       // anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
@@ -117,7 +117,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
 
-static constexpr float FEEDFORWARD_GAIN = 0.2f;
+static constexpr float FEEDFORWARD_GAIN = 0.3f;
 }  // namespace turretMajor
 
 namespace turretLeft

@@ -35,7 +35,7 @@ bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
     float turretMajorChassisYawRadians = turretMajor.getReadOnlyMotor().getAngleFromCenter();
     *output = modm::Angle::normalize(
-        imu.getYaw() / 180 * M_TWOPI + offset - turretMajorChassisYawRadians);
+        imu.getYaw() / 180 * M_PI + offset - turretMajorChassisYawRadians);
     return true;
 }
 

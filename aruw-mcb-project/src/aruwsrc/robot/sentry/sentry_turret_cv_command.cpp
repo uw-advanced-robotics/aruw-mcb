@@ -98,7 +98,6 @@ void SentryTurretCVCommand::computeAimSetpoints(
         solution.distance);
 }
 
-float temp;
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
@@ -190,12 +189,10 @@ void SentryTurretCVCommand::execute()
             // temp = WrappedFloat(sentryTransforms.getWorldToTurretMajor().getYaw(), 0.0f, M_TWOPI)
             //            .getWrappedValue();
 
-            temp = majorSetpoint;
-
-            leftYawSetpoint = SCAN_TURRET_LEFT_YAW + temp;
+            leftYawSetpoint = SCAN_TURRET_LEFT_YAW + majorSetpoint;
             leftYawSetpoint =
                 turretLeftConfig.turretSubsystem.yawMotor.unwrapTargetAngle(leftYawSetpoint);
-            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW + temp;
+            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW + majorSetpoint;
             rightYawSetpoint =
                 turretRightConfig.turretSubsystem.yawMotor.unwrapTargetAngle(rightYawSetpoint);
         }

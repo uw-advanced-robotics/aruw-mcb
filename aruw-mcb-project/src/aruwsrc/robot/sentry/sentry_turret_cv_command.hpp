@@ -78,14 +78,15 @@ public:
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(120.0f);
-    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
+    // @todo this should be swapped but there seems to be an issue with the turret mcb calibrate setting yaw to 180 degrees
+    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(-90.0f);
+    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.2f);  // 0.3
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.08f);  // 0.2
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
