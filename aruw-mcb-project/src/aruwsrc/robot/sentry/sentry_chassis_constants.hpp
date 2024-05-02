@@ -51,10 +51,14 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
  * module velocities given a [x, y, r] chassis velocity vector
  *
  */
-constexpr float SWERVE_FORWARD_MATRIX[24]{
-    0.25,      0.0,      0.25,     0.0,      0.25,      0.,        0.25,     0.0,
-    0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
-    -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
+// constexpr float SWERVE_FORWARD_MATRIX[24]{
+//     0.25,      0.0,      0.25,     0.0,      0.25,      0.,        0.25,     0.0,
+//     0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
+//     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
+constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
+    0.25,     0.0,      0.25,      0.,      
+    0.0,      0.25,     0.0,       0.25,    
+    0.862325, 0.862325, -0.862325, -0.862325};
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
@@ -76,7 +80,7 @@ aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
 
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
-    .azimuthZeroOffset = 356,
+    .azimuthZeroOffset = 4410,
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     // .driveMotorInverted = false,
@@ -85,7 +89,7 @@ aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,
-    .azimuthZeroOffset = 3093,
+    .azimuthZeroOffset = 348,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     // .driveMotorInverted = false,

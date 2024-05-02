@@ -32,6 +32,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
+#include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -138,12 +139,8 @@ aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     &drivers()->chassisMcbLite,
     tap::motor::MOTOR5,
     tap::motor::MOTOR6,
-    // tap::motor::MOTOR7,
-    // tap::motor::MOTOR7,
     turretMajor::CAN_BUS_MOTOR_1,
     turretMajor::CAN_BUS_MOTOR_1,
-    // turretMajor::CAN_BUS_MOTOR_1,
-    // turretMajor::CAN_BUS_MOTOR_2,
     false,
     false,
     "Major Yaw Turret 1",
@@ -312,22 +309,6 @@ TurretMinorWorldControllers turretLeftWorldControllers{
 
 };
 
-VirtualDjiMotor leftFrontDriveMotor(
-    drivers(),
-    MOTOR2,
-    tap::can::CanBus::CAN_BUS2,  // not actually used but needs to be here to keep chassis happy
-    &(drivers()->chassisMcbLite),
-    leftFrontSwerveConfig.driveMotorInverted,
-    "Left Front Swerve Drive Motor");
-
-VirtualDjiMotor leftFrontAzimuthMotor(
-    drivers(),
-    MOTOR6,
-    tap::can::CanBus::CAN_BUS2,  // same as above
-    &(drivers()->chassisMcbLite),
-    leftFrontSwerveConfig.azimuthMotorInverted,
-    "Left Front Swerve Azimuth Motor");
-
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
@@ -360,46 +341,25 @@ VirtualDjiMotor leftBackAzimuthMotor(
     leftBackSwerveConfig.azimuthMotorInverted,
     "Left Back Swerve Azimuth Motor");
 
-VirtualDjiMotor rightBackDriveMotor(
+// This is the one facing parallel to the frame
+VirtualDjiMotor leftOmni(
     drivers(),
-    MOTOR4,
-    tap::can::CanBus::CAN_BUS2,  // same as above
+    MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
-    rightBackSwerveConfig.driveMotorInverted,
-    "Right Back Swerve Drive Motor");
+    false,
+    "Right Omni Dead Wheel");
 
-VirtualDjiMotor rightBackAzimuthMotor(
+// This is the one sticking out towards the frame
+VirtualDjiMotor rightOmni(
     drivers(),
-    MOTOR5,
-    tap::can::CanBus::CAN_BUS2,  // same as above
+    MOTOR2,
+    tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
-    rightBackSwerveConfig.azimuthMotorInverted,
-    "Right Back Swerve Azimuth Motor");
-
-// // This is the one facing parallel to the frame
-// VirtualDjiMotor leftOmni(
-//     drivers(),
-//     MOTOR1,
-//     tap::can::CanBus::CAN_BUS1,
-//     &(drivers()->chassisMcbLite),
-//     false,
-//     "Right Omni Dead Wheel");
-
-// // This is the one sticking out towards the frame
-// VirtualDjiMotor rightOmni(
-//     drivers(),
-//     MOTOR2,
-//     tap::can::CanBus::CAN_BUS1,
-//     &(drivers()->chassisMcbLite),
-//     false,
-// "Left Omni Dead Wheel");
+    false,
+"Left Omni Dead Wheel");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
-aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
-    leftFrontDriveMotor,
-    leftFrontAzimuthMotor,
-    leftFrontSwerveConfig);
-
 aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
     rightFrontDriveMotor,
     rightFrontAzimuthMotor,
@@ -409,11 +369,6 @@ aruwsrc::chassis::SwerveModule leftBackSwerveModule(
     leftBackDriveMotor,
     leftBackAzimuthMotor,
     leftBackSwerveConfig);
-
-aruwsrc::chassis::SwerveModule rightBackSwerveModule(
-    rightBackDriveMotor,
-    rightBackAzimuthMotor,
-    rightBackSwerveConfig);
 
 // Friction wheels ---------------------------------------------------------------------------
 
@@ -457,14 +412,12 @@ aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::SwerveChassisSubsystem chassis(
+aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     drivers(),
     &currentSensor,
-    &leftFrontSwerveModule,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
-    &rightBackSwerveModule,
-    SWERVE_FORWARD_MATRIX);
+    HALF_SWERVE_FORWARD_MATRIX);
 
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
@@ -651,8 +604,8 @@ void initializeSubsystems()
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
-    // rightOmni.initialize();
-    // leftOmni.initialize();
+    rightOmni.initialize();
+    leftOmni.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -674,7 +627,7 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    // chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     turretMajor.setDefaultCommand(&majorManualCommand);
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
