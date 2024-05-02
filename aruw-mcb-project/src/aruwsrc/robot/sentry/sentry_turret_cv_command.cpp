@@ -60,9 +60,6 @@ bool SentryTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentryTurretCVCommand::initialize()
 {
-    // turretLeftConfig.turretSubsystem.initialize();
-    // turretRightConfig.turretSubsystem.initialize();
-
     prevTime = getTimeMilliseconds();
     visionCoprocessor.sendSelectNewTargetMessage();
 }
@@ -143,7 +140,7 @@ void SentryTurretCVCommand::execute()
                 &withinAimingToleranceRight);
         }
 
-        // sus: one of these could be std::nullopt
+        // sus: one of these could be std::nullopt ?
         WrappedFloat leftYawWrapped(leftBallisticsSolution->yawAngle, 0, M_TWOPI);
         WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
 

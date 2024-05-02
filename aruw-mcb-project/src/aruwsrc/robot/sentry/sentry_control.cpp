@@ -21,6 +21,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
@@ -606,7 +607,7 @@ SentryTurretCVCommand turretCVCommand(
     transformer);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping leftDownRightUp(
+PressCommandMapping leftDownRightUp(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
@@ -685,8 +686,9 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
+    drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
+    // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
+    drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
     drivers->commandMapper.addMap(&leftUpRightUp);  // cv
