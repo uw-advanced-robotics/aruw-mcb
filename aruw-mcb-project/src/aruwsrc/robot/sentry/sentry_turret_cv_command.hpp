@@ -179,7 +179,8 @@ private:
     static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(45.0f);
     static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
 
-    tap::algorithms::WrappedFloat majorScanValue = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    tap::algorithms::WrappedFloat majorScanValue =
+        tap::algorithms::WrappedFloat(0.0f, 0.0f, M_TWOPI);
 
     bool withinAimingToleranceLeft = false;
     bool withinAimingToleranceRight = false;

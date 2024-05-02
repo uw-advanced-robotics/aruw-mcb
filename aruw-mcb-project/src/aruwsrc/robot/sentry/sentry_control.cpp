@@ -391,7 +391,7 @@ VirtualDjiMotor rightBackAzimuthMotor(
 //     tap::can::CanBus::CAN_BUS1,
 //     &(drivers()->chassisMcbLite),
 //     false,
-    // "Left Omni Dead Wheel");
+// "Left Omni Dead Wheel");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
 aruwsrc::chassis::SwerveModule leftFrontSwerveModule(
@@ -419,7 +419,7 @@ aruwsrc::chassis::SwerveModule rightBackSwerveModule(
 // Left
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheelsGirlboss(
+    leftFrictionWheels(
         drivers(),
         tap::motor::MOTOR2,
         tap::motor::MOTOR1,
@@ -430,7 +430,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 // Right
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheelsMalewife(
+    rightFrictionWheels(
         drivers(),
         tap::motor::MOTOR2,
         tap::motor::MOTOR1,
@@ -439,12 +439,12 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Agitators
-aruwsrc::agitator::VelocityAgitatorSubsystem agitatorGirlboss(
+aruwsrc::agitator::VelocityAgitatorSubsystem leftAgitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::girlboss::AGITATOR_CONFIG);
 
-aruwsrc::agitator::VelocityAgitatorSubsystem agitatorMalewife(
+aruwsrc::agitator::VelocityAgitatorSubsystem rightAgitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
     aruwsrc::control::agitator::constants::malewife::AGITATOR_CONFIG);
@@ -567,9 +567,9 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
 
 aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
     drivers()->visionCoprocessor,
-    transformer,
-    null,
-    30.f,
+    transformAdapter,
+    leftFrictionWheels,
+    turretLeft::default_launch_speed,
     transformer.getWorldToTurretMajor(),
     turretMajor.getReadOnlyMotor(),
     TURRET_MINOR_OFFSET,
@@ -577,15 +577,15 @@ aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
-    turretLeftControllers.yawController,
-    turretLeftControllers.pitchController,
+    turretLeftWorldControllers.yawController,
+    turretLeftWorldControllers.pitchController,
     turretLeftSolver);
 
 aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
     drivers()->visionCoprocessor,
-    transformer,
-    null,
-    30.f,
+    transformAdapter,
+    rightFrictionWheels,
+    turretRight::default_launch_speed,
     transformer.getWorldToTurretMajor(),
     turretMajor.getReadOnlyMotor(),
     TURRET_MINOR_OFFSET,
@@ -593,11 +593,11 @@ aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
 
 SentryTurretCVCommand::TurretConfig turretRightCVConfig(
     turretRight,
-    turretRightControllers.yawController,
-    turretRightControllers.pitchController,
-    turretLetSolver);
+    turretRightWorldControllers.yawController,
+    turretRightWorldControllers.pitchController,
+    turretLeftSolver);
 
-SentryTurretCVCommand(
+SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
     turretMajor,
     turretMajorWorldYawController,
@@ -626,6 +626,11 @@ HoldCommandMapping leftDownRightDown(
     {&beybladeCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+HoldCommandMapping leftUpRightUp(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -635,10 +640,10 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    frictionWheelsGirlboss.initialize();
-    frictionWheelsMalewife.initialize();
-    agitatorGirlboss.initialize();
-    agitatorMalewife.initialize();
+    leftFrictionWheels.initialize();
+    rightFrictionWheels.initialize();
+    leftAgitator.initialize();
+    rightAgitator.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
@@ -653,10 +658,10 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
-    drivers->commandScheduler.registerSubsystem(&frictionWheelsGirlboss);
-    drivers->commandScheduler.registerSubsystem(&frictionWheelsMalewife);
-    drivers->commandScheduler.registerSubsystem(&agitatorGirlboss);
-    drivers->commandScheduler.registerSubsystem(&agitatorMalewife);
+    drivers->commandScheduler.registerSubsystem(&leftFrictionWheels);
+    drivers->commandScheduler.registerSubsystem(&rightFrictionWheels);
+    drivers->commandScheduler.registerSubsystem(&leftAgitator);
+    drivers->commandScheduler.registerSubsystem(&rightAgitator);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
@@ -684,6 +689,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
+    drivers->commandMapper.addMap(&leftUpRightUp);  // cv
 }
 }  // namespace sentry_control
 

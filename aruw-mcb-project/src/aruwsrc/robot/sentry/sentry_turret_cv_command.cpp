@@ -21,7 +21,6 @@
 #include <cassert>
 
 #include "tap/algorithms/ballistics.hpp"
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
@@ -111,13 +110,7 @@ void SentryTurretCVCommand::execute()
     float leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
     float rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
-    // world angles
-    auto leftAimData =
-        visionCoprocessor.getLastAimData(turretLeftConfig.turretSubsystem.getTurretID());
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
-
-    auto rightAimData =
-        visionCoprocessor.getLastAimData(turretRightConfig.turretSubsystem.getTurretID());
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
     targetFound = visionCoprocessor.isCvOnline() && !(leftBallisticsSolution == std::nullopt &&
@@ -154,7 +147,6 @@ void SentryTurretCVCommand::execute()
         WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
 
         // major averaging
-        auto &worldToChassisTransform = sentryTransforms.getWorldToChassis();
         WrappedFloat majorYawWrapped(leftYawWrapped.minDifference(rightYawWrapped), -M_PI, M_PI);
 
         majorYawWrapped = WrappedFloat(majorYawWrapped.getWrappedValue() / -2.0f, 0, M_TWOPI);
