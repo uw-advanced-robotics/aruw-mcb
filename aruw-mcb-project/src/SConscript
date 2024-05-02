@@ -43,7 +43,7 @@ except subprocess.CalledProcessError as error:
     print(error.output)
 try:
     now = dt.datetime.now()
-    get_datetime = f"{now.month:02}-{now.day:02} {now.hour:02}:{now.minute:02}"
+    get_datetime = f"{now.month:02}-{now.day:02}"
 except subprocess.CalledProcessError as error:
     get_datetime = "Unknown"
     print(error.output)
