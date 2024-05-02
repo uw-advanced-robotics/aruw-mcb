@@ -60,9 +60,6 @@ bool SentryTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentryTurretCVCommand::initialize()
 {
-    // turretLeftConfig.turretSubsystem.initialize();
-    // turretRightConfig.turretSubsystem.initialize();
-
     prevTime = getTimeMilliseconds();
     visionCoprocessor.sendSelectNewTargetMessage();
 }
@@ -92,12 +89,12 @@ void SentryTurretCVCommand::computeAimSetpoints(
     *desiredPitchSetpoint =
         config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
 
-    auto differenceWrappedGirlboss = [](float measurement, float setpoint)
+    auto differenceWrapped = [](float measurement, float setpoint)
     { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
 
     *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
-        differenceWrappedGirlboss(config.yawController.getMeasurement(), *desiredYawSetpoint),
-        differenceWrappedGirlboss(config.pitchController.getMeasurement(), *desiredPitchSetpoint),
+        differenceWrapped(config.yawController.getMeasurement(), *desiredYawSetpoint),
+        differenceWrapped(config.pitchController.getMeasurement(), *desiredPitchSetpoint),
         solution.distance);
 }
 
@@ -143,7 +140,7 @@ void SentryTurretCVCommand::execute()
                 &withinAimingToleranceRight);
         }
 
-        // sus: one of these could be std::nullopt
+        // sus: one of these could be std::nullopt ?
         WrappedFloat leftYawWrapped(leftBallisticsSolution->yawAngle, 0, M_TWOPI);
         WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
 
@@ -190,9 +187,17 @@ void SentryTurretCVCommand::execute()
             leftPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             rightPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
 
-            temp = sentryTransforms.getWorldToTurretMajor().getYaw();
-            leftYawSetpoint = SCAN_TURRET_LEFT_YAW - temp;
-            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW - temp;
+            // temp = WrappedFloat(sentryTransforms.getWorldToTurretMajor().getYaw(), 0.0f, M_TWOPI)
+            //            .getWrappedValue();
+
+            temp = majorSetpoint;
+
+            leftYawSetpoint = SCAN_TURRET_LEFT_YAW + temp;
+            leftYawSetpoint =
+                turretLeftConfig.turretSubsystem.yawMotor.unwrapTargetAngle(leftYawSetpoint);
+            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW + temp;
+            rightYawSetpoint =
+                turretRightConfig.turretSubsystem.yawMotor.unwrapTargetAngle(rightYawSetpoint);
         }
     }
 

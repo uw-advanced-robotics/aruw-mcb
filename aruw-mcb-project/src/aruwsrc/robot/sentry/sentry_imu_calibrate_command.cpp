@@ -41,7 +41,11 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem &chassis,
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
-    const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite)
+    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite,
+    aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+    aruwsrc::virtualMCB::MCBLite &chassisMCBLite
+
+    )
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
@@ -50,7 +54,9 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       chassis(chassis),
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
-      mcbLite(mcbLite)
+      majorMCBLite(majorMCBLite),
+      chassisMCBLite(chassisMCBLite)
+//   mcbLite(mcbLite)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -133,6 +139,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
+size_t i;
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
@@ -184,10 +191,17 @@ void SentryImuCalibrateCommand::execute()
                 }
 
                 drivers->mpu6500.requestCalibration();
-                for (auto mcb : mcbLite)
-                {
-                    mcb->imu.requestCalibration();
-                }
+
+                chassisMCBLite.imu.requestCalibration();
+                majorMCBLite.imu.requestCalibration();
+                // for (auto mcb : mcbLite)
+
+                // for (i = 0; i < mcbLite.size(); i++)
+
+                // // for (auto mcb : mcbLite)
+                // {
+                //     mcbLite[i]->imu.requestCalibration();
+                // }
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
 

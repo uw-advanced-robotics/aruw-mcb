@@ -78,7 +78,7 @@ public:
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(120.0f);
     static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
 
     /**
