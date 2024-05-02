@@ -60,8 +60,8 @@ bool SentryTurretCVCommand::isReady() { return !isFinished(); }
 
 void SentryTurretCVCommand::initialize()
 {
-    turretLeftConfig.turretSubsystem.initialize();
-    turretRightConfig.turretSubsystem.initialize();
+    // turretLeftConfig.turretSubsystem.initialize();
+    // turretRightConfig.turretSubsystem.initialize();
 
     prevTime = getTimeMilliseconds();
     visionCoprocessor.sendSelectNewTargetMessage();
@@ -101,6 +101,7 @@ void SentryTurretCVCommand::computeAimSetpoints(
         solution.distance);
 }
 
+float temp;
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
@@ -188,8 +189,10 @@ void SentryTurretCVCommand::execute()
                 lowPassFilter(majorSetpoint, majorScanValue.getWrappedValue(), SCAN_LOW_PASS_ALPHA);
             leftPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             rightPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
-            leftYawSetpoint = SCAN_TURRET_LEFT_YAW;
-            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW;
+
+            temp = sentryTransforms.getWorldToTurretMajor().getYaw();
+            leftYawSetpoint = SCAN_TURRET_LEFT_YAW - temp;
+            rightYawSetpoint = SCAN_TURRET_RIGHT_YAW - temp;
         }
     }
 
