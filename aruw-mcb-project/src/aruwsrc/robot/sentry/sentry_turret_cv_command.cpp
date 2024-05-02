@@ -187,7 +187,10 @@ void SentryTurretCVCommand::execute()
             leftPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             rightPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
 
-            temp = sentryTransforms.getWorldToTurretMajor().getYaw();
+            // temp = WrappedFloat(sentryTransforms.getWorldToTurretMajor().getYaw(), 0.0f, M_TWOPI)
+            //            .getWrappedValue();
+
+            temp = majorSetpoint;
 
             leftYawSetpoint = SCAN_TURRET_LEFT_YAW + temp;
             leftYawSetpoint =

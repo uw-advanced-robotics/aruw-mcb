@@ -564,7 +564,9 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     chassisOdometry,
-    {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
+    // {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
+    drivers()->turretMajorMcbLite,
+    drivers()->chassisMcbLite);
 
 aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
     drivers()->visionCoprocessor,
@@ -607,7 +609,7 @@ SentryTurretCVCommand turretCVCommand(
     transformer);
 
 /* define command mappings --------------------------------------------------*/
-PressCommandMapping leftDownRightUp(
+HoldCommandMapping leftDownRightUp(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
