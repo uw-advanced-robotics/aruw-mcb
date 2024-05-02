@@ -120,7 +120,7 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // rpm, rpm,
     {
         coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
         wheels[i]->executeWheelVelocity(
-            desiredWheelVel[i].first * coeff,
+            desiredWheelVel[i].first * coeff*0.2,
             desiredWheelVel[i].second);
     }
 }

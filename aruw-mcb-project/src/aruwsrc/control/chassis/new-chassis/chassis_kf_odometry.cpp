@@ -58,10 +58,10 @@ void ChassisKFOdometry::update()
     }
 
     // get chassis frame velocity as measured by the motor encoders
-    // auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    // tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
-    //     chassisVelocity,
-    //     chassisYaw);
+    auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
+        chassisVelocity,
+        chassisYaw);
 
     for (int i = 0; i < 6; i++)
     {
