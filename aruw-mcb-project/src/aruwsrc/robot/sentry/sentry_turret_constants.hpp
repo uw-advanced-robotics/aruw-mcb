@@ -116,6 +116,8 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
+
+static constexpr float FEEDFORWARD_GAIN = 0.2f;
 }  // namespace turretMajor
 
 namespace turretLeft

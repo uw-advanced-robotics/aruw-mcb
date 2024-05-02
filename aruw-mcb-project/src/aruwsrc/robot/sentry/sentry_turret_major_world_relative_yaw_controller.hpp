@@ -74,7 +74,8 @@ public:
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
         float maxVelErrorInput,
-        float minorMajorTorqueRatio);
+        float minorMajorTorqueRatio,
+        float feedforwardGain);
 
     void initialize() final;
 
@@ -129,6 +130,8 @@ private:
     float maxVelErrorInput;
 
     float minorMajorTorqueRatio;
+
+    float feedforwardGain;
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

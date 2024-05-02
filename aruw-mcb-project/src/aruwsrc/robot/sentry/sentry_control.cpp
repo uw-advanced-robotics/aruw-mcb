@@ -498,7 +498,8 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajorYawPosPid,
     turretMajorYawVelPid,
     turretMajor::MAX_VEL_ERROR_INPUT,
-    turretMajor::TURRET_MINOR_TORQUE_RATIO);
+    turretMajor::TURRET_MINOR_TORQUE_RATIO,
+    turretMajor::FEEDFORWARD_GAIN);
 
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
