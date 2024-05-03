@@ -23,7 +23,7 @@
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
 #elif defined(TARGET_SENTRY_BEEHIVE)
-#include "aruwsrc/robot/sentry/sentry_beehive_agitator_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
 #elif defined(TARGET_HERO_CYCLONE)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
 #endif
