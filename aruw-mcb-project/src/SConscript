@@ -43,9 +43,9 @@ except subprocess.CalledProcessError as error:
     print(error.output)
 try:
     now = dt.datetime.now()
-    get_datetime = f"{now.month:02}-{now.day:02}"
+    get_date = f"{now.month:02}-{now.day:02}"  # Including time causes scons to recompile all files whenever time changes
 except subprocess.CalledProcessError as error:
-    get_datetime = "Unknown"
+    get_date = "Unknown"
     print(error.output)
 try:
     get_branch_name = get_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
@@ -63,7 +63,7 @@ env_cpy = env.Clone()
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_DATETIME=" + get_datetime])
+env_cpy.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
 env_cpy.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
 
 
