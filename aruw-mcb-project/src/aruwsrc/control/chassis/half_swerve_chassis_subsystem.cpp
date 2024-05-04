@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "half_swerve_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -25,14 +24,14 @@ using namespace tap::algorithms;
 using namespace aruwsrc::chassis;
 
 HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
-        tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        Module* moduleOne,
-        Module* moduleTwo,
-        const float forwardMatrixArray[24])
-        : HolonomicChassisSubsystem(drivers, currentSensor),
-          modules{moduleOne, moduleTwo},
-          forwardMatrix(forwardMatrixArray)
+    tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    Module* moduleOne,
+    Module* moduleTwo,
+    const float forwardMatrixArray[24])
+    : HolonomicChassisSubsystem(drivers, currentSensor),
+      modules{moduleOne, moduleTwo},
+      forwardMatrix(forwardMatrixArray)
 {
 }
 
@@ -95,7 +94,6 @@ void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r,
         modules[i]->scaleAndSetDesiredState(scaleCoeff);
     }
 }
-
 
 void HalfSwerveChassisSubsystem::refresh()
 {

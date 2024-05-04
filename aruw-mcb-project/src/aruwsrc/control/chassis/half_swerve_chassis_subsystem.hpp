@@ -1,29 +1,28 @@
 /*
-* Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
-*
-* This file is part of aruw-mcb.
-*
-* aruw-mcb is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* aruw-mcb is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 #define HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/control/subsystem.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/control/subsystem.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
-
 #include "swerve_module.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -39,7 +38,7 @@ namespace aruwsrc::chassis
 
 class HalfSwerveChassisSubsystem : public HolonomicChassisSubsystem
 {
-public: 
+public:
     HalfSwerveChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
@@ -108,5 +107,5 @@ private:
 
 };  // class HalfSwerveChassisSubsystem
 
-}  // aruwsrc::chassis
+}  // namespace aruwsrc::chassis
 #endif  // HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
