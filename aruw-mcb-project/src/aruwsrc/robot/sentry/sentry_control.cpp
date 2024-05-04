@@ -234,11 +234,9 @@ TurretMinorChassisControllers turretLeftChassisControllers{
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR),
-
     .yawController = ChassisFrameYawTurretController(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
-
 };
 
 TurretMinorChassisControllers turretRightChassisControllers{
@@ -248,11 +246,9 @@ TurretMinorChassisControllers turretRightChassisControllers{
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR),
-
     .yawController = ChassisFrameYawTurretController(
         turretRight.yawMotor,
-        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME)
-
+        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
 struct TurretMinorWorldControllers
