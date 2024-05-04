@@ -76,7 +76,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(108),
     .limitMotorAngles = true,
 };
-#elif defined(TARGET_STANDARD_PHOBOS)
+#elif defined(TARGET_STANDARD_ORION)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 4098,
@@ -94,7 +94,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 #endif
 
-#if defined(TARGET_STANDARD_PHOBOS)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr float TURRET_CG_X = 55.76;
 static constexpr float TURRET_CG_Z = 52.25;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -12'500;
@@ -225,7 +225,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-#if defined(TARGET_STANDARD_PHOBOS)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 20000.0f,
     .ki = 0.0f,

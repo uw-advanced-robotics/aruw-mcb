@@ -121,7 +121,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
 tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS,
-#if defined(TARGET_STANDARD_PHOBOS)
+#if defined(TARGET_STANDARD_ORION)
  false,
 #else
  false,
@@ -134,7 +134,7 @@ tap::motor::DjiMotor yawMotor(
     CAN_BUS_MOTORS,
 #if defined(TARGET_STANDARD_ELSA)
     true,
-#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_PHOBOS)
+#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION)
     false,
 #else
     #error "did not define standard!"

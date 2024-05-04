@@ -110,7 +110,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 
-#elif defined(TARGET_STANDARD_PHOBOS)
+#elif defined(TARGET_STANDARD_ORION)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.37f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.415f;

@@ -69,7 +69,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {16.0f, 6700.0f},
     {20.0f, 8500.0f},
 };
-#elif defined(TARGET_STANDARD_PHOBOS)
+#elif defined(TARGET_STANDARD_ORION)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4325.0f},
