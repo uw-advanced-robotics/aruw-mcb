@@ -25,14 +25,13 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -51,7 +50,6 @@
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
@@ -357,7 +355,7 @@ VirtualDjiMotor rightOmni(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     false,
-"Left Omni Dead Wheel");
+    "Left Omni Dead Wheel");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
 aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
@@ -522,45 +520,45 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
-aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    leftFrictionWheels,
-    turretLeft::default_launch_speed,
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretLeft.getTurretID());
+// aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
+//     drivers()->visionCoprocessor,
+//     transformAdapter,
+//     leftFrictionWheels,
+//     turretLeft::default_launch_speed,
+//     transformer.getWorldToTurretMajor(),
+//     turretMajor.getReadOnlyMotor(),
+//     TURRET_MINOR_OFFSET,
+//     turretLeft.getTurretID());
 
-SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
-    turretLeft,
-    turretLeftWorldControllers.yawController,
-    turretLeftWorldControllers.pitchController,
-    turretLeftSolver);
+// SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
+//     turretLeft,
+//     turretLeftWorldControllers.yawController,
+//     turretLeftWorldControllers.pitchController,
+//     turretLeftSolver);
 
-aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    rightFrictionWheels,
-    turretRight::default_launch_speed,
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretRight.getTurretID());
+// aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
+//     drivers()->visionCoprocessor,
+//     transformAdapter,
+//     rightFrictionWheels,
+//     turretRight::default_launch_speed,
+//     transformer.getWorldToTurretMajor(),
+//     turretMajor.getReadOnlyMotor(),
+//     TURRET_MINOR_OFFSET,
+//     turretRight.getTurretID());
 
-SentryTurretCVCommand::TurretConfig turretRightCVConfig(
-    turretRight,
-    turretRightWorldControllers.yawController,
-    turretRightWorldControllers.pitchController,
-    turretLeftSolver);
+// SentryTurretCVCommand::TurretConfig turretRightCVConfig(
+//     turretRight,
+//     turretRightWorldControllers.yawController,
+//     turretRightWorldControllers.pitchController,
+//     turretLeftSolver);
 
-SentryTurretCVCommand turretCVCommand(
-    drivers()->visionCoprocessor,
-    turretMajor,
-    turretMajorWorldYawController,
-    turretLeftCVConfig,
-    turretRightCVConfig,
-    transformer);
+// SentryTurretCVCommand turretCVCommand(
+//     drivers()->visionCoprocessor,
+//     turretMajor,
+//     turretMajorWorldYawController,
+//     turretLeftCVConfig,
+//     turretRightCVConfig,
+//     transformer);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
@@ -583,10 +581,10 @@ HoldCommandMapping leftDownRightDown(
     {&beybladeCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftUpRightUp(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+// HoldCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&turretCVCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -647,7 +645,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-    drivers->commandMapper.addMap(&leftUpRightUp);  // cv
+    // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
 }
 }  // namespace sentry_control
 
