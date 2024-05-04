@@ -35,7 +35,6 @@ using Module = aruwsrc::chassis::SwerveModule;
 
 namespace aruwsrc::chassis
 {
-
 class HalfSwerveChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:

@@ -28,7 +28,7 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     Module* moduleOne,
     Module* moduleTwo,
-    const float forwardMatrixArray[24])
+    const float forwardMatrixArray[12])
     : HolonomicChassisSubsystem(drivers, currentSensor),
       modules{moduleOne, moduleTwo},
       forwardMatrix(forwardMatrixArray)
