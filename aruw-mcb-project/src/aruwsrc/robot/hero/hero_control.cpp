@@ -238,7 +238,10 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+    chassis_rel::PITCH_PID_CONFIG,
+    TURRET_CG_X,
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
@@ -269,7 +272,10 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid);
+    worldFramePitchTurretImuVelPid,
+    TURRET_CG_X,
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
 
 tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
