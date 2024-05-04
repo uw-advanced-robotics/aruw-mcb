@@ -55,7 +55,6 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/wiggle_blade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -233,12 +232,6 @@ aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
-
-aruwsrc::chassis::WiggleBladeCommand wiggleBladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
