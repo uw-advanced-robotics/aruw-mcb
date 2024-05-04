@@ -269,10 +269,7 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid,
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+    worldFramePitchTurretImuVelPid);
 
 tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
