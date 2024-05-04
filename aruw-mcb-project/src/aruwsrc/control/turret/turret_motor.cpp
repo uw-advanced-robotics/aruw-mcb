@@ -47,6 +47,14 @@ void TurretMotor::updateMotorAngle()
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
 
+        if (config.limitMotorAngles)
+        {
+            startEncoderOffset = 0;
+        }
+
+        //need to make sure startEncoderOffset is right to make encoderUnwrapped and 
+        //start encoder value is in the same revolution
+
         if (startEncoderOffset == INT16_MIN)
         {
             int encoderDiff =
@@ -69,11 +77,6 @@ void TurretMotor::updateMotorAngle()
             }
         }
 
-        if (config.limitMotorAngles)
-        {
-            startEncoderOffset = 0;
-        }
-
         if (lastUpdatedEncoderValue == encoderUnwrapped)
         {
             return;
@@ -86,7 +89,7 @@ void TurretMotor::updateMotorAngle()
                 encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
                 startEncoderOffset) *
                 M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;
+            config.startAngle; //returns angle
 
         chassisFrameMeasuredAngle.setWrappedValue(chassisFrameUnwrappedMeasurement);
     }
