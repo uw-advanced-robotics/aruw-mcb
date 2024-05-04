@@ -49,7 +49,7 @@ protected:
           yawMotor(&yawM, {}),
           pitchMotor(&pitM, {}),
           yawController(yawMotor, {}),
-          pitchController(pitchMotor, {}),
+          pitchController(pitchMotor, {}, TURRET_CG_X, TURRET_CG_Z, GRAVITY_COMPENSATION_SCALAR),
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
