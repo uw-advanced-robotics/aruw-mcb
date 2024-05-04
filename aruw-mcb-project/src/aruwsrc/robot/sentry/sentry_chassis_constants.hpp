@@ -56,9 +56,18 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
 
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
-    0.25,     0.0,      0.25,      0.,      
-    0.0,      0.25,     0.0,       0.25,    
-    0.862325, 0.862325, -0.862325, -0.862325};
+    0.25,
+    0.0,
+    0.25,
+    0.,
+    0.0,
+    0.25,
+    0.0,
+    0.25,
+    0.862325,
+    0.862325,
+    -0.862325,
+    -0.862325};
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,

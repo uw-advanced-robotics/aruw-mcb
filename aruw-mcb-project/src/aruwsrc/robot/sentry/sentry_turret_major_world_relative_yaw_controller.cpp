@@ -101,7 +101,9 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
     }
     // @note: in case things look weird, try adding the chassis' rotational velocity to
     // setMotorOutput
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation + feedforwardGain * turretMotor.getMotorOutput());
+    turretMotor.setMotorOutput(
+        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
+        feedforwardGain * turretMotor.getMotorOutput());
     // turretMotor.setMotorOutput(velocityPidOutput);  // @todo: final maxOutput for this controller
 }
 

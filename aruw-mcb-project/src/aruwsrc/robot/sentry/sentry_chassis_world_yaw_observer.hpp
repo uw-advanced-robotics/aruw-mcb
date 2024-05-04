@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
+
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
 namespace aruwsrc::sentry
@@ -44,8 +45,9 @@ public:
      * to get yaw angle of chassis relative to turret. This must be the same turret that the IMU on
      * CAN bus 1 is attached to.
      */
-    SentryChassisWorldYawObserver(tap::communication::sensors::imu::ImuInterface &imu, 
-            const aruwsrc::control::turret::YawTurretSubsystem& turretMajor);
+    SentryChassisWorldYawObserver(
+        tap::communication::sensors::imu::ImuInterface &imu,
+        const aruwsrc::control::turret::YawTurretSubsystem &turretMajor);
 
     /**
      * Get the current chassis yaw in radians.
@@ -65,7 +67,7 @@ public:
 private:
     tap::communication::sensors::imu::ImuInterface &imu;
 
-    const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
+    const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
 
     // error factor since we don't know how to reset the imu to some non-zero value outright
     float offset = 0.0f;
