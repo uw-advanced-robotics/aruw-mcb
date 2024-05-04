@@ -21,9 +21,9 @@
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 #include "turret_gravity_compensation.hpp"
-
 namespace aruwsrc::control::turret::algorithms
 {
 /**
@@ -290,18 +290,18 @@ WorldFramePitchTurretImuCascadePidTurretController::
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
         tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid,
-        float turret_cg_x,
-        float turret_cg_z,
-        float gravity_compensation_scalar)
+        tap::algorithms::SmoothPid &velocityPid)
+    // float turret_cg_x,
+    // float turret_cg_z,
+    // float gravity_compensation_scalar)
     : TurretPitchControllerInterface(turretMotor),
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0),
-      turret_cg_x(turret_cg_x),
-      turret_cg_z(turret_cg_z),
-      gravity_compensation_scalar(gravity_compensation_scalar)
+      worldFrameSetpoint(0)
+//       turret_cg_x(turret_cg_x),
+//       turret_cg_z(turret_cg_z),
+//       gravity_compensation_scalar(gravity_compensation_scalar)
 {
 }
 
@@ -341,10 +341,10 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         velocityPid);
 
     pidOut += computeGravitationalForceOffset(
-        turret_cg_x,
-        turret_cg_z,
+        TURRET_CG_X,
+        TURRET_CG_Z,
         -turretMotor.getAngleFromCenter(),
-        gravity_compensation_scalar);
+        GRAVITY_COMPENSATION_SCALAR);
 
     turretMotor.setMotorOutput(pidOut);
 }

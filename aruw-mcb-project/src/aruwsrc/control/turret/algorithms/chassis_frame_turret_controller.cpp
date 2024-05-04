@@ -80,15 +80,15 @@ bool ChassisFrameYawTurretController::isOnline() const { return turretMotor.isOn
 
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
     TurretMotor &pitchMotorp,
-    const tap::algorithms::SmoothPidConfig &pidConfig,
-    const float turret_cg_x,
-    const float turret_cg_z,
-    const float gravity_compensation_scalar)
+    const tap::algorithms::SmoothPidConfig &pidConfig)
+    // const float turret_cg_x,
+    // const float turret_cg_z,
+    // const float gravity_compensation_scalar)
     : TurretPitchControllerInterface(pitchMotorp),
-      pid(pidConfig),
-      turret_cg_x(turret_cg_x),
-      turret_cg_z(turret_cg_z),
-      gravity_compensation_scalar(gravity_compensation_scalar)
+      pid(pidConfig)
+//   turret_cg_x(turret_cg_x),
+//   turret_cg_z(turret_cg_z),
+//   gravity_compensation_scalar(gravity_compensation_scalar)
 {
 }
 
@@ -115,10 +115,10 @@ void ChassisFramePitchTurretController::runController(
         pid.runController(positionControllerError, turretMotor.getChassisFrameVelocity(), dt);
 
     pidOutput += computeGravitationalForceOffset(
-        turret_cg_x,
-        turret_cg_z,
+        TURRET_CG_X,
+        TURRET_CG_Z,
         -turretMotor.getAngleFromCenter(),
-        gravity_compensation_scalar);
+        GRAVITY_COMPENSATION_SCALAR);
 
     turretMotor.setMotorOutput(pidOutput);
 }
