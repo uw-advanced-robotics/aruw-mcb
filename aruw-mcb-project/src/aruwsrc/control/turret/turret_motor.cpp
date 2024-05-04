@@ -69,6 +69,11 @@ void TurretMotor::updateMotorAngle()
             }
         }
 
+        if (config.limitMotorAngles)
+        {
+            startEncoderOffset = 0;
+        }
+
         if (lastUpdatedEncoderValue == encoderUnwrapped)
         {
             return;
@@ -92,10 +97,10 @@ void TurretMotor::updateMotorAngle()
             return;
         }
 
-        lastUpdatedEncoderValue = config.startEncoderValue;
+        lastUpdatedEncoderValue = config.startEncoderValue;  // why do we assume this....
         startEncoderOffset = INT16_MIN;
 
-        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
+        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);  // and go with it
     }
 }
 
