@@ -240,10 +240,7 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG,
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+    chassis_rel::PITCH_PID_CONFIG);
 
 algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
