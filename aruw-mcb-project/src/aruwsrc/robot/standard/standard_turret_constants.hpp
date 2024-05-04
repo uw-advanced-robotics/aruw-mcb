@@ -31,6 +31,8 @@
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
 #endif
 
+using tap::motor::DjiMotor;
+
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
@@ -42,23 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-#ifdef TARGET_STANDARD_WOODY
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 6821,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = false,
-};
-
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 7500,
-    .minAngle = modm::toRadian(40),
-    .maxAngle = modm::toRadian(117),
-    .limitMotorAngles = true,
-};
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 1100,
@@ -77,7 +63,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 375,
+    .startEncoderValue = 656,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -103,7 +89,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.3f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -117,7 +103,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
     .ki = 0.0f,
     .kd = 0.3f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -131,7 +117,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 100.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -145,7 +131,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.5f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -159,7 +145,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
     .ki = 0.6f,
     .kd = 1.0f,
     .maxICumulative = 0.5f,
-    .maxOutput = 10'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -173,7 +159,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -190,7 +176,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 10'886.2f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -207,7 +193,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 10'886.2f,
     .maxICumulative = 0.0f,
-    .maxOutput = 32'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 70.0f,
     .tQProportionalKalman = 1.0f,
@@ -221,7 +207,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 7'448.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 32000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,

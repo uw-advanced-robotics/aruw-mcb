@@ -163,7 +163,7 @@ public:
 
     void onHardwareTestStart() override;
 
-    mockable const char* getName() override { return "Agitator"; }
+    mockable const char* getName() const override { return "Agitator"; }
 
 protected:
     /**

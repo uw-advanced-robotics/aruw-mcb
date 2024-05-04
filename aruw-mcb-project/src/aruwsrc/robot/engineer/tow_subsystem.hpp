@@ -88,7 +88,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "Tow"; }
+    const char *getName() const override { return "Tow"; }
 
 private:
     /**

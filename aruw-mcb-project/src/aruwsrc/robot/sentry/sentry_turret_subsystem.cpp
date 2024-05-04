@@ -22,6 +22,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
+// @todo: this class should be deprecated
 namespace aruwsrc::control::turret
 {
 SentryTurretSubsystem::SentryTurretSubsystem(
@@ -45,12 +46,12 @@ SentryTurretSubsystem::SentryTurretSubsystem(
 
 float SentryTurretSubsystem::getWorldYaw() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getValue();
+    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 
 float SentryTurretSubsystem::getWorldPitch() const
 {
-    return pitchMotor.getChassisFrameMeasuredAngle().getValue();
+    return pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 
 uint32_t SentryTurretSubsystem::getLastMeasurementTimeMicros() const

@@ -24,6 +24,7 @@
 #include "standard_and_hero_transformer.hpp"
 #include "transformer_interface.hpp"
 
+using namespace tap::algorithms::transforms;
 namespace aruwsrc::algorithms::transforms
 {
 StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
@@ -32,20 +33,9 @@ StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
 {
 }
 
-modm::Location2D<float> StandardAndHeroTransformAdapter::getCurrentLocation2D() const
-{
-    const tap::algorithms::transforms::Transform& worldToChassis = transforms.getWorldToChassis();
-    return modm::Location2D(worldToChassis.getX(), worldToChassis.getY(), worldToChassis.getYaw());
-}
-
-modm::Vector2f StandardAndHeroTransformAdapter::getCurrentVelocity2D() const
+modm::Vector2f StandardAndHeroTransformAdapter::getChassisVelocity2d() const
 {
     return transforms.getChassisOdometry().getCurrentVelocity2D();
-}
-
-float StandardAndHeroTransformAdapter::getYaw() const
-{
-    return transforms.getWorldToChassis().getYaw();
 }
 
 uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
@@ -53,32 +43,14 @@ uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-tap::algorithms::CMSISMat<3, 1> StandardAndHeroTransformAdapter::getTurretLocation(
-    int turretID) const
+const Transform& StandardAndHeroTransformAdapter::getWorldToChassis() const
 {
-    // Irrelevant Parameter in standard, gets rid of warning
-    turretID = turretID;
-    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
-    const float positionData[3 * 1] = {
-        worldToTurret.getX(),
-        worldToTurret.getY(),
-        worldToTurret.getZ()};
-    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
-    return positionInCMS;
+    return transforms.getWorldToChassis();
 }
-
-tap::algorithms::CMSISMat<3, 1> StandardAndHeroTransformAdapter::getTurretOrientation(
-    int turretID) const
+const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t turretID) const
 {
-    // Irrelevant Parameter in standard, gets rid of warning
-    turretID = turretID;
-    const tap::algorithms::transforms::Transform& worldToTurret = transforms.getWorldToTurret();
-    const float positionData[3 * 1] = {
-        worldToTurret.getRoll(),
-        worldToTurret.getYaw(),
-        worldToTurret.getPitch()};
-    tap::algorithms::CMSISMat<3, 1> positionInCMS(positionData);
-    return positionInCMS;
+    turretID = turretID;  // for pipeline checks (unused params)
+    return transforms.getWorldToTurret();
 };
 
 };  // namespace aruwsrc::algorithms::transforms

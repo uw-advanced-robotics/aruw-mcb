@@ -141,7 +141,7 @@ public:
      */
     virtual modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override = 0;
 
-    const char* getName() override { return "Chassis"; }
+    const char* getName() const override { return "Chassis"; }
 
     mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 

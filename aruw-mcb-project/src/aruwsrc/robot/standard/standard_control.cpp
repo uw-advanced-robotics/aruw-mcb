@@ -35,6 +35,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
@@ -43,6 +44,7 @@
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -153,6 +155,8 @@ OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::V
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
 StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+
+StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -317,7 +321,7 @@ cv::TurretCVCommand turretCVCommand(
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // base rotate/unjam commands
-MoveIntegralCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
 UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
@@ -485,7 +489,8 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
-    cvOnTargetGovernor);
+    cvOnTargetGovernor,
+    &rotateAgitator);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
@@ -592,8 +597,7 @@ void startStandardCommands(Drivers *drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
