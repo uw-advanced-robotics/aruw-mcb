@@ -33,6 +33,8 @@
 #error "Do not include this file directly! Use agitator_constants.hpp instead."
 #endif
 
+using tap::motor::DjiMotor;
+
 namespace aruwsrc::control::agitator::constants
 {
 // position PID terms
@@ -42,7 +44,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };

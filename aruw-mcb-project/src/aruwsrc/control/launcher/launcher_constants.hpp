@@ -85,14 +85,6 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_STANDARD_WOODY)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4400.0f},
-    {18.0f, 4850.0f},
-    {30.0f, 7100.0f},
-    {32.0f, 8400.0f},
-};
 #elif defined(TARGET_SENTRY_BEEHIVE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
