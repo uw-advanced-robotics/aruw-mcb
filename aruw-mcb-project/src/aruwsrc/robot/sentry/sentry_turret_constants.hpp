@@ -46,7 +46,8 @@ static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
 
 static constexpr float TURRET_CG_X = 32.5f;
 static constexpr float TURRET_CG_Z = 32.3f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -13'000.0f;  // Right turret is -14'000 for some reason
+static constexpr float GRAVITY_COMPENSATION_SCALAR =
+    -13'000.0f;  // Right turret is -14'000 for some reason
 
 // The distance from turret 0 to turret 1 in meters
 static modm::Vector3f OFFSET_TURRET_0_TO_TURRET_1 = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
@@ -117,7 +118,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
 
-static constexpr float FEEDFORWARD_GAIN = 0.3f;
+static constexpr float FEEDFORWARD_GAIN = 0.0f;
 }  // namespace turretMajor
 
 namespace turretLeft
@@ -164,7 +165,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 6132,
     .minAngle = modm::toRadian(-195),  // actual CAD limit is -200
-    .maxAngle = modm::toRadian(15),  // actual CAD limit is -20
+    .maxAngle = modm::toRadian(15),    // actual CAD limit is -20
     .limitMotorAngles = true,
 };
 
@@ -172,7 +173,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 4780,
     .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
-    .maxAngle = modm::toRadian(35),  // actual CAD limit 37
+    .maxAngle = modm::toRadian(35),   // actual CAD limit 37
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
@@ -261,7 +262,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_P
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
-}  // namespace pidConfigs
+}  // namespace minorPidConfigs
 }  // namespace  aruwsrc::control::turret
 
 #endif  // SENTRY_TURRET_CONSTANTS_HPP_
