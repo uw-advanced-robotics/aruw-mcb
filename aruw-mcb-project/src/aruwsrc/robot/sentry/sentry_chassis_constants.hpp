@@ -49,12 +49,12 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
  *
  * The above matrix gives the successive x, y components of the LF, RF, LB, and RB
  * module velocities given a [x, y, r] chassis velocity vector
- *
  */
-// constexpr float SWERVE_FORWARD_MATRIX[24]{
-//     0.25,      0.0,      0.25,     0.0,      0.25,      0.,        0.25,     0.0,
-//     0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
-//     -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
+constexpr float SWERVE_FORWARD_MATRIX[24]{
+    0.25,      0.0,      0.25,     0.0,      0.25,      0.,        0.25,     0.0,
+    0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
+    -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
+
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     0.25,     0.0,      0.25,      0.,      
     0.0,      0.25,     0.0,       0.25,    
