@@ -38,41 +38,30 @@ class SentryStrategyMenu
     : public modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
+    static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
+
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
-        : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
-              vs,
-              SENTRY_STRATEGY_MENU_ID,
-              getMenuName()),
-          visionCoprocessor(visionCoprocessor)
-    {
-        addEntry(
-            "None",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
-            true);
-        addEntry(
-            "Go crazy",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
-            false);
-        addEntry(
-            "Go stupid",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
-            false);
-        addEntry(
-            "AAH",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
-            false);
-    }
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor);
 
-    void openNextScreen() override {}
+    void draw() override;
+
+    void update() override;
+
+    void shortButtonPress(modm::MenuButtons::Button button) override;
 
     static const char *getMenuName() { return "Sentry Strategy Menu"; }
+
+    bool hasChanged() override;
+
+    void openNextScreen() override {};
 
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+
+    tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };
 }  // namespace aruwsrc::display
 

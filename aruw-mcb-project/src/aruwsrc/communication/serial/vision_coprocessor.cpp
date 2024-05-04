@@ -134,6 +134,7 @@ bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& mess
 
 bool VisionCoprocessor::decodeToMotionStrategyOptionsData(const ReceivedSerialMessage& message)
 {
+    memset(&lastMotionStratOptionsData, 0, sizeof(lastMotionStratOptionsData));
     memcpy(&lastMotionStratOptionsData, &message.data, sizeof(MotionStrategyOptionsData));
     return true;
 }
