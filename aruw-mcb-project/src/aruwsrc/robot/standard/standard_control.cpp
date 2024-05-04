@@ -262,19 +262,13 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid,
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+    worldFramePitchTurretImuVelPid);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
-    worldFramePitchTurretImuVelPid,
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+    worldFramePitchTurretImuVelPid);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
