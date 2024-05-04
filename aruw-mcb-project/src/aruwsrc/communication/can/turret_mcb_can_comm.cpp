@@ -188,6 +188,36 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     }
 }
 
+void TurretMCBCanComm::handleRawGyroMessage(const modm::can::Message& message)
+{
+    const RawMessageData* rawGyroMessage = reinterpret_cast<const RawMessageData*>(message.data);
+
+    if (rawGyroMessage->seq != currProcessingImuData.seq)
+    {
+        RAISE_ERROR(drivers, "seq # mismatch when handling raw gyro data");
+        return;
+    }
+
+    currProcessingImuData.rawGyroX = rawGyroMessage->x;
+    currProcessingImuData.rawGyroY = rawGyroMessage->y;
+    currProcessingImuData.rawGyroZ = rawGyroMessage->z;
+}
+
+void TurretMCBCanComm::handleRawAccelMessage(const modm::can::Message& message)
+{
+    const RawMessageData* rawAccelMessage = reinterpret_cast<const RawMessageData*>(message.data);
+
+    if (rawAccelMessage->seq != currProcessingImuData.seq)
+    {
+        RAISE_ERROR(drivers, "seq # mismatch when handling raw accel data");
+        return;
+    }
+
+    currProcessingImuData.rawAccelX = rawAccelMessage->x;
+    currProcessingImuData.rawAccelY = rawAccelMessage->y;
+    currProcessingImuData.rawAccelZ = rawAccelMessage->z;
+}
+
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
     limitSwitchDepressed = message.data[0] & 0b1;

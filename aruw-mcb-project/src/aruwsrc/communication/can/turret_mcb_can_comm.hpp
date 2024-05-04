@@ -64,6 +64,8 @@ public:
 
     enum CanIDs
     {
+        GRYO_RAW_RX_CAN_ID = 0x1f6,
+        ACCEL_RAW_RX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
         TURRET_STATUS_RX_CAN_ID = 0x1fa,
@@ -225,6 +227,14 @@ private:
         uint8_t seq;
     } modm_packed;
 
+    struct RawMessageData
+    {
+        int16_t x;
+        int16_t y;
+        int16_t z;
+        uint8_t seq;
+    } modm_packed;
+
     struct ImuData
     {
         float yaw;                     ///< Normalized yaw value, between [-pi, pi]
@@ -237,6 +247,12 @@ private:
         float yAcceleration;           ///< (m/s^2) Y-Acceleration
         float zAcceleration;           ///< (m/s^2) Z-Acceleration
         uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was received
+        int16_t rawGyroX;              ///< Raw gyro X value
+        int16_t rawGyroY;              ///< Raw gyro Y value
+        int16_t rawGyroZ;              ///< Raw gyro Z value
+        int16_t rawAccelX;             ///< Raw accelerometer X value
+        int16_t rawAccelY;             ///< Raw accelerometer Y value
+        int16_t rawAccelZ;             ///< Raw accelerometer Z value
         uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };
 
@@ -276,6 +292,10 @@ private:
     void handleYAxisMessage(const modm::can::Message& message);
 
     void handleZAxisMessage(const modm::can::Message& message);
+
+    void handleRawGyroMessage(const modm::can::Message& message);
+
+    void handleRawAccelMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
 
