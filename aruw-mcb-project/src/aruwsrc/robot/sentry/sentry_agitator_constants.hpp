@@ -32,6 +32,7 @@
 #error "Do not include this file directly! Use agitator_constants.hpp instead."
 #endif
 
+// @todo update agitator constants for new agitator
 namespace aruwsrc::control::agitator::constants
 {
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {

@@ -84,60 +84,6 @@ using namespace aruwsrc::control;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace aruwsrc::control::agitator::constants
-{
-static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 3'000.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 5'000.0f,
-    .maxOutput = 16'000.0f,
-    .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0f,
-};
-
-namespace malewife
-{
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
-    .isAgitatorInverted = false,
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     *
-     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
-     *
-     * This should be positive or else weird behavior can occur
-     */
-    .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
-    .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
-};
-}
-
-namespace girlboss
-{
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,  // @todo: check
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between the velocity
-     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
-     */
-    .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
-    .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
-};
-}
-
-}  // namespace aruwsrc::control::agitator::constants
-
 namespace sentry_control
 {
 // tap::motor::DoubleDjiMotor turretMajorYawMotor(
@@ -239,10 +185,7 @@ struct TurretMinorChassisControllers
 TurretMinorChassisControllers turretLeftChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretLeft.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
     .yawController = ChassisFrameYawTurretController(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -251,10 +194,7 @@ TurretMinorChassisControllers turretLeftChassisControllers{
 TurretMinorChassisControllers turretRightChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretRight.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
     .yawController = ChassisFrameYawTurretController(
         turretRight.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -281,10 +221,7 @@ TurretMinorWorldControllers turretRightWorldControllers{
         drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        turretRightWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         drivers()->turretMCBCanCommBus1,
@@ -299,10 +236,7 @@ TurretMinorWorldControllers turretLeftWorldControllers{
         drivers()->turretMCBCanCommBus2,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        turretLeftWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         drivers()->turretMCBCanCommBus2,
@@ -401,12 +335,12 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 aruwsrc::agitator::VelocityAgitatorSubsystem leftAgitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::girlboss::AGITATOR_CONFIG);
+    aruwsrc::control::agitator::constants::turretLeft::AGITATOR_CONFIG);
 
 aruwsrc::agitator::VelocityAgitatorSubsystem rightAgitator(
     drivers(),
     aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::malewife::AGITATOR_CONFIG);
+    aruwsrc::control::agitator::constants::turretRight::AGITATOR_CONFIG);
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
@@ -771,6 +705,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
     // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
     // drivers->commandMapper.addMap(&shoot);          // Shoot
+}
 }  // namespace sentry_control
 
 namespace aruwsrc::sentry

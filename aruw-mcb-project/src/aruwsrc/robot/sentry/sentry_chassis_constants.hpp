@@ -38,36 +38,19 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
 /**
  * Calculated by solving for the pseudo-inverse of the following kinematics matrix
  *
- * 1, 0, -LF_Y
- * 0, 1,  LF_X
  * 1, 0, -RF_Y
  * 0, 1,  RF_X
  * 1, 0, -LB_Y
  * 0, 1,  LB_X
- * 1, 0, -RB_Y
- * 0, 1,  RB_X
  *
  * The above matrix gives the successive x, y components of the LF, RF, LB, and RB
  * module velocities given a [x, y, r] chassis velocity vector
  */
-constexpr float SWERVE_FORWARD_MATRIX[24]{
-    0.25,      0.0,      0.25,     0.0,      0.25,      0.,        0.25,     0.0,
-    0.0,       0.25,     0.0,      0.25,     0.0,       0.25,      0.0,      0.25,
-    -0.862325, 0.862325, 0.862325, 0.862325, -0.862325, -0.862325, 0.862325, -0.862325};
 
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
-    0.25,
-    0.0,
-    0.25,
-    0.,
-    0.0,
-    0.25,
-    0.0,
-    0.25,
-    0.862325,
-    0.862325,
-    -0.862325,
-    -0.862325};
+    0.5,     0.0,      0.5,      0.5,      
+    0.0,      0.5,     0.0,       0.25,    
+    1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
