@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SENTRY_MINOR_WORLD_PROVIDER_SUBSYSTEM_HPP_
-#define SENTRY_MINOR_WORLD_PROVIDER_SUBSYSTEM_HPP_
+#ifndef SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
+#define SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 
@@ -27,10 +27,10 @@
 namespace aruwsrc::control::turret
 {
 
-class SentryMinorWorldYawProviderSubsystem : public tap::control::Subsystem
+class SentryMinorWorldOrientationProviderSubsystem : public tap::control::Subsystem
 {
 public:
-    SentryMinorWorldYawProviderSubsystem(
+    SentryMinorWorldOrientationProviderSubsystem(
         TurretMotor turretMotor,
         const aruwsrc::can::TurretMCBCanComm& turretMCB,
         tap::Drivers* drivers);
@@ -43,14 +43,26 @@ public:
 
     float getYawVel() const;
 
-    float getPitch() const;
+    inline float getPitch() const { return turretMCB.getPitch(); }
 
-    float getPitchVel() const;
+    inline float getPitchVel() const { return turretMCB.getPitchVelocity(); }
+
+    inline float getRoll() const { return 0.0; }
+
+    inline float getRollVel() const { return 0.0; }
 
     inline void refreshSafeDisconnect() override{};
 
-    const char* getName() const override { return "Sentry Minor World Yaw Provider Subsystem"; }
-};  // class SentryMinorWorldYawProviderSubsystem
+    const char* getName() const override
+    {
+        return "Sentry Minor World Orientation Provider Subsystem";
+    }
+
+private:
+    TurretMotor turretMotor;
+    const aruwsrc::can::TurretMCBCanComm& turretMCB;
+
+};  // class SentryMinorWorldOrientationProviderSubsystem
 
 }  // namespace aruwsrc::control::turret
-#endif  // SENTRY_MINOR_WORLD_PROVIDER_SUBSYSTEM_HPP_
+#endif  // SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
