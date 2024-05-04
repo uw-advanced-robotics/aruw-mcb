@@ -28,6 +28,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -49,7 +50,7 @@ namespace aruwsrc::control::imu
  * 6. Send signal to onboard IMU to recalibrate.
  * 7. Wait until calibration is complete and then end the command.
  */
-class SentryImuCalibrateCommand : public tap::control::Command
+class SentryImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
 {
 public:
     /**
@@ -81,24 +82,6 @@ public:
      * in radians
      */
     static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
-
-    struct TurretIMUCalibrationConfig
-    {
-        /// The turret mounted IMU to be calibrated.
-        aruwsrc::can::TurretMCBCanComm *turretMCBCanComm;
-        /// A `TurretSubsystem` that this command will control (will lock the turret).
-        turret::TurretSubsystem &turret;
-        /// A chassis relative yaw controller used to lock the turret.
-        turret::algorithms::ChassisFrameYawTurretController &yawController;
-        /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFramePitchTurretController &pitchController;
-        /**
-         * `true` if the turret IMU is mounted on the pitch axis of the
-         * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
-         * before calibration is performed.
-         */
-        bool turretImuOnPitch;
-    };
 
     /**
      * @param[in] drivers A pointer to the global drivers object.

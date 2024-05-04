@@ -367,16 +367,16 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     {
         {
             &drivers()->turretMCBCanCommBus2,
-            turretLeft,
-            turretLeftControllers.yawController,
-            turretLeftControllers.pitchController,
+            &turretLeft,
+            &turretLeftControllers.yawController,
+            &turretLeftControllers.pitchController,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
-            turretRight,
-            turretRightControllers.yawController,
-            turretRightControllers.pitchController,
+            &turretRight,
+            &turretRightControllers.yawController,
+            &turretRightControllers.pitchController,
             true,
         },
     },
