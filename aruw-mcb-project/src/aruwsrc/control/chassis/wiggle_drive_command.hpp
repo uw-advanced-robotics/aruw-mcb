@@ -23,10 +23,10 @@
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-#include "modm/math/geometry/angle.hpp"
 
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc
 {
@@ -46,7 +46,7 @@ public:
         tap::Drivers* drivers,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::ControlOperatorInterface& operatorInterface, 
+        aruwsrc::control::ControlOperatorInterface& operatorInterface,
         float turretPlateOffset = M_PI_4);
 
     void initialize() override;
