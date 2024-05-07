@@ -81,14 +81,8 @@ bool ChassisFrameYawTurretController::isOnline() const { return turretMotor.isOn
 ChassisFramePitchTurretController::ChassisFramePitchTurretController(
     TurretMotor &pitchMotorp,
     const tap::algorithms::SmoothPidConfig &pidConfig)
-    // const float turret_cg_x,
-    // const float turret_cg_z,
-    // const float gravity_compensation_scalar)
     : TurretPitchControllerInterface(pitchMotorp),
       pid(pidConfig)
-//   turret_cg_x(turret_cg_x),
-//   turret_cg_z(turret_cg_z),
-//   gravity_compensation_scalar(gravity_compensation_scalar)
 {
 }
 
