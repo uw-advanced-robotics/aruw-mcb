@@ -307,41 +307,6 @@ aruwsrc::chassis::SwerveModule leftBackSwerveModule(
     leftBackAzimuthMotor,
     leftBackSwerveConfig);
 
-// Friction wheels ---------------------------------------------------------------------------
-
-// Left
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    leftFrictionWheels(
-        drivers(),
-        tap::motor::MOTOR2,
-        tap::motor::MOTOR1,
-        tap::can::CanBus::CAN_BUS2,
-        &drivers()->turretMCBCanCommBus2,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-
-// Right
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    rightFrictionWheels(
-        drivers(),
-        tap::motor::MOTOR2,
-        tap::motor::MOTOR1,
-        tap::can::CanBus::CAN_BUS1,
-        &drivers()->turretMCBCanCommBus1,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-// Agitators
-aruwsrc::agitator::VelocityAgitatorSubsystem leftAgitator(
-    drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::turretLeft::AGITATOR_CONFIG);
-
-aruwsrc::agitator::VelocityAgitatorSubsystem rightAgitator(
-    drivers(),
-    aruwsrc::control::agitator::constants::AGITATOR_PID_CONFIG,
-    aruwsrc::control::agitator::constants::turretRight::AGITATOR_CONFIG);
-
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
@@ -392,26 +357,26 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
 
-// // Friction Wheels
-// aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-//     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-//     frictionWheelsTurretLeft(
-//         drivers(),
-//         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETLEFT,
-//         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETLEFT,
-//         turretLeft::CAN_BUS_MOTORS,
-//         &getTurretMCBCanComm(),
-//         turretLeft::barrelID);
+// Friction Wheels
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheelsTurretLeft(
+        drivers(),
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETLEFT,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETLEFT,
+        turretLeft::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
+        turretLeft::barrelID);
 
-// aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-//     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-//     frictionWheelsTurretRight(
-//         drivers(),
-//         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETRIGHT,
-//         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETRIGHT,
-//         turretRight::CAN_BUS_MOTORS,
-//         &getTurretMCBCanComm(),
-//         turretRight::barrelID);  // @todo idk what they actually are
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    frictionWheelsTurretRight(
+        drivers(),
+        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETRIGHT,
+        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETRIGHT,
+        turretRight::CAN_BUS_MOTORS,
+        &getTurretMCBCanComm(),
+        turretRight::barrelID);  // @todo idk what they actually are
 
 // Agitators
 VelocityAgitatorSubsystem turretLeftAgitator(
@@ -490,106 +455,63 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
-// aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
-//     drivers()->visionCoprocessor,
-//     transformAdapter,
-//     leftFrictionWheels,
-//     turretLeft::default_launch_speed,
-//     transformer.getWorldToTurretMajor(),
-//     turretMajor.getReadOnlyMotor(),
-//     TURRET_MINOR_OFFSET,
-//     turretLeft.getTurretID());
-
-// SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
-//     turretLeft,
-//     turretLeftWorldControllers.yawController,
-//     turretLeftWorldControllers.pitchController,
-//     turretLeftSolver);
-
-// aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
-//     drivers()->visionCoprocessor,
-//     transformAdapter,
-//     rightFrictionWheels,
-//     turretRight::default_launch_speed,
-//     transformer.getWorldToTurretMajor(),
-//     turretMajor.getReadOnlyMotor(),
-//     TURRET_MINOR_OFFSET,
-//     turretRight.getTurretID());
-
-// SentryTurretCVCommand::TurretConfig turretRightCVConfig(
-//     turretRight,
-//     turretRightWorldControllers.yawController,
-//     turretRightWorldControllers.pitchController,
-//     turretLeftSolver);
-
-// SentryTurretCVCommand turretCVCommand(
-//     drivers()->visionCoprocessor,
-//     turretMajor,
-//     turretMajorWorldYawController,
-//     turretLeftCVConfig,
-//     turretRightCVConfig,
-//     transformer);
-
 // LEFT shooting ======================
 
 // spin friction wheels commands
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand
-// turretLeftFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsTurretLeft,
-//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
-//     false,
-//     turretLeft::barrelID);
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsTurretLeft,
+    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    false,
+    turretLeft::barrelID);
 
-// aruwsrc::control::launcher::
-//     FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
-//         drivers(),
-//         &frictionWheelsTurretLeft,
-//         0.0f,
-//         true,
-//         turretLeft::barrelID);
+aruwsrc::control::launcher::
+    FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
+        drivers(),
+        &frictionWheelsTurretLeft,
+        0.0f,
+        true,
+        turretLeft::barrelID);
 
 // Agitator commands (turret left)
-// MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator,
-// constants::AGITATOR_ROTATE_CONFIG); UnjamIntegralCommand
-// turretLeftUnjamAgitator(turretLeftAgitator, constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
-//     *drivers(),
-//     turretLeftAgitator,
-//     turretLeftRotateAgitator,
-//     turretLeftUnjamAgitator);
+MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand turretLeftUnjamAgitator(turretLeftAgitator, constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
+    *drivers(),
+    turretLeftAgitator,
+    turretLeftRotateAgitator,
+    turretLeftUnjamAgitator);
 
 // RIGHT shooting ======================
 
 // spin friction wheels commands
-// aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand
-// turretRightFrictionWheelSpinCommand(
-//     drivers(),
-//     &frictionWheelsTurretRight,
-//     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
-//     false,
-//     turretRight::barrelID);
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsTurretRight,
+    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    false,
+    turretRight::barrelID);
 
-// aruwsrc::control::launcher::
-//     FrictionWheelSpinRefLimitedCommand stopTurretRightFrictionWheelSpinCommand(
-//         drivers(),
-//         &frictionWheelsTurretRight,
-//         0.0f,
-//         true,
-//         turretRight::barrelID);
+aruwsrc::control::launcher::
+    FrictionWheelSpinRefLimitedCommand stopTurretRightFrictionWheelSpinCommand(
+        drivers(),
+        &frictionWheelsTurretRight,
+        0.0f,
+        true,
+        turretRight::barrelID);
 
 // Agitator commands (turret Right)
-// MoveIntegralCommand turretRightRotateAgitator(
-//     turretRightAgitator,
-//     constants::AGITATOR_ROTATE_CONFIG);
-// UnjamIntegralCommand turretRightUnjamAgitator(
-//     turretRightAgitator,
-//     constants::AGITATOR_UNJAM_CONFIG);
-// MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
-//     *drivers(),
-//     turretRightAgitator,
-//     turretRightRotateAgitator,
-//     turretRightUnjamAgitator);
+MoveIntegralCommand turretRightRotateAgitator(
+    turretRightAgitator,
+    constants::AGITATOR_ROTATE_CONFIG);
+UnjamIntegralCommand turretRightUnjamAgitator(
+    turretRightAgitator,
+    constants::AGITATOR_UNJAM_CONFIG);
+MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
+    *drivers(),
+    turretRightAgitator,
+    turretRightRotateAgitator,
+    turretRightUnjamAgitator);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
@@ -607,16 +529,16 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-// HoldRepeatCommandMapping leftUpRightUp(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-//     true);
+HoldRepeatCommandMapping leftUpRightUp(
+    drivers(),
+    {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
-// HoldCommandMapping shoot(
-//     drivers(),
-//     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping shoot(
+    drivers(),
+    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftDownRightDown(
     drivers(),
@@ -636,10 +558,8 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    leftFrictionWheels.initialize();
-    rightFrictionWheels.initialize();
-    leftAgitator.initialize();
-    rightAgitator.initialize();
+    // leftFrictionWheels.initialize();
+    // rightFrictionWheels.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
@@ -647,8 +567,9 @@ void initializeSubsystems()
     leftOmni.initialize();
     // turret
     // frictionWheelsTurretLeft.initialize();
-    turretLeftAgitator.initialize();
     // frictionWheelsTurretRight.initialize();
+
+    turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
 }
 
@@ -659,17 +580,14 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
-    drivers->commandScheduler.registerSubsystem(&leftFrictionWheels);
-    drivers->commandScheduler.registerSubsystem(&rightFrictionWheels);
-    drivers->commandScheduler.registerSubsystem(&leftAgitator);
-    drivers->commandScheduler.registerSubsystem(&rightAgitator);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
+
     // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
     // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
-
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
+
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
