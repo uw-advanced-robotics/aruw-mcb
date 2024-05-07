@@ -87,15 +87,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace aruwsrc::control::agitator::constants
 {
-static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 3'000.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 5'000.0f,
-    .maxOutput = 16'000.0f,
-    .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0f,
-};
 
 namespace malewife
 {
@@ -676,11 +667,11 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldRepeatCommandMapping leftUpRightUp(
-    drivers(),
-    {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-    true);
+// HoldRepeatCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+//     true);
 
 HoldCommandMapping shoot(
     drivers(),
