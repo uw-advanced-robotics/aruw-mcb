@@ -73,7 +73,8 @@ public:
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
 #elif defined(TARGET_SENTRY_HYDRA)
     // MCB is on a diagonal
-    static constexpr float MCB_ROTATION_OFFSET = -3.0f * M_PI_4;
+    // @todo: ensure this is correct
+    static constexpr float MCB_ROTATION_OFFSET = 0;
 #else
     // MCB has power inlet facing backwards
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
