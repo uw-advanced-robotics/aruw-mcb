@@ -120,7 +120,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
 
-tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, "Pitch Turret");
+tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -131,7 +131,7 @@ tap::motor::DjiMotor yawMotor(
 #elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION)
     false,
 #else
-    #error "did not define standard!"
+#error "did not define standard!"
 #endif
     "Yaw Turret");
 StandardTurretSubsystem turret(
@@ -421,7 +421,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    false);
+    true);
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
