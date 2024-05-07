@@ -20,8 +20,9 @@
 #ifndef TURRET_CONSTANTS_HPP_
 #define TURRET_CONSTANTS_HPP_
 
-#include "aruwsrc/util_macros.hpp"
 #include <stdint.h>
+
+#include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
@@ -35,7 +36,7 @@ static constexpr uint8_t NUM_TURRETS = 1;
 static constexpr float TURRET_CG_X = 0.0f;
 static constexpr float TURRET_CG_Z = 0.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
-}
+}  // namespace aruwsrc::control::turret
 #elif defined(TARGET_HERO_CYCLONE)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
