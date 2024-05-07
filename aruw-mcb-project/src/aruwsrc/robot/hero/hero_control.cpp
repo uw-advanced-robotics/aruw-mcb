@@ -278,11 +278,14 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     worldFramePitchTurretImuVelPidCv);
 
 // turret commands
+// @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for
+// this
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    &chassisFrameYawTurretController,
+    &chassisFrameYawTurretController,  // @todo: wrong controller; breaks hero if turretMCB
+                                       // disconnects
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
@@ -433,10 +436,7 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zShiftNotPressed(
-    drivers(),
-    {&turretUTurnCommand},
-    RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
+PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
@@ -456,13 +456,13 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping xNotShiftPressed(
+PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rNotShiftPressed(
+    RemoteMapState({Remote::Key::X}));
+CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
-    RemoteMapState({Remote::Key::R}, {Remote::Key::SHIFT}),
+    RemoteMapState({Remote::Key::R}),
     true,
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
@@ -533,11 +533,11 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&zShiftNotPressed);
+    drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&xNotShiftPressed);
-    drivers->commandMapper.addMap(&rNotShiftPressed);
+    drivers->commandMapper.addMap(&xPressed);
+    drivers->commandMapper.addMap(&rPressed);
 }
 }  // namespace hero_control
 
