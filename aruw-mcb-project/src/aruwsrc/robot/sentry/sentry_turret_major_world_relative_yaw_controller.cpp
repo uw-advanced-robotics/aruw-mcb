@@ -104,7 +104,7 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
     turretMotor.setMotorOutput(
         velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
         feedforwardGain * turretMotor.getMotorOutput());
-    // turretMotor.setMotorOutput(velocityPidOutput);  // @todo: final maxOutput for this controller
+    // @todo: it would be nice to have a final maxOutput for this controller
 }
 
 // @todo what's the point of this; overridden by runController anyways?

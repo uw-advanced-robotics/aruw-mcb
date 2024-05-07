@@ -86,7 +86,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
-// tap::motor::DoubleDjiMotor turretMajorYawMotor(
 aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     drivers(),
     &drivers()->chassisMcbLite,

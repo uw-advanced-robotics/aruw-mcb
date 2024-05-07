@@ -24,6 +24,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 #include "turret_gravity_compensation.hpp"
+
 namespace aruwsrc::control::turret::algorithms
 {
 /**
@@ -291,17 +292,11 @@ WorldFramePitchTurretImuCascadePidTurretController::
         TurretMotor &turretMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid)
-    // float turret_cg_x,
-    // float turret_cg_z,
-    // float gravity_compensation_scalar)
     : TurretPitchControllerInterface(turretMotor),
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0)
-//       turret_cg_x(turret_cg_x),
-//       turret_cg_z(turret_cg_z),
-//       gravity_compensation_scalar(gravity_compensation_scalar)
 {
 }
 
