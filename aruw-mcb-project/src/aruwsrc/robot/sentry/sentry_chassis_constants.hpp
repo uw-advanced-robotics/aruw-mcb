@@ -47,10 +47,12 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
  * module velocities given a [x, y, r] chassis velocity vector
  */
 
+// clang-format off
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     0.5,     0.0,      0.5,      0.5,      
     0.0,      0.5,     0.0,       0.25,    
     1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
+// clang-format on
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
