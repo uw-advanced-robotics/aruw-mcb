@@ -97,7 +97,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #endif
 
 #if defined(TARGET_STANDARD_ORION)
-static constexpr float TURRET_CG_X = 35.76;  // Actual CAD value is 55.76, decreased for balls in hopper
+// Actual CAD value is 55.76, decreased for balls in hopper
+static constexpr float TURRET_CG_X = 35.76;
 static constexpr float TURRET_CG_Z = 52.25;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -11'500;
 #elif defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_SPIDER)
