@@ -238,6 +238,26 @@ before_script:
   variables:
     ROBOT: STANDARD_ELSA
 
+# Standard (Orion) build
+
+"Standard (Orion): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_ORION
+
+"Standard (Orion): Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: STANDARD_ORION
+
+"Standard (Orion): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_ORION
+
 # Drone build
 
 "Drone: MCB Build":
