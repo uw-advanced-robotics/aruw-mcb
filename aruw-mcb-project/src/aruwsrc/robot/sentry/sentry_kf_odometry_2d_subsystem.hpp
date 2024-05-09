@@ -80,6 +80,8 @@ public:
     void overrideOdometryPosition(const modm::Vector2f &newPos);
 
     void overrideOdometryOrientation(const float deltaYaw);
+
+    
 };
 
 }  // namespace aruwsrc::sentry

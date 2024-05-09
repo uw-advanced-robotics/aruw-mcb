@@ -95,6 +95,10 @@ protected:
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
 private:
+
+    float parallelWheelVelocity = 0;
+    float perpendicularWheelVelocity = 0;
+
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =

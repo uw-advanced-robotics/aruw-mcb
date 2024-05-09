@@ -416,6 +416,8 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     &currentSensor,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
+    &leftOmni,
+    &rightOmni,
     HALF_SWERVE_FORWARD_MATRIX);
 
 SentryKFOdometry2DSubsystem chassisOdometry(

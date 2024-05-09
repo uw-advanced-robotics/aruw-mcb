@@ -17,7 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "half_swerve_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
@@ -25,14 +24,18 @@ using namespace tap::algorithms;
 using namespace aruwsrc::chassis;
 
 HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
-        tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        Module* moduleOne,
-        Module* moduleTwo,
-        const float forwardMatrixArray[24])
-        : HolonomicChassisSubsystem(drivers, currentSensor),
-          modules{moduleOne, moduleTwo},
-          forwardMatrix(forwardMatrixArray)
+    tap::Drivers* drivers,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    Module* moduleOne,
+    Module* moduleTwo,
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
+    const float forwardMatrixArray[24])
+    : HolonomicChassisSubsystem(drivers, currentSensor),
+      modules{moduleOne, moduleTwo},
+      parallelEncoder(parallelEncoder),
+      perpendiculoluarEncoder(perpendiculoluarEncoder),
+      forwardMatrix(forwardMatrixArray)
 {
 }
 
@@ -96,7 +99,6 @@ void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r,
     }
 }
 
-
 void HalfSwerveChassisSubsystem::refresh()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++)
@@ -125,24 +127,28 @@ void HalfSwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, 4, 1> actualModuleVectors;
+    modm::Matrix<float, 6, 1> actualModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
         actualModuleVectors[2 * i][0] = moduleVel[0][0];
         actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
+    actualModuleVectors[4][0] = getParallelMotorVelocity();
+    actualModuleVectors[5][0] = getPerpendicularMotorVelocity();
     return forwardMatrix * actualModuleVectors;
 }
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
-    modm::Matrix<float, 4, 1> desiredModuleVectors;
+    modm::Matrix<float, 6, 1> desiredModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
         desiredModuleVectors[2 * i][0] = moduleVel[0][0];
         desiredModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
+    desiredModuleVectors[4][0] = 0;
+    desiredModuleVectors[5][0] = 0;
     return forwardMatrix * desiredModuleVectors;
 }

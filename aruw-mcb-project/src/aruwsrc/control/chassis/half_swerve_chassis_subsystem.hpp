@@ -1,29 +1,30 @@
 /*
-* Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
-*
-* This file is part of aruw-mcb.
-*
-* aruw-mcb is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* aruw-mcb is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 #define HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/control/subsystem.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/control/subsystem.hpp"
+
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
-
 #include "swerve_module.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -39,13 +40,15 @@ namespace aruwsrc::chassis
 
 class HalfSwerveChassisSubsystem : public HolonomicChassisSubsystem
 {
-public: 
+public:
     HalfSwerveChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         Module* moduleOne,
         Module* moduleTwo,
-        const float forwardMatrixArray[12]);
+        aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
+        aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
+        const float forwardMatrixArray[24]);
 
     void initialize() override;
 
@@ -62,6 +65,11 @@ public:
     void setZeroRPM() override;
 
     void refreshSafeDisconnect() override { setZeroRPM(); }
+
+    // TODO - new one has 0.096 diameter
+    inline float getParallelMotorVelocity() const { return  parallelEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;}
+    inline float getPerpendicularMotorVelocity() const { return perpendiculoluarEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;}
+
 
     Module* getModule(unsigned int i);
 
@@ -91,6 +99,7 @@ private:
 private:
     const unsigned int NUM_MODULES{2};
     std::array<Module*, 2> modules;
+    
 #endif
 
     /**
@@ -98,7 +107,10 @@ private:
      */
     modm::Matrix<float, 2, 1> desiredModuleSpeeds;
 
-    const modm::Matrix<float, 3, 4> forwardMatrix;
+    const modm::Matrix<float, 3, 6> forwardMatrix;
+
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it
@@ -108,5 +120,5 @@ private:
 
 };  // class HalfSwerveChassisSubsystem
 
-}  // aruwsrc::chassis
+}  // namespace aruwsrc::chassis
 #endif  // HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_

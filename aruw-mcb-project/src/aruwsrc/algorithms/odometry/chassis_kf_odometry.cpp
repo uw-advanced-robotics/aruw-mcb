@@ -85,6 +85,9 @@ void ChassisKFOdometry::update()
 
 void ChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 {
+
+    // parallelWheelVelocity
+
     const auto& x = kf.getStateVectorAsMatrix();
 
     // update odometry velocity and orientation
