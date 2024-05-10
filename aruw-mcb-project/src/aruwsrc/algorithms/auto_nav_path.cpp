@@ -20,6 +20,11 @@ void AutoNavPath::popPoint() {
     setpointData.pop_front();
 }
 
+void AutoNavPath::resetPath() {
+    setpointData.clear();
+    oldSetpoint = currentSetpoint;
+}
+
 Position AutoNavPath::getSetPoint() const {
     return currentSetpoint;
 }
@@ -41,7 +46,6 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
 }
 
 Position AutoNavPath::findClosestPoint(Position current) {
-    printf("entered findClosestPoint\n");
     float minDistance = F32_MAX;
     size_t closestIndex = 0;
     Position minClosest = Position(0,0,0);
@@ -49,28 +53,27 @@ Position AutoNavPath::findClosestPoint(Position current) {
         Position p1 = setpointData[i];
         Position p2 = setpointData[i+1];
         Position closest = getClosestOnSegment(current, p1, p2);
-        printf("passed getClosestOnSegment\n");
-        if (getDistance(current, closest) < minDistance) {
-            minDistance = getDistance(current, closest);
+        float distance = getDistance(current, closest);
+        if (distance < minDistance) {
+            minDistance = distance;
             minClosest = closest;
             closestIndex = i;
-            nextPathPoint = p2;
         }
     }
 
     // remove points behind where we currently are
-    for (size_t i = 0; i < closestIndex - 1; i++) {
+    for (size_t i = 0; i < closestIndex; i++) {
         popPoint();
     }
     return minClosest;
 }
 
 Position AutoNavPath::setInterpolatedPoint(Position current) {
-    printf("entered setInterpolatedPoint\n");
+    if (setpointData.empty()) {
+        return current;
+    }
     Position closest = findClosestPoint(current);
-    printf("passed findClosestPoint\n");
     float offset = getDistance(setpointData[0], closest);
-    printf("passed getDistance\n");
     float offsetDistance = offset + interpolationDistance;
     size_t i = (size_t)offsetDistance; // floor of distance from first path point
 
@@ -85,7 +88,6 @@ Position AutoNavPath::setInterpolatedPoint(Position current) {
     float interpolatedX = p1.x() + ratio * (p2.x() - p1.x());
     float interpolatedY = p1.y() + ratio * (p2.y() - p1.y());
 
-    oldSetpoint = currentSetpoint;
     currentSetpoint = Position(interpolatedX, interpolatedY, 0);
 
     return currentSetpoint;
