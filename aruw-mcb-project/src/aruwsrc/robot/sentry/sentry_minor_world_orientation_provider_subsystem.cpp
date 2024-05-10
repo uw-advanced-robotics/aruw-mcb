@@ -22,9 +22,21 @@
 namespace aruwsrc::control::turret
 {
 
+SentryMinorWorldOrientationProviderSubsystem::SentryMinorWorldOrientationProviderSubsystem(
+    TurretMotor& turretMotor,
+    const aruwsrc::can::TurretMCBCanComm& turretMCB,
+    const tap::algorithms::SmoothPidConfig& driftPidConfig,
+    tap::Drivers* drivers)
+    : Subsystem(drivers),
+      turretMotor(turretMotor),
+      turretMCB(turretMCB),
+      driftPid(driftPidConfig)
+{
+}
+
 void SentryMinorWorldOrientationProviderSubsystem::refresh()
 {
-    //
+    lastEncoderYaw = turretMotor.getAngleFromCenter();
 }
 
 }  // namespace aruwsrc::control::turret

@@ -19,6 +19,7 @@
 #ifndef SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
 #define SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
@@ -31,8 +32,9 @@ class SentryMinorWorldOrientationProviderSubsystem : public tap::control::Subsys
 {
 public:
     SentryMinorWorldOrientationProviderSubsystem(
-        TurretMotor turretMotor,
+        TurretMotor& turretMotor,
         const aruwsrc::can::TurretMCBCanComm& turretMCB,
+        const tap::algorithms::SmoothPidConfig& driftPidConfig,
         tap::Drivers* drivers);
 
     void initialize() override;
@@ -41,7 +43,7 @@ public:
 
     float getYaw() const;
 
-    float getYawVel() const;
+    inline float getYawVel() const { return turretMCB.getYawVelocity(); };
 
     inline float getPitch() const { return turretMCB.getPitch(); }
 
@@ -51,7 +53,7 @@ public:
 
     inline float getRollVel() const { return 0.0; }
 
-    inline void refreshSafeDisconnect() override{};
+    inline void refreshSafeDisconnect() override {};
 
     const char* getName() const override
     {
@@ -61,6 +63,12 @@ public:
 private:
     TurretMotor turretMotor;
     const aruwsrc::can::TurretMCBCanComm& turretMCB;
+
+    tap::algorithms::SmoothPid driftPid;
+
+    // "encoder yaw" refers to the yaw computed using the turret major imu and turret minor yaw
+    // encoder
+    float lastIMUYaw{0}, lastEncoderYaw{0};
 
 };  // class SentryMinorWorldOrientationProviderSubsystem
 
