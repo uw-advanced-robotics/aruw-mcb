@@ -89,11 +89,11 @@ public:
     // TODO - new one has 0.096 diameter
     inline float getParallelMotorVelocity() const
     {
-        return parallelEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;
+        return parallelEncoder->getShaftRPM() / 60 * M_TWOPI * 0.050;
     }
     inline float getPerpendicularMotorVelocity() const
     {
-        return perpendiculoluarEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;
+        return perpendiculoluarEncoder->getShaftRPM() / 60 * M_TWOPI * 0.050;
     }
 
     Module* getModule(unsigned int i);
@@ -139,9 +139,7 @@ private:
 
     const modm::Matrix<float, 3, 6> forwardMatrix;
 
-    
-
-    /**
+        /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it
      *   for the delegated kinematics calculation, as well as limits the maximum wheel speed
      */
