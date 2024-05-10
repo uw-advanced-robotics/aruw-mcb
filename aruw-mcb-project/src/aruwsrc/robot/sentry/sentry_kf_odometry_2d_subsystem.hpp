@@ -69,7 +69,7 @@ public:
      */
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        const tap::control::chassis::ChassisSubsystemInterface &chassis,
+        tap::control::chassis::ChassisSubsystemInterface &chassis,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,

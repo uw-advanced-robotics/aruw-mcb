@@ -50,6 +50,26 @@ public:
         aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
         const float forwardMatrixArray[24]);
 
+    class ModuleVels
+    {
+    public:
+        ModuleVels() : x1(0), y1(0), x2(0), y2(0), o1(0), o2(0) {}
+        float x1;
+        float y1;
+        float x2;
+        float y2;
+        float o1;
+        float o2;
+        void inline setX1(float x) { x1 = x; }
+        void inline setY1(float y) { y1 = y; }
+        void inline setO1(float o) { o1 = o; }
+        void inline setX2(float x) { x2 = x; }
+        void inline setY2(float y) { y2 = y; }
+        void inline setO2(float o) { o2 = o; }
+    };
+
+    ModuleVels moduleVels;
+
     void initialize() override;
 
     void setDesiredOutput(float x, float y, float r) override;
@@ -67,9 +87,14 @@ public:
     void refreshSafeDisconnect() override { setZeroRPM(); }
 
     // TODO - new one has 0.096 diameter
-    inline float getParallelMotorVelocity() const { return  parallelEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;}
-    inline float getPerpendicularMotorVelocity() const { return perpendiculoluarEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;}
-
+    inline float getParallelMotorVelocity() const
+    {
+        return parallelEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;
+    }
+    inline float getPerpendicularMotorVelocity() const
+    {
+        return perpendiculoluarEncoder->getShaftRPM() / 60 * M_2_PI * 0.050;
+    }
 
     Module* getModule(unsigned int i);
 
@@ -86,6 +111,8 @@ public:
 
     modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
+    void setObservableState() override;
+
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
     const char* getName() const override { return "half swerve chassis subsystem"; }
@@ -99,7 +126,7 @@ private:
 private:
     const unsigned int NUM_MODULES{2};
     std::array<Module*, 2> modules;
-    
+
 #endif
 
     /**
@@ -107,10 +134,12 @@ private:
      */
     modm::Matrix<float, 2, 1> desiredModuleSpeeds;
 
-    const modm::Matrix<float, 3, 6> forwardMatrix;
-
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;
+
+    const modm::Matrix<float, 3, 6> forwardMatrix;
+
+    
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it

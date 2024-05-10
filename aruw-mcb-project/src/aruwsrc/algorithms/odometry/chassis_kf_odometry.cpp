@@ -24,7 +24,7 @@
 namespace aruwsrc::algorithms::odometry
 {
 ChassisKFOdometry::ChassisKFOdometry(
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+    tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
@@ -53,6 +53,8 @@ void ChassisKFOdometry::update()
         chassisYaw = 0;
         return;
     }
+
+    chassisSubsystem.setObservableState();
 
     // get chassis frame velocity as measured by the motor encoders
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();

@@ -50,7 +50,7 @@ public:
      * @param initPos Initial position of chassis when robot boots
      */
     ChassisKFOdometry(
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos);
@@ -160,7 +160,7 @@ private:
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+    tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 

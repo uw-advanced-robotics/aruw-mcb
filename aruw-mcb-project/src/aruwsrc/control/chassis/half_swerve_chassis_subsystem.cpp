@@ -136,7 +136,27 @@ modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRe
     }
     actualModuleVectors[4][0] = getParallelMotorVelocity();
     actualModuleVectors[5][0] = getPerpendicularMotorVelocity();
+
     return forwardMatrix * actualModuleVectors;
+}
+
+void HalfSwerveChassisSubsystem::setObservableState()
+{
+    modm::Matrix<float, 6, 1> actualModuleVectors;
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+    {
+        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
+        actualModuleVectors[2 * i][0] = moduleVel[0][0];
+        actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
+    }
+    actualModuleVectors[4][0] = getParallelMotorVelocity();
+    actualModuleVectors[5][0] = getPerpendicularMotorVelocity();
+    moduleVels.setX1(actualModuleVectors[0][0]);
+    moduleVels.setY1(actualModuleVectors[1][0]);
+    moduleVels.setO1(actualModuleVectors[4][0]);
+    moduleVels.setX2(actualModuleVectors[2][0]);
+    moduleVels.setY2(actualModuleVectors[3][0]);
+    moduleVels.setO2(actualModuleVectors[5][0]);
 }
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
