@@ -32,6 +32,8 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
+using namespace tap::algorithms;
+
 namespace aruwsrc::control::imu
 {
 /**
