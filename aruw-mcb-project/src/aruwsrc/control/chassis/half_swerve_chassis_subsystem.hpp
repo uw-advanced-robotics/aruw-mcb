@@ -43,6 +43,7 @@ public:
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         Module* moduleOne,
         Module* moduleTwo,
+        const float wheelbaseRadius,
         const float forwardMatrixArray[12]);
 
     void initialize() override;
@@ -95,6 +96,8 @@ private:
      * Stores the desired wheel rpm of each of the modules in a matrix, indexed by ModuleIndex
      */
     modm::Matrix<float, 2, 1> desiredModuleSpeeds;
+
+    const float wheelbaseRadius;
 
     const modm::Matrix<float, 3, 4> forwardMatrix;
 
