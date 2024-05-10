@@ -642,12 +642,8 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }
 }  // namespace aruwsrc::sentry
 
-
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
-{
-    return &sentry_control::imuCalibrateCommand;
-}
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
 #endif
 
 #endif
