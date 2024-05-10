@@ -115,10 +115,10 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 void SwerveModule::refresh()
 {
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    driveMotor.setDesiredOutput(drivePid.getOutput());
+    driveMotor.setDesiredOutput(drivePid.getOutput() * powerLimitFrac);
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+    azimuthMotor.setDesiredOutput(azimuthPid.getOutput() * powerLimitFrac);
 }
 
 float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
@@ -140,12 +140,11 @@ float SwerveModule::getAngularVelocity() const
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor.setDesiredOutput(
-        driveMotor.getOutputDesired() * frac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(
-        azimuthMotor.getOutputDesired() * frac *
-        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    powerLimitFrac = frac;
+    // driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);  // *
+    // angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle())));
+    // azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);  // *
+    // (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
 }  // namespace chassis
