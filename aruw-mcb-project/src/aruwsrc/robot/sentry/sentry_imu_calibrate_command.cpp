@@ -41,7 +41,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem &chassis,
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
-    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite,
+    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite,  // @todo: debug weird iterator
+    // issue with vector
     aruwsrc::virtualMCB::MCBLite &majorMCBLite,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite
 

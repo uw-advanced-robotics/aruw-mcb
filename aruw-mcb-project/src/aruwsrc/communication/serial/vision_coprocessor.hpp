@@ -64,7 +64,8 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER) || \
+    defined(TARGET_STANDARD_ORION)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -73,7 +74,8 @@ public:
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
 #elif defined(TARGET_SENTRY_HYDRA)
     // MCB is on a diagonal
-    static constexpr float MCB_ROTATION_OFFSET = -3.0f * M_PI_4;
+    // @todo: ensure this is correct
+    static constexpr float MCB_ROTATION_OFFSET = 0;
 #else
     // MCB has power inlet facing backwards
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;

@@ -27,7 +27,7 @@
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.23;
+static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.230;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
@@ -38,14 +38,10 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
 /**
  * Calculated by solving for the pseudo-inverse of the following kinematics matrix
  *
- * 1, 0, -LF_Y
- * 0, 1,  LF_X
  * 1, 0, -RF_Y
  * 0, 1,  RF_X
  * 1, 0, -LB_Y
  * 0, 1,  LB_X
- * 1, 0, -RB_Y
- * 0, 1,  RB_X
  *
  * The above matrix gives the successive x, y components of the LF, RF, LB, and RB
  * module velocities given a [x, y, r] chassis velocity vector
@@ -69,40 +65,22 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
 };
 
 // todo: hopefullly these can live as constants here soon :)
-aruwsrc::chassis::SwerveModuleConfig leftFrontSwerveConfig = {
-    // .azimuthZeroOffset = 7888,
-    .azimuthZeroOffset = 3753,
-    .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
-    .driveMotorInverted = true,
-};
-
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     // .azimuthZeroOffset = 4452,
-    .azimuthZeroOffset = 4410,
+    .azimuthZeroOffset = 7474 - (3 * DjiMotor::ENC_RESOLUTION / 8),
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     // .driveMotorInverted = false,
-    .driveMotorInverted = true,
+    .driveMotorInverted = false,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,
-    .azimuthZeroOffset = 348,
+    .azimuthZeroOffset = 3419 - (3 * DjiMotor::ENC_RESOLUTION / 8),
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     // .driveMotorInverted = false,
-    .driveMotorInverted = true,
-};
-
-aruwsrc::chassis::SwerveModuleConfig rightBackSwerveConfig = {
-    // .azimuthZeroOffset = 7878,
-    .azimuthZeroOffset = 3679,
-    .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
-    .driveMotorInverted = true,
+    .driveMotorInverted = false,
 };
 
 }  // namespace aruwsrc::sentry::chassis

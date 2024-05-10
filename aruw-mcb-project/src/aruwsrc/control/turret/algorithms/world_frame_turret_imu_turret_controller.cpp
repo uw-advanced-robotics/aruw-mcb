@@ -21,6 +21,7 @@
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 #include "turret_gravity_compensation.hpp"
 

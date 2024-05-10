@@ -32,8 +32,8 @@ namespace aruwsrc::robot::sentry::launcher
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
 // @todo this is not the greatest
-static constexpr tap::motor::MotorId LEFT_MOTOR_ID_TURRETLEFT = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId RIGHT_MOTOR_ID_TURRETLEFT = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID_TURRETLEFT = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID_TURRETLEFT = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID_TURRETRIGHT = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID_TURRETRIGHT = tap::motor::MOTOR1;
 

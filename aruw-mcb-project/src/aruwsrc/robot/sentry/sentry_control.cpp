@@ -23,6 +23,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
@@ -34,6 +35,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
+#include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
@@ -132,7 +134,6 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 
 namespace sentry_control
 {
-// tap::motor::DoubleDjiMotor turretMajorYawMotor(
 aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     drivers(),
     &drivers()->chassisMcbLite,
@@ -231,29 +232,19 @@ struct TurretMinorChassisControllers
 TurretMinorChassisControllers turretLeftChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretLeft.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
-
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
     .yawController = ChassisFrameYawTurretController(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
-
 };
 
 TurretMinorChassisControllers turretRightChassisControllers{
     .pitchController = ChassisFramePitchTurretController(
         turretRight.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
-
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
     .yawController = ChassisFrameYawTurretController(
         turretRight.yawMotor,
-        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME)
-
+        minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
 struct TurretMinorWorldControllers
@@ -277,10 +268,7 @@ TurretMinorWorldControllers turretRightWorldControllers{
         drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        turretRightWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         drivers()->turretMCBCanCommBus1,
@@ -295,10 +283,7 @@ TurretMinorWorldControllers turretLeftWorldControllers{
         drivers()->turretMCBCanCommBus2,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid,
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR),
+        turretLeftWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         drivers()->turretMCBCanCommBus2,
@@ -356,7 +341,7 @@ VirtualDjiMotor rightOmni(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     false,
-"Left Omni Dead Wheel");
+    "Left Omni Dead Wheel");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
 aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
@@ -551,49 +536,8 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     chassisOdometry,
-    // {&drivers()->turretMajorMcbLite, &drivers()->chassisMcbLite});
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
-
-aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    leftFrictionWheels,
-    turretLeft::default_launch_speed,
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretLeft.getTurretID());
-
-SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
-    turretLeft,
-    turretLeftWorldControllers.yawController,
-    turretLeftWorldControllers.pitchController,
-    turretLeftSolver);
-
-aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    rightFrictionWheels,
-    turretRight::default_launch_speed,
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretRight.getTurretID());
-
-SentryTurretCVCommand::TurretConfig turretRightCVConfig(
-    turretRight,
-    turretRightWorldControllers.yawController,
-    turretRightWorldControllers.pitchController,
-    turretLeftSolver);
-
-SentryTurretCVCommand turretCVCommand(
-    drivers()->visionCoprocessor,
-    turretMajor,
-    turretMajorWorldYawController,
-    turretLeftCVConfig,
-    turretRightCVConfig,
-    transformer);
 
 // LEFT shooting ======================
 
@@ -685,10 +629,10 @@ HoldCommandMapping leftDownRightDown(
     {&beybladeCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftUpRightUp(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+// HoldCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&turretCVCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -698,15 +642,19 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    leftFrictionWheels.initialize();
-    rightFrictionWheels.initialize();
-    leftAgitator.initialize();
-    rightAgitator.initialize();
+    // leftFrictionWheels.initialize();
+    // rightFrictionWheels.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
     rightOmni.initialize();
     leftOmni.initialize();
+    // turret
+    // frictionWheelsTurretLeft.initialize();
+    // frictionWheelsTurretRight.initialize();
+
+    turretLeftAgitator.initialize();
+    turretRightAgitator.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -722,11 +670,12 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&rightAgitator);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
-    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
-    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
 
+    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
+    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
+
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
@@ -738,8 +687,8 @@ void setDefaultSentryCommands(Drivers *)
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
 
-    frictionWheelsTurretLeft.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
-    frictionWheelsTurretRight.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+    // frictionWheelsTurretLeft.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
+    // frictionWheelsTurretRight.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -756,7 +705,14 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-    drivers->commandMapper.addMap(&leftUpRightUp);  // cv
+    // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
+    // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
+    // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
+    // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
+    // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
+
+    // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
+    // drivers->commandMapper.addMap(&shoot);          // Shoot
 }
 }  // namespace sentry_control
 
