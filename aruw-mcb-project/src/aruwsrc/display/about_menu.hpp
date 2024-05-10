@@ -52,8 +52,12 @@ public:
     static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_HYDRA";
 #elif defined(TARGET_HERO_CYCLONE)
     static constexpr char ROBOT_NAME[] = "TARGET_HERO_CYCLONE";
+#elif defined(TARGET_STANDARD_SPIDER)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_SPIDER";
+#elif defined(TARGET_STANDARD_ORION)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ORION";
 #else
-    static constexpr char ROBOT_NAME[] = "UNKNOWN";
+    static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
 #endif
 
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
