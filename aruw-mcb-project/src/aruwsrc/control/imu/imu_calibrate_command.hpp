@@ -22,8 +22,10 @@
 
 #include <vector>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
