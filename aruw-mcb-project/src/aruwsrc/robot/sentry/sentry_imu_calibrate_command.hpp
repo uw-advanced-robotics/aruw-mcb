@@ -116,7 +116,10 @@ public:
         chassis::HolonomicChassisSubsystem &chassis,
         aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
         aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
-        const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite);
+        // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite
+
+        aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+        aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -179,8 +182,10 @@ private:
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver;
 
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface;
+    aruwsrc::virtualMCB::MCBLite &majorMCBLite;
+    aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
 
-    const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
+    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
 }  // namespace aruwsrc::control::imu
 

@@ -23,15 +23,19 @@
 namespace aruwsrc::sentry
 {
 SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
-    tap::communication::sensors::imu::ImuInterface& imu)
-    : imu(imu)
+    tap::communication::sensors::imu::ImuInterface& imu,
+    const aruwsrc::control::turret::YawTurretSubsystem& turretMajor)
+    : imu(imu),
+      turretMajor(turretMajor)
 {
 }
 
 bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
-    *output = modm::Angle::normalize(imu.getYaw() + offset);
+    float turretMajorChassisYawRadians = turretMajor.getReadOnlyMotor().getAngleFromCenter();
+    *output = modm::Angle::normalize(
+        modm::toRadian(imu.getYaw()) + offset - turretMajorChassisYawRadians);
     return true;
 }
 
