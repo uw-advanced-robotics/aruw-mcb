@@ -331,7 +331,7 @@ VirtualDjiMotor leftOmni(
     MOTOR1,
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
-    false,
+    true,
     "Right Omni Dead Wheel");
 
 // This is the one sticking out towards the frame

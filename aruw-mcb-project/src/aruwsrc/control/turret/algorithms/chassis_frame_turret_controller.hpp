@@ -102,10 +102,7 @@ public:
      */
     ChassisFramePitchTurretController(
         TurretMotor &pitchMotor,
-        const tap::algorithms::SmoothPidConfig &pidConfig,
-        float turret_cg_x,
-        float turret_cg_z,
-        float gravity_compensation_scalar);
+        const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
 
@@ -142,9 +139,6 @@ public:
 
 private:
     tap::algorithms::SmoothPid pid;
-    float turret_cg_x;
-    float turret_cg_z;
-    float gravity_compensation_scalar;
 };
 
 }  // namespace aruwsrc::control::turret::algorithms
