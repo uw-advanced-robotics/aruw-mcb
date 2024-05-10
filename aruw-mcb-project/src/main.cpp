@@ -102,20 +102,21 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
         }
@@ -136,7 +137,7 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
     ((Drivers *)drivers)->oledDisplay.initialize();
@@ -144,7 +145,7 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
@@ -169,7 +170,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
-#ifdef TARGET_SENTRY_BEEHIVE
+#ifdef TARGET_SENTRY_HYDRA
     ((Drivers *)drivers)->chassisMcbLite.updateSerial();
     ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
     ((Drivers *)drivers)->oledDisplay.updateDisplay();

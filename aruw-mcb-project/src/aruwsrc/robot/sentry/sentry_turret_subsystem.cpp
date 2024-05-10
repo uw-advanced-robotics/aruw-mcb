@@ -61,7 +61,7 @@ uint32_t SentryTurretSubsystem::getLastMeasurementTimeMicros() const
 
 modm::Vector3f SentryTurretSubsystem::getTurretOffset() const
 {
-#ifdef TARGET_SENTRY_BEEHIVE
+#ifdef TARGET_SENTRY_HYDRA
     if (turretID == 1)
     {
         return modm::Vector3f(0, 0, 0);
@@ -77,7 +77,7 @@ modm::Vector3f SentryTurretSubsystem::getTurretOffset() const
 
 float SentryTurretSubsystem::getPitchOffset() const
 {
-#ifdef TARGET_SENTRY_BEEHIVE
+#ifdef TARGET_SENTRY_HYDRA
     return control::turret::PITCH_YAW_OFFSET;
 #else
     return 0;

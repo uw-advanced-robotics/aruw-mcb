@@ -33,7 +33,7 @@
  * A helper macro that makes it easier to specify at compile time something that should be true for
  * all sentries.
  */
-#if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_HYDRA)
 #define ALL_SENTRIES
 #endif
 
