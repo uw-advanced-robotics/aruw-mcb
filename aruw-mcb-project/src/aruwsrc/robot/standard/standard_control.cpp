@@ -126,10 +126,12 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_STANDARD_ELSA
+#if defined(TARGET_STANDARD_ELSA)
     true,
-#else
+#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION)
     false,
+#else
+#error "did not define standard!"
 #endif
     "Yaw Turret");
 StandardTurretSubsystem turret(
@@ -428,45 +430,6 @@ HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// @todo: sort out all mappings in a different PR
-/// @brief sentry messages
-// PressCommandMapping cShiftPressed(
-//     drivers(),
-//     {&sendSentryNoMotionStrategy},
-//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
-// PressCommandMapping qShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToFriendlyBase},
-//     RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
-// PressCommandMapping eShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToEnemyBase},
-//     RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
-// PressCommandMapping rShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToSupplierZone},
-//     RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
-// PressCommandMapping fShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToEnemySupplierZone},
-//     RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
-// PressCommandMapping gShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToCenterPoint},
-//     RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
-// PressCommandMapping zShiftPressed(
-//     drivers(),
-//     {&sendSentryHoldFire},
-//     RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
-// PressCommandMapping xShiftPressed(
-//     drivers(),
-//     {&sendSentryToggleMovement},
-//     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
-// PressCommandMapping vShiftPressed(
-//     drivers(),
-//     {&sendSentryToggleBeyblade},
-//     RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
