@@ -58,7 +58,7 @@ public:
 
     void initialize();
 
-    constexpr static int UART_BAUDRATE = 500'000;
+    constexpr static int UART_BAUDRATE = 230'000;
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;

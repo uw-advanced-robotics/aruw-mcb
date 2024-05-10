@@ -60,6 +60,9 @@
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
 
+#include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+
 using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
@@ -454,6 +457,68 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
+// Left
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    leftFrictionWheels(
+        drivers(),
+        tap::motor::MOTOR2,
+        tap::motor::MOTOR1,
+        tap::can::CanBus::CAN_BUS2,
+        &drivers()->turretMCBCanCommBus2,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
+
+// Right
+aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    rightFrictionWheels(
+        drivers(),
+        tap::motor::MOTOR2,
+        tap::motor::MOTOR1,
+        tap::can::CanBus::CAN_BUS1,
+        &drivers()->turretMCBCanCommBus1,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
+aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
+    drivers()->visionCoprocessor,
+    transformAdapter,
+    leftFrictionWheels,
+    turretLeft::default_launch_speed,
+    transformer.getWorldToTurretMajor(),
+    turretMajor.getReadOnlyMotor(),
+    TURRET_MINOR_OFFSET,
+    turretLeft.getTurretID());
+
+SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
+    turretLeft,
+    turretLeftWorldControllers.yawController,
+    turretLeftWorldControllers.pitchController,
+    turretLeftSolver);
+
+aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
+    drivers()->visionCoprocessor,
+    transformAdapter,
+    rightFrictionWheels,
+    turretRight::default_launch_speed,
+    transformer.getWorldToTurretMajor(),
+    turretMajor.getReadOnlyMotor(),
+    TURRET_MINOR_OFFSET,
+    turretRight.getTurretID());
+
+SentryTurretCVCommand::TurretConfig turretRightCVConfig(
+    turretRight,
+    turretRightWorldControllers.yawController,
+    turretRightWorldControllers.pitchController,
+    turretLeftSolver);
+
+SentryTurretCVCommand turretCVCommand(
+    drivers()->visionCoprocessor,
+    turretMajor,
+    turretMajorWorldYawController,
+    turretLeftCVConfig,
+    turretRightCVConfig,
+    transformer);
+
 // LEFT shooting ======================
 
 // spin friction wheels commands
@@ -528,11 +593,11 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldRepeatCommandMapping leftUpRightUp(
-    drivers(),
-    {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-    true);
+// HoldRepeatCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+//     true);
 
 HoldCommandMapping shoot(
     drivers(),
@@ -544,10 +609,10 @@ HoldCommandMapping leftDownRightDown(
     {&beybladeCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
-// HoldCommandMapping leftUpRightUp(
-//     drivers(),
-//     {&turretCVCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+HoldCommandMapping leftUpRightUp(
+    drivers(),
+    {&turretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
