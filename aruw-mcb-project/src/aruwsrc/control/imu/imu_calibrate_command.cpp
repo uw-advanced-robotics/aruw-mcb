@@ -76,28 +76,6 @@ void ImuCalibrateCommand::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-static inline bool turretReachedCenterAndNotMoving(
-    turret::TurretSubsystem *turret,
-    bool ignorePitch)
-{
-    return compareFloatClose(
-               0.0f,
-               turret->yawMotor.getChassisFrameVelocity(),
-               ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(
-               0.0f,
-               turret->yawMotor.getAngleFromCenter(),
-               ImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
-           (ignorePitch || (compareFloatClose(
-                                0.0f,
-                                turret->pitchMotor.getChassisFrameVelocity(),
-                                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-                            compareFloatClose(
-                                0.0f,
-                                turret->pitchMotor.getAngleFromCenter(),
-                                ImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
-}
-
 void ImuCalibrateCommand::execute()
 {
     switch (calibrationState)

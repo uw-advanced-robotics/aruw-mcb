@@ -434,16 +434,16 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     {
         {
             &drivers()->turretMCBCanCommBus2,
-            turretLeft,
-            turretLeftChassisControllers.yawController,
-            turretLeftChassisControllers.pitchController,
+            &turretLeft,
+            &turretLeftChassisControllers.yawController,
+            &turretLeftChassisControllers.pitchController,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
-            turretRight,
-            turretRightChassisControllers.yawController,
-            turretRightChassisControllers.pitchController,
+            &turretRight,
+            &turretRightChassisControllers.yawController,
+            &turretRightChassisControllers.pitchController,
             true,
         },
     },
@@ -641,5 +641,9 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
+
+#ifndef PLATFORM_HOSTED
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
+#endif
 
 #endif
