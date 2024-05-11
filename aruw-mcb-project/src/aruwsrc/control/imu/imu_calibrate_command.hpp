@@ -24,6 +24,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -67,6 +68,8 @@ public:
         LOCKING_TURRET,
         /** While in this state, the command waits until calibration of the IMUs are complete. */
         CALIBRATING_IMU,
+        /** While in this state, turn on buzzer so people know we are done*/
+        BUZZING,
         /** While in this state, the command waits a small time after calibration is complete to
            handle any latency associated with sending messages to the TurretMCBCanComm. */
         WAITING_CALIBRATION_COMPLETE,
@@ -162,6 +165,8 @@ protected:
      * enough time to successfully calibrate.
      */
     tap::arch::MilliTimeout calibrationTimer;
+
+    tap::arch::MilliTimeout buzzerTimer;
 
     /**
      * Timeout used to determine if we should give up on calibration.
