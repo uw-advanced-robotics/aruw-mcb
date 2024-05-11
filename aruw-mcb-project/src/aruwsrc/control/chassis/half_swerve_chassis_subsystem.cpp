@@ -98,20 +98,23 @@ void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r,
         modules[i]->scaleAndSetDesiredState(scaleCoeff);
     }
 }
-
+// int wtf = 0, wtf2 = 0;
 void HalfSwerveChassisSubsystem::refresh()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i]->refresh();
     }
+    // wtf++;
+    limitChassisPower();
 }
-
+float powerLimitFrac;
 void HalfSwerveChassisSubsystem::limitChassisPower()
 {
     // use power limiting object to compute initial power limiting fraction
+    // wtf2++;
     currentSensor->update();
-    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // short circuit if power limiting doesn't need to be applied
     if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
