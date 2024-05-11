@@ -56,7 +56,7 @@ const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) cons
     }
     else
     {
-        return this->transforms.getWorldToTurretLeft();
+        return this->transforms.getWorldToTurretRight();
     }
 }
 
