@@ -78,9 +78,8 @@ public:
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    // @todo this should be swapped but there seems to be an issue with the turret mcb calibrate setting yaw to 180 degrees
-    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(-90.0f);
-    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call

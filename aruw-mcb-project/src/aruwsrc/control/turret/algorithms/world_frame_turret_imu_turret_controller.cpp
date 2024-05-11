@@ -132,11 +132,14 @@ static inline void updateWorldFrameSetpoint(
 
     // transform target angle from turret imu relative to chassis relative
     // to keep turret/command setpoints synchronized
-
-    turretMotor.setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
+    float chassisFrameSetpoint = transformWorldFrameValueToChassisFrame(
         chassisFrameMeasurement,
         worldFrameMeasurement,
-        worldFrameSetpoint));
+        worldFrameSetpoint);
+    
+    chassisFrameSetpoint = turretMotor.getReachableNonNormalizedSetpoint(chassisFrameSetpoint).value_or(chassisFrameMeasurement);
+
+    turretMotor.setChassisFrameSetpoint(chassisFrameSetpoint);
 
     if (turretMotor.getConfig().limitMotorAngles)
     {

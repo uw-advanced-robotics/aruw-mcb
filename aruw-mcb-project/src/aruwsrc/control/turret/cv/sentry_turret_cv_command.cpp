@@ -95,14 +95,26 @@ void SentryTurretCVCommand::computeAimSetpoints(
         solution.distance);
 }
 
+float debug_majorSetpoint;
+float debug_leftPitchSetpoint;
+float debug_rightPitchSetpoint;
+float debug_leftYawSetpoint;
+float debug_rightYawSetpoint;
+bool debug = false;
+
+float majorSetpoint;
+float leftYawSetpoint;
+float rightYawSetpoint;
+float leftPitchSetpoint;
+float rightPitchSetpoint;
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
-    float majorSetpoint = yawControllerMajor.getSetpoint();
-    float leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
-    float rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
-    float leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
-    float rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
+    majorSetpoint = yawControllerMajor.getSetpoint();
+    leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
+    rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
+    leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
+    rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
@@ -199,6 +211,19 @@ void SentryTurretCVCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
+    if (debug)
+    {
+    yawControllerMajor.runController(dt, debug_majorSetpoint);
+
+    turretLeftConfig.pitchController.runController(dt, debug_leftPitchSetpoint);
+    turretRightConfig.pitchController.runController(dt, debug_rightPitchSetpoint);
+
+    turretLeftConfig.yawController.runController(dt, debug_leftYawSetpoint);
+    turretRightConfig.yawController.runController(dt, debug_rightYawSetpoint);
+    }
+    else
+    {
+
     yawControllerMajor.runController(dt, majorSetpoint);
 
     turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
@@ -206,6 +231,7 @@ void SentryTurretCVCommand::execute()
 
     turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
     turretRightConfig.yawController.runController(dt, rightYawSetpoint);
+    }
 }
 
 bool SentryTurretCVCommand::isFinished() const

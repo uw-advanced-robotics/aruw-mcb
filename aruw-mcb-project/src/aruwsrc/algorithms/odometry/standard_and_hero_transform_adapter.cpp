@@ -47,9 +47,8 @@ const Transform& StandardAndHeroTransformAdapter::getWorldToChassis() const
 {
     return transforms.getWorldToChassis();
 }
-const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t turretID) const
+const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t) const
 {
-    turretID = turretID;  // for pipeline checks (unused params)
     return transforms.getWorldToTurret();
 };
 

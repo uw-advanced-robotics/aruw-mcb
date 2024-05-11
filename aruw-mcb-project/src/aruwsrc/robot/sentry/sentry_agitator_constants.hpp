@@ -45,6 +45,12 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+/// Max desired rate of fire for the agitator
+constexpr float MAX_AGITATOR_ROF = 20.0f;
+
+/// Number of projectiles in one agitator rotation
+constexpr float AGITATOR_NUM_POCKETS = 10.0f;
+
 namespace turretLeft
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
@@ -86,13 +92,13 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 }
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = M_TWOPI / 10.0f,
-    .desiredSetpoint = 2.0f * M_TWOPI,
+    .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS,
+    .desiredSetpoint = MAX_AGITATOR_ROF * M_TWOPI / AGITATOR_NUM_POCKETS,
     .integralSetpointTolerance = M_PI / 20.0f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = M_TWOPI / 10.0f,
+    .targetUnjamIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS,
     .unjamSetpoint = M_TWOPI / 2.0f,
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.

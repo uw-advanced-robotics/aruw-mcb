@@ -363,7 +363,7 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
 // Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheelsTurretLeft(
+    turretLeftFrictionWheels(
         drivers(),
         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETLEFT,
         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETLEFT,
@@ -373,7 +373,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheelsTurretRight(
+    turretRightFrictionWheels(
         drivers(),
         aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETRIGHT,
         aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETRIGHT,
@@ -437,16 +437,16 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     {
         {
             &drivers()->turretMCBCanCommBus2,
-            turretLeft,
-            turretLeftChassisControllers.yawController,
-            turretLeftChassisControllers.pitchController,
+            &turretLeft,
+            &turretLeftChassisControllers.yawController,
+            &turretLeftChassisControllers.pitchController,
             true,
         },
         {
             &drivers()->turretMCBCanCommBus1,
-            turretRight,
-            turretRightChassisControllers.yawController,
-            turretRightChassisControllers.pitchController,
+            &turretRight,
+            &turretRightChassisControllers.yawController,
+            &turretRightChassisControllers.pitchController,
             true,
         },
     },
@@ -525,7 +525,7 @@ SentryTurretCVCommand turretCVCommand(
 // spin friction wheels commands
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictionWheelSpinCommand(
     drivers(),
-    &frictionWheelsTurretLeft,
+    &turretLeftFrictionWheels,
     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
     false,
     turretLeft::barrelID);
@@ -533,7 +533,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictio
 aruwsrc::control::launcher::
     FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
         drivers(),
-        &frictionWheelsTurretLeft,
+        &turretLeftFrictionWheels,
         0.0f,
         true,
         turretLeft::barrelID);
@@ -552,7 +552,7 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
 // spin friction wheels commands
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFrictionWheelSpinCommand(
     drivers(),
-    &frictionWheelsTurretRight,
+    &turretRightFrictionWheels,
     aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
     false,
     turretRight::barrelID);
@@ -560,7 +560,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFricti
 aruwsrc::control::launcher::
     FrictionWheelSpinRefLimitedCommand stopTurretRightFrictionWheelSpinCommand(
         drivers(),
-        &frictionWheelsTurretRight,
+        &turretRightFrictionWheels,
         0.0f,
         true,
         turretRight::barrelID);
@@ -603,7 +603,7 @@ HoldCommandMapping leftMidRightMid(
 HoldCommandMapping shoot(
     drivers(),
     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 HoldCommandMapping leftDownRightDown(
     drivers(),
@@ -623,16 +623,14 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    // leftFrictionWheels.initialize();
-    // rightFrictionWheels.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
 
     rightOmni.initialize();
     leftOmni.initialize();
-    // turret
-    // frictionWheelsTurretLeft.initialize();
-    // frictionWheelsTurretRight.initialize();
+
+    turretLeftFrictionWheels.initialize();
+    turretRightFrictionWheels.initialize();
 
     turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
@@ -648,8 +646,8 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
 
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
+    drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
+    drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
@@ -664,8 +662,8 @@ void setDefaultSentryCommands(Drivers *)
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
 
-    // frictionWheelsTurretLeft.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
-    // frictionWheelsTurretRight.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+    turretLeftFrictionWheels.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
+    turretRightFrictionWheels.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -682,7 +680,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
+    drivers->commandMapper.addMap(&leftUpRightUp);  // cv
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
     // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
@@ -706,5 +704,9 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
+
+#ifndef PLATFORM_HOSTED
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand; }
+#endif
 
 #endif

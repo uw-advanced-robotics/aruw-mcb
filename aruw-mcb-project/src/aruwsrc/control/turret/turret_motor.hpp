@@ -28,6 +28,7 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "turret_motor_config.hpp"
+#include <optional>
 
 namespace aruwsrc::control::turret
 {
@@ -180,6 +181,12 @@ public:
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
     mockable float getValidMinError(const float setpoint, const float measurement) const;
+
+    /**
+     * Gets 
+     * @param[in] measurement Unwrapped (non-normalized) measurement in radians.
+    */
+    std::optional<float> getReachableNonNormalizedSetpoint(float setpoint);
 
     /**
      * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
