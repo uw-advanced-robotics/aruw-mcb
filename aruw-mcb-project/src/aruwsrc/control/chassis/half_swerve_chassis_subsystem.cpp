@@ -99,14 +99,14 @@ void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r,
 
 void HalfSwerveChassisSubsystem::refresh()
 {
+    updateChassisPowerLimitFrac();
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i]->refresh();
     }
-    limitChassisPower();
 }
 
-void HalfSwerveChassisSubsystem::limitChassisPower()
+void HalfSwerveChassisSubsystem::updateChassisPowerLimitFrac()
 {
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();

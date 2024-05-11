@@ -50,7 +50,7 @@ public:
 
     void setDesiredOutput(float x, float y, float r) override;
 
-    void limitChassisPower() override;
+    void updateChassisPowerLimitFrac() override;
 
     void refresh() override;
 
