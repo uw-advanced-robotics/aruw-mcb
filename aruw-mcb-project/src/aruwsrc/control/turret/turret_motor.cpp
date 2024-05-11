@@ -46,35 +46,32 @@ void TurretMotor::updateMotorAngle()
     if (isOnline())
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
-
-        if (config.limitMotorAngles)
-        {
-            startEncoderOffset = 0;
-        }
-
-        //need to make sure startEncoderOffset is right to make encoderUnwrapped and 
-        //start encoder value is in the same revolution
-
+        int64_t adjustedStartEncoderValue = 0;
         if (startEncoderOffset == INT16_MIN)
         {
-            int encoderDiff =
-                static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
+            // int encoderDiff =
+            //     static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
 
-            if (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
-            {
-                // encoder offset by 1 rev in negative direction
-                startEncoderOffset = -DjiMotor::ENC_RESOLUTION;
-            }
-            else if (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
-            {
-                // offset by 1 rev in positive direction
-                startEncoderOffset = DjiMotor::ENC_RESOLUTION;
-            }
-            else
-            {
-                // no offset necessary
-                startEncoderOffset = 0;
-            }
+            // if (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
+            // {
+            //     // encoder offset by 1 rev in negative direction
+            //     startEncoderOffset = -DjiMotor::ENC_RESOLUTION;
+            // }
+            // else if (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
+            // {
+            //     // offset by 1 rev in positive direction
+            //     startEncoderOffset = DjiMotor::ENC_RESOLUTION;
+            // }
+            // else
+            // {
+            //     // no offset necessary
+            //     startEncoderOffset = 0;
+            // }
+            // float startEncoderValueRad = DjiMotor::encoderToDegrees(config.startEncoderValue) *
+            // M_PI/180;
+            float adjustedStartAngleDegrees = unwrapTargetAngle(config.startAngle) * 180 / M_PI;
+            adjustedStartEncoderValue =
+                DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
         }
 
         if (lastUpdatedEncoderValue == encoderUnwrapped)
@@ -85,11 +82,9 @@ void TurretMotor::updateMotorAngle()
         lastUpdatedEncoderValue = encoderUnwrapped;
 
         chassisFrameUnwrappedMeasurement =
-            static_cast<float>(
-                encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
-                startEncoderOffset) *
+            static_cast<float>(encoderUnwrapped - static_cast<int64_t>(adjustedStartEncoderValue)) *
                 M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle; //returns angle
+            config.startAngle;
 
         chassisFrameMeasuredAngle.setWrappedValue(chassisFrameUnwrappedMeasurement);
     }
@@ -100,10 +95,10 @@ void TurretMotor::updateMotorAngle()
             return;
         }
 
-        lastUpdatedEncoderValue = config.startEncoderValue;  // why do we assume this....
+        lastUpdatedEncoderValue = config.startEncoderValue;
         startEncoderOffset = INT16_MIN;
 
-        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);  // and go with it
+        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
     }
 }
 
