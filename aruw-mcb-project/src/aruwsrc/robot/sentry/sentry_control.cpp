@@ -510,7 +510,7 @@ SentryTurretCVCommand::TurretConfig turretRightCVConfig(
     turretRight,
     turretRightWorldControllers.yawController,
     turretRightWorldControllers.pitchController,
-    turretLeftSolver);
+    turretRightSolver);
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,

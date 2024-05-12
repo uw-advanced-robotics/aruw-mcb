@@ -128,7 +128,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &lastComputedSolution->pitchAngle,
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,
-                worldToTurret.getPitch()))
+                0))
         {
             lastComputedSolution = std::nullopt;
         }
