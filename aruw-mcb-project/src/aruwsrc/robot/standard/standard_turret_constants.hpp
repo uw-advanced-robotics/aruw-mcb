@@ -58,7 +58,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startEncoderValue = 7500,
     .minAngle = modm::toRadian(60),
     .maxAngle = modm::toRadian(115),
-    .limitMotorAngles = true, //works without limiting because encoder gives it a negative value...
+    .limitMotorAngles =
+        true,  // works without limiting because encoder gives it a negative value...
 };
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {

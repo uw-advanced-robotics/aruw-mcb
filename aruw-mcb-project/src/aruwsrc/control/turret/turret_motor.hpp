@@ -278,6 +278,7 @@ private:
     float chassisFrameUnwrappedMeasurement;
 
     int64_t lastUpdatedEncoderValue;
+    int64_t adjustedStartEncoderValue;
 };
 }  // namespace aruwsrc::control::turret
 
