@@ -136,8 +136,6 @@ static inline void updateWorldFrameSetpoint(
         chassisFrameMeasurement,
         worldFrameMeasurement,
         worldFrameSetpoint);
-    
-    chassisFrameSetpoint = turretMotor.getReachableNonNormalizedSetpoint(chassisFrameSetpoint).value_or(chassisFrameMeasurement);
 
     turretMotor.setChassisFrameSetpoint(chassisFrameSetpoint);
 

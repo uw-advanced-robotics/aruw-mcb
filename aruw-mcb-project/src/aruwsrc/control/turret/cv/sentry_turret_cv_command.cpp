@@ -82,9 +82,9 @@ void SentryTurretCVCommand::computeAimSetpoints(
      * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
      * that is closest to the unwrapped measured angle.
      */
-    // *desiredYawSetpoint = config.turretSubsystem.yawMotor.unwrapTargetAngle(*desiredYawSetpoint);
-    // *desiredPitchSetpoint =
-    //     config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
+    *desiredYawSetpoint = config.turretSubsystem.yawMotor.unwrapTargetAngle(*desiredYawSetpoint);
+    *desiredPitchSetpoint =
+        config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
 
     auto differenceWrapped = [](float measurement, float setpoint)
     { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
@@ -153,6 +153,7 @@ void SentryTurretCVCommand::execute()
         WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
 
         // major averaging
+        // @todo use interpolate method
         WrappedFloat majorYawWrapped(leftYawWrapped.minDifference(rightYawWrapped), -M_PI, M_PI);
 
         majorYawWrapped = WrappedFloat(majorYawWrapped.getWrappedValue() / -2.0f, 0, M_TWOPI);
