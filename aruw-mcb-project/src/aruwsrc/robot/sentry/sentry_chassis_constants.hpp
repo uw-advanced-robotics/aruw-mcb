@@ -54,7 +54,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
 constexpr float HALF_SWERVE_FORWARD_MATRIX[18]{
     0.416667, 0.0     ,  0.291667,  0.0     , -0.176777, 0.235702, 
     0.0     , 0.291667,  0.0     ,  0.416667,  0.176777, 0.235702,    
-    1.53719 , 0.768594, -0.768594, -1.53719 ,  0.869565, 0.0     };
+    1.53719 , 0.768594, -0.768594, -1.53719 ,  1.08696 , 0.0};
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
