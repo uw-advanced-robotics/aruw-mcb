@@ -70,7 +70,7 @@ static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
 static float VELOCITY_PID_KP = 8000.0f;  // constexpr
-static float VELOCITY_PID_KI = 800.0f;      // const
+static float VELOCITY_PID_KI = 00.0f;      // const
 static float VELOCITY_PID_KD = 0.0f;      // const
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
 /**

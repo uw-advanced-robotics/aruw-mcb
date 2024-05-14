@@ -150,10 +150,7 @@ public:
      */
     inline void setZeroRPM()
     {
-        for (int i = 0; i < getNumChassisWheels(); i++)
-        {
-            wheels[i]->setZeroRPM();
-        }
+        setDesiredOutput(0, 0, 0);
     }
 
     /**
