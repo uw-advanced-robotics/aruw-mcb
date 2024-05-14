@@ -57,7 +57,7 @@ namespace chassis
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
  */
-class ChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
+class ChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:
     ChassisSubsystem(

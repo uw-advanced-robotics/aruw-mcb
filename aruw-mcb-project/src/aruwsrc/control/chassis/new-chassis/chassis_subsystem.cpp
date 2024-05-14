@@ -25,6 +25,8 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+
 #include "modm/math/matrix.hpp"
 
 using namespace tap::algorithms;
@@ -43,7 +45,7 @@ ChassisSubsystem::ChassisSubsystem(
     // ,
     // aruwsrc::chassis::ChassisOdometry<0, 4> odometrySubsystem
     )
-    : tap::control::chassis::ChassisSubsystemInterface(drivers),
+    : HolonomicChassisSubsystem(drivers, currentSensor),
       wheels(wheels),
       currentSensor(currentSensor),
     //   odometrySubsystem(odometrySubsystem),

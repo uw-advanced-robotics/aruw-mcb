@@ -34,7 +34,9 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/new_chassis_odo.hpp"
+
+// #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
@@ -54,7 +56,13 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+// #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "tap/control/subsystem.hpp"
+
+#include "aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp"
+#include "aruwsrc/control/chassis/new-chassis/odometry_subsystem.hpp"
+// #include "aruwsrc/control/chassis/x_drive_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -149,9 +157,74 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(drivers(), &currentSensor);
+tap::motor::DjiMotor leftFrontDriveMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG.inverted,
+    "Left Front Drive Motor");
+tap::motor::DjiMotor rightFrontDriveMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG.inverted,
+    "Right Front Drive Motor");
+tap::motor::DjiMotor leftBackDriveMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG.inverted,
+    "Left Back Drive Motor");
+tap::motor::DjiMotor rightBackDriveMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG.inverted,
+    "Right Back Drive Motor");
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+aruwsrc::chassis::MecanumWheel leftFrontMecanumWheel(
+    leftFrontDriveMotor,
+    aruwsrc::chassis::LEFT_FRONT_MECANUM_WHEEL_CONFIG,
+    -1);
+aruwsrc::chassis::MecanumWheel rightFrontMecanumWheel(
+    rightFrontDriveMotor,
+    aruwsrc::chassis::RIGHT_FRONT_MECANUM_WHEEL_CONFIG,
+    1);
+aruwsrc::chassis::MecanumWheel leftBackMecanumWheel(
+    leftBackDriveMotor,
+    aruwsrc::chassis::LEFT_BACK_MECANUM_WHEEL_CONFIG,
+    1);
+aruwsrc::chassis::MecanumWheel rightBackMecanumWheel(
+    rightBackDriveMotor,
+    aruwsrc::chassis::RIGHT_BACK_MECANUM_WHEEL_CONFIG,
+    -1);
+std::vector<aruwsrc::chassis::Wheel *> wheels = {
+    &leftFrontMecanumWheel,
+    &rightFrontMecanumWheel,
+    &leftBackMecanumWheel,
+    &rightBackMecanumWheel};
+
+// aruwsrc::chassis::ChassisOdometry odometryKF =
+//     aruwsrc::chassis::ChassisOdometry<0, 4>::ChassisOdometryBuilder::constructChassisOdometry(
+//         wheels,
+//         *drivers(),
+//         modm::Vector2f(0, 0),
+//         turret);
+
+
+
+
+aruwsrc::chassis::ChassisSubsystem chassis(drivers(), wheels, &currentSensor);
+
+aruwsrc::chassis::OdometrySubsystem odometrySubsystem(*drivers(), turret, chassis, wheels, modm::Vector2f(0, 0));
+
+
+// aruwsrc::chassis::Odometry2DSubsystem odometrySubsystem(
+//     *drivers(),
+//     turret,
+//     chassis,
+//     modm::Vector2f(0, 0),
+//     odometryKF);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -479,10 +552,10 @@ PressCommandMapping bCtrlPressed(
 // The user can press q or e to manually rotate the chassis left or right.
 // The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
-PressCommandMapping qEPressed(
-    drivers(),
-    {&wiggleCommand},
-    RemoteMapState({Remote::Key::Q, Remote::Key::E}));
+// PressCommandMapping qEPressed(
+//     drivers(),
+//     {&wiggleCommand},
+//     RemoteMapState({Remote::Key::Q, Remote::Key::E}));
 PressCommandMapping qNotEPressed(
     drivers(),
     {&chassisImuDriveCommand},
@@ -575,7 +648,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qEPressed);
+    // drivers->commandMapper.addMap(&qEPressed);
     drivers->commandMapper.addMap(&qNotEPressed);
     drivers->commandMapper.addMap(&eNotQPressed);
     drivers->commandMapper.addMap(&xPressed);
