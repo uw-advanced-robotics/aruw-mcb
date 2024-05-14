@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef WHEEL_HPP_
-#define WHEEL_HPP_
+#ifndef WHEEL_CONVERSIONS_HPP_
+#define WHEEL_CONVERSIONS_HPP_
 
 #include "modm/math/geometry/angle.hpp"
 
@@ -35,13 +35,13 @@ namespace algorithms
  * A simple wheel class to handle gear ratio and encoder calculations
  *
  */
-class Wheel
+class WheelConversions
 {
 public:
     /**
      * @param diameter in meters
      */
-    Wheel(float diameter, float gearRatio, float motorGearRatio);
+    WheelConversions(float diameter, float gearRatio, float motorGearRatio);
 
     float mpsToRpm(float mps) const;
     float rpmToMps(float rpm) const;
@@ -49,7 +49,7 @@ public:
 private:
     const float circumference, gearRatio, motorGearRatio;
 
-};  // class Wheel
+};  // class WheelConversions
 
 }  // namespace algorithms
 

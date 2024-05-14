@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wheel.hpp"
+#include "wheel_conversions.hpp"
 
 namespace aruwsrc
 {
@@ -28,19 +28,19 @@ namespace aruwsrc
 {
 namespace algorithms
 {
-Wheel::Wheel(float diameter, float gearRatio, float motorGearRatio)
+WheelConversions::WheelConversions(float diameter, float gearRatio, float motorGearRatio)
     : circumference(diameter * M_PI),
       gearRatio(gearRatio),
       motorGearRatio(motorGearRatio)
 {
 }
 
-float Wheel::mpsToRpm(float mps) const
+float WheelConversions::mpsToRpm(float mps) const
 {
     return (mps / circumference) / motorGearRatio * 60.0f / gearRatio;
 }
 
-float Wheel::rpmToMps(float rpm) const
+float WheelConversions::rpmToMps(float rpm) const
 {
     return rpm * motorGearRatio / 60.0f * gearRatio * circumference;
 }

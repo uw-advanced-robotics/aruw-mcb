@@ -31,6 +31,16 @@
 #include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+
+#include "modm/math/matrix.hpp"
+
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
@@ -57,7 +67,7 @@ namespace chassis
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
  */
-class ChassisSubsystem : public HolonomicChassisSubsystem
+class ChassisSubsystem : public aruwsrc::chassis::HolonomicChassisSubsystem
 {
 public:
     ChassisSubsystem(
@@ -185,9 +195,9 @@ public:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
     modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
-    const char* getName() const override { return "Chassis"; }
+    // const char* getName() const override { return "Chassis"; }
 
-    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
+    // mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 

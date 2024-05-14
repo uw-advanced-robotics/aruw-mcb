@@ -19,15 +19,7 @@
 
 #include "chassis_subsystem.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
-#include "tap/architecture/clock.hpp"
-#include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-
-#include "modm/math/matrix.hpp"
 
 using namespace tap::algorithms;
 
@@ -42,12 +34,11 @@ ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel*>& wheels,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor
-    // ,
     // aruwsrc::chassis::ChassisOdometry<0, 4> odometrySubsystem
     )
     : HolonomicChassisSubsystem(drivers, currentSensor),
       wheels(wheels),
-      currentSensor(currentSensor),
+    //   currentSensor(currentSensor),
     //   odometrySubsystem(odometrySubsystem),
       chasisSpeedRotationPID({
           AUTOROTATION_PID_KP,
@@ -57,12 +48,12 @@ ChassisSubsystem::ChassisSubsystem(
           AUTOROTATION_PID_MAX_OUTPUT,  // Able to take a lot of kalman stuff, deadzone, and floor
                                         // but might not need
       }),
-      chassisPowerLimiter(
+      chassisPowerLimiter({
           drivers,
           currentSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
-          ENERGY_BUFFER_CRIT_THRESHOLD)
+          ENERGY_BUFFER_CRIT_THRESHOLD})
 {
 }
 
@@ -153,18 +144,18 @@ void ChassisSubsystem::refresh()
 
 void ChassisSubsystem::limitPower()
 {
-    currentSensor->update();
-    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    // currentSensor->update();
+    // float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
-    // don't power limit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        powerLimitFrac = 1;
-    }
+    // // don't power limit if power limiting doesn't need to be applied
+    // if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    // {
+    //     powerLimitFrac = 1;
+    // }
 
-    for (int i = 0; i < getNumChassisWheels(); i++)
+    for (int i = 0; i < 4; i++)
     {
-        wheels[i]->limitPower(powerLimitFrac);
+        wheels[i]->limitPower(1);
     }
 }
 
@@ -178,6 +169,25 @@ bool ChassisSubsystem::allMotorsOnline() const
         }
     }
     return true;
+}
+
+void ChassisSubsystem::limitChassisPower()
+{
+    // // use power limiting object to compute initial power limiting fraction
+    // currentSensor->update();
+    // float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // // short circuit if power limiting doesn't need to be applied
+    // if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    // {
+    //     return;
+    // }
+
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        wheels[i]->limitPower(1);
+    }
+
 }
 
 modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const

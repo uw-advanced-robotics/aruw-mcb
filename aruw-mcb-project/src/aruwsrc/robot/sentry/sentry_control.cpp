@@ -284,7 +284,7 @@ VirtualDjiMotor leftOmni(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     false,
-    "Right Omni Dead Wheel");
+    "Right Omni Dead WheelConversions");
 
 // This is the one sticking out towards the frame
 VirtualDjiMotor rightOmni(
@@ -293,7 +293,7 @@ VirtualDjiMotor rightOmni(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     false,
-    "Left Omni Dead Wheel");
+    "Left Omni Dead WheelConversions");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
 aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
