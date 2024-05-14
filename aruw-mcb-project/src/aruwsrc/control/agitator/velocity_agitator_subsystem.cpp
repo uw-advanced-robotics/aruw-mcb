@@ -79,6 +79,12 @@ void VelocityAgitatorSubsystem::refresh()
     {
         subsystemJamStatus = true;
     }
+
+    // WE COOKING BOYYSSSSSS!!!! - Chef Gordon Ramsay
+    if (agitatorMotor.getTemperature() > 50)
+    {
+        agitatorMotor.setDesiredOutput(0);
+    }
 }
 
 bool VelocityAgitatorSubsystem::calibrateHere()
