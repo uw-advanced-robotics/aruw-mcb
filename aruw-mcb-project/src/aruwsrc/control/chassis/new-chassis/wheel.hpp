@@ -21,15 +21,23 @@
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/motor/dji_motor.hpp"
 
 #include "modm/container/pair.hpp"
 #include "modm/math/filter/pid.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "tap/mock/dji_motor_mock.hpp"
+using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+#include "tap/motor/dji_motor.hpp"
 using Motor = tap::motor::DjiMotor;
+#endif
+
 using SmoothPid = tap::algorithms::SmoothPid;
 using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 using namespace tap::algorithms;
 namespace aruwsrc
+
 {
 namespace chassis
 {
@@ -39,12 +47,23 @@ struct WheelConfig
     float wheelPositionChassisRelativeX;
     float wheelPositionChassisRelativeY;
     float wheelOrientationChassisRelative;
-    float diameter;        // considering shoving these into DjiMotor in the future
-    float gearRatio;       // considering shoving these into DjiMotor in the future
+    // Check that this is the correct value for any arbitrary wheel placement
+    // In a configuration with the wheels at non standrd distances to the center,
+    // this should the maximum of all four.
+    float distFromCenterToWheel;
+    float diameter;   // considering shoving these into DjiMotor in the future
+    float gearRatio;  // considering shoving these into DjiMotor in the future
+    // considering combining gearRatio and motorGearRatio into one
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
-    SmoothPidConfig& velocityPidConfig;
+    const SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
-    float maxWheelRPM;
+    float maxWheelRPM = 1000;
+    bool inverted;
+    // Used by odometry to determine the confidence of the wheel's velocity
+    // Defaults to zero (no error in the sensor)
+    float rConfidence = 1.0f;
+    float initalPValue = 1E3;
+    float initalQValue = 1E2;
 };
 
 class Wheel
@@ -53,19 +72,25 @@ public:
     /* Creates a wheel object using given motorId, x-direction distance from chassis center,
         y-direction distance from chassis center, wheel orientation, if wheel is powered
     */
-    Wheel(Motor& driveMotor, WheelConfig& config)
-        : config(config),
-          velocityPid(config.velocityPidConfig),
-          motor(driveMotor)
+    Wheel(const WheelConfig& config) : config(config)
     {
+        distanceMat = CMSISMat<2, 3>(
+            {1,
+             0,
+             -config.wheelPositionChassisRelativeY,
+             0,
+             1,
+             config.wheelPositionChassisRelativeX});
+        wheelOrientationMat = CMSISMat<2, 2>(
+            {cos(config.wheelOrientationChassisRelative),
+             -sin(config.wheelOrientationChassisRelative),
+             sin(config.wheelOrientationChassisRelative),
+             cos(config.wheelOrientationChassisRelative)});
+        wheelOrientationMat = wheelOrientationMat.inverse();
     }
 
     // Config parameters for the individual wheel
     const WheelConfig config;
-    ;
-
-    // PID used to control the driving motor
-    SmoothPid velocityPid;
 
     /**
      * Calculates desired x and y velocity of the wheel based on passed in x, y, and r
@@ -79,11 +104,19 @@ public:
      *         in the x direction and the second value containing the desired velocity
      *         of the wheel in the y direction. Units: m/s. Might change type later???
      */
-    inline modm::Pair<float, float> calculateDesiredWheelVelocity(float vx, float vy, float vr)
+    inline modm::Pair<float, float> calculateDesiredWheelVelocity(
+        float vx,
+        float vy,
+        float vr)  // chassis in mps, mps, rad/s
     {
-        CMSISMat<3, 1> chassisVel = tap::algorithms::CMSISMat<3, 1>({vx, vy, vr});
-        CMSISMat<2, 1> wheelVel = distanceMat * chassisVel;
-        return {wheelVel.data[0], wheelVel.data[1]};
+        CMSISMat<3, 1> chassisVel = CMSISMat<3, 1>({vx, vy, vr});
+        CMSISMat<2, 1> wheelVel = wheelOrientationMat * distanceMat * chassisVel;
+        return {
+            wheelVel.data[0],
+            wheelVel.data[1]};  // wheel speed in mps if lx and ly are meters in chassis frame
+                                // common interface -- multiply resulting matrix with the sin/cos
+                                // matrices too for
+                                // wheel relative speeds
     }
 
     /**
@@ -103,11 +136,23 @@ public:
         return rpm * config.motorGearRatio / 60.0f * config.gearRatio * (config.diameter * M_PI);
     }
 
+    inline float rpmToRadPerS(float rpm) const
+    {
+        return rpm * M_2_PI / 60.0f * config.motorGearRatio * config.gearRatio;
+    }
+    
+    inline float getWheelVelocityChassisRelative() const
+    {
+        return getDriveVelocity();
+    }
+
     virtual void initialize() = 0;
 
     virtual void refresh() = 0;
 
     virtual void setZeroRPM() = 0;
+
+    virtual void limitPower(float powerLimitFrac) = 0;
 
     virtual bool allMotorsOnline() const = 0;
 
@@ -115,12 +160,18 @@ public:
 
     virtual float getDriveRPM() const = 0;
 
+    virtual int getNumMotors() const = 0; // todo make static
+
+    virtual std::vector<float> getMMat() = 0;
+
+    virtual std::vector<float> getHMat() = 0;
+
+    inline float getRConfidence() {return config.rConfidence;}
+
 protected:
-    // Motor that drives the wheel
-    Motor& motor;
     /// matrix containing distances from wheel to chassis center
-    tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
-        {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
+    tap::algorithms::CMSISMat<2, 3> distanceMat;
+    tap::algorithms::CMSISMat<2, 2> wheelOrientationMat;
 };  // class Wheel
 }  // namespace chassis
 }  // namespace aruwsrc

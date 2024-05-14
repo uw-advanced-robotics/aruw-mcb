@@ -25,18 +25,21 @@ namespace chassis
 SwerveWheel::SwerveWheel(
     Motor& driveMotor,
     Motor& azimuthMotor,
-    WheelConfig& config,
+    const WheelConfig& config,
     SwerveAzimuthConfig& azimuthConfig,
     SmoothPid drivePid,
     SmoothPid azimuthPid)
-    : Wheel(driveMotor, config),
-      azimuthConfig(azimuthConfig),
+    : Wheel(config),
       driveMotor(driveMotor),
       azimuthMotor(azimuthMotor),
+      azimuthConfig(azimuthConfig),
       drivePid(drivePid),
       azimuthPid(azimuthPid),
       rotationVectorX(-config.wheelPositionChassisRelativeY),
-      rotationVectorY(config.wheelPositionChassisRelativeX)
+      rotationVectorY(config.wheelPositionChassisRelativeX),
+      angularBiasLUTInterpolator(
+          azimuthConfig.angular_power_frac_LUT,
+          MODM_ARRAY_SIZE(azimuthConfig.angular_power_frac_LUT))
 {
     rotationSetpoint = 0;
     speedSetpointRPM = 0;
@@ -70,11 +73,11 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
         // TODO 2: Test again on this year's bot (2024)
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        {
-            rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        }
+        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        // {
+        //     rotationOffset -=
+        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        // }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
@@ -90,20 +93,47 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
     rotationSetpoint = preScaledRotationSetpoint;
 }
 
+void SwerveWheel::initialize()
+{
+    driveMotor.initialize();
+    azimuthMotor.initialize();
+}
+
+void SwerveWheel::limitPower(float powerLimitFrac)
+{
+    drivePowerLimitFrac =
+        powerLimitFrac * angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle());
+    azimuthPowerLimitFrac =
+        powerLimitFrac *
+        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
+}
+
 void SwerveWheel::refresh()
 {
-    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    driveMotor.setDesiredOutput(drivePid.getOutput());
+    driveMotor.setDesiredOutput(
+        drivePowerLimitFrac *
+        drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f));
+    azimuthMotor.setDesiredOutput(
+        azimuthPowerLimitFrac *
+        azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f));
+}
 
-    azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+void SwerveWheel::setZeroRPM()
+{
+    driveMotor.setDesiredOutput(0.0f);
+    azimuthMotor.setDesiredOutput(0.0f);
+}
+
+bool SwerveWheel::allMotorsOnline() const
+{
+    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
 float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
 
-void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
-
 float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+
+int SwerveWheel::getNumMotors() const { return 2; }
 
 float SwerveWheel::getAngle() const
 {
@@ -113,15 +143,30 @@ float SwerveWheel::getAngle() const
         azimuthConfig.azimuthMotorGearing);
 }
 
-void SwerveWheel::initialize()
-{
-    driveMotor.initialize();
-    azimuthMotor.initialize();
+std::vector<float> SwerveWheel::getMMat(){
+    float r = config.diameter / 2;
+    float omega = getDriveVelocity();
+    float beta = getAngle();
+    float xDot = r * omega * cos(beta);
+    float yDot = r * omega * sin(beta);
+    return std::vector<float>({xDot, yDot});
 }
 
-bool SwerveWheel::allMotorsOnline() const
+std::vector<float> SwerveWheel::getHMat()
 {
-    return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
+    return std::vector<float>({
+        0,
+        0,
+        0,
+        Wheel::distanceMat.data[0],
+        Wheel::distanceMat.data[1],
+        Wheel::distanceMat.data[2],
+        0,
+        0,
+        0,
+        Wheel::distanceMat.data[3],
+        Wheel::distanceMat.data[4],
+        Wheel::distanceMat.data[5]});
 }
 
 float SwerveWheel::getAngularVelocity() const
@@ -129,6 +174,8 @@ float SwerveWheel::getAngularVelocity() const
     return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) *
            (azimuthConfig.azimuthMotorGearing);
 }
+
+
 
 }  // namespace chassis
 

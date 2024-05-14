@@ -25,6 +25,8 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
+#include "modm/math/matrix.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -36,11 +38,15 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
-    std::vector<Wheel>* wheels,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    std::vector<Wheel*>& wheels,
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor
+    // ,
+    // aruwsrc::chassis::ChassisOdometry<0, 4> odometrySubsystem
+    )
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
-      wheels(*wheels),
+      wheels(wheels),
       currentSensor(currentSensor),
+    //   odometrySubsystem(odometrySubsystem),
       chasisSpeedRotationPID({
           AUTOROTATION_PID_KP,
           0.0f,
@@ -92,16 +98,30 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     return rTranslationalGain;
 }
 
-void ChassisSubsystem::setDesiredOutput(float x, float y, float r)
+void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // rpm, rpm, rpm
 {
+    lastDesiredVelocity[0][0] = x;
+    lastDesiredVelocity[1][0] = y;
+    lastDesiredVelocity[2][0] = r;
     float rotationTranslationGain = calculateRotationTranslationalGain(r);
+    float tempMax = 0;
+    float coeff;
+
+    std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        desiredWheelVel = wheels[i].calculateDesiredWheelVelocity(
-            rotationTranslationGain * x,
-            rotationTranslationGain * y,
-            r);
-        tempMax = std::max(tempMax, fabsf(desiredWheelVel.first));
+        desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
+            rotationTranslationGain * wheels[i]->rpmToMps(x),
+            rotationTranslationGain * wheels[i]->rpmToMps(y),
+            wheels[i]->rpmToMps(r) / maxDistFromCenterToWheel);
+        tempMax = std::max(tempMax, fabsf(desiredWheelVel[i].first));
+    }
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        coeff = std::min(wheels[i]->config.maxWheelRPM / tempMax, 1.0f);
+        wheels[i]->executeWheelVelocity(
+            desiredWheelVel[i].first * coeff,
+            desiredWheelVel[i].second);
     }
 }
 
@@ -109,17 +129,64 @@ void ChassisSubsystem::initialize()
 {
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        wheels[i].initialize();
+        wheels[i]->initialize();
     }
+    float max = 0.0;
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        max = std::max(max, wheels[i]->config.distFromCenterToWheel);
+    }
+    maxDistFromCenterToWheel = max;
 }
 
 void ChassisSubsystem::refresh()
 {
+    limitPower();
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
-        float coeff = std::min(wheels[i].config.maxWheelRPM / tempMax, 1.0f);
-        wheels[i].executeWheelVelocity(desiredWheelVel.first * coeff, desiredWheelVel.second);
+        wheels[i]->refresh();
     }
+    // odometrySubsystem.update();
+}
+
+void ChassisSubsystem::limitPower()
+{
+    currentSensor->update();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+
+    // don't power limit if power limiting doesn't need to be applied
+    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
+    {
+        powerLimitFrac = 1;
+    }
+
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        wheels[i]->limitPower(powerLimitFrac);
+    }
+}
+
+bool ChassisSubsystem::allMotorsOnline() const
+{
+    for (int i = 0; i < getNumChassisWheels(); i++)
+    {
+        if (!wheels[i]->allMotorsOnline())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+modm::Matrix<float, 3, 1> ChassisSubsystem::getActualVelocityChassisRelative() const
+{
+    modm::Matrix<float, 3, 1> wheelVelocity;
+    return wheelVelocity.zeroMatrix();
+}
+
+modm::Matrix<float, 3, 1> ChassisSubsystem::getDesiredVelocityChassisRelative() const
+{
+    return lastDesiredVelocity;
 }
 
 }  // namespace chassis
