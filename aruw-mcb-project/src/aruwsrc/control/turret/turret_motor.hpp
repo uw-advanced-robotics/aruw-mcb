@@ -84,7 +84,7 @@ public:
      * The setpoint is limited between the min and max config angles as specified in the
      * constructor.
      */
-    mockable void setChassisFrameSetpoint(float setpoint);
+    mockable void setChassisFrameSetpoint(WrappedFloat setpoint);
 
     /// @return `true` if the hardware motor is connected and powered on
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
@@ -92,11 +92,11 @@ public:
     /**
      * @return turret motor angle setpoint relative to the chassis, in radians, not normalized
      */
-    mockable inline float getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
+    mockable inline WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const tap::algorithms::WrappedFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const WrappedFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
@@ -269,10 +269,10 @@ private:
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
-    float chassisFrameSetpoint;
+    WrappedFloat chassisFrameSetpoint;
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
-    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle;
+    WrappedFloat chassisFrameMeasuredAngle;
 
     /// Unwrapped chassis frame measured angle. Units radians.
     float chassisFrameUnwrappedMeasurement;

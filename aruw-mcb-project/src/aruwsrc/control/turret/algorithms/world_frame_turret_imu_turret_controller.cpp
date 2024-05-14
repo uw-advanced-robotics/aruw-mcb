@@ -40,10 +40,10 @@ namespace aruwsrc::control::turret::algorithms
  * @param[in] angleToTransform The angle to transform.
  * @return The transformed angle in the world frame.
  */
-static inline float transformChassisFrameToWorldFrame(
-    const float turretChassisFrameCurrAngle,
-    const float turretWorldFrameCurrAngle,
-    const float angleToTransform)
+static inline WrappedFloat transformChassisFrameToWorldFrame(
+    const WrappedFloat turretChassisFrameCurrAngle,
+    const WrappedFloat turretWorldFrameCurrAngle,
+    const WrappedFloat angleToTransform)
 {
     return turretWorldFrameCurrAngle + (angleToTransform - turretChassisFrameCurrAngle);
 }
@@ -61,10 +61,10 @@ static inline float transformChassisFrameToWorldFrame(
  * @param[in] angleToTransform The angle to transform.
  * @return The transformed angle in the chassis frame.
  */
-static inline float transformWorldFrameValueToChassisFrame(
-    const float turretChassisFrameCurrAngle,
-    const float turretWorldFrameCurrAngle,
-    const float angleToTransform)
+static inline WrappedFloat transformWorldFrameValueToChassisFrame(
+    const WrappedFloat turretChassisFrameCurrAngle,
+    const WrappedFloat turretWorldFrameCurrAngle,
+    const WrappedFloat angleToTransform)
 {
     return turretChassisFrameCurrAngle + (angleToTransform - turretWorldFrameCurrAngle);
 }
@@ -84,11 +84,11 @@ static inline float transformWorldFrameValueToChassisFrame(
  */
 static inline void initializeWorldFrameTurretImuController(
     const TurretControllerInterface *controllerToInitialize,
-    const float worldFrameMeasurement,
+    const WrappedFloat worldFrameMeasurement,
     TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid,
-    float &worldFrameSetpoint)
+    WrappedFloat &worldFrameSetpoint)
 {
     if (turretMotor.getTurretController() != controllerToInitialize)
     {
@@ -96,9 +96,9 @@ static inline void initializeWorldFrameTurretImuController(
         velocityPid.reset();
 
         worldFrameSetpoint = transformChassisFrameToWorldFrame(
-            turretMotor.getChassisFrameUnwrappedMeasuredAngle(),
+            turretMotor.getChassisFrameMeasuredAngle(),
             worldFrameMeasurement,
-            turretMotor.getChassisFrameSetpoint());
+            WrappedFloat(turretMotor.getChassisFrameSetpoint(), 0, M_TWOPI));
 
         turretMotor.attachTurretController(controllerToInitialize);
     }

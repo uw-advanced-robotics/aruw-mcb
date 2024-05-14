@@ -29,6 +29,8 @@
 
 #include "turret_controller_interface.hpp"
 
+using namespace tap::algorithms;
+
 namespace aruwsrc::control::turret
 {
 class TurretMotor;
@@ -60,8 +62,8 @@ public:
     WorldFrameYawTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
-        tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        SmoothPid &positionPid,
+        SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -90,8 +92,8 @@ public:
 private:
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::SmoothPid &positionPid;
-    tap::algorithms::SmoothPid &velocityPid;
+    SmoothPid &positionPid;
+    SmoothPid &velocityPid;
 
     float worldFrameSetpoint;
 };
@@ -121,8 +123,8 @@ public:
     WorldFramePitchTurretImuCascadePidTurretController(
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
-        tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        SmoothPid &positionPid,
+        SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -151,8 +153,8 @@ public:
 private:
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::SmoothPid &positionPid;
-    tap::algorithms::SmoothPid &velocityPid;
+    SmoothPid &positionPid;
+    SmoothPid &velocityPid;
 
     float worldFrameSetpoint;
 };

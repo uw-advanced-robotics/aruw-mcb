@@ -113,13 +113,16 @@ void TurretMotor::setMotorOutput(float out)
     }
 }
 
-void TurretMotor::setChassisFrameSetpoint(float setpoint)
+void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 {
     chassisFrameSetpoint = setpoint;
 
     if (config.limitMotorAngles)
     {
-        chassisFrameSetpoint = limitVal(chassisFrameSetpoint, config.minAngle, config.maxAngle);
+        chassisFrameSetpoint =
+            WrappedFloat::limitValue(chassisFrameSetpoint, config.minAngle, config.maxAngle);
+
+        chassisFrameSetpoint.limitValue()
     }
 }
 
