@@ -58,6 +58,7 @@ VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
 
 void VelocityAgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
 
+int stopping;
 void VelocityAgitatorSubsystem::refresh()
 {
     if (!isOnline())
@@ -83,6 +84,7 @@ void VelocityAgitatorSubsystem::refresh()
     // WE COOKING BOYYSSSSSS!!!! - Chef Gordon Ramsay
     if (agitatorMotor.getTemperature() > 50)
     {
+        stopping++;
         agitatorMotor.setDesiredOutput(0);
     }
 }
