@@ -156,7 +156,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
         chassisYawInput.update(
-            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterChassisYawInput = updateCounter;
     }

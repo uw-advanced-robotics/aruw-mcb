@@ -17,29 +17,27 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "swerve_chassis_subsystem.hpp"
+#include "half_swerve_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
-{
-SwerveChassisSubsystem::SwerveChassisSubsystem(
+using namespace aruwsrc::chassis;
+
+HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-    Module* moduleLeftFront,
-    Module* moduleRightFront,
-    Module* moduleLeftBack,
-    Module* moduleRightBack,
-    const float forwardMatrixArray[24])
+    Module* moduleOne,
+    Module* moduleTwo,
+    float wheelbaseRadius,
+    const float forwardMatrixArray[12])
     : HolonomicChassisSubsystem(drivers, currentSensor),
-      modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
+      modules{moduleOne, moduleTwo},
+      wheelbaseRadius(wheelbaseRadius),
       forwardMatrix(forwardMatrixArray)
 {
 }
 
-void SwerveChassisSubsystem::initialize()
+void HalfSwerveChassisSubsystem::initialize()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
@@ -47,29 +45,29 @@ void SwerveChassisSubsystem::initialize()
     }
 }
 
-bool SwerveChassisSubsystem::allMotorsOnline() const
+bool HalfSwerveChassisSubsystem::allMotorsOnline() const
 {
     bool online = true;
     for (unsigned int i = 0; i < NUM_MODULES; i++) online &= modules[i]->allMotorsOnline();
     return online;
 }
 
-void SwerveChassisSubsystem::setZeroRPM()
+void HalfSwerveChassisSubsystem::setZeroRPM()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++) modules[i]->setZeroRPM();
 }
 
-Module* SwerveChassisSubsystem::getModule(unsigned int i)
+Module* HalfSwerveChassisSubsystem::getModule(unsigned int i)
 {
     if (i >= NUM_MODULES) return nullptr;
     return modules[i];
 }
 
-void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
+void HalfSwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    x = modules[LF]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
-    y = modules[LF]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
-    r = modules[LF]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
+    x = modules[0]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
+    y = modules[0]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
+    r = modules[0]->wheel.rpmToMps(r) / 0.230f;  // convert input from motor rpm to rad/s
     // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
@@ -81,7 +79,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
             drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
-void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
+void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
     desiredRotation = modules[LF]->wheel.mpsToRpm(r) * 0.205f;
     float maxInitialSpeed = 0;
@@ -99,7 +97,7 @@ void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, flo
     }
 }
 
-void SwerveChassisSubsystem::refresh()
+void HalfSwerveChassisSubsystem::refresh()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
@@ -107,7 +105,7 @@ void SwerveChassisSubsystem::refresh()
     }
 }
 
-void SwerveChassisSubsystem::limitChassisPower()
+void HalfSwerveChassisSubsystem::limitChassisPower()
 {
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
@@ -125,9 +123,9 @@ void SwerveChassisSubsystem::limitChassisPower()
     }
 }
 
-modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, 8, 1> actualModuleVectors;
+    modm::Matrix<float, 4, 1> actualModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
@@ -137,9 +135,9 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getActualVelocityChassisRelati
     return forwardMatrix * actualModuleVectors;
 }
 
-modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
+modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
-    modm::Matrix<float, 8, 1> desiredModuleVectors;
+    modm::Matrix<float, 4, 1> desiredModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
@@ -148,7 +146,3 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelat
     }
     return forwardMatrix * desiredModuleVectors;
 }
-
-}  // namespace chassis
-
-}  // namespace aruwsrc

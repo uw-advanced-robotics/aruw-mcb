@@ -42,7 +42,7 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#if defined(TARGET_SENTRY_BEEHIVE)
+#if defined(TARGET_SENTRY_HYDRA)
 static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #else
@@ -69,6 +69,14 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {16.0f, 6700.0f},
     {20.0f, 8500.0f},
 };
+#elif defined(TARGET_STANDARD_ORION)
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {15.0f, 4325.0f},
+    {18.0f, 4800.0f},
+    {30.0f, 6900.0f},
+    {32.0f, 8400.0f},
+};
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
@@ -77,7 +85,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 6900.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_SENTRY_BEEHIVE)
+#elif defined(TARGET_SENTRY_HYDRA)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4400.0f},
@@ -107,7 +115,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO_CYCLONE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
-#elif defined(TARGET_SENTRY_BEEHIVE)
+#elif defined(TARGET_SENTRY_HYDRA)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #endif
 

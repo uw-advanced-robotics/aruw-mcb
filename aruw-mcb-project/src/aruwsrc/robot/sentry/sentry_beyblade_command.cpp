@@ -37,7 +37,7 @@ namespace sentry
 {
 SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
-    aruwsrc::chassis::SwerveChassisSubsystem* chassis,
+    aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
     const tap::algorithms::transforms::Transform& worldToChassis,
