@@ -30,6 +30,7 @@
 #endif
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
 #include "tap/control/setpoint/interfaces/integrable_setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
@@ -127,6 +128,7 @@ public:
     inline void clearJam() override
     {
         subsystemJamStatus = false;
+        motorStuck = false;
         jamChecker.restart();
     }
 
@@ -188,6 +190,11 @@ private:
 
     /// Runes the velocity PID controller
     void runVelocityPidControl();
+
+    // Timeout for irrecoverable stalling
+    tap::arch::MilliTimeout stallingTimeout;
+    static constexpr uint32_t STALLING_TIMEOUT = 1'000;
+    bool motorStuck = false;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

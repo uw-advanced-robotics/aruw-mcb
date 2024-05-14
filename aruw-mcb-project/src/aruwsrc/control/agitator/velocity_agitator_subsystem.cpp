@@ -46,6 +46,7 @@ VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
       config(agitatorSubsystemConfig),
       velocityPid(pidParams),
       jamChecker(this, config.jammingVelocityDifference, config.jammingTime),
+      stallingTimeout(),
       agitatorMotor(
           drivers,
           config.agitatorMotorId,
@@ -76,15 +77,22 @@ void VelocityAgitatorSubsystem::refresh()
 
     runVelocityPidControl();
 
-    if (jamChecker.check())
+    // Check if we are jammed, if we aren't already jammed
+    if (jamChecker.check() && !subsystemJamStatus)
     {
         subsystemJamStatus = true;
+        stallingTimeout.restart(STALLING_TIMEOUT);
     }
 
-    // WE COOKING BOYYSSSSSS!!!! - Chef Gordon Ramsay
-    if (agitatorMotor.getTemperature() > 50)
+    // The motor has been stalled for too long, it's stuck in place
+    if (stallingTimeout.execute())
     {
-        stopping++;
+        motorStuck = true;
+    }
+
+    // Don't move as to not overheat the motor
+    if (motorStuck)
+    {
         agitatorMotor.setDesiredOutput(0);
     }
 }
