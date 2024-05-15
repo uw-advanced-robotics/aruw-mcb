@@ -111,7 +111,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
-    memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
+    //TODO: update this to handle the new protocol:
+    //  - a path reset
+    AutoNavSetpointData setpointData;
+    memcpy(&setpointData, &message.data, sizeof(AutoNavSetpointData));
+    path.pushPoint(setpointData);
     return true;
 }
 

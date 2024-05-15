@@ -92,6 +92,7 @@ void AutoNavBeybladeCommand::execute()
 
         float rampTarget = 0.0;
 
+        //TODO: replace this with chassis auto nav controller functionality
         aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
             visionCoprocessor.getLastSetpointData();
         const tap::communication::serial::RefSerialData::Rx::GameType& gametype =

@@ -4,8 +4,6 @@
 #include "tap\algorithms\transforms\vector.hpp"
 #include "tap\algorithms\transforms\position.hpp"
 
-#include "aruwsrc\communication\serial\vision_coprocessor.hpp"
-
 using tap::algorithms::transforms::Position;
 
 void AutoNavPath::pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point) {
@@ -48,7 +46,7 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
 Position AutoNavPath::findClosestPoint(Position current) {
     float minDistance = F32_MAX;
     size_t closestIndex = 0;
-    Position minClosest = Position(0,0,0);
+    Position minClosest;
     for (size_t i = 0; i < setpointData.size() - 1; i++) {
         Position p1 = setpointData[i];
         Position p2 = setpointData[i+1];
@@ -69,6 +67,7 @@ Position AutoNavPath::findClosestPoint(Position current) {
 }
 
 Position AutoNavPath::setInterpolatedPoint(Position current) {
+    //TODO: account for and deal with the case of a path reset
     if (setpointData.empty()) {
         return current;
     }

@@ -33,6 +33,7 @@
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -346,7 +347,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    std::deque<AutoNavSetpointData> setpointData();
+    aruwsrc::algorithms::AutoNavPath path;
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     // CV online variables.
