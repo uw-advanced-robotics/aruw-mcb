@@ -204,7 +204,15 @@ public:
 
     modm::Matrix<float, 3, 1> lastDesiredVelocity;
 
+    std::array<modm::Pair<float, float>, 4> desiredWheelVel;
+
+    float rotationTranslationGain;
+
+    float coeff;
+
     const std::vector<Wheel*>& wheels;
+
+    float wheelSpeeds[15];
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 

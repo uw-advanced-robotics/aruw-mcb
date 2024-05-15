@@ -70,9 +70,9 @@ static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
 static float VELOCITY_PID_KP = 8000.0f;  // constexpr
-static float VELOCITY_PID_KI = 00.0f;      // const
+static float VELOCITY_PID_KI = 10.2f;      // const
 static float VELOCITY_PID_KD = 0.0f;      // const
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 1'000.0f;
 /**
  * This max output is measured in the c620 robomaster translated current.
  * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -148,7 +148,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_FRONT_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     true,
-    1000.0f,
+    9000.0f,
     true,
     10};
 static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
@@ -161,7 +161,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_FRONT_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     true,
-    1000.0f,
+    9000.0f,
     false,
     10};
 static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
@@ -174,7 +174,7 @@ static const aruwsrc::chassis::WheelConfig LEFT_BACK_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     true,
-    1000.0f,
+    9000.0f,
     true,
     10};
 static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
@@ -187,7 +187,7 @@ static const aruwsrc::chassis::WheelConfig RIGHT_BACK_MECANUM_WHEEL_CONFIG = {
     CHASSIS_GEARBOX_RATIO,
     MOTOR_PID_CONFIG,
     true,
-    1000.0f,
+    9000.0f,
     false,
     10};
 static constexpr float WHEELBASE_HYPOTENUSE =

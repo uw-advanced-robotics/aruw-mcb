@@ -50,6 +50,10 @@ public:
 
 private:
     float driveSetPoint;
+    float error;
+    float driveRMP;
+    float driveMPS;
+    float calculation;
     int invertAngleMultiplier;
     Motor& driveMotor;
     // PID used to control the driving motor

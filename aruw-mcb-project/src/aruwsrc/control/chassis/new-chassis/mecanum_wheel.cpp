@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "mecanum_wheel.hpp"
+#include <tap/algorithms/math_user_utils.hpp>
 
 namespace aruwsrc
 {
@@ -38,8 +39,13 @@ MecanumWheel::MecanumWheel(Motor& driveMotor, const WheelConfig& config, int inv
 
 void MecanumWheel::executeWheelVelocity(float vx, float vy)  // mps, mps of wheel
 {
+    
     wheelMat = CMSISMat<2, 1>({vx, vy});
     CMSISMat<2, 1> desiredMat = wheelVelocityTransformation * wheelMat;
+    if (fabsf(desiredMat.data[0])< 0.005)
+    {
+        driveSetPoint = 0.0f;
+    }
     driveSetPoint = desiredMat.data[0];  // rad/s
 }
 
@@ -55,12 +61,18 @@ void MecanumWheel::initialize()
 
 void MecanumWheel::refresh()
 {
+    // driveSetPoint = motorPowerLimitFrac * velocityPid.runController(
+                                    //    driveSetPoint - rpmToMps(driveMotor.getShaftRPM()), 0, 0);
+    driveSetPoint = limitVal(driveSetPoint, -0.189f, 0.189f);
+    error = (driveSetPoint - rpmToMps(driveMotor.getShaftRPM()));
+    driveMPS = rpmToMps(driveMotor.getShaftRPM());
+    driveRMP = driveMotor.getShaftRPM();
+    calculation = velocityPid.runControllerDerivateError(error, 2.0f);
     if (config.isPowered)
     {
         driveMotor.setDesiredOutput(
-            motorPowerLimitFrac * velocityPid.runControllerDerivateError(
-                                      driveSetPoint - rpmToMps(driveMotor.getShaftRPM()),
-                                      0.002f));
+            calculation
+        );
     }
 }
 

@@ -96,11 +96,9 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // rpm, rpm,
     lastDesiredVelocity[0][0] = x;
     lastDesiredVelocity[1][0] = y;
     lastDesiredVelocity[2][0] = r;
-    float rotationTranslationGain = calculateRotationTranslationalGain(r);
+    rotationTranslationGain = calculateRotationTranslationalGain(r);
     float tempMax = 0;
-    float coeff;
 
-    std::array<modm::Pair<float, float>, 4> desiredWheelVel;
     for (int i = 0; i < getNumChassisWheels(); i++)
     {
         desiredWheelVel[i] = wheels[i]->calculateDesiredWheelVelocity(
@@ -115,6 +113,8 @@ void ChassisSubsystem::setDesiredOutput(float x, float y, float r)  // rpm, rpm,
         wheels[i]->executeWheelVelocity(
             desiredWheelVel[i].first * coeff,
             desiredWheelVel[i].second);
+        wheelSpeeds[i] = desiredWheelVel[i].first * coeff;
+        wheelSpeeds[i + 5] = desiredWheelVel[i].second;
     }
 }
 
