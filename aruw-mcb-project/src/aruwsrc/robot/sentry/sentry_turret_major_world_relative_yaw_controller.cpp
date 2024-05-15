@@ -34,7 +34,8 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
     float maxVelErrorInput,
-    float minorMajorTorqueRatio)
+    float minorMajorTorqueRatio,
+    float feedforwardGain)
     : TurretYawControllerInterface(yawMotor),
       worldToChassis(worldToChassis),
       chassis(chassis),
@@ -45,7 +46,8 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
       maxVelErrorInput(maxVelErrorInput),
-      minorMajorTorqueRatio(minorMajorTorqueRatio)
+      minorMajorTorqueRatio(minorMajorTorqueRatio),
+      feedforwardGain(feedforwardGain)
 {
     assert(maxVelErrorInput >= 0);
 }
@@ -93,13 +95,16 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 
     torqueCompensation =
         turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
-    if (abs(torqueCompensation) < 2000)
+    if (abs(torqueCompensation) < 3000)  // @todo make a config
     {
         torqueCompensation = 0;
     }
     // @note: in case things look weird, try adding the chassis' rotational velocity to
     // setMotorOutput
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
+    turretMotor.setMotorOutput(
+        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
+        feedforwardGain * turretMotor.getMotorOutput());
+    // @todo: it would be nice to have a final maxOutput for this controller
 }
 
 // @todo what's the point of this; overridden by runController anyways?
