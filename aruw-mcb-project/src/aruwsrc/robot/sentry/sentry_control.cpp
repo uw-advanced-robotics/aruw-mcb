@@ -594,16 +594,20 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-// HoldRepeatCommandMapping leftUpRightUp(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-//     true);
 
-HoldCommandMapping shoot(
+// HoldCommandMapping shoot(
+//     drivers(),
+//     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+
+HoldRepeatCommandMapping leftUpRightDown(
     drivers(),
-    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    {&turretLeftRotateAndUnjamAgitator,
+     &turretRightRotateAndUnjamAgitator,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
+    true);
 
 HoldCommandMapping leftDownRightDown(
     drivers(),
@@ -688,6 +692,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
     // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
     // drivers->commandMapper.addMap(&shoot);          // Shoot
+    drivers->commandMapper.addMap(&leftUpRightDown);          // Shoot
 }
 }  // namespace sentry_control
 
