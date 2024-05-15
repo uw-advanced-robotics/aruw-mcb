@@ -65,6 +65,7 @@ void MecanumWheel::refresh()
                                     //    driveSetPoint - rpmToMps(driveMotor.getShaftRPM()), 0, 0);
     driveSetPoint = limitVal(driveSetPoint, -0.189f, 0.189f);
     error = (driveSetPoint - rpmToMps(driveMotor.getShaftRPM()));
+    error = error * 2;
     driveMPS = rpmToMps(driveMotor.getShaftRPM());
     driveRMP = driveMotor.getShaftRPM();
     calculation = velocityPid.runControllerDerivateError(error, 2.0f);
