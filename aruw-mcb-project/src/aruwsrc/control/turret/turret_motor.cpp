@@ -46,6 +46,7 @@ void TurretMotor::updateMotorAngle()
     if (isOnline())
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
+
         if (startEncoderOffset == INT16_MIN)
         {
             float positionRad = modm::toRadian(DjiMotor::encoderToDegrees(encoderUnwrapped));
@@ -56,8 +57,7 @@ void TurretMotor::updateMotorAngle()
             adjustedStartEncoderValue =
                 DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
         }
-        else
-        {
+        if (config.limitMotorAngles) {
             adjustedStartEncoderValue = config.startEncoderValue;
         }
 
