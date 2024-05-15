@@ -3,6 +3,7 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 
 using namespace testing;
+using namespace aruwsrc::algorithms;
 
 class AutoNavPathTest : public Test {
 protected:
@@ -88,13 +89,15 @@ TEST_F(AutoNavPathTest, set_interpolated_point) {
     path.pushPoint(Position(2.0, 2.0, 0.0));
     path.pushPoint(Position(3, 3, 0));
     path.pushPoint(Position(4, 5, 0));
-    printf("I have reached this point!!\n");
     Position setpoint = path.setInterpolatedPoint(current);
-    printf("The thing works!!\n");
 
     EXPECT_EQ(Position(3.5, 4, 0), setpoint);
 }  
 
 TEST_F(AutoNavPathTest, set_interpolated_point_no_points) {
+    Position current(1, 2, 3);
+    path.pushPoint(current);
+    Position setpoint = path.setInterpolatedPoint(current);
 
+    EXPECT_EQ(Position(1, 2, 3), setpoint);
 }

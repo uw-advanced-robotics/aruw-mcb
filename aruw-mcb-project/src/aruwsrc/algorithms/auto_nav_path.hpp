@@ -23,13 +23,12 @@ public:
 
 private:
     Position findClosestPoint(Position current);
-    // TODO: should this be placed in Vector as magnitude()??... Should we even be using transforms library functions?!?!?!?!
     float getDistance(Position p1, Position p2) const; 
 
     std::deque<Position> setpointData;
 
-    const float interpolationDistance;
-    Position oldSetpoint; // The last setpoint used along the previous path
+    const float interpolationDistance;  // 
+    Position oldSetpoint;  // The last setpoint used along the previous path
     Position currentSetpoint;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
