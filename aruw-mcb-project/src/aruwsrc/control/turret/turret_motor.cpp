@@ -32,7 +32,7 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
     : config(motorConfig),
       motor(motor),
-      chassisFrameSetpoint(config.startAngle),
+      chassisFrameSetpoint(config.startAngle, 0, M_TWOPI),
       chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
       chassisFrameUnwrappedMeasurement(config.startAngle),
       lastUpdatedEncoderValue(config.startEncoderValue)
@@ -119,37 +119,41 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
     if (config.limitMotorAngles)
     {
-        chassisFrameSetpoint =
-            WrappedFloat::limitValue(chassisFrameSetpoint, config.minAngle, config.maxAngle);
-
-        chassisFrameSetpoint.limitValue()
+        int status;
+        chassisFrameSetpoint = Angle(WrappedFloat::limitValue(
+            chassisFrameSetpoint,
+            config.minAngle,
+            config.maxAngle,
+            &status));
     }
 }
 
 float TurretMotor::getValidChassisMeasurementError() const
 {
-    return getValidMinError(chassisFrameSetpoint, chassisFrameUnwrappedMeasurement);
+    return getValidMinError(chassisFrameSetpoint, chassisFrameMeasuredAngle);
 }
 
+// unused?
 float TurretMotor::getValidChassisMeasurementErrorWrapped() const
 {
     // equivalent to this - other
-    return WrappedFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI)
-        .minDifference(chassisFrameSetpoint);
+    return chassisFrameMeasuredAngle.minDifference(chassisFrameSetpoint);
 }
 
-float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
+float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
+    const
 {
     if (config.limitMotorAngles)
     {
         // the error is absolute
-        return setpoint - measurement;
+        return (setpoint - config.minAngle).getWrappedValue() -
+               (measurement - config.minAngle).getWrappedValue() + config.minAngle;
     }
     else
     {
         // the error can be wrapped around the unit circle
         // equivalent to this - other
-        return WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
+        return measurement.minDifference(setpoint);
     }
 }
 

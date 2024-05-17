@@ -179,7 +179,8 @@ public:
      * @note Before calling this function, you **must** first set the chassis frame setpoint before
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
-    mockable float getValidMinError(const float setpoint, const float measurement) const;
+    mockable float getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
+        const;
 
     /**
      * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned

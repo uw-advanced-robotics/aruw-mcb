@@ -324,7 +324,7 @@ private:
 class Angle : public WrappedFloat
 {
 public:
-    inline Angle(const float value) : WrappedFloat(value, -M_PI, M_PI){};
+    inline Angle(const float value) : WrappedFloat(value, 0, M_TWOPI){};
 };
 
 }  // namespace algorithms

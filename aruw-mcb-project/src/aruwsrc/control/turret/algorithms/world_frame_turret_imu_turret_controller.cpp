@@ -98,7 +98,7 @@ static inline void initializeWorldFrameTurretImuController(
         worldFrameSetpoint = transformChassisFrameToWorldFrame(
             turretMotor.getChassisFrameMeasuredAngle(),
             worldFrameMeasurement,
-            WrappedFloat(turretMotor.getChassisFrameSetpoint(), 0, M_TWOPI));
+            turretMotor.getChassisFrameSetpoint());
 
         turretMotor.attachTurretController(controllerToInitialize);
     }
