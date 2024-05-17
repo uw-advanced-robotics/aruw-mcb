@@ -22,8 +22,8 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"

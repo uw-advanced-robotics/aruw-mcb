@@ -40,28 +40,19 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::HolonomicChassisSubsystem &chassis,
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface)
-    : tap::control::Command(),
-      drivers(drivers),
-      turretsAndControllers(turretsAndControllers),
+    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
+    aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+    aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
+    : imu::ImuCalibrateCommand(drivers, turretsAndControllers, &chassis),
       turretMajor(turretMajor),
       turretMajorController(turretMajorController),
-      chassis(chassis),
       yawObserver(yawObserver),
-      odometryInterface(odometryInterface)
+      odometryInterface(odometryInterface),
+      majorMCBLite(majorMCBLite),
+      chassisMCBLite(chassisMCBLite)
 {
-    for (auto &config : turretsAndControllers)
-    {
-        assert(config.turretMCBCanComm != nullptr);
-
-        addSubsystemRequirement(&config.turret);
-    }
-
     addSubsystemRequirement(&turretMajor);
-    addSubsystemRequirement(&chassis);
 }
-
-bool SentryImuCalibrateCommand::isReady() { return true; }
 
 void SentryImuCalibrateCommand::initialize()
 {
@@ -69,19 +60,7 @@ void SentryImuCalibrateCommand::initialize()
     // reset odometry
     odometryInterface.reset();
 
-    calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
-
-    chassis.setDesiredOutput(0, 0, 0);
-
-    for (auto &config : turretsAndControllers)
-    {
-        config.turret.yawMotor.setChassisFrameSetpoint(
-            config.turret.yawMotor.getConfig().startAngle);
-        config.turret.pitchMotor.setChassisFrameSetpoint(
-            config.turret.pitchMotor.getConfig().startAngle);
-        config.pitchController.initialize();
-        config.yawController.initialize();
-    }
+    ImuCalibrateCommand::initialize();
 
     // initialize major
     turretMajor.getMutableMotor().setChassisFrameSetpoint(
@@ -94,28 +73,6 @@ void SentryImuCalibrateCommand::initialize()
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
-}
-
-static inline bool turretReachedCenterAndNotMoving(
-    turret::TurretSubsystem &turret,
-    bool ignorePitch)
-{
-    return compareFloatClose(
-               0.0f,
-               turret.yawMotor.getChassisFrameVelocity(),
-               SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(
-               0.0f,
-               turret.yawMotor.getAngleFromCenter(),
-               SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
-           (ignorePitch || (compareFloatClose(
-                                0.0f,
-                                turret.pitchMotor.getChassisFrameVelocity(),
-                                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-                            compareFloatClose(
-                                0.0f,
-                                turret.pitchMotor.getAngleFromCenter(),
-                                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
 }
 
 static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsystem &turret)
@@ -131,6 +88,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
+size_t i;
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
@@ -147,7 +105,7 @@ void SentryImuCalibrateCommand::execute()
             for (auto &config : turretsAndControllers)
             {
                 turretMCBsReady &= config.turretMCBCanComm->isConnected();
-                turretsOnline &= config.turret.isOnline();
+                turretsOnline &= config.turret->isOnline();
             }
 
             if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
@@ -182,6 +140,10 @@ void SentryImuCalibrateCommand::execute()
                 }
 
                 drivers->mpu6500.requestCalibration();
+
+                chassisMCBLite.imu.requestCalibration();
+                majorMCBLite.imu.requestCalibration();
+
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
 
@@ -195,12 +157,19 @@ void SentryImuCalibrateCommand::execute()
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
+                calibrationState = CalibrationState::BUZZING;
+            }
+            buzzerTimer.restart(1000);
+            break;
+        case CalibrationState::BUZZING:
+            if (buzzerTimer.isExpired())
+            {
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
             }
-
+            tap::buzzer::playNote(&drivers->pwm, 1000);
             break;
-
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
             break;
     }
 
@@ -213,11 +182,11 @@ void SentryImuCalibrateCommand::execute()
         // don't run pitch controller when turret IMU not on pitch (as there is no need)
         if (config.turretImuOnPitch)
         {
-            config.pitchController.runController(
+            config.pitchController->runController(
                 dt,
-                config.turret.pitchMotor.getChassisFrameSetpoint());
+                config.turret->pitchMotor.getChassisFrameSetpoint());
         }
-        config.yawController.runController(dt, config.turret.yawMotor.getChassisFrameSetpoint());
+        config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 
     turretMajorController.runController(
@@ -236,13 +205,6 @@ void SentryImuCalibrateCommand::end(bool)
     // }
 
     // turretMajor->yawMotor.setMotorOutput(0);
-}
-
-bool SentryImuCalibrateCommand::isFinished() const
-{
-    return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
-            calibrationTimer.isExpired()) ||
-           calibrationLongTimeout.isExpired();
 }
 
 }  // namespace aruwsrc::control::imu

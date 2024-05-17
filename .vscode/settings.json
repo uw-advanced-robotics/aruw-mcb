@@ -102,4 +102,15 @@
         ]
     },
     "git.autoRepositoryDetection": false,
+    // For file templates (see extensions section in README.md)
+    "auto-snippets.snippets": [
+        {
+            "pattern": "**/*_command.hpp",
+            "snippet": "declare-command"
+        },
+        {
+            "pattern": "**/*_subsystem.hpp",
+            "snippet": "declare-subsystem"
+        },
+    ]
 }

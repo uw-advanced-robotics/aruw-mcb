@@ -19,12 +19,13 @@ from SCons.Script import *
 
 from .parse_args import USAGE
 
-VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
-                        "STANDARD_ELSA",
+# TODO: Make this sync up with check.py and c_cpp_properties.json if possible
+VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "STANDARD_SPIDER",
+                        "STANDARD_ORION",
                         "DRONE",
                         "ENGINEER",
-                        "SENTRY_BEEHIVE",
+                        "SENTRY_HYDRA",
                         "HERO_CYCLONE",
                         "DART",
                         "TESTBED" ]

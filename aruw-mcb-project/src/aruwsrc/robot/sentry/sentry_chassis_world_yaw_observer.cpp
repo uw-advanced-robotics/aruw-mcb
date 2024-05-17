@@ -18,41 +18,24 @@
  */
 #include "sentry_chassis_world_yaw_observer.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::sentry
 {
 SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
-    aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-    const aruwsrc::control::turret::TurretSubsystem& turretLeft,
-    const aruwsrc::control::turret::TurretSubsystem& turretRight)
-    : turretMajor(turretMajor),
-      turretLeft(turretLeft),
-      turretRight(turretRight)
+    tap::communication::sensors::imu::ImuInterface& imu,
+    const aruwsrc::control::turret::YawTurretSubsystem& turretMajor)
+    : imu(imu),
+      turretMajor(turretMajor)
 {
 }
 
 bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
-    auto turretMCB = turretRight.getTurretMCB();
-    assert(turretMCB != nullptr);
-
-    auto& turretMajorMotor = turretMajor.getReadOnlyMotor();
-
-    if (!turretMCB->isConnected() || !turretRight.yawMotor.isOnline() ||
-        !turretMajorMotor.isOnline())
-    {
-        return false;
-    }
-    float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
-    float turretMinorMajorYawRadians = turretRight.yawMotor.getAngleFromCenter();
-    float turretMajorChassisYawRadians = turretMajorMotor.getAngleFromCenter();
-
+    // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
+    float turretMajorChassisYawRadians = turretMajor.getReadOnlyMotor().getAngleFromCenter();
     *output = modm::Angle::normalize(
-        turretWorldYawRadians - turretMinorMajorYawRadians - turretMajorChassisYawRadians + offset);
+        modm::toRadian(imu.getYaw()) + offset - turretMajorChassisYawRadians);
     return true;
 }
 

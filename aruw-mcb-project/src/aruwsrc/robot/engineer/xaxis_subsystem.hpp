@@ -53,7 +53,7 @@ public:
 
     void onHardwareTestComplete() override;
 
-    const char *getName() override { return "X-Axis"; }
+    const char *getName() const override { return "X-Axis"; }
 
 private:
     tap::gpio::Digital::OutputPin pin;
