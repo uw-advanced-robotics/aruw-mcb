@@ -84,7 +84,7 @@ static inline WrappedFloat transformWorldFrameValueToChassisFrame(
  */
 static inline void initializeWorldFrameTurretImuController(
     const TurretControllerInterface *controllerToInitialize,
-    const WrappedFloat worldFrameMeasurement,
+    const float worldFrameMeasurement,
     TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid,
@@ -97,7 +97,7 @@ static inline void initializeWorldFrameTurretImuController(
 
         worldFrameSetpoint = transformChassisFrameToWorldFrame(
             turretMotor.getChassisFrameMeasuredAngle(),
-            worldFrameMeasurement,
+            Angle(worldFrameMeasurement),
             turretMotor.getChassisFrameSetpoint());
 
         turretMotor.attachTurretController(controllerToInitialize);
@@ -125,7 +125,7 @@ static inline void updateWorldFrameSetpoint(
     const float desiredSetpoint,
     const float chassisFrameMeasurement,
     const float worldFrameMeasurement,
-    float &worldFrameSetpoint,
+    WrappedFloat &worldFrameSetpoint,
     TurretMotor &turretMotor)
 {
     worldFrameSetpoint = desiredSetpoint;
@@ -134,8 +134,8 @@ static inline void updateWorldFrameSetpoint(
     // to keep turret/command setpoints synchronized
 
     turretMotor.setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
-        chassisFrameMeasurement,
-        worldFrameMeasurement,
+        Angle(chassisFrameMeasurement),
+        Angle(worldFrameMeasurement),
         worldFrameSetpoint));
 
     if (turretMotor.getConfig().limitMotorAngles)
@@ -143,8 +143,8 @@ static inline void updateWorldFrameSetpoint(
         // transform angle that is limited by subsystem to world relative again to run the
         // controller
         worldFrameSetpoint = transformChassisFrameToWorldFrame(
-            chassisFrameMeasurement,
-            worldFrameMeasurement,
+            Angle(chassisFrameMeasurement),
+            Angle(worldFrameMeasurement),
             turretMotor.getChassisFrameSetpoint());
     }
 }
@@ -173,8 +173,9 @@ static inline float runWorldFrameTurretImuController(
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)
 {
-    const float positionControllerError =
-        turretMotor.getValidMinError(worldFrameAngleSetpoint, worldFrameAngleMeasurement);
+    const float positionControllerError = turretMotor.getValidMinError(
+        Angle(worldFrameAngleSetpoint),
+        Angle(worldFrameAngleMeasurement));
     const float positionPidOutput =
         positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
 
@@ -194,7 +195,7 @@ WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadeP
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0)
+      worldFrameSetpoint(Angle(0))
 {
 }
 

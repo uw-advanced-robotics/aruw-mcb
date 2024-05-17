@@ -95,7 +95,7 @@ private:
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    WrappedFloat worldFrameSetpoint;
 };
 
 /**
