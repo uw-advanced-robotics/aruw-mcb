@@ -38,7 +38,7 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - STANDARD_WOODY, STANDARD_ELSA, STANDARD_SPIDER, DRONE, ENGINEER, SENTRY_BEEHIVE, HERO_CYCLONE, DART\n\
+            - STANDARD_ELSA, STANDARD_SPIDER, STANDARD_ORION, DRONE, ENGINEER, SENTRY_HYDRA, HERO_CYCLONE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 

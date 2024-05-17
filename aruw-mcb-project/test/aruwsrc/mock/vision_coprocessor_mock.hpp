@@ -41,8 +41,8 @@ public:
     MOCK_METHOD(const TurretAimData &, getLastAimData, (uint8_t turretID), (const override));
     MOCK_METHOD(
         void,
-        attachOdometryInterface,
-        (tap::algorithms::odometry::Odometry2DInterface *),
+        attachTransformer,
+        (aruwsrc::algorithms::transforms::TransformerInterface *),
         (override));
     MOCK_METHOD(void, sendShutdownMessage, (), (override));
     MOCK_METHOD(void, sendRebootMessage, (), (override));

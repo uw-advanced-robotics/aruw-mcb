@@ -18,12 +18,6 @@
  */
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
-#include "tap/algorithms/contiguous_float.hpp"
-
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-
 using namespace tap::algorithms;
 // using namespace tap::algorithms::transforms;
 using namespace aruwsrc::chassis;
@@ -40,7 +34,8 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
     float maxVelErrorInput,
-    float minorMajorTorqueRatio)
+    float minorMajorTorqueRatio,
+    float feedforwardGain)
     : TurretYawControllerInterface(yawMotor),
       worldToChassis(worldToChassis),
       chassis(chassis),
@@ -51,7 +46,8 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
       maxVelErrorInput(maxVelErrorInput),
-      minorMajorTorqueRatio(minorMajorTorqueRatio)
+      minorMajorTorqueRatio(minorMajorTorqueRatio),
+      feedforwardGain(feedforwardGain)
 {
     assert(maxVelErrorInput >= 0);
 }
@@ -63,7 +59,8 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setValue(yawMotor.getChassisFrameSetpoint() + worldToChassis.getYaw());
+        worldFrameSetpoint.setWrappedValue(
+            yawMotor.getChassisFrameSetpoint() + worldToChassis.getYaw());
 
         yawMotor.attachTurretController(this);
     }
@@ -74,17 +71,17 @@ void TurretMajorWorldFrameController::initialize()
 //       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(const uint32_t dt, const float desiredSetpoint)
 {
-    ContiguousFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
+    WrappedFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
 
     const float localVelocity = yawMotor.getChassisFrameVelocity();
 
     const float chassisVelocity = *chassis.getActualVelocityChassisRelative()[2];
 
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 
     const float positionControllerError = turretMotor.getValidMinError(
-        worldFrameSetpoint.getValue() - worldToChassis.getYaw(),
-        localAngle.getValue());
+        worldFrameSetpoint.getWrappedValue() - worldToChassis.getYaw(),
+        localAngle.getWrappedValue());
 
     positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
 
@@ -98,26 +95,32 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 
     torqueCompensation =
         turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
-    if (abs(torqueCompensation) < 2000)
+    if (abs(torqueCompensation) < 3000)  // @todo make a config
     {
         torqueCompensation = 0;
     }
     // @note: in case things look weird, try adding the chassis' rotational velocity to
     // setMotorOutput
-    turretMotor.setMotorOutput(velocityPidOutput + minorMajorTorqueRatio * torqueCompensation);
+    turretMotor.setMotorOutput(
+        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
+        feedforwardGain * turretMotor.getMotorOutput());
+    // @todo: it would be nice to have a final maxOutput for this controller
 }
 
 // @todo what's the point of this; overridden by runController anyways?
 void TurretMajorWorldFrameController::setSetpoint(float desiredSetpoint)
 {
-    worldFrameSetpoint.setValue(desiredSetpoint);
+    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 }
 
-float TurretMajorWorldFrameController::getSetpoint() const { return worldFrameSetpoint.getValue(); }
+float TurretMajorWorldFrameController::getSetpoint() const
+{
+    return worldFrameSetpoint.getWrappedValue();
+}
 
 float TurretMajorWorldFrameController::getMeasurement() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getValue() + worldToChassis.getYaw();
+    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue() + worldToChassis.getYaw();
 }
 
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }

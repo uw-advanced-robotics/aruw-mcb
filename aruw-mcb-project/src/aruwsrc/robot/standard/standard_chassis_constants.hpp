@@ -21,6 +21,7 @@
 #define STANDARD_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
@@ -29,6 +30,8 @@
 #ifndef CHASSIS_CONSTANTS_HPP_
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
+
+using tap::motor::DjiMotor;
 
 namespace aruwsrc::chassis
 {
@@ -74,7 +77,7 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
 
 /**
  * Rotation PID: A PD controller for chassis autorotation.
@@ -97,17 +100,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076;
 
-#ifdef TARGET_STANDARD_WOODY
-/**
- * Distance from center of the two front wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-
-#elif defined(TARGET_STANDARD_ELSA)
+#if defined(TARGET_STANDARD_ELSA)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
@@ -116,6 +109,15 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+
+#elif defined(TARGET_STANDARD_ORION)
+
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.37f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.415f;
+
+#else
+
+#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
 
 #endif
 

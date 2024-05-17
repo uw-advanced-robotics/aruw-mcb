@@ -238,25 +238,25 @@ before_script:
   variables:
     ROBOT: STANDARD_ELSA
 
-# Standard (Woody) Build
+# Standard (Orion) build
 
-"Standard (Woody): MCB Build":
+"Standard (Orion): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_WOODY
+    ROBOT: STANDARD_ORION
 
-"Standard (Woody): Sim Build":
+"Standard (Orion): Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: STANDARD_WOODY
+    ROBOT: STANDARD_ORION
 
-"Standard (Woody): Test Build":
+"Standard (Orion): Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: STANDARD_WOODY
+    ROBOT: STANDARD_ORION
 
 # Drone build
 
@@ -324,19 +324,19 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 "Sentry: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 "Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_HYDRA
 
 # Dart Build
 

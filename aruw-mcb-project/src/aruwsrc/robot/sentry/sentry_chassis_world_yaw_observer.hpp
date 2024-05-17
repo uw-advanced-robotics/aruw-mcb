@@ -21,8 +21,8 @@
 #define SENTRY_CHASSIS_WORLD_YAW_OBSERVER_HPP_
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
 namespace aruwsrc::sentry
@@ -30,8 +30,7 @@ namespace aruwsrc::sentry
 /**
  * @brief Sentry specific ChassisWorldYawObserverInterface implementation
  *
- * Returns the orientation of the chassis based on subtracting the turret
- * yaw in chassis-frame from the turret IMU's yaw in global frame.
+ * Returns the orientation of the chassis based on the orientation of the turret-major IMU
  *
  * @see tap::algorithms::odometry::ChassisWorldYawObserverInterface
  */
@@ -47,11 +46,8 @@ public:
      * CAN bus 1 is attached to.
      */
     SentryChassisWorldYawObserver(
-        aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-        const aruwsrc::control::turret::TurretSubsystem& turretLeft,
-        const aruwsrc::control::turret::TurretSubsystem&
-            turretRight);  // Could do sensor fusion in the future but for now the
-                           // malewife turret is unused
+        tap::communication::sensors::imu::ImuInterface &imu,
+        const aruwsrc::control::turret::YawTurretSubsystem &turretMajor);
 
     /**
      * Get the current chassis yaw in radians.
@@ -64,19 +60,14 @@ public:
      * @return `true` if valid chassis orientation was available. i.e: true if and only if
      *      turret->isOnline() && turretSubsystem.getChassisMCB()->isConnected()
      */
-    bool getChassisWorldYaw(float* yaw) const final;
+    bool getChassisWorldYaw(float *yaw) const final;
 
     void overrideChassisYaw(float newYaw);
 
-    mutable float lastGottenYaw;
-    mutable float turretWorldYawRadians;
-    mutable float turretMinorMajorYawRadians;
-    mutable float turretMajorChassisYawRadians;
-
 private:
-    const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-    const aruwsrc::control::turret::TurretSubsystem& turretLeft;
-    const aruwsrc::control::turret::TurretSubsystem& turretRight;
+    tap::communication::sensors::imu::ImuInterface &imu;
+
+    const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
 
     // error factor since we don't know how to reset the imu to some non-zero value outright
     float offset = 0.0f;

@@ -35,6 +35,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
@@ -125,10 +126,12 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#ifdef TARGET_STANDARD_ELSA
+#if defined(TARGET_STANDARD_ELSA)
     true,
-#else
+#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION)
     false,
+#else
+#error "did not define standard!"
 #endif
     "Yaw Turret");
 StandardTurretSubsystem turret(
@@ -153,6 +156,8 @@ OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::V
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
 StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+
+StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -426,45 +431,6 @@ HoldCommandMapping leftSwitchUp(
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// @todo: sort out all mappings in a different PR
-/// @brief sentry messages
-// PressCommandMapping cShiftPressed(
-//     drivers(),
-//     {&sendSentryNoMotionStrategy},
-//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
-// PressCommandMapping qShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToFriendlyBase},
-//     RemoteMapState({Remote::Key::Q, Remote::Key::SHIFT}));
-// PressCommandMapping eShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToEnemyBase},
-//     RemoteMapState({Remote::Key::E, Remote::Key::SHIFT}));
-// PressCommandMapping rShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToSupplierZone},
-//     RemoteMapState({Remote::Key::R, Remote::Key::SHIFT}));
-// PressCommandMapping fShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToEnemySupplierZone},
-//     RemoteMapState({Remote::Key::F, Remote::Key::SHIFT}));
-// PressCommandMapping gShiftPressed(
-//     drivers(),
-//     {&sendSentryGoToCenterPoint},
-//     RemoteMapState({Remote::Key::G, Remote::Key::SHIFT}));
-// PressCommandMapping zShiftPressed(
-//     drivers(),
-//     {&sendSentryHoldFire},
-//     RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
-// PressCommandMapping xShiftPressed(
-//     drivers(),
-//     {&sendSentryToggleMovement},
-//     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
-// PressCommandMapping vShiftPressed(
-//     drivers(),
-//     {&sendSentryToggleBeyblade},
-//     RemoteMapState({Remote::Key::V, Remote::Key::SHIFT}));
-
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
     RemoteMapState({Remote::Key::R}),
@@ -587,8 +553,7 @@ void startStandardCommands(Drivers *drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
