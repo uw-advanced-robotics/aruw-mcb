@@ -47,7 +47,7 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
 Position AutoNavPath::findClosestPoint(Position current) {
     float minDistance = F32_MAX;
     size_t closestIndex = 0;
-    Position minClosest;
+    Position minClosest = setpointData[0];
     for (size_t i = 0; i < setpointData.size() - 1; i++) {
         Position p1 = setpointData[i];
         Position p2 = setpointData[i+1];

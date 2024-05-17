@@ -30,6 +30,7 @@
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -41,13 +42,13 @@ class HolonomicChassisSubsystem;
 class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
-    float POS_RAMP_RATE = 0.0008f;
+    // float POS_RAMP_RATE = 0.0008f;
 
     AutoNavBeybladeCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
         const aruwsrc::control::turret::TurretMotor& yawMotor,
-        const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
         const aruwsrc::sentry::SentryBeybladeConfig config,
         const tap::algorithms::SmoothPidConfig pidConfig,
@@ -68,16 +69,16 @@ public:
     const char* getName() const override { return "autonav beyblade"; }
 
 private:
-    float rotationDirection;
+    // float rotationDirection;
 
-    tap::algorithms::Ramp rotateSpeedRamp;
-    tap::algorithms::Ramp xRamp;
-    tap::algorithms::Ramp yRamp;
+    // tap::algorithms::Ramp rotateSpeedRamp;
+    // tap::algorithms::Ramp xRamp;
+    // tap::algorithms::Ramp yRamp;
 
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
     const aruwsrc::control::turret::TurretMotor& yawMotor;
-    const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
 
     const aruwsrc::sentry::SentryBeybladeConfig config;
@@ -90,6 +91,8 @@ private:
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;
+
+    aruwsrc::chassis::ChassisAutoNavController autoNavController;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

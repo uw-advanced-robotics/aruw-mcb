@@ -42,7 +42,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
     const aruwsrc::control::turret::TurretMotor& yawMotor,
-    const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
     const aruwsrc::sentry::SentryBeybladeConfig config,
     tap::algorithms::SmoothPidConfig pidConfig,
@@ -55,7 +55,8 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
       config(config),
       autoNavOnlyInGame(autoNavOnlyInGame),
       xPid(pidConfig),
-      yPid(pidConfig)
+      yPid(pidConfig),
+      autoNavController(chassis, visionCoprocessor.getPath(), visionCoprocessor, drivers, config)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -65,103 +66,47 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
 // Resets ramp
 void AutoNavBeybladeCommand::initialize()
 {
-#ifdef ENV_UNIT_TESTS
-    rotationDirection = 1;
-#else
-    rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
-#endif
-    rotateSpeedRamp.reset(chassis.getDesiredRotation());
-    xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
-    yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
+// #ifdef ENV_UNIT_TESTS
+//     rotationDirection = 1;
+// #else
+//     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
+// #endif
+//     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+//     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
+//     yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
+    float x = odometryInterface.getCurrentLocation2D().getX();
+    float y = odometryInterface.getCurrentLocation2D().getY();
+    autoNavController.initialize(Position(x, y, 0));
 }
 
 void AutoNavBeybladeCommand::execute()
 {
-    if (yawMotor.isOnline())
-    {
-        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        prevTime = currTime;
-        // Gets current chassis yaw angle
-        float currentX = odometryInterface.getCurrentLocation2D().getX();
-        float currentY = odometryInterface.getCurrentLocation2D().getY();
-        float chassisYawAngle = odometryInterface.getYaw();
+    if (!yawMotor.isOnline()) return;
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers.refSerial.getRefSerialReceivingData(),
-            drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    prevTime = currTime;
+    // Gets current chassis yaw angle
+    float currentX = odometryInterface.getCurrentLocation2D().getX();
+    float currentY = odometryInterface.getCurrentLocation2D().getY();
+    float chassisYawAngle = odometryInterface.getYaw();
 
-        float rampTarget = 0.0;
+    const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers.refSerial.getRefSerialReceivingData(),
+        drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-        //TODO: replace this with chassis auto nav controller functionality
-        aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData setpointData =
-            visionCoprocessor.getLastSetpointData();
-        const tap::communication::serial::RefSerialData::Rx::GameType& gametype =
-            drivers.refSerial.getGameData().gameType;
+    float rampTarget = 0.0;
+    
+    const tap::communication::serial::RefSerialData::Rx::GameType& gametype =
+        drivers.refSerial.getGameData().gameType;
 
-        float x = 0.0f;
-        float y = 0.0f;
-
-        if ((int(gametype) == 0 ||
-             (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) &&
-            setpointData.pathFound && visionCoprocessor.isCvOnline() && movementEnabled)
-        {
-            xRamp.setTarget(setpointData.x);
-            yRamp.setTarget(setpointData.y);
-
-            xRamp.update(POS_RAMP_RATE);
-            yRamp.update(POS_RAMP_RATE);
-
-            float desiredVelocityX = xRamp.getValue() - currentX;
-            float desiredVelocityY = yRamp.getValue() - currentY;
-            float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
-            if (mag > 0.01)
-            {
-                x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier *
-                    maxWheelSpeed;
-                y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier *
-                    maxWheelSpeed;
-            }
-        }
-
-        // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) *
-        // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed; float y =
-        // yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) *
-        // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-
-        if ((int(gametype) == 0 ||
-             (drivers.refSerial.getGameData().gameStage == RefSerial::Rx::GameStage::IN_GAME)) &&
-            beybladeEnabled)
-        {
-            // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
-            // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
-            // maxWheelSpeed)
-            const float translationalSpeedThreshold =
-                config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-                config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-
-            rampTarget =
-                rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
-
-            // reduce the beyblade rotation when translating to allow for better translational speed
-            // (otherwise it is likely that you will barely move unless
-            // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-            if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
-            {
-                rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
-            }
-        }
-
-        rotateSpeedRamp.setTarget(rampTarget);
-        // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-        rotateSpeedRamp.update(config.beybladeRampRate);
-        float r = rotateSpeedRamp.getValue();
-
-        // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
-
-        // set outputs
-        chassis.setDesiredOutput(x, y, r);
-    }
+    autoNavController.runController(
+        currTime - prevTime,
+        Position(currentX, currentY, 0),
+        maxWheelSpeed,
+        gametype,
+        movementEnabled,
+        beybladeEnabled,
+        chassisYawAngle);
 }
 
 void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }

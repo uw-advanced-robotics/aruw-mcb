@@ -259,6 +259,8 @@ public:
         return lastSetpointData;
     }
 
+    mockable inline aruwsrc::algorithms::AutoNavPath& getPath() { return path; }
+
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
     mockable inline bool getSomeTurretHasTarget() const

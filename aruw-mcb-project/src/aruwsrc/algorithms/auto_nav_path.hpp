@@ -2,10 +2,11 @@
 #define AUTO_NAV_PATH_HPP_
 
 #include <deque>
-#include "tap\algorithms\transforms\position.hpp"
-#include "aruwsrc\communication\serial\vision_coprocessor.hpp"
+#include "tap/algorithms/transforms/position.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 using namespace tap::algorithms::transforms;
+using namespace aruwsrc::serial;
 namespace aruwsrc::algorithms {
 class AutoNavPath {
 public:
@@ -14,10 +15,11 @@ public:
         interpolationDistance(distance),
         oldSetpoint(0,0,0),
         currentSetpoint(0,0,0) {}
-    void pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
+    void pushPoint(VisionCoprocessor::AutoNavSetpointData point);
     void pushPoint(Position point);
     void popPoint();
     void resetPath();
+    bool empty() const { return setpointData.empty(); }
     Position getSetPoint() const;
     Position setInterpolatedPoint(Position current);
 
