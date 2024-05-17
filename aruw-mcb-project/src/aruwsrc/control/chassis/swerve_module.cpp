@@ -141,6 +141,7 @@ float SwerveModule::getAngularVelocity() const
 void SwerveModule::limitPower(float frac)
 {
     powerLimitFrac = frac;
+    // TODO: We were scared so we commented out the code to prioritize azimuth motor power
     // driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);  // *
     // angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle())));
     // azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);  // *

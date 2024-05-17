@@ -101,6 +101,7 @@ void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r,
 // int wtf = 0, wtf2 = 0;
 void HalfSwerveChassisSubsystem::refresh()
 {
+    limitChassisPower();
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i]->refresh();
