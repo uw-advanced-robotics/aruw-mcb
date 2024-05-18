@@ -79,8 +79,8 @@ void VisionCoprocessor::initializeCV()
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 1'000'000>();
-    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 1'000'000>();
+    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, VISION_COPROCESSOR_BAUD_RATE>();
+    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, VISION_COPROCESSOR_BAUD_RATE>();
 }
 
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)

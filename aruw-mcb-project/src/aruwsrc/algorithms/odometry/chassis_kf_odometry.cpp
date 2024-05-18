@@ -67,6 +67,11 @@ void ChassisKFOdometry::update()
     float y[int(OdomInput::NUM_INPUTS)] = {};
     y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
     y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+    // @todo this is a dumb ifdef to avoid support for vertically mounted chassis MCB
+#ifdef TARGET_HERO_PERSEUS
+    y[int(OdomInput::ACC_X)] = imu.getAz();
+    y[int(OdomInput::ACC_Y)] = -imu.getAy();
+#else
     y[int(OdomInput::ACC_X)] = imu.getAx();
     y[int(OdomInput::ACC_Y)] = imu.getAy();
 
@@ -75,6 +80,7 @@ void ChassisKFOdometry::update()
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
         serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+#endif
 
     // perform the update, after this update a new state matrix is now available
     kf.performUpdate(y);
