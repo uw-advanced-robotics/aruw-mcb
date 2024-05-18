@@ -32,8 +32,9 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
-    const float forwardMatrixArray[24])
-    : HolonomicChassisSubsystem(drivers, currentSensor),
+    const float forwardMatrixArray[24],
+    communication::can::capbank::CapacitorBank* capacitorBank)
+    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {

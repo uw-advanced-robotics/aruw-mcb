@@ -32,6 +32,7 @@ namespace chassis
 MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    communication::can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
@@ -39,6 +40,7 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     : Holonomic4MotorChassisSubsystem(
           drivers,
           currentSensor,
+          capacitorBank,
           leftFrontMotorId,
           leftBackMotorId,
           rightFrontMotorId,

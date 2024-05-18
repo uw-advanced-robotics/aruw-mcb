@@ -31,6 +31,7 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
+#include "capacitor_bank_power_limiter.hpp"
 #include "constants/chassis_constants.hpp"
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
@@ -58,7 +59,8 @@ class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystem
 public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        communication::can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -153,7 +155,7 @@ public:
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
-    tap::control::chassis::PowerLimiter chassisPowerLimiter;
+    CapBankPowerLimiter chassisPowerLimiter;
 
     virtual void limitChassisPower() = 0;
 

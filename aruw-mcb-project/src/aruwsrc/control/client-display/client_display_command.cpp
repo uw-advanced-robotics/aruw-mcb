@@ -47,7 +47,8 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
+    const aruwsrc::communication::can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -61,6 +62,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           agitatorSubsystem,
           imuCalibrateCommand,
           sentryResponseHandler),
+      capBankIndicator(refSerialTransmitter, capBank),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(
           drivers,
@@ -92,6 +94,7 @@ void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
     booleanHudIndicators.initialize();
+    capBankIndicator.initialize();
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
@@ -119,6 +122,7 @@ bool ClientDisplayCommand::run()
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
+    PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
@@ -128,6 +132,7 @@ bool ClientDisplayCommand::run()
     while (!this->restarting)
     {
         PT_CALL(booleanHudIndicators.update());
+        PT_CALL(capBankIndicator.update());
         PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());

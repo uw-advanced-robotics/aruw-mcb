@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,36 +17,32 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SPLASH_SCREEN_HPP_
-#define SPLASH_SCREEN_HPP_
+#ifndef CAPACITOR_BANK_MENU_HPP_
+#define CAPACITOR_BANK_MENU_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
 {
 class Drivers;
-}
+}  // namespace aruwsrc
 
-namespace aruwsrc
+namespace aruwsrc::display
 {
-namespace display
-{
-class SplashScreen : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+/**
+ * Menu that allows user to see information about the current state of the capacitor bank.
+ */
+class CapacitorBankMenu
+    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    SplashScreen(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        tap::Drivers *drivers,
-        serial::VisionCoprocessor *visionCoprocessor,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2,
+    CapacitorBankMenu(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
         communication::can::capbank::CapacitorBank* capacitorBank);
-
     void draw() override;
 
     void update() override;
@@ -55,19 +51,18 @@ public:
 
     bool hasChanged() override;
 
-    inline void resetHasChanged() { drawn = false; }
+    static const char* getMenuName() { return "Capacitor Bank Menu"; }
 
 private:
-    static constexpr int SPLASH_SCREEN_MENU_ID = 1;
+    static constexpr int TURRET_MCB_MENU_ID = 13;
 
-    bool drawn = false;
-    tap::Drivers *drivers;
-    serial::VisionCoprocessor *visionCoprocessor;
-    can::TurretMCBCanComm *turretMCBCanCommBus1;
-    can::TurretMCBCanComm *turretMCBCanCommBus2;
-    communication::can::capbank::CapacitorBank *capacitorBank;
+    communication::can::capbank::CapacitorBank* capacitorBank;
+
+    int milliVolts = 0, milliAmps = 0, powerLimit = 0, availableEnergy = 0;
+    communication::can::capbank::State state;
+
+    bool changed;
 };
-}  // namespace display
-}  // namespace aruwsrc
+}  // namespace aruwsrc::display
 
-#endif  // SPLASH_SCREEN_HPP_
+#endif  // CAPACITOR_BANK_MENU_HPP_

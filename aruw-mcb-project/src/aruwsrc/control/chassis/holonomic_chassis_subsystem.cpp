@@ -34,12 +34,14 @@ modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        communication::can::capbank::CapacitorBank* capacitorBank)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       currentSensor(currentSensor),
       chassisPowerLimiter(
           drivers,
           currentSensor,
+          capacitorBank,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)

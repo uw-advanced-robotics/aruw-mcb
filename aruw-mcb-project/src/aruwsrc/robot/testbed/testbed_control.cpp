@@ -37,7 +37,9 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-void initializeSubsystems() {}
+void initializeSubsystems() {
+    drivers()->capacitorBank.initialize();
+}
 
 }  // namespace testbed_control
 
