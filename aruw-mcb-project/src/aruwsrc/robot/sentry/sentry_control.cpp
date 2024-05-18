@@ -32,7 +32,6 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
-#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -72,6 +71,7 @@ using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::sentry::chassis;
 using namespace aruwsrc::control::agitator;
@@ -491,7 +491,13 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
 
-ManualFireRateReselectionManager fireRateReselectionManagerTurretLeft;
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    sentryTurretCVCommand, // Doesn't exist yet
+    turretLeft::turretID
+);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretLeft(fireRateReselectionManagerTurretLeft);
 
@@ -533,7 +539,13 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
 
-ManualFireRateReselectionManager fireRateReselectionManagerTurretRight;
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    sentryTurretCVCommand, // DNE
+    turretRight::turretID
+);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretRight(fireRateReselectionManagerTurretRight);
 
@@ -571,7 +583,7 @@ HoldCommandMapping shoot(
 
 HoldRepeatCommandMapping shootRightSwitchDownAgitator(
     drivers(),
-    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting, 
+    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
     true);
