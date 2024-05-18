@@ -57,7 +57,7 @@ struct WheelConfig
     float motorGearRatio;  // considering shoving these into DjiMotor in the future
     const SmoothPidConfig& velocityPidConfig;
     bool isPowered = true;
-    float maxWheelRPM = 1000;
+    float maxWheelRPM = 10000;
     bool inverted;
     // Used by odometry to determine the confidence of the wheel's velocity
     // Defaults to zero (no error in the sensor)

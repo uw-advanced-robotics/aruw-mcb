@@ -54,6 +54,30 @@ constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
 // clang-format on
 
+
+tap::algorithms::SmoothPidConfig drivePidConfig = {
+        .kp = 7.0f,
+        .ki = 0.0f,
+        .kd = -80.0f,
+        .maxICumulative = 0.0f,
+        .maxOutput = 16'000.0f,
+        .tRDerivativeKalman = 100.0f,
+        .tRProportionalKalman = 100.0f,
+        .errDeadzone = 0.0f,
+        .errorDerivativeFloor = 0.0f};
+
+    tap::algorithms::SmoothPidConfig azimuthPidConfig = {
+        .kp = 15000.0f,  // 10000.0f
+        .ki = 0.0f,
+        .kd = 0.0f,  // 12.0f
+        .maxICumulative = 0.0f,
+        .maxOutput = 16'000.0f,
+        .errDeadzone = 0.0f,
+        .errorDerivativeFloor = 0.0f,
+    };
+
+     
+
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
     .beybladeTranslationalSpeedMultiplier = 0.1f,
@@ -71,6 +95,72 @@ aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
     // .driveMotorInverted = false,
     .driveMotorInverted = false,
 };
+
+aruwsrc::chassis::SwerveAzimuthConfig rightFrontAzimuthConfig = {
+    .azimuthZeroOffset = 3419 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthMotorGearing = 1.0f,
+    .azimuthPidConfig = azimuthPidConfig,
+    .inverted = false,
+};
+
+aruwsrc::chassis::SwerveAzimuthConfig leftBackAzimuthConfig = {
+    .azimuthZeroOffset = 3419 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthMotorGearing = 1.0f,
+    .azimuthPidConfig = azimuthPidConfig,
+    .inverted = false,
+};
+
+
+aruwsrc::chassis::WheelConfig leftBackWheelConfig = {
+    .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.1016f,
+    .gearRatio = 23.0f / 12.0f,
+    .motorGearRatio = 1.0f / 19.0f,
+    .velocityPidConfig = drivePidConfig,
+    .inverted = false,
+};
+
+aruwsrc::chassis::WheelConfig rightFrontWheelConfig = {
+    .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = 0,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.1016f,
+    .gearRatio = 23.0f / 12.0f,
+    .motorGearRatio = 1.0f / 19.0f,
+    .velocityPidConfig = drivePidConfig,
+    .inverted = false,
+};
+
+aruwsrc::chassis::WheelConfig rightOmniConfig = {
+    .wheelPositionChassisRelativeX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = M_SQRT2 / 2.0f,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.102f,
+    .gearRatio = 1,
+    .motorGearRatio = 1,
+    .velocityPidConfig = drivePidConfig,
+    .isPowered = false,
+    .inverted = false,
+};
+
+aruwsrc::chassis::WheelConfig leftOmniConfig = {
+    .wheelPositionChassisRelativeX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelPositionChassisRelativeY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
+    .wheelOrientationChassisRelative = -M_SQRT2 / 2.0f,
+    .distFromCenterToWheel = CENTER_TO_WHEELBASE_RADIUS,
+    .diameter = 0.102f,
+    .gearRatio = 1,
+    .motorGearRatio = 1,
+    .velocityPidConfig = drivePidConfig,
+    .isPowered = false,
+    .inverted = false,
+};
+
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
     // .azimuthZeroOffset = 7172,

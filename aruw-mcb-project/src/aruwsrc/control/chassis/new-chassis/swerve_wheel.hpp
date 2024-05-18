@@ -45,7 +45,10 @@ struct SwerveAzimuthConfig
     int azimuthZeroOffset;
     float azimuthMotorGearing;
     SmoothPidConfig& azimuthPidConfig;
-    modm::Pair<float, float> angular_power_frac_LUT[2];
+    modm::Pair<float, float> angular_power_frac_LUT[2] = {
+        {0.0f, 0.2f},
+        {M_PI_2, 0.75f},
+    };
     bool inverted;
 };
 

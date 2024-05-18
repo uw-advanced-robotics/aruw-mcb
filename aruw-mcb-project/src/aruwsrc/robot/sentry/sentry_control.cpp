@@ -18,6 +18,9 @@
  */
 
 #if defined(TARGET_SENTRY_HYDRA)
+#include <aruwsrc/control/chassis/new-chassis/mecanum_wheel.hpp>
+#include <aruwsrc/control/chassis/new-chassis/swerve_wheel.hpp>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -59,6 +62,7 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
+#include <aruwsrc/control/chassis/new-chassis/chassis_subsystem.hpp>
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -296,15 +300,21 @@ VirtualDjiMotor rightOmni(
     "Left Omni Dead WheelConversions");
 
 // these four swerve modules will later be passed into SwerveChassisSubsystem
-aruwsrc::chassis::SwerveModule rightFrontSwerveModule(
+aruwsrc::chassis::SwerveWheel rightFrontSwerveWheel(
     rightFrontDriveMotor,
     rightFrontAzimuthMotor,
-    rightFrontSwerveConfig);
+    rightFrontWheelConfig,
+    rightFrontAzimuthConfig,
+    rightFrontSwerveConfig.drivePidConfig,
+    rightFrontSwerveConfig.azimuthPidConfig);
 
-aruwsrc::chassis::SwerveModule leftBackSwerveModule(
+aruwsrc::chassis::SwerveWheel leftBackSwerveWheel(
     leftBackDriveMotor,
     leftBackAzimuthMotor,
-    leftBackSwerveConfig);
+    leftBackWheelConfig,
+    leftBackAzimuthConfig,
+    leftBackSwerveConfig.drivePidConfig,
+    leftBackSwerveConfig.azimuthPidConfig);
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
@@ -313,13 +323,15 @@ aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
+std::vector<aruwsrc::chassis::Wheel *> wheels = {
+    &rightFrontSwerveWheel,
+    &leftBackSwerveWheel};
+
+
+aruwsrc::chassis::ChassisSubsystem chassis(
     drivers(),
-    &currentSensor,
-    &rightFrontSwerveModule,
-    &leftBackSwerveModule,
-    CENTER_TO_WHEELBASE_RADIUS,
-    HALF_SWERVE_FORWARD_MATRIX);
+    wheels,
+    &currentSensor);
 
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
