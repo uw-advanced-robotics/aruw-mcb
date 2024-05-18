@@ -41,8 +41,8 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -571,7 +571,8 @@ HoldCommandMapping shoot(
 
 HoldRepeatCommandMapping shootRightSwitchDownAgitator(
     drivers(),
-    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting, &turretRightRotateAndUnjamAgitatorWithHeatLimiting},
+    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting, 
+     &turretRightRotateAndUnjamAgitatorWithHeatLimiting},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
     true);
 
@@ -649,7 +650,7 @@ void registerSentryIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
+    drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
     drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
     // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
@@ -658,8 +659,8 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
-    drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    drivers->commandMapper.addMap(&shoot);          // Shoot
+    drivers->commandMapper.addMap(&leftUpRightUp);                 // Agitators
+    drivers->commandMapper.addMap(&shoot);                         // Shoot
     drivers->commandMapper.addMap(&shootRightSwitchDownAgitator);  // Shoot with governors
 }
 }  // namespace sentry_control
