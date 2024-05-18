@@ -56,9 +56,10 @@ void TurretMotor::updateMotorAngle()
                 getClosestNonNormalizedSetpointToMeasurement(positionRad, startEncoderValueRad));
             adjustedStartEncoderValue =
                 DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
-        }
-        if (config.limitMotorAngles) {
-            adjustedStartEncoderValue = config.startEncoderValue;
+            if (config.limitMotorAngles) {
+                adjustedStartEncoderValue = config.startEncoderValue;
+            }
+            startEncoderOffset = 0;
         }
 
         if (lastUpdatedEncoderValue == encoderUnwrapped)
