@@ -30,6 +30,7 @@
 #include "modm/ui/menu/view_stack.hpp"
 
 #include "splash_screen.hpp"
+#include "message_screen.hpp"
 
 namespace aruwsrc
 {
@@ -68,6 +69,8 @@ public:
      * should be displayed on the OLED.
      */
     mockable void updateMenu();
+
+    void crash(const char* errorMsg);
 
 private:
     tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;

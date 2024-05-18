@@ -92,5 +92,15 @@ void OledDisplay::updateMenu()
 
     viewStack.update();
 }
+
+void OledDisplay::crash(const char* errorMsg)
+{
+    MessageScreen crashView(&viewStack, errorMsg);
+    viewStack.push(&crashView);
+    while (true)
+    {
+        
+    }
+}
 }  // namespace display
 }  // namespace aruwsrc
