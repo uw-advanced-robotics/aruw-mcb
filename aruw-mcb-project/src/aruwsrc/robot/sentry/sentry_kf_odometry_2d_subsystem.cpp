@@ -33,7 +33,7 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     float initialXPos,
     float initialYPos)
     : Subsystem(&drivers),
-      ChassisKFOdometry(chassis, yawObserver, imu, modm::Vector2f(initialXPos, initialYPos))
+      aruwsrc::algorithms::odometry::ChassisKFOdometry(chassis, yawObserver, imu, modm::Vector2f(initialXPos, initialYPos))
 {
 }
 
