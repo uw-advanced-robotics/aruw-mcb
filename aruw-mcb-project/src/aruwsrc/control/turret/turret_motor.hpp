@@ -265,7 +265,7 @@ private:
      *
      * If equal to INT16_MIN, needs to be re-computed
      */
-    int16_t startEncoderOffset = INT16_MIN;
+    int16_t startValueNeedsCorrection = true;
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.

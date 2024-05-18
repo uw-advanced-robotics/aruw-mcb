@@ -46,20 +46,30 @@ void TurretMotor::updateMotorAngle()
     if (isOnline())
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
+        int64_t encoderDiffFromStart = encoderUnwrapped - config.startEncoderValue;
 
-        if (startEncoderOffset == INT16_MIN)
+        if (startValueNeedsCorrection)
         {
-            float positionRad = modm::toRadian(DjiMotor::encoderToDegrees(encoderUnwrapped));
-            float startEncoderValueRad =
-                modm::toRadian(DjiMotor::encoderToDegrees(config.startEncoderValue));
-            float adjustedStartAngleDegrees = modm::toDegree(
-                getClosestNonNormalizedSetpointToMeasurement(positionRad, startEncoderValueRad));
-            adjustedStartEncoderValue =
-                DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
             if (config.limitMotorAngles) {
-                adjustedStartEncoderValue = config.startEncoderValue;
+                // float positionRad = modm::toRadian(DjiMotor::encoderToDegrees(encoderUnwrapped));
+                // float startEncoderValueRad =
+                // modm::toRadian(DjiMotor::encoderToDegrees(config.startEncoderValue));
+                // float adjustedStartAngleDegrees = modm::toDegree(
+                // getSetpointWithinTurretRange(getClosestNonNormalizedSetpointToMeasurement(positionRad, startEncoderValueRad)));  
+                // adjustedStartEncoderValue =
+                // DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
+                float adjustedEncoderDiff = getSetpointWithinTurretRange(modm::toRadian(DjiMotor::encoderToDegrees(encoderDiffFromStart)));
+                
+            } else {
+                float positionRad = modm::toRadian(DjiMotor::encoderToDegrees(encoderUnwrapped));
+                float startEncoderValueRad =
+                modm::toRadian(DjiMotor::encoderToDegrees(config.startEncoderValue));
+                float adjustedStartAngleDegrees = modm::toDegree(
+                getClosestNonNormalizedSetpointToMeasurement(positionRad, startEncoderValueRad));  
+                adjustedStartEncoderValue =
+                DjiMotor::degreesToEncoder<int64_t>(adjustedStartAngleDegrees);
             }
-            startEncoderOffset = 0;
+            startValueNeedsCorrection = false;
         }
 
         if (lastUpdatedEncoderValue == encoderUnwrapped)
@@ -84,7 +94,7 @@ void TurretMotor::updateMotorAngle()
         }
 
         lastUpdatedEncoderValue = config.startEncoderValue;
-        startEncoderOffset = INT16_MIN;
+        startValueNeedsCorrection = true;
 
         chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
     }
