@@ -81,6 +81,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -215,6 +216,23 @@ aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
+
+aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
+    *drivers(),
+    chassis,
+    turret.yawMotor,
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    aruwsrc::sentry::SentryBeybladeConfig{
+        .beybladeRotationalSpeedFractionOfMax = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
+        .beybladeTranslationalSpeedMultiplier = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
+        .beybladeRotationalSpeedMultiplierWhenTranslating = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
+        .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
+        .beybladeRampRate = aruwsrc::chassis::BEYBLADE_RAMP_UPDATE_RAMP
+    },
+    chassis_rel::PITCH_PID_CONFIG, // DUMMY VALUE - NOT USED
+    false
+    );
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
@@ -543,7 +561,7 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&autonavBeybladeCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
 }

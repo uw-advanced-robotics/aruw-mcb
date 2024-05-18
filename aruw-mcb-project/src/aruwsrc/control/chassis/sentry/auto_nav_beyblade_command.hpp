@@ -93,6 +93,8 @@ private:
     bool movementEnabled = true;
 
     aruwsrc::chassis::ChassisAutoNavController autoNavController;
+
+    bool command_scheduled = false;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

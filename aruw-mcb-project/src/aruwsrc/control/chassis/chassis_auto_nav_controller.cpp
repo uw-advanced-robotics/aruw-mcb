@@ -19,7 +19,8 @@ void ChassisAutoNavController::runController(const uint32_t dt,
                                                 const tap::communication::serial::RefSerialData::Rx::GameType& gametype,
                                                 const bool movementEnabled,
                                                 const bool beybladeEnabled,
-                                                const float chassisYawAngle) {                         
+                                                const float chassisYawAngle) {   
+    controller_called = true;                      
     Position setPoint = path.setInterpolatedPoint(currentPos);
     float rampTarget = 0.0;
     float x = 0.0f;
@@ -29,8 +30,8 @@ void ChassisAutoNavController::runController(const uint32_t dt,
             (drivers.refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
         !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled)
     {
-        float currentX = currentPos.x();
-        float currentY = currentPos.y();
+        float currentX = setPoint.x();
+        float currentY = setPoint.y();
 
         xRamp.setTarget(currentX);
         yRamp.setTarget(currentY);

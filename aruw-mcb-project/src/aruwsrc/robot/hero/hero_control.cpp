@@ -513,7 +513,8 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
+    // chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
+    chassis.setDefaultCommand(&autonavBeybladeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);

@@ -120,7 +120,7 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     //  - a path reset
     AutoNavSetpointData setpointData;
     memcpy(&setpointData, &message.data, sizeof(AutoNavSetpointData));
-    path.pushPoint(setpointData);
+    path.pushPoint(Position(setpointData.x, setpointData.y, 0));
     return true;
 }
 

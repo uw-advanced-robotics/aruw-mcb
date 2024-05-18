@@ -6,10 +6,10 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+//#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 using namespace tap::algorithms::transforms;
-using namespace aruwsrc::serial;
+
 namespace aruwsrc::algorithms
 {
 class AutoNavPath
@@ -20,9 +20,10 @@ public:
           interpolationDistance(distance),
           oldSetpoint(0, 0, 0),
           currentSetpoint(0, 0, 0)
-    {
+    { 
+        setpointData.push_back(Position(0.1, 0.1, 0));
     }
-    void pushPoint(VisionCoprocessor::AutoNavSetpointData point);
+    //void pushPoint(struct aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
     void pushPoint(Position point);
     void popPoint();
     void resetPath();
@@ -40,6 +41,8 @@ private:
     const float interpolationDistance;  //
     Position oldSetpoint;               // The last setpoint used along the previous path
     Position currentSetpoint;
+
+    bool path_interpolated = false;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

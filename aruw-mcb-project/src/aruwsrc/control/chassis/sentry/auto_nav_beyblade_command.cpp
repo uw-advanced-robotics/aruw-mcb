@@ -81,6 +81,7 @@ void AutoNavBeybladeCommand::initialize()
 
 void AutoNavBeybladeCommand::execute()
 {
+    command_scheduled = true;
     if (!yawMotor.isOnline()) return;
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();

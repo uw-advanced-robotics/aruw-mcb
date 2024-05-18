@@ -8,10 +8,10 @@
 using tap::algorithms::transforms::Position;
 using namespace aruwsrc::algorithms;
 
-void AutoNavPath::pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point)
-{
-    setpointData.push_back(Position(point.x, point.y, 0));
-}
+// void AutoNavPath::pushPoint(aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point)
+// {
+//     setpointData.push_back(Position(point.x, point.y, 0));
+// }
 
 void AutoNavPath::pushPoint(Position point) { setpointData.push_back(point); }
 
@@ -97,6 +97,7 @@ Position AutoNavPath::findClosestPoint(Position current)
 
 Position AutoNavPath::setInterpolatedPoint(Position current)
 {
+    path_interpolated = true;
     // TODO: account for and deal with the case of a path reset
     if (setpointData.empty())
     {

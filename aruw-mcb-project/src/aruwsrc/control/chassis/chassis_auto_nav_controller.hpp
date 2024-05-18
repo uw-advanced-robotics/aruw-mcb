@@ -54,6 +54,8 @@ private:
     tap::algorithms::Ramp rotateSpeedRamp;
     tap::algorithms::Ramp xRamp;
     tap::algorithms::Ramp yRamp;
+
+    bool controller_called = false;
 };
 } // namespace aruwsrc::chassis
 

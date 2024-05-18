@@ -361,7 +361,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    aruwsrc::algorithms::AutoNavPath path;
+    aruwsrc::algorithms::AutoNavPath path{0.5f};
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
     ArucoResetData lastArucoData{
