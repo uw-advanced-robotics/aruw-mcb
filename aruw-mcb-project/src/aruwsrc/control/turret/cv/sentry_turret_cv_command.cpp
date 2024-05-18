@@ -214,24 +214,23 @@ void SentryTurretCVCommand::execute()
 
     if (debug)
     {
-    yawControllerMajor.runController(dt, debug_majorSetpoint);
+        // yawControllerMajor.runController(dt, debug_majorSetpoint);
 
-    turretLeftConfig.pitchController.runController(dt, debug_leftPitchSetpoint);
-    turretRightConfig.pitchController.runController(dt, debug_rightPitchSetpoint);
+        turretLeftConfig.pitchController.runController(dt, debug_leftPitchSetpoint);
+        turretRightConfig.pitchController.runController(dt, debug_rightPitchSetpoint);
 
-    turretLeftConfig.yawController.runController(dt, debug_leftYawSetpoint);
-    turretRightConfig.yawController.runController(dt, debug_rightYawSetpoint);
+        turretLeftConfig.yawController.runController(dt, debug_leftYawSetpoint);
+        turretRightConfig.yawController.runController(dt, debug_rightYawSetpoint);
     }
     else
     {
+        // yawControllerMajor.runController(dt, majorSetpoint);
 
-    yawControllerMajor.runController(dt, majorSetpoint);
+        turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
+        turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
 
-    turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
-    turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
-
-    turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
-    turretRightConfig.yawController.runController(dt, rightYawSetpoint);
+        turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
+        turretRightConfig.yawController.runController(dt, rightYawSetpoint);
     }
 }
 

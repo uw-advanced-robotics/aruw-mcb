@@ -93,8 +93,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .desiredSetpoint = 225.0f / 60.06 * M_TWOPI,
-    // MAX_AGITATOR_ROF * M_TWOPI / AGITATOR_NUM_POCKETS,
+    // .desiredSetpoint = 225.0f / 60.06 * M_TWOPI,
+    .desiredSetpoint = MAX_AGITATOR_ROF * M_TWOPI / AGITATOR_NUM_POCKETS,
     // .integralSetpointTolerance = M_PI / 20.0f,
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
