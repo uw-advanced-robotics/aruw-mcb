@@ -169,6 +169,8 @@ private:
     // multiple of PI)
     float rotationOffset{0};
 
+    float powerLimitFrac{1};
+
     modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;
 
 };  // class SwerveModule
