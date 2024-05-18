@@ -2,19 +2,26 @@
 #define AUTO_NAV_PATH_HPP_
 
 #include <deque>
+
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/position.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::serial;
-namespace aruwsrc::algorithms {
-class AutoNavPath {
+namespace aruwsrc::algorithms
+{
+class AutoNavPath
+{
 public:
-    AutoNavPath(float distance):
-        setpointData(),
-        interpolationDistance(distance),
-        oldSetpoint(0,0,0),
-        currentSetpoint(0,0,0) {}
+    AutoNavPath(float distance)
+        : setpointData(),
+          interpolationDistance(distance),
+          oldSetpoint(0, 0, 0),
+          currentSetpoint(0, 0, 0)
+    {
+    }
     void pushPoint(VisionCoprocessor::AutoNavSetpointData point);
     void pushPoint(Position point);
     void popPoint();
@@ -22,23 +29,25 @@ public:
     bool empty() const { return setpointData.empty(); }
     Position getSetPoint() const;
     Position setInterpolatedPoint(Position current);
+    Position pointFromParameter(const float parameter) const;
 
 private:
     Position findClosestPoint(Position current);
-    float getDistance(Position p1, Position p2) const; 
+    float getDistance(Position p1, Position p2) const;
 
     std::deque<Position> setpointData;
 
-    const float interpolationDistance;  // 
-    Position oldSetpoint;  // The last setpoint used along the previous path
+    const float interpolationDistance;  //
+    Position oldSetpoint;               // The last setpoint used along the previous path
     Position currentSetpoint;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif
     Position getClosestOnSegment(Position current, Position p1, Position p2) const;
+    float getClosestParameterOnSegment(Position current, Position p1, Position p2) const;
 };
 
-} // namespace aruwsrc::algorithms
+}  // namespace aruwsrc::algorithms
 
-#endif // AUTO_NAV_PATH_HPP_
+#endif  // AUTO_NAV_PATH_HPP_
