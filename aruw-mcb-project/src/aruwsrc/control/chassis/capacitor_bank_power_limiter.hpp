@@ -34,6 +34,21 @@ class Drivers;
 namespace aruwsrc::chassis
 {
 
+class CapacitorSelectingCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
+{
+public:
+    CapacitorSelectingCurrentSensor(
+        tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+        aruwsrc::communication::can::capbank::CapacitorBank *capacitorBank);
+
+    float getCurrentMa() const override;
+
+    void update() override { this->currentSensor->update(); };
+private:
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor;
+    aruwsrc::communication::can::capbank::CapacitorBank *capacitorBank;
+};
+
 class CapBankPowerLimiter : tap::control::chassis::PowerLimiter
 {
 public:
@@ -50,6 +65,7 @@ public:
 private:
     const tap::Drivers* drivers;
     const aruwsrc::communication::can::capbank::CapacitorBank* capacitorBank;
+    CapacitorSelectingCurrentSensor sensor;
 
     const float LOWEST_CAP_VOLTAGE = 10.0f;
     const float POWER_RAMPDOWN_RANGE = 5.0f;

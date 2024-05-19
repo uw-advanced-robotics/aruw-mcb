@@ -24,6 +24,25 @@
 
 namespace aruwsrc::chassis
 {
+
+CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    aruwsrc::communication::can::capbank::CapacitorBank *capacitorBank):
+
+    currentSensor(currentSensor),
+    capacitorBank(capacitorBank) {
+
+    };
+
+float CapacitorSelectingCurrentSensor::getCurrentMa() const {
+    if (this->capacitorBank == nullptr || this->capacitorBank->getState() == communication::can::capbank::State::UNKNOWN)
+    {
+        return currentSensor->getCurrentMa();
+    }
+
+    return this->capacitorBank->getCurrent() * 1000;
+}
+
 CapBankPowerLimiter::CapBankPowerLimiter(
     const tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
@@ -31,14 +50,15 @@ CapBankPowerLimiter::CapBankPowerLimiter(
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
-    : tap::control::chassis::PowerLimiter(
+    : sensor(currentSensor, capacitorBank),
+      drivers(drivers),
+      capacitorBank(capacitorBank),
+      tap::control::chassis::PowerLimiter(
           drivers,
-          currentSensor,
+          &sensor,
           startingEnergyBuffer,
           energyBufferLimitThreshold,
-          energyBufferCritThreshold),
-      drivers(drivers),
-      capacitorBank(capacitorBank)
+          energyBufferCritThreshold)
 {
 }
 
@@ -66,7 +86,11 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         0.0f,
         1.0f);
 
-    return this->capacitorBank->getSprintModifer() * ((1 - capVoltageLimit) * fallbackLimit + capVoltageLimit);
+    if (this->capacitorBank->getSprinting() == communication::can::capbank::SprintMode::REGULAR) {
+        return fallbackLimit;
+    }
+
+    return ((1 - capVoltageLimit) * fallbackLimit + capVoltageLimit);
 }
 
 }  // namespace aruwsrc::chassis

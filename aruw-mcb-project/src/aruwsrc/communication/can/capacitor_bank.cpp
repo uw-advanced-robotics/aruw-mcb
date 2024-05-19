@@ -100,9 +100,4 @@ void CapacitorBank::setPowerLimit(uint16_t watts)
     message.data[3] = watts >> 8;  // Should always be zero or we are drawing 250+ watts.
     this->drivers->can.sendMessage(this->canBus, message);
 }
-
-void CapacitorBank::setSprintModifier(float newSprintModifier)
-{
-    sprintModifier = tap::algorithms::limitVal(newSprintModifier, 0.0f, 1.0f);
-}
 }  // namespace aruwsrc::communication::can::capbank

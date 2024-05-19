@@ -33,11 +33,6 @@ class Drivers;
 namespace aruwsrc::control::cap_bank
 {
 
-enum SprintMode
-{
-    REGULAR = 0,
-    SPRINT = 1
-};
 
 class CapBankSubsystem : public tap::control::Subsystem
 {
@@ -52,7 +47,7 @@ public:
     void toggleCapacitors() { this->enabled = !this->enabled; }
     void toggleDischarge() { this->enabled = false; }
 
-    void changeSprintMode(SprintMode mode);
+    void changeSprintMode(aruwsrc::communication::can::capbank::SprintMode mode);
 
     void refreshSafeDisconnect() override
     {
@@ -66,17 +61,17 @@ private:
 
     bool enabled;
 
-    const float SPRINT_MODIFIER = 1.0f;
-    const float REGULAR_MODIFIER = 0.2f;
-    const float BASE_MODIFIER = 0.4f;
+    // const float SPRINT_MODIFIER = 1.0f;
+    // const float REGULAR_MODIFIER = 0.2f;
+    // const float BASE_MODIFIER = 0.4f;
 
-    float desiredSprintModifier = REGULAR_MODIFIER;
+    communication::can::capbank::SprintMode desiredSprint = communication::can::capbank::SprintMode::REGULAR;
 
     int8_t messageTimer = 0;
 
-    const float SPRINT_SCALE_CHUNK_SIZE = 0.01f;
+    // const float SPRINT_SCALE_CHUNK_SIZE = 0.01f;
 
-    float debug = 0;
+    // float debug = 0;
 };
 }  // namespace aruwsrc::control::cap_bank
 

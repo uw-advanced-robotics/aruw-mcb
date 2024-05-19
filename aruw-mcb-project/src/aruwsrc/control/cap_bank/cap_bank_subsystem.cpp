@@ -27,22 +27,21 @@ CapBankSubsystem::CapBankSubsystem(
     : Subsystem(drivers),
       capacitorBank(capacitorBank)
 {
-    capacitorBank.setSprintModifier(REGULAR_MODIFIER);
+    capacitorBank.setSprinting(communication::can::capbank::SprintMode::REGULAR);
 }
 
-void CapBankSubsystem::changeSprintMode(SprintMode mode)
+void CapBankSubsystem::changeSprintMode(communication::can::capbank::SprintMode mode)
 {
     switch (mode)
     {
-        case SprintMode::REGULAR:
+        case communication::can::capbank::SprintMode::REGULAR:
         {
-            desiredSprintModifier =
-                ((((float)capacitorBank.getPowerLimit()) / 120) * REGULAR_MODIFIER) + BASE_MODIFIER;
+            desiredSprint = communication::can::capbank::SprintMode::SPRINT;
             break;
         }
 
-        case SprintMode::SPRINT:
-            desiredSprintModifier = SPRINT_MODIFIER;
+        case communication::can::capbank::SprintMode::SPRINT:
+            desiredSprint = communication::can::capbank::SprintMode::REGULAR;
             break;
 
         default:
@@ -68,14 +67,7 @@ void CapBankSubsystem::refresh()
 
     messageTimer++;
 
-    float sprintModifer = capacitorBank.getSprintModifer();
-
-    if (sprintModifer > desiredSprintModifier)
-        sprintModifer = SPRINT_SCALE_CHUNK_SIZE;
-    else if (sprintModifer < desiredSprintModifier)
-        sprintModifer += SPRINT_SCALE_CHUNK_SIZE;
-
-    this->capacitorBank.setSprintModifier(sprintModifer);
+    this->capacitorBank.setSprinting(this->desiredSprint);
 }
 
 }  // namespace aruwsrc::control::cap_bank

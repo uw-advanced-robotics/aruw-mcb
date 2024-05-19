@@ -126,6 +126,8 @@ private:
     // ✨ the motors ✨
     tap::motor::DjiMotor* motors[4];
 
+    float powerLimitFrac;
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;

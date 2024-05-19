@@ -50,6 +50,12 @@ enum State
     FAILURE = 6,
 };
 
+enum SprintMode
+{
+    REGULAR = 0,
+    SPRINT = 1
+};
+
 class CapacitorBank : public tap::can::CanRxListener
 {
 public:
@@ -71,21 +77,21 @@ public:
 
     bool isEnabled() const {
         return 
-            this->getState() == communication::can::capbank::SAFE ||
-            this->getState() == communication::can::capbank::CHARGE ||
-            this->getState() == communication::can::capbank::CHARGE_DISCHARGE ||
-            this->getState() == communication::can::capbank::DISCHARGE ||
-            this->getState() == communication::can::capbank::BATTERY_OFF;
+            this->getState() == communication::can::capbank::State::SAFE ||
+            this->getState() == communication::can::capbank::State::CHARGE ||
+            this->getState() == communication::can::capbank::State::CHARGE_DISCHARGE ||
+            this->getState() == communication::can::capbank::State::DISCHARGE ||
+            this->getState() == communication::can::capbank::State::BATTERY_OFF;
     }
 
     bool isDisabled() const {
         return 
-            this->getState() == communication::can::capbank::RESET ||
-            this->getState() == communication::can::capbank::FAILURE;
+            this->getState() == communication::can::capbank::State::RESET ||
+            this->getState() == communication::can::capbank::State::FAILURE;
     }
 
-    void setSprintModifier(float sprintModifier);
-    float getSprintModifer() const { return this->sprintModifier; };
+    void setSprinting(SprintMode sprint) { this->sprint = sprint; };
+    SprintMode getSprinting() const { return this->sprint; };
 
 private:
     const float capacitance;
@@ -99,7 +105,7 @@ private:
 
     bool started = false;  // Set to true once any message from the cap bank is received
 
-    float sprintModifier;
+    SprintMode sprint;
 };
 }  // namespace aruwsrc::communication::can::capbank
 
