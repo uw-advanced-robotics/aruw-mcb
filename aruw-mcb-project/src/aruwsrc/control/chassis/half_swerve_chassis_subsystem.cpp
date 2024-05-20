@@ -29,11 +29,17 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     Module* moduleOne,
     Module* moduleTwo,
     float wheelbaseRadius,
-    const float forwardMatrixArray[12])
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
+    const float forwardMatrixArray[18],
+    const float velocityForwardMatrixArray[18])
     : HolonomicChassisSubsystem(drivers, currentSensor),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),
-      forwardMatrix(forwardMatrixArray)
+      forwardMatrix(forwardMatrixArray),
+      velocityForwardMatrix(velocityForwardMatrixArray),
+      parallelEncoder(parallelEncoder),
+      perpendiculoluarEncoder(perpendiculoluarEncoder)
 {
 }
 
@@ -67,7 +73,7 @@ void HalfSwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     x = modules[0]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
     y = modules[0]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
-    r = modules[0]->wheel.rpmToMps(r) / 0.230f;  // convert input from motor rpm to rad/s
+    r = modules[0]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
     // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(
@@ -126,24 +132,31 @@ void HalfSwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, 4, 1> actualModuleVectors;
-    for (unsigned int i = 0; i < NUM_MODULES; i++)
-    {
-        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
-        actualModuleVectors[2 * i][0] = moduleVel[0][0];
-        actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
-    }
-    return forwardMatrix * actualModuleVectors;
+    modm::Matrix<float, 3, 1> velocity;
+    float V1 = getPerpendicularMotorVelocity();
+    float V2 = getParallelMotorVelocity();
+
+    // Calculate velocities in the robot's frame of reference
+    // velocity[0][0] = (V1 + V2) / M_SQRT2; // Vx
+    // velocity[1][0] = (V1 - V2) / M_SQRT2; // Vy
+    // velocity[2][0] = 0; 
+    velocity[0][0] = V1;
+    velocity[1][0] = V2;
+    velocity[2][0] = 0;
+    return velocity;
 }
+
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
-    modm::Matrix<float, 4, 1> desiredModuleVectors;
+    modm::Matrix<float, 6, 1> desiredModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
         desiredModuleVectors[2 * i][0] = moduleVel[0][0];
         desiredModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
+    desiredModuleVectors[4][0] = 0;
+    desiredModuleVectors[5][0] = 0;
     return forwardMatrix * desiredModuleVectors;
 }

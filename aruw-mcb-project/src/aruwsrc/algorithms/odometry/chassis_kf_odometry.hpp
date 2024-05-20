@@ -182,7 +182,7 @@ private:
 
     void updateChassisStateFromKF(float chassisYaw);
 
-    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+void updateMeasurementCovariance(float Vx, float Vy);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

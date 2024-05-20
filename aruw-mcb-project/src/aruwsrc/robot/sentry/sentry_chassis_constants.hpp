@@ -31,8 +31,8 @@ static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.230;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 3.074f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 // @todo generate this using the position offsets in the swerve module configs
 /**
@@ -48,10 +48,17 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
  */
 
 // clang-format off
-constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
-    0.5,     0.0,      0.5,      0.5,      
-    0.0,      0.5,     0.0,       0.25,    
-    1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
+//Full mat:
+constexpr float HALF_SWERVE_FORWARD_MATRIX[18]{
+    0.416667, 0.0     ,  0.291667,  0.0     , -0.176777, 0.235702, 
+    0.0     , 0.291667,  0.0     ,  0.416667,  0.176777, 0.235702,    
+    1.53719 , 0.768594, -0.768594, -1.53719 ,  1.08696 , 0.0};
+//omni only:
+constexpr float HALF_SWERVE_FORWARD_MATRIX_OMNI_ONLY[18]{
+    0.0, 0.0, 0.0, 0.0, -0.67158, 0.707107, 
+    0.0, 0.0, 0.0, 0.0,  0.67158, 0.707107,    
+    0.0, 0.0, 0.0, 0.0,  0.218444, 0.0};
+
 // clang-format on
 
 static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{

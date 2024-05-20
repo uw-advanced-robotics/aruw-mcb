@@ -22,6 +22,8 @@
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+
 #include "holonomic_chassis_subsystem.hpp"
 #include "swerve_module.hpp"
 
@@ -44,9 +46,22 @@ public:
         Module* moduleOne,
         Module* moduleTwo,
         const float wheelbaseRadius,
-        const float forwardMatrixArray[12]);
+        aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
+        aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
+        const float forwardMatrixArray[18],
+        const float velocityForwardMatrixArray[18]);
 
     void initialize() override;
+
+    // TODO - new one has 0.096 diameter
+    inline float getParallelMotorVelocity() const
+    {
+        return parallelEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
+    }
+    inline float getPerpendicularMotorVelocity() const
+    {
+        return perpendiculoluarEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
+    }
 
     void setDesiredOutput(float x, float y, float r) override;
 
@@ -99,7 +114,12 @@ private:
 
     const float wheelbaseRadius;
 
-    const modm::Matrix<float, 3, 4> forwardMatrix;
+    const modm::Matrix<float, 3, 6> forwardMatrix;
+    const modm::Matrix<float, 3, 6> velocityForwardMatrix;
+
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;
+
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it
