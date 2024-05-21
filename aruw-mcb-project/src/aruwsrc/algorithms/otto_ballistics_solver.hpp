@@ -117,7 +117,8 @@ public:
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      * @param[in] worldToTurretBaseTransform transform from the world to the point the turret
-     * rotates around (ex: transform to turret major for the sentry)
+     * rotates around (ex: transform to turret major for the sentry). This is used to get the
+     * velocity of the turret
      * @param[in] turretBaseMotor motor that rotates the base on which the turret is mounted (ex:
      * motor of turret major for the sentry)
      * @param[in] turretDistFromBase the absolute distance of the turret from the point it spins
