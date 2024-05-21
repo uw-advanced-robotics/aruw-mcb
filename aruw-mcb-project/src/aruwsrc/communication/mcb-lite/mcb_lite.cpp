@@ -184,16 +184,20 @@ void MCBLite::processCanMessage(
         &(canbus == tap::can::CanBus::CAN_BUS1 ? can1Data : can2Data),
         completeMessage.data,
         sizeof(can1Data));
-    for (int i = 0; i < 8; i++)
+    uint8_t bitmap = completeMessage.data[sizeof(can1Data)];
+
+    modm::can::Message msg;
+    for (uint8_t i = 0; i < 8; i++)
     {
-        modm::can::Message msg;
-        for (uint8_t i = 0; i < 8; i++)
+        if((bitmap & (1 << i)) == 0)
         {
-            // Get back the motor num
-            msg.identifier = i + tap::motor::MotorId::MOTOR1;
-            memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
-            canRxHandler.refresh(canbus, msg);
+            continue;
         }
+        
+        // Get back the motor num
+        msg.identifier = i + tap::motor::MotorId::MOTOR1;
+        memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
+        canRxHandler.refresh(canbus, msg);
     }
 }
 
