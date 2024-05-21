@@ -65,7 +65,7 @@ void DeadwheelChassisKFOdometry::update()
     V2 -= modm::toRadian(imu.getGy()) * 0.230;
     Vx = (((V1 - V2)) / M_SQRT2) ;
     Vy = (((V1 + V2)) / M_SQRT2) ;
-
+    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();
     float ay = imu.getAy();
