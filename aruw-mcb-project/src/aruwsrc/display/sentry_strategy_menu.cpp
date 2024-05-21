@@ -18,72 +18,32 @@
  */
 
 #include "sentry_strategy_menu.hpp"
-
-#include "tap/drivers.hpp"
-
 namespace aruwsrc::display
 {
 SentryStrategyMenu::SentryStrategyMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
     : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
-        vs,
-        SENTRY_STRATEGY_MENU_ID,
+        vs, 
+        SENTRY_STRATEGY_MENU_ID, 
         getMenuName()),
         visionCoprocessor(visionCoprocessor)
-{}
-
-void SentryStrategyMenu::draw()
 {
-    modm::GraphicDisplay &display = getViewStack()->getDisplay();
-    display.clear();
-    display.setCursor(0, 2);
-    display << getMenuName() << modm::endl;
-
-    aruwsrc::serial::VisionCoprocessor::MotionStrategyOptionsData options = visionCoprocessor->getLastMotionStratOptionsData();
-    std::string string_so_far;
-    for (unsigned int i = 0; i < sizeof(options.motion_strategy_options); i++) {
-        char c = options.motion_strategy_options[i];
-        if (c == ',') {
-            addEntry(
-                string_so_far.c_str(),
-                visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
-                false);
-        } else {
-            string_so_far += c;
-        }
-    }
-
-    display.printf(options.motion_strategy_options);
+    addEntry(
+        "Idle",
+        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::IDLE),
+        true);
+    addEntry(
+        "Default State Machine",
+        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::DEFAULT_STATE_MACHINE),
+        false);
+    addEntry(
+        "Test State Machine",
+        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::TEST_STATE_MACHINE),
+        false);
 }
 
-    // addEntry(
-    //     "None",
-    //     visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
-    //     true);
-    // addEntry(
-    //     "Go crazy",
-    //     visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
-    //     false);
-    // addEntry(
-    //     "Go stupid",
-    //     visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
-    //     false);
-    // addEntry(
-    //     "AAH",
-    //     visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
-    //     false);
+    void openNextScreen() {};
 
-void SentryStrategyMenu::update() {}
-
-void SentryStrategyMenu::shortButtonPress(modm::MenuButtons::Button button)
-{
-    if (button == modm::MenuButtons::LEFT)
-    {
-        this->remove();
-    }
-}
-
-bool SentryStrategyMenu::hasChanged() { return updatePeriodicTimer.execute(); }
-
+    static const char *getMenuName() { return "Sentry Strategy Menu"; }
 }  // namespace aruwsrc::display

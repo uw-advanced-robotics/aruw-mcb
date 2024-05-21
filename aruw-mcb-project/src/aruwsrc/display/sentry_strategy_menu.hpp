@@ -21,9 +21,7 @@
 #define SENTRY_STRATEGY_MENU_HPP_
 
 #include <aruwsrc/communication/serial/sentry_strategy_message_types.hpp>
-
 #include "tap/display/dummy_allocator.hpp"
-
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/choice_menu.hpp"
 
@@ -38,30 +36,19 @@ class SentryStrategyMenu
     : public modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
-    static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
-
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor);
 
-    void draw() override;
 
-    void update() override;
+    void openNextScreen() override;
 
-    void shortButtonPress(modm::MenuButtons::Button button) override;
-
-    static const char *getMenuName() { return "Sentry Strategy Menu"; }
-
-    bool hasChanged() override;
-
-    void openNextScreen() override {};
+    static const char *getMenuName();
 
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
-
-    tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };
 }  // namespace aruwsrc::display
 

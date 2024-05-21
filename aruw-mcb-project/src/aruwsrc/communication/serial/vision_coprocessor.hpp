@@ -305,7 +305,7 @@ public:
 
     // This is for compatibility with the OLED menu
     bool* getMutableMotionStrategyPtr(
-        aruwsrc::communication::serial::SentryVisionMessageType messageType)
+        aruwsrc::communication::serial::SentryMotionStrategyType messageType)
     {
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
@@ -416,7 +416,7 @@ private:
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
-        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+        aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {};
 
 #ifdef ENV_UNIT_TESTS
 public:
