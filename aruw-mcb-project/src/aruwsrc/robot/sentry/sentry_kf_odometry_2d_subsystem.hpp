@@ -20,7 +20,7 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
-#include <aruwsrc/algorithms/odometry/2_deadwheel_odometry_interface.hpp>
+#include <aruwsrc/algorithms/odometry/two_deadwheel_odometry_interface.hpp>
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"

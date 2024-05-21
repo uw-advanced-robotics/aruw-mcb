@@ -18,8 +18,8 @@
  */
 
 #include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
-#ifndef DEADWHEEL_ODOMETRY_INTERFACE_HPP_
-#define DEADWHEEL_ODOMETRY_INTERFACE_HPP_
+#ifndef TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
+#define TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
 
 namespace aruwsrc::algorithms::odometry
 {
