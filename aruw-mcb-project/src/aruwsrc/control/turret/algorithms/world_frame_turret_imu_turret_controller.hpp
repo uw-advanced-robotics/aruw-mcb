@@ -67,7 +67,8 @@ public:
 
     /**
      * @see TurretControllerInterface for more details.
-     * @param[in] desiredSetpoint The unwrapped yaw desired setpoint in the world frame. Clamped within chassis frame turret angle limits if applicable.
+     * @param[in] desiredSetpoint The unwrapped yaw desired setpoint in the world frame. Clamped
+     * within chassis frame turret angle limits if applicable.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 

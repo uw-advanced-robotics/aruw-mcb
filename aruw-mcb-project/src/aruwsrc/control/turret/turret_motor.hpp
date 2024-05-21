@@ -20,6 +20,8 @@
 #ifndef TURRET_MOTOR_HPP_
 #define TURRET_MOTOR_HPP_
 
+#include <optional>
+
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
@@ -28,7 +30,6 @@
 #include "modm/math/geometry/angle.hpp"
 
 #include "turret_motor_config.hpp"
-#include <optional>
 
 namespace aruwsrc::control::turret
 {
@@ -183,9 +184,9 @@ public:
     mockable float getValidMinError(const float setpoint, const float measurement) const;
 
     /**
-     * Gets 
+     * Gets
      * @param[in] measurement Unwrapped (non-normalized) measurement in radians.
-    */
+     */
     std::optional<float> getReachableNonNormalizedSetpoint(float setpoint);
 
     /**

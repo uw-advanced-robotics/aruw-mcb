@@ -27,6 +27,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
@@ -43,6 +44,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
@@ -59,9 +61,6 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
-
-#include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -594,7 +593,6 @@ HoldCommandMapping leftMidRightMid(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-
 // HoldCommandMapping shoot(
 //     drivers(),
 //     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
@@ -692,7 +690,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
     // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
     // drivers->commandMapper.addMap(&shoot);          // Shoot
-    drivers->commandMapper.addMap(&leftUpRightDown);          // Shoot
+    drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
 }
 }  // namespace sentry_control
 
