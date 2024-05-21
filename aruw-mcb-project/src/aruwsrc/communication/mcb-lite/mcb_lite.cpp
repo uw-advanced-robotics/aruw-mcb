@@ -189,11 +189,11 @@ void MCBLite::processCanMessage(
     modm::can::Message msg;
     for (uint8_t i = 0; i < 8; i++)
     {
-        if((bitmap & (1 << i)) == 0)
+        if ((bitmap & (1 << i)) == 0)
         {
             continue;
         }
-        
+
         // Get back the motor num
         msg.identifier = i + tap::motor::MotorId::MOTOR1;
         memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
