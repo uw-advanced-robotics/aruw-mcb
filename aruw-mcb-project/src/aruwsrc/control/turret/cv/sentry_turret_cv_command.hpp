@@ -57,7 +57,6 @@ class LaunchSpeedPredictorInterface;
 
 namespace aruwsrc::control::sentry
 {
-
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
  * aims the turrets accordingly using a position PID controller.
