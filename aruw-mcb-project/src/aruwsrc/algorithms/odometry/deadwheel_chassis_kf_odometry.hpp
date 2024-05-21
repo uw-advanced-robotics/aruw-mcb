@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_KF_ODOMETRY_HPP_
-#define CHASSIS_KF_ODOMETRY_HPP_
+#ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
@@ -29,6 +29,7 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
+#include <aruwsrc/control/turret/yaw_turret_subsystem.hpp>
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -38,7 +39,7 @@ namespace aruwsrc::algorithms::odometry
  * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
  */
-class ChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class DeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -49,10 +50,12 @@ public:
      * @param imu IMU mounted on the chassis to measure chassis acceleration
      * @param initPos Initial position of chassis when robot boots
      */
-    ChassisKFOdometry(
+    DeadwheelChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        const aruwsrc::control::turret::YawTurretSubsystem &turret,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
+        tap::communication::sensors::imu::ImuInterface& turretMajorImu,
         const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -121,11 +124,11 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E1, 0  , 0  , 0  , 0  ,
+        1E0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E0, 0  , 0  , 0  , 0  ,
         0  , 0  , 5E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E1, 0  ,
+        0  , 0  , 0  , 1E0, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E0, 0  ,
         0  , 0  , 0  , 0  , 0  , 5E0,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
@@ -135,11 +138,11 @@ private:
         0  , 0  , 0  , 1.2,
     };
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E3, 0  , 0  , 0  , 0  ,
+        1E0, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E0, 0  , 0  , 0  , 0  ,
         0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E3, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 1E0, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E0, 0  ,
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
@@ -154,11 +157,13 @@ private:
             {MAX_ACCELERATION, 1E2},
         };
 
-    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
+    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+    const aruwsrc::control::turret::YawTurretSubsystem &turret;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+    tap::communication::sensors::imu::ImuInterface& turretMajorImu;
 
     const modm::Vector2f initPos;
 
@@ -180,9 +185,22 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
+    float Vx;
+    float Vy;
+    float getGy;
+    float current;
+    float diff;
+    float prev;
+    float angularVelmauybe;
+    float shaftRps;
+    float getGz;
+    float getGx;
+    float subtractor;
+    float V1;
+    float V2;
     void updateChassisStateFromKF(float chassisYaw);
 
-    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+void updateMeasurementCovariance(float Vx, float Vy);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

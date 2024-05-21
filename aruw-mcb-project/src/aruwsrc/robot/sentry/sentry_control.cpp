@@ -327,8 +327,10 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
     chassis,
+    turretMajor,
     chassisYawObserver,
     drivers()->chassisMcbLite.imu,
+    drivers()->turretMajorMcbLite.imu,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y);
 

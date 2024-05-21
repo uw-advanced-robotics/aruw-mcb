@@ -25,7 +25,7 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
@@ -48,7 +48,7 @@ class ChassisSubsystemInterface;
 namespace aruwsrc::sentry
 {
 class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::ChassisKFOdometry
+                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
 {
 public:
     /**
@@ -70,8 +70,10 @@ public:
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         const tap::control::chassis::ChassisSubsystemInterface &chassis,
+        const aruwsrc::control::turret::YawTurretSubsystem &turret,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
+        tap::communication::sensors::imu::ImuInterface &turretMajorImu,
         float initialXPos,
         float initialYPos);
 

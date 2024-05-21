@@ -53,7 +53,6 @@ public:
 
     void initialize() override;
 
-    // TODO - new one has 0.096 diameter
     inline float getParallelMotorVelocity() const
     {
         return parallelEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
@@ -61,6 +60,14 @@ public:
     inline float getPerpendicularMotorVelocity() const
     {
         return perpendiculoluarEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
+    }
+    inline float getParallelMotorRPM() const
+    {
+        return parallelEncoder->getShaftRPM();
+    }
+    inline float getPerpendicularRPM() const
+    {
+        return perpendiculoluarEncoder->getShaftRPM();
     }
 
     void setDesiredOutput(float x, float y, float r) override;
