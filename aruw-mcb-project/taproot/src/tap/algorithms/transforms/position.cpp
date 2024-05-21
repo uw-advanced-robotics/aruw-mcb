@@ -32,12 +32,17 @@ inline Vector Position::operator-(const Vector& other) const
     return Vector(this->coordinates_ - other.coordinates());
 }
 
+inline Vector Position::operator-(const Position& other) const
+{
+    return Vector(this->coordinates_ - other.coordinates());
+}
+
 inline Position Position::operator+(const Position& vector) const
 {
     return Position(this->coordinates_ + vector.coordinates_);
 }
 
-inline Position Position::operator*(const float& scalar) const
+inline Position Position::operator*(const float scalar) const
 {
     return Position(this->coordinates_ * scalar);
 }

@@ -6,7 +6,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 
-//#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+// #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 using namespace tap::algorithms::transforms;
 
@@ -20,17 +20,25 @@ public:
           interpolationDistance(distance),
           oldSetpoint(0, 0, 0),
           currentSetpoint(0, 0, 0)
-    { 
+    {
         setpointData.push_back(Position(0.1, 0.1, 0));
     }
-    //void pushPoint(struct aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
+
+    // void pushPoint(struct aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
     void pushPoint(Position point);
     void popPoint();
     void resetPath();
     bool empty() const { return setpointData.empty(); }
     Position getSetPoint() const;
     Position setInterpolatedPoint(Position current);
-    Position pointFromParameter(const float parameter) const;
+    float positionToClosestParameter(const Position pos) const;
+    Position parametertoPosition(const float parameter) const;
+    float parameterToSpeed(const float parameter) const;
+
+    inline float distTo(const Position& position, const float parameter) const
+    {
+        return Position::distance(position, parametertoPosition(parameter));
+    }
 
 private:
     Position findClosestPoint(Position current);

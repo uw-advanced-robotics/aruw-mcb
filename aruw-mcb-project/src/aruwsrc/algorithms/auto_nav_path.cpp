@@ -25,7 +25,27 @@ void AutoNavPath::resetPath()
 
 Position AutoNavPath::getSetPoint() const { return currentSetpoint; }
 
-Position AutoNavPath::pointFromParameter(const float parameter) const
+float AutoNavPath::positionToClosestParameter(const Position pos) const
+{
+    float minDistance = F32_MAX;
+    size_t closestIndex = 0;
+    float minClosest = 0;
+    for (size_t i = 0; i < setpointData.size() - 1; i++)
+    {
+        Position p1 = setpointData[i];
+        Position p2 = setpointData[i + 1];
+        float closest = getClosestParameterOnSegment(pos, p1, p2);
+        float distance = distTo(pos, closest);
+        if (distance < minDistance)
+        {
+            minDistance = distance;
+            minClosest = closest;
+            closestIndex = i;
+        }
+    }
+}
+
+Position AutoNavPath::parametertoPosition(const float parameter) const
 {
     int pointIndex = (int)parameter;  // only works bc parameterized length every segment is
                                       // currently considered to be 1
@@ -33,6 +53,11 @@ Position AutoNavPath::pointFromParameter(const float parameter) const
         setpointData[pointIndex],
         setpointData[pointIndex + 1],
         parameter - pointIndex);
+}
+
+float AutoNavPath::parameterToSpeed(const float parameter) const
+{
+    //
 }
 
 float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, Position p2) const
