@@ -48,8 +48,7 @@ public:
         const float wheelbaseRadius,
         aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
         aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
-        const float forwardMatrixArray[18],
-        const float velocityForwardMatrixArray[18]);
+        const float forwardMatrixArray[12]);
 
     void initialize() override;
 
@@ -122,7 +121,6 @@ private:
     const float wheelbaseRadius;
 
     const modm::Matrix<float, 3, 6> forwardMatrix;
-    const modm::Matrix<float, 3, 6> velocityForwardMatrix;
 
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;

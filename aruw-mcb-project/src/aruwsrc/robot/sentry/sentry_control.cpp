@@ -321,7 +321,6 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     CENTER_TO_WHEELBASE_RADIUS,
     &leftOmni,
     &rightOmni,
-    HALF_SWERVE_FORWARD_MATRIX_OMNI_ONLY,
     HALF_SWERVE_FORWARD_MATRIX);
 
 SentryKFOdometry2DSubsystem chassisOdometry(

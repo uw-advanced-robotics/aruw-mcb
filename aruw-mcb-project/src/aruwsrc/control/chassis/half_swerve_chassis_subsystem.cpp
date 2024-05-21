@@ -31,13 +31,11 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     float wheelbaseRadius,
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
-    const float forwardMatrixArray[18],
-    const float velocityForwardMatrixArray[18])
+    const float forwardMatrixArray[12])
     : HolonomicChassisSubsystem(drivers, currentSensor),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),
       forwardMatrix(forwardMatrixArray),
-      velocityForwardMatrix(velocityForwardMatrixArray),
       parallelEncoder(parallelEncoder),
       perpendiculoluarEncoder(perpendiculoluarEncoder)
 {
@@ -146,7 +144,6 @@ modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRe
     return velocity;
 }
 
-
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
     modm::Matrix<float, 6, 1> desiredModuleVectors;
@@ -156,7 +153,5 @@ modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisR
         desiredModuleVectors[2 * i][0] = moduleVel[0][0];
         desiredModuleVectors[2 * i + 1][0] = moduleVel[1][0];
     }
-    desiredModuleVectors[4][0] = 0;
-    desiredModuleVectors[5][0] = 0;
     return forwardMatrix * desiredModuleVectors;
 }
