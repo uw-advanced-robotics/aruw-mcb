@@ -21,17 +21,15 @@
 
 namespace aruwsrc::algorithms::odometry
 {
-
 TwoDeadwheelOdometryInterface::TwoDeadwheelOdometryInterface(
-        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
-        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel
-    ) :
-    perpendicularWheel(perpendicularWheel),
-    parallelWheel(parallelWheel) {};
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel)
+    : perpendicularWheel(perpendicularWheel),
+      parallelWheel(parallelWheel){};
 
 float TwoDeadwheelOdometryInterface::getParallelMotorRPM() const
 {
-    return parallelWheel->getShaftRPM(); 
+    return parallelWheel->getShaftRPM();
 }
 
 float TwoDeadwheelOdometryInterface::getPerpendicularRPM() const

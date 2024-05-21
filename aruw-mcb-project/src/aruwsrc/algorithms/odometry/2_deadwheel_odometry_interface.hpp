@@ -28,12 +28,10 @@ class TwoDeadwheelOdometryInterface
 public:
     TwoDeadwheelOdometryInterface(
         aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
-        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel
-    );
+        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel);
 
     float getParallelMotorRPM() const;
     float getPerpendicularRPM() const;
-    
 
 private:
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;

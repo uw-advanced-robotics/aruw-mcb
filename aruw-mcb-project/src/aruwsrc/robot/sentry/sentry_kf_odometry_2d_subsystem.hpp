@@ -20,6 +20,8 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
+#include <aruwsrc/algorithms/odometry/2_deadwheel_odometry_interface.hpp>
+
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
@@ -29,7 +31,6 @@
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
-#include <aruwsrc/algorithms/odometry/2_deadwheel_odometry_interface.hpp>
 
 // Forward declarations
 namespace tap

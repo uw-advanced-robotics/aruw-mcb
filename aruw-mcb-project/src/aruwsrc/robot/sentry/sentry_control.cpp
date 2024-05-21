@@ -323,9 +323,7 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     &rightOmni,
     HALF_SWERVE_FORWARD_MATRIX);
 
-aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface deadwheels(
-    &rightOmni,
-    &leftOmni);
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface deadwheels(&rightOmni, &leftOmni);
 
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),

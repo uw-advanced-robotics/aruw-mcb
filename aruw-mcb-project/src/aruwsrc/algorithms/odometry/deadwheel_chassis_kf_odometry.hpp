@@ -31,6 +31,7 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
+
 #include "2_deadwheel_odometry_interface.hpp"
 
 namespace aruwsrc::algorithms::odometry
