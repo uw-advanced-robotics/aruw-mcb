@@ -31,6 +31,7 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
+#include "2_deadwheel_odometry_interface.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -53,6 +54,7 @@ public:
      */
     DeadwheelChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+        aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos);
@@ -159,6 +161,7 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
+    aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 

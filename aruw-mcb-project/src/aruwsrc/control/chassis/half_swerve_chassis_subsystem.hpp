@@ -114,7 +114,7 @@ private:
 
     const float wheelbaseRadius;
 
-    const modm::Matrix<float, 3, 6> forwardMatrix;
+    const modm::Matrix<float, 3, 4> forwardMatrix;
 
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;

@@ -25,11 +25,13 @@ namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+    aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
+      deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
@@ -56,8 +58,8 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    V1 = chassisSubsystem.getActualVelocityChassisRelative()[0][0];
-    V2 = chassisSubsystem.getActualVelocityChassisRelative()[1][0];
+    V1 = deadwheelOdometry.getPerpendicularRPM();
+    V2 = deadwheelOdometry.getParallelMotorRPM();
     V1 = V1 / 60 * M_TWOPI * 0.048;
     V2 = V2 / 60 * M_TWOPI * 0.048;
     // Calculate velocities in the robot's frame of reference
@@ -84,8 +86,6 @@ void DeadwheelChassisKFOdometry::update()
 
     // Perform the Kalman filter update
     kf.performUpdate(y);
-
-    // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromKF(chassisYaw);
 }
 

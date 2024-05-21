@@ -130,23 +130,19 @@ void HalfSwerveChassisSubsystem::limitChassisPower()
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRelative() const
 {
-    modm::Matrix<float, 3, 1> velocity;
-    float V1 = getPerpendicularRPM();
-    float V2 = getParallelMotorRPM();
-
-    // Calculate velocities in the robot's frame of reference
-    // velocity[0][0] = (V1 + V2) / M_SQRT2; // Vx
-    // velocity[1][0] = (V1 - V2) / M_SQRT2; // Vy
-    // velocity[2][0] = 0;
-    velocity[0][0] = V1;
-    velocity[1][0] = V2;
-    velocity[2][0] = 0;
-    return velocity;
+    modm::Matrix<float, 4, 1> actualModuleVectors;
+    for (unsigned int i = 0; i < NUM_MODULES; i++)
+    {
+        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getActualModuleVelocity();
+        actualModuleVectors[2 * i][0] = moduleVel[0][0];
+        actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
+    }
+    return forwardMatrix * actualModuleVectors;
 }
 
 modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getDesiredVelocityChassisRelative() const
 {
-    modm::Matrix<float, 6, 1> desiredModuleVectors;
+    modm::Matrix<float, 4, 1> desiredModuleVectors;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();

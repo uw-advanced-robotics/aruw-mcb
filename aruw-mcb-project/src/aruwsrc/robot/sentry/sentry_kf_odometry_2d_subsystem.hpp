@@ -29,6 +29,7 @@
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
+#include <aruwsrc/algorithms/odometry/2_deadwheel_odometry_interface.hpp>
 
 // Forward declarations
 namespace tap
@@ -70,6 +71,7 @@ public:
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         const tap::control::chassis::ChassisSubsystemInterface &chassis,
+        aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface &deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
