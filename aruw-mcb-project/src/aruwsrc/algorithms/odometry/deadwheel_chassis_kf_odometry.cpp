@@ -25,17 +25,13 @@ namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-    const aruwsrc::control::turret::YawTurretSubsystem &turret,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    tap::communication::sensors::imu::ImuInterface& turretMajorImu,
     const modm::Vector2f initPos)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
-      turret(turret),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
-      turretMajorImu(turretMajorImu),
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
@@ -65,24 +61,8 @@ void DeadwheelChassisKFOdometry::update()
     V1 = V1 / 60 * M_TWOPI * 0.048;
     V2 = V2 / 60 * M_TWOPI * 0.048;
     // Calculate velocities in the robot's frame of reference
-    V2 += subtractor;
-    // angularVelmauybe = modm::toRadian(turretMajorImu.getGx())  * 0.230;
-    getGz = turretMajorImu.getGz() * M_PI / 180;
-    getGx = turretMajorImu.getGx() * M_PI / 180;
-    getGy = turretMajorImu.getGy() * M_PI / 180;
-
-    // shaftRps = turret.getReadOnlyMotor().getChassisFrameVelocity() * 2;
-    current = turret.getReadOnlyMotor().getAngleFromCenter();
-    diff = current - prev;
-    prev = current;
-    diff /= 0.002;
-    shaftRps = diff;
-    angularVelmauybe = getGy;
-    subtractor = (angularVelmauybe - shaftRps) * 0.230 ;
-    //  Vx  - ( ( get shaft rps - (angular speed rps ) ) * distance from center to wheels)
-    // V1 += subtractor;
-    // V2 += subtractor;
-
+    // Correct for roation of the robot
+    V2 -= modm::toRadian(imu.getGy()) * 0.230;
     Vx = (((V1 - V2)) / M_SQRT2) ;
     Vy = (((V1 + V2)) / M_SQRT2) ;
 

@@ -28,14 +28,12 @@ namespace aruwsrc::sentry
 SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::Drivers &drivers,
     const tap::control::chassis::ChassisSubsystemInterface &chassis,
-    const aruwsrc::control::turret::YawTurretSubsystem &turret,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
-    tap::communication::sensors::imu::ImuInterface &turretMajorImu,
     float initialXPos,
     float initialYPos)
     : Subsystem(&drivers),
-      DeadwheelChassisKFOdometry(chassis, turret, yawObserver, imu, turretMajorImu, modm::Vector2f(initialXPos, initialYPos))
+      DeadwheelChassisKFOdometry(chassis, yawObserver, imu, modm::Vector2f(initialXPos, initialYPos))
 {
 }
 

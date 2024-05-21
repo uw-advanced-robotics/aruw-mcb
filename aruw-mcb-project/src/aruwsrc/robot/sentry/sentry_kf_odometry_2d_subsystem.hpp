@@ -70,10 +70,8 @@ public:
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         const tap::control::chassis::ChassisSubsystemInterface &chassis,
-        const aruwsrc::control::turret::YawTurretSubsystem &turret,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
-        tap::communication::sensors::imu::ImuInterface &turretMajorImu,
         float initialXPos,
         float initialYPos);
 

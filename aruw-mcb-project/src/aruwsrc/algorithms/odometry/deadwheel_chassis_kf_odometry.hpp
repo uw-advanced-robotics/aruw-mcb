@@ -52,10 +52,8 @@ public:
      */
     DeadwheelChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-        const aruwsrc::control::turret::YawTurretSubsystem &turret,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        tap::communication::sensors::imu::ImuInterface& turretMajorImu,
         const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -160,10 +158,8 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
-    const aruwsrc::control::turret::YawTurretSubsystem &turret;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
-    tap::communication::sensors::imu::ImuInterface& turretMajorImu;
 
     const modm::Vector2f initPos;
 
@@ -187,15 +183,6 @@ private:
 
     float Vx;
     float Vy;
-    float getGy;
-    float current;
-    float diff;
-    float prev;
-    float angularVelmauybe;
-    float shaftRps;
-    float getGz;
-    float getGx;
-    float subtractor;
     float V1;
     float V2;
     void updateChassisStateFromKF(float chassisYaw);
