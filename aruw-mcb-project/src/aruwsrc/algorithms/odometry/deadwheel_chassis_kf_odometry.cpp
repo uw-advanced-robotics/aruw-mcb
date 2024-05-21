@@ -63,8 +63,8 @@ void DeadwheelChassisKFOdometry::update()
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGy()) * 0.230;
-    Vx = (((V1 - V2)) / M_SQRT2) ;
-    Vy = (((V1 + V2)) / M_SQRT2) ;
+    Vx = (((V1 - V2)) / M_SQRT2);
+    Vy = (((V1 + V2)) / M_SQRT2);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();

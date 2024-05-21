@@ -60,14 +60,8 @@ public:
     {
         return perpendiculoluarEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
     }
-    inline float getParallelMotorRPM() const
-    {
-        return parallelEncoder->getShaftRPM();
-    }
-    inline float getPerpendicularRPM() const
-    {
-        return perpendiculoluarEncoder->getShaftRPM();
-    }
+    inline float getParallelMotorRPM() const { return parallelEncoder->getShaftRPM(); }
+    inline float getPerpendicularRPM() const { return perpendiculoluarEncoder->getShaftRPM(); }
 
     void setDesiredOutput(float x, float y, float r) override;
 
@@ -124,7 +118,6 @@ private:
 
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;
-
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it

@@ -46,7 +46,7 @@ public:
     float getRoll() override { return roll; }
     float getYaw() override { return yaw; }
     float getGx() override { return Gx; }
-    
+
     float getGy() override { return Gy; }
     float getGz() override { return Gz; }
     float getAx() override { return Ax; }

@@ -137,7 +137,7 @@ modm::Matrix<float, 3, 1> HalfSwerveChassisSubsystem::getActualVelocityChassisRe
     // Calculate velocities in the robot's frame of reference
     // velocity[0][0] = (V1 + V2) / M_SQRT2; // Vx
     // velocity[1][0] = (V1 - V2) / M_SQRT2; // Vy
-    // velocity[2][0] = 0; 
+    // velocity[2][0] = 0;
     velocity[0][0] = V1;
     velocity[1][0] = V2;
     velocity[2][0] = 0;

@@ -20,6 +20,8 @@
 #ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
+#include <aruwsrc/control/turret/yaw_turret_subsystem.hpp>
+
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
@@ -29,7 +31,6 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
-#include <aruwsrc/control/turret/yaw_turret_subsystem.hpp>
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -187,7 +188,7 @@ private:
     float V2;
     void updateChassisStateFromKF(float chassisYaw);
 
-void updateMeasurementCovariance(float Vx, float Vy);
+    void updateMeasurementCovariance(float Vx, float Vy);
 };
 }  // namespace aruwsrc::algorithms::odometry
 
