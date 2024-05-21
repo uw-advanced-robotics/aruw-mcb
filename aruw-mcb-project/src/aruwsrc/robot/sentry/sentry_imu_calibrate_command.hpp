@@ -74,6 +74,8 @@ public:
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
 
+    bool isReady() override { return turretMajor.getReadOnlyMotor().isOnline(); }
+
     void initialize() override;
 
     void execute() override;
