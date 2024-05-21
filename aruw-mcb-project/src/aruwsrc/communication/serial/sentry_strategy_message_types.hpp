@@ -69,8 +69,9 @@ enum class SentryResponseMessageType : uint16_t
 enum class SentryMotionStrategyType : uint8_t
 {
     IDLE = 0,
-    DEFAULT_STATE_MACHINE = 1,
-    TEST_STATE_MACHINE = 2,
+    DEFAULT_STATE_MACHINE,
+    TEST_STATE_MACHINE,
+    NUM_MESSAGE_TYPES
 };
 }  // namespace aruwsrc::communication::serial
 
