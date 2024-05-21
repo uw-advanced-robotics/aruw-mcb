@@ -318,7 +318,8 @@ private:
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
         CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
-        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13,
+        CV_MESSAGE_TYPES_BULLETS_REMAINING = 14
     };
 
     enum RxMessageTypes
@@ -419,6 +420,7 @@ public:
     void sendRobotTypeData();
     void sendHealthMessage();
     void sendTimeSyncMessage();
+    void sendBulletsRemaining();
 };
 }  // namespace serial
 }  // namespace aruwsrc

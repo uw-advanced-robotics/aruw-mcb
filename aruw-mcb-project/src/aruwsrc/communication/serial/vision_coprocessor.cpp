@@ -172,6 +172,7 @@ void VisionCoprocessor::sendMessage()
     sendRefereeWarning();
     sendTimeSyncMessage();
     sendSentryMotionStrategy();
+    sendBulletsRemaining();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -411,4 +412,38 @@ void VisionCoprocessor::sendSentryMotionStrategy()
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&sentryMotionStrategyMessage),
         sizeof(sentryMotionStrategyMessage));
+}
+
+void VisionCoprocessor::sendBulletsRemaining()
+{
+    if (sendHealthTimeout.execute())
+    {
+        DJISerial::SerialMessage<sizeof(RefSerialData::Rx::TurretData::bulletsRemaining17)> bulletsRemainMessage;
+        bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
+
+        const tap::communication::serial::RefSerialData::RobotId robotId = *&drivers->refSerial.getRobotData().robotId;
+
+        switch (robotId)
+        {
+        case tap::communication::serial::RefSerialData::RobotId::RED_HERO:
+        case tap::communication::serial::RefSerialData::RobotId::BLUE_HERO:
+            memcpy(
+            &bulletsRemainMessage.data,
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining42,
+            sizeof(bulletsRemainMessage.data));
+            break;
+        default:
+            memcpy(
+            &bulletsRemainMessage.data,
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining17,
+            sizeof(bulletsRemainMessage.data));
+            break;
+        }
+        
+        bulletsRemainMessage.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&bulletsRemainMessage),
+            sizeof(bulletsRemainMessage));
+    }
 }
