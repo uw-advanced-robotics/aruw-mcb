@@ -21,7 +21,7 @@ public:
           oldSetpoint(0, 0, 0),
           currentSetpoint(0, 0, 0)
     {
-        setpointData.push_back(Position(0.1, 0.1, 0));
+        setpointData.push_back(Position(0.2, 0, 0));
     }
 
     // void pushPoint(struct aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);

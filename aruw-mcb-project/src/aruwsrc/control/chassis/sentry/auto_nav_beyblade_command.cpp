@@ -91,9 +91,10 @@ void AutoNavBeybladeCommand::execute()
     float currentY = odometryInterface.getCurrentLocation2D().getY();
     float chassisYawAngle = odometryInterface.getYaw();
 
-    const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers.refSerial.getRefSerialReceivingData(),
-        drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
+    const float maxWheelSpeed = 10000;
+    // const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        // drivers.refSerial.getRefSerialReceivingData(),
+        // drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     float rampTarget = 0.0;
     

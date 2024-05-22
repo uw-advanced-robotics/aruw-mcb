@@ -13,6 +13,8 @@ void ChassisAutoNavController::initialize(Position initialPos) {
     yRamp.reset(initialPos.y());
 }
 
+float debugx = 0;
+float debugy = 0;
 void ChassisAutoNavController::runController(const uint32_t dt,
                                                 const Position currentPos,
                                                 const float maxWheelSpeed,
@@ -26,15 +28,15 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     float x = 0.0f;
     float y = 0.0f;
 
-    if ((int(gametype) == 0 ||
+    if (((int(gametype) == 0 ||
             (drivers.refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
-        !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled)
+        !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled) || true )
     {
-        float currentX = setPoint.x();
-        float currentY = setPoint.y();
+        float currentX = currentPos.x();
+        float currentY = currentPos.y();
 
-        xRamp.setTarget(currentX);
-        yRamp.setTarget(currentY);
+        xRamp.setTarget(setPoint.x());
+        yRamp.setTarget(setPoint.y());
 
         xRamp.update(POS_RAMP_RATE);
         yRamp.update(POS_RAMP_RATE);
@@ -86,10 +88,12 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     float r = rotateSpeedRamp.getValue();
 
     // Rotate X and Y depending on turret angle
-    tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
+    // tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
     // set outputs
-    chassis.setDesiredOutput(x, y, r);
+    debugx = x;
+    debugy = y;
+    chassis.setDesiredOutput(x, y, 0);
 
 }
 

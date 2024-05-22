@@ -123,6 +123,9 @@ Position AutoNavPath::findClosestPoint(Position current)
 Position AutoNavPath::setInterpolatedPoint(Position current)
 {
     path_interpolated = true;
+    currentSetpoint = Position(100, 0, 0);
+    return currentSetpoint;
+
     // TODO: account for and deal with the case of a path reset
     if (setpointData.empty())
     {
@@ -135,7 +138,8 @@ Position AutoNavPath::setInterpolatedPoint(Position current)
 
     if (i >= setpointData.size() - 1)
     {
-        return setpointData.back();
+        currentSetpoint = setpointData.back();
+        return currentSetpoint;
     }
 
     Position p1 = setpointData[i];
