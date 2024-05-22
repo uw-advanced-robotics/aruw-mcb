@@ -59,7 +59,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 
 // Desired speed of projectile in m/s
-static constexpr float DESIRED_LAUNCH_SPEED = 30.0f;
+static constexpr float DESIRED_LAUNCH_SPEED = 5.0f;
 
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 60'000;
 

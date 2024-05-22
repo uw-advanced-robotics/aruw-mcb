@@ -150,6 +150,31 @@ float TurretMotor::getValidMinError(const float setpoint, const float measuremen
     }
 }
 
+std::optional<float> TurretMotor::getReachableNonNormalizedSetpoint(float setpoint)
+{
+    if (setpoint < config.minAngle)
+    {
+        float newSetpoint = setpoint;
+        while (newSetpoint < config.minAngle)
+        {
+            newSetpoint += M_TWOPI;
+        }
+        return newSetpoint <= config.maxAngle ? std::optional(newSetpoint) : std::nullopt;
+    }
+
+    if (setpoint > config.maxAngle)
+    {
+        float newSetpoint = setpoint;
+        while (newSetpoint > config.maxAngle)
+        {
+            newSetpoint -= M_TWOPI;
+        }
+        return newSetpoint >= config.minAngle ? std::optional(newSetpoint) : std::nullopt;
+    }
+
+    return std::optional(setpoint);
+}
+
 float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
 {
     return WrappedFloat(WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint), -M_PI, M_PI)
