@@ -245,6 +245,11 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
 
+algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+    *drivers(),
+    turret.yawMotor,
+    world_rel_chassis_imu::YAW_PID_CONFIG);
+
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
@@ -284,8 +289,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    &chassisFrameYawTurretController,  // @todo: wrong controller; breaks hero if turretMCB
-                                       // disconnects
+    &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
@@ -380,6 +384,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+// @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
