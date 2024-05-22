@@ -25,7 +25,7 @@
 #define TAPROOT_VECTOR_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
-#include "tap/algorithms/transforms/position.hpp"
+// #include "tap/algorithms/transforms/position.hpp"
 
 namespace tap::algorithms::transforms
 {
