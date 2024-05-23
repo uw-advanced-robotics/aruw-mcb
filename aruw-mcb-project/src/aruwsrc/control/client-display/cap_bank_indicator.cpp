@@ -70,7 +70,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             // Update the voltage bar
 
             // Bottom of the bar is 10v
-            // Top of the bar is 29v
+            // Top of the bar is 30v
             // 10v - 13v is orange
             // 13v - 18v is yellow
             // 18v - 30v is green

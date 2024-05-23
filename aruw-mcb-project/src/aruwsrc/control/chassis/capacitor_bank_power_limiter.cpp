@@ -62,6 +62,9 @@ CapBankPowerLimiter::CapBankPowerLimiter(
 {
 }
 
+float error = 0.0f;
+float currentIntegratorCopy = 0.0f;
+
 float CapBankPowerLimiter::getPowerLimitRatio()
 {
     if (drivers->refSerial.getRefSerialReceivingData() &&
@@ -86,14 +89,27 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         setpoint = 6; // TODO: get this based on a table or something
     }
 
-    float measured = this->sensor.getCurrentMa();
+    float measured = this->sensor.getCurrentMa() / 1000; // convert to amps
     
-    float error = setpoint - measured;
-    this->currentIntegrator += 0.001 * error;
+    error = setpoint - measured;
 
-    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 1.0f);
+    const float K_I = 0.001;
+    this->currentIntegrator += K_I * error;
+    
+    const float K_P = 0.005;
 
-    return std::clamp(this->currentIntegrator, 0.0f, 1.0f);
+    currentIntegratorCopy = this->currentIntegrator;
+
+    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 0.4f);
+
+    float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
+
+    const float LOW_V_RAMP_RANGE = 3.0f;
+    const float MIN_CAP_V = 10.0f;
+
+    float lowVoltageRamp = std::clamp((this->capacitorBank->getVoltage() - MIN_CAP_V) / LOW_V_RAMP_RANGE, 0.0f, 1.0f);
+
+    return controlFractionOutput * lowVoltageRamp;
 }
 
 }  // namespace aruwsrc::chassis
