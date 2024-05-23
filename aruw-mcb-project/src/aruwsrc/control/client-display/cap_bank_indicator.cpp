@@ -73,7 +73,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             // Top of the bar is 29v
             // 10v - 13v is orange
             // 13v - 18v is yellow
-            // 18v - 29v is green
+            // 18v - 30v is green
             voltage = capBank->getVoltage();
 
             if (voltage < 10.1)
@@ -84,7 +84,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             RefSerialTransmitter::configLine(
                 BOX_WIDTH - 20,
                 CAP_CENTER_X,
-                ((voltage - 10) / (28.5 - 10.0)) * (BOX_HEIGHT - 20) + BOTTOM + 10,
+                std::min((voltage - 10) / (30 - 10), 1.0f) * (BOX_HEIGHT - 20) + BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);

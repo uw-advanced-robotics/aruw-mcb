@@ -61,17 +61,7 @@ private:
 
     bool enabled;
 
-    // const float SPRINT_MODIFIER = 1.0f;
-    // const float REGULAR_MODIFIER = 0.2f;
-    // const float BASE_MODIFIER = 0.4f;
-
-    communication::can::capbank::SprintMode desiredSprint = communication::can::capbank::SprintMode::REGULAR;
-
     int8_t messageTimer = 0;
-
-    // const float SPRINT_SCALE_CHUNK_SIZE = 0.01f;
-
-    // float debug = 0;
 };
 }  // namespace aruwsrc::control::cap_bank
 

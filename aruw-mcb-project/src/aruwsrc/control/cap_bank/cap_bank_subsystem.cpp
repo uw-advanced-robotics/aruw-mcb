@@ -32,21 +32,7 @@ CapBankSubsystem::CapBankSubsystem(
 
 void CapBankSubsystem::changeSprintMode(communication::can::capbank::SprintMode mode)
 {
-    switch (mode)
-    {
-        case communication::can::capbank::SprintMode::REGULAR:
-        {
-            desiredSprint = communication::can::capbank::SprintMode::SPRINT;
-            break;
-        }
-
-        case communication::can::capbank::SprintMode::SPRINT:
-            desiredSprint = communication::can::capbank::SprintMode::REGULAR;
-            break;
-
-        default:
-            break;
-    }
+    this->capacitorBank.setSprinting(mode);
 }
 
 void CapBankSubsystem::refresh()
@@ -57,6 +43,7 @@ void CapBankSubsystem::refresh()
 
         if (!this->enabled && !this->capacitorBank.isDisabled())
         {
+            this->capacitorBank.setSprinting(communication::can::capbank::SprintMode::REGULAR);
             this->capacitorBank.stop();
         } 
         else if (this->enabled && !this->capacitorBank.isEnabled())
@@ -66,8 +53,6 @@ void CapBankSubsystem::refresh()
     }
 
     messageTimer++;
-
-    this->capacitorBank.setSprinting(this->desiredSprint);
 }
 
 }  // namespace aruwsrc::control::cap_bank

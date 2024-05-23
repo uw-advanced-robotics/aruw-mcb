@@ -69,6 +69,8 @@ private:
 
     const float LOWEST_CAP_VOLTAGE = 10.0f;
     const float POWER_RAMPDOWN_RANGE = 5.0f;
+
+    float currentIntegrator = 0;
 };
 }  // namespace aruwsrc::chassis
 

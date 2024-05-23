@@ -71,26 +71,29 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return 0;
     }
 
-    float fallbackLimit = tap::control::chassis::PowerLimiter::getPowerLimitRatio();
-
+    float fallback = tap::control::chassis::PowerLimiter::getPowerLimitRatio();
     if (this->capacitorBank == nullptr ||
         this->capacitorBank->isDisabled() ||
+        this->capacitorBank->getState() == communication::can::capbank::State::UNKNOWN ||
         this->capacitorBank->getState() == communication::can::capbank::State::SAFE)
     {
-        return fallbackLimit;
+        return fallback;
     }
 
-    // volage limiting, lerps to the fallback as the caps are close to empty
-    float capVoltageLimit = tap::algorithms::limitVal(
-        (this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / POWER_RAMPDOWN_RANGE,
-        0.0f,
-        1.0f);
+    float setpoint = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
 
-    if (this->capacitorBank->getSprinting() == communication::can::capbank::SprintMode::REGULAR) {
-        return fallbackLimit;
+    if (this->capacitorBank->getSprinting() == communication::can::capbank::SprintMode::SPRINT) {
+        setpoint = 6; // TODO: get this based on a table or something
     }
 
-    return ((1 - capVoltageLimit) * fallbackLimit + capVoltageLimit);
+    float measured = this->sensor.getCurrentMa();
+    
+    float error = setpoint - measured;
+    this->currentIntegrator += 0.001 * error;
+
+    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 1.0f);
+
+    return std::clamp(this->currentIntegrator, 0.0f, 1.0f);
 }
 
 }  // namespace aruwsrc::chassis

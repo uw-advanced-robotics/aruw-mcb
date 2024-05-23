@@ -105,7 +105,7 @@ private:
 
     bool started = false;  // Set to true once any message from the cap bank is received
 
-    SprintMode sprint;
+    SprintMode sprint = SprintMode::REGULAR;
 };
 }  // namespace aruwsrc::communication::can::capbank
 

@@ -171,7 +171,7 @@ public:
     mockable void releaseTransmissionSemaphore(uint32_t sentMsgLen)
     {
         transmissionSemaphore.release();
-        transmissionDelayTimer.restart(sentMsgLen * 1'000 / Tx::MAX_TRANSMIT_SPEED_BYTES_PER_S);
+        transmissionDelayTimer.restart(std::ceil((float)sentMsgLen * (float)1'000 / (float)Tx::MAX_TRANSMIT_SPEED_BYTES_PER_S));
     }
 
     /**
