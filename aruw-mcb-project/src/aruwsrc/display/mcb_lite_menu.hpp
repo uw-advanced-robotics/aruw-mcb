@@ -30,32 +30,32 @@ namespace aruwsrc::display
 {
 /**
  * Menu that allows the user to see data coming from an MCB-lite
-*/
+ */
 class MCBLiteMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
+    static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
 
-MCBLiteMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::virtualMCB::MCBLite *mcbLite);
+    MCBLiteMenu(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        aruwsrc::virtualMCB::MCBLite *mcbLite);
 
-void draw() override;
+    void draw() override;
 
-void update() override;
+    void update() override;
 
-void shortButtonPress(modm::MenuButtons::Button button) override;
+    void shortButtonPress(modm::MenuButtons::Button button) override;
 
-bool hasChanged() override;
+    bool hasChanged() override;
 
-static const char *getMenuName() { return "MCB Lite Menu"; }
+    static const char *getMenuName() { return "MCB Lite Menu"; }
 
 private:
-static constexpr int MCB_LITE_MENU_ID = 14;
+    static constexpr int MCB_LITE_MENU_ID = 14;
 
-aruwsrc::virtualMCB::MCBLite *mcbLite;
+    aruwsrc::virtualMCB::MCBLite *mcbLite;
 
-tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
+    tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };
 
 }  // namespace aruwsrc::display

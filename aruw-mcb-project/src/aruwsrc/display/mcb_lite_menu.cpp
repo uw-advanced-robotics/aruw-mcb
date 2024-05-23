@@ -40,14 +40,14 @@ void MCBLiteMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    display.printf("IMU data (yaw): %.2f\n", mcbLite->imu.getYaw());
+    display.printf("IMU data (yaw): %.2f\n", static_cast<double>(mcbLite->imu.getYaw()));
 
     display << "Motor positions: " << modm::endl;
     // Position of the motors, should be the first two bytes
     for (int i = 0; i < 8; i++)
     {
         display << "Motor " << i << ": "
-                << (mcbLite->can1Data[i * 8] << 8 | mcbLite->can1Data[i * 8 + 1]) << "      ";
+                << (mcbLite->can1Data[i * 8] << 8 | mcbLite->can1Data[i * 8 + 1]) << "    ";
         i++;
         display << "Motor " << i << ": "
                 << (mcbLite->can1Data[i * 8] << 8 | mcbLite->can1Data[i * 8 + 1]) << modm::endl;

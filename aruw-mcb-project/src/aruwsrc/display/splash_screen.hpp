@@ -23,9 +23,9 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 namespace aruwsrc
 {
