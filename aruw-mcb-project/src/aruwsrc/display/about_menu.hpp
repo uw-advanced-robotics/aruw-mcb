@@ -56,6 +56,8 @@ public:
     static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_SPIDER";
 #elif defined(TARGET_STANDARD_ORION)
     static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ORION";
+#elif defined(TARGET_STANDARD_CYGNUS)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_CYGNUS";
 #else
     static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
 #endif
