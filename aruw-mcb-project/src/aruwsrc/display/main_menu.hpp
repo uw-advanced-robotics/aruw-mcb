@@ -36,6 +36,7 @@
 #include "imu_calibrate_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
+#include "mcb_lite_menu.hpp"
 
 namespace aruwsrc
 {
@@ -54,7 +55,9 @@ public:
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::virtualMCB::MCBLite *mcbLite1,
+        aruwsrc::virtualMCB::MCBLite *mcbLite2);
 
     virtual ~MainMenu() = default;
 
@@ -78,11 +81,15 @@ private:
     tap::communication::sensors::imu::ImuMenu imuMenu;
     TurretMCBMenu turretStatusMenuBus1;
     TurretMCBMenu turretStatusMenuBus2;
+    MCBLiteMenu mcbLiteMenu1;
+    MCBLiteMenu mcbLiteMenu2;
     AboutMenu aboutMenu;
     SentryStrategyMenu sentryStrategyMenu;
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
+    aruwsrc::virtualMCB::MCBLite *mcbLite1;
+    aruwsrc::virtualMCB::MCBLite *mcbLite2;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -97,6 +104,8 @@ private:
     void addTurretMCBMenuBus2Callback();
     void addAboutMenuCallback();
     void addSentryStrategyMenuCallback();
+    void addMCBLiteMenu1Callback();
+    void addMCBLiteMenu2Callback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

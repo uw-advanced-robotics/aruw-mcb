@@ -25,6 +25,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 namespace aruwsrc
 {
@@ -43,7 +44,9 @@ public:
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::virtualMCB::MCBLite *mcbLite1,
+        aruwsrc::virtualMCB::MCBLite *mcbLite2);
 
     void draw() override;
 
@@ -63,6 +66,8 @@ private:
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
+    aruwsrc::virtualMCB::MCBLite *mcbLite1;
+    aruwsrc::virtualMCB::MCBLite *mcbLite2;
 };
 }  // namespace display
 }  // namespace aruwsrc
