@@ -40,7 +40,11 @@ void MCBLiteMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    display.printf("IMU data (yaw): %.2f\n", static_cast<double>(mcbLite->imu.getYaw()));
+    display.printf(
+        "IMU data: Calibrated? %d (yaw): %.2f\n",
+        mcbLite->imu.getImuState() ==
+            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED,
+        static_cast<double>(mcbLite->imu.getYaw()));
 
     display << "Motor positions: " << modm::endl;
     // Position of the motors, should be the first two bytes
