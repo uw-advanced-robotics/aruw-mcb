@@ -41,7 +41,7 @@ void MCBLiteMenu::draw()
     display << getMenuName() << modm::endl;
 
     display.printf(
-        "IMU data: Calibrated? %d (yaw): %.2f\n",
+        "IMU calib? %d (yaw): %.2f\n",
         mcbLite->imu.getImuState() ==
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED,
         static_cast<double>(mcbLite->imu.getYaw()));
