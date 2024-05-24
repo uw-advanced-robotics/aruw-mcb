@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,7 +28,8 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    const modm::Vector2f initPos)
+    const modm::Vector2f initPos,
+    const float centerToWheelDistance)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
       deadwheelOdometry(deadwheelOdometry),
@@ -37,8 +38,9 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
-{
+          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
+      wheelRadius(deadwheelOdometry.wheelRadius),
+      centerToWheelDistance(centerToWheelDistance){
     reset();
 }
 
@@ -58,15 +60,15 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    V1 = deadwheelOdometry.getPerpendicularRPM();
-    V2 = deadwheelOdometry.getParallelMotorRPM();
-    V1 = V1 / 60 * M_TWOPI * 0.048;
-    V2 = V2 / 60 * M_TWOPI * 0.048;
+    float V1 = deadwheelOdometry.getPerpendicularRPM();
+    float V2 = deadwheelOdometry.getParallelMotorRPM();
+    V1 = rpmToMetersPerSecond(V1);
+    V2 = rpmToMetersPerSecond(V2);
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
-    V2 -= modm::toRadian(imu.getGy()) * 0.230;
-    Vx = (((V1 - V2)) / M_SQRT2);
-    Vy = (((V1 + V2)) / M_SQRT2);
+    V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
+    float Vx = (((V1 - V2)) / M_SQRT2);
+    float Vy = (((V1 + V2)) / M_SQRT2);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();

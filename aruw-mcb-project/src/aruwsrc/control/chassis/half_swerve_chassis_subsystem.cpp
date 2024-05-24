@@ -29,15 +29,11 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     Module* moduleOne,
     Module* moduleTwo,
     float wheelbaseRadius,
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
     const float forwardMatrixArray[12])
     : HolonomicChassisSubsystem(drivers, currentSensor),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),
-      forwardMatrix(forwardMatrixArray),
-      parallelEncoder(parallelEncoder),
-      perpendiculoluarEncoder(perpendiculoluarEncoder)
+      forwardMatrix(forwardMatrixArray)
 {
 }
 
@@ -71,7 +67,7 @@ void HalfSwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
     x = modules[0]->wheel.rpmToMps(x);           // convert input from motor rpm to m/s
     y = modules[0]->wheel.rpmToMps(y);           // convert input from motor rpm to m/s
-    r = modules[0]->wheel.rpmToMps(r) / 0.205f;  // convert input from motor rpm to rad/s
+    r = modules[0]->wheel.rpmToMps(r) / 0.230f;  // convert input from motor rpm to rad/s
     // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
     swerveDriveCalculate(

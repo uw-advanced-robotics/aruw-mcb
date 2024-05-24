@@ -76,7 +76,8 @@ public:
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
-        float initialYPos);
+        float initialYPos,
+        const float centerToWheelDistance);
 
     void refresh() override;
 

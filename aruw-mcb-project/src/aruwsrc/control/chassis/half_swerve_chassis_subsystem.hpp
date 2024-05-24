@@ -46,22 +46,9 @@ public:
         Module* moduleOne,
         Module* moduleTwo,
         const float wheelbaseRadius,
-        aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder,
-        aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder,
         const float forwardMatrixArray[12]);
 
     void initialize() override;
-
-    inline float getParallelMotorVelocity() const
-    {
-        return parallelEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
-    }
-    inline float getPerpendicularMotorVelocity() const
-    {
-        return perpendiculoluarEncoder->getShaftRPM() / 60 * M_TWOPI * 0.048;
-    }
-    inline float getParallelMotorRPM() const { return parallelEncoder->getShaftRPM(); }
-    inline float getPerpendicularRPM() const { return perpendiculoluarEncoder->getShaftRPM(); }
 
     void setDesiredOutput(float x, float y, float r) override;
 
@@ -115,9 +102,6 @@ private:
     const float wheelbaseRadius;
 
     const modm::Matrix<float, 3, 4> forwardMatrix;
-
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelEncoder;
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendiculoluarEncoder;
 
     /**
      * Given the desired x(m/s), y(m/s), and r(rad/s), updates each module with it

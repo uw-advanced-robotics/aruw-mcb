@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -58,7 +58,8 @@ public:
         aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f initPos);
+        const modm::Vector2f initPos,
+        const float centerToWheelDistance);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -67,6 +68,8 @@ public:
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
     inline float getYaw() const override { return chassisYaw; }
+
+    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * wheelRadius;}
 
     /**
      * @brief Resets the KF back to the robot's boot position.
@@ -99,7 +102,7 @@ protected:
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-private:
+private:     
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
@@ -186,10 +189,8 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
-    float Vx;
-    float Vy;
-    float V1;
-    float V2;
+    const float wheelRadius;
+    const float centerToWheelDistance;
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);

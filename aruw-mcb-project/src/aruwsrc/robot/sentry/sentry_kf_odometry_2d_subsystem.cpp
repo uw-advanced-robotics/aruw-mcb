@@ -32,14 +32,16 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
-    float initialYPos)
+    float initialYPos,
+    const float centerToWheelDistance)
     : Subsystem(&drivers),
       DeadwheelChassisKFOdometry(
           chassis,
           deadwheels,
           yawObserver,
           imu,
-          modm::Vector2f(initialXPos, initialYPos))
+          modm::Vector2f(initialXPos, initialYPos),
+          centerToWheelDistance)
 {
 }
 
