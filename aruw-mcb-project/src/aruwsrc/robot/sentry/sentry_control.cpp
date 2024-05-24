@@ -322,7 +322,7 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     HALF_SWERVE_FORWARD_MATRIX);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface deadwheels(
-    &rightOmni, 
+    &rightOmni,
     &leftOmni,
     DEADWHEEL_RADIUS);
 

@@ -40,7 +40,8 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
       wheelRadius(deadwheelOdometry.wheelRadius),
-      centerToWheelDistance(centerToWheelDistance){
+      centerToWheelDistance(centerToWheelDistance)
+{
     reset();
 }
 

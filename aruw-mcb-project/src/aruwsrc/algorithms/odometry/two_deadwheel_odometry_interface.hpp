@@ -35,6 +35,7 @@ public:
     float getParallelMotorRPM() const;
     float getPerpendicularRPM() const;
     float wheelRadius;
+
 private:
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
