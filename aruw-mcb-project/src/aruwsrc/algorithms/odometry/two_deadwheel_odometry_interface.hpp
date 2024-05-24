@@ -30,15 +30,16 @@ public:
     TwoDeadwheelOdometryInterface(
         aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
         aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
-        float wheelRadius);
+        const float wheelRadius);
 
     float getParallelMotorRPM() const;
     float getPerpendicularRPM() const;
-    float wheelRadius;
+    float getWheelRadius() const;
 
 private:
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
+    const float wheelRadius;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

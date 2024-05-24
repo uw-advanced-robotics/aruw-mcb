@@ -19,8 +19,6 @@
 
 #include "deadwheel_chassis_kf_odometry.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
 namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
@@ -39,7 +37,7 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
-      wheelRadius(deadwheelOdometry.wheelRadius),
+      wheelRadius(deadwheelOdometry.getWheelRadius()),
       centerToWheelDistance(centerToWheelDistance)
 {
     reset();
@@ -68,6 +66,8 @@ void DeadwheelChassisKFOdometry::update()
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
+    // It is assumed that the wheels are rotated 45 degrees 
+    // relative to the forward direction of the robot
     float Vx = (((V1 - V2)) / M_SQRT2);
     float Vy = (((V1 + V2)) / M_SQRT2);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);

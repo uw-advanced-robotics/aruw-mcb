@@ -22,8 +22,6 @@
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-
 #include "holonomic_chassis_subsystem.hpp"
 #include "swerve_module.hpp"
 
