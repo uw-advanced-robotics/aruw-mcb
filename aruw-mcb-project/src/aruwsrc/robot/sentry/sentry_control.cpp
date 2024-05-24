@@ -484,6 +484,7 @@ aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
     transformAdapter,
     leftFrictionWheels,
     turretLeft::default_launch_speed,
+    0.f,  // turret minor pitch offset
     transformer.getWorldToTurretMajor(),
     turretMajor.getReadOnlyMotor(),
     TURRET_MINOR_OFFSET,
@@ -500,6 +501,7 @@ aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
     transformAdapter,
     rightFrictionWheels,
     turretRight::default_launch_speed,
+    0.f,  // turret minor pitch offset
     transformer.getWorldToTurretMajor(),
     turretMajor.getReadOnlyMotor(),
     TURRET_MINOR_OFFSET,
