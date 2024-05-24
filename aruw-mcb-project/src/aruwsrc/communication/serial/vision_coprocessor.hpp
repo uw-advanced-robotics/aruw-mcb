@@ -338,6 +338,9 @@ private:
     /** Time in ms between sending the robot health message. */
     static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
 
+    /** Time in ms between sending the bullets remaining message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_BULLETS_REMAINING_MSG = 100;
+
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
@@ -374,6 +377,8 @@ private:
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
+
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 

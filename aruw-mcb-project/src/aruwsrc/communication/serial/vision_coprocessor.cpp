@@ -416,7 +416,7 @@ void VisionCoprocessor::sendSentryMotionStrategy()
 
 void VisionCoprocessor::sendBulletsRemaining()
 {
-    if (sendHealthTimeout.execute())
+    if (sendBulletsRemainingTimeout.execute())
     {
         DJISerial::SerialMessage<sizeof(RefSerialData::Rx::TurretData::bulletsRemaining17)> bulletsRemainMessage;
         bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
