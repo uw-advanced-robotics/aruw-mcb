@@ -17,9 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
 #ifndef TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
 #define TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
+
+#include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
 
 namespace aruwsrc::algorithms::odometry
 {
