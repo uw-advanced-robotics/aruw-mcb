@@ -33,11 +33,6 @@ namespace aruwsrc::chassis
 class HolonomicChassisSubsystem;
 }
 
-namespace aruwsrc::control::turret
-{
-class RobotTurretSubsystem;
-}
-
 namespace aruwsrc::serial
 {
 class VisionCoprocessor;
@@ -130,7 +125,8 @@ public:
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
+        float defaultLaunchSpeed,
+        float turretPitchOffset,
         const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
         const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
         const float turretDistFromBase,
@@ -153,6 +149,7 @@ private:
     const aruwsrc::algorithms::transforms::TransformerInterface &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+    const float turretPitchOffset;
     const tap::algorithms::transforms::Transform &worldToTurretBaseTransform;
     const aruwsrc::control::turret::TurretMotor &turretBaseMotor;
     const float turretDistFromBase;
