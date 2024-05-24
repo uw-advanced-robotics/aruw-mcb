@@ -616,7 +616,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
     drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
-    // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
+    drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
     // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
     // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
