@@ -578,44 +578,67 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightUnjamAgitator);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping leftDownRightUp(
+// HoldCommandMapping leftDownRightUp(
+//     drivers(),
+//     {&imuCalibrateCommand},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+HoldCommandMapping leftDown(
     drivers(),
     {&imuCalibrateCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftMidRightDown(
+// HoldCommandMapping leftMidRightDown(
+//     drivers(),
+//     {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
+//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+HoldCommandMapping leftMid(
     drivers(),
     {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
-HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+// HoldCommandMapping leftMidRightMid(
+//     drivers(),
+//     {&chassisDriveCommand},
+//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // HoldCommandMapping shoot(
 //     drivers(),
 //     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
 //     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-HoldRepeatCommandMapping leftUpRightDown(
-    drivers(),
-    {&turretLeftRotateAndUnjamAgitator,
-     &turretRightRotateAndUnjamAgitator,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
-    true);
+// HoldRepeatCommandMapping leftUpRightDown(
+//     drivers(),
+//     {&turretLeftRotateAndUnjamAgitator,
+//      &turretRightRotateAndUnjamAgitator,
+//      &turretLeftFrictionWheelSpinCommand,
+//      &turretRightFrictionWheelSpinCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
+//     true);
 
-HoldCommandMapping leftDownRightDown(
+HoldCommandMapping rightUp(
     drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+    {
+        &turretLeftRotateAndUnjamAgitator,
+        &turretRightRotateAndUnjamAgitator,
+    },
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping leftUpRightUp(
+// HoldCommandMapping leftDownRightDown(
+//     drivers(),
+//     {&beybladeCommand},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
+// HoldCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&turretCVCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+HoldCommandMapping leftUp(
     drivers(),
-    {&turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    {&turretCVCommand, &turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -677,12 +700,22 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
+    // left mid: manual
+    drivers->commandMapper.addMap(&leftMid);
+    // down: imu calibrate
+    drivers->commandMapper.addMap(&leftDown);
+    // up: cv
+    drivers->commandMapper.addMap(&leftUp);
+    // right down: no shoot (no mapping)
+    // right up : shoot
+    drivers->commandMapper.addMap(&rightUp);
+
+    // drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
+    // drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-    drivers->commandMapper.addMap(&leftUpRightUp);  // cv
+    // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
     // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
     // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
@@ -690,7 +723,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
     // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
     // drivers->commandMapper.addMap(&shoot);          // Shoot
-    drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
+    // drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
 }
 }  // namespace sentry_control
 
