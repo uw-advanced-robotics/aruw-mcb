@@ -11,10 +11,14 @@ void ChassisAutoNavController::initialize(Position initialPos) {
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
     xRamp.reset(initialPos.x());
     yRamp.reset(initialPos.y());
+
+    path.pushPoint(Position(0.5, 0, 0));
+    path.pushPoint(Position(1, 0, 0));
 }
 
 float debugx = 0;
 float debugy = 0;
+Position debugSetPoint = Position(0, 0, 0);
 void ChassisAutoNavController::runController(const uint32_t dt,
                                                 const Position currentPos,
                                                 const float maxWheelSpeed,
@@ -24,6 +28,7 @@ void ChassisAutoNavController::runController(const uint32_t dt,
                                                 const float chassisYawAngle) {   
     controller_called = true;                      
     Position setPoint = path.setInterpolatedPoint(currentPos);
+    debugSetPoint = setPoint;
     float rampTarget = 0.0;
     float x = 0.0f;
     float y = 0.0f;
@@ -88,7 +93,7 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     float r = rotateSpeedRamp.getValue();
 
     // Rotate X and Y depending on turret angle
-    // tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
+    tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
     // set outputs
     debugx = x;

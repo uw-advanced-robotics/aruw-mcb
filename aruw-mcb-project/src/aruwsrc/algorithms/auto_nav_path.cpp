@@ -93,13 +93,18 @@ Position AutoNavPath::getClosestOnSegment(Position current, Position p1, Positio
     }
 }
 
+size_t debugSize = 0;
 Position AutoNavPath::findClosestPoint(Position current)
 {
     float minDistance = F32_MAX;
     size_t closestIndex = 0;
     Position minClosest = setpointData[0];
-    for (size_t i = 0; i < setpointData.size() - 1; i++)
-    {
+    size_t size = setpointData.size() - 1;
+    debugSize = size;
+    assert(debugSize == 0);
+    for (size_t i = 0; i < size; i++) {
+        // assert(false);
+        path_interpolated = true;
         Position p1 = setpointData[i];
         Position p2 = setpointData[i + 1];
         Position closest = getClosestOnSegment(current, p1, p2);
@@ -122,16 +127,20 @@ Position AutoNavPath::findClosestPoint(Position current)
 
 Position AutoNavPath::setInterpolatedPoint(Position current)
 {
-    path_interpolated = true;
-    currentSetpoint = Position(100, 0, 0);
-    return currentSetpoint;
+    // currentSetpoint = setpointData.back();
+    // return currentSetpoint;
 
     // TODO: account for and deal with the case of a path reset
     if (setpointData.empty())
     {
-        return current;
+        return currentSetpoint;
     }
+    
     Position closest = findClosestPoint(current);
+
+    currentSetpoint = setpointData.back();
+    return currentSetpoint;
+
     float offset = getDistance(setpointData[0], closest);
     float offsetDistance = offset + interpolationDistance;
     size_t i = (size_t)offsetDistance;  // floor of distance from first path point
