@@ -165,7 +165,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 2107,
+    .startEncoderValue = 4850,
     .minAngle = modm::toRadian(-195),  // actual CAD limit is -200
     .maxAngle = modm::toRadian(15),    // actual CAD limit is -20
     .limitMotorAngles = true,
