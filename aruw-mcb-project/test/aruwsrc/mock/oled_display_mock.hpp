@@ -37,7 +37,9 @@ public:
         tap::Drivers *drivers,
         aruwsrc::serial::VisionCoprocessor *vc,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::virtualMCB::MCBLite *mcbLite1,
+        aruwsrc::virtualMCB::MCBLite *mcbLite2);
     virtual ~OledDisplayMock();
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(bool, updateDisplay, (), (override));
