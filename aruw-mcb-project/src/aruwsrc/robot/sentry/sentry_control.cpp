@@ -328,6 +328,7 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
 
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
+    chassis,
     deadwheels,
     chassisYawObserver,
     drivers()->chassisMcbLite.imu,
