@@ -117,7 +117,6 @@ void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw)
     float y[int(OdomInput::NUM_INPUTS)] = {};
     y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
     y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
-    // @todo this is a dumb ifdef to avoid support for vertically mounted chassis MCB
     y[int(OdomInput::ACC_X)] = imu.getAz();
     y[int(OdomInput::ACC_Y)] = -imu.getAy();
     tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
