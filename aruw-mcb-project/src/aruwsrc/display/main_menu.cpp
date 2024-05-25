@@ -32,7 +32,9 @@ MainMenu::MainMenu(
     tap::Drivers* drivers,
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
-    can::TurretMCBCanComm* turretMCBCanCommBus2)
+    can::TurretMCBCanComm* turretMCBCanCommBus2,
+    aruwsrc::virtualMCB::MCBLite* mcbLite1,
+    aruwsrc::virtualMCB::MCBLite* mcbLite2)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
@@ -45,11 +47,15 @@ MainMenu::MainMenu(
       imuMenu(stack, &drivers->mpu6500),
       turretStatusMenuBus1(stack, turretMCBCanCommBus1),
       turretStatusMenuBus2(stack, turretMCBCanCommBus2),
+      mcbLiteMenu1(stack, mcbLite1),
+      mcbLiteMenu2(stack, mcbLite2),
       aboutMenu(stack),
       sentryStrategyMenu(stack, visionCoprocessor),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
-      turretMCBCanCommBus2(turretMCBCanCommBus2)
+      turretMCBCanCommBus2(turretMCBCanCommBus2),
+      mcbLite1(mcbLite1),
+      mcbLite2(mcbLite2)
 {
 }
 
@@ -93,6 +99,18 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addTurretMCBMenuBus2Callback));
+    if (this->mcbLite1 != nullptr)
+        addEntry(
+            "MCB Lite Menu 1",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu1Callback));
+    if (this->mcbLite2 != nullptr)
+        addEntry(
+            "MCB Lite Menu 2",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu2Callback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -185,6 +203,18 @@ void MainMenu::addTurretMCBMenuBus2Callback()
     TurretMCBMenu* tsm =
         new (&turretStatusMenuBus2) TurretMCBMenu(getViewStack(), turretMCBCanCommBus2);
     getViewStack()->push(tsm);
+}
+
+void MainMenu::addMCBLiteMenu1Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu1) MCBLiteMenu(getViewStack(), mcbLite1);
+    getViewStack()->push(mlm);
+}
+
+void MainMenu::addMCBLiteMenu2Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu2) MCBLiteMenu(getViewStack(), mcbLite2);
+    getViewStack()->push(mlm);
 }
 
 void MainMenu::addAboutMenuCallback()

@@ -32,6 +32,7 @@
 #error "Do not include this file directly! Use agitator_constants.hpp instead."
 #endif
 
+// @todo update agitator constants for new agitator
 namespace aruwsrc::control::agitator::constants
 {
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
@@ -49,7 +50,7 @@ namespace turretLeft
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
     .isAgitatorInverted = false,  // @todo: check
     /**
      * The jamming constants. Agitator is considered jammed if difference between setpoint
@@ -71,7 +72,7 @@ namespace turretRight
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,  // @todo: check
     /**
      * The jamming constants. Agitator is considered jammed if difference between the velocity
