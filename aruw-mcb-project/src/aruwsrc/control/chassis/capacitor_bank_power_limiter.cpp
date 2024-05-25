@@ -89,18 +89,18 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         setpoint = 6; // TODO: get this based on a table or something
     }
 
-    float measured = this->sensor.getCurrentMa() / 1000; // convert to amps
+    float measured = this->sensor.getCurrentMa() / 1000.0f; // convert to amps
     
     error = setpoint - measured;
 
-    const float K_I = 0.001;
+    const float K_I = 0.0025;
     this->currentIntegrator += K_I * error;
     
     const float K_P = 0.005;
 
     currentIntegratorCopy = this->currentIntegrator;
 
-    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 0.4f);
+    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 1.0f);
 
     float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
 
