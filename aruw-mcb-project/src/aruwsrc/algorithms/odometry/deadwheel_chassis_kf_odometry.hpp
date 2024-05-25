@@ -192,7 +192,7 @@ private:
 
     void updateMeasurementCovariance(float Vx, float Vy);
     void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
-    
+
     void deadwheelUpdate(float chassisYaw);
 
     void fallbackUpdate(float chassisYaw);

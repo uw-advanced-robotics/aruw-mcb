@@ -65,43 +65,45 @@ void DeadwheelChassisKFOdometry::update()
     }
 }
 
-void DeadwheelChassisKFOdometry::deadwheelUpdate(float chassisYaw){
-// Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the
-        // velocities
-        // of the two omni wheels
-        float V1 = deadwheelOdometry.getPerpendicularRPM();
-        float V2 = deadwheelOdometry.getParallelMotorRPM();
-        V1 = deadwheelOdometry.rpmToMetersPerSecond(V1);
-        V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
-        // Calculate velocities in the robot's frame of reference
-        // Correct for roation of the robot
-        V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
-        // It is assumed that the wheels are rotated 45 degrees
-        // relative to the forward direction of the robot
-        float Vx = (((V1 - V2)) / M_SQRT2);
-        float Vy = (((V1 + V2)) / M_SQRT2);
-        tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
-        // Get acceleration from IMU
-        float ax = imu.getAx();
-        float ay = imu.getAy();
+void DeadwheelChassisKFOdometry::deadwheelUpdate(float chassisYaw)
+{
+    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the
+    // velocities
+    // of the two omni wheels
+    float V1 = deadwheelOdometry.getPerpendicularRPM();
+    float V2 = deadwheelOdometry.getParallelMotorRPM();
+    V1 = deadwheelOdometry.rpmToMetersPerSecond(V1);
+    V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
+    // Calculate velocities in the robot's frame of reference
+    // Correct for roation of the robot
+    V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
+    // It is assumed that the wheels are rotated 45 degrees
+    // relative to the forward direction of the robot
+    float Vx = (((V1 - V2)) / M_SQRT2);
+    float Vy = (((V1 + V2)) / M_SQRT2);
+    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
+    // Get acceleration from IMU
+    float ax = imu.getAx();
+    float ay = imu.getAy();
 
-        // Rotate acceleration to the world frame
-        float accelXWorld, accelYWorld;
-        tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
-        accelXWorld = ax;
-        accelYWorld = ay;
+    // Rotate acceleration to the world frame
+    float accelXWorld, accelYWorld;
+    tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
+    accelXWorld = ax;
+    accelYWorld = ay;
 
-        // The measurement covariance is dynamically updated based on chassis-measured acceleration
-        updateMeasurementCovariance(Vx, Vy);
+    // The measurement covariance is dynamically updated based on chassis-measured acceleration
+    updateMeasurementCovariance(Vx, Vy);
 
-        // Create the measurement vector
-        float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
-        // Perform the Kalman filter update
-        kf.performUpdate(y);
-        updateChassisStateFromKF(chassisYaw);
+    // Create the measurement vector
+    float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
+    // Perform the Kalman filter update
+    kf.performUpdate(y);
+    updateChassisStateFromKF(chassisYaw);
 }
 
-void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw){
+void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw)
+{
     // get chassis frame velocity as measured by the motor encoders
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
     tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
@@ -119,7 +121,6 @@ void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw){
     y[int(OdomInput::ACC_X)] = imu.getAz();
     y[int(OdomInput::ACC_Y)] = -imu.getAy();
     tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
-
 
     // perform the update, after this update a new state matrix is now available
     kf.performUpdate(y);
