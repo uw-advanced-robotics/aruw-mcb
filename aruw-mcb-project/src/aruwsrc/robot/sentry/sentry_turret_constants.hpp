@@ -59,7 +59,7 @@ namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5335,
+    .startEncoderValue = 1228,
     .minAngle = 0,
     .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
@@ -132,7 +132,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 2045,
+    .startEncoderValue = 7510,
     .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(195),
     .limitMotorAngles = true,
@@ -163,7 +163,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 6132,
+    .startEncoderValue = 4850,
     .minAngle = modm::toRadian(-195),  // actual CAD limit is -200
     .maxAngle = modm::toRadian(15),    // actual CAD limit is -20
     .limitMotorAngles = true,
@@ -171,7 +171,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4780,
+    .startEncoderValue = 4727,
     .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
     .maxAngle = modm::toRadian(35),   // actual CAD limit 37
     .limitMotorAngles = true,
