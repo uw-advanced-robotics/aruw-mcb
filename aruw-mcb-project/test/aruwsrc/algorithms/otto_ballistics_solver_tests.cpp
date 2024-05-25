@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
@@ -27,6 +28,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
+#include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -104,8 +107,16 @@ class OttoBallisticsSolverTest : public Test
 protected:
     OttoBallisticsSolverTest()
         : vc(&drivers),
-          turret(&drivers),
-          solver(vc, odometry, turret, launcher, 15, 0)
+          solver(
+              vc,
+              transformer,
+              launcher,
+              15,
+              0,
+              tap::algorithms::transforms::Transform::identity(),
+              turretBaseMotor,
+              0,
+              0)
     {
     }
 
@@ -126,9 +137,11 @@ protected:
     tap::Drivers drivers;
 
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TransformerInterface> transformer;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
+    NiceMock<aruwsrc::mock::TurretMotorMock> turretBaseMotor;
+    // todo: default constructor?
+    tap::algorithms::transforms::Transform worldToTurretBaseTransform;
 
     OttoBallisticsSolver solver;
 
@@ -137,6 +150,8 @@ protected:
     aruwsrc::serial::VisionCoprocessor::TurretAimData aimData = {};
     uint32_t lastComputedOdomTime = 0;
     float launchSpeed = 15;
+    float turretPitchOffset = 0;
+    float turretDistFromBase = 0;
     bool cvOnline = true;
     modm::Location2D<float> chassisLoc;
     modm::Vector2f chassisVel;
