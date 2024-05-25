@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -31,13 +31,10 @@ TwoDeadwheelOdometryInterface::TwoDeadwheelOdometryInterface(
 {
 }
 
-/// Get RPM of odom wheel oriented such that it rolls on the tangent line to the chassis
 float TwoDeadwheelOdometryInterface::getParallelMotorRPM() const
 {
     return parallelWheel->getShaftRPM();
 }
-
-/// Get RPM of odom wheel oriented such that it rolls on the line perpendicular to the chassis
 float TwoDeadwheelOdometryInterface::getPerpendicularRPM() const
 {
     return perpendicularWheel->getShaftRPM();

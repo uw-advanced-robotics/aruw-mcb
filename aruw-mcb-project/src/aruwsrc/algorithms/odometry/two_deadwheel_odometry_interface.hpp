@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,16 +28,18 @@ class TwoDeadwheelOdometryInterface
 {
 public:
     TwoDeadwheelOdometryInterface(
-        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
         aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
+        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
         const float wheelRadius);
-
-    float getParallelMotorRPM() const;
-    float getPerpendicularRPM() const;
 
     const float WHEEL_RADIUS;
 
-    // @todo Should be in TwoDeadwheelOdometryInterface but mysteriously breaks
+    /// Get RPM of odom wheel oriented such that it rolls on the tangent line to the chassis
+    float getParallelMotorRPM() const;
+
+    /// Get RPM of odom wheel oriented such that it rolls on the line perpendicular to the chassis
+    float getPerpendicularRPM() const;
+
     inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * WHEEL_RADIUS; }
 
 private:
