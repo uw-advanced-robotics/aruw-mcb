@@ -36,7 +36,7 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     const float centerToWheelDistance)
     : Subsystem(&drivers),
       DeadwheelChassisKFOdometry(
-            chassis,
+          chassis,
           deadwheels,
           yawObserver,
           imu,
