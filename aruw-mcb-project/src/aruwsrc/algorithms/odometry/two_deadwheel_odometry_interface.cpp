@@ -22,28 +22,25 @@
 namespace aruwsrc::algorithms::odometry
 {
 TwoDeadwheelOdometryInterface::TwoDeadwheelOdometryInterface(
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
     const float wheelRadius)
-    : perpendicularWheel(perpendicularWheel),
+    : WHEEL_RADIUS(wheelRadius),
       parallelWheel(parallelWheel),
-      wheelRadius(wheelRadius){};
+      perpendicularWheel(perpendicularWheel)
+{
+}
 
-// parallel wheel is oriented such that it rolls on the tangent line to the chassis
-// perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
+/// Get RPM of odom wheel oriented such that it rolls on the tangent line to the chassis
 float TwoDeadwheelOdometryInterface::getParallelMotorRPM() const
 {
     return parallelWheel->getShaftRPM();
 }
 
+/// Get RPM of odom wheel oriented such that it rolls on the line perpendicular to the chassis
 float TwoDeadwheelOdometryInterface::getPerpendicularRPM() const
 {
     return perpendicularWheel->getShaftRPM();
-}
-
-float TwoDeadwheelOdometryInterface::getWheelRadius() const
-{
-    return wheelRadius;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

@@ -34,12 +34,17 @@ public:
 
     float getParallelMotorRPM() const;
     float getPerpendicularRPM() const;
-    float getWheelRadius() const;
+
+    const float WHEEL_RADIUS;
+
+    // @todo Should be in TwoDeadwheelOdometryInterface but mysteriously breaks
+    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * WHEEL_RADIUS; }
 
 private:
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
+    /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
-    const float wheelRadius;
+    /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

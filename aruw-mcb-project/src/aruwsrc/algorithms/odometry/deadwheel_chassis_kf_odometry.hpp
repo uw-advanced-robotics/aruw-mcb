@@ -69,12 +69,9 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
-    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * deadwheelOdometry.getWheelRadius();}
-
     /**
      * @brief Resets the KF back to the robot's boot position.
      */
-
     void reset();
 
     void update();
@@ -102,7 +99,7 @@ protected:
 
     tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
 
-private:     
+private:
     static constexpr int STATES_SQUARED =
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
