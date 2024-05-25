@@ -69,7 +69,7 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
-    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * wheelRadius;}
+    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * deadwheelOdometry.getWheelRadius();}
 
     /**
      * @brief Resets the KF back to the robot's boot position.
@@ -189,7 +189,6 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
-    const float wheelRadius;
     const float centerToWheelDistance;
     void updateChassisStateFromKF(float chassisYaw);
 
