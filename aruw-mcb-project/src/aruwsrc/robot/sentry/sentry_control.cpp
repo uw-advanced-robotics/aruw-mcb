@@ -321,14 +321,13 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     CENTER_TO_WHEELBASE_RADIUS,
     HALF_SWERVE_FORWARD_MATRIX);
 
-aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface deadwheels(
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &leftOmni,
     &rightOmni,
     DEADWHEEL_RADIUS);
 
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
-    chassis,
     deadwheels,
     chassisYawObserver,
     drivers()->chassisMcbLite.imu,

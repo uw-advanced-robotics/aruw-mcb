@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "two_deadwheel_odometry_interface.hpp"
+#include "two_deadwheel_odometry_observer.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
-TwoDeadwheelOdometryInterface::TwoDeadwheelOdometryInterface(
+TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
     const float wheelRadius)
@@ -31,11 +31,11 @@ TwoDeadwheelOdometryInterface::TwoDeadwheelOdometryInterface(
 {
 }
 
-float TwoDeadwheelOdometryInterface::getParallelMotorRPM() const
+float TwoDeadwheelOdometryObserver::getParallelMotorRPM() const
 {
     return parallelWheel->getShaftRPM();
 }
-float TwoDeadwheelOdometryInterface::getPerpendicularRPM() const
+float TwoDeadwheelOdometryObserver::getPerpendicularRPM() const
 {
     return perpendicularWheel->getShaftRPM();
 }

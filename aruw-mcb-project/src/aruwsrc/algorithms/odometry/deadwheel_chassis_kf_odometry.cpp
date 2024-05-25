@@ -22,14 +22,12 @@
 namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-    aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
+    const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float centerToWheelDistance)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
-      chassisSubsystem(chassisSubsystem),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),

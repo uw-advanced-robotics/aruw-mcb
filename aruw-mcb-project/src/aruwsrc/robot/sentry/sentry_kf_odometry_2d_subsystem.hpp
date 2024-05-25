@@ -20,7 +20,7 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
-#include <aruwsrc/algorithms/odometry/two_deadwheel_odometry_interface.hpp>
+#include <aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp>
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -62,7 +62,7 @@ public:
      * @see ChassisKFOdometry
      *
      * @param[in] drivers reference to tap drivers
-     * @param[in] chassis const reference to chassis subsystem
+     * @param[in] deadwheelOdometry reference to deadwheels for odometry data
      * @param[in] yawObserver reference to a SentryChassisWorldYawObserver, which provides world
      * relative yaw of the chassis @see OttoChassisWorldYawObserver for how it is used
      * @param[in] imu reference to the chassis-mounted IMU
@@ -71,8 +71,7 @@ public:
      */
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        const tap::control::chassis::ChassisSubsystemInterface &chassis,
-        aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface &deadwheels,
+        const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,

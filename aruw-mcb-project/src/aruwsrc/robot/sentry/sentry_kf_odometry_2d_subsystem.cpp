@@ -27,8 +27,7 @@ namespace aruwsrc::sentry
 {
 SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::Drivers &drivers,
-    const tap::control::chassis::ChassisSubsystemInterface &chassis,
-    aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface &deadwheels,
+    const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
@@ -36,7 +35,6 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     const float centerToWheelDistance)
     : Subsystem(&drivers),
       DeadwheelChassisKFOdometry(
-          chassis,
           deadwheels,
           yawObserver,
           imu,

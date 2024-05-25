@@ -32,7 +32,7 @@
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-#include "two_deadwheel_odometry_interface.hpp"
+#include "two_deadwheel_odometry_observer.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -48,14 +48,13 @@ public:
     /**
      * Constructor.
      *
-     * @param chassisSubsystem The chassis subsystem of the robot for odometry measurements
+     * @param deadwheelOdometry The deadwheels of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
      * @param initPos Initial position of chassis when robot boots
      */
     DeadwheelChassisKFOdometry(
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-        aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry,
+        const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
@@ -161,8 +160,7 @@ private:
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
-    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
-    aruwsrc::algorithms::odometry::TwoDeadwheelOdometryInterface& deadwheelOdometry;
+    const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 

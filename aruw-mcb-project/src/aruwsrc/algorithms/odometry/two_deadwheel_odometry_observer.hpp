@@ -17,17 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
-#define TWO_DEADWHEEL_ODOMETRY_INTERFACE_HPP_
+#ifndef TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
+#define TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 
 #include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
 
 namespace aruwsrc::algorithms::odometry
 {
-class TwoDeadwheelOdometryInterface
+class TwoDeadwheelOdometryObserver
 {
 public:
-    TwoDeadwheelOdometryInterface(
+    TwoDeadwheelOdometryObserver(
         aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
         aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
         const float wheelRadius);
@@ -51,4 +51,4 @@ private:
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // OTTO_CHASSIS_WORLD_YAW_OBSERVER_HPP_
+#endif  // TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
