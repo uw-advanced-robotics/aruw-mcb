@@ -20,6 +20,10 @@
 #ifndef TURRET_CONTROLLER_INTERFACE_HPP_
 #define TURRET_CONTROLLER_INTERFACE_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
+
+using namespace tap::algorithms;
+
 namespace aruwsrc::control::turret
 {
 class TurretMotor;

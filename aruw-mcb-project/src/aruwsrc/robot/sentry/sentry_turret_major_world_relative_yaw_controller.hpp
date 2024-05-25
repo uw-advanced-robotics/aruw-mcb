@@ -95,25 +95,25 @@ public:
     void setSetpoint(float desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     /// @return World frame yaw angle measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
     // @todo see todo in interface class
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    WrappedFloat convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const final
     {
         controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
-        return 0.0;
+        return Angle(0.0);
     };
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final
     {
         chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
-        return 0.0;
+        return Angle(0.0);
     };
 
 private:
