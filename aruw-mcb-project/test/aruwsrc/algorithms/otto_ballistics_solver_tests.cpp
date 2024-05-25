@@ -107,13 +107,14 @@ class OttoBallisticsSolverTest : public Test
 protected:
     OttoBallisticsSolverTest()
         : vc(&drivers),
+          turretBaseMotor(&baseMotor, {}),
           solver(
               vc,
               transformer,
               launcher,
               15,
               0,
-              tap::algorithms::transforms::Transform::identity(),
+              worldToTurretBaseTransform,
               turretBaseMotor,
               0,
               0)
@@ -126,24 +127,32 @@ protected:
 
         ON_CALL(vc, getLastAimData).WillByDefault(ReturnRef(aimData));
 
-        ON_CALL(odometry, getLastComputedOdometryTime)
-            .WillByDefault(ReturnPointee(&lastComputedOdomTime));
-        ON_CALL(odometry, getCurrentLocation2D).WillByDefault(ReturnPointee(&chassisLoc));
-        ON_CALL(odometry, getCurrentVelocity2D).WillByDefault(ReturnPointee(&chassisVel));
-
         ON_CALL(launcher, getPredictedLaunchSpeed).WillByDefault(ReturnPointee(&launchSpeed));
+
+        // reset transforms
+        turretPose = tap::algorithms::transforms::Transform::identity();
+
+        ON_CALL(transformer, getWorldToTurret).WillByDefault(ReturnRef(turretPose));
+        ON_CALL(turretBaseMotor, getChassisFrameVelocity).WillByDefault(Return(0));
+        ON_CALL(transformer, getLastComputedOdometryTime)
+            .WillByDefault(ReturnPointee(&lastComputedOdomTime));
+        ON_CALL(transformer, getChassisVelocity2d).WillByDefault(ReturnPointee(&chassisVel));
     }
 
     tap::Drivers drivers;
 
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
-    NiceMock<aruwsrc::mock::TransformerInterface> transformer;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<aruwsrc::mock::TurretMotorMock> turretBaseMotor;
-    // todo: default constructor?
-    tap::algorithms::transforms::Transform worldToTurretBaseTransform;
+    tap::algorithms::transforms::Transform worldToTurretBaseTransform =
+        tap::algorithms::transforms::Transform::identity();
 
+    NiceMock<tap::mock::MotorInterfaceMock> baseMotor;
+    aruwsrc::mock::TurretMotorMock turretBaseMotor;
     OttoBallisticsSolver solver;
+
+    tap::algorithms::transforms::Transform turretPose =
+        tap::algorithms::transforms::Transform::identity();
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> solution;
 
@@ -153,7 +162,6 @@ protected:
     float turretPitchOffset = 0;
     float turretDistFromBase = 0;
     bool cvOnline = true;
-    modm::Location2D<float> chassisLoc;
     modm::Vector2f chassisVel;
     tap::arch::clock::ClockStub clock;
 };
@@ -217,7 +225,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
-    chassisLoc.setPosition(-2, 0);
+    turretPose = tap::algorithms::transforms::Transform(-2, 0, 0, 0, 0, 0);
 
     aimData.timestamp = 100;
 
@@ -239,7 +247,7 @@ TEST_F(
 
     clock.time = 100;
 
-    EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
+    // EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
 
     solution = solver.computeTurretAimAngles();
 
