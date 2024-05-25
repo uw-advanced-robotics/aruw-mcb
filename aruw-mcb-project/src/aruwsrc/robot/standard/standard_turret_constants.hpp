@@ -95,7 +95,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_CYGNUS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 7000,
+    .startEncoderValue = 6000,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -103,7 +103,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 2000,
+    .startEncoderValue = 3000,
     .minAngle = modm::toRadian(48),
     .maxAngle = modm::toRadian(115),
     .limitMotorAngles = true,
