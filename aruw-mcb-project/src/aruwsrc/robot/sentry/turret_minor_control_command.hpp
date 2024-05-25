@@ -20,11 +20,14 @@
 #ifndef TURRET_MINOR_CONTROL_COMMAND_HPP_
 #define TURRET_MINOR_CONTROL_COMMAND_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc
 {

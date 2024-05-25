@@ -20,6 +20,7 @@
 #ifndef TURRET_CV_COMMAND_HPP_
 #define TURRET_CV_COMMAND_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
@@ -29,6 +30,7 @@
 
 #include "turret_cv_command_interface.hpp"
 
+using namespace tap::algorithms;
 namespace tap::control::odometry
 {
 class Odometry2DInterface;

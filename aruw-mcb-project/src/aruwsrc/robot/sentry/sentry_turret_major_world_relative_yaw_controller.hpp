@@ -89,10 +89,10 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     WrappedFloat getSetpoint() const final;

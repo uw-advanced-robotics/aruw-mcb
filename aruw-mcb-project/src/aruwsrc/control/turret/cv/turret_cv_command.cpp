@@ -71,32 +71,32 @@ void TurretCVCommand::initialize()
 
 void TurretCVCommand::execute()
 {
-    float pitchSetpoint = pitchController->getSetpoint();
-    float yawSetpoint = yawController->getSetpoint();
+    WrappedFloat pitchSetpoint = pitchController->getSetpoint();
+    WrappedFloat yawSetpoint = yawController->getSetpoint();
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
     {
-        pitchSetpoint = ballisticsSolution->pitchAngle;
-        yawSetpoint = ballisticsSolution->yawAngle;
+        pitchSetpoint = Angle(ballisticsSolution->pitchAngle);
+        yawSetpoint = Angle(ballisticsSolution->yawAngle);
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI)
          * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
          * that is closest to the unwrapped measured angle.
          */
-        yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
-        pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
+        // yawSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(yawSetpoint);
+        // pitchSetpoint = turretSubsystem->pitchMotor.unwrapTargetAngle(pitchSetpoint);
 
-        auto differenceWrapped = [](float measurement, float setpoint) {
-            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
-        };
+        // auto differenceWrapped = [](WrappedFloat measurement, WrappedFloat setpoint)
+        // { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
+        // };
 
         withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
-            differenceWrapped(yawController->getMeasurement(), yawSetpoint),
-            differenceWrapped(pitchController->getMeasurement(), pitchSetpoint),
+            yawController->getMeasurement().minDifference(yawSetpoint),
+            pitchController->getMeasurement().minDifference(pitchSetpoint),
             ballisticsSolution->distance);
     }
     else

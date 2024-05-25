@@ -68,7 +68,9 @@ void TurretMajorWorldFrameController::initialize()
 // @todo implement separate controller with limiting or refactor elsewhere
 //       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
 //       code difficult to trace, follow, and maintain
-void TurretMajorWorldFrameController::runController(const uint32_t dt, const float desiredSetpoint)
+void TurretMajorWorldFrameController::runController(
+    const uint32_t dt,
+    const WrappedFloat desiredSetpoint)
 {
     WrappedFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
 
@@ -76,7 +78,7 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 
     const float chassisVelocity = *chassis.getActualVelocityChassisRelative()[2];
 
-    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameSetpoint - worldToChassis.getYaw(), localAngle);
@@ -106,9 +108,9 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 }
 
 // @todo what's the point of this; overridden by runController anyways?
-void TurretMajorWorldFrameController::setSetpoint(float desiredSetpoint)
+void TurretMajorWorldFrameController::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 }
 
 WrappedFloat TurretMajorWorldFrameController::getSetpoint() const { return worldFrameSetpoint; }

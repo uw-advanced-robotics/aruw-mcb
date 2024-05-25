@@ -59,9 +59,9 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
     /// details.
@@ -115,9 +115,9 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /**
      * @return The pitch setpoint, in the chassis frame.

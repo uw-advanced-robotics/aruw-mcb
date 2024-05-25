@@ -47,10 +47,12 @@ void ChassisFrameYawTurretController::initialize()
     }
 }
 
-void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
+void ChassisFrameYawTurretController::runController(
+    const uint32_t dt,
+    const WrappedFloat desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret yaw gimbal
     float positionControllerError = turretMotor.getValidChassisMeasurementError();
@@ -61,9 +63,9 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
     turretMotor.setMotorOutput(pidOutput);
 }
 
-void ChassisFrameYawTurretController::setSetpoint(float desiredSetpoint)
+void ChassisFrameYawTurretController::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 }
 
 WrappedFloat ChassisFrameYawTurretController::getSetpoint() const
@@ -97,10 +99,10 @@ void ChassisFramePitchTurretController::initialize()
 
 void ChassisFramePitchTurretController::runController(
     const uint32_t dt,
-    const float desiredSetpoint)
+    const WrappedFloat desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 
     // position controller based on turret pitch gimbal
     float positionControllerError = turretMotor.getValidChassisMeasurementError();
@@ -117,9 +119,9 @@ void ChassisFramePitchTurretController::runController(
     turretMotor.setMotorOutput(pidOutput);
 }
 
-void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
+void ChassisFramePitchTurretController::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
+    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 }
 
 WrappedFloat ChassisFramePitchTurretController::getSetpoint() const

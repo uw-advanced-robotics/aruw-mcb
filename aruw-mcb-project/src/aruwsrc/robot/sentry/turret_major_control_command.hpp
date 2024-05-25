@@ -20,12 +20,14 @@
 #ifndef TURRET_MAJOR_CONTROL_COMMAND_HPP_
 #define TURRET_MAJOR_CONTROL_COMMAND_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::sentry;
+using namespace tap::algorithms;
 
 namespace aruwsrc
 {
@@ -46,7 +48,6 @@ namespace aruwsrc::control::turret::sentry
 class TurretMajorSentryControlCommand : public tap::control::Command
 {
 public:
-    float lastYawSetPoint = 0.0f;
     /**
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] turretMajorSubsystem Pointer to the sentry turret to control.
@@ -79,6 +80,7 @@ private:
     SentryControlOperatorInterface &controlOperatorInterface;
     YawTurretSubsystem &turretMajorSubsystem;
 
+    WrappedFloat lastYawSetPoint;
     uint32_t prevTime = 0;
 
     algorithms::TurretYawControllerInterface &yawController;

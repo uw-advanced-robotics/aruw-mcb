@@ -77,10 +77,11 @@ void TurretMinorSentryControlCommand::execute()
             pitchInput = 0;
             yawInput = 0;
     }
-    const float pitchSetpoint = pitchController.getSetpoint() + userPitchInputScalar * pitchInput;
+    const WrappedFloat pitchSetpoint =
+        pitchController.getSetpoint() + userPitchInputScalar * pitchInput;
     pitchController.runController(dt, pitchSetpoint);
 
-    const float yawSetpoint = yawController.getSetpoint() + userYawInputScalar * yawInput;
+    const WrappedFloat yawSetpoint = yawController.getSetpoint() + userYawInputScalar * yawInput;
     yawController.runController(dt, yawSetpoint);
 }
 

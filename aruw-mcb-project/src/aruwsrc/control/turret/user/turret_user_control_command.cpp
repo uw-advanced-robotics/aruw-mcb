@@ -62,12 +62,12 @@ void TurretUserControlCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    const float pitchSetpoint =
+    const WrappedFloat pitchSetpoint =
         pitchController->getSetpoint() +
         userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
-    const float yawSetpoint =
+    const WrappedFloat yawSetpoint =
         yawController->getSetpoint() +
         userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);

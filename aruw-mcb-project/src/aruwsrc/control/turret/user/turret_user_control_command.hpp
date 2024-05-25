@@ -21,9 +21,12 @@
 #define TURRET_USER_CONTROL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../turret_subsystem.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc
 {

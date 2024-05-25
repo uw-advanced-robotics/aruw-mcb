@@ -65,12 +65,14 @@ public:
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
      * is operating. Units radians.
      */
-    virtual void runController(const uint32_t dt, const float desiredSetpoint) = 0;
+    virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
 
     /**
      * Sets the controller setpoint, but doesn't run the controller.
      */
-    virtual void setSetpoint(float desiredSetpoint) = 0;
+    virtual void setSetpoint(WrappedFloat desiredSetpoint) = 0;
+
+    inline void setSetpoint(float desiredSetpoint) { setSetpoint(Angle(desiredSetpoint)); }
 
     /**
      * @return The controller's setpoint, units radians. **Does not** have to be in the same
