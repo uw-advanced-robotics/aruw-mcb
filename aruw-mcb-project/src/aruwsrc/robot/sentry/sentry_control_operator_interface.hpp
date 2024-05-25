@@ -41,9 +41,9 @@ public:
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 10'000.0f;  // TODO: change these values
+    static constexpr float MAX_ACCELERATION_X = 8'000.0f;  // TODO: change these values
     static constexpr float MAX_DECELERATION_X = 20'000.0f;
-    static constexpr float MAX_ACCELERATION_Y = 10'000.0f;  // TODO: change the values?
+    static constexpr float MAX_ACCELERATION_Y = 8'000.0f;  // TODO: change the values?
     static constexpr float MAX_DECELERATION_Y = 20'000.0f;
     static constexpr float MAX_ACCELERATION_R = 10'000.0f;  // TODO: change the values?
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
