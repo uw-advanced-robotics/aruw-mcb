@@ -128,7 +128,7 @@ static inline void updateWorldFrameSetpoint(
     WrappedFloat &worldFrameSetpoint,
     TurretMotor &turretMotor)
 {
-    worldFrameSetpoint = desiredSetpoint;
+    worldFrameSetpoint = Angle(desiredSetpoint);
 
     // transform target angle from turret imu relative to chassis relative
     // to keep turret/command setpoints synchronized
