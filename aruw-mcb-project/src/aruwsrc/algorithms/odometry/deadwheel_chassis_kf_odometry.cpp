@@ -22,12 +22,14 @@
 namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
+    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float centerToWheelDistance)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+      chassisSubsystem(chassisSubsystem),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
@@ -53,39 +55,76 @@ void DeadwheelChassisKFOdometry::update()
         chassisYaw = 0;
         return;
     }
+    if (deadwheelOdometry.allDeadwheelsOnline())
+    {
+        deadwheelUpdate(chassisYaw);
+    }
+    else
+    {
+        fallbackUpdate(chassisYaw);
+    }
+}
 
-    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
-    // of the two omni wheels
-    float V1 = deadwheelOdometry.getPerpendicularRPM();
-    float V2 = deadwheelOdometry.getParallelMotorRPM();
-    V1 = deadwheelOdometry.rpmToMetersPerSecond(V1);
-    V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
-    // Calculate velocities in the robot's frame of reference
-    // Correct for roation of the robot
-    V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
-    // It is assumed that the wheels are rotated 45 degrees
-    // relative to the forward direction of the robot
-    float Vx = (((V1 - V2)) / M_SQRT2);
-    float Vy = (((V1 + V2)) / M_SQRT2);
-    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
-    // Get acceleration from IMU
-    float ax = imu.getAx();
-    float ay = imu.getAy();
+void DeadwheelChassisKFOdometry::deadwheelUpdate(float chassisYaw){
+// Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the
+        // velocities
+        // of the two omni wheels
+        float V1 = deadwheelOdometry.getPerpendicularRPM();
+        float V2 = deadwheelOdometry.getParallelMotorRPM();
+        V1 = deadwheelOdometry.rpmToMetersPerSecond(V1);
+        V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
+        // Calculate velocities in the robot's frame of reference
+        // Correct for roation of the robot
+        V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
+        // It is assumed that the wheels are rotated 45 degrees
+        // relative to the forward direction of the robot
+        float Vx = (((V1 - V2)) / M_SQRT2);
+        float Vy = (((V1 + V2)) / M_SQRT2);
+        tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
+        // Get acceleration from IMU
+        float ax = imu.getAx();
+        float ay = imu.getAy();
 
-    // Rotate acceleration to the world frame
-    float accelXWorld, accelYWorld;
-    tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
-    accelXWorld = ax;
-    accelYWorld = ay;
+        // Rotate acceleration to the world frame
+        float accelXWorld, accelYWorld;
+        tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
+        accelXWorld = ax;
+        accelYWorld = ay;
 
-    // The measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(Vx, Vy);
+        // The measurement covariance is dynamically updated based on chassis-measured acceleration
+        updateMeasurementCovariance(Vx, Vy);
 
-    // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
+        // Create the measurement vector
+        float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
+        // Perform the Kalman filter update
+        kf.performUpdate(y);
+        updateChassisStateFromKF(chassisYaw);
+}
 
-    // Perform the Kalman filter update
+void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw){
+    // get chassis frame velocity as measured by the motor encoders
+    auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
+        chassisVelocity,
+        chassisYaw);
+
+    // the measurement covariance is dynamically updated based on chassis-measured acceleration
+    updateMeasurementCovariance(chassisVelocity);
+
+    // assume 0 velocity/acceleration in z direction
+    float y[int(OdomInput::NUM_INPUTS)] = {};
+    y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
+    y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+    // @todo this is a dumb ifdef to avoid support for vertically mounted chassis MCB
+    y[int(OdomInput::ACC_X)] = imu.getAz();
+    y[int(OdomInput::ACC_Y)] = -imu.getAy();
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
+
+
+    // perform the update, after this update a new state matrix is now available
     kf.performUpdate(y);
+
+    // update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromKF(chassisYaw);
 }
 
@@ -136,6 +175,49 @@ void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
         chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
 
     // Set measurement covariance of chassis velocity as measured by the wheels
+    kf.getMeasurementCovariance()[0] = velocityCovariance;
+    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
+        velocityCovariance;
+}
+
+/// Backup covariance update for hotswap in event of deadwheel failure
+void DeadwheelChassisKFOdometry::updateMeasurementCovariance(
+    const modm::Matrix<float, 3, 1>& chassisVelocity)
+{
+    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
+    const uint32_t dt = curTime - prevTime;
+    prevTime = curTime;
+
+    // return to avoid weird acceleration spike on startup
+    if (prevTime == 0)
+    {
+        return;
+    }
+
+    // compute acceleration
+
+    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
+        chassisMeasuredDeltaVelocity.x,
+        chassisVelocity[0][0] - prevChassisVelocity[0][0],
+        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
+        chassisMeasuredDeltaVelocity.y,
+        chassisVelocity[1][0] - prevChassisVelocity[1][0],
+        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
+
+    prevChassisVelocity = chassisVelocity;
+
+    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
+    // convert dt in microseconds to seconds
+    const float accelMagnitude =
+        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
+
+    const float velocityCovariance =
+        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
+
+    // set measurement covariance of chassis velocity as measured by the wheels because if
+    // acceleration is large, the likelihood of slippage is greater
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
         velocityCovariance;

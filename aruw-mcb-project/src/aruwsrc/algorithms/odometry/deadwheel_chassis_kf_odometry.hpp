@@ -29,6 +29,7 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -54,6 +55,7 @@ public:
      * @param initPos Initial position of chassis when robot boots
      */
     DeadwheelChassisKFOdometry(
+        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
@@ -160,6 +162,7 @@ private:
 
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
+    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
@@ -188,6 +191,11 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
+    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+    
+    void deadwheelUpdate(float chassisYaw);
+
+    void fallbackUpdate(float chassisYaw);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

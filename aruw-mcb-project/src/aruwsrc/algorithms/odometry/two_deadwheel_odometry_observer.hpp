@@ -42,6 +42,11 @@ public:
 
     inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * WHEEL_RADIUS; }
 
+    inline bool allDeadwheelsOnline() const
+    {
+        return parallelWheel->isMotorOnline() && perpendicularWheel->isMotorOnline();
+    }
+
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
