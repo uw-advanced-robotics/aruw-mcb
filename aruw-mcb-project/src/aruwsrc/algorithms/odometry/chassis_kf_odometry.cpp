@@ -71,10 +71,7 @@ void ChassisKFOdometry::update()
     // @todo this is a dumb ifdef to avoid support for vertically mounted chassis MCB
     y[int(OdomInput::ACC_X)] = imu.getAz();
     y[int(OdomInput::ACC_Y)] = -imu.getAy();
-    tap::algorithms::rotateVector(
-        &y[int(OdomInput::ACC_X)],
-        &y[int(OdomInput::ACC_Y)],
-        chassisYaw);
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
 #else
     y[int(OdomInput::ACC_X)] = imu.getAx();
     y[int(OdomInput::ACC_Y)] = imu.getAy();

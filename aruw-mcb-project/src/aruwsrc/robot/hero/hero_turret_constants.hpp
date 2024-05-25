@@ -153,7 +153,6 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 
 namespace world_rel_chassis_imu
 {
-
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 150'000.0f,
     .ki = 0.0f,
