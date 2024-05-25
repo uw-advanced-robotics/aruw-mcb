@@ -26,7 +26,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_HYDRA",
-                        "HERO_CYCLONE",
+                        "HERO_PERSEUS",
                         "DART",
                         "TESTBED" ]
 
