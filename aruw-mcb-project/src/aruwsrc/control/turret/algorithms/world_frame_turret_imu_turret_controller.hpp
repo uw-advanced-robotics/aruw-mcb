@@ -77,17 +77,18 @@ public:
     void setSetpoint(float desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     /// @return World frame yaw angle measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final;
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
@@ -139,16 +140,17 @@ public:
     void setSetpoint(float desiredSetpoint) final;
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final;
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
@@ -156,7 +158,7 @@ private:
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    WrappedFloat worldFrameSetpoint;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

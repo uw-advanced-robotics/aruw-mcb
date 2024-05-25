@@ -23,8 +23,11 @@
 #include <cstdint>
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "turret_controller_interface.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
@@ -62,23 +65,25 @@ public:
 
     /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     bool isOnline() const final;
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    inline WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final
     {
         return controllerFrameAngle;
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    inline WrappedFloat convertChassisAngleToControllerFrame(
+        WrappedFloat chassisFrameAngle) const final
     {
         return chassisFrameAngle;
     }
@@ -117,22 +122,24 @@ public:
     /**
      * @return The pitch setpoint, in the chassis frame.
      */
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     /// @return The chassis frame pitch turret measurement, refer to top level documentation for
     /// more details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    inline WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final
     {
         return controllerFrameAngle;
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    inline WrappedFloat convertChassisAngleToControllerFrame(
+        WrappedFloat chassisFrameAngle) const final
     {
         return chassisFrameAngle;
     }

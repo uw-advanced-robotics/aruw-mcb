@@ -30,6 +30,8 @@
 
 #include "turret_controller_interface.hpp"
 
+using namespace tap::algorithms;
+
 namespace aruwsrc::control::turret
 {
 class TurretMotor;
@@ -74,55 +76,57 @@ public:
 
     /// @return world frame yaw angle measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     /**
      * @return The yaw setpoint, in the world frame.
      */
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     bool isOnline() const final;
 
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final;
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
     tap::Drivers &drivers;
 
     tap::algorithms::SmoothPid pid;
 
-    int revolutions = 0;
-    float prevYaw = 0;
+    // int revolutions = 0;
+    // float prevYaw = 0;
 
-    float worldFrameSetpoint = 0;
+    WrappedFloat worldFrameSetpoint;
 
-    float chassisFrameInitImuYawAngle = 0.0f;
+    WrappedFloat chassisFrameInitImuYawAngle;
 
-    float getMpu6500YawUnwrapped() const
+    inline WrappedFloat getMpu6500Yaw() const
     {
-        return modm::toRadian(drivers.mpu6500.getYaw()) + M_TWOPI * revolutions;
+        return Angle(modm::toRadian(drivers.mpu6500.getYaw()));
     }
 
-    /**
-     * Updates the mpu6500 yaw revolution counter and the prevYaw value (which is used to update the
-     * revolution counter). This is the only function that should be used to update `prevYaw` or
-     * `revolutions`.
-     */
-    void updateRevolutionCounter()
-    {
-        const float newYaw = modm::toRadian(drivers.mpu6500.getYaw());
-        const float diff = newYaw - prevYaw;
-        prevYaw = newYaw;
-        if (diff < -M_PI)
-        {
-            revolutions++;
-        }
-        else if (diff > M_PI)
-        {
-            revolutions--;
-        }
-    }
+    // /**
+    //  * Updates the mpu6500 yaw revolution counter and the prevYaw value (which is used to update
+    //  the
+    //  * revolution counter). This is the only function that should be used to update `prevYaw` or
+    //  * `revolutions`.
+    //  */
+    // void updateRevolutionCounter()
+    // {
+    //     const WrappedFloat newYaw = getMpu6500YawUnwrapped();
+    //     const float diff = newYaw - prevYaw;
+    //     prevYaw = newYaw;
+    //     if (diff < -M_PI)
+    //     {
+    //         revolutions++;
+    //     }
+    //     else if (diff > M_PI)
+    //     {
+    //         revolutions--;
+    //     }
+    // }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

@@ -50,7 +50,7 @@ void ChassisFrameYawTurretController::initialize()
 void ChassisFrameYawTurretController::runController(const uint32_t dt, const float desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
 
     // position controller based on turret yaw gimbal
     float positionControllerError = turretMotor.getValidChassisMeasurementError();
@@ -63,17 +63,17 @@ void ChassisFrameYawTurretController::runController(const uint32_t dt, const flo
 
 void ChassisFrameYawTurretController::setSetpoint(float desiredSetpoint)
 {
-    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
 }
 
-float ChassisFrameYawTurretController::getSetpoint() const
+WrappedFloat ChassisFrameYawTurretController::getSetpoint() const
 {
     return turretMotor.getChassisFrameSetpoint();
 }
 
-float ChassisFrameYawTurretController::getMeasurement() const
+WrappedFloat ChassisFrameYawTurretController::getMeasurement() const
 {
-    return turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+    return turretMotor.getChassisFrameMeasuredAngle();
 }
 
 bool ChassisFrameYawTurretController::isOnline() const { return turretMotor.isOnline(); }
@@ -100,7 +100,7 @@ void ChassisFramePitchTurretController::runController(
     const float desiredSetpoint)
 {
     // limit the yaw min and max angles
-    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
 
     // position controller based on turret pitch gimbal
     float positionControllerError = turretMotor.getValidChassisMeasurementError();
@@ -119,17 +119,17 @@ void ChassisFramePitchTurretController::runController(
 
 void ChassisFramePitchTurretController::setSetpoint(float desiredSetpoint)
 {
-    turretMotor.setChassisFrameSetpoint(desiredSetpoint);
+    turretMotor.setChassisFrameSetpoint(Angle(desiredSetpoint));
 }
 
-float ChassisFramePitchTurretController::getSetpoint() const
+WrappedFloat ChassisFramePitchTurretController::getSetpoint() const
 {
     return turretMotor.getChassisFrameSetpoint();
 }
 
-float ChassisFramePitchTurretController::getMeasurement() const
+WrappedFloat ChassisFramePitchTurretController::getMeasurement() const
 {
-    return turretMotor.getChassisFrameUnwrappedMeasuredAngle();
+    return turretMotor.getChassisFrameMeasuredAngle();
 }
 
 bool ChassisFramePitchTurretController::isOnline() const { return turretMotor.isOnline(); }

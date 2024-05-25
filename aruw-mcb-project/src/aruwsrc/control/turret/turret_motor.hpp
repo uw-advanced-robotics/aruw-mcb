@@ -231,23 +231,23 @@ public:
      * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
      * or if the notes above apply.
      */
-    inline float unwrapTargetAngle(float setpointToUnwrap) const
-    {
-        if (turretController == nullptr || !config.limitMotorAngles)
-        {
-            return setpointToUnwrap;
-        }
+    // inline float unwrapTargetAngle(float setpointToUnwrap) const
+    // {
+    //     if (turretController == nullptr || !config.limitMotorAngles)
+    //     {
+    //         return setpointToUnwrap;
+    //     }
 
-        setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
-            turretController->getMeasurement(),
-            setpointToUnwrap);
+    //     setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
+    //         turretController->getMeasurement(),
+    //         setpointToUnwrap);
 
-        setpointToUnwrap =
-            turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
-                turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
+    //     setpointToUnwrap =
+    //         turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
+    //             turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
 
-        return setpointToUnwrap;
-    }
+    //     return setpointToUnwrap;
+    // }
 
 private:
     const TurretMotorConfig config;
