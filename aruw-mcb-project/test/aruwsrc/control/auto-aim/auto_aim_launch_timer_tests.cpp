@@ -29,6 +29,7 @@
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -47,16 +48,34 @@ protected:
         : frictionWheels(&drivers),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          turretBaseMotor(&baseMotor, {}),
+          ballistics(
+              visionCoprocessor,
+              transformer,
+              frictionWheels,
+              0,
+              0,
+              worldToTurretBaseTransform,
+              turretBaseMotor,
+              0,
+              0){};
 
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
     tap::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
+
+    tap::algorithms::transforms::Transform worldToTurretBaseTransform =
+        tap::algorithms::transforms::Transform::identity();
+
+    NiceMock<tap::mock::MotorInterfaceMock> baseMotor;
+    aruwsrc::mock::TurretMotorMock turretBaseMotor;
+
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
 };
 
