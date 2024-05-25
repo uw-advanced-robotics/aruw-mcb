@@ -55,13 +55,13 @@ public:
     inline float z() const { return coordinates_.data[2]; }
 
     /* Operators */
-    inline Vector operator-(const Vector& other) const;
+    Vector operator-(const Vector& other) const;
 
-    inline Vector operator-(const Position& other) const;
+    Vector operator-(const Position& other) const;
 
-    inline Position operator+(const Position& vector) const;
+    Position operator+(const Position& vector) const;
 
-    inline Position operator*(const float scalar) const;
+    Position operator*(const float scalar) const;
 
     Position& operator=(const Position& other);
 

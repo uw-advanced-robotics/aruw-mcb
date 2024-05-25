@@ -95,8 +95,6 @@ void AutoNavBeybladeCommand::execute()
     // const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         // drivers.refSerial.getRefSerialReceivingData(),
         // drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
-
-    float rampTarget = 0.0;
     
     const tap::communication::serial::RefSerialData::Rx::GameType& gametype =
         drivers.refSerial.getGameData().gameType;

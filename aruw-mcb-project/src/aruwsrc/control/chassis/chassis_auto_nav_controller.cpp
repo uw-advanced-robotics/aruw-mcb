@@ -12,8 +12,9 @@ void ChassisAutoNavController::initialize(Position initialPos) {
     xRamp.reset(initialPos.x());
     yRamp.reset(initialPos.y());
 
+    path.pushPoint(Position(0, 0, 0));
     path.pushPoint(Position(0.5, 0, 0));
-    path.pushPoint(Position(1, 0, 0));
+    path.pushPoint(Position(0.5, 0.5, 0));
 }
 
 float debugx = 0;
@@ -27,7 +28,7 @@ void ChassisAutoNavController::runController(const uint32_t dt,
                                                 const bool beybladeEnabled,
                                                 const float chassisYawAngle) {   
     controller_called = true;                      
-    Position setPoint = path.setInterpolatedPoint(currentPos);
+    Position setPoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER);
     debugSetPoint = setPoint;
     float rampTarget = 0.0;
     float x = 0.0f;
@@ -100,6 +101,19 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     debugy = y;
     chassis.setDesiredOutput(x, y, 0);
 
+}
+
+Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter) const
+{
+    // TODO: account for and deal with the case of a path reset
+
+    if (path.empty())
+    {
+        return current;
+    }
+    
+    float closest = path.positionToClosestParameter(current);
+    return path.parametertoPosition(closest + interpolationParameter);
 }
 
 } // namespace aruwsrc::chassis

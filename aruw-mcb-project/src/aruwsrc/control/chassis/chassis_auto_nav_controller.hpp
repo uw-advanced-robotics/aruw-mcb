@@ -15,6 +15,7 @@ namespace aruwsrc::chassis
 {
 
 static constexpr float POS_RAMP_RATE = 0.0008f;
+static constexpr float INTERPOLATION_PARAMETER = 1.0f;
 
 class ChassisAutoNavController {
 public:
@@ -41,6 +42,7 @@ public:
                        const bool movementEnabled,
                        const bool beybladeEnabled,
                        const float chassisYawAngle);
+    Position calculateSetPoint(Position current, float interpolationParameter) const;
 
 private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
@@ -55,7 +57,7 @@ private:
     tap::algorithms::Ramp xRamp;
     tap::algorithms::Ramp yRamp;
 
-    bool controller_called = false;
+    bool controller_called = false; // DEBUG
 };
 } // namespace aruwsrc::chassis
 

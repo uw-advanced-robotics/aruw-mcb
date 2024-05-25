@@ -66,7 +66,7 @@ public:
 
     const inline CMSISMat<3, 1>& coordinates() const { return coordinates_; }
 
-    const inline float magnitude() const { return sqrt(*this * *this); }
+    inline float magnitude() const { return sqrt(*this * *this); }
 
 private:
     CMSISMat<3, 1> coordinates_;

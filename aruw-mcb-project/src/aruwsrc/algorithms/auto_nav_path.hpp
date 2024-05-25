@@ -15,20 +15,14 @@ namespace aruwsrc::algorithms
 class AutoNavPath
 {
 public:
-    AutoNavPath(float distance)
-        : setpointData(),
-          interpolationDistance(distance),
-          oldSetpoint(0, 0, 0),
-          currentSetpoint(0, 0, 0)
+    AutoNavPath()
+        : setpointData()
     {}
-
-    // void pushPoint(struct aruwsrc::serial::VisionCoprocessor::AutoNavSetpointData point);
+    
     void pushPoint(Position point);
     void popPoint();
     void resetPath();
     bool empty() const { return setpointData.empty(); }
-    Position getSetPoint() const;
-    Position setInterpolatedPoint(Position current);
     float positionToClosestParameter(const Position pos) const;
     Position parametertoPosition(const float parameter) const;
     float parameterToSpeed(const float parameter) const;
@@ -39,22 +33,28 @@ public:
     }
 
 private:
-    Position findClosestPoint(Position current);
-    float getDistance(Position p1, Position p2) const;
-
     std::deque<Position> setpointData;
 
-    const float interpolationDistance;  //
-    Position oldSetpoint;               // The last setpoint used along the previous path
-    Position currentSetpoint;
-
-    bool path_interpolated = false;
+    bool path_interpolated = false; // DEBUG
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif
-    Position getClosestOnSegment(Position current, Position p1, Position p2) const;
     float getClosestParameterOnSegment(Position current, Position p1, Position p2) const;
+    
+    // BAD STUFF -- REMOVE THIS POST TESTING
+    Position calculateSetPoint(Position current, float interpolationParameter)
+    {
+        // TODO: account for and deal with the case of a path reset
+
+        if (setpointData.empty())
+        {
+            return current;
+        }
+        
+        float closest = positionToClosestParameter(current);
+        return parametertoPosition(closest + interpolationParameter);
+    }
 };
 
 }  // namespace aruwsrc::algorithms
