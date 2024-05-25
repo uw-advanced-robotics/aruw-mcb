@@ -149,7 +149,7 @@
             "defines": ["TARGET_TESTBED"]
         },
         {
-            "name": "MCB Hero Cyclone",
+            "name": "MCB Hero Perseus",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -159,7 +159,7 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_HERO_CYCLONE"]
+            "defines": ["TARGET_HERO_PERSEUS"]
         }
     ],
     "version": 4

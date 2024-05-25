@@ -38,6 +38,12 @@
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
+// Yucky forward declaration
+namespace aruwsrc::display
+{
+class MCBLiteMenu;
+}
+
 namespace aruwsrc::virtualMCB
 {
 /**
@@ -49,6 +55,8 @@ namespace aruwsrc::virtualMCB
  */
 class MCBLite : public tap::communication::serial::DJISerial
 {
+    friend class aruwsrc::display::MCBLiteMenu;
+
 public:
     MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
 
