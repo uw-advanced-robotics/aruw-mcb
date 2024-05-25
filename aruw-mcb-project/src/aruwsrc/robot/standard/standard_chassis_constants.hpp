@@ -115,7 +115,6 @@ static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.37f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.415f;
 
-
 #else
 
 #error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
