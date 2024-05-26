@@ -1,9 +1,11 @@
 #include "chassis_auto_nav_controller.hpp"
+
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::chassis
 {
-void ChassisAutoNavController::initialize(Position initialPos) {
+void ChassisAutoNavController::initialize(Position initialPos)
+{
     path.resetPath();
 
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
@@ -20,23 +22,26 @@ void ChassisAutoNavController::initialize(Position initialPos) {
 float debugx = 0;
 float debugy = 0;
 Position debugSetPoint = Position(0, 0, 0);
-void ChassisAutoNavController::runController(const uint32_t dt,
-                                                const Position currentPos,
-                                                const float maxWheelSpeed,
-                                                const tap::communication::serial::RefSerialData::Rx::GameType& gametype,
-                                                const bool movementEnabled,
-                                                const bool beybladeEnabled,
-                                                const float chassisYawAngle) {   
-    controller_called = true;                      
+void ChassisAutoNavController::runController(
+    const uint32_t dt,
+    const Position currentPos,
+    const float maxWheelSpeed,
+    const tap::communication::serial::RefSerialData::Rx::GameType& gametype,
+    const bool movementEnabled,
+    const bool beybladeEnabled,
+    const float chassisYawAngle)
+{
+    controller_called = true;
     Position setPoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER);
     debugSetPoint = setPoint;
     float rampTarget = 0.0;
     float x = 0.0f;
     float y = 0.0f;
 
-    if (((int(gametype) == 0 ||
-            (drivers.refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
-        !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled) || true )
+    if (((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
+                                 tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
+         !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled) ||
+        true)
     {
         float currentX = currentPos.x();
         float currentY = currentPos.y();
@@ -47,8 +52,8 @@ void ChassisAutoNavController::runController(const uint32_t dt,
         xRamp.update(POS_RAMP_RATE);
         yRamp.update(POS_RAMP_RATE);
 
-        float desiredVelocityX = xRamp.getValue() - currentX;
-        float desiredVelocityY = yRamp.getValue() - currentY;
+        float desiredVelocityX = setPoint.x() - currentX;
+        float desiredVelocityY = setPoint.y() - currentY;
         float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
 
         if (mag > 0.01)
@@ -65,8 +70,8 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     // yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) *
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    if ((int(gametype) == 0 ||
-            (drivers.refSerial.getGameData().gameStage == tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
+    if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
+                                tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
         beybladeEnabled)
     {
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
@@ -100,10 +105,10 @@ void ChassisAutoNavController::runController(const uint32_t dt,
     debugx = x;
     debugy = y;
     chassis.setDesiredOutput(x, y, 0);
-
 }
 
-Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter) const
+Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter)
+    const
 {
     // TODO: account for and deal with the case of a path reset
 
@@ -111,9 +116,9 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     {
         return current;
     }
-    
+
     float closest = path.positionToClosestParameter(current);
     return path.parametertoPosition(closest + interpolationParameter);
 }
 
-} // namespace aruwsrc::chassis
+}  // namespace aruwsrc::chassis
