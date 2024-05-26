@@ -161,7 +161,8 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
+    float rotationSetpoint{0},
+        speedSetpointRPM{0};  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians, moveVectorX, moveVectorY;
 

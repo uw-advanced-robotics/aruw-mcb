@@ -39,7 +39,7 @@ namespace aruwsrc::control::agitator::constants
 {
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 
 // position PID terms
 // PID terms for standard

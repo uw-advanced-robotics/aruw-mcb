@@ -28,6 +28,7 @@ namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.230;
+static constexpr float DEADWHEEL_RADIUS = 0.048f;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
@@ -50,6 +51,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
  */
 
 // clang-format off
+//Full mat:
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     0.5,     0.0,      0.5,      0.5,      
     0.0,      0.5,     0.0,       0.25,    
