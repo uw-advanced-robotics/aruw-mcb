@@ -50,16 +50,17 @@ protected:
     void SetUp() override
     {
         ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
-        ON_CALL(djiMotor, getEncoderUnwrapped).WillByDefault([&]() {
-            return chassisFrameUnwrappedMeasurement * tap::motor::DjiMotor::ENC_RESOLUTION /
-                   M_TWOPI;
-        });
-        ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
-            return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
-        });
-        ON_CALL(djiMotor, getOutputDesired).WillByDefault([&]() {
-            return djiMotor.DjiMotor::getOutputDesired();
-        });
+        ON_CALL(djiMotor, getEncoderUnwrapped)
+            .WillByDefault(
+                [&]() {
+                    return chassisFrameUnwrappedMeasurement * tap::motor::DjiMotor::ENC_RESOLUTION /
+                           M_TWOPI;
+                });
+        ON_CALL(djiMotor, setDesiredOutput)
+            .WillByDefault([&](int32_t desiredOutput)
+                           { return djiMotor.DjiMotor::setDesiredOutput(desiredOutput); });
+        ON_CALL(djiMotor, getOutputDesired)
+            .WillByDefault([&]() { return djiMotor.DjiMotor::getOutputDesired(); });
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
@@ -79,13 +80,12 @@ protected:
 
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
 
-        ON_CALL(turretMotor, setChassisFrameSetpoint).WillByDefault([&](float setpoint) {
-            turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint);
-        });
+        ON_CALL(turretMotor, setChassisFrameSetpoint)
+            .WillByDefault([&](float setpoint)
+                           { turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint); });
 
-        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() {
-            return turretMotor.TurretMotor::getChassisFrameSetpoint();
-        });
+        ON_CALL(turretMotor, getChassisFrameSetpoint)
+            .WillByDefault([&]() { return turretMotor.TurretMotor::getChassisFrameSetpoint(); });
     }
 
     tap::Drivers drivers;

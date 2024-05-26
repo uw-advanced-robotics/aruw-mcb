@@ -37,13 +37,21 @@ public:
     virtual ~TurretControllerInterfaceMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, runController, (const uint32_t, const float), (override));
-    MOCK_METHOD(void, setSetpoint, (float), (override));
-    MOCK_METHOD(float, getSetpoint, (), (const override));
-    MOCK_METHOD(float, getMeasurement, (), (const override));
+    MOCK_METHOD(void, runController, (const uint32_t, const WrappedFloat), (override));
+    MOCK_METHOD(void, setSetpoint, (WrappedFloat), (override));
+    MOCK_METHOD(WrappedFloat, getSetpoint, (), (const override));
+    MOCK_METHOD(WrappedFloat, getMeasurement, (), (const override));
     MOCK_METHOD(bool, isOnline, (), (const override));
-    MOCK_METHOD(float, convertControllerAngleToChassisFrame, (float), (const override));
-    MOCK_METHOD(float, convertChassisAngleToControllerFrame, (float), (const override));
+    MOCK_METHOD(
+        WrappedFloat,
+        convertControllerAngleToChassisFrame,
+        (WrappedFloat),
+        (const override));
+    MOCK_METHOD(
+        WrappedFloat,
+        convertChassisAngleToControllerFrame,
+        (WrappedFloat),
+        (const override));
 
 protected:
     aruwsrc::control::turret::TurretMotor *turretMotor;
