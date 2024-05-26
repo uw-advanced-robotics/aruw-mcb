@@ -62,7 +62,7 @@ private:
         IMUMessage* imuMessage = (IMUMessage*)completeMessage.data;
         pitch = imuMessage->pitch;
         roll = imuMessage->roll;
-        yaw = imuMessage->yaw;
+        yaw = fmodf(imuMessage->yaw + 180, 360);
         Gx = imuMessage->Gx;
         Gy = imuMessage->Gy;
         Gz = imuMessage->Gz;

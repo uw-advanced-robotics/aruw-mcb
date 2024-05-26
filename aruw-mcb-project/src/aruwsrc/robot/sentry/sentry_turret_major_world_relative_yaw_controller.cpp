@@ -61,8 +61,7 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setWrappedValue(
-            yawMotor.getChassisFrameSetpoint() + worldToMajor.getYaw());
+        worldFrameSetpoint.setWrappedValue(yawMotor.getChassisFrameSetpoint() - yawMotor.getChassisFrameUnwrappedMeasuredAngle() + worldToMajor.getYaw());
 
         yawMotor.attachTurretController(this);
     }

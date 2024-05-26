@@ -346,12 +346,12 @@ SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
 SentryTransformAdapter transformAdapter(transformer);
 
-tap::algorithms::SmoothPid turretMajorYawPosPid(
+SmoothPid turretMajorYawPosPid(
     turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid turretMajorYawVelPid(
+SmoothPid turretMajorYawVelPid(
     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
-algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
+TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
@@ -363,6 +363,11 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajor::MAX_VEL_ERROR_INPUT,
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
+
+ChassisFrameYawTurretController turretMajorChassisYawController(
+    turretMajor.getMutableMotor(),
+    turretMajor::chassisFrameController::YAW_PID_CONFIG
+);
 
 // Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -455,7 +460,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
         },
     },
     turretMajor,
-    turretMajorWorldYawController,
+    turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
     chassisOdometry,
