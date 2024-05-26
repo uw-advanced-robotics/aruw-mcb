@@ -48,7 +48,12 @@ void SwerveModule::initialize()
     azimuthMotor.initialize();
 }
 
-void SwerveModule::setZeroRPM() { speedSetpointRPM = 0; }
+void SwerveModule::setZeroRPM()
+{
+    speedSetpointRPM = 0;
+    driveMotor.setDesiredOutput(0);
+    azimuthMotor.setDesiredOutput(0);
+}
 
 bool SwerveModule::allMotorsOnline() const
 {
