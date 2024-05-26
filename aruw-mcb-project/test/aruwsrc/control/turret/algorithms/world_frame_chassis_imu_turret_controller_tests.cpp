@@ -76,7 +76,7 @@ TEST_F(
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
-    turretController.runController(1, M_PI_2);
+    turretController.runController(1, Angle(M_PI_2));
 }
 
 TEST_F(
@@ -87,7 +87,7 @@ TEST_F(
 
     EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
-    turretController.runController(1, M_PI_2);
+    turretController.runController(1, Angle(M_PI_2));
 }
 
 TEST_F(
@@ -98,7 +98,7 @@ TEST_F(
 
     EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 
-    turretController.runController(1, M_PI_2);
+    turretController.runController(1, Angle(M_PI_2));
 }
 
 TEST_F(
@@ -110,5 +110,5 @@ TEST_F(
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
-    turretController.runController(1, M_PI_2);
+    turretController.runController(1, Angle(M_PI_2));
 }

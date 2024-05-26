@@ -42,7 +42,7 @@ public:
         attachTurretController,
         (const control::turret::algorithms::TurretControllerInterface *),
         (override));
-    MOCK_METHOD(void, setChassisFrameSetpoint, (WrappedFloat), (override));
+    MOCK_METHOD(void, setChassisFrameSetpoint, (WrappedFloat));
     MOCK_METHOD(void, setChassisFrameSetpoint, (float));
     MOCK_METHOD(bool, isOnline, (), (const override));
     MOCK_METHOD(WrappedFloat, getChassisFrameSetpoint, (), (const override));

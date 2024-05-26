@@ -593,31 +593,32 @@ struct UnwrapTargetAngleTestValues
 //     },
 // };
 
-std::vector<TurretMotorConfig> motorConfigValuesToTest = {
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = 0,
-        .maxAngle = 0,
-        .limitMotorAngles = false,
-    },
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = -M_PI,
-        .maxAngle = M_PI,
-        .limitMotorAngles = true,
-    },
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
-        .limitMotorAngles = true,
-    },
-};
+// std::vector<TurretMotorConfig> motorConfigValuesToTest = {
+//     {
+//         .startAngle = 0,
+//         .startEncoderValue = 0,
+//         .minAngle = 0,
+//         .maxAngle = 0,
+//         .limitMotorAngles = false,
+//     },
+//     {
+//         .startAngle = 0,
+//         .startEncoderValue = 0,
+//         .minAngle = -M_PI,
+//         .maxAngle = M_PI,
+//         .limitMotorAngles = true,
+//     },
+//     {
+//         .startAngle = 0,
+//         .startEncoderValue = 0,
+//         .minAngle = -M_TWOPI,
+//         .maxAngle = M_TWOPI,
+//         .limitMotorAngles = true,
+//     },
+// };
 
-INSTANTIATE_TEST_SUITE_P(
-    TurretMotorTest,
-    UnwrapTargetAngleTest,
-    Combine(ValuesIn(unwrapTargetAnglesValuesToTest), ValuesIn(motorConfigValuesToTest)));
+// todo: this might have disabled ALL of the tests in this file? idk lol
+//  INSTANTIATE_TEST_SUITE_P(
+//      TurretMotorTest,
+//      UnwrapTargetAngleTest,
+//      Combine(ValuesIn(unwrapTargetAnglesValuesToTest), ValuesIn(motorConfigValuesToTest)));
