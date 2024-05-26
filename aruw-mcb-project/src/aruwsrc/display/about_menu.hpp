@@ -48,19 +48,23 @@ public:
     static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
     static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTRY)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY";
-#elif defined(TARGET_SENTRY_BEEHIVE)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_BEEHIVE";
+#elif defined(TARGET_SENTRY_HYDRA)
+    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_HYDRA";
 #elif defined(TARGET_HERO_CYCLONE)
-    static constexpr char ROBOT_NAME[] = "TARGET_HERO_CYCLONE";
+    static constexpr char ROBOT_NAME[] = "TARGET_HERO_PERSEUS";
+#elif defined(TARGET_STANDARD_SPIDER)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_SPIDER";
+#elif defined(TARGET_STANDARD_ORION)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ORION";
+#elif defined(TARGET_STANDARD_CYGNUS)
+    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_CYGNUS";
 #else
-    static constexpr char ROBOT_NAME[] = "UNKNOWN";
+    static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
 #endif
 
     static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
     static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
-    static constexpr char LAST_DATETIME[] = STRINGIFYMACRO(BUILD_DATETIME);
+    static constexpr char LAST_DATE[] = STRINGIFYMACRO(BUILD_DATE);
     static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
 
     AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);

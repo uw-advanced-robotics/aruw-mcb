@@ -22,10 +22,12 @@ from .parse_args import USAGE
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
 VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "STANDARD_SPIDER",
+                        "STANDARD_ORION",
+                        "STANDARD_CYGNUS",
                         "DRONE",
                         "ENGINEER",
-                        "SENTRY_BEEHIVE",
-                        "HERO_CYCLONE",
+                        "SENTRY_HYDRA",
+                        "HERO_PERSEUS",
                         "DART",
                         "TESTBED" ]
 
