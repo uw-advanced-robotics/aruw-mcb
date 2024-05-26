@@ -20,12 +20,14 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
+#include <aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp>
+
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
@@ -48,7 +50,7 @@ class ChassisSubsystemInterface;
 namespace aruwsrc::sentry
 {
 class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::ChassisKFOdometry
+                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
 {
 public:
     /**
@@ -60,7 +62,7 @@ public:
      * @see ChassisKFOdometry
      *
      * @param[in] drivers reference to tap drivers
-     * @param[in] chassis const reference to chassis subsystem
+     * @param[in] deadwheelOdometry reference to deadwheels for odometry data
      * @param[in] yawObserver reference to a SentryChassisWorldYawObserver, which provides world
      * relative yaw of the chassis @see OttoChassisWorldYawObserver for how it is used
      * @param[in] imu reference to the chassis-mounted IMU
@@ -69,11 +71,12 @@ public:
      */
     SentryKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        const tap::control::chassis::ChassisSubsystemInterface &chassis,
+        const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
-        float initialYPos);
+        float initialYPos,
+        const float centerToWheelDistance);
 
     void refresh() override;
 

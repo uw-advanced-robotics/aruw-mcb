@@ -163,8 +163,16 @@ OledDisplayMock::OledDisplayMock(
     tap::Drivers *drivers,
     aruwsrc::serial::VisionCoprocessor *vc,
     can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2)
-    : display::OledDisplay(drivers, vc, turretMCBCanCommBus1, turretMCBCanCommBus2)
+    can::TurretMCBCanComm *turretMCBCanCommBus2,
+    aruwsrc::virtualMCB::MCBLite *mcbLite1,
+    aruwsrc::virtualMCB::MCBLite *mcbLite2)
+    : display::OledDisplay(
+          drivers,
+          vc,
+          turretMCBCanCommBus1,
+          turretMCBCanCommBus2,
+          mcbLite1,
+          mcbLite2)
 {
 }
 OledDisplayMock::~OledDisplayMock() {}
