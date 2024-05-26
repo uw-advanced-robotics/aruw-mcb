@@ -25,6 +25,7 @@
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -58,7 +59,7 @@ class TurretMajorWorldFrameController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] worldToChassis An self-updating reference to a transform from the world frame
+     * @param[in] worldToMajor An self-updating reference to a transform from the world frame
      *          to the chassis frame, used to determine the pose of the chassis relative to the
      *          world frame.
      * @param[in] chassis A chassis subsystem for getting angular velocity of the chassis.
@@ -72,9 +73,10 @@ public:
      * @param[in] feedforwardGain Gain on the feedforward term of the final output.
      */
     TurretMajorWorldFrameController(
-        const tap::algorithms::transforms::Transform& worldToChassis,
+        const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor& yawMotor,
+        aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
@@ -117,11 +119,13 @@ public:
     };
 
 private:
-    const tap::algorithms::transforms::Transform& worldToChassis;
+    const tap::algorithms::transforms::Transform& worldToMajor;
 
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
     TurretMotor& yawMotor;
+
+    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU;
 
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;

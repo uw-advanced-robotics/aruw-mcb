@@ -346,9 +346,10 @@ tap::algorithms::SmoothPid turretMajorYawVelPid(
     turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
 algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
-    transformer.getWorldToChassis(),
+    transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
+    drivers()->turretMajorMcbLite.imu,
     turretLeft,
     turretRight,
     turretMajorYawPosPid,
