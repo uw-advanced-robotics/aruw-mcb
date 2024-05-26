@@ -477,13 +477,12 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictio
     false,
     turretLeft::barrelID);
 
-aruwsrc::control::launcher::
-    FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
-        drivers(),
-        &frictionWheelsTurretLeft,
-        0.0f,
-        true,
-        turretLeft::barrelID);
+aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
+    drivers(),
+    &frictionWheelsTurretLeft,
+    0.0f,
+    true,
+    turretLeft::barrelID);
 
 // Agitator commands (turret left)
 MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -536,21 +535,21 @@ HoldCommandMapping leftMidRightDown(
     {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+// HoldCommandMapping leftMidRightMid(
+//     drivers(),
+//     {&chassisDriveCommand},
+//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldRepeatCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftMidRightMid(
     drivers(),
     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID),
     true);
 
-HoldCommandMapping shoot(
+HoldCommandMapping leftDown(
     drivers(),
-    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&stopTurretLeftFrictionWheelSpinCommand, &stopTurretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftDownRightDown(
     drivers(),
@@ -578,8 +577,8 @@ void initializeSubsystems()
     rightOmni.initialize();
     leftOmni.initialize();
     // turret
-    // frictionWheelsTurretLeft.initialize();
-    // frictionWheelsTurretRight.initialize();
+    frictionWheelsTurretLeft.initialize();
+    frictionWheelsTurretRight.initialize();
 
     turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
@@ -595,8 +594,8 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
 
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
@@ -611,8 +610,8 @@ void setDefaultSentryCommands(Drivers *)
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
 
-    // frictionWheelsTurretLeft.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
-    // frictionWheelsTurretRight.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+    frictionWheelsTurretLeft.setDefaultCommand(&turretLeftFrictionWheelSpinCommand);
+    frictionWheelsTurretRight.setDefaultCommand(&turretRightFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -635,8 +634,8 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    // drivers->commandMapper.addMap(&shoot);          // Shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);  // Agitators
+    drivers->commandMapper.addMap(&leftDown);          // Don't shoot
 }
 }  // namespace sentry_control
 
