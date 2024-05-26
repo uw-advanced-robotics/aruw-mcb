@@ -29,6 +29,7 @@
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -41,21 +42,21 @@ namespace chassis
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
-    const aruwsrc::control::turret::TurretMotor& yawMotor,
+    // const aruwsrc::control::turret::TurretMotor& yawMotor,
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-    const aruwsrc::sentry::SentryBeybladeConfig config,
-    tap::algorithms::SmoothPidConfig pidConfig,
+    const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
+    // tap::algorithms::SmoothPidConfig& pidConfig,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
-      yawMotor(yawMotor),
+    //   yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
-      odometryInterface(odometryInterface),
+      transformerInterface(transformerInterface),
       config(config),
       autoNavOnlyInGame(autoNavOnlyInGame),
-      xPid(pidConfig),
-      yPid(pidConfig),
+    //   xPid(pidConfig),
+    //   yPid(pidConfig),
       autoNavController(chassis, visionCoprocessor.getPath(), visionCoprocessor, drivers, config)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
@@ -74,24 +75,24 @@ void AutoNavBeybladeCommand::initialize()
 //     rotateSpeedRamp.reset(chassis.getDesiredRotation());
 //     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
 //     yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
-    float x = odometryInterface.getCurrentLocation2D().getX();
-    float y = odometryInterface.getCurrentLocation2D().getY();
+    float x = transformerInterface.getWorldToChassis().getX();
+    float y = transformerInterface.getWorldToChassis().getY();
     autoNavController.initialize(Position(x, y, 0));
 }
 
 void AutoNavBeybladeCommand::execute()
 {
     command_scheduled = true;
-    if (!yawMotor.isOnline()) return;
+    // if (!yawMotor.isOnline()) return;
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     prevTime = currTime;
     // Gets current chassis yaw angle
-    float currentX = odometryInterface.getCurrentLocation2D().getX();
-    float currentY = odometryInterface.getCurrentLocation2D().getY();
-    float chassisYawAngle = odometryInterface.getYaw();
+    float currentX = transformerInterface.getWorldToChassis().getX();
+    float currentY = transformerInterface.getWorldToChassis().getY();
+    float chassisYawAngle = transformerInterface.getWorldToChassis().getYaw();
 
-    const float maxWheelSpeed = 10000;
+    const float maxWheelSpeed = 1000;
     // const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         // drivers.refSerial.getRefSerialReceivingData(),
         // drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);

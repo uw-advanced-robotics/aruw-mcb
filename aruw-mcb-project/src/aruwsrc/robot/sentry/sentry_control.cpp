@@ -59,6 +59,8 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -390,6 +392,18 @@ VelocityAgitatorSubsystem turretRightAgitator(
     constants::turretRight::AGITATOR_CONFIG);
 
 /* define commands ----------------------------------------------------------*/
+aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
+    *drivers(),
+    chassis,
+    // turretMajorYawMotor,
+    drivers()->visionCoprocessor,
+    transformAdapter,
+    aruwsrc::sentry::chassis::beybladeConfig,
+    // aruwsrc::control::turret::turretMajor::chassisFrameController::YAW_POS_PID_CONFIG, // DUMMY DUMMY
+    false
+    );
+
+
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -594,7 +608,7 @@ void registerSentrySubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultSentryCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&autonavBeybladeCommand);
     turretMajor.setDefaultCommand(&majorManualCommand);
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);

@@ -217,19 +217,21 @@ aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     &chassis,
     &turret.yawMotor);
 
+aruwsrc::sentry::SentryBeybladeConfig sentryBeybladeConfig = {
+        .beybladeRotationalSpeedFractionOfMax = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
+        .beybladeTranslationalSpeedMultiplier = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
+        .beybladeRotationalSpeedMultiplierWhenTranslating = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
+        .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
+        .beybladeRampRate = aruwsrc::chassis::BEYBLADE_RAMP_UPDATE_RAMP
+    };
+
 aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
     *drivers(),
     chassis,
     turret.yawMotor,
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    aruwsrc::sentry::SentryBeybladeConfig{
-        .beybladeRotationalSpeedFractionOfMax = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
-        .beybladeTranslationalSpeedMultiplier = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
-        .beybladeRotationalSpeedMultiplierWhenTranslating = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
-        .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
-        .beybladeRampRate = aruwsrc::chassis::BEYBLADE_RAMP_UPDATE_RAMP
-    },
+    sentryBeybladeConfig,
     chassis_rel::PITCH_PID_CONFIG, // DUMMY VALUE - NOT USED
     false
     );

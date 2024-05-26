@@ -10,21 +10,22 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 namespace aruwsrc::chassis
 {
 
 static constexpr float POS_RAMP_RATE = 0.0008f;
-static constexpr float INTERPOLATION_PARAMETER = 1.0f;
+static constexpr float INTERPOLATION_PARAMETER = 0.75f;
 
 class ChassisAutoNavController {
 public:
     //TODO: clean up what should be fields and what should be passed into runController
-    ChassisAutoNavController(aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+    inline ChassisAutoNavController(aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
                              aruwsrc::algorithms::AutoNavPath& path,
                              aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
                              tap::Drivers& drivers,
-                             const aruwsrc::sentry::SentryBeybladeConfig& config
+                             const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config
                              ) :
         chassis(chassis),
         path(path),
@@ -44,13 +45,13 @@ public:
                        const float chassisYawAngle);
     Position calculateSetPoint(Position current, float interpolationParameter) const;
 
-private:
+// private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 
-    const aruwsrc::sentry::SentryBeybladeConfig& config;
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
 
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;

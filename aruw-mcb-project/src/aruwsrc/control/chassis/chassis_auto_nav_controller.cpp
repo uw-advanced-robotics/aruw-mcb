@@ -15,13 +15,18 @@ void ChassisAutoNavController::initialize(Position initialPos)
     yRamp.reset(initialPos.y());
 
     path.pushPoint(Position(0, 0, 0));
-    path.pushPoint(Position(0.5, 0, 0));
-    path.pushPoint(Position(0.5, 0.5, 0));
+    path.pushPoint(Position(0.45, 1, 0));
+    path.pushPoint(Position(1.75, 0, 0));
+    path.pushPoint(Position(2, 0, 0));
+    path.pushPoint(Position(3, 0, 0));
 }
 
 float debugx = 0;
 float debugy = 0;
+float mag = -1;
 Position debugSetPoint = Position(0, 0, 0);
+float desiredVelocityX, desiredVelocityY;
+float dumbFuckConstant;
 void ChassisAutoNavController::runController(
     const uint32_t dt,
     const Position currentPos,
@@ -52,72 +57,75 @@ void ChassisAutoNavController::runController(
         xRamp.update(POS_RAMP_RATE);
         yRamp.update(POS_RAMP_RATE);
 
-        float desiredVelocityX = setPoint.x() - currentX;
-        float desiredVelocityY = setPoint.y() - currentY;
-        float mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
+        desiredVelocityX = setPoint.x() - currentX;
+        desiredVelocityY = setPoint.y() - currentY;
+        mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
 
         if (mag > 0.01)
         {
+            dumbFuckConstant = config.beybladeTranslationalSpeedMultiplier;
             x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier *
                 maxWheelSpeed;
             y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier *
                 maxWheelSpeed;
+            // x = desiredVelocityX / mag * 0.5 * maxWheelSpeed;
+            // y = desiredVelocityY / mag * 0.5 * maxWheelSpeed;
         }
     }
+    debugx = x;
+    debugy = y;
 
     // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) *
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed; float y =
     // yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) *
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
-                                tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
-        beybladeEnabled)
-    {
-        // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
-        // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
-        // maxWheelSpeed)
-        const float translationalSpeedThreshold =
-            config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+    // if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
+    //                             tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
+    //     beybladeEnabled)
+    // {
+    //     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
+    //     // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
+    //     // maxWheelSpeed)
+    //     const float translationalSpeedThreshold =
+    //         config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+    //         config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-        rampTarget =
-            rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+    //     rampTarget =
+    //         rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
-        // reduce the beyblade rotation when translating to allow for better translational speed
-        // (otherwise it is likely that you will barely move unless
-        // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-        if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
-        {
-            rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
-        }
-    }
+    //     // reduce the beyblade rotation when translating to allow for better translational speed
+    //     // (otherwise it is likely that you will barely move unless
+    //     // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+    //     if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
+    //     {
+    //         rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+    //     }
+    // }
 
-    rotateSpeedRamp.setTarget(rampTarget);
-    // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-    rotateSpeedRamp.update(config.beybladeRampRate);
-    float r = rotateSpeedRamp.getValue();
+    // rotateSpeedRamp.setTarget(rampTarget);
+    // // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
+    // rotateSpeedRamp.update(config.beybladeRampRate);
+    // float r = rotateSpeedRamp.getValue();
 
     // Rotate X and Y depending on turret angle
     tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
 
     // set outputs
-    debugx = x;
-    debugy = y;
     chassis.setDesiredOutput(x, y, 0);
 }
-
+float closest;
 Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter)
     const
 {
     // TODO: account for and deal with the case of a path reset
-
+    
     if (path.empty())
     {
         return current;
     }
 
-    float closest = path.positionToClosestParameter(current);
+    closest = path.positionToClosestParameter(current);
     return path.parametertoPosition(closest + interpolationParameter);
 }
 

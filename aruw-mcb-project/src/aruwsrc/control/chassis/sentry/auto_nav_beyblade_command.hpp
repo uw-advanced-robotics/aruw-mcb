@@ -31,6 +31,7 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -47,11 +48,11 @@ public:
     AutoNavBeybladeCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        const aruwsrc::control::turret::TurretMotor& yawMotor,
+        // const aruwsrc::control::turret::TurretMotor& yawMotor,
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-        const aruwsrc::sentry::SentryBeybladeConfig config,
-        const tap::algorithms::SmoothPidConfig pidConfig,
+        const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
+        // const tap::algorithms::SmoothPidConfig& pidConfig,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -77,15 +78,15 @@ private:
 
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
-    const aruwsrc::control::turret::TurretMotor& yawMotor;
+    // const aruwsrc::control::turret::TurretMotor& yawMotor;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
+    const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface;
 
-    const aruwsrc::sentry::SentryBeybladeConfig config;
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
 
     bool autoNavOnlyInGame;
-    tap::algorithms::SmoothPid xPid;
-    tap::algorithms::SmoothPid yPid;
+    // tap::algorithms::SmoothPid xPid;
+    // tap::algorithms::SmoothPid yPid;
 
     uint32_t prevTime = 0;
 
