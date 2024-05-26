@@ -111,7 +111,7 @@ void DeadwheelChassisKFOdometry::fallbackUpdate(float chassisYaw)
         chassisYaw);
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(chassisVelocity);
+    updateMeasurementCovariance(chassisVelocity[0][0], chassisVelocity[1][0]);
 
     // assume 0 velocity/acceleration in z direction
     float y[int(OdomInput::NUM_INPUTS)] = {};
@@ -175,49 +175,6 @@ void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
         chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
 
     // Set measurement covariance of chassis velocity as measured by the wheels
-    kf.getMeasurementCovariance()[0] = velocityCovariance;
-    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-        velocityCovariance;
-}
-
-/// Backup covariance update for hotswap in event of deadwheel failure
-void DeadwheelChassisKFOdometry::updateMeasurementCovariance(
-    const modm::Matrix<float, 3, 1>& chassisVelocity)
-{
-    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
-
-    // return to avoid weird acceleration spike on startup
-    if (prevTime == 0)
-    {
-        return;
-    }
-
-    // compute acceleration
-
-    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.x,
-        chassisVelocity[0][0] - prevChassisVelocity[0][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.y,
-        chassisVelocity[1][0] - prevChassisVelocity[1][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    prevChassisVelocity = chassisVelocity;
-
-    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
-    // convert dt in microseconds to seconds
-    const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
-
-    const float velocityCovariance =
-        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
-
-    // set measurement covariance of chassis velocity as measured by the wheels because if
-    // acceleration is large, the likelihood of slippage is greater
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
         velocityCovariance;

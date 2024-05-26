@@ -29,7 +29,6 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -48,7 +47,7 @@ class DeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DI
 public:
     /**
      * Constructor.
-     *
+     * @param chassisSubsystem The chassis subsystem of the robot
      * @param deadwheelOdometry The deadwheels of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
@@ -191,7 +190,6 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
-    void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
 
     void deadwheelUpdate(float chassisYaw);
 
