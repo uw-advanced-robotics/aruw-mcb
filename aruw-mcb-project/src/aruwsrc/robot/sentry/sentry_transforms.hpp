@@ -66,6 +66,11 @@ public:
         return worldToTurretRight;
     };
 
+    inline const tap::algorithms::transforms::Transform& getChassisToMajor() const
+    {
+        return chassisToTurretMajor;
+    };
+
     // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
     {
@@ -87,6 +92,18 @@ public:
     inline const tap::algorithms::transforms::Transform& getMajorToTurretRight() const
     {
         return turretMajorToTurretRight;
+    };
+
+    inline const tap::algorithms::transforms::Transform& getMajorToMinor(uint8_t turretId) const
+    {
+        if (turretId == turretLeft.getTurretID())
+        {
+            return turretMajorToTurretLeft;
+        }
+        else
+        {
+            return turretMajorToTurretRight;
+        }
     };
 
 protected:
