@@ -36,10 +36,13 @@ class OttoBallisticsSolverMock : public OttoBallisticsSolver
 public:
     OttoBallisticsSolverMock(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
+        float defaultLaunchSpeed,
+        float turretPitchOffset,
+        const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
+        const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
+        const float turretDistFromBase,
         const uint8_t turretID);
     virtual ~OttoBallisticsSolverMock();
 

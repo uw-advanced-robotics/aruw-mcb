@@ -255,14 +255,19 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(
-            getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getWrappedValue());
-    });
+        .WillByDefault(
+            [&](const float setpoint, const float measurement) {
+                return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI)
+                    .minDifference(setpoint);
+            });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]()
+            {
+                return getValidMinError(
+                    getChassisFrameSetpoint(),
+                    getChassisFrameMeasuredAngle().getWrappedValue());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}
@@ -293,17 +298,23 @@ TurretCVCommandMock::~TurretCVCommandMock() {}
 
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed,
+    float defaultLaunchSpeed,
+    float turretPitchOffset,
+    const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
+    const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
+    const float turretDistFromBase,
     const uint8_t turretID)
     : aruwsrc::algorithms::OttoBallisticsSolver(
           visionCoprocessor,
-          odometryInterface,
-          turretSubsystem,
+          transformer,
           frictionWheels,
           defaultLaunchSpeed,
+          turretPitchOffset,
+          worldToTurretBaseTransform,
+          turretBaseMotor,
+          turretDistFromBase,
           turretID){};
 
 OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};

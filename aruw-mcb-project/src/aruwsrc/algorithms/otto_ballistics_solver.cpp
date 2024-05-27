@@ -27,7 +27,6 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-
 using namespace tap::algorithms;
 using namespace modm;
 
@@ -38,7 +37,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    // @todo: make this a config?
+    const float turretPitchOffset,
     const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
     const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
     const float turretDistFromBase,
@@ -47,11 +46,11 @@ OttoBallisticsSolver::OttoBallisticsSolver(
       transformer(transformer),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
+      turretPitchOffset(turretPitchOffset),
       worldToTurretBaseTransform(worldToTurretBaseTransform),
       turretBaseMotor(turretBaseMotor),
       turretDistFromBase(turretDistFromBase),
       turretID(turretID)
-
 {
 }
 
@@ -128,7 +127,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &lastComputedSolution->pitchAngle,
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,
-                0))
+                turretPitchOffset))
         {
             lastComputedSolution = std::nullopt;
         }

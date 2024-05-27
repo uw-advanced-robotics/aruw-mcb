@@ -28,7 +28,7 @@
 
 namespace aruwsrc::mock
 {
-class TransformerInterface : public aruwsrc::algorithms::transforms::TransformerInterface
+class TransformerInterfaceMock : public aruwsrc::algorithms::transforms::TransformerInterface
 {
 public:
     MOCK_METHOD(modm::Vector2f, getChassisVelocity2d, (), (const override));
