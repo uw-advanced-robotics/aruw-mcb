@@ -43,7 +43,6 @@ public:
         (const control::turret::algorithms::TurretControllerInterface *),
         (override));
     MOCK_METHOD(void, setChassisFrameSetpoint, (WrappedFloat));
-    // MOCK_METHOD(void, setChassisFrameSetpoint, (float));
     MOCK_METHOD(bool, isOnline, (), (const override));
     MOCK_METHOD(WrappedFloat, getChassisFrameSetpoint, (), (const override));
     MOCK_METHOD(
@@ -51,7 +50,6 @@ public:
         getChassisFrameMeasuredAngle,
         (),
         (const override));
-    // MOCK_METHOD(float, getChassisFrameUnwrappedMeasuredAngle, (), (const override));
     MOCK_METHOD(float, getChassisFrameVelocity, (), (const override));
     MOCK_METHOD(float, getAngleFromCenter, (), (const override));
     MOCK_METHOD(

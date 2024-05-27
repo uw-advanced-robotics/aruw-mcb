@@ -95,9 +95,6 @@ private:
 
     tap::algorithms::SmoothPid pid;
 
-    // int revolutions = 0;
-    // float prevYaw = 0;
-
     WrappedFloat worldFrameSetpoint;
 
     WrappedFloat chassisFrameInitImuYawAngle;

@@ -127,9 +127,6 @@ void WorldFrameYawChassisImuTurretController::initialize()
     {
         pid.reset();
 
-        // revolutions = 0;
-        // prevYaw = ;
-
         chassisFrameInitImuYawAngle = getMpu6500Yaw();
         worldFrameSetpoint = turretMotor.getChassisFrameSetpoint();
 
@@ -141,8 +138,6 @@ void WorldFrameYawChassisImuTurretController::runController(
     const uint32_t dt,
     const WrappedFloat desiredSetpoint)
 {
-    // updateRevolutionCounter();
-
     const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
     updateYawWorldFrameSetpoint(

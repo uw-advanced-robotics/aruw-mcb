@@ -130,10 +130,6 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
 float TurretMotor::getValidChassisMeasurementError() const
 {
-    // std::cout << "sp: " << chassisFrameSetpoint.getUnwrappedValue()
-    //           << ", ma: " << chassisFrameMeasuredAngle.getUnwrappedValue() << "\n";
-    // std::cout << "spw: " << chassisFrameSetpoint.getWrappedValue()
-    //           << ", maw: " << chassisFrameMeasuredAngle.getWrappedValue() << "\n";
     return getValidMinError(chassisFrameSetpoint, chassisFrameMeasuredAngle);
 }
 
