@@ -34,6 +34,7 @@
 #include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -53,7 +54,16 @@ protected:
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          ballisticsSolver(
+              visionCoprocessor,
+              transformer,
+              launcher,
+              0,
+              0,
+              worldToTurretBaseTransform,
+              yawMotor,
+              0,
+              0),
           turretCvCommand(
               &visionCoprocessor,
               &operatorInterface,
@@ -98,6 +108,10 @@ private:
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
     NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+
+    tap::algorithms::transforms::Transform worldToTurretBaseTransform =
+        tap::algorithms::transforms::Transform::identity();
 
     aruwsrc::control::governor::AutoAimLaunchTimer launchTimer;
 
