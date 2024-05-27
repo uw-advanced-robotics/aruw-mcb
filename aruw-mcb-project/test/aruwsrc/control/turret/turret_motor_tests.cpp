@@ -99,7 +99,7 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__limited_to_min_max_when_limit_a
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
-        turretMotor.setChassisFrameSetpoint(inputAngle);
+        turretMotor.setChassisFrameSetpoint(Angle(inputAngle));
         EXPECT_NEAR(0, turretMotor.getChassisFrameSetpoint().minDifference(expectedAngle), 1E-3);
     }
 }
@@ -123,7 +123,7 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__not_limited_when_limit_angles_f
 
     for (auto expectedAngle : limitedAndInputAnglePairs)
     {
-        turretMotor.setChassisFrameSetpoint(expectedAngle);
+        turretMotor.setChassisFrameSetpoint(Angle(expectedAngle));
         EXPECT_NEAR(0, turretMotor.getChassisFrameSetpoint().minDifference(expectedAngle), 1E-3);
     }
 }
@@ -351,10 +351,10 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint_large_min_max_difference_limited
     };
     TurretMotor tm(&motor, mc);
 
-    tm.setChassisFrameSetpoint(-M_PI_2 - M_PI_4 / 2.0f);
+    tm.setChassisFrameSetpoint(Angle(-M_PI_2 - M_PI_4 / 2.0f));
     EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(-M_PI_2), 1E-3);
 
-    tm.setChassisFrameSetpoint(M_PI + M_PI_4 / 2.0f);
+    tm.setChassisFrameSetpoint(Angle(M_PI + M_PI_4 / 2.0f));
     EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(M_PI), 1E-3);
 }
 
@@ -393,9 +393,9 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
         setEncoder(getEncoderUnwrapped(mc, measured));
         tm.updateMotorAngle();
 
-        EXPECT_NEAR(measured, tm.getChassisFrameUnwrappedMeasuredAngle(), 1E-3);
+        EXPECT_NEAR(0, tm.getChassisFrameMeasuredAngle().minDifference(measured), 1E-3);
 
-        tm.setChassisFrameSetpoint(setpoint);
+        tm.setChassisFrameSetpoint(Angle(setpoint));
 
         EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(setpoint), 1E-3);
 

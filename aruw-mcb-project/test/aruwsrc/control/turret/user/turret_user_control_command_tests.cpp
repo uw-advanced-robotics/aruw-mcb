@@ -107,10 +107,10 @@ TEST_F(TurretUserControlCommandTest, end_sets_motor_out_to_0)
 
 TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 {
-    tap::algorithms::WrappedFloat yawActual(M_PI_2, 0, M_TWOPI);
-    tap::algorithms::WrappedFloat pitchActual(M_PI_2, 0, M_TWOPI);
-    float yawSetpoint = M_PI_2;
-    float pitchSetpoint = M_PI_2;
+    WrappedFloat yawActual = Angle(M_PI_2);
+    WrappedFloat pitchActual = Angle(M_PI_2);
+    WrappedFloat yawSetpoint = Angle(M_PI_2);
+    WrappedFloat pitchSetpoint = Angle(M_PI_2);
 
     ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
     ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
@@ -131,8 +131,12 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
                 GRAVITY_COMPENSATION_SCALAR),
             1E-3)));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(0));
-    EXPECT_CALL(turret.pitchMotor, setChassisFrameSetpoint(M_PI_2));
-    EXPECT_CALL(turret.yawMotor, setChassisFrameSetpoint(M_PI_2));
+    EXPECT_CALL(
+        turret.pitchMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_2)));
+    EXPECT_CALL(
+        turret.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_2)));
 
     turretCmd.initialize();
     turretCmd.execute();
@@ -140,10 +144,10 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 
 TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 {
-    WrappedFloat pitchSetpoint(Angle(M_PI_2));
-    WrappedFloat yawSetpoint(Angle(M_PI_2));
-    tap::algorithms::WrappedFloat yawActual(M_PI_2, 0, M_TWOPI);
-    tap::algorithms::WrappedFloat pitchActual(M_PI_2, 0, M_TWOPI);
+    WrappedFloat pitchSetpoint = Angle(M_PI_2);
+    WrappedFloat yawSetpoint = Angle(M_PI_2);
+    WrappedFloat yawActual = Angle(M_PI_2);
+    WrappedFloat pitchActual = Angle(M_PI_2);
     ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(1));
     ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
     ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
@@ -165,12 +169,12 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
     EXPECT_CALL(
         turret.pitchMotor,
         setChassisFrameSetpoint(
-            Matcher<WrappedFloat>(Field(&WrappedFloat::getUnwrappedValue, Gt(M_PI_2)))))
+            Matcher<WrappedFloat>(Property(&WrappedFloat::getUnwrappedValue, Gt(M_PI_2)))))
         .WillRepeatedly([&](WrappedFloat setpoint) { pitchSetpoint = setpoint; });
     EXPECT_CALL(
         turret.yawMotor,
         setChassisFrameSetpoint(
-            Matcher<WrappedFloat>(Field(&WrappedFloat::getUnwrappedValue, Lt(M_PI_2)))))
+            Matcher<WrappedFloat>(Property(&WrappedFloat::getUnwrappedValue, Lt(M_PI_2)))))
         .WillRepeatedly([&](WrappedFloat setpoint) { yawSetpoint = setpoint; });
 
     turretCmd.initialize();

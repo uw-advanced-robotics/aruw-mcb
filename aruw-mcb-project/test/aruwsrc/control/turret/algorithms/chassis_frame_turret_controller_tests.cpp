@@ -89,9 +89,15 @@ protected:
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match_p_controller)
 {
     // check setpoints 0, 90, 150
-    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(0));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(M_PI_2));
-    EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(modm::toRadian(150)));
+    EXPECT_CALL(
+        turretSubsystem.pitchMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, 0)));
+    EXPECT_CALL(
+        turretSubsystem.pitchMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_2)));
+    EXPECT_CALL(
+        turretSubsystem.pitchMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, modm::toRadian(150))));
 
     // should set motor output to 0 for each setpoint
     EXPECT_CALL(
@@ -155,9 +161,15 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
 TEST_F(YawControllerTest, runYawPidController_pid_out_0_when_setpoints_match_p_controller)
 {
     // Validate pitch setpoint set and pid output is reasonable
-    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(0));
-    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(M_PI_2));
-    EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(modm::toRadian(150)));
+    EXPECT_CALL(
+        turretSubsystem.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, 0)));
+    EXPECT_CALL(
+        turretSubsystem.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_2)));
+    EXPECT_CALL(
+        turretSubsystem.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, modm::toRadian(150))));
 
     EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(0)).Times(3);
 

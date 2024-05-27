@@ -44,15 +44,15 @@ protected:
     WorldFrameChassisImuTurretControllerTest()
         : turretMotor(&motor, TURRET_MOTOR_CONFIG),
           turretController(drivers, turretMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          chassisFrameMeasured(0),
-          chassisFrameSetpoint(0)
+          chassisFrameMeasured(Angle(0)),
+          chassisFrameSetpoint(Angle(0))
     {
     }
 
     void SetUp() override
     {
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&mpu6500Yaw));
-        ON_CALL(turretMotor, getChassisFrameUnwrappedMeasuredAngle)
+        ON_CALL(turretMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnPointee(&chassisFrameMeasured));
         ON_CALL(turretMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&chassisFrameSetpoint));
@@ -64,15 +64,15 @@ protected:
     testing::NiceMock<aruwsrc::mock::TurretMotorMock> turretMotor;
     WorldFrameYawChassisImuTurretController turretController;
     float mpu6500Yaw = 0;
-    float chassisFrameMeasured;
-    float chassisFrameSetpoint;
+    WrappedFloat chassisFrameMeasured;
+    WrappedFloat chassisFrameSetpoint;
 };
 
 TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_actual_identical_output_0)
 {
-    chassisFrameMeasured = M_PI_2;
+    chassisFrameMeasured = Angle(M_PI_2);
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 
@@ -83,7 +83,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_gt_actual_output_positive)
 {
-    chassisFrameMeasured = modm::toRadian(80);
+    chassisFrameMeasured = Angle(modm::toRadian(80));
 
     EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
@@ -94,7 +94,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_lt_actual_output_negative)
 {
-    chassisFrameMeasured = modm::toRadian(100);
+    chassisFrameMeasured = Angle(modm::toRadian(100));
 
     EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 
@@ -105,7 +105,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_chassis_frame_rotated_setpoint_actual_equal_0_output)
 {
-    chassisFrameMeasured = 0;
+    chassisFrameMeasured = Angle(0);
     mpu6500Yaw = 90;
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));

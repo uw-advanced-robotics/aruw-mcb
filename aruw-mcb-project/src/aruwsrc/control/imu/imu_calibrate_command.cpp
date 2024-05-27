@@ -64,9 +64,9 @@ void ImuCalibrateCommand::initialize()
     for (auto &config : turretsAndControllers)
     {
         config.turret->yawMotor.setChassisFrameSetpoint(
-            config.turret->yawMotor.getConfig().startAngle);
+            Angle(config.turret->yawMotor.getConfig().startAngle));
         config.turret->pitchMotor.setChassisFrameSetpoint(
-            config.turret->pitchMotor.getConfig().startAngle);
+            Angle(config.turret->pitchMotor.getConfig().startAngle));
         config.pitchController->initialize();
         config.yawController->initialize();
     }

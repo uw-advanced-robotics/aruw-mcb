@@ -86,10 +86,10 @@ public:
      */
     mockable void setChassisFrameSetpoint(WrappedFloat setpoint);
 
-    inline void setChassisFrameSetpoint(float setpoint)
-    {
-        setChassisFrameSetpoint(Angle(setpoint));
-    }
+    // inline void setChassisFrameSetpoint(float setpoint)
+    // {
+    //     setChassisFrameSetpoint(Angle(setpoint));
+    // }
 
     /// @return `true` if the hardware motor is connected and powered on
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
@@ -106,11 +106,11 @@ public:
         return chassisFrameMeasuredAngle;
     }
 
-    /// @return turret motor angle measurement in chassis frame, unwrapped (not normalized).
-    mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
-    {
-        return chassisFrameUnwrappedMeasurement;
-    }
+    // /// @return turret motor angle measurement in chassis frame, unwrapped (not normalized).
+    // mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
+    // {
+    //     return chassisFrameUnwrappedMeasurement;
+    // }
 
     /**
      * @return angular velocity of the turret, in rad/sec, positive rotation is defined by the

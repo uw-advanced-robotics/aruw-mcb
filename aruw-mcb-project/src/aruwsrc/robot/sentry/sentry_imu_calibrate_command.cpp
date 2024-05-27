@@ -64,10 +64,10 @@ void SentryImuCalibrateCommand::initialize()
 
     // initialize major
     turretMajor.getMutableMotor().setChassisFrameSetpoint(
-        turretMajor.getReadOnlyMotor()
-            .getConfig()
-            .startAngle);  // @todo really sus interdependency with imu
-                           // drift because assumes world controller
+        Angle(turretMajor.getReadOnlyMotor()
+                  .getConfig()
+                  .startAngle));  // @todo really sus interdependency with imu
+                                  // drift because assumes world controller
     turretMajorController.initialize();
 
     calibrationLongTimeout.stop();
