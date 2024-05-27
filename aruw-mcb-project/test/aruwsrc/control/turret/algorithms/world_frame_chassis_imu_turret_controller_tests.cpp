@@ -83,7 +83,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_gt_actual_output_positive)
 {
-    chassisFrameMeasured = Angle(modm::toRadian(80));
+    chassisFrameMeasured = Angle::fromDegrees(80);
 
     EXPECT_CALL(turretMotor, setMotorOutput(Gt(0)));
 
@@ -94,7 +94,7 @@ TEST_F(
     WorldFrameChassisImuTurretControllerTest,
     runYawPidController_setpoint_lt_actual_output_negative)
 {
-    chassisFrameMeasured = Angle(modm::toRadian(100));
+    chassisFrameMeasured = Angle::fromDegrees(100);
 
     EXPECT_CALL(turretMotor, setMotorOutput(Lt(0)));
 

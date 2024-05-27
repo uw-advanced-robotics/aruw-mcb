@@ -104,29 +104,8 @@ private:
 
     inline WrappedFloat getMpu6500Yaw() const
     {
-        return Angle(modm::toRadian(drivers.mpu6500.getYaw()));
+        return Angle::fromDegrees(drivers.mpu6500.getYaw());
     }
-
-    // /**
-    //  * Updates the mpu6500 yaw revolution counter and the prevYaw value (which is used to update
-    //  the
-    //  * revolution counter). This is the only function that should be used to update `prevYaw` or
-    //  * `revolutions`.
-    //  */
-    // void updateRevolutionCounter()
-    // {
-    //     const WrappedFloat newYaw = getMpu6500YawUnwrapped();
-    //     const float diff = newYaw - prevYaw;
-    //     prevYaw = newYaw;
-    //     if (diff < -M_PI)
-    //     {
-    //         revolutions++;
-    //     }
-    //     else if (diff > M_PI)
-    //     {
-    //         revolutions--;
-    //     }
-    // }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

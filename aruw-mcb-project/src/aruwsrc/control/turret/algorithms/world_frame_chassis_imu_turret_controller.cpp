@@ -213,7 +213,7 @@ WrappedFloat WorldFrameYawChassisImuTurretController::convertControllerAngleToCh
 WrappedFloat WorldFrameYawChassisImuTurretController::convertChassisAngleToControllerFrame(
     WrappedFloat chassisFrameAngle) const
 {
-    const WrappedFloat chassisFrameImuYawAngle = Angle(modm::toRadian(drivers.mpu6500.getYaw()));
+    const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
     return transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,

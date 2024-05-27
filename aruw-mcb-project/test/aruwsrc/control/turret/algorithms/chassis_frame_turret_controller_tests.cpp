@@ -119,7 +119,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
     currentAngle.setWrappedValue(M_PI_2);
     turretController.runController(1, setpoint);
 
-    setpoint = Angle(modm::toRadian(150));
+    setpoint = Angle::fromDegrees(150);
     currentAngle.setWrappedValue(modm::toRadian(150));
     turretController.runController(1, setpoint);
 }
@@ -127,7 +127,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint_gt_current)
 {
     // setpoint > pitch angle, output should be > 0
-    setpoint = Angle(modm::toRadian(30));
+    setpoint = Angle::fromDegrees(30);
     currentAngle.setWrappedValue(modm::toRadian(20));
     EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(
@@ -144,7 +144,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint_lt_current)
 {
     // setpoint < pitch angle, output should be < 0
-    setpoint = Angle(modm::toRadian(30));
+    setpoint = Angle::fromDegrees(30);
     currentAngle.setWrappedValue(modm::toRadian(40));
     EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(
@@ -181,7 +181,7 @@ TEST_F(YawControllerTest, runYawPidController_pid_out_0_when_setpoints_match_p_c
     currentAngle.setWrappedValue(M_PI_2);
     turretController.runController(1, setpoint);
 
-    setpoint = Angle(modm::toRadian(150));
+    setpoint = Angle::fromDegrees(150);
     currentAngle.setWrappedValue(modm::toRadian(150));
     turretController.runController(1, setpoint);
 }
@@ -189,7 +189,7 @@ TEST_F(YawControllerTest, runYawPidController_pid_out_0_when_setpoints_match_p_c
 TEST_F(YawControllerTest, runYawPidController_pid_out_positive_if_setpoint_gt_current)
 {
     // setpoint > pitch angle, output should be positive
-    setpoint = Angle(modm::toRadian(30));
+    setpoint = Angle::fromDegrees(30);
     currentAngle.setWrappedValue(modm::toRadian(20));
     EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Gt(0)));
@@ -199,7 +199,7 @@ TEST_F(YawControllerTest, runYawPidController_pid_out_positive_if_setpoint_gt_cu
 TEST_F(YawControllerTest, runYawPidController_pid_out_negative_if_setpoint_lt_current)
 {
     // setpoint < pitch angle, output should be < 0
-    setpoint = Angle(modm::toRadian(30));
+    setpoint = Angle::fromDegrees(30);
     currentAngle.setWrappedValue(modm::toRadian(40));
     EXPECT_CALL(turretSubsystem.yawMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(turretSubsystem.yawMotor, setMotorOutput(Lt(0)));
