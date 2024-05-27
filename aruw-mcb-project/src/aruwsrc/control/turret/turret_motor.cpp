@@ -130,6 +130,10 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
 float TurretMotor::getValidChassisMeasurementError() const
 {
+    // std::cout << "sp: " << chassisFrameSetpoint.getUnwrappedValue()
+    //           << ", ma: " << chassisFrameMeasuredAngle.getUnwrappedValue() << "\n";
+    // std::cout << "spw: " << chassisFrameSetpoint.getWrappedValue()
+    //           << ", maw: " << chassisFrameMeasuredAngle.getWrappedValue() << "\n";
     return getValidMinError(chassisFrameSetpoint, chassisFrameMeasuredAngle);
 }
 
@@ -145,9 +149,13 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        // the error is absolute
+        int limitStatus;
+        WrappedFloat::limitValue(measurement, config.minAngle, config.maxAngle, &limitStatus);
+        if (limitStatus != 0)
+            return measurement.minDifference(setpoint);  // measurement is somehow out of bounds
+
         return (setpoint - config.minAngle).getWrappedValue() -
-               (measurement - config.minAngle).getWrappedValue() + config.minAngle;
+               (measurement - config.minAngle).getWrappedValue();
     }
     else
     {
@@ -155,13 +163,6 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         // equivalent to this - other
         return measurement.minDifference(setpoint);
     }
-}
-
-float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
-{
-    return WrappedFloat(WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint), -M_PI, M_PI)
-               .getWrappedValue() +
-           measurement;
 }
 
 float TurretMotor::getSetpointWithinTurretRange(float setpoint) const

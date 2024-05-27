@@ -188,20 +188,6 @@ public:
         const;
 
     /**
-     * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
-     * is an equivalent angle to the specified setpoint, but the setpoint returned is the closest
-     * possible angle to the passed in measurement.
-     *
-     * @param[in] measurement Some non-normalized measurement in radians. The returned setpoint will
-     * be the closest possible angle within the limits of this turret motor to this measurement.
-     * @param[in] setpoint A setpoint in radians that is not necessarily normalized.
-     *
-     * @return A setpoint angle in radians that is unwrapped and is the closest value between the
-     * min/max angle values that is closest to the measurement.
-     */
-    static float getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint);
-
-    /**
      * Translates the setpoint that may or may not be within the range of the turret to an angle
      * that is within the min/max bounds of the turret motor if possible. If there is no valid
      * setpoint within the min/max bounds, this function will return the original setpoint.
@@ -217,42 +203,6 @@ public:
     float getSetpointWithinTurretRange(float setpoint) const;
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
-
-    /**
-     * Takes in a normalized setpoint and "unnormalizes" it. Finds an equivalent unwrapped setpoint
-     * that is closest to the TurretMotor's measured angle that is also within bounds of the min/max
-     * angles.
-     *
-     * @note This function assumes that if the TurretMotor's angle is not limited, this function
-     * does not need to perform any updates of setpointToUnwrap since the turret controller will
-     * normalize both the setpoint and measurement before performing computation.
-     *
-     * @note A TurretController must be attached to the TurretMotor in order for this function to do
-     * anything. If a TurretController is not associated, we don't know how to convert the
-     * setpointToUnwrap into the chassis reference frame.
-     *
-     * @param[in] setpointToUnwrap Setpoint to update, a setpoint angle measurement in radians in
-     * the same reference frame as the attached turretController's reference frame.
-     * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
-     * or if the notes above apply.
-     */
-    // inline float unwrapTargetAngle(float setpointToUnwrap) const
-    // {
-    //     if (turretController == nullptr || !config.limitMotorAngles)
-    //     {
-    //         return setpointToUnwrap;
-    //     }
-
-    //     setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
-    //         turretController->getMeasurement(),
-    //         setpointToUnwrap);
-
-    //     setpointToUnwrap =
-    //         turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
-    //             turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
-
-    //     return setpointToUnwrap;
-    // }
 
 private:
     const TurretMotorConfig config;
