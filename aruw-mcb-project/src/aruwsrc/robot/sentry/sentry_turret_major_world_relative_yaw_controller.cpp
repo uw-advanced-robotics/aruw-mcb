@@ -72,8 +72,6 @@ void TurretMajorWorldFrameController::initialize()
 //       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(const uint32_t dt, const float desiredSetpoint)
 {
-    WrappedFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
-
     worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 
     const float positionControllerError = turretMotor.getValidMinError(
