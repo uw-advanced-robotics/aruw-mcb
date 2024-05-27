@@ -47,6 +47,7 @@
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
@@ -323,13 +324,19 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     CENTER_TO_WHEELBASE_RADIUS,
     HALF_SWERVE_FORWARD_MATRIX);
 
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+    &leftOmni,
+    &rightOmni,
+    DEADWHEEL_RADIUS);
+
 SentryKFOdometry2DSubsystem chassisOdometry(
     *drivers(),
-    chassis,
+    deadwheels,
     chassisYawObserver,
     drivers()->chassisMcbLite.imu,
     INITIAL_CHASSIS_POSITION_X,
-    INITIAL_CHASSIS_POSITION_Y);
+    INITIAL_CHASSIS_POSITION_Y,
+    CENTER_TO_WHEELBASE_RADIUS);
 
 SentryTransforms transformer(
     chassisOdometry,
@@ -340,6 +347,12 @@ SentryTransforms transformer(
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
+SentryArucoResetSubsystem arucoResetSubsystem(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    chassisYawObserver,
+    chassisOdometry,
+    transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
 tap::algorithms::SmoothPid turretMajorYawPosPid(
@@ -627,6 +640,7 @@ void initializeSubsystems()
     turretMajor.initialize();
     chassisOdometry.initialize();
     transformerSubsystem.initialize();
+    arucoResetSubsystem.initialize();
 
     rightOmni.initialize();
     leftOmni.initialize();
@@ -647,6 +661,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRight);
     drivers->commandScheduler.registerSubsystem(&chassisOdometry);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
+    drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 
     drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);

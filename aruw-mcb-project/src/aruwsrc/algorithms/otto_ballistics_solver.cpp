@@ -92,17 +92,17 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
-        ballistics::MeasuredKinematicState targetState = {
-            .position =
+        ballistics::SecondOrderKinematicState targetState = {
+            modm::Vector3f
                 {aimData.pva.xPos - worldToTurret.getX(),
                  aimData.pva.yPos - worldToTurret.getY(),
                  aimData.pva.zPos - worldToTurret.getZ()},
-            .velocity =
+            modm::Vector3f
                 {aimData.pva.xVel -
                      (chassisVel.x - turretChassisRelVelocity.x),  // someone pls check math
                  aimData.pva.yVel - (chassisVel.y - turretChassisRelVelocity.y),
                  aimData.pva.zVel},
-            .acceleration =
+            modm::Vector3f
                 {aimData.pva.xAcc,
                  aimData.pva.yAcc,
                  aimData.pva.zAcc},  // TODO consider using chassis
