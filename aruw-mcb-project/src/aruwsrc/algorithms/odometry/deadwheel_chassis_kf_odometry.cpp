@@ -76,7 +76,7 @@ void DeadwheelChassisKFOdometry::deadwheelUpdate(float chassisYaw)
     V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
-    V2 -= modm::toRadian(imu.getGy()) * centerToWheelDistance;
+    V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;
     // It is assumed that the wheels are rotated 45 degrees
     // relative to the forward direction of the robot
     float Vx = (((V1 - V2)) / M_SQRT2);
