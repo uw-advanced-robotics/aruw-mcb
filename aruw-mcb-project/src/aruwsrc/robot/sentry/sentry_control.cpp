@@ -353,15 +353,14 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
-tap::algorithms::SmoothPid turretMajorYawPosPid(
-    turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid turretMajorYawVelPid(
-    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
+SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
-algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
-    transformer.getWorldToChassis(),
+TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
+    transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
+    drivers()->turretMajorMcbLite.imu,
     turretLeft,
     turretRight,
     turretMajorYawPosPid,
@@ -369,6 +368,10 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajor::MAX_VEL_ERROR_INPUT,
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
+
+ChassisFrameYawTurretController turretMajorChassisYawController(
+    turretMajor.getMutableMotor(),
+    turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -461,7 +464,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
         },
     },
     turretMajor,
-    turretMajorWorldYawController,
+    turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
     chassisOdometry,
@@ -537,21 +540,21 @@ HoldCommandMapping leftMidRightDown(
     {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+// HoldCommandMapping leftMidRightMid(
+//     drivers(),
+//     {&chassisDriveCommand},
+//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldRepeatCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftMidRightMid(
     drivers(),
     {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID),
     true);
 
-HoldCommandMapping shoot(
+HoldCommandMapping leftDown(
     drivers(),
-    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&stopTurretLeftFrictionWheelSpinCommand, &stopTurretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping leftDownRightDown(
     drivers(),
@@ -580,8 +583,8 @@ void initializeSubsystems()
     rightOmni.initialize();
     leftOmni.initialize();
     // turret
-    // frictionWheelsTurretLeft.initialize();
-    // frictionWheelsTurretRight.initialize();
+    frictionWheelsTurretLeft.initialize();
+    frictionWheelsTurretRight.initialize();
 
     turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
@@ -598,8 +601,8 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
-    // drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretLeft);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsTurretRight);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
@@ -614,8 +617,8 @@ void setDefaultSentryCommands(Drivers *)
     turretLeft.setDefaultCommand(&turretLeftManualCommand);
     turretRight.setDefaultCommand(&turretRightManualCommand);
 
-    // frictionWheelsTurretLeft.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
-    // frictionWheelsTurretRight.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+    frictionWheelsTurretLeft.setDefaultCommand(&turretLeftFrictionWheelSpinCommand);
+    frictionWheelsTurretRight.setDefaultCommand(&turretRightFrictionWheelSpinCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -638,8 +641,8 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    // drivers->commandMapper.addMap(&shoot);          // Shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);  // Agitators
+    drivers->commandMapper.addMap(&leftDown);         // Don't shoot
 }
 }  // namespace sentry_control
 
