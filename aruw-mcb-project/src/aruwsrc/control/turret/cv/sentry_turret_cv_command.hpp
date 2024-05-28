@@ -126,10 +126,7 @@ public:
     const char *getName() const { return "sentry turret CV command"; }
 
     //TODO FIX
-    bool getTurretID() const
-    {
-        return turretLeftConfig.turretSubsystem.getTurretID();
-    }
+    bool getTurretID() const { return turretLeftConfig.turretSubsystem.getTurretID(); }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -140,7 +137,8 @@ public:
      * away the target the closer to the center of the plate the turret must be aiming)
      */
 
-    bool isAimingWithinLaunchingTolerance() const {
+    bool isAimingWithinLaunchingTolerance() const 
+    {
         return isAimingWithinLaunchingTolerance(turretLeftConfig.turretSubsystem.getTurretID());
     };
 

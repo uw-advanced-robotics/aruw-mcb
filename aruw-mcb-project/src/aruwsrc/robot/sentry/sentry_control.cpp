@@ -562,8 +562,7 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
     turretCVCommand,
-    turretLeft::turretID
-);
+    turretLeft::turretID);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretLeft(fireRateReselectionManagerTurretLeft);
 
@@ -580,8 +579,10 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft, &refSystemProjectileLaunchedGovernorTurretLeft, 
-     &frictionWheelsOnGovernorTurretLeft, &fireRateLimitGovernorTurretLeft});
+    {&heatLimitGovernorTurretLeft, 
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft,
+     &fireRateLimitGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -620,9 +621,8 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
     *drivers(),
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
-    turretCVCommand, // DNE
-    turretRight::turretID
-);
+    turretCVCommand,
+    turretRight::turretID);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretRight(fireRateReselectionManagerTurretRight);
 
@@ -639,9 +639,9 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRig
 GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretRight, 
-     &refSystemProjectileLaunchedGovernorTurretRight, 
-     &frictionWheelsOnGovernorTurretRight, 
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight,
      &fireRateLimitGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
@@ -677,9 +677,9 @@ HoldRepeatCommandMapping leftUpRightDown(
 HoldRepeatCommandMapping shootLeftUpRightMidAgitator(
     drivers(),
      {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
-      &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
-      &turretLeftFrictionWheelSpinCommand,
-      &turretRightFrictionWheelSpinCommand},
+     &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID),
     true);
 
@@ -765,9 +765,9 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
     // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    drivers->commandMapper.addMap(&shoot);          // Shoot
-    //drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
-    drivers->commandMapper.addMap(&shootLeftUpRightMidAgitator); //shoot with govenment.
+    drivers->commandMapper.addMap(&shoot);  // Shoot
+    // drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
+    drivers->commandMapper.addMap(&shootLeftUpRightMidAgitator);  // shoot with govenment.
 }
 }  // namespace sentry_control
 

@@ -86,8 +86,9 @@ void SentryTurretCVCommand::computeAimSetpoints(
     *desiredPitchSetpoint =
         config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
 
-    auto differenceWrapped = [](float measurement, float setpoint)
-    { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
+    auto differenceWrapped = [](float measurement, float setpoint) {
+        return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
+    };
 
     *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
         differenceWrapped(config.yawController.getMeasurement(), *desiredYawSetpoint),
