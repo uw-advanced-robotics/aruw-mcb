@@ -26,9 +26,10 @@ using namespace aruwsrc::control::sentry;
 namespace aruwsrc::control::turret::algorithms
 {
 TurretMajorWorldFrameController::TurretMajorWorldFrameController(
-    const transforms::Transform& worldToChassis,
+    const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     TurretMotor& yawMotor,
+    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
     SmoothPid& positionPid,
@@ -37,9 +38,10 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     float minorMajorTorqueRatio,
     float feedforwardGain)
     : TurretYawControllerInterface(yawMotor),
-      worldToChassis(worldToChassis),
+      worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),
+      turretMajorIMU(turretMajorIMU),
       turretLeft(turretLeft),
       turretRight(turretRight),
       positionPid(positionPid),
@@ -59,7 +61,8 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint = yawMotor.getChassisFrameSetpoint() + worldToChassis.getYaw();
+        worldFrameSetpoint = yawMotor.getChassisFrameSetpoint() -
+                             yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 
         yawMotor.attachTurretController(this);
     }
@@ -72,21 +75,18 @@ void TurretMajorWorldFrameController::runController(
     const uint32_t dt,
     const WrappedFloat desiredSetpoint)
 {
-    WrappedFloat localAngle = yawMotor.getChassisFrameMeasuredAngle();
-
-    const float localVelocity = yawMotor.getChassisFrameVelocity();
-
-    const float chassisVelocity = *chassis.getActualVelocityChassisRelative()[2];
-
     worldFrameSetpoint = desiredSetpoint;
 
     const float positionControllerError =
-        turretMotor.getValidMinError(worldFrameSetpoint - worldToChassis.getYaw(), localAngle);
+        turretMotor.getValidMinError(worldFrameSetpoint, Angle(worldToMajor.getYaw()));
 
-    positionPidOutput = positionPid.runControllerDerivateError(positionControllerError, dt);
+    positionPidOutput = positionPid.runController(
+        positionControllerError,
+        modm::toRadian(turretMajorIMU.getGy()),
+        dt);
 
     const float velocityControllerError = limitVal(
-        positionPidOutput - localVelocity - chassisVelocity,
+        positionPidOutput - modm::toRadian(turretMajorIMU.getGy()),
         -maxVelErrorInput,
         maxVelErrorInput);
 
@@ -117,7 +117,7 @@ WrappedFloat TurretMajorWorldFrameController::getSetpoint() const { return world
 
 WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle() + worldToChassis.getYaw();
+    return yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
