@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTRY_HYDRA)
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -27,6 +28,8 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
@@ -67,6 +70,7 @@ using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
 using namespace tap::control::setpoint;
+using namespace tap::control::governor;
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::sentry;
@@ -78,6 +82,7 @@ using namespace aruwsrc::control::turret::sentry;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::governor;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -567,6 +572,20 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
 
+namespace left
+{
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
+    drivers()->refSerial,
+    turretLeft::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(turretLeftFrictionWheels);
+
+GovernorLimitedCommand<2> rotateUnjamAgitatorFlywheelLimited(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor});
+}
+
 // RIGHT shooting ======================
 
 // spin friction wheels commands
@@ -598,68 +617,67 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
 
-/* define command mappings --------------------------------------------------*/
-// HoldCommandMapping leftDownRightUp(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+namespace right
+{
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
+    drivers()->refSerial,
+    turretRight::barrelID);
 
-HoldCommandMapping leftDown(
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(turretRightFrictionWheels);
+
+GovernorLimitedCommand<2> rotateUnjamAgitatorFlywheelLimited(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor});
+}
+
+/* define command mappings --------------------------------------------------*/
+
+HoldCommandMapping leftUpRightDown(
     drivers(),
     {&imuCalibrateCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-// HoldCommandMapping leftMidRightDown(
-//     drivers(),
-//     {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
-
-HoldCommandMapping leftMid(
+HoldCommandMapping leftDownRightMid(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+    {&turretCVCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-// HoldCommandMapping leftMidRightMid(
-//     drivers(),
-//     {&chassisDriveCommand},
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
-
-// HoldCommandMapping shoot(
-//     drivers(),
-//     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
-
-// HoldRepeatCommandMapping leftUpRightDown(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitator,
-//      &turretRightRotateAndUnjamAgitator,
-//      &turretLeftFrictionWheelSpinCommand,
-//      &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
-//     true);
-
-HoldCommandMapping rightUp(
+HoldCommandMapping leftMidRightMid(
     drivers(),
-    {
-        &turretLeftRotateAndUnjamAgitator,
-        &turretRightRotateAndUnjamAgitator,
-    },
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    {&left::rotateUnjamAgitatorFlywheelLimited,
+     &right::rotateUnjamAgitatorFlywheelLimited,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-// HoldCommandMapping leftDownRightDown(
-//     drivers(),
-//     {&beybladeCommand},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
-
-// HoldCommandMapping leftUpRightUp(
-//     drivers(),
-//     {&turretCVCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
-
-HoldCommandMapping leftUp(
+HoldCommandMapping leftUpRightMid(
     drivers(),
-    {&turretCVCommand, &turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&turretCVCommand},  // @todo autonav here
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+HoldCommandMapping leftDownRightUp(
+    drivers(),
+    {&turretCVCommand,
+     &left::rotateUnjamAgitatorFlywheelLimited,
+     &right::rotateUnjamAgitatorFlywheelLimited,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},  // @todo replace with cv gated fire here
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {},  // @todo autonav here
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+HoldCommandMapping leftUpRightUp(
+    drivers(),
+    {&turretCVCommand,
+     &left::rotateUnjamAgitatorFlywheelLimited,
+     &right::rotateUnjamAgitatorFlywheelLimited,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},  // @todo autonav and cv gated fire here
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -723,30 +741,13 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    // left mid: manual
-    drivers->commandMapper.addMap(&leftMid);
-    // down: imu calibrate
-    drivers->commandMapper.addMap(&leftDown);
-    // up: cv
-    drivers->commandMapper.addMap(&leftUp);
-    // right down: no shoot (no mapping)
-    // right up : shoot
-    drivers->commandMapper.addMap(&rightUp);
-
-    // drivers->commandMapper.addMap(&leftMidRightDown);  // turret manual control
-    // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    // drivers->commandMapper.addMap(&leftDownRightUp);  // imu calibrate command
-    // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
-    // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // cv
-    // drivers->commandMapper.addMap(&leftMidRightDown);   // turret manual control
-    // drivers->commandMapper.addMap(&leftDownRightUp);    // imu calibrate command
-    // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
-    // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
-
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    // drivers->commandMapper.addMap(&shoot);          // Shoot
-    // drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
+    drivers->commandMapper.addMap(&leftUpRightDown);   // imu calibrate
+    drivers->commandMapper.addMap(&leftDownRightMid);  // cv
+    drivers->commandMapper.addMap(&leftMidRightMid);   // fire
+    drivers->commandMapper.addMap(&leftUpRightMid);    // cv + autonav
+    drivers->commandMapper.addMap(&leftDownRightUp);   // cv + fire
+    drivers->commandMapper.addMap(&leftMidRightUp);    // autonav
+    drivers->commandMapper.addMap(&leftUpRightUp);     // cv + autonav + fire
 }
 }  // namespace sentry_control
 
