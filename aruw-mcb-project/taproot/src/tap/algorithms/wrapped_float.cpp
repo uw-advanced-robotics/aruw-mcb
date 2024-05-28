@@ -33,7 +33,6 @@ WrappedFloat::WrappedFloat(const float value, const float lowerBound, const floa
       upperBound(upperBound)
 {
     assert(upperBound > lowerBound);
-
     wrapValue();
 }
 
@@ -165,11 +164,11 @@ void WrappedFloat::wrapValue()
     {
         this->wrapped = upperBound + fmodf(oldValue - upperBound, upperBound - lowerBound);
     }
-    else if (oldValue >= upperBound - 1E-5)
+    else if (oldValue >= upperBound)
     {
         this->wrapped = lowerBound + fmodf(oldValue - lowerBound, upperBound - lowerBound);
     }
-    this->revolutions += floor((oldValue - lowerBound) / (upperBound - lowerBound));
+    this->revolutions += (int)((oldValue - lowerBound) / (upperBound - lowerBound));
 }
 
 float WrappedFloat::limitValue(

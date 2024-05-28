@@ -81,9 +81,9 @@ void TurretMotor::updateMotorAngle()
                 encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
                 startEncoderOffset) *
                 M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;
+            config.startAngle;  // todo: can probably not do all this bc it's wrapped again anyway
 
-        chassisFrameMeasuredAngle.setWrappedValue(chassisFrameUnwrappedMeasurement);
+        chassisFrameMeasuredAngle.setUnwrappedValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
@@ -150,8 +150,8 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         if (limitStatus != 0)
             return measurement.minDifference(setpoint);  // measurement is somehow out of bounds
 
-        return (setpoint - config.minAngle).getWrappedValue() -
-               (measurement - config.minAngle).getWrappedValue();
+        return (Angle(setpoint.getWrappedValue()) - config.minAngle).getUnwrappedValue() -
+               (Angle(measurement.getWrappedValue()) - config.minAngle).getUnwrappedValue();
     }
     else
     {
