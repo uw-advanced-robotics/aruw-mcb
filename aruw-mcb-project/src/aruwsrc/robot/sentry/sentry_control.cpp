@@ -346,10 +346,8 @@ SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 
 SentryTransformAdapter transformAdapter(transformer);
 
-SmoothPid turretMajorYawPosPid(
-    turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
-SmoothPid turretMajorYawVelPid(
-    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
+SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
 TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),
@@ -366,8 +364,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
 
 ChassisFrameYawTurretController turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
-    turretMajor::chassisFrameController::YAW_PID_CONFIG
-);
+    turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -477,12 +474,13 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictio
     false,
     turretLeft::barrelID);
 
-aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
-    drivers(),
-    &frictionWheelsTurretLeft,
-    0.0f,
-    true,
-    turretLeft::barrelID);
+aruwsrc::control::launcher::
+    FrictionWheelSpinRefLimitedCommand stopTurretLeftFrictionWheelSpinCommand(
+        drivers(),
+        &frictionWheelsTurretLeft,
+        0.0f,
+        true,
+        turretLeft::barrelID);
 
 // Agitator commands (turret left)
 MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -635,7 +633,7 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
     drivers->commandMapper.addMap(&leftMidRightMid);  // Agitators
-    drivers->commandMapper.addMap(&leftDown);          // Don't shoot
+    drivers->commandMapper.addMap(&leftDown);         // Don't shoot
 }
 }  // namespace sentry_control
 

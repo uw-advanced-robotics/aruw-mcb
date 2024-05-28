@@ -61,7 +61,9 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setWrappedValue(yawMotor.getChassisFrameSetpoint() - yawMotor.getChassisFrameUnwrappedMeasuredAngle() + worldToMajor.getYaw());
+        worldFrameSetpoint.setWrappedValue(
+            yawMotor.getChassisFrameSetpoint() - yawMotor.getChassisFrameUnwrappedMeasuredAngle() +
+            worldToMajor.getYaw());
 
         yawMotor.attachTurretController(this);
     }
@@ -74,11 +76,13 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 {
     worldFrameSetpoint.setWrappedValue(desiredSetpoint);
 
-    const float positionControllerError = turretMotor.getValidMinError(
-        worldFrameSetpoint.getWrappedValue(),
-        worldToMajor.getYaw());
+    const float positionControllerError =
+        turretMotor.getValidMinError(worldFrameSetpoint.getWrappedValue(), worldToMajor.getYaw());
 
-    positionPidOutput = positionPid.runController(positionControllerError, modm::toRadian(turretMajorIMU.getGy()), dt);
+    positionPidOutput = positionPid.runController(
+        positionControllerError,
+        modm::toRadian(turretMajorIMU.getGy()),
+        dt);
 
     const float velocityControllerError = limitVal(
         positionPidOutput - modm::toRadian(turretMajorIMU.getGy()),
