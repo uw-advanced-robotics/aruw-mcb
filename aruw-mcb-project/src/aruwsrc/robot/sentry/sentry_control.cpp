@@ -579,7 +579,7 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft, 
+    {&heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
      &fireRateLimitGovernorTurretLeft});
@@ -676,7 +676,7 @@ HoldRepeatCommandMapping leftUpRightDown(
 
 HoldRepeatCommandMapping shootLeftUpRightMidAgitator(
     drivers(),
-     {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
+    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
      &turretLeftFrictionWheelSpinCommand,
      &turretRightFrictionWheelSpinCommand},
