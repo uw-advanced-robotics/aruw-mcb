@@ -81,11 +81,11 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 
     positionPidOutput = positionPid.runController(
         positionControllerError,
-        modm::toRadian(turretMajorIMU.getGy()),
+        modm::toRadian(turretMajorIMU.getGz()),
         dt);
 
     const float velocityControllerError = limitVal(
-        positionPidOutput - modm::toRadian(turretMajorIMU.getGy()),
+        positionPidOutput - modm::toRadian(turretMajorIMU.getGz()),
         -maxVelErrorInput,
         maxVelErrorInput);
 
