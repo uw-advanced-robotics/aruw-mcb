@@ -45,6 +45,12 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+/// Max desired rate of fire for the agitator
+constexpr float MAX_AGITATOR_ROF = 20.0f;
+
+/// Number of projectiles in one agitator rotation
+constexpr float AGITATOR_NUM_POCKETS = 10.0f;
+
 namespace turretLeft
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
@@ -86,17 +92,24 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 }
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = M_TWOPI / 10.0f,
-    .desiredSetpoint = 2.0f * M_TWOPI,
-    .integralSetpointTolerance = M_PI / 20.0f,
+    .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    // .desiredSetpoint = 225.0f / 60.06 * M_TWOPI,
+    .desiredSetpoint = MAX_AGITATOR_ROF * M_TWOPI / AGITATOR_NUM_POCKETS,
+    // .integralSetpointTolerance = M_PI / 20.0f,
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = M_TWOPI / 10.0f,
-    .unjamSetpoint = M_TWOPI / 2.0f,
+    .targetUnjamIntegralChange = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    // .unjamSetpoint = M_TWOPI / 2.0f,
+    .unjamSetpoint = 0.1f * MAX_AGITATOR_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds. Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
+    // .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
+    .maxWaitTime = static_cast<uint32_t>(
+                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.2f * MAX_AGITATOR_ROF *
+                       (M_TWOPI / AGITATOR_NUM_POCKETS)) +
+                   100,
     .targetCycleCount = 2,
 };
 
