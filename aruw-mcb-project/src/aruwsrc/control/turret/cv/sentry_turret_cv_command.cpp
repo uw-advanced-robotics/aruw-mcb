@@ -120,8 +120,8 @@ void SentryTurretCVCommand::execute()
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
-    targetFound = visionCoprocessor.isCvOnline() && !(leftBallisticsSolution == std::nullopt &&
-                                                      rightBallisticsSolution == std::nullopt);
+    targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
+                                                     rightBallisticsSolution != std::nullopt);
 
     // Turret minor control
     // If target spotted
@@ -215,7 +215,7 @@ void SentryTurretCVCommand::execute()
 
     if (debug)
     {
-        // yawControllerMajor.runController(dt, debug_majorSetpoint);
+        yawControllerMajor.runController(dt, debug_majorSetpoint);
 
         turretLeftConfig.pitchController.runController(dt, debug_leftPitchSetpoint);
         turretRightConfig.pitchController.runController(dt, debug_rightPitchSetpoint);
@@ -225,7 +225,7 @@ void SentryTurretCVCommand::execute()
     }
     else
     {
-        // yawControllerMajor.runController(dt, majorSetpoint);
+        yawControllerMajor.runController(dt, majorSetpoint);
 
         turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
         turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);

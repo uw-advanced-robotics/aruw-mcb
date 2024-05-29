@@ -27,7 +27,6 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-
 using namespace tap::algorithms;
 using namespace modm;
 
@@ -38,7 +37,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    // @todo: make this a config?
+    const float turretPitchOffset,
     const tap::algorithms::transforms::Transform &worldToTurretBaseTransform,
     const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
     const float turretDistFromBase,
@@ -47,11 +46,11 @@ OttoBallisticsSolver::OttoBallisticsSolver(
       transformer(transformer),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
+      turretPitchOffset(turretPitchOffset),
       worldToTurretBaseTransform(worldToTurretBaseTransform),
       turretBaseMotor(turretBaseMotor),
       turretDistFromBase(turretDistFromBase),
       turretID(turretID)
-
 {
 }
 
@@ -92,22 +91,22 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
-
-        ballistics::SecondOrderKinematicState targetState(
-            modm::Vector3f(
-                aimData.pva.xPos - turretPosition.x,
-                aimData.pva.yPos - turretPosition.y,
-                aimData.pva.zPos - turretPosition.z),
-            modm::Vector3f(
-                aimData.pva.xVel - chassisVel.x,
-                aimData.pva.yVel - chassisVel.y,
-                aimData.pva.zVel),
-            modm::Vector3f(
+        ballistics::SecondOrderKinematicState targetState = {
+            modm::Vector3f{
+                aimData.pva.xPos - worldToTurret.getX(),
+                aimData.pva.yPos - worldToTurret.getY(),
+                aimData.pva.zPos - worldToTurret.getZ()},
+            modm::Vector3f{
+                aimData.pva.xVel -
+                    (chassisVel.x - turretChassisRelVelocity.x),  // someone pls check math
+                aimData.pva.yVel - (chassisVel.y - turretChassisRelVelocity.y),
+                aimData.pva.zVel},
+            modm::Vector3f{
                 aimData.pva.xAcc,
                 aimData.pva.yAcc,
-                aimData.pva.zAcc)  // TODO consider using chassis
-                                   // acceleration from IMU
-        );
+                aimData.pva.zAcc},  // TODO consider using chassis
+                                    // acceleration from IMU
+        };
 
         // time in microseconds to project the target position ahead by
         int64_t projectForwardTimeDt =
@@ -128,7 +127,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &lastComputedSolution->pitchAngle,
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,
-                0))
+                turretPitchOffset))
         {
             lastComputedSolution = std::nullopt;
         }

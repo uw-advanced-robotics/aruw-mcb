@@ -20,8 +20,6 @@
 #ifndef TURRET_MOTOR_HPP_
 #define TURRET_MOTOR_HPP_
 
-#include <optional>
-
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
@@ -182,12 +180,6 @@ public:
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
     mockable float getValidMinError(const float setpoint, const float measurement) const;
-
-    /**
-     * Gets
-     * @param[in] measurement Unwrapped (non-normalized) measurement in radians.
-     */
-    std::optional<float> getReachableNonNormalizedSetpoint(float setpoint);
 
     /**
      * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
