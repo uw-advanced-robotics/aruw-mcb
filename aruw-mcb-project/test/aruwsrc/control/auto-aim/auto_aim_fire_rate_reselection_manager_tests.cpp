@@ -29,7 +29,6 @@
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
-#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -51,16 +50,7 @@ protected:
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
-          ballisticsSolver(
-              visionCoprocessor,
-              transformer,
-              launcher,
-              0,
-              0,
-              tap::algorithms::transforms::Transform(0, 0, 0, 0, 0, 0),
-              yawMotor,
-              0,
-              0),
+          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
           operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
@@ -96,10 +86,6 @@ protected:
 
 private:
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
-    // // needed to construct ballistics solver
-    // NiceMock<aruwsrc::mock::TurretMotorMock> turretBaseMotor;
-    // tap::algorithms::transforms::Transform worldToTurretBaseTransform;
-    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
 
 protected:
     tap::Drivers drivers;
