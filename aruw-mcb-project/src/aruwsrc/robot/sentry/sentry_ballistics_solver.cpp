@@ -34,8 +34,9 @@ namespace aruwsrc::sentry
 {
 SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
+    const aruwsrc::sentry::SentryTransforms &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const aruwsrc::control::turret &turretMajor,
     const float defaultLaunchSpeed,
     const float turretPitchOffset,
     // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
@@ -44,6 +45,7 @@ SentryBallisticsSolver::SentryBallisticsSolver(
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       frictionWheels(frictionWheels),
+      turretMajor(turretMajor),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
       //   worldToTurretBaseTransform(worldToTurretBaseTransform),
@@ -79,14 +81,8 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         }
 
         auto &worldToTurret = transformer.getWorldToTurret(turretID);
+        auto &worldToMajor = transformer.getWorldToTurretMajor();
         const Vector2f chassisVel = transformer.getChassisVelocity2d();
-
-        // chassis-relative velocity of the turret
-        // modm::Vector2f turretChassisRelVelocity(
-        //     turretBaseMotor.getChassisFrameVelocity() *
-        //         std::cos(worldToTurretBaseTransform.getYaw()) * turretDistFromBase,
-        //     turretBaseMotor.getChassisFrameVelocity() *
-        //         std::sin(worldToTurretBaseTransform.getYaw()) * turretDistFromBase);
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
@@ -96,10 +92,12 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
                 aimData.pva.yPos - worldToTurret.getY(),
                 aimData.pva.zPos - worldToTurret.getZ()},
             modm::Vector3f{
-                aimData.pva.xVel - chassisVel.x,
-                // (chassisVel.x - turretChassisRelVelocity.x),  // someone pls check math
-                // aimData.pva.yVel - (chassisVel.y - turretChassisRelVelocity.y),
-                aimData.pva.yVel - chassisVel.y,
+                aimData.pva.xVel -
+                    (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() *
+                                        std::cos(worldToMajor.getYaw()) * turretDistFromBase),
+                aimData.pva.yVel -
+                    (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() *
+                                        std::sin(worldToMajor.getYaw()) * turretDistFromBase),
                 aimData.pva.zVel},
             modm::Vector3f{aimData.pva.xAcc, aimData.pva.yAcc, aimData.pva.zAcc},
         };

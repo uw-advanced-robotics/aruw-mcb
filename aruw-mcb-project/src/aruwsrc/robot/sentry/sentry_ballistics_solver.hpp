@@ -28,6 +28,8 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
+#include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -125,8 +127,9 @@ public:
      */
     SentryBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const aruwsrc::algorithms::transforms::TransformerInterface &transformer,
+        const aruwsrc::sentry::SentryTransforms &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const aruwsrc::control::turret &turretMajor,
         float defaultLaunchSpeed,
         float turretPitchOffset,
         // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
@@ -147,8 +150,9 @@ public:
 
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const aruwsrc::algorithms::transforms::TransformerInterface &transformer;
+    const aruwsrc::sentry::SentryTransforms &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
+    const aruwsrc::control::turret &turretMajor;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     // const tap::algorithms::transforms::Transform &worldToTurretBaseTransform;
