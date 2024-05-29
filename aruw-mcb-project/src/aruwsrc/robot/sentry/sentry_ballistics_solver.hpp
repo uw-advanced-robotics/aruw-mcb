@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_BALLISTICS_SOLVER_HPP_
-#define OTTO_BALLISTICS_SOLVER_HPP_
+#ifndef SENTRY_BALLISTICS_SOLVER_HPP_
+#define SENTRY_BALLISTICS_SOLVER_HPP_
 
 #include <optional>
 
@@ -168,4 +168,4 @@ public:
 };
 }  // namespace aruwsrc::sentry
 
-#endif  // OTTO_BALLISTICS_SOLVER_HPP_
+#endif  // SENTRY_BALLISTICS_SOLVER_HPP_
