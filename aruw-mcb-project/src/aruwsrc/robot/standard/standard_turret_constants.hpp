@@ -93,11 +93,27 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .maxAngle = modm::toRadian(115),
     .limitMotorAngles = true,
 };
+#elif defined(TARGET_STANDARD_CYGNUS)
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 6844,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = false,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 3393,
+    .minAngle = modm::toRadian(48),
+    .maxAngle = modm::toRadian(115),
+    .limitMotorAngles = true,
+};
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
 
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 // Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr float TURRET_CG_X = 35.76;
 static constexpr float TURRET_CG_Z = 52.25;
@@ -112,7 +128,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'000;
 
 namespace world_rel_turret_imu
 {
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10.0f,
     .ki = 0.0f,
@@ -304,7 +320,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 229'183.1f,
     .ki = 0.0f,
