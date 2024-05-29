@@ -25,13 +25,13 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
@@ -72,7 +72,7 @@ public:
         SentryTurretMinorSubsystem &turretSubsystem;
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
-        aruwsrc::algorithms::OttoBallisticsSolver &ballisticsSolver;
+        aruwsrc::sentry::SentryBallisticsSolver &ballisticsSolver;
     };
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
@@ -147,7 +147,7 @@ private:
      */
     void computeAimSetpoints(
         TurretConfig &config,
-        aruwsrc::algorithms::OttoBallisticsSolver::BallisticsSolution &solution,
+        aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
         float *desiredYawSetpoint,
         float *desiredPitchSetpoint,
         bool *withinAimingTolerance);

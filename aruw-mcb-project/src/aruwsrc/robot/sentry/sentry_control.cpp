@@ -27,7 +27,6 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
@@ -412,7 +411,7 @@ VelocityAgitatorSubsystem turretRightAgitator(
 SentryBallisticsSolver turretRightSolver(
     drivers()->visionCoprocessor,
     transformer,
-    frictionWheelsTurretRight,
+    turretRightFrictionWheels,
     turretMajor,
     turretRight::default_launch_speed,
     0.f,  // turret minor pitch offset
@@ -422,7 +421,7 @@ SentryBallisticsSolver turretRightSolver(
 SentryBallisticsSolver turretLeftSolver(
     drivers()->visionCoprocessor,
     transformer,
-    frictionWheelsTurretLeft,
+    turretLeftFrictionWheels,
     turretMajor,
     turretLeft::default_launch_speed,
     0.f,  // turret minor pitch offset
@@ -517,33 +516,11 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &drivers()->turretMCBCanCommBus1,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-aruwsrc::algorithms::OttoBallisticsSolver turretLeftSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    leftFrictionWheels,
-    turretLeft::default_launch_speed,
-    0.f,  // turret minor pitch offset
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretLeft.getTurretID());
-
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
     turretLeftWorldControllers.pitchController,
     turretLeftSolver);
-
-aruwsrc::algorithms::OttoBallisticsSolver turretRightSolver(
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    rightFrictionWheels,
-    turretRight::default_launch_speed,
-    0.f,  // turret minor pitch offset
-    transformer.getWorldToTurretMajor(),
-    turretMajor.getReadOnlyMotor(),
-    TURRET_MINOR_OFFSET,
-    turretRight.getTurretID());
 
 SentryTurretCVCommand::TurretConfig turretRightCVConfig(
     turretRight,

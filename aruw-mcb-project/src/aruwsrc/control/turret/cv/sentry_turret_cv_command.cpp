@@ -66,7 +66,7 @@ void SentryTurretCVCommand::initialize()
 
 void SentryTurretCVCommand::computeAimSetpoints(
     TurretConfig &config,
-    aruwsrc::algorithms::OttoBallisticsSolver::BallisticsSolution &solution,
+    aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
     float *desiredYawSetpoint,
     float *desiredPitchSetpoint,
     bool *withinAimingTolerance)
