@@ -605,6 +605,15 @@ HoldCommandMapping leftDownRightDown(
     {&beybladeCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+HoldRepeatCommandMapping shootLeftUpRightMidAgitator(
+    drivers(),
+    {&turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID),
+    true);
+
 // HoldCommandMapping leftUpRightUp(
 //     drivers(),
 //     {&turretCVCommand},
@@ -687,6 +696,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
     drivers->commandMapper.addMap(&leftMidRightMid);  // Agitators
     drivers->commandMapper.addMap(&leftDown);         // Don't shoot
+    drivers->commandMapper.addMap(&shootLeftUpRightMidAgitator);
 }
 }  // namespace sentry_control
 
