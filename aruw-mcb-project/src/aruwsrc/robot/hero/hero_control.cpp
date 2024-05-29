@@ -168,14 +168,11 @@ StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    transformAdapter,
+    odometrySubsystem,
+    turret,
     frictionWheels,
     9.0f,  // defaultLaunchSpeed
-    turret.getPitchOffset(),
-    transformer.getWorldToChassis(),  // world to turretbase transform
-    turret.yawMotor,
-    0.0,  // turret offset from where the base rotates around
-    0     // turretID
+    0      // turretID
 );
 
 AutoAimLaunchTimer autoAimLaunchTimer(
