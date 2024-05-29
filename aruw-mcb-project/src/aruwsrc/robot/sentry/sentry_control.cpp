@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTRY_HYDRA)
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -38,6 +39,9 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
+#include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -64,12 +68,14 @@
 using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
+using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::sentry::chassis;
+using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret::sentry;
@@ -498,6 +504,25 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
 
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernorTurretLeft(
+    *drivers(),
+    turretLeft::barrelID,
+    constants::HEAT_LIMIT_BUFFER);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
+    drivers()->refSerial,
+    turretLeft::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(frictionWheelsTurretLeft);
+
+GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft});
+
 // RIGHT shooting ======================
 
 // spin friction wheels commands
@@ -528,6 +553,26 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightAgitator,
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
+
+    // rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernorTurretRight(
+    *drivers(),
+    turretRight::barrelID,
+    constants::HEAT_LIMIT_BUFFER);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
+    drivers()->refSerial,
+    turretRight::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(frictionWheelsTurretRight);
+
+GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight});
+
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
