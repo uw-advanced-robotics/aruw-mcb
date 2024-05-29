@@ -32,6 +32,7 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
@@ -496,7 +497,7 @@ aruwsrc::control::launcher::
         turretLeft::barrelID);
 
 // Agitator commands (turret left)
-MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
+ConstantVelocityAgitatorCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
 UnjamIntegralCommand turretLeftUnjamAgitator(turretLeftAgitator, constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     *drivers(),
@@ -542,7 +543,7 @@ aruwsrc::control::launcher::
         turretRight::barrelID);
 
 // Agitator commands (turret Right)
-MoveIntegralCommand turretRightRotateAgitator(
+ConstantVelocityAgitatorCommand turretRightRotateAgitator(
     turretRightAgitator,
     constants::AGITATOR_ROTATE_CONFIG);
 UnjamIntegralCommand turretRightUnjamAgitator(
@@ -678,6 +679,8 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    turretLeftRotateAgitator.enableConstantRotation(true);
+    turretRightRotateAgitator.enableConstantRotation(true);
 }
 
 /* register io mappings here ------------------------------------------------*/
