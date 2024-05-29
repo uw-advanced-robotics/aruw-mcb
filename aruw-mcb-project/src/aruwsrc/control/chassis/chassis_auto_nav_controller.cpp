@@ -15,10 +15,10 @@ void ChassisAutoNavController::initialize(Position initialPos)
     yRamp.reset(initialPos.y());
 
     path.pushPoint(Position(0, 0, 0));
-    path.pushPoint(Position(0.45, 1, 0));
-    path.pushPoint(Position(1.75, 0, 0));
-    path.pushPoint(Position(2, 0, 0));
-    path.pushPoint(Position(3, 0, 0));
+    path.pushPoint(Position(0.75, 0, 0));
+    path.pushPoint(Position(0.75, 0.75, 0));
+    path.pushPoint(Position(0, 0.75, 0));
+    path.pushPoint(Position(0, 0.05, 0));
 }
 
 float debugx = 0;
@@ -38,6 +38,7 @@ void ChassisAutoNavController::runController(
 {
     controller_called = true;
     Position setPoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER);
+    lastSetPoint = setPoint;
     debugSetPoint = setPoint;
     float rampTarget = 0.0;
     float x = 0.0f;
@@ -123,6 +124,12 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     if (path.empty())
     {
         return current;
+    }
+    
+    if (path.hasChanged()) {
+        path.pushFront(lastSetPoint);
+        path.pushFront(current);
+        path.togglePathChanged();
     }
 
     closest = path.positionToClosestParameter(current);

@@ -109,13 +109,25 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
     }
 }
 
+
+
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
     //TODO: update this to handle the new protocol:
     //  - a path reset
-    AutoNavSetpointData setpointData;
-    memcpy(&setpointData, &message.data, sizeof(AutoNavSetpointData));
-    path.pushPoint(Position(setpointData.x, setpointData.y, 0));
+    struct AutoNavSetpointMessage setpointData;
+    memcpy(&setpointData, &message.data, sizeof(uint32_t) * 2 + sizeof(float));
+    memcpy(&setpointData.setpoints, &message.data[sizeof(uint32_t) * 2 + sizeof(float)], sizeof(AutoNavCoordinate) * setpointData.num_setpoints);
+    if (lastSetpointData.sequence_num == setpointData.sequence_num)
+    {
+        return true;
+    }
+    path.resetPath();
+    for (uint32_t i = 0; i < setpointData.sequence_num; i++)
+    {
+        path.pushPoint(Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
+    }
+    lastSetpointData = setpointData;
     return true;
 }
 

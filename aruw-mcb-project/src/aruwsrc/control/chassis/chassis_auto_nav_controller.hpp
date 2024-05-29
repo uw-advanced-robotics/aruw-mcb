@@ -29,6 +29,7 @@ public:
                              ) :
         chassis(chassis),
         path(path),
+        lastSetPoint(Position(0, 0, 0)),
         visionCoprocessor(visionCoprocessor),
         drivers(drivers),
         config(config)
@@ -48,6 +49,7 @@ public:
 // private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
+    Position lastSetPoint;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 

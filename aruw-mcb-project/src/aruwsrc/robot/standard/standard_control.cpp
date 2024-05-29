@@ -83,6 +83,8 @@
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
+
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
@@ -218,7 +220,7 @@ aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     &chassis,
     &turret.yawMotor);
 
-aruwsrc::sentry::SentryBeybladeConfig sentryBeybladeConfig = {
+aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig sentryBeybladeConfig = {
         .beybladeRotationalSpeedFractionOfMax = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
         .beybladeTranslationalSpeedMultiplier = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
         .beybladeRotationalSpeedMultiplierWhenTranslating = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
@@ -229,11 +231,11 @@ aruwsrc::sentry::SentryBeybladeConfig sentryBeybladeConfig = {
 aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
     *drivers(),
     chassis,
-    turret.yawMotor,
+    //turret.yawMotor,
     drivers()->visionCoprocessor,
-    odometrySubsystem,
+    transformAdapter,
     sentryBeybladeConfig,
-    chassis_rel::PITCH_PID_CONFIG, // DUMMY VALUE - NOT USED
+    // chassis_rel::PITCH_PID_CONFIG, // DUMMY VALUE - NOT USED
     false
     );
 

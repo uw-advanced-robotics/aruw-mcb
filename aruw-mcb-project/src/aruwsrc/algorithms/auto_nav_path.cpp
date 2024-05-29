@@ -10,9 +10,17 @@ using namespace aruwsrc::algorithms;
 
 void AutoNavPath::pushPoint(Position point) { setpointData.push_back(point); }
 
+void AutoNavPath::pushFront(Position point) { setpointData.push_front(point); }
+
 void AutoNavPath::popPoint() { setpointData.pop_front(); }
 
-void AutoNavPath::resetPath() { setpointData.clear(); }
+void AutoNavPath::resetPath() { 
+    setpointData.clear(); 
+    path_changed = true;
+}
+
+bool AutoNavPath::hasChanged() const { return path_changed; }
+void AutoNavPath::togglePathChanged() { path_changed = !path_changed; }
 
 float debugMinClosest = 0;
 float AutoNavPath::positionToClosestParameter(const Position pos) const

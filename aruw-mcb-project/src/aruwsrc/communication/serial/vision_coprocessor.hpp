@@ -261,10 +261,10 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    {
-        return lastSetpointData;
-    }
+    // mockable inline const AutoNavSetpointData& getLastSetpointData() const
+    // {
+    //     return lastSetpointData;
+    // }
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getPath() { return path; }
 
@@ -368,8 +368,19 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    static constexpr uint8_t MAXSETPOINTS = 50;
+    struct AutoNavCoordinate {
+        float x;
+        float y;
+    };
+    struct AutoNavSetpointMessage {
+        uint32_t sequence_num;
+        float speed;
+        uint32_t num_setpoints;
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
     aruwsrc::algorithms::AutoNavPath path;
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    AutoNavSetpointMessage lastSetpointData;
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},

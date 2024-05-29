@@ -16,16 +16,19 @@ class AutoNavPath
 {
 public:
     AutoNavPath()
-        : setpointData()
+        : setpointData(), path_changed(false)
     {}
     
     void pushPoint(Position point);
+    void pushFront(Position point);
     void popPoint();
     void resetPath();
     bool empty() const { return setpointData.empty(); }
     float positionToClosestParameter(const Position pos) const;
     Position parametertoPosition(const float parameter) const;
     float parameterToSpeed(const float parameter) const;
+    bool hasChanged() const;
+    void togglePathChanged();
 
     inline float distTo(const Position& position, const float parameter) const
     {
@@ -34,6 +37,7 @@ public:
 
 private:
     std::deque<Position> setpointData;
+    bool path_changed;
 
     bool path_interpolated = false; // DEBUG
 
