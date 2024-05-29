@@ -730,11 +730,6 @@ HoldRepeatCommandMapping leftMidRightMid(
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID),
     true);
 
-HoldCommandMapping leftDown(
-    drivers(),
-    {&stopTurretLeftFrictionWheelSpinCommand, &stopTurretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-
 HoldCommandMapping leftDownRightDown(
     drivers(),
     {&beybladeCommand},
