@@ -47,12 +47,6 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
 static constexpr int AGITATOR_NUM_POCKETS = 8;    // number of balls in one rotation
 static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
-/// Max desired rate of fire for the agitator
-constexpr float MAX_AGITATOR_ROF = 20.0f;
-
-/// Number of projectiles in one agitator rotation
-constexpr float AGITATOR_NUM_POCKETS = 10.0f;
-
 namespace turretLeft
 {
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
