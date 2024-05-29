@@ -554,7 +554,7 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
 
-    // rotates agitator with heat limiting applied
+// rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorTurretRight(
     *drivers(),
     turretRight::barrelID,
@@ -572,7 +572,6 @@ GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorTurretRight,
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
-
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftDownRightUp(
