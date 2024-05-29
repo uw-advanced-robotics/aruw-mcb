@@ -155,8 +155,6 @@ private:
     const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
-    // const tap::algorithms::transforms::Transform &worldToTurretBaseTransform;
-    // const aruwsrc::control::turret::TurretMotor &turretBaseMotor;
     const float turretDistFromBase;
 
     uint32_t lastAimDataTimestamp = 0;

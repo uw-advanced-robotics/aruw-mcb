@@ -39,7 +39,6 @@ SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
     const float defaultLaunchSpeed,
     const float turretPitchOffset,
-    // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
     const float turretDistFromBase,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
@@ -48,8 +47,6 @@ SentryBallisticsSolver::SentryBallisticsSolver(
       turretMajor(turretMajor),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
-      //   worldToTurretBaseTransform(worldToTurretBaseTransform),
-      //   turretBaseMotor(turretBaseMotor),
       turretDistFromBase(turretDistFromBase),
       turretID(turretID)
 {
