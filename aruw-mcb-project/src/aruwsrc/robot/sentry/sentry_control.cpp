@@ -355,15 +355,14 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
-tap::algorithms::SmoothPid turretMajorYawPosPid(
-    turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
-tap::algorithms::SmoothPid turretMajorYawVelPid(
-    turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
+SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
-algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
-    transformer.getWorldToChassis(),
+TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
+    transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
+    drivers()->turretMajorMcbLite.imu,
     turretLeft,
     turretRight,
     turretMajorYawPosPid,
@@ -371,6 +370,10 @@ algorithms::TurretMajorWorldFrameController turretMajorWorldYawController(  // @
     turretMajor::MAX_VEL_ERROR_INPUT,
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
+
+ChassisFrameYawTurretController turretMajorChassisYawController(
+    turretMajor.getMutableMotor(),
+    turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -463,7 +466,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
         },
     },
     turretMajor,
-    turretMajorWorldYawController,
+    turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
     chassisOdometry,
@@ -618,19 +621,16 @@ HoldCommandMapping leftMid(
 //     {&chassisDriveCommand},
 //     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-// HoldCommandMapping shoot(
-//     drivers(),
-//     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+HoldRepeatCommandMapping leftMidRightMid(
+    drivers(),
+    {&turretLeftRotateAndUnjamAgitator, &turretRightRotateAndUnjamAgitator},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID),
+    true);
 
-// HoldRepeatCommandMapping leftUpRightDown(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitator,
-//      &turretRightRotateAndUnjamAgitator,
-//      &turretLeftFrictionWheelSpinCommand,
-//      &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN),
-//     true);
+HoldCommandMapping leftDown(
+    drivers(),
+    {&stopTurretLeftFrictionWheelSpinCommand, &stopTurretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping rightUp(
     drivers(),
@@ -738,9 +738,8 @@ void registerSentryIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&leftMidRightMid);    // chassis drive
     // drivers->commandMapper.addMap(&leftDownRightDown);  // beyblade
 
-    // drivers->commandMapper.addMap(&leftUpRightUp);  // Agitators
-    // drivers->commandMapper.addMap(&shoot);          // Shoot
-    // drivers->commandMapper.addMap(&leftUpRightDown);  // Shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);  // Agitators
+    drivers->commandMapper.addMap(&leftDown);         // Don't shoot
 }
 }  // namespace sentry_control
 

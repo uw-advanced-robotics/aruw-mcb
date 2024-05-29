@@ -190,7 +190,7 @@ void SentryImuCalibrateCommand::execute()
 
     turretMajorController.runController(
         dt,
-        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint() + odometryInterface.getYaw());
+        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
 }
 
 void SentryImuCalibrateCommand::end(bool)
