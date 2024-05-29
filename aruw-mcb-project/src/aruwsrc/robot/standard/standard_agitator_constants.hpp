@@ -39,7 +39,7 @@ namespace aruwsrc::control::agitator::constants
 {
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 
 // position PID terms
 // PID terms for standard
@@ -53,7 +53,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 static constexpr int AGITATOR_NUM_POCKETS = 10;   // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 20.0f;  // balls per second
+static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,

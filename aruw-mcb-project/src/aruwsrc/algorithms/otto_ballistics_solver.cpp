@@ -92,22 +92,22 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
-        ballistics::MeasuredKinematicState targetState = {
-            .position =
-                {aimData.pva.xPos - worldToTurret.getX(),
-                 aimData.pva.yPos - worldToTurret.getY(),
-                 aimData.pva.zPos - worldToTurret.getZ()},
-            .velocity =
-                {aimData.pva.xVel -
-                     (chassisVel.x - turretChassisRelVelocity.x),  // someone pls check math
-                 aimData.pva.yVel - (chassisVel.y - turretChassisRelVelocity.y),
-                 aimData.pva.zVel},
-            .acceleration =
-                {aimData.pva.xAcc,
-                 aimData.pva.yAcc,
-                 aimData.pva.zAcc},  // TODO consider using chassis
-                                     // acceleration from IMU
-        };
+
+        ballistics::SecondOrderKinematicState targetState(
+            modm::Vector3f(
+                aimData.pva.xPos - turretPosition.x,
+                aimData.pva.yPos - turretPosition.y,
+                aimData.pva.zPos - turretPosition.z),
+            modm::Vector3f(
+                aimData.pva.xVel - chassisVel.x,
+                aimData.pva.yVel - chassisVel.y,
+                aimData.pva.zVel),
+            modm::Vector3f(
+                aimData.pva.xAcc,
+                aimData.pva.yAcc,
+                aimData.pva.zAcc)  // TODO consider using chassis
+                                   // acceleration from IMU
+        );
 
         // time in microseconds to project the target position ahead by
         int64_t projectForwardTimeDt =

@@ -258,6 +258,26 @@ before_script:
   variables:
     ROBOT: STANDARD_ORION
 
+# Standard (Cygnus) build
+
+"Standard (Cygnus): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_CYGNUS
+
+"Standard (Cygnus): Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: STANDARD_CYGNUS
+
+"Standard (Cygnus): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_CYGNUS
+
 # Drone build
 
 "Drone: MCB Build":
@@ -304,19 +324,19 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO_PERSEUS
 
 "Hero: Sim Build":
   extends:
     - .sim_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO_PERSEUS
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO_PERSEUS
 
 # Sentry (Beehive) build
 
