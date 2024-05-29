@@ -129,7 +129,7 @@ public:
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const aruwsrc::sentry::SentryTransforms &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const aruwsrc::control::turret &turretMajor,
+        const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         float defaultLaunchSpeed,
         float turretPitchOffset,
         // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
@@ -152,7 +152,7 @@ private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const aruwsrc::sentry::SentryTransforms &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
-    const aruwsrc::control::turret &turretMajor;
+    const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     // const tap::algorithms::transforms::Transform &worldToTurretBaseTransform;

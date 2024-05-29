@@ -112,7 +112,10 @@ public:
         return chassisOdometry.getLastComputedOdometryTime();
     }
 
-    inline Vector2f getChassisVelocity2d() const { return chassisOdometry.getCurrentVelocity2D(); }
+    inline modm::Vector2f getChassisVelocity2d() const
+    {
+        return chassisOdometry.getCurrentVelocity2D();
+    }
 
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const

@@ -36,7 +36,7 @@ SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const aruwsrc::sentry::SentryTransforms &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const aruwsrc::control::turret &turretMajor,
+    const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
     const float defaultLaunchSpeed,
     const float turretPitchOffset,
     // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
@@ -93,10 +93,10 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
                 aimData.pva.zPos - worldToTurret.getZ()},
             modm::Vector3f{
                 aimData.pva.xVel -
-                    (chassisVel.x - turretMajor.yawMotor.getChassisFrameVelocity() *
+                    (chassisVel.x - turretMajor.getReadOnlyMotor().getChassisFrameVelocity() *
                                         std::cos(worldToMajor.getYaw()) * turretDistFromBase),
                 aimData.pva.yVel -
-                    (chassisVel.y - turretMajor.yawMotor.getChassisFrameVelocity() *
+                    (chassisVel.y - turretMajor.getReadOnlyMotor().getChassisFrameVelocity() *
                                         std::sin(worldToMajor.getYaw()) * turretDistFromBase),
                 aimData.pva.zVel},
             modm::Vector3f{aimData.pva.xAcc, aimData.pva.yAcc, aimData.pva.zAcc},
