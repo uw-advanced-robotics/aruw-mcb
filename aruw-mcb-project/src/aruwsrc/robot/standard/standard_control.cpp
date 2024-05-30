@@ -552,6 +552,10 @@ void startStandardCommands(Drivers *drivers)
     drivers->refSerial.attachRobotToRobotMessageHandler(
         aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
         &sentryResponseHandler);
+
+    // Allows constant rotation when using the remote, overriden by MultiShotCvCommandMapping when
+    // using keyboard
+    rotateAgitator.enableConstantRotation(true);
 }
 
 /* register io mappings here ------------------------------------------------*/

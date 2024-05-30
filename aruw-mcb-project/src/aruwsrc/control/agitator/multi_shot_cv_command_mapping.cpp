@@ -37,47 +37,53 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
 
 void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::RemoteMapState &currState)
 {
-    int timesToReschedule = 0;
-
-    float fireRate = 0.0f;
-
-    auto launchMode = cvOnTargetGovernor.inShotTimingMode() ? FULL_AUTO : this->launchMode;
-    bool enableConstantRotation = false;
-    switch (launchMode)
+    // if mapping subset of the current remote map state and if the neg keys are not used or the neg
+    // keys are not pressed, compute firing rate
+    if (mappingSubset(currState) &&
+        !(mapState.getNegKeysUsed() && negKeysSubset(mapState, currState)))
     {
-        case SINGLE:
-            timesToReschedule = 1;
-            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            break;
-        case NO_HEATING:
-            timesToReschedule = -1;
-            fireRate = getCurrentBarrelCoolingRate();
-            break;
-        case FULL_AUTO_10HZ:
-            timesToReschedule = -1;
-            fireRate = 10;
-            break;
-        case FULL_AUTO:
-            timesToReschedule = -1;
-            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-            enableConstantRotation = true;
-            break;
-        default:
-            assert(false);
-            break;
-    }
+        int timesToReschedule = 0;
 
-    if (command.has_value())
-    {
-        command.value()->enableConstantRotation(enableConstantRotation);
-    }
+        float fireRate = 0.0f;
 
-    if (fireRateReselectionManager.has_value())
-    {
-        fireRateReselectionManager.value()->setFireRate(fireRate);
-    }
+        auto launchMode = cvOnTargetGovernor.inShotTimingMode() ? FULL_AUTO : this->launchMode;
+        bool enableConstantRotation = false;
+        switch (launchMode)
+        {
+            case SINGLE:
+                timesToReschedule = 1;
+                fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+                break;
+            case NO_HEATING:
+                timesToReschedule = -1;
+                fireRate = getCurrentBarrelCoolingRate();
+                break;
+            case FULL_AUTO_10HZ:
+                timesToReschedule = -1;
+                fireRate = 10;
+                break;
+            case FULL_AUTO:
+                timesToReschedule = -1;
+                fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+                enableConstantRotation = true;
+                break;
+            default:
+                assert(false);
+                break;
+        }
 
-    setMaxTimesToSchedule(timesToReschedule);
+        if (command.has_value())
+        {
+            command.value()->enableConstantRotation(enableConstantRotation);
+        }
+
+        if (fireRateReselectionManager.has_value())
+        {
+            fireRateReselectionManager.value()->setFireRate(fireRate);
+        }
+
+        setMaxTimesToSchedule(timesToReschedule);
+    }
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
 
