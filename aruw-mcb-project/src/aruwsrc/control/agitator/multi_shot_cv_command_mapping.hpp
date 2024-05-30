@@ -111,6 +111,8 @@ private:
         return coolingRate / 10.0f;
 #endif
     }
+
+    bool prev_held;
 };
 
 }  // namespace aruwsrc::control::agitator
