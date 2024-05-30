@@ -279,6 +279,9 @@ private:
 
     int64_t lastUpdatedEncoderValue;
     int64_t adjustedStartEncoderValue;
+    float startEncoderValueRad;
+    int64_t minAngleEncoder;
+    int64_t maxAngleEncoder;
 };
 }  // namespace aruwsrc::control::turret
 
