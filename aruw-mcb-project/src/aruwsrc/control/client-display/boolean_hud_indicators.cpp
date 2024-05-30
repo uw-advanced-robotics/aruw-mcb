@@ -48,14 +48,14 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const tap::communication::serial::RefSerial *refSerial)
     : HudIndicator(refSerialTransmitter),
       commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
-      sentryResponseHandler(sentryResponseHandler),
+      refSerial(refSerial),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -73,10 +73,10 @@ BooleanHudIndicators::BooleanHudIndicators(
               0),
           BooleanHUDIndicator(
               refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
+              &booleanHudIndicatorGraphics[AMMO_AVAILABLE],
               updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE])>,
               0),
       }
 {
@@ -114,8 +114,10 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
+    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(
+        refSerial->getRefSerialReceivingData() &&
+        (refSerial->getRobotData().turret.bulletsRemaining17 ||
+         refSerial->getRobotData().turret.bulletsRemaining42));
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;

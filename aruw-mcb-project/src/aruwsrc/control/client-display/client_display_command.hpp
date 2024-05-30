@@ -95,8 +95,6 @@ public:
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
-     * @param[in] sentryResponseHandler Global sentry response handler that contains the current
-     * movement state of the sentry.
      */
     ClientDisplayCommand(
         tap::Drivers &drivers,
@@ -112,8 +110,7 @@ public:
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
 
     const char *getName() const override { return "client display"; }
 
