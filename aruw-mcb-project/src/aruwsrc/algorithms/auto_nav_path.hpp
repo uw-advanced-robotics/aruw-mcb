@@ -15,10 +15,8 @@ namespace aruwsrc::algorithms
 class AutoNavPath
 {
 public:
-    AutoNavPath()
-        : setpointData(), path_changed(false)
-    {}
-    
+    AutoNavPath() : setpointData(), path_changed(false) {}
+
     void pushPoint(Position point);
     void pushFront(Position point);
     void popPoint();
@@ -39,13 +37,13 @@ private:
     std::deque<Position> setpointData;
     bool path_changed;
 
-    bool path_interpolated = false; // DEBUG
+    bool path_interpolated = false;  // DEBUG
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif
     float getClosestParameterOnSegment(Position current, Position p1, Position p2) const;
-    
+
     // BAD STUFF -- REMOVE THIS POST TESTING
     Position calculateSetPoint(Position current, float interpolationParameter)
     {
@@ -55,7 +53,7 @@ public:
         {
             return current;
         }
-        
+
         float closest = positionToClosestParameter(current);
         return parametertoPosition(closest + interpolationParameter);
     }

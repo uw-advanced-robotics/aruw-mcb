@@ -14,8 +14,9 @@ void AutoNavPath::pushFront(Position point) { setpointData.push_front(point); }
 
 void AutoNavPath::popPoint() { setpointData.pop_front(); }
 
-void AutoNavPath::resetPath() { 
-    setpointData.clear(); 
+void AutoNavPath::resetPath()
+{
+    setpointData.clear();
     path_changed = true;
 }
 
@@ -44,20 +45,21 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
     return minClosest;
 }
 int minPointIndex = 1000;
-Position back(-1.0,-1.0,0.0);
-Position firstPoint(-1.0,-1.0,0.0);
+Position back(-1.0, -1.0, 0.0);
+Position firstPoint(-1.0, -1.0, 0.0);
 int dequeSize = -1;
 float debugParameter = 1000.0;
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
     // assert(!setpointData.empty());
     debugParameter = parameter;
-    int pointIndex = static_cast<int>(parameter);  // only works bc parameterized length every segment is
-                                      // currently considered to be 1
+    int pointIndex = static_cast<int>(parameter);  // only works bc parameterized length every
+                                                   // segment is currently considered to be 1
     dequeSize = setpointData.size();
     minPointIndex = (pointIndex < minPointIndex) ? pointIndex : minPointIndex;
 
-    if ((size_t) pointIndex + 2 > setpointData.size()) {
+    if ((size_t)pointIndex + 2 > setpointData.size())
+    {
         back = setpointData.back();
         return back;
     }

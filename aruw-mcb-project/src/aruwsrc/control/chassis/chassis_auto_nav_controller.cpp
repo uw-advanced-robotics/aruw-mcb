@@ -6,14 +6,13 @@ namespace aruwsrc::chassis
 {
 void ChassisAutoNavController::initialize(Position initialPos)
 {
-    path.resetPath();
-
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
     xRamp.reset(initialPos.x());
     yRamp.reset(initialPos.y());
 
+    path.resetPath();
     path.pushPoint(Position(0, 0, 0));
     path.pushPoint(Position(0.75, 0, 0));
     path.pushPoint(Position(0.75, 0.75, 0));
@@ -38,7 +37,6 @@ void ChassisAutoNavController::runController(
 {
     controller_called = true;
     Position setPoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER);
-    lastSetPoint = setPoint;
     debugSetPoint = setPoint;
     float rampTarget = 0.0;
     float x = 0.0f;
@@ -69,8 +67,6 @@ void ChassisAutoNavController::runController(
                 maxWheelSpeed;
             y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier *
                 maxWheelSpeed;
-            // x = desiredVelocityX / mag * 0.5 * maxWheelSpeed;
-            // y = desiredVelocityY / mag * 0.5 * maxWheelSpeed;
         }
     }
     debugx = x;
@@ -82,7 +78,8 @@ void ChassisAutoNavController::runController(
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
     // if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
-    //                             tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
+    //                             tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME))
+    //                             &&
     //     beybladeEnabled)
     // {
     //     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
@@ -117,23 +114,32 @@ void ChassisAutoNavController::runController(
 }
 float closest;
 Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter)
-    const
 {
     // TODO: account for and deal with the case of a path reset
-    
+
     if (path.empty())
     {
         return current;
     }
-    
-    if (path.hasChanged()) {
-        path.pushFront(lastSetPoint);
-        path.pushFront(current);
+
+    if (path.hasChanged())
+    {
         path.togglePathChanged();
+        pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
     closest = path.positionToClosestParameter(current);
-    return path.parametertoPosition(closest + interpolationParameter);
+    Position lookahead = path.parametertoPosition(closest + interpolationParameter);
+
+    if (!pathTransitionTimeout.isExpired())
+        return quadraticBezierInterpolation(
+            lookahead,
+            current,
+            lastSetPoint,
+            (float)pathTransitionTimeout.timeRemaining() / PATH_TRANSITION_TIME_MILLIS);
+
+    lastSetPoint = lookahead;
+    return lookahead;
 }
 
 }  // namespace aruwsrc::chassis
