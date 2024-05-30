@@ -112,7 +112,7 @@ private:
 #endif
     }
 
-    bool prev_held;
+    bool prev_held = false;
 };
 
 }  // namespace aruwsrc::control::agitator
