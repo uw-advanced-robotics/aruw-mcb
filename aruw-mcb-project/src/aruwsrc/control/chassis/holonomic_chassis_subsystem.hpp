@@ -166,6 +166,12 @@ public:
         return mat * ratio;
     }
 
+    virtual inline float mpsToRpm(float mps) const
+    {
+        float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;  // not right
+        return mps / ratio;
+    }
+
 };  // class HolonomicChassisSubsystem
 
 }  // namespace chassis
