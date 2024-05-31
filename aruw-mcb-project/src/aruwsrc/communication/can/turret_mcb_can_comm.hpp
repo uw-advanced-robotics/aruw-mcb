@@ -155,7 +155,12 @@ public:
      */
     mockable inline float getYawUnwrapped() const
     {
+        // @todo this is dumb
+#ifdef TARGET_SENTRY_HYDRA
+        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions) - M_PI;
+#else
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
+#endif
     }
 
     mockable inline float getAx() const { return lastCompleteImuData.xAcceleration; }

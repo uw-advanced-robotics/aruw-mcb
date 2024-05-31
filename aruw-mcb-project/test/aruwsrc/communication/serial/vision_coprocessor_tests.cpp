@@ -274,7 +274,7 @@ TEST(VisionCoprocessor, sendOdometryData_valid_turret_chassis_odom)
 
     tap::Drivers drivers;
     VisionCoprocessor serial(&drivers);
-    testing::NiceMock<aruwsrc::mock::TransformerInterface> transformerInterface;
+    testing::NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformerInterface;
 
     serial.attachTransformer(&transformerInterface);
     VisionCoprocessor::OdometryData odometryData;

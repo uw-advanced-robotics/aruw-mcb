@@ -20,17 +20,20 @@
 #ifndef SENTRY_TURRET_CV_COMMAND_HPP_
 #define SENTRY_TURRET_CV_COMMAND_HPP_
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "../algorithms/turret_controller_interface.hpp"
-#include "../constants/turret_constants.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
-#include "setpoint_scanner.hpp"
-#include "turret_cv_command_interface.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
+#include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
+#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
 {
@@ -52,45 +55,36 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace aruwsrc::control::turret::cv
+namespace aruwsrc::control::sentry
 {
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
- * aims the turret accordingly using a position PID controller.
+ * aims the turrets accordingly using a position PID controller.
  *
- * This command, unlike the `SentryTurretCVCommand`, is not responsible for firing projectiles
- * when the auto aim system determines it should fire. Nor does this class scan the turret back and
- * forth.
- *
- * @note If the auto aim system is offline, does not have a target acquired, or has an invalid
- * target (for example, the target is too far away), then user input from the
- * `ControlOperatorInterface` is used to control the turret instead.
+ * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
+ * of movement. (This is why we need both minors controlled by a single command.)
  */
-class SentryTurretCVCommand : public TurretCVCommandInterface
+class SentryTurretCVCommand : public tap::control::Command
 {
 public:
-    /// Min scanning angle for the pitch motor since the turret doesn't need to scan all the way up
-    /// (in radians)
-    static constexpr float PITCH_MIN_SCAN_ANGLE = modm::toRadian(-15.0f);
-    static constexpr float PITCH_MAX_SCAN_ANGLE = modm::toRadian(50.0f);
+    struct TurretConfig
+    {
+        SentryTurretMinorSubsystem &turretSubsystem;
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
+        aruwsrc::sentry::SentryBallisticsSolver &ballisticsSolver;
+    };
 
-    /**
-     * Scanning angle tolerance away from the min/max turret angles, in radians, at which point the
-     * turret will turn around and start scanning around.
-     */
-    static constexpr float YAW_SCAN_ANGLE_TOLERANCE_FROM_MIN_MAX = modm::toRadian(0.5f);
+    static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
+
+    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
+    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
 
     /**
      * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.4f);
-
-    /**
-     * Yaw angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in radians.
-     */
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.3f);
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.08f);  // 0.2
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
@@ -98,7 +92,7 @@ public:
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
 
-    static constexpr float SCAN_LOW_PASS_ALPHA = 0.013f;
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Time to ignore aim requests while the turret is u-turning to aim at a new quadrant.
@@ -106,87 +100,89 @@ public:
     static constexpr uint32_t TIME_TO_IGNORE_TARGETS_WHILE_TURNING_AROUND_MS = 1'000;
 
     /**
-     * Constructs a TurretCVCommand
+     * Constructor.
      *
      * @param[in] visionCoprocessor Pointer to a global visionCoprocessor object.
-     * @param[in] turretSubsystem Pointer to the turret to control.
-     * @param[in] yawController Pointer to a yaw controller that will be used to control the yaw
-     * axis of the turret.
-     * @param[in] pitchController Pointer to a pitch controller that will be used to control the
-     * pitch axis of the turret.
-     * @param[in] firingCommand Pointer to command to schedule when this command deems it's time to
-     * shoot.
-     * @param[in] ballisticsSolver A ballistics computation engine to use for computing aiming
-     * solutions.
-     * @param[in] turretID The vision turet ID, must be a valid 0-based index, see VisionCoprocessor
-     * for more information.
+     * # TODO: docstring
      */
     SentryTurretCVCommand(
-        serial::VisionCoprocessor *visionCoprocessor,
-        RobotTurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
-        const uint8_t turretID);
+        serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+        TurretConfig &turretLeftConfig,
+        TurretConfig &turretRightConfig,
+        aruwsrc::sentry::SentryTransforms &sentryTransforms);
 
-    void initialize() override;
+    void initialize();
 
-    bool isReady() override;
+    bool isReady();
 
-    void execute() override;
+    void execute();
 
-    bool isFinished() const override;
+    bool isFinished() const;
 
-    void end(bool) override;
+    void end(bool);
 
-    const char *getName() const override { return "sentry turret CV"; }
+    const char *getName() const { return "sentry turret CV command"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
-
-    /// Request the desired turret setpoint to a new currently-unseen by CV "quadrant". Useful if
-    /// the sentry is getting shot at by a robot from behind and being baited by a robot in front
-    /// of it.
-    void changeScanningQuadrant();
-
-    bool getTurretID() const override { return turretID; }
 
     /**
      * @return True if vision is active and the turret CV command has acquired the target and the
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
+    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
+    {
+        return turretID == turretLeftConfig.turretSubsystem.getTurretID()
+                   ? withinAimingToleranceLeft
+                   : withinAimingToleranceRight;
+    }
 
 private:
-    serial::VisionCoprocessor *visionCoprocessor;
+    /**
+     * Converts the angles contained in the ballistics solution to the frame of the turret major,
+     * since chassis-frame controllers are used
+     */
+    void computeAimSetpoints(
+        TurretConfig &config,
+        aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
+        float *desiredYawSetpoint,
+        float *desiredPitchSetpoint,
+        bool *withinAimingTolerance);
 
-    RobotTurretSubsystem *turretSubsystem;
+    serial::VisionCoprocessor &visionCoprocessor;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
 
-    const uint8_t turretID;
-
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
+    TurretConfig &turretLeftConfig;
+    TurretConfig &turretRightConfig;
+    aruwsrc::sentry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
 
     /**
-     * Handles scanning logic in the pitch direction
-     */
-    SetpointScanner pitchScanner;
-
-    /**
      * Handles scanning logic in the yaw direction
      */
-    SetpointScanner yawScanner;
-
     bool scanning = false;
+    bool targetFound = false;
 
-    bool withinAimingTolerance = false;
+    // scan direction
+    static constexpr int SCAN_CLOCKWISE = -1;
+    static constexpr int SCAN_COUNTER_CLOCKWISE = 1;
+    int scanDir = 1;
 
-    tap::arch::MilliTimeout ignoreTargetTimeout;
+    // scan between 90 and 270 to avoid any silliness from wrapping
+    static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(45.0f);
+    static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
+
+    tap::algorithms::WrappedFloat majorScanValue =
+        tap::algorithms::WrappedFloat(0.0f, 0.0f, M_TWOPI);
+
+    bool withinAimingToleranceLeft = false;
+    bool withinAimingToleranceRight = false;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
@@ -196,17 +192,16 @@ private:
      */
     unsigned int lostTargetCounter = AIM_LOST_NUM_COUNTS;
 
-    inline void enterScanMode(float yawSetpoint, float pitchSetpoint)
+    /**
+     * Initializes scanning mode.
+     *
+     * Sets the yaw scanner to the current setpoint of the turret major.
+     */
+    inline void enterScanMode(float majorYawSetpoint)
     {
-        if (yawController != nullptr)
-        {
-            yawSetpoint = yawController->convertControllerAngleToChassisFrame(yawSetpoint);
-        }
-
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        yawScanner.setScanSetpoint(yawSetpoint);
-        pitchScanner.setScanSetpoint(pitchSetpoint);
+        majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI);
     }
 
     inline void exitScanMode()
@@ -214,17 +209,8 @@ private:
         scanning = false;
         lostTargetCounter = 0;
     }
-
-    /**
-     * Performs a single scan iteration, updating the pitch and yaw setpoints based on the pitch/yaw
-     * setpoint scanners.
-     *
-     * @param[out] yawSetpoint The current yaw setpoint, which this function will update
-     * @param[out] pitchSetpoint The current pitch setpoint, which this function will update
-     */
-    void performScanIteration(float &yawSetpoint, float &pitchSetpoint);
 };
 
-}  // namespace aruwsrc::control::turret::cv
+}  // namespace aruwsrc::control::sentry
 
 #endif  // SENTRY_TURRET_CV_COMMAND_HPP_
