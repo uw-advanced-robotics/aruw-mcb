@@ -72,7 +72,7 @@ public:
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    float INTERPOLATION_PARAMETER = 0.2f;
+    float LOOKAHEAD_DISTANCE = 0.2f;
     uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
 };
 }  // namespace aruwsrc::chassis

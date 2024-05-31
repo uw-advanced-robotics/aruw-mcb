@@ -44,6 +44,7 @@ void ChassisAutoNavController::initialize()
     // path.pushPoint(Position(0.0, 0.0, 0));
 }
 
+// debug declarations
 float closest;
 float mag = -1;
 Position currentPos = Position(0, 0, 0);
@@ -58,7 +59,9 @@ void ChassisAutoNavController::runController(
     const bool beybladeEnabled)
 {
     currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
-    setpoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER, movementEnabled);
+    float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
+                                               // this constant with a function in the future
+    setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
     float rampTarget = 0.0;
 
     moveVector = Vector(0, 0, 0);
@@ -66,11 +69,12 @@ void ChassisAutoNavController::runController(
     Vector posError = setpoint - currentPos;
     mag = posError.magnitude();
 
-    float desiredSpeed = path.parameterToSpeed(0);  // todo: need to get parameter here somehow
+    float desiredSpeed =
+        path.parameterToSpeed(0);  // todo: need to get current parameter here somehow
 
     if (mag > 0.01)
     {
-        moveVector = posError / INTERPOLATION_PARAMETER * desiredSpeed * chassis.mpsToRpm(1);
+        moveVector = posError / lookaheadDist * desiredSpeed * chassis.mpsToRpm(1);
     }
 
     // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) *

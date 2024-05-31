@@ -106,11 +106,9 @@ float AutoNavPath::parameterToSpeed(const float parameter) const
 
 float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, Position p2) const
 {
-    float distance1x = p2.x() - p1.x();
-    float distance1y = p2.y() - p1.y();
-    float distance2x = current.x() - p1.x();
-    float distance2y = current.y() - p1.y();
-    float dotprod = distance1x * distance2x + distance1y * distance2y;
-    float ratio = dotprod / (distance1x * distance1x + distance1y * distance1y);
+    Vector distance1 = p2 - p1;
+    Vector distance2 = current - p1;
+    float dotprod = distance1 * distance2;
+    float ratio = dotprod / (distance1 * distance1);
     return tap::algorithms::limitVal(ratio, 0.0f, 1.0f) * Position::distance(p1, p2);
 }
