@@ -51,7 +51,8 @@ void SentryTransforms::updateTransforms()
 {
     // pose of chassis in world frame
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
-    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    worldToChassis.updateTranslation(0, 0, 0.);
+    // worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
     // Chassis to Turret Major
