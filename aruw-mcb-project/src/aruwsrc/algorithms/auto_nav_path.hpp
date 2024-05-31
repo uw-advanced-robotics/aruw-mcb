@@ -39,6 +39,8 @@ private:
 
     bool path_interpolated = false;  // DEBUG
 
+    float getDistance(const Position p1, const Position p2) const;
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif

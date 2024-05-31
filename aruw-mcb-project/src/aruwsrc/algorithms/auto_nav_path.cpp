@@ -29,23 +29,33 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
     float minDistance = F32_MAX;
     float minClosest = 0.0f;
     debugMinClosest = minClosest;
+    float currParameter = 0.0f;
+
+    if (setpointData.size() < 2) {
+        return 0.0f;
+    }
 
     for (size_t i = 0; i < setpointData.size() - 1; i++)
     {
         Position p1 = setpointData[i];
         Position p2 = setpointData[i + 1];
-        float closest = i + getClosestParameterOnSegment(pos, p1, p2);
-        float distance = distTo(pos, closest);
-        if (distance < minDistance)
+
+        float distance = Position::distance(p1, p2); // segment distance
+        float paramOnSegment = getClosestParameterOnSegment(pos, p1, p2); // parameter along segment of closest point
+        Position closestPoint = Position::interpolate(p1, p2, paramOnSegment / distance); // position of closest point on segment
+        float closest = currParameter + paramOnSegment; // total parameter of closest point on path
+
+        float distanceToClosest = Position::distance(pos, closestPoint);
+
+        if (distanceToClosest < minDistance)
         {
-            minDistance = distance;
+            minDistance = distanceToClosest;
             minClosest = closest;
         }
+        currParameter += distance;
     }
     return minClosest;
 }
-int minPointIndex = 1000;
-Position back(-1.0, -1.0, 0.0);
 Position firstPoint(-1.0, -1.0, 0.0);
 int dequeSize = -1;
 float debugParameter = 1000.0;
@@ -55,25 +65,33 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
     debugParameter = parameter;
     int pointIndex = static_cast<int>(parameter);  // only works bc parameterized length every
                                                    // segment is currently considered to be 1
-    dequeSize = setpointData.size();
-    minPointIndex = (pointIndex < minPointIndex) ? pointIndex : minPointIndex;
+    
+    dequeSize = (int)setpointData.size();
+    float currParameter = 0;
+    float segmentDistance = 0;
+    for (pointIndex = 0; pointIndex < dequeSize - 1; pointIndex++) {
+        segmentDistance = Position::distance(setpointData[pointIndex], setpointData[pointIndex + 1]);
+        if (currParameter + segmentDistance > parameter) {
+            break;
+        }
+        currParameter += segmentDistance;
+    }
 
     if ((size_t)pointIndex + 2 > setpointData.size())
     {
-        back = setpointData.back();
-        return back;
+        return setpointData.back();
     }
     firstPoint = setpointData[pointIndex];
 
     return Position::interpolate(
         setpointData[pointIndex],
         setpointData[pointIndex + 1],
-        parameter - pointIndex);
+        (parameter - currParameter) / segmentDistance);
 }
 
 float AutoNavPath::parameterToSpeed(const float parameter) const
 {
-    // IMPLEMENT THIS!!
+    // TODO: IMPLEMENT THIS!!
     // currently making warnings go away
     return parameter;
 }
@@ -86,5 +104,5 @@ float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, P
     float distance2y = current.y() - p1.y();
     float dotprod = distance1x * distance2x + distance1y * distance2y;
     float ratio = dotprod / (distance1x * distance1x + distance1y * distance1y);
-    return tap::algorithms::limitVal(ratio, 0.0f, 1.0f);
+    return tap::algorithms::limitVal(ratio, 0.0f, 1.0f) * Position::distance(p1, p2);
 }

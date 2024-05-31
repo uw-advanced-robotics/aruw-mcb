@@ -127,6 +127,7 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     }
 
     closest = path.positionToClosestParameter(current);
+    
     Position lookahead = path.parametertoPosition(closest + interpolationParameter);
 
     if (!pathTransitionTimeout.isExpired())
