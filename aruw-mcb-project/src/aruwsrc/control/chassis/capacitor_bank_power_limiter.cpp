@@ -27,15 +27,18 @@ namespace aruwsrc::chassis
 
 CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    can::capbank::CapacitorBank *capacitorBank):
+    can::capbank::CapacitorBank *capacitorBank)
+    :
 
-    currentSensor(currentSensor),
-    capacitorBank(capacitorBank) {
+      currentSensor(currentSensor),
+      capacitorBank(capacitorBank){
 
-    };
+      };
 
-float CapacitorSelectingCurrentSensor::getCurrentMa() const {
-    if (this->capacitorBank == nullptr || this->capacitorBank->getState() == can::capbank::State::UNKNOWN)
+float CapacitorSelectingCurrentSensor::getCurrentMa() const
+{
+    if (this->capacitorBank == nullptr ||
+        this->capacitorBank->getState() == can::capbank::State::UNKNOWN)
     {
         return currentSensor->getCurrentMa();
     }
@@ -72,8 +75,7 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     }
 
     float fallback = tap::control::chassis::PowerLimiter::getPowerLimitRatio();
-    if (this->capacitorBank == nullptr ||
-        this->capacitorBank->isDisabled() ||
+    if (this->capacitorBank == nullptr || this->capacitorBank->isDisabled() ||
         this->capacitorBank->getState() == can::capbank::State::UNKNOWN ||
         this->capacitorBank->getState() == can::capbank::State::SAFE)
     {
@@ -82,12 +84,13 @@ float CapBankPowerLimiter::getPowerLimitRatio()
 
     float setpoint = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
 
-    if (this->capacitorBank->isSprinting()) {
-        setpoint = 6; // TODO: get this based on a table or something
+    if (this->capacitorBank->isSprinting())
+    {
+        setpoint = 6;  // TODO: get this based on a table or something
     }
 
     float measured = this->capacitorBank->getCurrent();
-    
+
     float error = setpoint - measured;
 
     const float K_I = 0.0025;
@@ -98,7 +101,10 @@ float CapBankPowerLimiter::getPowerLimitRatio()
 
     float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
 
-    float lowVoltageRamp = std::clamp((this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / VOLTAGE_RAMPDOWN_RANGE, 0.0f, 1.0f);
+    float lowVoltageRamp = std::clamp(
+        (this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / VOLTAGE_RAMPDOWN_RANGE,
+        0.0f,
+        1.0f);
 
     return controlFractionOutput * lowVoltageRamp;
 }

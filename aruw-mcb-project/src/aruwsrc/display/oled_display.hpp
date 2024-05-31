@@ -48,7 +48,7 @@ public:
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
-        can::capbank::CapacitorBank* capacitorBank = nullptr);
+        can::capbank::CapacitorBank *capacitorBank = nullptr);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 

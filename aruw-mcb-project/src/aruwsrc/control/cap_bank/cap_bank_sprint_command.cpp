@@ -35,11 +35,17 @@ CapBankSprintCommand::CapBankSprintCommand(
     addSubsystemRequirement(&capBankSubsystem);
 }
 
-void CapBankSprintCommand::initialize() { capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT); }
+void CapBankSprintCommand::initialize()
+{
+    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT);
+}
 
 void CapBankSprintCommand::execute() {}
 
-void CapBankSprintCommand::end(bool) { capBankSubsystem.changeSprintMode(can::capbank::SprintMode::REGULAR); }
+void CapBankSprintCommand::end(bool)
+{
+    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::REGULAR);
+}
 
 bool CapBankSprintCommand::isFinished() const { return false; }
 

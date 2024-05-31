@@ -75,19 +75,16 @@ public:
     int getPowerLimit() const { return this->powerLimit; };
     State getState() const { return this->state; };
 
-    bool isEnabled() const {
-        return 
-            this->getState() == State::SAFE ||
-            this->getState() == State::CHARGE ||
-            this->getState() == State::CHARGE_DISCHARGE ||
-            this->getState() == State::DISCHARGE ||
-            this->getState() == State::BATTERY_OFF;
+    bool isEnabled() const
+    {
+        return this->getState() == State::SAFE || this->getState() == State::CHARGE ||
+               this->getState() == State::CHARGE_DISCHARGE ||
+               this->getState() == State::DISCHARGE || this->getState() == State::BATTERY_OFF;
     }
 
-    bool isDisabled() const {
-        return 
-            this->getState() == State::RESET ||
-            this->getState() == State::DISABLED;
+    bool isDisabled() const
+    {
+        return this->getState() == State::RESET || this->getState() == State::DISABLED;
     }
 
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };

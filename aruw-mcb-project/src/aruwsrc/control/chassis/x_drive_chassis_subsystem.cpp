@@ -36,7 +36,7 @@ namespace chassis
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank,
+    can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,

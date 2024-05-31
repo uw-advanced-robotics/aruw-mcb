@@ -102,7 +102,8 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA) || defined(TARGET_TESTBED)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_TESTBED)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -141,7 +142,8 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA) || defined(TARGET_TESTBED)
+#if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_TESTBED)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_CYCLONE) || defined(ALL_STANDARDS)
@@ -164,7 +166,8 @@ static void updateIo(tap::Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA) || defined(TARGET_TESTBED)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_CYCLONE) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_TESTBED)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 

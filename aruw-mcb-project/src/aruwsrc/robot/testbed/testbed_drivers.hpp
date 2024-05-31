@@ -34,9 +34,12 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(),
-        oledDisplay(this, nullptr, nullptr, nullptr, &capacitorBank),
-        capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358) {}
+    Drivers()
+        : tap::Drivers(),
+          oledDisplay(this, nullptr, nullptr, nullptr, &capacitorBank),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
+    {
+    }
 
 public:
     display::OledDisplay oledDisplay;

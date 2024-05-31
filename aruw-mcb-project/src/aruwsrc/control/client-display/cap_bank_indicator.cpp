@@ -68,7 +68,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                                                                                : Tx::GRAPHIC_MODIFY;
 
             // Update the voltage bar
-            
+
             voltage_squared = pow(capBank->getVoltage(), 2);
 
             if (voltage_squared < VOLTAGE_SQUARED_MIN)
@@ -79,7 +79,12 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             RefSerialTransmitter::configLine(
                 BOX_WIDTH - 20,
                 CAP_CENTER_X,
-                std::min((voltage_squared - VOLTAGE_SQUARED_MIN) / (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN), 1.0f) * (BOX_HEIGHT - 20) + BOTTOM + 10,
+                std::min(
+                    (voltage_squared - VOLTAGE_SQUARED_MIN) /
+                        (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN),
+                    1.0f) *
+                        (BOX_HEIGHT - 20) +
+                    BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);
@@ -87,41 +92,50 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
                 voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
                 : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
-                                 : Tx::GraphicColor::GREEN);
+                                                           : Tx::GraphicColor::GREEN);
 
             // Update the background status
-            switch(capBank->getState()) {
+            switch (capBank->getState())
+            {
                 case can::capbank::State::RESET:
                     strncpy(capBankTextGraphic.msg, "RST ", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
                 case can::capbank::State::SAFE:
                     strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
                 case can::capbank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "CHDS", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "DSCH", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
                 case can::capbank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg, "OFF", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
                 default:
                     strncpy(capBankTextGraphic.msg, "UNK ", 5);
-                    capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
+                    capBankGraphics.graphicData[0].color =
+                        static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
             }
             // Update the text

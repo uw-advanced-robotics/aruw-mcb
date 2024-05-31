@@ -33,13 +33,10 @@ class Drivers;
 namespace aruwsrc::control::cap_bank
 {
 
-
 class CapBankSubsystem : public tap::control::Subsystem
 {
 public:
-    CapBankSubsystem(
-        tap::Drivers* drivers,
-        can::capbank::CapacitorBank& capacitorBank);
+    CapBankSubsystem(tap::Drivers* drivers, can::capbank::CapacitorBank& capacitorBank);
 
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
@@ -49,10 +46,7 @@ public:
 
     void changeSprintMode(aruwsrc::can::capbank::SprintMode mode);
 
-    void refreshSafeDisconnect() override
-    {
-        this->enabled = false;
-    }
+    void refreshSafeDisconnect() override { this->enabled = false; }
 
     void refresh() override;
 

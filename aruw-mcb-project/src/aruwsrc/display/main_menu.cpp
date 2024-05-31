@@ -116,7 +116,7 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addSentryStrategyMenuCallback));
-    
+
     if (this->capacitorBank != nullptr)
         addEntry(
             CapacitorBankMenu::getMenuName(),

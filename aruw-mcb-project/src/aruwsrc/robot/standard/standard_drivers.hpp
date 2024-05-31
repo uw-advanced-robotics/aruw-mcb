@@ -52,7 +52,12 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2, &capacitorBank),
+          oledDisplay(
+              this,
+              &visionCoprocessor,
+              &turretMCBCanCommBus1,
+              &turretMCBCanCommBus2,
+              &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),

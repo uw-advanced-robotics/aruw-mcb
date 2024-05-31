@@ -34,19 +34,21 @@ class Drivers;
 namespace aruwsrc::chassis
 {
 
-class CapacitorSelectingCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
+class CapacitorSelectingCurrentSensor
+    : public tap::communication::sensors::current::CurrentSensorInterface
 {
 public:
     CapacitorSelectingCurrentSensor(
-        tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-        can::capbank::CapacitorBank *capacitorBank);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        can::capbank::CapacitorBank* capacitorBank);
 
     float getCurrentMa() const override;
 
     void update() override { this->currentSensor->update(); };
+
 private:
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor;
-    can::capbank::CapacitorBank *capacitorBank;
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
+    can::capbank::CapacitorBank* capacitorBank;
 };
 
 class CapBankPowerLimiter : tap::control::chassis::PowerLimiter

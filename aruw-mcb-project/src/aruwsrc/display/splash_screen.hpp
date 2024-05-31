@@ -45,7 +45,7 @@ public:
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
-        can::capbank::CapacitorBank* capacitorBank);
+        can::capbank::CapacitorBank *capacitorBank);
 
     void draw() override;
 

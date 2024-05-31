@@ -45,7 +45,7 @@ void CapBankSubsystem::refresh()
         {
             this->capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
             this->capacitorBank.stop();
-        } 
+        }
         else if (this->enabled && !this->capacitorBank.isEnabled())
         {
             this->capacitorBank.start();
