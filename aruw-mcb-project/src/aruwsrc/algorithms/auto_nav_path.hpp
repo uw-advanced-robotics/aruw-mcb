@@ -45,20 +45,6 @@ private:
 public:
 #endif
     float getClosestParameterOnSegment(Position current, Position p1, Position p2) const;
-
-    // BAD STUFF -- REMOVE THIS POST TESTING
-    Position calculateSetPoint(Position current, float interpolationParameter)
-    {
-        // TODO: account for and deal with the case of a path reset
-
-        if (setpointData.empty())
-        {
-            return current;
-        }
-
-        float closest = positionToClosestParameter(current);
-        return parametertoPosition(closest + interpolationParameter);
-    }
 };
 
 }  // namespace aruwsrc::algorithms

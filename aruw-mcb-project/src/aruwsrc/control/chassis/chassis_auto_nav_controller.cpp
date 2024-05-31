@@ -4,117 +4,122 @@
 
 namespace aruwsrc::chassis
 {
-void ChassisAutoNavController::initialize(Position initialPos)
+void ChassisAutoNavController::initialize()
 {
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
+    lastSetPoint = Position(worldToChassis.getX(), worldToChassis.getY(), 0);
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
-    xRamp.reset(initialPos.x());
-    yRamp.reset(initialPos.y());
 
     path.resetPath();
-    path.pushPoint(Position(0, 0, 0));
-    path.pushPoint(Position(0.75, 0, 0));
-    path.pushPoint(Position(0.75, 0.75, 0));
-    path.pushPoint(Position(0, 0.75, 0));
-    path.pushPoint(Position(0, 0.05, 0));
+    path.pushPoint(Position(0.0, 0.0, 0));  // sorry about this lol
+    path.pushPoint(Position(0.1, 0.0, 0));  // somehow this felt like less effort than using loops..
+    path.pushPoint(Position(0.2, 0.0, 0));
+    path.pushPoint(Position(0.3, 0.0, 0));
+    path.pushPoint(Position(0.4, 0.0, 0));
+    path.pushPoint(Position(0.5, 0.0, 0));
+    path.pushPoint(Position(0.6, 0.0, 0));
+    path.pushPoint(Position(0.7, 0.0, 0));
+    path.pushPoint(Position(0.7, 0.0, 0));
+    path.pushPoint(Position(0.7, 0.1, 0));
+    path.pushPoint(Position(0.7, 0.2, 0));
+    path.pushPoint(Position(0.7, 0.3, 0));
+    path.pushPoint(Position(0.7, 0.4, 0));
+    path.pushPoint(Position(0.7, 0.5, 0));
+    path.pushPoint(Position(0.7, 0.6, 0));
+    path.pushPoint(Position(0.7, 0.7, 0));
+    path.pushPoint(Position(0.6, 0.7, 0));
+    path.pushPoint(Position(0.5, 0.7, 0));
+    path.pushPoint(Position(0.4, 0.7, 0));
+    path.pushPoint(Position(0.3, 0.7, 0));
+    path.pushPoint(Position(0.2, 0.7, 0));
+    path.pushPoint(Position(0.1, 0.7, 0));
+    path.pushPoint(Position(0.0, 0.7, 0));
+    path.pushPoint(Position(0.0, 0.6, 0));
+    path.pushPoint(Position(0.0, 0.5, 0));
+    path.pushPoint(Position(0.0, 0.4, 0));
+    path.pushPoint(Position(0.0, 0.3, 0));
+    path.pushPoint(Position(0.0, 0.2, 0));
+    // path.pushPoint(Position(0.0, 0.1, 0));
+    // path.pushPoint(Position(0.0, 0.0, 0));
 }
 
-float debugx = 0;
-float debugy = 0;
+float closest;
 float mag = -1;
-Position debugSetPoint = Position(0, 0, 0);
-float desiredVelocityX, desiredVelocityY;
-float dumbFuckConstant;
+Position currentPos = Position(0, 0, 0);
+Position setpoint = Position(0, 0, 0);
+Vector moveVector(-1, -1, 0);
+Vector chassisFrameMoveVector(0, 0, 0);
+
 void ChassisAutoNavController::runController(
     const uint32_t dt,
-    const Position currentPos,
     const float maxWheelSpeed,
-    const tap::communication::serial::RefSerialData::Rx::GameType& gametype,
     const bool movementEnabled,
-    const bool beybladeEnabled,
-    const float chassisYawAngle)
+    const bool beybladeEnabled)
 {
-    controller_called = true;
-    Position setPoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER);
-    debugSetPoint = setPoint;
+    currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
+    setpoint = calculateSetPoint(currentPos, INTERPOLATION_PARAMETER, movementEnabled);
     float rampTarget = 0.0;
-    float x = 0.0f;
-    float y = 0.0f;
 
-    if (((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
-                                 tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME)) &&
-         !path.empty() && visionCoprocessor.isCvOnline() && movementEnabled) ||
-        true)
+    moveVector = Vector(0, 0, 0);
+
+    Vector posError = setpoint - currentPos;
+    mag = posError.magnitude();
+
+    float desiredSpeed = path.parameterToSpeed(0);  // todo: need to get parameter here somehow
+
+    if (mag > 0.01)
     {
-        float currentX = currentPos.x();
-        float currentY = currentPos.y();
-
-        xRamp.setTarget(setPoint.x());
-        yRamp.setTarget(setPoint.y());
-
-        xRamp.update(POS_RAMP_RATE);
-        yRamp.update(POS_RAMP_RATE);
-
-        desiredVelocityX = setPoint.x() - currentX;
-        desiredVelocityY = setPoint.y() - currentY;
-        mag = sqrtf(pow(desiredVelocityX, 2) + pow(desiredVelocityY, 2));
-
-        if (mag > 0.01)
-        {
-            dumbFuckConstant = config.beybladeTranslationalSpeedMultiplier;
-            x = desiredVelocityX / mag * config.beybladeTranslationalSpeedMultiplier *
-                maxWheelSpeed;
-            y = desiredVelocityY / mag * config.beybladeTranslationalSpeedMultiplier *
-                maxWheelSpeed;
-        }
+        moveVector = posError / INTERPOLATION_PARAMETER * desiredSpeed * chassis.mpsToRpm(1);
     }
-    debugx = x;
-    debugy = y;
 
     // float x = xPid.runControllerDerivateError(xRamp.getValue() - currentX, dt) *
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed; float y =
     // yPid.runControllerDerivateError(yRamp.getValue() - currentY, dt) *
     // config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    // if ((int(gametype) == 0 || (drivers.refSerial.getGameData().gameStage ==
-    //                             tap::communication::serial::RefSerial::Rx::GameStage::IN_GAME))
-    //                             &&
-    //     beybladeEnabled)
-    // {
-    //     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
-    //     // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
-    //     // maxWheelSpeed)
-    //     const float translationalSpeedThreshold =
-    //         config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-    //         config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+    // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
+    // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
+    // maxWheelSpeed)
+    const float translationalSpeedThreshold =
+        config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+        config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    //     rampTarget =
-    //         rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+    rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
-    //     // reduce the beyblade rotation when translating to allow for better translational speed
-    //     // (otherwise it is likely that you will barely move unless
-    //     // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-    //     if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
-    //     {
-    //         rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
-    //     }
-    // }
+    // reduce the beyblade rotation when translating to allow for better translational speed
+    // (otherwise it is likely that you will barely move unless
+    // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+    if (moveVector.magnitude() > translationalSpeedThreshold)
+    {
+        rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+    }
 
-    // rotateSpeedRamp.setTarget(rampTarget);
+    rotateSpeedRamp.setTarget(rampTarget);
     // // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-    // rotateSpeedRamp.update(config.beybladeRampRate);
-    // float r = rotateSpeedRamp.getValue();
+    rotateSpeedRamp.update(config.beybladeRampRate);
+    float r = rotateSpeedRamp.getValue();
 
-    // Rotate X and Y depending on turret angle
-    tap::algorithms::rotateVector(&x, &y, -chassisYawAngle);
+    // convert world frame translation to chassis frame
+    chassisFrameMoveVector = worldToChassis.apply(moveVector);
 
     // set outputs
-    chassis.setDesiredOutput(x, y, 0);
+    chassis.setDesiredOutput(
+        chassisFrameMoveVector.x(),
+        chassisFrameMoveVector.y(),
+        beybladeEnabled ? r : 0);
 }
-float closest;
-Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter)
+
+Position ChassisAutoNavController::calculateSetPoint(
+    Position current,
+    float lookaheadDistance,
+    bool movementEnabled)
 {
+    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    {
+        return lastSetPoint;
+    }
+
     if (path.empty())
     {
         return current;
@@ -127,18 +132,18 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     }
 
     closest = path.positionToClosestParameter(current);
-    
-    Position lookahead = path.parametertoPosition(closest + interpolationParameter);
+
+    Position lookaheadPos = path.parametertoPosition(closest + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return quadraticBezierInterpolation(
-            lookahead,
+            lookaheadPos,
             current,
             lastSetPoint,
             (float)pathTransitionTimeout.timeRemaining() / PATH_TRANSITION_TIME_MILLIS);
 
-    lastSetPoint = lookahead;
-    return lookahead;
+    lastSetPoint = lookaheadPos;
+    return lookaheadPos;
 }
 
 }  // namespace aruwsrc::chassis

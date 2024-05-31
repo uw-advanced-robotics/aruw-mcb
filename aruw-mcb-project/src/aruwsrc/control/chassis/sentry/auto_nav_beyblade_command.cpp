@@ -35,6 +35,10 @@ using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;
 
+using GameType = RefSerialData::Rx::GameType;
+using GameStage = RefSerialData::Rx::GameStage;
+using GameData = RefSerialData::Rx::GameData;
+
 namespace aruwsrc
 {
 namespace chassis
@@ -42,72 +46,48 @@ namespace chassis
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
-    // const aruwsrc::control::turret::TurretMotor& yawMotor,
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
-    // tap::algorithms::SmoothPidConfig& pidConfig,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
-    //   yawMotor(yawMotor),
       visionCoprocessor(visionCoprocessor),
       transformerInterface(transformerInterface),
       config(config),
       autoNavOnlyInGame(autoNavOnlyInGame),
-    //   xPid(pidConfig),
-    //   yPid(pidConfig),
-      autoNavController(chassis, visionCoprocessor.getPath(), visionCoprocessor, drivers, config)
+      autoNavController(
+          chassis,
+          visionCoprocessor.getPath(),
+          visionCoprocessor,
+          drivers,
+          transformerInterface.getWorldToChassis(),
+          config)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
     addSubsystemRequirement(&chassis);
 }
 
-// Resets ramp
-void AutoNavBeybladeCommand::initialize()
-{
-// #ifdef ENV_UNIT_TESTS
-//     rotationDirection = 1;
-// #else
-//     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
-// #endif
-//     rotateSpeedRamp.reset(chassis.getDesiredRotation());
-//     xRamp.reset(odometryInterface.getCurrentLocation2D().getX());
-//     yRamp.reset(odometryInterface.getCurrentLocation2D().getY());
-    float x = transformerInterface.getWorldToChassis().getX();
-    float y = transformerInterface.getWorldToChassis().getY();
-    autoNavController.initialize(Position(x, y, 0));
-}
+void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavBeybladeCommand::execute()
 {
-    command_scheduled = true;
-    // if (!yawMotor.isOnline()) return;
-
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     prevTime = currTime;
-    // Gets current chassis yaw angle
-    float currentX = transformerInterface.getWorldToChassis().getX();
-    float currentY = transformerInterface.getWorldToChassis().getY();
-    float chassisYawAngle = transformerInterface.getWorldToChassis().getYaw();
 
-    const float maxWheelSpeed = 10000;
-    // const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-        // drivers.refSerial.getRefSerialReceivingData(),
-        // drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
-    
-    const tap::communication::serial::RefSerialData::Rx::GameType& gametype =
-        drivers.refSerial.getGameData().gameType;
+    const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers.refSerial.getRefSerialReceivingData(),
+        drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
-    autoNavController.runController(
-        currTime - prevTime,
-        Position(currentX, currentY, 0),
-        maxWheelSpeed,
-        gametype,
-        movementEnabled,
-        beybladeEnabled,
-        chassisYawAngle);
+    const GameData gameData = drivers.refSerial.getGameData();
+
+    if (!autoNavOnlyInGame ||
+        (gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME)))
+    {
+        autoNavController
+            .runController(currTime - prevTime, maxWheelSpeed, movementEnabled, beybladeEnabled);
+    }
 }
 
 void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }

@@ -25,13 +25,13 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
-#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -43,16 +43,12 @@ class HolonomicChassisSubsystem;
 class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
-    // float POS_RAMP_RATE = 0.0008f;
-
     AutoNavBeybladeCommand(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        // const aruwsrc::control::turret::TurretMotor& yawMotor,
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
-        // const tap::algorithms::SmoothPidConfig& pidConfig,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -70,32 +66,22 @@ public:
     const char* getName() const override { return "autonav beyblade"; }
 
 private:
-    // float rotationDirection;
-
-    // tap::algorithms::Ramp rotateSpeedRamp;
-    // tap::algorithms::Ramp xRamp;
-    // tap::algorithms::Ramp yRamp;
-
     tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
-    // const aruwsrc::control::turret::TurretMotor& yawMotor;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface;
 
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
 
     bool autoNavOnlyInGame;
-    // tap::algorithms::SmoothPid xPid;
-    // tap::algorithms::SmoothPid yPid;
 
     uint32_t prevTime = 0;
 
-    bool beybladeEnabled = true;
+    bool beybladeEnabled = false;
     bool movementEnabled = true;
 
     aruwsrc::chassis::ChassisAutoNavController autoNavController;
 
-    bool command_scheduled = false;
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis

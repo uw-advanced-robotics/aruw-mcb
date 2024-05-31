@@ -15,10 +15,6 @@
 namespace aruwsrc::chassis
 {
 
-static constexpr float POS_RAMP_RATE = 0.0008f;
-static constexpr float INTERPOLATION_PARAMETER = 0.75f;
-static constexpr uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
-
 class ChassisAutoNavController
 {
 public:
@@ -28,27 +24,30 @@ public:
         aruwsrc::algorithms::AutoNavPath& path,
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         tap::Drivers& drivers,
+        const Transform& worldToChassis,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config)
         : chassis(chassis),
           path(path),
           lastSetPoint(Position(-1, -1, 0)),
           visionCoprocessor(visionCoprocessor),
           drivers(drivers),
+          worldToChassis(worldToChassis),
           config(config)
     {
     }
 
-    void initialize(Position initialPos);
+    void initialize();
+
     void runController(
         const uint32_t dt,
-        const Position currentPos,
         const float maxWheelSpeed,
-        const tap::communication::serial::RefSerialData::Rx::GameType& gametype,
         const bool movementEnabled,
-        const bool beybladeEnabled,
-        const float chassisYawAngle);
+        const bool beybladeEnabled);
 
-    Position calculateSetPoint(Position current, float interpolationParameter);
+    Position calculateSetPoint(
+        Position current,
+        float interpolationParameter,
+        bool movementEnabled);
 
     static inline Position quadraticBezierInterpolation(Position a, Position b, Position c, float t)
     {
@@ -65,15 +64,16 @@ public:
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 
+    const Transform& worldToChassis;
+
     const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
-    tap::algorithms::Ramp xRamp;
-    tap::algorithms::Ramp yRamp;
 
-    bool controller_called = false;  // DEBUG
+    float INTERPOLATION_PARAMETER = 0.2f;
+    uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
 };
 }  // namespace aruwsrc::chassis
 
