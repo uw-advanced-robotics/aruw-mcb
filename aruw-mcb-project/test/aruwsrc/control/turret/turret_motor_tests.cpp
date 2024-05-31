@@ -370,8 +370,8 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
     TurretMotorConfig mc = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
     TurretMotor tm(&motor, mc);
@@ -399,6 +399,7 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
 
         EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(setpoint), 1E-3);
 
+        EXPECT_NEAR(expectedErr, tm.getValidMinError(Angle(setpoint), Angle(measured)), 1E-3);
         EXPECT_NEAR(expectedErr, tm.getValidChassisMeasurementError(), 1E-3);
     }
 }

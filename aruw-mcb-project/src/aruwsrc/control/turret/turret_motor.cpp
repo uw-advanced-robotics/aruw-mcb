@@ -20,6 +20,7 @@
 #include "turret_motor.hpp"
 
 #include <cassert>
+#include <iomanip>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -47,7 +48,8 @@ void TurretMotor::updateMotorAngle()
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
 
-        if (startEncoderOffset == INT16_MIN)
+        if (startEncoderOffset ==
+            INT16_MIN)  // startEncoderOffset itself can prolly just be removed
         {
             int encoderDiff =
                 static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
@@ -95,7 +97,7 @@ void TurretMotor::updateMotorAngle()
         lastUpdatedEncoderValue = config.startEncoderValue;
         startEncoderOffset = INT16_MIN;
 
-        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
+        chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
 }
 
@@ -150,8 +152,12 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         if (limitStatus != 0)
             return measurement.minDifference(setpoint);  // measurement is somehow out of bounds
 
-        return (Angle(setpoint.getWrappedValue()) - config.minAngle).getUnwrappedValue() -
-               (Angle(measurement.getWrappedValue()) - config.minAngle).getUnwrappedValue();
+        std::cout << std::setprecision(10) << setpoint.getWrappedValue() << "  "
+                  << measurement.getWrappedValue() << "\n";
+
+        return ((setpoint.getNormalized() - config.minAngle) -
+                (measurement.getNormalized() - config.minAngle))
+            .getUnwrappedValue();
     }
     else
     {

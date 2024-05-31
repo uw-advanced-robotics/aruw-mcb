@@ -48,11 +48,12 @@ void WrappedFloat::operator+=(const WrappedFloat& other)
     assertBoundsEqual(other);
 
     this->wrapped += other.wrapped;
-    if (this->wrapped > this->upperBound)
-    {
-        this->wrapped -= (this->upperBound - this->lowerBound);
-        this->revolutions++;
-    }
+    // if (this->wrapped > this->upperBound)
+    // {
+    //     this->wrapped -= (this->upperBound - this->lowerBound);
+    //     this->revolutions++;
+    // }
+    wrapValue();
     this->revolutions += other.revolutions;
 }
 
@@ -61,11 +62,12 @@ void WrappedFloat::operator-=(const WrappedFloat& other)
     assertBoundsEqual(other);
 
     this->wrapped -= other.wrapped;
-    if (this->wrapped < this->lowerBound)
-    {
-        this->wrapped += (this->upperBound - this->lowerBound);
-        this->revolutions--;
-    }
+    // if (this->wrapped < this->lowerBound)
+    // {
+    //     this->wrapped += (this->upperBound - this->lowerBound);
+    //     this->revolutions--;
+    // }
+    wrapValue();
     this->revolutions -= other.revolutions;
 }
 
@@ -119,6 +121,14 @@ float WrappedFloat::minDifference(const WrappedFloat& other) const
                                                               : difference_around;
 }
 
+float WrappedFloat::differenceThroughRange(
+    const WrappedFloat& other,
+    const WrappedFloat& lowerBound,
+    const WrappedFloat& upperBound) const
+{
+    //
+}
+
 float WrappedFloat::minDifference(const float& unwrappedValue) const
 {
     return minDifference(WrappedFloat(unwrappedValue, this->lowerBound, this->upperBound));
@@ -128,26 +138,28 @@ WrappedFloat WrappedFloat::minInterpolate(const WrappedFloat& other, const float
 {
     assertBoundsEqual(other);
 
-    float halfInterval = (this->upperBound - other.lowerBound) / 2;
-    float rawInterpolation = this->wrapped * alpha + other.wrapped * (1 - alpha);
+    return *this + (minDifference(other) * alpha);
 
-    if (abs(this->wrapped - other.wrapped) <= halfInterval)
-    {
-        return WrappedFloat(rawInterpolation, this->lowerBound, this->upperBound);
-    }
-    else
-    {
-        if (rawInterpolation > this->lowerBound + halfInterval)
-            return WrappedFloat(
-                rawInterpolation - halfInterval,
-                this->lowerBound,
-                this->upperBound);
-        else
-            return WrappedFloat(
-                rawInterpolation + halfInterval,
-                this->lowerBound,
-                this->upperBound);
-    }
+    // float halfInterval = (this->upperBound - other.lowerBound) / 2;
+    // float rawInterpolation = this->wrapped * alpha + other.wrapped * (1 - alpha);
+
+    // if (abs(this->wrapped - other.wrapped) <= halfInterval)
+    // {
+    //     return WrappedFloat(rawInterpolation, this->lowerBound, this->upperBound);
+    // }
+    // else
+    // {
+    //     if (rawInterpolation > this->lowerBound + halfInterval)
+    //         return WrappedFloat(
+    //             rawInterpolation - halfInterval,
+    //             this->lowerBound,
+    //             this->upperBound);
+    //     else
+    //         return WrappedFloat(
+    //             rawInterpolation + halfInterval,
+    //             this->lowerBound,
+    //             this->upperBound);
+    // }
 }
 
 void WrappedFloat::shiftBounds(const float shiftMagnitude)
@@ -168,7 +180,7 @@ void WrappedFloat::wrapValue()
     {
         this->wrapped = lowerBound + fmodf(oldValue - lowerBound, upperBound - lowerBound);
     }
-    this->revolutions += (int)((oldValue - lowerBound) / (upperBound - lowerBound));
+    this->revolutions += floor((oldValue - lowerBound) / (upperBound - lowerBound));
 }
 
 float WrappedFloat::limitValue(
@@ -195,12 +207,7 @@ float WrappedFloat::limitValue(
     {
         return valueToLimit.getWrappedValue();
     }
-    if ((min.getWrappedValue() < max.getWrappedValue() &&
-         (valueToLimit.getWrappedValue() > max.getWrappedValue() ||
-          valueToLimit.getWrappedValue() < min.getWrappedValue())) ||
-        (min.getWrappedValue() > max.getWrappedValue() &&
-         valueToLimit.getWrappedValue() > max.getWrappedValue() &&
-         valueToLimit.getWrappedValue() < min.getWrappedValue()))
+    if (!withinRange(valueToLimit, min, max))
     {
         // valueToLimit is not "within" min and max
         float targetMinDifference = valueToLimit.minDifference(min);
