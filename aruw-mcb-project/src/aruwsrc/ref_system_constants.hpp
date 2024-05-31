@@ -19,9 +19,14 @@
 
 #include <stdint.h>
 
+#ifndef REF_SYSTEM_CONSTANTS_HPP_
+#define REF_SYSTEM_CONSTANTS_HPP_
+
 namespace aruwsrc::constants
 {
 static constexpr uint16_t HEAT_COST_42MM = 100;
 static constexpr uint16_t HEAT_COST_17MM = 10;
 
 }  // namespace aruwsrc::constants
+
+#endif // REF_SYSTEM_CONSTANTS_HPP_
