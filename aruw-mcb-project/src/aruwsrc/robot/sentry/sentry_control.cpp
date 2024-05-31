@@ -35,6 +35,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -62,8 +63,6 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -434,14 +433,10 @@ SentryBallisticsSolver turretLeftSolver(
 aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
     *drivers(),
     chassis,
-    // turretMajorYawMotor,
     drivers()->visionCoprocessor,
     transformAdapter,
     aruwsrc::sentry::chassis::beybladeConfig,
-    // aruwsrc::control::turret::turretMajor::chassisFrameController::YAW_POS_PID_CONFIG, // DUMMY DUMMY
-    false
-    );
-
+    false);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
