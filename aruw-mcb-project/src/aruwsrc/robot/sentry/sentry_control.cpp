@@ -20,6 +20,7 @@
 #if defined(TARGET_SENTRY_HYDRA)
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
@@ -30,6 +31,7 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -38,6 +40,9 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
+#include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -66,12 +71,14 @@
 using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
+using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::sentry::chassis;
+using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret::sentry;
@@ -555,13 +562,35 @@ aruwsrc::control::launcher::
         turretLeft::barrelID);
 
 // Agitator commands (turret left)
-MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
+ConstantVelocityAgitatorCommand turretLeftRotateAgitator(
+    turretLeftAgitator,
+    constants::AGITATOR_ROTATE_CONFIG);
 UnjamIntegralCommand turretLeftUnjamAgitator(turretLeftAgitator, constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     *drivers(),
     turretLeftAgitator,
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernorTurretLeft(
+    *drivers(),
+    turretLeft::barrelID,
+    constants::HEAT_LIMIT_BUFFER);
+
+// TODO:: see if this actually does stuff, test later.
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
+    drivers()->refSerial,
+    turretLeft::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
+
+GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -582,7 +611,7 @@ aruwsrc::control::launcher::
         turretRight::barrelID);
 
 // Agitator commands (turret Right)
-MoveIntegralCommand turretRightRotateAgitator(
+ConstantVelocityAgitatorCommand turretRightRotateAgitator(
     turretRightAgitator,
     constants::AGITATOR_ROTATE_CONFIG);
 UnjamIntegralCommand turretRightUnjamAgitator(
@@ -593,6 +622,25 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightAgitator,
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
+
+// rotates agitator with heat limiting applied
+HeatLimitGovernor heatLimitGovernorTurretRight(
+    *drivers(),
+    turretRight::barrelID,
+    constants::HEAT_LIMIT_BUFFER);
+
+RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
+    drivers()->refSerial,
+    turretRight::barrelID);
+
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
+
+GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftUp(
@@ -616,8 +664,8 @@ HoldCommandMapping leftDown(
 HoldRepeatCommandMapping rightUp(
     drivers(),
     {
-        &turretLeftRotateAndUnjamAgitator,
-        &turretRightRotateAndUnjamAgitator,
+        &turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
+        &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
     },
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
@@ -686,6 +734,8 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    turretLeftRotateAgitator.enableConstantRotation(true);
+    turretRightRotateAgitator.enableConstantRotation(true);
 }
 
 /* register io mappings here ------------------------------------------------*/
