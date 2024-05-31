@@ -68,7 +68,7 @@ public:
         Module* moduleLeftBack,
         Module* moduleRightBack,
         const float forwardMatrixArray[24],
-        communication::can::capbank::CapacitorBank* capacitorBank = nullptr);
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 

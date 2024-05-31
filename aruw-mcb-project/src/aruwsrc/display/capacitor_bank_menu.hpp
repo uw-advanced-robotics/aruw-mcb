@@ -42,7 +42,7 @@ class CapacitorBankMenu
 public:
     CapacitorBankMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
-        communication::can::capbank::CapacitorBank* capacitorBank);
+        can::capbank::CapacitorBank* capacitorBank);
     void draw() override;
 
     void update() override;
@@ -56,10 +56,10 @@ public:
 private:
     static constexpr int TURRET_MCB_MENU_ID = 13;
 
-    communication::can::capbank::CapacitorBank* capacitorBank;
+    can::capbank::CapacitorBank* capacitorBank;
 
     int milliVolts = 0, milliAmps = 0, powerLimit = 0, availableEnergy = 0;
-    communication::can::capbank::State state;
+    can::capbank::State state;
 
     bool changed;
 };

@@ -87,7 +87,7 @@ SplashScreen::SplashScreen(
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
     can::TurretMCBCanComm* turretMCBCanCommBus2,
-    communication::can::capbank::CapacitorBank* capacitorBank)
+    can::capbank::CapacitorBank* capacitorBank)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),

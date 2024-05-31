@@ -45,7 +45,7 @@ public:
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
-        communication::can::capbank::CapacitorBank* capacitorBank);
+        can::capbank::CapacitorBank* capacitorBank);
 
     void draw() override;
 
@@ -65,7 +65,7 @@ private:
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
-    communication::can::capbank::CapacitorBank *capacitorBank;
+    can::capbank::CapacitorBank *capacitorBank;
 };
 }  // namespace display
 }  // namespace aruwsrc

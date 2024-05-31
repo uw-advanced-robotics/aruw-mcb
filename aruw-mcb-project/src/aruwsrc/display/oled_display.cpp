@@ -33,7 +33,7 @@ OledDisplay::OledDisplay(
     serial::VisionCoprocessor *visionCoprocessor,
     can::TurretMCBCanComm *turretMCBCanCommBus1,
     can::TurretMCBCanComm *turretMCBCanCommBus2,
-    communication::can::capbank::CapacitorBank* capacitorBank)
+    can::capbank::CapacitorBank* capacitorBank)
     : display(),
       viewStack(&display),
       buttonHandler(drivers),

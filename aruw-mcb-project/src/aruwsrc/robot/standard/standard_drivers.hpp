@@ -75,7 +75,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    communication::can::capbank::CapacitorBank capacitorBank;
+    can::capbank::CapacitorBank capacitorBank;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

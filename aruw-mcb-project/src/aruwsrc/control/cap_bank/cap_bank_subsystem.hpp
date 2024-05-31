@@ -39,7 +39,7 @@ class CapBankSubsystem : public tap::control::Subsystem
 public:
     CapBankSubsystem(
         tap::Drivers* drivers,
-        aruwsrc::communication::can::capbank::CapacitorBank& capacitorBank);
+        can::capbank::CapacitorBank& capacitorBank);
 
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
@@ -47,7 +47,7 @@ public:
     void toggleCapacitors() { this->enabled = !this->enabled; }
     void toggleDischarge() { this->enabled = false; }
 
-    void changeSprintMode(aruwsrc::communication::can::capbank::SprintMode mode);
+    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode);
 
     void refreshSafeDisconnect() override
     {
@@ -57,7 +57,7 @@ public:
     void refresh() override;
 
 private:
-    aruwsrc::communication::can::capbank::CapacitorBank& capacitorBank;
+    can::capbank::CapacitorBank& capacitorBank;
 
     bool enabled;
 

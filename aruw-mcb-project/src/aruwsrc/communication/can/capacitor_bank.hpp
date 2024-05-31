@@ -26,7 +26,7 @@
 
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::communication::can::capbank
+namespace aruwsrc::can::capbank
 {
 const uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
@@ -77,21 +77,21 @@ public:
 
     bool isEnabled() const {
         return 
-            this->getState() == communication::can::capbank::State::SAFE ||
-            this->getState() == communication::can::capbank::State::CHARGE ||
-            this->getState() == communication::can::capbank::State::CHARGE_DISCHARGE ||
-            this->getState() == communication::can::capbank::State::DISCHARGE ||
-            this->getState() == communication::can::capbank::State::BATTERY_OFF;
+            this->getState() == State::SAFE ||
+            this->getState() == State::CHARGE ||
+            this->getState() == State::CHARGE_DISCHARGE ||
+            this->getState() == State::DISCHARGE ||
+            this->getState() == State::BATTERY_OFF;
     }
 
     bool isDisabled() const {
         return 
-            this->getState() == communication::can::capbank::State::RESET ||
-            this->getState() == communication::can::capbank::State::DISABLED;
+            this->getState() == State::RESET ||
+            this->getState() == State::DISABLED;
     }
 
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };
-    SprintMode getSprinting() const { return this->sprint; };
+    bool isSprinting() const { return this->sprint == SprintMode::SPRINT; };
 
 private:
     const float capacitance;
@@ -103,10 +103,10 @@ private:
     float voltage = 0;
     State state = State::UNKNOWN;
 
-    bool started = false;  // Set to true once any message from the cap bank is received
+    bool connected = false;  // Set to true once any message from the cap bank is received
 
     SprintMode sprint = SprintMode::REGULAR;
 };
-}  // namespace aruwsrc::communication::can::capbank
+}  // namespace aruwsrc::can::capbank
 
 #endif  // CAPACITOR_BANK_HPP_

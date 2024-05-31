@@ -116,7 +116,7 @@ public:
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
         const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
         const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
-        const aruwsrc::communication::can::capbank::CapacitorBank *capBank = nullptr);
+        const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
 

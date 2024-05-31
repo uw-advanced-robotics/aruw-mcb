@@ -40,7 +40,7 @@ public:
 
 public:
     display::OledDisplay oledDisplay;
-    communication::can::capbank::CapacitorBank capacitorBank;
+    can::capbank::CapacitorBank capacitorBank;
 
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed

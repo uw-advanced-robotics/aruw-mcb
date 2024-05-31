@@ -57,7 +57,7 @@ public:
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
-        communication::can::capbank::CapacitorBank* capacitorBank);
+        can::capbank::CapacitorBank* capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -87,7 +87,7 @@ private:
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
-    communication::can::capbank::CapacitorBank *capacitorBank;
+    can::capbank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();

@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-namespace aruwsrc::communication::can::capbank
+namespace aruwsrc::can::capbank
 {
 CapacitorBank::CapacitorBank(
     tap::Drivers* drivers,
@@ -60,10 +60,10 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
         }
 
         {
-            if (!this->started && this->state == State::RESET)
+            if (!this->connected && this->state == State::RESET)
             {
                 this->start();
-                this->started = true;
+                this->connected = true;
             }
         }
     }
@@ -72,7 +72,7 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
 void CapacitorBank::initialize()
 {
     this->attachSelfToRxHandler();
-    this->started = false;
+    this->connected = false;
 }
 
 void CapacitorBank::start() const
@@ -100,4 +100,4 @@ void CapacitorBank::setPowerLimit(uint16_t watts)
     message.data[3] = watts >> 8;  // Should always be zero or we are drawing 250+ watts.
     this->drivers->can.sendMessage(this->canBus, message);
 }
-}  // namespace aruwsrc::communication::can::capbank
+}  // namespace aruwsrc::can::capbank

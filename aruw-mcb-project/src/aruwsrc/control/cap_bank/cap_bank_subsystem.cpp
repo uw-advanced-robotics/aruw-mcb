@@ -23,14 +23,14 @@ namespace aruwsrc::control::cap_bank
 {
 CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
-    aruwsrc::communication::can::capbank::CapacitorBank& capacitorBank)
+    can::capbank::CapacitorBank& capacitorBank)
     : Subsystem(drivers),
       capacitorBank(capacitorBank)
 {
-    capacitorBank.setSprinting(communication::can::capbank::SprintMode::REGULAR);
+    capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
 }
 
-void CapBankSubsystem::changeSprintMode(communication::can::capbank::SprintMode mode)
+void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
 {
     this->capacitorBank.setSprinting(mode);
 }
@@ -43,7 +43,7 @@ void CapBankSubsystem::refresh()
 
         if (!this->enabled && !this->capacitorBank.isDisabled())
         {
-            this->capacitorBank.setSprinting(communication::can::capbank::SprintMode::REGULAR);
+            this->capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
             this->capacitorBank.stop();
         } 
         else if (this->enabled && !this->capacitorBank.isEnabled())

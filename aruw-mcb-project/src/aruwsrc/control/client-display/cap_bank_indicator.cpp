@@ -29,7 +29,7 @@ namespace aruwsrc::control::client_display
 {
 CapBankIndicator::CapBankIndicator(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::communication::can::capbank::CapacitorBank *capBank)
+    const can::capbank::CapacitorBank *capBank)
     : HudIndicator(refSerialTransmitter),
       capBank(capBank)
 {
@@ -55,7 +55,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
 
     if (capBank != nullptr)
     {
-        if (capBank->getState() != aruwsrc::communication::can::capbank::State::UNKNOWN)
+        if (capBank->getState() != can::capbank::State::UNKNOWN)
         {
             capBankGraphics.graphicData[0].operation =
                 capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
@@ -91,31 +91,31 @@ modm::ResumableResult<bool> CapBankIndicator::update()
 
             // Update the background status
             switch(capBank->getState()) {
-                case communication::can::capbank::State::RESET:
+                case can::capbank::State::RESET:
                     strncpy(capBankTextGraphic.msg, "RST ", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
-                case communication::can::capbank::State::SAFE:
+                case can::capbank::State::SAFE:
                     strncpy(capBankTextGraphic.msg, "SAFE", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
-                case communication::can::capbank::State::CHARGE:
+                case can::capbank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case communication::can::capbank::State::CHARGE_DISCHARGE:
+                case can::capbank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "CHDS", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case communication::can::capbank::State::DISCHARGE:
+                case can::capbank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "DSCH", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case communication::can::capbank::State::BATTERY_OFF:
+                case can::capbank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
-                case communication::can::capbank::State::DISABLED:
+                case can::capbank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg, "OFF", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;

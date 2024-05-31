@@ -60,7 +60,7 @@ public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        communication::can::capbank::CapacitorBank* capacitorBank = nullptr);
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().

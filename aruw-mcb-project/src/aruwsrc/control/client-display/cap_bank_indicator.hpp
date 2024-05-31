@@ -50,7 +50,7 @@ public:
      */
     CapBankIndicator(
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::communication::can::capbank::CapacitorBank *capBank);
+        const can::capbank::CapacitorBank *capBank);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -79,7 +79,7 @@ private:
     // minimum displayed voltage of the supercapacitors (minimum usable voltage)
     static constexpr uint16_t VOLTAGE_SQUARED_MIN = pow(8, 2);
 
-    const aruwsrc::communication::can::capbank::CapacitorBank *capBank;
+    const can::capbank::CapacitorBank *capBank;
 
     /**
      * Two graphics that represent the Capacitor Bank charge. The first graphic is the background

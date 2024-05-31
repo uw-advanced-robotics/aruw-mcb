@@ -48,7 +48,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
     const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
-    const aruwsrc::communication::can::capbank::CapacitorBank *capBank)
+    const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),

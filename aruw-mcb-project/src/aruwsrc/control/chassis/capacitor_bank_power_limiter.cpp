@@ -27,7 +27,7 @@ namespace aruwsrc::chassis
 
 CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    aruwsrc::communication::can::capbank::CapacitorBank *capacitorBank):
+    can::capbank::CapacitorBank *capacitorBank):
 
     currentSensor(currentSensor),
     capacitorBank(capacitorBank) {
@@ -35,7 +35,7 @@ CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
     };
 
 float CapacitorSelectingCurrentSensor::getCurrentMa() const {
-    if (this->capacitorBank == nullptr || this->capacitorBank->getState() == communication::can::capbank::State::UNKNOWN)
+    if (this->capacitorBank == nullptr || this->capacitorBank->getState() == can::capbank::State::UNKNOWN)
     {
         return currentSensor->getCurrentMa();
     }
@@ -46,7 +46,7 @@ float CapacitorSelectingCurrentSensor::getCurrentMa() const {
 CapBankPowerLimiter::CapBankPowerLimiter(
     const tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    aruwsrc::communication::can::capbank::CapacitorBank *capacitorBank,
+    aruwsrc::can::capbank::CapacitorBank *capacitorBank,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
@@ -62,9 +62,6 @@ CapBankPowerLimiter::CapBankPowerLimiter(
 {
 }
 
-float error = 0.0f;
-float currentIntegratorCopy = 0.0f;
-
 float CapBankPowerLimiter::getPowerLimitRatio()
 {
     if (drivers->refSerial.getRefSerialReceivingData() &&
@@ -77,37 +74,31 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     float fallback = tap::control::chassis::PowerLimiter::getPowerLimitRatio();
     if (this->capacitorBank == nullptr ||
         this->capacitorBank->isDisabled() ||
-        this->capacitorBank->getState() == communication::can::capbank::State::UNKNOWN ||
-        this->capacitorBank->getState() == communication::can::capbank::State::SAFE)
+        this->capacitorBank->getState() == can::capbank::State::UNKNOWN ||
+        this->capacitorBank->getState() == can::capbank::State::SAFE)
     {
         return fallback;
     }
 
     float setpoint = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
 
-    if (this->capacitorBank->getSprinting() == communication::can::capbank::SprintMode::SPRINT) {
+    if (this->capacitorBank->isSprinting()) {
         setpoint = 6; // TODO: get this based on a table or something
     }
 
     float measured = this->capacitorBank->getCurrent();
     
-    error = setpoint - measured;
+    float error = setpoint - measured;
 
     const float K_I = 0.0025;
-    this->currentIntegrator += K_I * error;
-    
     const float K_P = 0.005;
 
-    currentIntegratorCopy = this->currentIntegrator;
-
+    this->currentIntegrator += K_I * error;
     this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 1.0f);
 
     float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
 
-    const float LOW_V_RAMP_RANGE = 3.0f;
-    const float MIN_CAP_V = 10.0f;
-
-    float lowVoltageRamp = std::clamp((this->capacitorBank->getVoltage() - MIN_CAP_V) / LOW_V_RAMP_RANGE, 0.0f, 1.0f);
+    float lowVoltageRamp = std::clamp((this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / VOLTAGE_RAMPDOWN_RANGE, 0.0f, 1.0f);
 
     return controlFractionOutput * lowVoltageRamp;
 }

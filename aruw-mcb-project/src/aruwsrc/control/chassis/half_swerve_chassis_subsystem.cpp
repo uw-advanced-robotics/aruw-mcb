@@ -30,7 +30,7 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     Module* moduleTwo,
     float wheelbaseRadius,
     const float forwardMatrixArray[12],
-    communication::can::capbank::CapacitorBank* capacitorBank)
+    can::capbank::CapacitorBank* capacitorBank)
     : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),
