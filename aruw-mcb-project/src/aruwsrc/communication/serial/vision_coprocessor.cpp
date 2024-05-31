@@ -122,8 +122,9 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     {
         return true;
     }
+    // clears path and denotes that the path has changed
     path.resetPath();
-    for (uint32_t i = 0; i < setpointData.sequence_num; i++)
+    for (uint32_t i = 0; i < setpointData.num_setpoints; i++)
     {
         path.pushPoint(Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
     }

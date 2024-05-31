@@ -115,8 +115,6 @@ void ChassisAutoNavController::runController(
 float closest;
 Position ChassisAutoNavController::calculateSetPoint(Position current, float interpolationParameter)
 {
-    // TODO: account for and deal with the case of a path reset
-
     if (path.empty())
     {
         return current;
@@ -126,6 +124,8 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     {
         path.togglePathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
+        path.pushFront(current);
+        path.pushFront(lastSetPoint);
     }
 
     closest = path.positionToClosestParameter(current);
