@@ -147,6 +147,7 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
+        std::cout << "!!\n";
         int limitStatus;
         WrappedFloat::limitValue(measurement, config.minAngle, config.maxAngle, &limitStatus);
         if (limitStatus != 0)
@@ -155,9 +156,10 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         std::cout << std::setprecision(10) << setpoint.getWrappedValue() << "  "
                   << measurement.getWrappedValue() << "\n";
 
-        return ((setpoint.getNormalized() - config.minAngle) -
-                (measurement.getNormalized() - config.minAngle))
-            .getUnwrappedValue();
+        return (
+            (setpoint.getNormalized() - config.minAngle).getWrappedValue() -
+            (measurement.getNormalized() - config.minAngle).getWrappedValue());
+        // .getUnwrappedValue();
     }
     else
     {

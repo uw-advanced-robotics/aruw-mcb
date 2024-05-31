@@ -126,7 +126,15 @@ float WrappedFloat::differenceThroughRange(
     const WrappedFloat& lowerBound,
     const WrappedFloat& upperBound) const
 {
-    //
+    /*
+    both within bounds: subtract min and do unwrapped
+
+
+
+
+
+
+    */
 }
 
 float WrappedFloat::minDifference(const float& unwrappedValue) const
