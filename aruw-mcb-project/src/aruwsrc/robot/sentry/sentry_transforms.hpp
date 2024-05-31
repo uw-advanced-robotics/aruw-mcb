@@ -23,6 +23,7 @@
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "modm/math/geometry/location_2d.hpp"
 
 #include "sentry_turret_minor_subsystem.hpp"
 
@@ -105,6 +106,16 @@ public:
             return turretMajorToTurretRight;
         }
     };
+
+    inline uint32_t getLastComputedOdometryTime() const
+    {
+        return chassisOdometry.getLastComputedOdometryTime();
+    }
+
+    inline modm::Vector2f getChassisVelocity2d() const
+    {
+        return chassisOdometry.getCurrentVelocity2D();
+    }
 
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const

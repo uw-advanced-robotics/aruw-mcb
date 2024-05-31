@@ -46,6 +46,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
@@ -404,6 +405,27 @@ VelocityAgitatorSubsystem turretRightAgitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
     constants::turretRight::AGITATOR_CONFIG);
+
+// ballistics solvers
+SentryBallisticsSolver turretRightSolver(
+    drivers()->visionCoprocessor,
+    transformer,
+    frictionWheelsTurretRight,
+    turretMajor,
+    turretRight::default_launch_speed,
+    0.f,  // turret minor pitch offset
+    TURRET_MINOR_OFFSET,
+    turretRight.getTurretID());
+
+SentryBallisticsSolver turretLeftSolver(
+    drivers()->visionCoprocessor,
+    transformer,
+    frictionWheelsTurretLeft,
+    turretMajor,
+    turretLeft::default_launch_speed,
+    0.f,  // turret minor pitch offset
+    TURRET_MINOR_OFFSET,
+    turretLeft.getTurretID());
 
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
