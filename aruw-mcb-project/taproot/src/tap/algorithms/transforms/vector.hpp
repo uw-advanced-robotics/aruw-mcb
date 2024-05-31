@@ -51,6 +51,12 @@ public:
 
     inline float z() const { return coordinates_.data[2]; }
 
+    inline Vector& operator=(const Vector& other)
+    {
+        this->coordinates_ = other.coordinates_;
+        return *this;
+    }
+
     inline Vector operator+(const Vector& other) const;
 
     inline Vector operator+(const Position& other) const;
