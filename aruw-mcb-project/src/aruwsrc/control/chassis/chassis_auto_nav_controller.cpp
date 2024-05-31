@@ -124,8 +124,6 @@ Position ChassisAutoNavController::calculateSetPoint(Position current, float int
     {
         path.togglePathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
-        path.pushFront(current);
-        path.pushFront(lastSetPoint);
     }
 
     closest = path.positionToClosestParameter(current);

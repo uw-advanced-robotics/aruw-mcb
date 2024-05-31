@@ -31,7 +31,7 @@ public:
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config)
         : chassis(chassis),
           path(path),
-          lastSetPoint(Position(0, 0, 0)),
+          lastSetPoint(Position(-1, -1, 0)),
           visionCoprocessor(visionCoprocessor),
           drivers(drivers),
           config(config)

@@ -92,7 +92,7 @@ void AutoNavBeybladeCommand::execute()
     float currentY = transformerInterface.getWorldToChassis().getY();
     float chassisYawAngle = transformerInterface.getWorldToChassis().getYaw();
 
-    const float maxWheelSpeed = 1000;
+    const float maxWheelSpeed = 10000;
     // const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         // drivers.refSerial.getRefSerialReceivingData(),
         // drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
