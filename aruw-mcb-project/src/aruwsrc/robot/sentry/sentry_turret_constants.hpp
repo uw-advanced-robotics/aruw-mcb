@@ -49,11 +49,7 @@ static constexpr float TURRET_CG_Z = 32.3f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR =
     -13'000.0f;  // Right turret is -14'000 for some reason
 
-// The distance from turret 0 to turret 1 in meters
-static modm::Vector3f OFFSET_TURRET_0_TO_TURRET_1 = modm::Vector3f(-0.17511f, -.27905f, 0.0f);
-static constexpr float PITCH_YAW_OFFSET = 0.045f;
-
-static constexpr float TURRET_MINOR_OFFSET = 0.145f;
+static constexpr float TURRET_MINOR_OFFSET = 0.132f;
 
 namespace turretMajor
 {
@@ -68,8 +64,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 50'000.0f,
-    .ki = 400.0f,
+    .kp = 90'000.0f,
+    .ki = 800.0f,
     .kd = 8'000.0f,
     .maxICumulative = 900.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,

@@ -63,7 +63,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * This should be positive or else weird behavior can occur
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 300,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
@@ -81,7 +81,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 300,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
