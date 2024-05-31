@@ -143,6 +143,7 @@ void SentryImuCalibrateCommand::execute()
 
                 chassisMCBLite.imu.requestCalibration();
                 majorMCBLite.imu.requestCalibration();
+
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
 
