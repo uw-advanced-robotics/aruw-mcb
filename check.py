@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
 #
 # This file is part of aruw-mcb.
@@ -226,5 +227,4 @@ def parse_args():
     return arg.parse_args()
 
 
-if __name__ == "__main__":
-    main()
+main()
