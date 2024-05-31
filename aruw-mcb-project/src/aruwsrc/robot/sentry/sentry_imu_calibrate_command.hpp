@@ -53,7 +53,6 @@ namespace aruwsrc::control::imu
 class SentryImuCalibrateCommand : public imu::ImuCalibrateCommand
 {
 public:
-
     /**
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
