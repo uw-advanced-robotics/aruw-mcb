@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-
 #ifndef REF_SYSTEM_CONSTANTS_HPP_
 #define REF_SYSTEM_CONSTANTS_HPP_
+
+#include <stdint.h>
 
 namespace aruwsrc::constants
 {
