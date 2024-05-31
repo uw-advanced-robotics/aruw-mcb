@@ -44,6 +44,8 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+static constexpr int AGITATOR_NUM_POCKETS = 8;    // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
 namespace turretLeft
 {
@@ -61,11 +63,11 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * This should be positive or else weird behavior can occur
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 300,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
-}
+}  // namespace turretLeft
 
 namespace turretRight
 {
@@ -79,25 +81,30 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 300,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
-}
+}  // namespace turretRight
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = M_TWOPI / 10.0f,
-    .desiredSetpoint = 2.0f * M_TWOPI,
-    .integralSetpointTolerance = M_PI / 20.0f,
+    // magic numbers are fudge factors
+    .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = M_TWOPI / 10.0f,
-    .unjamSetpoint = M_TWOPI / 2.0f,
+    // magic numbers are fudge factors
+    .targetUnjamIntegralChange = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .unjamSetpoint = 0.15f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
-    /// seconds. Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(1000.0f * (M_TWOPI / 15.0f) / (M_TWOPI / 4.0f)) + 100,
-    .targetCycleCount = 2,
+    /// seconds.Convert to ms, Add 100 ms extra tolerance.
+    .maxWaitTime = static_cast<uint32_t>(
+                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.2f * AGITATOR_MAX_ROF *
+                       (M_TWOPI / AGITATOR_NUM_POCKETS)) +
+                   100,
+    .targetCycleCount = 3,
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
