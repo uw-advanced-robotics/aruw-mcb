@@ -29,4 +29,4 @@ static constexpr uint16_t HEAT_COST_17MM = 10;
 
 }  // namespace aruwsrc::constants
 
-#endif // REF_SYSTEM_CONSTANTS_HPP_
+#endif  // REF_SYSTEM_CONSTANTS_HPP_
