@@ -583,7 +583,7 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
     drivers()->refSerial,
     turretLeft::barrelID);
 
-FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(frictionWheelsTurretLeft);
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
 GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretLeftAgitator},
@@ -633,7 +633,7 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRig
     drivers()->refSerial,
     turretRight::barrelID);
 
-FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(frictionWheelsTurretRight);
+FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
 GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretRightAgitator},
