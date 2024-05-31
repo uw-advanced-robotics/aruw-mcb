@@ -664,8 +664,8 @@ HoldCommandMapping leftDown(
 HoldRepeatCommandMapping rightUp(
     drivers(),
     {
-        &turretLeftRotateAndUnjamAgitator,
-        &turretRightRotateAndUnjamAgitator,
+        &turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
+        &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
     },
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
