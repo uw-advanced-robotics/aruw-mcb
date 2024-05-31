@@ -68,6 +68,17 @@ private:
     /** The width of the cap bank bar, in pixels. */
     static constexpr uint16_t BOX_WIDTH = 50;
 
+    // Indicator bar is in units of voltage squared so it is proportional to energy, 
+    //   but doesnt depend on differences in capacitance between robots, and limits can be easily changed
+    // maximum displayed voltage of the supercapacitors (full charge)
+    static constexpr uint16_t VOLTAGE_SQUARED_MAX = pow(30, 2);
+    // cap voltage below which the indicator bar turns from green to yellow
+    static constexpr uint16_t VOLTAGE_SQUARED_YELLOW = pow(20, 2);
+    // cap voltage below which the indicator bar turns from yellow to orange
+    static constexpr uint16_t VOLTAGE_SQUARED_ORANGE = pow(15, 2);
+    // minimum displayed voltage of the supercapacitors (minimum usable voltage)
+    static constexpr uint16_t VOLTAGE_SQUARED_MIN = pow(8, 2);
+
     const aruwsrc::communication::can::capbank::CapacitorBank *capBank;
 
     /**

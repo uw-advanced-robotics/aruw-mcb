@@ -64,8 +64,8 @@ void CapacitorBankMenu::draw()
         case communication::can::capbank::State::BATTERY_OFF:
             display << "BATTERY_OFF";
             break;
-        case communication::can::capbank::State::FAILURE:
-            display << "FAILURE";
+        case communication::can::capbank::State::DISABLED:
+            display << "DISABLED";
             break;
         default:
             display << "UNKNOWN";

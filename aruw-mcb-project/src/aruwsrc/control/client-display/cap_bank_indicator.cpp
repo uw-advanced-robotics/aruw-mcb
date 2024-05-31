@@ -49,7 +49,7 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
 modm::ResumableResult<bool> CapBankIndicator::update()
 {
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
-    float voltage = 0;
+    float voltage_squared = 0;
 
     RF_BEGIN(1);
 
@@ -68,30 +68,25 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                                                                                : Tx::GRAPHIC_MODIFY;
 
             // Update the voltage bar
+            
+            voltage_squared = pow(capBank->getVoltage(), 2);
 
-            // Bottom of the bar is 10v
-            // Top of the bar is 30v
-            // 10v - 13v is orange
-            // 13v - 18v is yellow
-            // 18v - 30v is green
-            voltage = capBank->getVoltage();
-
-            if (voltage < 10.1)
+            if (voltage_squared < VOLTAGE_SQUARED_MIN)
             {
-                voltage = 10.1;
+                voltage_squared = VOLTAGE_SQUARED_MIN;
             }
 
             RefSerialTransmitter::configLine(
                 BOX_WIDTH - 20,
                 CAP_CENTER_X,
-                std::min((voltage - 10) / (30 - 10), 1.0f) * (BOX_HEIGHT - 20) + BOTTOM + 10,
+                std::min((voltage_squared - VOLTAGE_SQUARED_MIN) / (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN), 1.0f) * (BOX_HEIGHT - 20) + BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
                 &capBankGraphics.graphicData[1]);
 
             capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
-                voltage < 13.0   ? Tx::GraphicColor::ORANGE
-                : voltage < 18.0 ? Tx::GraphicColor::YELLOW
+                voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
+                : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
                                  : Tx::GraphicColor::GREEN);
 
             // Update the background status
@@ -120,8 +115,8 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
-                case communication::can::capbank::State::FAILURE:
-                    strncpy(capBankTextGraphic.msg, "FAIL", 5);
+                case communication::can::capbank::State::DISABLED:
+                    strncpy(capBankTextGraphic.msg, "OFF", 5);
                     capBankGraphics.graphicData[0].color = static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
                 default:

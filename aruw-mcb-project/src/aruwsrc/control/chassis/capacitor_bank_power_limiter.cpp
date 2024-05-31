@@ -89,7 +89,7 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         setpoint = 6; // TODO: get this based on a table or something
     }
 
-    float measured = this->sensor.getCurrentMa() / 1000; // convert to amps
+    float measured = this->capacitorBank->getCurrent();
     
     error = setpoint - measured;
 

@@ -47,7 +47,7 @@ enum State
     CHARGE_DISCHARGE = 3,
     DISCHARGE = 4,
     BATTERY_OFF = 5,
-    FAILURE = 6,
+    DISABLED = 6,
 };
 
 enum SprintMode
@@ -87,7 +87,7 @@ public:
     bool isDisabled() const {
         return 
             this->getState() == communication::can::capbank::State::RESET ||
-            this->getState() == communication::can::capbank::State::FAILURE;
+            this->getState() == communication::can::capbank::State::DISABLED;
     }
 
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };
