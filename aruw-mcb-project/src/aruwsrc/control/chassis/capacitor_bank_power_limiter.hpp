@@ -50,7 +50,7 @@ private:
     can::capbank::CapacitorBank* capacitorBank;
 };
 
-class CapBankPowerLimiter : tap::control::chassis::PowerLimiter
+class CapBankPowerLimiter
 {
 public:
     CapBankPowerLimiter(
@@ -67,6 +67,8 @@ private:
     const tap::Drivers* drivers;
     const can::capbank::CapacitorBank* capacitorBank;
     CapacitorSelectingCurrentSensor sensor;
+
+    tap::control::chassis::PowerLimiter fallback;
 
     const float LOWEST_CAP_VOLTAGE = 10.0f;
     const float VOLTAGE_RAMPDOWN_RANGE = 5.0f;

@@ -52,10 +52,10 @@ CapBankPowerLimiter::CapBankPowerLimiter(
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
-    : sensor(currentSensor, capacitorBank),
-      drivers(drivers),
+    : drivers(drivers),
       capacitorBank(capacitorBank),
-      tap::control::chassis::PowerLimiter(
+      sensor(currentSensor, capacitorBank),
+      fallback(
           drivers,
           &sensor,
           startingEnergyBuffer,
@@ -73,7 +73,7 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return 0;
     }
 
-    float fallback = tap::control::chassis::PowerLimiter::getPowerLimitRatio();
+    float fallback = this->fallback.getPowerLimitRatio();
     if (this->capacitorBank == nullptr || this->capacitorBank->isDisabled() ||
         this->capacitorBank->getState() == can::capbank::State::UNKNOWN ||
         this->capacitorBank->getState() == can::capbank::State::SAFE)
