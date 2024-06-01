@@ -67,6 +67,8 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -77,6 +79,7 @@ using namespace tap::control::setpoint;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::sentry;
 using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::sentry::chassis;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
@@ -572,6 +575,15 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
 
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    turretCVCommand,
+    turretLeft::turretID);
+
+FireRateLimitGovernor fireRateLimitGovernorTurretLeft(fireRateReselectionManagerTurretLeft);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorTurretLeft(
     *drivers(),
@@ -585,12 +597,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
-GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
-     &frictionWheelsOnGovernorTurretLeft});
+     &frictionWheelsOnGovernorTurretLeft,
+     &fireRateLimitGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -623,6 +636,15 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
 
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    turretCVCommand,
+    turretRight::turretID);
+
+FireRateLimitGovernor fireRateLimitGovernorTurretRight(fireRateReselectionManagerTurretRight);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorTurretRight(
     *drivers(),
@@ -635,12 +657,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRig
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
-GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
+GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretRight,
      &refSystemProjectileLaunchedGovernorTurretRight,
-     &frictionWheelsOnGovernorTurretRight});
+     &frictionWheelsOnGovernorTurretRight,
+     &fireRateLimitGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftUp(
