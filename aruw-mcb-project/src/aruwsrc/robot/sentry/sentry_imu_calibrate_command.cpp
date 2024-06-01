@@ -191,11 +191,12 @@ void SentryImuCalibrateCommand::execute()
 
     turretMajorController.runController(
         dt,
-        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint() + odometryInterface.getYaw());
+        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
 }
 
 void SentryImuCalibrateCommand::end(bool)
 {
+    tap::buzzer::silenceBuzzer(&drivers->pwm);
     // TODO: this being commented out causes turrets to hold position when this deschedules
     // change if you want
     // for (auto &config : turretsAndControllers)

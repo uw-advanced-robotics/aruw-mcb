@@ -58,14 +58,22 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
+    defined(TARGET_STANDARD_CYGNUS)
+    // Hero slip ring cannot handle
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#endif
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
+    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -305,6 +313,13 @@ public:
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
 private:
     enum TxMessageTypes
     {
@@ -329,7 +344,7 @@ private:
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
-    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
@@ -396,13 +411,6 @@ private:
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
-
-    /**
-     * Sets the most recent aruco reset message's to updated field to false.
-     * This signals that the message has been consumed and should not be used
-     * for future resets.
-     */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(

@@ -28,6 +28,7 @@ namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.230;
+static constexpr float DEADWHEEL_RADIUS = 0.048f;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
@@ -48,6 +49,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
  */
 
 // clang-format off
+//Full mat:
 constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     0.5,     0.0,      0.5,      0.5,      
     0.0,      0.5,     0.0,       0.25,    
@@ -64,20 +66,16 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    // .azimuthZeroOffset = 4452,
-    .azimuthZeroOffset = 7474 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthZeroOffset = 3378 - (3 * DjiMotor::ENC_RESOLUTION / 8),
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
     .driveMotorInverted = false,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    // .azimuthZeroOffset = 7172,
-    .azimuthZeroOffset = 3419 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthZeroOffset = 7515 - (3 * DjiMotor::ENC_RESOLUTION / 8),
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
-    // .driveMotorInverted = false,
     .driveMotorInverted = false,
 };
 

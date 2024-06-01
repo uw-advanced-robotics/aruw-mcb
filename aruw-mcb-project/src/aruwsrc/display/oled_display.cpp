@@ -33,6 +33,8 @@ OledDisplay::OledDisplay(
     serial::VisionCoprocessor *visionCoprocessor,
     can::TurretMCBCanComm *turretMCBCanCommBus1,
     can::TurretMCBCanComm *turretMCBCanCommBus2,
+    aruwsrc::virtualMCB::MCBLite *mcbLite1,
+    aruwsrc::virtualMCB::MCBLite *mcbLite2,
     can::capbank::CapacitorBank *capacitorBank)
     : display(),
       viewStack(&display),
@@ -43,6 +45,8 @@ OledDisplay::OledDisplay(
           visionCoprocessor,
           turretMCBCanCommBus1,
           turretMCBCanCommBus2,
+          mcbLite1,
+          mcbLite2,
           capacitorBank),
       drivers(drivers)
 {

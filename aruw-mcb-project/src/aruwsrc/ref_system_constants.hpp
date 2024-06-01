@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,13 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_PERSEUS) && defined(PLATFORM_HOSTED)
+#ifndef REF_SYSTEM_CONSTANTS_HPP_
+#define REF_SYSTEM_CONSTANTS_HPP_
 
-#include "robot_sim.hpp"
+#include <stdint.h>
 
-namespace aruwsrc::sim
+namespace aruwsrc::constants
 {
-void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
+static constexpr uint16_t HEAT_COST_42MM = 100;
+static constexpr uint16_t HEAT_COST_17MM = 10;
 
-#endif
+}  // namespace aruwsrc::constants
+
+#endif  // REF_SYSTEM_CONSTANTS_HPP_

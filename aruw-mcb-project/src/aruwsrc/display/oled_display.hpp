@@ -26,6 +26,7 @@
 #include "tap/display/sh1106.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
@@ -48,6 +49,8 @@ public:
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::virtualMCB::MCBLite *mcbLite1,
+        aruwsrc::virtualMCB::MCBLite *mcbLite2,
         can::capbank::CapacitorBank *capacitorBank = nullptr);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;

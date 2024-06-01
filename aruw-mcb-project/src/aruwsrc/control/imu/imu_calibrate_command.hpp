@@ -83,7 +83,7 @@ public:
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.5f);
 
     struct TurretIMUCalibrationConfig
     {

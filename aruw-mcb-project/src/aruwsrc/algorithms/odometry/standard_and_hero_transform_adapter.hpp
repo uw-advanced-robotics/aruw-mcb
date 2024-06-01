@@ -37,7 +37,7 @@ public:
     uint32_t getLastComputedOdometryTime() const;
     const tap::algorithms::transforms::Transform& getWorldToChassis() const;
 
-    const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
+    const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t) const;
 
 private:
     const aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transforms;

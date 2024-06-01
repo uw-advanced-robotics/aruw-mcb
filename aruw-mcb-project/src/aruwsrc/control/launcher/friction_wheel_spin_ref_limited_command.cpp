@@ -43,6 +43,7 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
 
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
+    // @todo dubious
     if (alwaysUseDefaultLaunchSpeed || !drivers->refSerial.getRefSerialReceivingData())
     {
         frictionWheels->setDesiredLaunchSpeed(defaultLaunchSpeed);

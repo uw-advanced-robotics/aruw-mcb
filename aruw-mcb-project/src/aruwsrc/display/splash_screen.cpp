@@ -87,6 +87,8 @@ SplashScreen::SplashScreen(
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
     can::TurretMCBCanComm* turretMCBCanCommBus2,
+    aruwsrc::virtualMCB::MCBLite* mcbLite1,
+    aruwsrc::virtualMCB::MCBLite* mcbLite2,
     can::capbank::CapacitorBank* capacitorBank)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
@@ -95,6 +97,8 @@ SplashScreen::SplashScreen(
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
       turretMCBCanCommBus2(turretMCBCanCommBus2),
+      mcbLite1(mcbLite1),
+      mcbLite2(mcbLite2),
       capacitorBank(capacitorBank)
 {
 }
@@ -124,6 +128,8 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
                 visionCoprocessor,
                 turretMCBCanCommBus1,
                 turretMCBCanCommBus2,
+                mcbLite1,
+                mcbLite2,
                 capacitorBank);
             mm->initialize();
             getViewStack()->push(mm);

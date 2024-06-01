@@ -56,6 +56,8 @@ public:
               &visionCoprocessor,
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
+              nullptr,
+              nullptr,
               &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),

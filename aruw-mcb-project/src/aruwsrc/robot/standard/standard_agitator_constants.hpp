@@ -37,9 +37,10 @@ using tap::motor::DjiMotor;
 
 namespace aruwsrc::control::agitator::constants
 {
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
+/// How much extra heat must be available beyond how much it takes to fire the next shot
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 10;
 
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 
 // position PID terms
 // PID terms for standard
@@ -52,8 +53,8 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 10;   // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 20.0f;  // balls per second
+static constexpr int AGITATOR_NUM_POCKETS = 8;    // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -120,7 +121,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = 1.1f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetIntegralChange =
+        1.1f * (M_TWOPI / AGITATOR_NUM_POCKETS),  // @todo remove multiplier if possible
     .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
