@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUWSRC_POWER_LIMITER_HPP_
-#define ARUWSRC_POWER_LIMITER_HPP_
+#ifndef CAPACITOR_BANK_POWER_LIMITER_HPP_
+#define CAPACITOR_BANK_POWER_LIMITER_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
@@ -33,7 +33,6 @@ class Drivers;
 
 namespace aruwsrc::chassis
 {
-
 class CapacitorSelectingCurrentSensor
     : public tap::communication::sensors::current::CurrentSensorInterface
 {
@@ -76,4 +75,4 @@ private:
 };
 }  // namespace aruwsrc::chassis
 
-#endif  // ARUWSRC_POWER_LIMITER_HPP_
+#endif  // CAPACITOR_BANK_POWER_LIMITER_HPP_

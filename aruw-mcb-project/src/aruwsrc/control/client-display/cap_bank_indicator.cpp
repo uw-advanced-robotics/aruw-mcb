@@ -90,7 +90,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 &capBankGraphics.graphicData[1]);
 
             capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
-                voltage_squared < VOLTAGE_SQUARED_ORANGE 
+                voltage_squared < VOLTAGE_SQUARED_ORANGE
                     ? Tx::GraphicColor::ORANGE
                     : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
                                                                : Tx::GraphicColor::GREEN);

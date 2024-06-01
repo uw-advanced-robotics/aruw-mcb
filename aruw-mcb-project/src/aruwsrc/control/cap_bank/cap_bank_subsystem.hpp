@@ -32,7 +32,6 @@ class Drivers;
 
 namespace aruwsrc::control::cap_bank
 {
-
 class CapBankSubsystem : public tap::control::Subsystem
 {
 public:
