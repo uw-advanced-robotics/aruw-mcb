@@ -480,7 +480,7 @@ PressCommandMapping bCtrlPressed(
 
 // The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
-PressCommandMapping qEPressed(
+ToggleCommandMapping qEPressed(
     drivers(),
     {&wiggleCommand},
     RemoteMapState({Remote::Key::Q, Remote::Key::E}));
