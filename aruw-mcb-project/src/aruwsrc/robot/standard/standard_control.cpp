@@ -1,3 +1,4 @@
+// REVERT CHANGES TO THIS FILE BEFORE MERGE, HAS AUTONAV TESTING CODE
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *

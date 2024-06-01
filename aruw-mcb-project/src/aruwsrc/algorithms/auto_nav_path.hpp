@@ -24,7 +24,7 @@ public:
     bool empty() const { return setpointData.empty(); }
     float positionToClosestParameter(const Position pos) const;
     Position parametertoPosition(const float parameter) const;
-    float parameterToSpeed(const float parameter) const;
+    //float parameterToSpeed(const float parameter) const;
     bool hasChanged() const;
     void togglePathChanged();
 

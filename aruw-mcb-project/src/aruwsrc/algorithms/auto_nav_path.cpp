@@ -97,12 +97,12 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
         (parameter - currParameter) / segmentDistance);
 }
 
-float AutoNavPath::parameterToSpeed(const float parameter) const
-{
-    // TODO: IMPLEMENT THIS!!
-    // currently just test value
-    return 0.8;
-}
+// float AutoNavPath::parameterToSpeed(const float parameter) const
+// {
+//     // TODO: IMPLEMENT THIS!!
+//     // currently just test value
+//     return 0.8;
+// }
 
 float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, Position p2) const
 {
