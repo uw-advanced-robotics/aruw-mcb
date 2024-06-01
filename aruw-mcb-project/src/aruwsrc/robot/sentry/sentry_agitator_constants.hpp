@@ -91,7 +91,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     // magic numbers are fudge factors
     .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.4f,
 };
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
