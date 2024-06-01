@@ -52,6 +52,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
 #include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
@@ -60,6 +61,7 @@
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_launcher_constants.hpp"
+#include "aruwsrc/robot/sentry/sentry_minor_cv_on_target_governor.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
@@ -428,6 +430,11 @@ SentryBallisticsSolver turretRightSolver(
     TURRET_MINOR_OFFSET,
     turretRight.getTurretID());
 
+SentryAutoAimLaunchTimer autoAimLaunchTimerTurretRight(
+    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &turretRightSolver);
+
 SentryBallisticsSolver turretLeftSolver(
     drivers()->visionCoprocessor,
     transformer,
@@ -437,6 +444,11 @@ SentryBallisticsSolver turretLeftSolver(
     0.f,  // turret minor pitch offset
     TURRET_MINOR_OFFSET,
     turretLeft.getTurretID());
+
+SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
+    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    &drivers()->visionCoprocessor,
+    &turretLeftSolver);
 
 /* define commands ----------------------------------------------------------*/
 TurretMajorSentryControlCommand majorManualCommand(
@@ -590,6 +602,15 @@ HeatLimitGovernor heatLimitGovernorTurretLeft(
     turretLeft::barrelID,
     constants::HEAT_LIMIT_BUFFER);
 
+// rotates agitator when aiming at target and within heat limit
+SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    turretCVCommand,
+    autoAimLaunchTimerTurretLeft,
+    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    turretLeft::turretID);
+
 // TODO:: see if this actually does stuff, test later.
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
     drivers()->refSerial,
@@ -604,6 +625,15 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
      &fireRateLimitGovernorTurretLeft});
+
+GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft,
+     &fireRateLimitGovernorTurretLeft,
+     &cvOnTargetGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -651,6 +681,15 @@ HeatLimitGovernor heatLimitGovernorTurretRight(
     turretRight::barrelID,
     constants::HEAT_LIMIT_BUFFER);
 
+// rotates agitator when aiming at target and within heat limit
+SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
+    ((tap::Drivers *)(drivers())),
+    drivers()->visionCoprocessor,
+    turretCVCommand,
+    autoAimLaunchTimerTurretRight,
+    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    turretRight::turretID);
+
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
     drivers()->refSerial,
     turretRight::barrelID);
@@ -664,6 +703,15 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight,
      &fireRateLimitGovernorTurretRight});
+
+GovernorLimitedCommand<5> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight,
+     &fireRateLimitGovernorTurretRight,
+     &cvOnTargetGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftUp(
@@ -687,8 +735,8 @@ HoldCommandMapping leftDown(
 HoldRepeatCommandMapping rightUp(
     drivers(),
     {
-        &turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
-        &turretRightRotateAndUnjamAgitatorWithHeatLimiting,
+        &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+        &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
     },
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
