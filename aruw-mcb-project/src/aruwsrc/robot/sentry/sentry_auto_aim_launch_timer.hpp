@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTO_AIM_LAUNCH_TIMER_HPP_
-#define AUTO_AIM_LAUNCH_TIMER_HPP_
+#ifndef SENTRY_AUTO_AIM_LAUNCH_TIMER_HPP_
+#define SENTRY_AUTO_AIM_LAUNCH_TIMER_HPP_
 
 #include <aruwsrc/algorithms/otto_ballistics_solver.hpp>
 #include <aruwsrc/communication/serial/vision_coprocessor.hpp>
