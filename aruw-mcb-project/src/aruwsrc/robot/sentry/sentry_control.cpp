@@ -626,13 +626,12 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
      &frictionWheelsOnGovernorTurretLeft,
      &fireRateLimitGovernorTurretLeft});
 
-GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
-     &fireRateLimitGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft});
 
 // RIGHT shooting ======================
@@ -710,7 +709,6 @@ GovernorLimitedCommand<5> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
     {&heatLimitGovernorTurretRight,
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight,
-     &fireRateLimitGovernorTurretRight,
      &cvOnTargetGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
