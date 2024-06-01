@@ -96,8 +96,8 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
 
 static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
     // magic numbers are fudge factors
-    .targetUnjamIntegralChange = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .unjamSetpoint = 0.15f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetUnjamIntegralChange = 0.4f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .unjamSetpoint = 0.07 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds.Convert to ms, Add 100 ms extra tolerance.
     .maxWaitTime = static_cast<uint32_t>(
