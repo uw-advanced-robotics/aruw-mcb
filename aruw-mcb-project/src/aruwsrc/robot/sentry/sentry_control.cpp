@@ -34,12 +34,14 @@
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
@@ -69,8 +71,6 @@
 #include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
-#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
-#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
