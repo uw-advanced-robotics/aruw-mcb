@@ -269,6 +269,8 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getPath() { return path; }
 
+    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
+
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
     mockable inline bool getSomeTurretHasTarget() const
@@ -388,7 +390,7 @@ private:
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
     aruwsrc::algorithms::AutoNavPath path;
-    AutoNavSetpointMessage lastSetpointData;
+    AutoNavSetpointMessage lastSetpointData{.sequence_num = 0, .speed = 0.8f, .num_setpoints = 0, .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},

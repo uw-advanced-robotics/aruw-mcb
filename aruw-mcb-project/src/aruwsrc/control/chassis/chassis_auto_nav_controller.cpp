@@ -69,8 +69,7 @@ void ChassisAutoNavController::runController(
     Vector posError = setpoint - currentPos;
     mag = posError.magnitude();
 
-    float desiredSpeed =
-        path.parameterToSpeed(0);  // todo: need to get current parameter here somehow
+    float desiredSpeed = visionCoprocessor.getAutonavSpeed();
 
     if (mag > 0.01)
     {
