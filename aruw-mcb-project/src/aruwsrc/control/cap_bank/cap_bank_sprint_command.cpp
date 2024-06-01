@@ -24,7 +24,6 @@
 
 namespace aruwsrc::control::cap_bank
 {
-
 CapBankSprintCommand::CapBankSprintCommand(
     tap::Drivers* drivers,
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)

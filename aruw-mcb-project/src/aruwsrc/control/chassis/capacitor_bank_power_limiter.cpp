@@ -24,7 +24,6 @@
 
 namespace aruwsrc::chassis
 {
-
 CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
     can::capbank::CapacitorBank *capacitorBank)

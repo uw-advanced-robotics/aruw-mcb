@@ -26,7 +26,6 @@
 
 namespace aruwsrc::control::cap_bank
 {
-
 CapBankToggleCommand::CapBankToggleCommand(
     tap::Drivers* drivers,
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
