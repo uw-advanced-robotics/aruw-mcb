@@ -25,7 +25,8 @@ CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
     can::capbank::CapacitorBank& capacitorBank)
     : Subsystem(drivers),
-      capacitorBank(capacitorBank)
+      capacitorBank(capacitorBank),
+      enabled(false)
 {
     capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
 }

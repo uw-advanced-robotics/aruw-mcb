@@ -32,6 +32,8 @@ CapacitorBank::CapacitorBank(
 
 void CapacitorBank::processMessage(const modm::can::Message& message)
 {
+    this->connected = true;
+
     switch (static_cast<MessageType>(message.data[0]))
     {
         case MessageType::STATUS:  // Update message
@@ -57,14 +59,6 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
         if (powerLimit != this->powerLimit)
         {
             this->setPowerLimit(powerLimit);
-        }
-
-        {
-            if (!this->connected && this->state == State::RESET)
-            {
-                this->start();
-                this->connected = true;
-            }
         }
     }
 }
