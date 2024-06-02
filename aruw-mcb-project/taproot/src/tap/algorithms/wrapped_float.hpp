@@ -230,6 +230,8 @@ public:
         bool lowerBinAInc = withinRangeInclusive(lowerB, lowerA, upperA);
         bool upperBinAInc = withinRangeInclusive(upperB, lowerA, upperA);
 
+        if (lowerA == lowerB && upperA == upperB) return lowerA.positiveDifference(upperA);
+
         if (!lowerAinB && !upperAinB && !lowerBinA && !upperBinA)  // no overlap
             return 0;
 
@@ -239,15 +241,15 @@ public:
         if (!upperAinB && !lowerBinA && lowerAinB && upperBinA)  // overlap, A above B
             return lowerA.positiveDifference(upperB);
 
-        std::cout << "two overlaps\n";
+        // std::cout << "two overlaps\n";
         if (upperAinB && lowerBinA && lowerAinB && upperBinA)  // two overlaps
             return lowerA.positiveDifference(upperB) + lowerB.positiveDifference(upperA);
 
-        std::cout << "A entirely in B\n";
+        // std::cout << "A entirely in B\n";
         if (lowerAinBInc && upperAinBInc)  // A entirely in B
             return lowerA.positiveDifference(upperA);
 
-        std::cout << "B entirely in A\n";
+        // std::cout << "B entirely in A\n";
         if (lowerBinAInc && upperBinAInc)  // B entirely in A
             return lowerB.positiveDifference(upperB);
 

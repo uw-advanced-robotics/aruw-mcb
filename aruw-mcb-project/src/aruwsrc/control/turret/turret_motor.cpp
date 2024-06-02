@@ -147,13 +147,42 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        std::cout << std::setprecision(10) << setpoint.getWrappedValue() << "  "
-                  << measurement.getWrappedValue() << "\n";
+        // std::cout << std::setprecision(10) << setpoint.getWrappedValue() << "  "
+        //           << measurement.getWrappedValue() << "\n";
 
-        if (WrappedFloat::unionRange(setpoint, measurement, Angle(config.maxAngle), Angle(config.minAngle)) < 
-            WrappedFloat::unionRange(measurement, setpoint, Angle(config.maxAngle), Angle(config.minAngle)))
-            return setpoint.positiveDifference(measurement);
-        return setpoint.negativeDifference(measurement);
+        int limitStatus;
+
+        // WrappedFloat limitedSetpoint = Angle(
+        //     WrappedFloat::limitValue(setpoint, config.minAngle, config.maxAngle, &limitStatus));
+
+        WrappedFloat limitedSetpoint = setpoint;
+
+        float pos = WrappedFloat::unionRange(
+            measurement,
+            limitedSetpoint,
+            Angle(config.maxAngle),
+            Angle(config.minAngle));
+        float neg = WrappedFloat::unionRange(
+            limitedSetpoint,
+            measurement,
+            Angle(config.maxAngle),
+            Angle(config.minAngle));
+
+        std::cout << "unions: pos: " << pos << "  neg: " << neg << "\n";
+        if (pos < neg)
+        {
+            std::cout << "POS DIFF\n";
+            return measurement.positiveDifference(limitedSetpoint);
+        }
+        else if (pos > neg)
+        {
+            std::cout << "NEG DIFF\n";
+            return measurement.negativeDifference(limitedSetpoint);
+        }
+        else
+        {
+            return measurement.minDifference(setpoint);
+        }
     }
     else
     {
