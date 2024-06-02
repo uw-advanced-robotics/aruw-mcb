@@ -145,6 +145,7 @@ TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_
     {
         InSequence seq;
         EXPECT_CALL(fireRateManager, setFireRate(10)).Times(4);
+        EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
         EXPECT_CALL(
             fireRateManager,
             setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
