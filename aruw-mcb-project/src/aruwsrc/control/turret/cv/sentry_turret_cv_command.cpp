@@ -88,9 +88,8 @@ void SentryTurretCVCommand::computeAimSetpoints(
     *desiredPitchSetpoint =
         config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
 
-    auto differenceWrapped = [](float measurement, float setpoint) {
-        return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
-    };
+    auto differenceWrapped = [](float measurement, float setpoint)
+    { return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint); };
 
     *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
         differenceWrapped(config.yawController.getMeasurement(), *desiredYawSetpoint),
@@ -158,14 +157,21 @@ void SentryTurretCVCommand::execute()
 
         if (gettingFlanked)
         {
+            // If it's the first time, we've been flanked, set setpoint
+            if (flankRotationCounter == FLANK_ROTATION_NUM_COUNTS)
+            {
+                flankingRobotYaw = getLastDamagedArmorPlateYaw();
+            }
+
+            // Move towards where we got shot from
             moveCloserTurretToFlankingRobot(
                 &leftYawSetpoint,
                 &rightYawSetpoint,
                 leftBallisticsSolution,
                 rightBallisticsSolution);
 
-            flankRotationCounter++;
-            if (flankRotationCounter > FLANK_ROTATION_NUM_COUNTS)
+            flankRotationCounter--;
+            if (flankRotationCounter == 0)
             {
                 exitFlankMode();
             }

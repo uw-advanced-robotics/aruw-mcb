@@ -303,8 +303,6 @@ private:
         std::optional<aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution>
             rightBallisticsSolution)
     {
-        flankingRobotYaw = getLastDamagedArmorPlateYaw();
-
         // Find which turret is closer to the flanking robot
         bool turretLeftCloser = fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) <
                                 fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
