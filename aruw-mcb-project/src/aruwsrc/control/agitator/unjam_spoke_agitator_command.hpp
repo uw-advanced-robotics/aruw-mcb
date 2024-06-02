@@ -29,24 +29,18 @@
 namespace aruwsrc::control::agitator
 {
 /**
- * Command that takes control of a velocity setpoint subsystem moves it back and forth.
- * One back and forward motion counts as a cycle. Unjamming cycles start by trying
- * to move in negative direction before trying to move in positive direction.
- *
- * If the unjam command successfully clears its forward and backward threshold it will
- * will clear the velocity setpoint subsystem's jam and end. If not successful after some number of
- * cycle counts, the command will give up and end without clearing the jam.
- *
- * Unlike the unjam command, this command will displace the integral by some amount in
- * order to facilitate unjamming.
- *
- * Like most velocity commands this one will not schedule/will deschedule if
- * IntegrableSetpointSubsystem goes offline.
+ * Command that unjams a velocity setpoint subsystem corresponding to a 2023/2024 spoke agitator.
+ * 
+ * Runs the agitator backwards until either reaching a @param targetUnjamIntegralChange or when the
+ * @param maxWaitTime has past. Then, it attempts to rotate back to the original position. If it
+ * successfully reaches that position, the agitator is considered unjammed and the command ends.
+ * Otherwise, it repeats this process up to a maximum of @param targetCycleCount times before
+ * giving up and ending.
  */
 class UnjamSpokeAgitatorCommand : public tap::control::Command
 {
 public:
-    /// Config struct that the user passes into the UnjamIntegralCommand's constructor.
+    /// Config struct that the user passes into the UnjamSpokeAgitatorCommand's constructor.
     struct Config
     {
         /**
@@ -106,7 +100,7 @@ private:
     enum UnjamState
     {
         UNJAM_BACKWARD,  ///< The subsystem is being commanded backwards
-        UNJAM_FORWARD,   ///< The subsystem is being commanded forwards
+        RETURN_FORWARD,   ///< The subsystem is being commanded forwards
         JAM_CLEARED,     ///< The jam is cleared, the subsystem is no longer being told to move.
     };
 
@@ -127,10 +121,6 @@ private:
     UnjamState currUnjamState;
 
     float positionBeforeUnjam;
-
-    bool backwardsCleared;
-
-    bool forwardsCleared;
 
     void beginUnjamForwards();
 

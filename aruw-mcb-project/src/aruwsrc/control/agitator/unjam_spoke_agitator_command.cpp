@@ -61,8 +61,6 @@ void UnjamSpokeAgitatorCommand::initialize()
 
     positionBeforeUnjam = integrableSetpointSubsystem.getCurrentValueIntegral();
 
-    forwardsCleared = false;
-    backwardsCleared = false;
     backwardsCount = 0;
 
     beginUnjamBackwards();
@@ -85,10 +83,10 @@ void UnjamSpokeAgitatorCommand::execute()
                 beginUnjamForwards();
             }
             break;
-        case UNJAM_FORWARD:
+        case RETURN_FORWARD:
             if (curPosition >= positionBeforeUnjam)
             {
-                forwardsCleared = true;
+                currUnjamState = JAM_CLEARED;
             }
             else if (unjamRotateTimeout.isExpired())
             {
@@ -97,12 +95,6 @@ void UnjamSpokeAgitatorCommand::execute()
             break;
         case JAM_CLEARED:
             break;
-    }
-
-    // Forward and backward thresholds cleared, try to return to original setpoint.
-    if (currUnjamState != JAM_CLEARED && forwardsCleared)
-    {
-        currUnjamState = JAM_CLEARED;
     }
 }
 
@@ -125,7 +117,7 @@ void UnjamSpokeAgitatorCommand::beginUnjamForwards()
 {
     unjamRotateTimeout.restart(config.maxWaitTime);
     integrableSetpointSubsystem.setSetpoint(config.unjamSetpoint);
-    currUnjamState = UNJAM_FORWARD;
+    currUnjamState = RETURN_FORWARD;
 }
 
 void UnjamSpokeAgitatorCommand::beginUnjamBackwards()
