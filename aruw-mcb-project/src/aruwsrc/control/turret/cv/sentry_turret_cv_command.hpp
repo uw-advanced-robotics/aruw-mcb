@@ -282,7 +282,6 @@ private:
                yawDifference.getWrappedValue() > -DAMAGED_ARMOR_PLATE_TOLERANCE;
     }
 
-
     bool inToleranceOfRightTurret, inToleranceOfLeftTurret;
     bool gotHitOutsideTurretCoverage()
     {
@@ -291,11 +290,13 @@ private:
 
         // Get the yaw of left turret
         float leftTurretYaw = sentryTransforms.getWorldToTurretLeft().getYaw();
-        inToleranceOfLeftTurret = turretYawWithinToleranceOfPlate(leftTurretYaw, damagedArmorPlateYaw);
+        inToleranceOfLeftTurret =
+            turretYawWithinToleranceOfPlate(leftTurretYaw, damagedArmorPlateYaw);
 
         // Get the yaw of right turret
         float rightTurretYaw = sentryTransforms.getWorldToTurretRight().getYaw();
-        inToleranceOfRightTurret = turretYawWithinToleranceOfPlate(rightTurretYaw, damagedArmorPlateYaw);
+        inToleranceOfRightTurret =
+            turretYawWithinToleranceOfPlate(rightTurretYaw, damagedArmorPlateYaw);
 
         return !inToleranceOfLeftTurret && !inToleranceOfRightTurret;
     }
@@ -311,7 +312,7 @@ private:
     {
         // Find which turret is closer to the flanking robot
         turretLeftCloser = fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) <
-                                fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
+                           fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
 
         bool bothTurretsHaveTargets =
             leftBallisticsSolution != std::nullopt && rightBallisticsSolution != std::nullopt;
