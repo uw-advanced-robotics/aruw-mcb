@@ -254,32 +254,36 @@ private:
     // We operate under the assumption that front is zero and that each plate is 90 deg from it
     static constexpr int ARMOR_PLATE_INDEX_CLOCKWISE = 1;
 
+    WrappedFloat armorPlateYaw;
     // Find the position of the hit plate in turret major / world frame
     float getLastDamagedArmorPlateYaw()
     {
+        armorPlateYaw = WrappedFloat(0.0f, 0.0f, M_TWOPI);
+
         // First transform to chassis frame
-        float armorPlateChassisYaw =
+        armorPlateYaw +=
             static_cast<int>(lastDamagedArmorPlate) * M_PI_2 * ARMOR_PLATE_INDEX_CLOCKWISE;
 
-        // Then rotate by chassis rotation in correspondence to world frame, accounting for velocity
-        float armorPlateChassisYawWorldFrame =
-            armorPlateChassisYaw + sentryTransforms.getWorldToChassis().getInverse().getYaw();
-        armorPlateChassisYawWorldFrame = modm::Angle::normalize(armorPlateChassisYawWorldFrame);
+        // Then rotate by chassis rotation in correspondence to world frame
+        armorPlateYaw += sentryTransforms.getWorldToChassis().getInverse().getYaw();
 
-        // TODO account for beyblade spin
+        // TODO account for beyblade spin / velocity of rotation
 
-        return armorPlateChassisYawWorldFrame;
+        return armorPlateYaw.getWrappedValue();
     }
 
     // How much to the left and right of each turret a damaged armor plate can be
     static constexpr float DAMAGED_ARMOR_PLATE_TOLERANCE = modm::toRadian(90.0f);
-
+    WrappedFloat yawDifference;
     inline bool turretYawWithinToleranceOfPlate(float turretYaw, float plateYaw)
     {
-        return modm::Angle::normalize(plateYaw - turretYaw) < DAMAGED_ARMOR_PLATE_TOLERANCE &&
-               modm::Angle::normalize(plateYaw - turretYaw) > -DAMAGED_ARMOR_PLATE_TOLERANCE;
+        yawDifference = WrappedFloat(plateYaw, -M_PI, M_PI);
+        return yawDifference.getWrappedValue() < DAMAGED_ARMOR_PLATE_TOLERANCE &&
+               yawDifference.getWrappedValue() > -DAMAGED_ARMOR_PLATE_TOLERANCE;
     }
 
+
+    bool inToleranceOfRightTurret, inToleranceOfLeftTurret;
     bool gotHitOutsideTurretCoverage()
     {
         // Get the yaw of the last damaged armor plate in turret major frame
@@ -287,14 +291,16 @@ private:
 
         // Get the yaw of left turret
         float leftTurretYaw = sentryTransforms.getWorldToTurretLeft().getYaw();
+        inToleranceOfLeftTurret = turretYawWithinToleranceOfPlate(leftTurretYaw, damagedArmorPlateYaw);
 
         // Get the yaw of right turret
         float rightTurretYaw = sentryTransforms.getWorldToTurretRight().getYaw();
+        inToleranceOfRightTurret = turretYawWithinToleranceOfPlate(rightTurretYaw, damagedArmorPlateYaw);
 
-        return !turretYawWithinToleranceOfPlate(leftTurretYaw, damagedArmorPlateYaw) &&
-               !turretYawWithinToleranceOfPlate(rightTurretYaw, damagedArmorPlateYaw);
+        return !inToleranceOfLeftTurret && !inToleranceOfRightTurret;
     }
 
+    bool turretLeftCloser;
     void moveCloserTurretToFlankingRobot(
         float *leftTurretYawSetpoint,
         float *rightTurretYawSetpoiont,
@@ -304,7 +310,7 @@ private:
             rightBallisticsSolution)
     {
         // Find which turret is closer to the flanking robot
-        bool turretLeftCloser = fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) <
+        turretLeftCloser = fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) <
                                 fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
 
         bool bothTurretsHaveTargets =
