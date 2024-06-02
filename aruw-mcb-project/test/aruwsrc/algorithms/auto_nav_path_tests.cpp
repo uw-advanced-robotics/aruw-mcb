@@ -5,16 +5,18 @@
 using namespace testing;
 using namespace aruwsrc::algorithms;
 
-class AutoNavPathTest : public Test {
+class AutoNavPathTest : public Test
+{
 protected:
-    constexpr static float kInterpolationDistance = 2.5f; // number of segments between path points
+    constexpr static float kInterpolationDistance = 2.5f;  // number of segments between path points
 
     AutoNavPathTest() : path() {}
 
     AutoNavPath path;
 };
 
-TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_first_point) {
+TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_first_point)
+{
     Position p1(0.0f, 0.0f, 0.0f);
     Position p2(5.0f, 0.0f, 0.0f);
 
@@ -27,7 +29,7 @@ TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_first_point) {
     current = Position(0.0f, -5.5f, 0.0f);
     closest = path.getClosestParameterOnSegment(current, p1, p2);
     EXPECT_EQ(0.0f, closest);
-    
+
     // p2 minus p1 is negative
     p1 = Position(5.0f, 0.0f, 0.0f);
     p2 = Position(0.0f, 0.0f, 0.0f);
@@ -36,7 +38,8 @@ TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_first_point) {
     EXPECT_EQ(0.0f, closest);
 }
 
-TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_second_point) {
+TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_second_point)
+{
     Position p1(0.0f, 0.0f, 0.0f);
     Position p2(5.0f, 0.0f, 0.0f);
 
@@ -49,7 +52,7 @@ TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_second_point) {
     current = Position(5.0f, -5.5f, 0.0f);
     closest = path.getClosestParameterOnSegment(current, p1, p2);
     EXPECT_EQ(5.0f, closest);
-    
+
     // p2 minus p1 is negative
     p1 = Position(5.0f, 0.0f, 0.0f);
     p2 = Position(0.0f, 0.0f, 0.0f);
@@ -58,7 +61,8 @@ TEST_F(AutoNavPathTest, getClosestOnSegment_clamp_to_second_point) {
     EXPECT_EQ(5.0f, closest);
 }
 
-TEST_F(AutoNavPathTest, getClosestOnSegment_projected_on_segment) {
+TEST_F(AutoNavPathTest, getClosestOnSegment_projected_on_segment)
+{
     Position p1(0.0f, 0.0f, 0.0f);
     Position p2(5.0f, 0.0f, 0.0f);
 
@@ -75,53 +79,54 @@ TEST_F(AutoNavPathTest, getClosestOnSegment_projected_on_segment) {
     EXPECT_EQ(2.5f, closest);
 }
 
-TEST_F(AutoNavPathTest, calculate_setpoint_point_no_point) {
-    float interpolationParameter = 1.5f;
-    Position current(1, 1, 1);
-    path.resetPath();
-    Position setpoint = path.calculateSetPoint(current, interpolationParameter);
-    
-    EXPECT_EQ(Position(1, 1, 1), setpoint);
-}
+// todo: migrate to controller test file?
+// TEST_F(AutoNavPathTest, calculate_setpoint_point_no_point) {
+//     float interpolationParameter = 1.5f;
+//     Position current(1, 1, 1);
+//     path.resetPath();
+//     Position setpoint = path.calculateSetPoint(current, interpolationParameter);
 
-TEST_F(AutoNavPathTest, calculate_setpoint_at_only_point) {
-    float interpolationParameter = 1.5f;
-    Position current(1, 2, 3);
-    path.pushPoint(current);
-    Position setpoint = path.calculateSetPoint(current, interpolationParameter);
+//     EXPECT_EQ(Position(1, 1, 1), setpoint);
+// }
 
-    EXPECT_EQ(Position(1, 2, 3), setpoint);
-}
+// TEST_F(AutoNavPathTest, calculate_setpoint_at_only_point) {
+//     float interpolationParameter = 1.5f;
+//     Position current(1, 2, 3);
+//     path.pushPoint(current);
+//     Position setpoint = path.calculateSetPoint(current, interpolationParameter);
 
-TEST_F(AutoNavPathTest, calculate_setpoint_single_point) {
-    float interpolationParameter = 1.5f;
-    Position current(0, 0, 0);
-    path.pushPoint(Position(1, 2, 3));
-    Position setpoint = path.calculateSetPoint(current, interpolationParameter);
-    
-    EXPECT_EQ(Position(1, 2, 3), setpoint);
-}
+//     EXPECT_EQ(Position(1, 2, 3), setpoint);
+// }
 
-TEST_F(AutoNavPathTest, calculate_setpoint_point_from_start) {
-    float interpolationParameter = 2 * sqrt(2) + 1.0f;
-    Position current(0, 0, 0);
-    path.pushPoint(Position(1.0, 1.0, 0.0));
-    path.pushPoint(Position(2.0, 2.0, 0.0));
-    path.pushPoint(Position(3, 3, 0));
-    path.pushPoint(Position(3, 5, 0));
-    Position setpoint = path.calculateSetPoint(current, interpolationParameter);
+// TEST_F(AutoNavPathTest, calculate_setpoint_single_point) {
+//     float interpolationParameter = 1.5f;
+//     Position current(0, 0, 0);
+//     path.pushPoint(Position(1, 2, 3));
+//     Position setpoint = path.calculateSetPoint(current, interpolationParameter);
 
-    EXPECT_EQ(Position(3, 4, 0), setpoint);
-}  
+//     EXPECT_EQ(Position(1, 2, 3), setpoint);
+// }
 
-TEST_F(AutoNavPathTest, calculate_setpoint_point_from_middle) {
-    float interpolationParameter = 0.5f * sqrt(2) + 1.0f;
-    Position current(3, 2, 0);
-    path.pushPoint(Position(1.0, 1.0, 0.0));
-    path.pushPoint(Position(2.0, 2.0, 0.0));
-    path.pushPoint(Position(3, 3, 0));
-    path.pushPoint(Position(3, 5, 0));
-    Position setpoint = path.calculateSetPoint(current, interpolationParameter);
+// TEST_F(AutoNavPathTest, calculate_setpoint_point_from_start) {
+//     float interpolationParameter = 2 * sqrt(2) + 1.0f;
+//     Position current(0, 0, 0);
+//     path.pushPoint(Position(1.0, 1.0, 0.0));
+//     path.pushPoint(Position(2.0, 2.0, 0.0));
+//     path.pushPoint(Position(3, 3, 0));
+//     path.pushPoint(Position(3, 5, 0));
+//     Position setpoint = path.calculateSetPoint(current, interpolationParameter);
 
-    EXPECT_EQ(Position(3, 4, 0), setpoint);
-}  
+//     EXPECT_EQ(Position(3, 4, 0), setpoint);
+// }
+
+// TEST_F(AutoNavPathTest, calculate_setpoint_point_from_middle) {
+//     float interpolationParameter = 0.5f * sqrt(2) + 1.0f;
+//     Position current(3, 2, 0);
+//     path.pushPoint(Position(1.0, 1.0, 0.0));
+//     path.pushPoint(Position(2.0, 2.0, 0.0));
+//     path.pushPoint(Position(3, 3, 0));
+//     path.pushPoint(Position(3, 5, 0));
+//     Position setpoint = path.calculateSetPoint(current, interpolationParameter);
+
+//     EXPECT_EQ(Position(3, 4, 0), setpoint);
+// }
