@@ -297,7 +297,7 @@ TEST_F(TurretMotorTest, getValidMinError_small_min_max_values)
         {M_PI, M_PI_2, M_PI_2},
         {M_PI_2, 0, M_PI_2},
         {M_PI_2, 1.5 * M_PI, -M_PI},
-        // {M_PI, 0, M_PI},
+        {M_PI, 0, M_PI},
         {M_PI, 1.5 * M_PI, -M_PI_2},
         {M_PI, 0.1, M_PI - 0.1},
     };
@@ -329,15 +329,13 @@ TEST_F(TurretMotorTest, getValidMinError_large_min_max_values)
         {0, M_PI_4, -M_PI_4},
         {0.1, M_PI - 0.1, -M_PI + 0.2},
         {M_PI_2 + M_PI_4, 1.5 * M_PI + 0.1, -M_PI_2 - M_PI_4 - 0.1},
-        // {M_PI_2 + M_PI_4, M_TWOPI - 0.1, -M_PI - M_PI_4 + 0.1},
-        {0, 1.5 * M_PI, -1.5 * M_PI},  //
+        {M_PI_2 + M_PI_4, M_TWOPI - 0.1, M_PI_2 + M_PI_4 + 0.1},
+        {0, 1.5 * M_PI, -1.5 * M_PI},
         {1.5 * M_PI, 0, 1.5 * M_PI},
     };
 
     for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
     {
-        std::cout << std::setprecision(10) << setpoint << " " << measurement << " " << error
-                  << "\n";
         EXPECT_NEAR(error, tm.getValidMinError(Angle(setpoint), Angle(measurement)), 1E-3);
     }
 }
