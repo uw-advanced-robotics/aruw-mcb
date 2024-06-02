@@ -25,6 +25,8 @@
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/ref_system_constants.hpp"
+
 namespace aruwsrc::control::governor
 {
 /**
@@ -34,6 +36,11 @@ namespace aruwsrc::control::governor
 class HeatLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
+    /**
+     * @param firingSystemMechanismID ID of the barrel used to determine heat
+     * @param heatLimitBuffer Amount of extra heat on top of cost of next projectile to wait for
+     * before allowing firing
+     */
     HeatLimitGovernor(
         tap::Drivers &drivers,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
@@ -64,26 +71,30 @@ private:
 
         const auto &robotData = drivers.refSerial.getRobotData();
 
-        uint16_t heat = 0, heatLimit = robotData.turret.heatLimit;
+        uint16_t heat = 0, heatLimit = robotData.turret.heatLimit, nextCost = 0;
 
         switch (firingSystemMechanismID)
         {
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
                 heat = robotData.turret.heat17ID1;
+                nextCost = aruwsrc::constants::HEAT_COST_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
                 heat = robotData.turret.heat17ID2;
+                nextCost = aruwsrc::constants::HEAT_COST_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
                 heat = robotData.turret.heat42;
+                nextCost = aruwsrc::constants::HEAT_COST_42MM;
                 break;
             default:
                 // don't perform heat limiting
                 heat = 0;
+                nextCost = 0;
                 heatLimit = heatLimitBuffer;
         }
 
-        const bool heatBelowLimit = heat + heatLimitBuffer <= heatLimit;
+        const bool heatBelowLimit = heat + nextCost + heatLimitBuffer <= heatLimit;
 
         return !tap::communication::serial::RefSerial::heatAndLimitValid(heat, heatLimit) ||
                heatBelowLimit;

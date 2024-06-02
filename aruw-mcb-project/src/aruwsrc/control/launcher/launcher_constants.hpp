@@ -65,9 +65,10 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #if defined(TARGET_HERO_PERSEUS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {10, 3700.0f},
-    {16.0f, 6700.0f},
-    {20.0f, 8500.0f},
+    {4.0f, 1900.0f},
+    {10.0f, 3850.0f},
+    {16.0f, 6350.0f},
+    {18.0f, 8500.0f},
 };
 #elif defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
