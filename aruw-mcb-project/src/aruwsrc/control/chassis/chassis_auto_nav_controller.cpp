@@ -53,7 +53,6 @@ Vector moveVector(-1, -1, 0);
 Vector chassisFrameMoveVector(0, 0, 0);
 
 void ChassisAutoNavController::runController(
-    const uint32_t dt,
     const float maxWheelSpeed,
     const bool movementEnabled,
     const bool beybladeEnabled)

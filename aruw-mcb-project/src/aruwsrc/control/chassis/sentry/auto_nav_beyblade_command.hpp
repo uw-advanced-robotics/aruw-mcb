@@ -75,8 +75,6 @@ private:
 
     bool autoNavOnlyInGame;
 
-    uint32_t prevTime = 0;
-
     bool beybladeEnabled = false;
     bool movementEnabled = true;
 

@@ -73,9 +73,6 @@ void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavBeybladeCommand::execute()
 {
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    prevTime = currTime;
-
     const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers.refSerial.getRefSerialReceivingData(),
         drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
@@ -85,8 +82,7 @@ void AutoNavBeybladeCommand::execute()
     if (!autoNavOnlyInGame ||
         (gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME)))
     {
-        autoNavController
-            .runController(currTime - prevTime, maxWheelSpeed, movementEnabled, beybladeEnabled);
+        autoNavController.runController(maxWheelSpeed, movementEnabled, beybladeEnabled);
     }
 }
 

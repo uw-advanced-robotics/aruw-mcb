@@ -39,7 +39,6 @@ public:
     void initialize();
 
     void runController(
-        const uint32_t dt,
         const float maxWheelSpeed,
         const bool movementEnabled,
         const bool beybladeEnabled);
