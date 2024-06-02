@@ -163,9 +163,9 @@ void SentryTurretCVCommand::execute()
                 &rightYawSetpoint,
                 leftBallisticsSolution,
                 rightBallisticsSolution);
-            
+
             flankRotationCounter++;
-            if(flankRotationCounter > FLANK_ROTATION_NUM_COUNTS)
+            if (flankRotationCounter > FLANK_ROTATION_NUM_COUNTS)
             {
                 exitFlankMode();
             }

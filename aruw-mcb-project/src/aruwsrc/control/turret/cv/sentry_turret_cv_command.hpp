@@ -306,8 +306,8 @@ private:
         flankingRobotYaw = getLastDamagedArmorPlateYaw();
 
         // Find which turret is closer to the flanking robot
-        bool turretLeftCloser =
-            fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) < fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
+        bool turretLeftCloser = fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) <
+                                fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
 
         bool bothTurretsHaveTargets =
             leftBallisticsSolution != std::nullopt && rightBallisticsSolution != std::nullopt;
