@@ -553,7 +553,8 @@ SentryTurretCVCommand turretCVCommand(
     turretMajorWorldYawController,
     turretLeftCVConfig,
     turretRightCVConfig,
-    transformer);
+    transformer,
+    drivers()->refSerial);
 
 // LEFT shooting ======================
 

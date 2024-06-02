@@ -221,10 +221,11 @@ private:
      * 1) From the ref system, see if the last known damaged plate has changed
      * 2) Compute location of that plate in terms of chassis, and then shift from chassis to turret
      * major 3) For each turret, check if that plate is "visible to them" via some configurable
-     * offset in both directions of yaw 4) If not, then we are getting hit from a region that is not
-     * being covered by either turret 5) If both turrets have a target, then move the one that the
-     * place that is being shot from for the next configureable duration 6) If only one turret has a
-     * target, then move the other turret to cover the region that is not being covered
+     * offset in both directions of yaw
+     * 4) If not, then we are getting hit from a region that is not being covered by either turret
+     * 5) If both turrets have a target, then move the one that the place that is being shot from
+     * for the next configureable duration 6) If only one turret has a target, then move the other
+     * turret to cover the region that is not being covered
      *
      */
     //clang-format on
@@ -257,13 +258,101 @@ private:
     float getLastDamagedArmorPlateYaw()
     {
         // First transform to chassis frame
-        float armorPlateChassisYaw = static_cast<int>(lastDamagedArmorPlate) * M_PI_2 * ARMOR_PLATE_INDEX_CLOCKWISE;
-        // Then rotate by chassis frame, accounting for velocity
-        armorPlateChassisYaw += modm::Angle::normalize()
+        float armorPlateChassisYaw =
+            static_cast<int>(lastDamagedArmorPlate) * M_PI_2 * ARMOR_PLATE_INDEX_CLOCKWISE;
 
+        // Then rotate by chassis rotation in correspondence to world frame, accounting for velocity
+        float armorPlateChassisYawWorldFrame =
+            armorPlateChassisYaw + sentryTransforms.getWorldToChassis().getInverse().getYaw();
+        armorPlateChassisYawWorldFrame = modm::Angle::normalize(armorPlateChassisYawWorldFrame);
 
-        return 0;
+        // TODO account for beyblade spin
+
+        return armorPlateChassisYawWorldFrame;
     }
+
+    // How much to the left and right of each turret a damaged armor plate can be
+    static constexpr float DAMAGED_ARMOR_PLATE_TOLERANCE = modm::toRadian(90.0f);
+
+    inline bool turretYawWithinToleranceOfPlate(float turretYaw, float plateYaw)
+    {
+        return modm::Angle::normalize(plateYaw - turretYaw) < DAMAGED_ARMOR_PLATE_TOLERANCE &&
+               modm::Angle::normalize(plateYaw - turretYaw) > -DAMAGED_ARMOR_PLATE_TOLERANCE;
+    }
+
+    bool gotHitOutsideTurretCoverage()
+    {
+        // Get the yaw of the last damaged armor plate in turret major frame
+        float damagedArmorPlateYaw = getLastDamagedArmorPlateYaw();
+
+        // Get the yaw of left turret
+        float leftTurretYaw = sentryTransforms.getWorldToTurretLeft().getYaw();
+
+        // Get the yaw of right turret
+        float rightTurretYaw = sentryTransforms.getWorldToTurretRight().getYaw();
+
+        return !turretYawWithinToleranceOfPlate(leftTurretYaw, damagedArmorPlateYaw) &&
+               !turretYawWithinToleranceOfPlate(rightTurretYaw, damagedArmorPlateYaw);
+    }
+
+    void moveCloserTurretToFlankingRobot(
+        float *leftTurretYawSetpoint,
+        float *rightTurretYawSetpoiont,
+        std::optional<aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution>
+            leftBallisticsSolution,
+        std::optional<aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution>
+            rightBallisticsSolution)
+    {
+        flankingRobotYaw = getLastDamagedArmorPlateYaw();
+
+        // Find which turret is closer to the flanking robot
+        bool turretLeftCloser =
+            fabs(flankingRobotYaw - (*leftTurretYawSetpoint)) < fabs(flankingRobotYaw - (*rightTurretYawSetpoiont));
+
+        bool bothTurretsHaveTargets =
+            leftBallisticsSolution != std::nullopt && rightBallisticsSolution != std::nullopt;
+        // If both are aiming at something, move to the closer one
+        if (bothTurretsHaveTargets)
+        {
+            if (turretLeftCloser)
+            {
+                *leftTurretYawSetpoint = flankingRobotYaw;
+            }
+            else
+            {
+                *rightTurretYawSetpoiont = flankingRobotYaw;
+            }
+        }
+        // Otherwise, move the one that is not aiming at anything
+        else if (leftBallisticsSolution != std::nullopt)
+        {
+            *leftTurretYawSetpoint = flankingRobotYaw;
+        }
+        else if (rightBallisticsSolution != std::nullopt)
+        {
+            *rightTurretYawSetpoiont = flankingRobotYaw;
+        }
+    }
+
+    bool gettingFlanked = false;
+    // How much time to spend rotating turret to face the new plate
+    static constexpr int FLANK_ROTATION_NUM_COUNTS = 250;
+    int flankRotationCounter = 0;
+    float flankingRobotYaw = 0.0f;
+
+    void enterFlankMode()
+    {
+        gettingFlanked = true;
+        flankRotationCounter = FLANK_ROTATION_NUM_COUNTS;
+    }
+
+    void exitFlankMode()
+    {
+        gettingFlanked = false;
+        flankRotationCounter = 0;
+    }
+
+};  // class SentryTurretCVCommand
 
 }  // namespace aruwsrc::control::sentry
 

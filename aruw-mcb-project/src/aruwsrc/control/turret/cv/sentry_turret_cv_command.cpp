@@ -43,13 +43,15 @@ SentryTurretCVCommand::SentryTurretCVCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
-    aruwsrc::sentry::SentryTransforms &sentryTransforms)
+    aruwsrc::sentry::SentryTransforms &sentryTransforms,
+    tap::communication::serial::RefSerial &refSerial)
     : visionCoprocessor(visionCoprocessor),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
       turretLeftConfig(turretLeftConfig),
       turretRightConfig(turretRightConfig),
-      sentryTransforms(sentryTransforms)
+      sentryTransforms(sentryTransforms),
+      refSerial(refSerial)
 {
     this->addSubsystemRequirement(&turretMajorSubsystem);
     this->addSubsystemRequirement(&turretLeftConfig.turretSubsystem);
@@ -120,7 +122,7 @@ void SentryTurretCVCommand::execute()
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
-    targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
+    targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt ||
                                                      rightBallisticsSolution != std::nullopt);
 
     // Turret minor control
@@ -128,6 +130,11 @@ void SentryTurretCVCommand::execute()
     if (targetFound)
     {
         exitScanMode();
+
+        if (gottenHitFromNewPlate() && gotHitOutsideTurretCoverage())
+        {
+            enterFlankMode();
+        }
 
         if (leftBallisticsSolution != std::nullopt)
         {
@@ -147,6 +154,21 @@ void SentryTurretCVCommand::execute()
                 &rightYawSetpoint,
                 &rightPitchSetpoint,
                 &withinAimingToleranceRight);
+        }
+
+        if (gettingFlanked)
+        {
+            moveCloserTurretToFlankingRobot(
+                &leftYawSetpoint,
+                &rightYawSetpoint,
+                leftBallisticsSolution,
+                rightBallisticsSolution);
+            
+            flankRotationCounter++;
+            if(flankRotationCounter > FLANK_ROTATION_NUM_COUNTS)
+            {
+                exitFlankMode();
+            }
         }
 
         // sus: one of these could be std::nullopt ?
