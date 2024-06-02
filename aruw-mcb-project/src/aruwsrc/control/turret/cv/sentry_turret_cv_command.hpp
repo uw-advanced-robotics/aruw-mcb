@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
@@ -111,7 +112,8 @@ public:
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         TurretConfig &turretLeftConfig,
         TurretConfig &turretRightConfig,
-        aruwsrc::sentry::SentryTransforms &sentryTransforms);
+        aruwsrc::sentry::SentryTransforms &sentryTransforms,
+        tap::communication::serial::RefSerial &refSerial);
 
     void initialize();
 
@@ -209,7 +211,59 @@ private:
         scanning = false;
         lostTargetCounter = 0;
     }
-};
+
+    /**
+     * Checks whether we are getting hit from a region that is not being covered by either turret.
+     */
+    //clang-format off
+    /**
+     * Logic for this:
+     * 1) From the ref system, see if the last known damaged plate has changed
+     * 2) Compute location of that plate in terms of chassis, and then shift from chassis to turret
+     * major 3) For each turret, check if that plate is "visible to them" via some configurable
+     * offset in both directions of yaw 4) If not, then we are getting hit from a region that is not
+     * being covered by either turret 5) If both turrets have a target, then move the one that the
+     * place that is being shot from for the next configureable duration 6) If only one turret has a
+     * target, then move the other turret to cover the region that is not being covered
+     *
+     */
+    //clang-format on
+    tap::communication::serial::RefSerial &refSerial;
+    // Ideally set to unknown, but for now top suffices
+    tap::communication::serial::RefSerialData::Rx::ArmorId lastDamagedArmorPlate =
+        tap::communication::serial::RefSerialData::Rx::ArmorId::TOP;
+
+    // See if we've gotten hit from a new plate than previously
+    bool gottenHitFromNewPlate()
+    {
+        if (refSerial.getRobotData().damageType ==
+            tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE)
+        {
+            tap::communication::serial::RefSerialData::Rx::ArmorId currentDamagedArmorPlate =
+                refSerial.getRobotData().damagedArmorId;
+            if (currentDamagedArmorPlate != lastDamagedArmorPlate)
+            {
+                lastDamagedArmorPlate = currentDamagedArmorPlate;
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // We operate under the assumption that front is zero and that each plate is 90 deg from it
+    static constexpr int ARMOR_PLATE_INDEX_CLOCKWISE = 1;
+
+    // Find the position of the hit plate in turret major / world frame
+    float getLastDamagedArmorPlateYaw()
+    {
+        // First transform to chassis frame
+        float armorPlateChassisYaw = static_cast<int>(lastDamagedArmorPlate) * M_PI_2 * ARMOR_PLATE_INDEX_CLOCKWISE;
+        // Then rotate by chassis frame, accounting for velocity
+        armorPlateChassisYaw += modm::Angle::normalize()
+
+
+        return 0;
+    }
 
 }  // namespace aruwsrc::control::sentry
 
