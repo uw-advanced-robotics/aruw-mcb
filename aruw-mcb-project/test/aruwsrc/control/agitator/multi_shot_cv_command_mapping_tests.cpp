@@ -151,9 +151,16 @@ TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_
             .Times(4);
     }
 
-    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(8);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(12);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::FULL_AUTO_10HZ);
+    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_10HZ);
+
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+
+    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_20HZ);
 
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);
