@@ -73,12 +73,8 @@ void UnjamSpokeAgitatorCommand::execute()
     switch (currUnjamState)
     {
         case UNJAM_BACKWARD:
-            if (curPosition <= positionBeforeUnjam - config.targetUnjamIntegralChange)
-            {
-                backwardsCleared = true;
-                beginUnjamForwards();
-            }
-            else if (unjamRotateTimeout.isExpired())
+            if ((curPosition <= positionBeforeUnjam - config.targetUnjamIntegralChange) ||
+                unjamRotateTimeout.isExpired())
             {
                 beginUnjamForwards();
             }
@@ -128,4 +124,4 @@ void UnjamSpokeAgitatorCommand::beginUnjamBackwards()
     backwardsCount += 1;
 }
 
-}  // namespace tap::control::setpoint
+}  // namespace aruwsrc::control::agitator

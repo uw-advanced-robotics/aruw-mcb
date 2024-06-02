@@ -102,9 +102,7 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_U
     .unjamSetpoint = UNJAM_VELOCITY,
     /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
     /// seconds.Convert to ms, Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(
-                       1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) +
-                   200,
+    .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
     .targetCycleCount = 3,
 };
 
