@@ -23,12 +23,10 @@ void AutoNavPath::resetPath()
 bool AutoNavPath::hasChanged() const { return path_changed; }
 void AutoNavPath::togglePathChanged() { path_changed = !path_changed; }
 
-float debugMinClosest = 0;
 float AutoNavPath::positionToClosestParameter(const Position pos) const
 {
     float minDistance = F32_MAX;
     float minClosest = 0.0f;
-    debugMinClosest = minClosest;
     float currParameter = 0.0f;
 
     if (setpointData.size() < 2)
@@ -61,20 +59,15 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
     }
     return minClosest;
 }
-Position firstPoint(-1.0, -1.0, 0.0);
-int dequeSize = -1;
-float debugParameter = 1000.0;
+
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
     // assert(!setpointData.empty());
-    debugParameter = parameter;
-    int pointIndex = static_cast<int>(parameter);  // only works bc parameterized length every
-                                                   // segment is currently considered to be 1
 
-    dequeSize = (int)setpointData.size();
+    int pointIndex;
     float currParameter = 0;
     float segmentDistance = 0;
-    for (pointIndex = 0; pointIndex < dequeSize - 1; pointIndex++)
+    for (pointIndex = 0; pointIndex < (int)setpointData.size() - 1; pointIndex++)
     {
         segmentDistance =
             Position::distance(setpointData[pointIndex], setpointData[pointIndex + 1]);
@@ -89,7 +82,6 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
     {
         return setpointData.back();
     }
-    firstPoint = setpointData[pointIndex];
 
     return Position::interpolate(
         setpointData[pointIndex],

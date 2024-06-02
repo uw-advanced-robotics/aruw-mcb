@@ -99,7 +99,7 @@ void ChassisAutoNavController::runController(
     }
 
     rotateSpeedRamp.setTarget(rampTarget);
-    // // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
+    // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
     rotateSpeedRamp.update(config.beybladeRampRate);
     float r = rotateSpeedRamp.getValue();
 
