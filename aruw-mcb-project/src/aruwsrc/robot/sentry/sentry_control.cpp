@@ -606,13 +606,6 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
-GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
-    {&turretLeftAgitator},
-    turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
-     &frictionWheelsOnGovernorTurretLeft});
-
 GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
@@ -684,8 +677,8 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftUp(
     drivers(),
-    // {&turretCVCommand,
-    {&majorManualCommand,
+    {&turretCVCommand,
+     &majorManualCommand,
      &turretLeftManualCommand,
      &turretRightManualCommand,
      &turretLeftFrictionWheelSpinCommand,
