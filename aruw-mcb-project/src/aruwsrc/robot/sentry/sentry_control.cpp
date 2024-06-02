@@ -678,9 +678,6 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
 HoldCommandMapping leftUp(
     drivers(),
     {&turretCVCommand,
-     &majorManualCommand,
-     &turretLeftManualCommand,
-     &turretRightManualCommand,
      &turretLeftFrictionWheelSpinCommand,
      &turretRightFrictionWheelSpinCommand,
      &chassisDriveCommand},
