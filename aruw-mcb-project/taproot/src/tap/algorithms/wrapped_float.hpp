@@ -210,7 +210,7 @@ public:
                  value.getWrappedValue() <= upperBound.getWrappedValue()));
     }
 
-    inline static float unionRange(
+    inline static float intersectionRange(
         const WrappedFloat& lowerA,
         const WrappedFloat& upperA,
         const WrappedFloat& lowerB,
@@ -241,15 +241,12 @@ public:
         if (!upperAinB && !lowerBinA && lowerAinB && upperBinA)  // overlap, A above B
             return lowerA.positiveDifference(upperB);
 
-        // std::cout << "two overlaps\n";
         if (upperAinB && lowerBinA && lowerAinB && upperBinA)  // two overlaps
             return lowerA.positiveDifference(upperB) + lowerB.positiveDifference(upperA);
 
-        // std::cout << "A entirely in B\n";
         if (lowerAinBInc && upperAinBInc)  // A entirely in B
             return lowerA.positiveDifference(upperA);
 
-        // std::cout << "B entirely in A\n";
         if (lowerBinAInc && upperBinAInc)  // B entirely in A
             return lowerB.positiveDifference(upperB);
 
