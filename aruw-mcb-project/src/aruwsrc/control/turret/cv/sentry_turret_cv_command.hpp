@@ -254,7 +254,7 @@ private:
     // We operate under the assumption that front is zero and that each plate is 90 deg from it
     static constexpr int ARMOR_PLATE_INDEX_CLOCKWISE = 1;
 
-    WrappedFloat armorPlateYaw;
+    WrappedFloat armorPlateYaw = WrappedFloat(0.0f, 0, M_TWOPI);
     // Find the position of the hit plate in turret major / world frame
     float getLastDamagedArmorPlateYaw()
     {
@@ -274,7 +274,7 @@ private:
 
     // How much to the left and right of each turret a damaged armor plate can be
     static constexpr float DAMAGED_ARMOR_PLATE_TOLERANCE = modm::toRadian(90.0f);
-    WrappedFloat yawDifference;
+    WrappedFloat yawDifference = WrappedFloat(0.0f, -M_PI, M_PI);
     inline bool turretYawWithinToleranceOfPlate(float turretYaw, float plateYaw)
     {
         yawDifference = WrappedFloat(plateYaw, -M_PI, M_PI);
