@@ -38,7 +38,7 @@ using tap::motor::DjiMotor;
 namespace aruwsrc::control::agitator::constants
 {
 /// How much extra heat must be available beyond how much it takes to fire the next shot
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 10;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
 
 #if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 
