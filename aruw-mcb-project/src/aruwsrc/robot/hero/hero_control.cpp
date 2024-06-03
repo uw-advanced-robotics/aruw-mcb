@@ -407,7 +407,8 @@ ClientDisplayCommand clientDisplayCommand(
     &beybladeCommand,
     &chassisAutorotateCommand,
     nullptr,
-    sentryResponseHandler);
+    sentryResponseHandler,
+    &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
