@@ -70,6 +70,7 @@ enum class SentryMotionStrategyType : uint8_t
 {
     IDLE = 0,
     DEFAULT_STATE_MACHINE,
+    PRACTICE_MATCH_STATE_MACHINE,
     TEST_STATE_MACHINE,
     NUM_MESSAGE_TYPES
 };
