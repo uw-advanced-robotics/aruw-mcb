@@ -53,17 +53,17 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 #if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
-static constexpr float LAUNCHER_PID_KP = 30.0f;
+static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 6'000.0f;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 7'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
 #else
-static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 0.4f;
+static constexpr float LAUNCHER_PID_KP = 20.0f;
+static constexpr float LAUNCHER_PID_KI = 0.2f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 6'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
 
 /**
@@ -83,8 +83,8 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {0.0f, 0.0f},
     {10.0f, 3750.0f},
     {24.0f, 6200.0f},
-    {30.0f, 8600.0f},
-    {32.0f, 9000.0f},
+    {30.0f, 7400.0f},
+    {32.0f, 9200.0f},
 };
 #elif defined(TARGET_STANDARD_SPIDER)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {

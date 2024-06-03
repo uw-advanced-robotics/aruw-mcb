@@ -108,9 +108,11 @@ void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredLaunchSpeed
 
 void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSpeed(0); }
 
+float debug = 0.0f;
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
-    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+    return debug;
+    // return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
 
 }  // namespace aruwsrc::control::launcher
