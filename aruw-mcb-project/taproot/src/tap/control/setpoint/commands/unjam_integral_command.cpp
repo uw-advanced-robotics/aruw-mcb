@@ -88,7 +88,7 @@ void UnjamIntegralCommand::execute()
             if (curPosition >= positionBeforeUnjam)
             {
                 forwardsCleared = true;
-                // beginUnjamBackwards();
+                beginUnjamBackwards();
             }
             else if (unjamRotateTimeout.isExpired())
             {
@@ -100,7 +100,7 @@ void UnjamIntegralCommand::execute()
     }
 
     // Forward and backward thresholds cleared, try to return to original setpoint.
-    if (currUnjamState != JAM_CLEARED && forwardsCleared)
+    if (currUnjamState != JAM_CLEARED && forwardsCleared && backwardsCleared)
     {
         currUnjamState = JAM_CLEARED;
     }

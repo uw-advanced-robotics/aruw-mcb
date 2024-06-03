@@ -33,6 +33,7 @@
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
@@ -577,7 +578,9 @@ aruwsrc::control::launcher::
 ConstantVelocityAgitatorCommand turretLeftRotateAgitator(
     turretLeftAgitator,
     constants::AGITATOR_ROTATE_CONFIG);
-UnjamIntegralCommand turretLeftUnjamAgitator(turretLeftAgitator, constants::AGITATOR_UNJAM_CONFIG);
+UnjamSpokeAgitatorCommand turretLeftUnjamAgitator(
+    turretLeftAgitator,
+    constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     *drivers(),
     turretLeftAgitator,
@@ -636,7 +639,7 @@ aruwsrc::control::launcher::
 ConstantVelocityAgitatorCommand turretRightRotateAgitator(
     turretRightAgitator,
     constants::AGITATOR_ROTATE_CONFIG);
-UnjamIntegralCommand turretRightUnjamAgitator(
+UnjamSpokeAgitatorCommand turretRightUnjamAgitator(
     turretRightAgitator,
     constants::AGITATOR_UNJAM_CONFIG);
 MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
