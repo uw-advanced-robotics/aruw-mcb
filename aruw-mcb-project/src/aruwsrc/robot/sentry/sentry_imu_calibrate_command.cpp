@@ -77,7 +77,6 @@ void SentryImuCalibrateCommand::initialize()
 
 static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsystem &turret)
 {
-    // return true;
     return compareFloatClose(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
@@ -88,7 +87,6 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
-size_t i;
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
