@@ -31,11 +31,15 @@ namespace aruwsrc::control::imu
 ImuCalibrateCommand::ImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-    chassis::HolonomicChassisSubsystem *chassis)
+    chassis::HolonomicChassisSubsystem *chassis,
+    float velocityZeroThreshold,
+    float positionZeroThreshold)
     : tap::control::Command(),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis)
+      chassis(chassis),
+      velocityZeroThreshold(velocityZeroThreshold),
+      positionZeroThreshold(positionZeroThreshold)
 {
     for (auto &config : turretsAndControllers)
     {
