@@ -378,7 +378,8 @@ private:
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
 
