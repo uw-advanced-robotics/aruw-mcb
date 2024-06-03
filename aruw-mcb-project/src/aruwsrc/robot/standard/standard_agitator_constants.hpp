@@ -127,7 +127,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
-static constexpr aruwsrc::control::agitator::algorithms::UnjamSpokeAgitatorCommand::Config
+static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS),
         .unjamSetpoint = 0.25f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),

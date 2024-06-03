@@ -36,10 +36,6 @@ namespace aruwsrc::control::agitator
  * successfully reaches that position, the agitator is considered unjammed and the command ends.
  * Otherwise, it repeats this process up to a maximum of @param targetCycleCount times before
  * giving up and ending.
- *
- * @todo This command has a lot of jank due to the previous unjam command, @class
- * UnjamIntegralCommand, being hard-coded as a requirement for a lot of agitator code. Generic unjam
- * interface should be created in taproot.
  */
 class UnjamSpokeAgitatorCommand : public tap::control::setpoint::UnjamCommandInterface
 {
