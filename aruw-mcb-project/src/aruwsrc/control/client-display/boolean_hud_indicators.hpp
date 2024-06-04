@@ -207,10 +207,11 @@ private:
     static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 500.0f;
     tap::arch::PeriodicMilliTimer outOfAmmoTimer;
 
-    static constexpr uint16_t AMMO_TEXT_X = 920;
-    static constexpr uint16_t AMMO_TEXT_Y = 904;
     static constexpr uint16_t AMMO_INDICATOR_X = 960;
-    static constexpr uint16_t AMMO_INDICATOR_Y = 841;
+    static constexpr uint16_t AMMO_INDICATOR_Y = 825;
+
+    static constexpr uint16_t AMMO_TEXT_X = 800;
+    static constexpr uint16_t AMMO_TEXT_Y = AMMO_INDICATOR_Y;
 };
 }  // namespace aruwsrc::control::client_display
 
