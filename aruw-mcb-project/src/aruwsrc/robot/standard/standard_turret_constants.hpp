@@ -171,7 +171,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 20.5f,
     .ki = 0.0f,
     .kd = 0.2f,
     .maxICumulative = 0.5f,
