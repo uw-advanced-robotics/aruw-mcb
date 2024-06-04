@@ -54,6 +54,11 @@ public:
                (useSingleShotMode && targetIntegralReached());
     };
 
+    void overrideTargetIntegralChange(float newSpeed)
+    {
+        this->overrideIntegralChange = newSpeed;
+    }
+
     void enableConstantRotation(bool constantRotation)
     {
         bool previousModeWasConstantRotation = !useSingleShotMode;
@@ -81,6 +86,7 @@ public:
 
 protected:
     bool useSingleShotMode = true;
+    float overrideIntegralChange = config.targetIntegralChange;
 };
 
 }  // namespace aruwsrc::control::agitator
