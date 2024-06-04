@@ -35,6 +35,7 @@ protected:
     FrictionWheelSpinRefLimitedCommandTest() : frictionWheels(&drivers) {}
 
     void SetUp() override
+    {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(drivers.refSerial, getRefSerialReceivingData)
             .WillByDefault(ReturnPointee(&refSerialOnline));
