@@ -170,9 +170,11 @@ private:
 
     inline bool haveAmmo()
     {
-        return (
-            refSerial->getRobotData().turret.bulletsRemaining17 ||
-            refSerial->getRobotData().turret.bulletsRemaining42);
+#if defined(TARGET_HERO)
+        return refSerial->getRobotData().turret.bulletsRemaining42 > 2;
+#else
+        return refSerial->getRobotData().turret.bulletsRemaining17 > 10;
+#endif
     }
 
     /**
