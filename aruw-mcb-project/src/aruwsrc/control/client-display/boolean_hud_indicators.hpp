@@ -20,6 +20,7 @@
 #ifndef BOOLEAN_HUD_INDICATORS_HPP_
 #define BOOLEAN_HUD_INDICATORS_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
@@ -167,6 +168,13 @@ private:
      */
     const tap::communication::serial::RefSerial *refSerial;
 
+    inline bool haveAmmo()
+    {
+        return (
+            refSerial->getRobotData().turret.bulletsRemaining17 ||
+            refSerial->getRobotData().turret.bulletsRemaining42);
+    }
+
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
      * depending on whether or not the hopper is open or closed.
@@ -190,6 +198,11 @@ private:
      */
     Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
+
+    bool outOfAmmo = false;
+    // How often to toggle the out of ammo indicator
+    static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 100.0f;
+    tap::arch::PeriodicMilliTimer outOfAmmoTimer;
 };
 }  // namespace aruwsrc::control::client_display
 

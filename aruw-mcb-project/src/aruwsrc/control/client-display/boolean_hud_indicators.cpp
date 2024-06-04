@@ -78,7 +78,8 @@ BooleanHudIndicators::BooleanHudIndicators(
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE])>,
               0),
-      }
+      },
+      outOfAmmoTimer(OUT_OF_AMMO_TOGGLE_PERIOD_MS)
 {
 }
 
@@ -114,10 +115,17 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(
-        refSerial->getRefSerialReceivingData() &&
-        (refSerial->getRobotData().turret.bulletsRemaining17 ||
-         refSerial->getRobotData().turret.bulletsRemaining42));
+    if (haveAmmo())
+    {
+        outOfAmmo = true;
+        outOfAmmoTimer.restart(OUT_OF_AMMO_TOGGLE_PERIOD_MS);
+    } else {
+        if(outOfAmmoTimer.execute()){
+            outOfAmmo = !outOfAmmo;
+        }
+    }
+
+    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(outOfAmmo);
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
