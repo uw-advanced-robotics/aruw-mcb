@@ -68,14 +68,14 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = 3378 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthZeroOffset = 3399 - (3 * DjiMotor::ENC_RESOLUTION / 8),  // 3394
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = 7515 - (3 * DjiMotor::ENC_RESOLUTION / 8),
+    .azimuthZeroOffset = 7484 - (3 * DjiMotor::ENC_RESOLUTION / 8),  // 7489
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,

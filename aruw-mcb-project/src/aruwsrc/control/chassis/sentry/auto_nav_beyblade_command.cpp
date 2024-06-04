@@ -19,18 +19,6 @@
 
 #include "auto_nav_beyblade_command.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/architecture/clock.hpp"
-#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
-#include "tap/communication/serial/ref_serial_data.hpp"
-#include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
-
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;
@@ -48,7 +36,7 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     HolonomicChassisSubsystem& chassis,
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
     const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
-    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
+    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),

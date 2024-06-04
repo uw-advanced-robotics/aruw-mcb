@@ -61,14 +61,17 @@ void ChassisAutoNavController::runController(
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
     setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
-    float rampTarget = 0.0;
+    // setpoint = currentPos + Position(LOOKAHEAD_DISTANCE, 0, 0);
+    lastSetPoint = setpoint;
 
     moveVector = Vector(0, 0, 0);
 
     Vector posError = setpoint - currentPos;
     mag = posError.magnitude();
 
-    float desiredSpeed = visionCoprocessor.getAutonavSpeed();
+    float desiredSpeed =
+        visionCoprocessor.getAutonavSpeed() *
+        (drivers.remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL));
 
     if (mag > 0.01)
     {
@@ -87,7 +90,9 @@ void ChassisAutoNavController::runController(
         config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
         config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
+    float rampTarget =
+        rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed *
+        (drivers.remote.getChannel(tap::communication::serial::Remote::Channel::RIGHT_VERTICAL));
 
     // reduce the beyblade rotation when translating to allow for better translational speed
     // (otherwise it is likely that you will barely move unless
@@ -117,7 +122,7 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    if (!movementEnabled)  // !visionCoprocessor.isCvOnline() ||
     {
         return lastSetPoint;
     }

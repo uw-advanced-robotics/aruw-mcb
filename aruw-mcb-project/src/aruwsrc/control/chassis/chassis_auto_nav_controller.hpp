@@ -25,7 +25,7 @@ public:
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         tap::Drivers& drivers,
         const Transform& worldToChassis,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config)
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config)
         : chassis(chassis),
           path(path),
           lastSetPoint(Position(-1, -1, 0)),
@@ -56,7 +56,6 @@ public:
             t);
     }
     // private:
-
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
     Position lastSetPoint;
@@ -65,7 +64,7 @@ public:
 
     const Transform& worldToChassis;
 
-    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
+    aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;

@@ -20,8 +20,13 @@
 #ifndef AUTO_NAV_BEYBLADE_COMMAND_HPP_
 #define AUTO_NAV_BEYBLADE_COMMAND_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -29,9 +34,12 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
+#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -48,7 +56,7 @@ public:
         HolonomicChassisSubsystem& chassis,
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config,
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -75,7 +83,7 @@ private:
 
     bool autoNavOnlyInGame;
 
-    bool beybladeEnabled = false;
+    bool beybladeEnabled = true;
     bool movementEnabled = true;
 
     aruwsrc::chassis::ChassisAutoNavController autoNavController;
