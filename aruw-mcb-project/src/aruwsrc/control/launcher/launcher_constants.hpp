@@ -76,6 +76,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {0.0f, 0.0f},
     {4.0f, 1900.0f},
     {10.0f, 3850.0f},
+    {15.0f, 5750.0f},
     {16.0f, 6350.0f},
     {18.0f, 8500.0f},
 };

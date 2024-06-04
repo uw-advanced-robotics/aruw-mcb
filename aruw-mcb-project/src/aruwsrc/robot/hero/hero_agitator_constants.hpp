@@ -110,7 +110,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI / 2.0f,
+        .targetIntegralChange = M_PI / 8.0f,
         .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
@@ -121,7 +121,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI,
+        .targetIntegralChange = M_PI * 2,
         .desiredSetpoint = 6.0 * M_PI,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
