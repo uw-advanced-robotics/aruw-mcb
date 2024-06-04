@@ -678,39 +678,72 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
      &cvOnTargetGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping leftUp(
-    drivers(),
-    {&turretCVCommand,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand,
-     &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+// HoldCommandMapping leftUpRightUp( /** auto drive + auto aim + cv gated fire */ )
+// HoldCommandMapping leftUpRightMid(/** auto drive + auto aim */)
 
-HoldCommandMapping leftMid(
+// imu calibrate
+HoldCommandMapping leftUpRightDown(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftDown(
+// auto drive & auto aim
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+        /** auto drive command */
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+// manual aim and shoot
+HoldCommandMapping leftMidRightMid(
+    drivers(),
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+        // TODO: this won't work for shooting, need a stop friction wheels command
+        // in everywhere we don't want to shoot
+        &turretLeftFrictionWheelSpinCommand,
+        &turretRightFrictionWheelSpinCommand,
+        &turretLeftRotateAndUnjamAgitator,
+        &turretRightRotateAndUnjamAgitator,
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+// manual aim
+HoldCommandMapping leftMidRightDown(
+    drivers(),
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+// manul drive, auto aim, cv-gated fire
+HoldCommandMapping leftDownRightUp(
+    drivers(),
+    {&chassisDriveCommand,
+     &turretCVCommand,
+     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+// manual drive & auto aim
+HoldCommandMapping leftDownRightMid(
+    drivers(),
+    {&turretCVCommand, &chassisDriveCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+
+// manual drive
+HoldCommandMapping leftDownRightDown(
     drivers(),
     {&chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-
-HoldRepeatCommandMapping rightUp(
-    drivers(),
-    {
-        &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-        &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-    },
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
-
-HoldCommandMapping rightDown(
-    drivers(),
-    {
-        &imuCalibrateCommand,
-    },
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -776,11 +809,15 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftMid);
-    drivers->commandMapper.addMap(&leftDown);
-    drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
+
+    drivers->commandMapper.addMap(&leftMidRightUp);    // auto drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightMid);   // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+
+    drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 }
 
 }  // namespace sentry_control
