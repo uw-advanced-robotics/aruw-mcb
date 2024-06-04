@@ -32,7 +32,8 @@ class CapBankSprintCommand : public tap::control::Command
 public:
     CapBankSprintCommand(
         tap::Drivers* drivers,
-        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem);
+        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+        const aruwsrc::can::capbank::SprintMode sprintOption);
 
     void initialize() override;
 
@@ -45,6 +46,8 @@ public:
     const char* getName() const override { return "Cap Bank Sprint"; }
 
 private:
+    const aruwsrc::can::capbank::SprintMode sprintOption;
+
     tap::Drivers* drivers;
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 };  // class CapBankToggleCommand

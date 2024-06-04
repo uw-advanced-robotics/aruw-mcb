@@ -422,7 +422,8 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 // Cap Bank
 aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(drivers(), capBankSubsystem);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(drivers(), capBankSubsystem, aruwsrc::can::capbank::SprintMode::SPRINT);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(drivers(), capBankSubsystem, aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -523,6 +524,10 @@ HoldCommandMapping shiftPressed(
     drivers(),
     {&capBankSprintCommand},
     RemoteMapState({Remote::Key::SHIFT}));
+HoldCommandMapping ctrlPressed(
+    drivers(),
+    {&capBankHalfSprintCommand},
+    RemoteMapState({Remote::Key::CTRL}));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -600,6 +605,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&vPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace standard_control
 

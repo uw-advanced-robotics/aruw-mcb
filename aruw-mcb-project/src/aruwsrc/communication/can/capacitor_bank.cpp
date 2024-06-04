@@ -94,4 +94,19 @@ void CapacitorBank::setPowerLimit(uint16_t watts)
     message.data[3] = watts >> 8;  // Should always be zero or we are drawing 250+ watts.
     this->drivers->can.sendMessage(this->canBus, message);
 }
+
+float CapacitorBank::getMaximumOutputCurrent() const
+{
+    // Limit to twice the ref limit current.
+    if (this->sprint == SprintMode::HALF_SPRINT)
+    {
+        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f * 1.5f;
+    }
+
+    float capacitorVoltage = this->getVoltage();
+    float maxOutput = CAP_VOLTAGE_TO_MAX_OUT_CURRENT.interpolate(capacitorVoltage);
+
+    return maxOutput;
+}
+
 }  // namespace aruwsrc::can::capbank

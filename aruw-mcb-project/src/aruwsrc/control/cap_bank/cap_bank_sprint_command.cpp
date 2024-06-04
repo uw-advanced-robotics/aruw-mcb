@@ -26,17 +26,18 @@ namespace aruwsrc::control::cap_bank
 {
 CapBankSprintCommand::CapBankSprintCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
-    : drivers(drivers),
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+    const aruwsrc::can::capbank::SprintMode sprintOption)
+    : sprintOption(sprintOption),
+      drivers(drivers),
       capBankSubsystem(capBankSubsystem)
-
 {
     addSubsystemRequirement(&capBankSubsystem);
 }
 
 void CapBankSprintCommand::initialize()
 {
-    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT);
+    capBankSubsystem.changeSprintMode(this->sprintOption);
 }
 
 void CapBankSprintCommand::execute() {}

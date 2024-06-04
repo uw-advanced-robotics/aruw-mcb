@@ -70,8 +70,8 @@ private:
 
     tap::control::chassis::PowerLimiter fallback;
 
-    const float LOWEST_CAP_VOLTAGE = 10.0f;
-    const float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
+    const float LOWEST_CAP_VOLTAGE = 8.0f;
+    const float VOLTAGE_RAMPDOWN_RANGE = 10.0f;
 
     float currentIntegrator = 0;
 };

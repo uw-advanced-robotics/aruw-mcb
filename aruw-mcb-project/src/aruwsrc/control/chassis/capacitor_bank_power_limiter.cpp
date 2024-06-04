@@ -81,18 +81,18 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return fallback;
     }
 
-    float setpoint = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
+    float setpoint = 0.9f * drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
 
     if (this->capacitorBank->isSprinting())
     {
-        setpoint = 6;  // TODO: get this based on a table or something
+        setpoint = this->capacitorBank->getMaximumOutputCurrent();
     }
 
     float measured = this->capacitorBank->getCurrent();
 
     float error = setpoint - measured;
 
-    const float K_I = 0.0025;
+    const float K_I = 0.002;
     const float K_P = 0.005;
 
     this->currentIntegrator += K_I * error;

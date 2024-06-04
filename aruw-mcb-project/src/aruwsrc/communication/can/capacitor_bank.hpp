@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::can::capbank
 {
@@ -53,8 +54,25 @@ enum State
 enum SprintMode
 {
     REGULAR = 0,
-    SPRINT = 1
+    HALF_SPRINT = 1,
+    SPRINT = 2
 };
+
+static constexpr modm::Pair<float, float> CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT[] = {
+    {7.0, 2.5},
+    {9.0, 4.0},
+    {11.0, 6.0},
+    {14.0, 7.0},
+    {17.0, 10.0},
+    {20.0, 12.0},
+    {23.0, 12.0},
+    {26.0, 12.0}, 
+    {29.0, 12.0}
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>> CAP_VOLTAGE_TO_MAX_OUT_CURRENT(
+    CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT,
+    MODM_ARRAY_SIZE(CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT));
 
 class CapacitorBank : public tap::can::CanRxListener
 {
@@ -88,7 +106,9 @@ public:
     }
 
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };
-    bool isSprinting() const { return this->sprint == SprintMode::SPRINT; };
+    bool isSprinting() const { return this->sprint != SprintMode::REGULAR; };
+
+    float getMaximumOutputCurrent() const;
 
 private:
     const float capacitance;
