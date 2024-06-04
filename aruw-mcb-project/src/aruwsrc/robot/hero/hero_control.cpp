@@ -111,8 +111,6 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
-
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
@@ -180,16 +178,6 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-
-// @todo: keybindings
-aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
-    sentryRequestSubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -478,7 +466,6 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentryRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -493,7 +480,6 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
