@@ -85,10 +85,11 @@ public:
         }
 
         // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power limit rarely changes, this helps cut down on unnecessary array searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != (int) chassisPowerLimit)
+        // power limit rarely changes, this helps cut down on unnecessary array
+        // searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != (int)chassisPowerLimit)
         {
-            lastComputedMaxWheelSpeed.first = (int) chassisPowerLimit;
+            lastComputedMaxWheelSpeed.first = (int)chassisPowerLimit;
             lastComputedMaxWheelSpeed.second =
                 CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
         }
@@ -96,7 +97,7 @@ public:
         return lastComputedMaxWheelSpeed.second;
     }
 
-    static inline float getChassisPowerLimit(tap::Drivers *drivers)
+    static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
         if (capacitorBank != nullptr && capacitorBank->isSprinting())
         {

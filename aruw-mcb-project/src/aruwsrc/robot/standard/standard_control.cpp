@@ -425,7 +425,7 @@ aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(),
 aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
-     aruwsrc::can::capbank::SprintMode::SPRINT);
+    aruwsrc::can::capbank::SprintMode::SPRINT);
 aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
     drivers(),
     capBankSubsystem,

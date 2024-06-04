@@ -33,10 +33,7 @@ namespace aruwsrc
 {
 namespace control
 {
-float ControlOperatorInterface::applyChassisSpeedScaling(float value)
-{
-    return value;
-}
+float ControlOperatorInterface::applyChassisSpeedScaling(float value) { return value; }
 
 /**
  * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
