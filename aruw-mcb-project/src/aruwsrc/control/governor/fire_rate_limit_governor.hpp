@@ -74,7 +74,7 @@ public:
     {
         // Never explicitly force the command to stop. We assume that it will fire at most one shot
         // then end by itself.
-        return false;
+        return isReady();
     }
 
 private:

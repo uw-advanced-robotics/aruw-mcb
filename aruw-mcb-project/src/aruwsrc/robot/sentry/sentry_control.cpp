@@ -626,21 +626,14 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
      &frictionWheelsOnGovernorTurretLeft,
      &fireRateLimitGovernorTurretLeft});
 
-GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
-     &cvOnTargetGovernorTurretLeft});
-
-GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
-    {&turretLeftAgitator},
-    turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
-     &frictionWheelsOnGovernorTurretLeft,
-     &cvOnTargetGovernorTurretLeft});
+     &cvOnTargetGovernorTurretLeft,
+     &fireRateLimitGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
