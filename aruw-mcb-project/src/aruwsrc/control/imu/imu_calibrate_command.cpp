@@ -35,11 +35,11 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     float velocityZeroThreshold,
     float positionZeroThreshold)
     : tap::control::Command(),
+      velocityZeroThreshold(velocityZeroThreshold),
+      positionZeroThreshold(positionZeroThreshold),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis),
-      velocityZeroThreshold(velocityZeroThreshold),
-      positionZeroThreshold(positionZeroThreshold)
+      chassis(chassis)
 {
     for (auto &config : turretsAndControllers)
     {
