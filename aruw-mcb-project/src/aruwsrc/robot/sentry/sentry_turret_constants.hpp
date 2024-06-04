@@ -145,7 +145,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr float majorToTurretR = 0.145;
 static constexpr float default_launch_speed = 14.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
 }  // namespace turretLeft
 
 namespace turretRight
@@ -175,7 +175,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr float majorToTurretR = -0.145;
 static constexpr float default_launch_speed = 14.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
 }  // namespace turretRight
 

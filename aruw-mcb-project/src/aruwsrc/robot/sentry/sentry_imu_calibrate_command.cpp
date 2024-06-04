@@ -88,7 +88,6 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
-size_t i;
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
