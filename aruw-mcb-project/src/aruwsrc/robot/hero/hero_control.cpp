@@ -414,8 +414,14 @@ aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 // Cap Bank
 aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(drivers(), capBankSubsystem, aruwsrc::can::capbank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(drivers(), capBankSubsystem, aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::SPRINT);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(

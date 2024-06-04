@@ -35,10 +35,7 @@ CapBankSprintCommand::CapBankSprintCommand(
     addSubsystemRequirement(&capBankSubsystem);
 }
 
-void CapBankSprintCommand::initialize()
-{
-    capBankSubsystem.changeSprintMode(this->sprintOption);
-}
+void CapBankSprintCommand::initialize() { capBankSubsystem.changeSprintMode(this->sprintOption); }
 
 void CapBankSprintCommand::execute() {}
 

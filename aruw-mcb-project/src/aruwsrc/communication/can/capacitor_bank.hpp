@@ -66,9 +66,8 @@ static constexpr modm::Pair<float, float> CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT[] =
     {17.0, 10.0},
     {20.0, 12.0},
     {23.0, 12.0},
-    {26.0, 12.0}, 
-    {29.0, 12.0}
-};
+    {26.0, 12.0},
+    {29.0, 12.0}};
 
 static modm::interpolation::Linear<modm::Pair<float, float>> CAP_VOLTAGE_TO_MAX_OUT_CURRENT(
     CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT,

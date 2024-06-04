@@ -43,6 +43,10 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
+#if defined(ALL_STANDARDS)
+#elif defined(TARGET_HERO_PERSEUS)
+#endif
+
 namespace aruwsrc
 {
 namespace chassis
@@ -73,23 +77,33 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
+    static inline float getMaxWheelSpeed(bool refSerialOnline, float chassisPowerLimit)
     {
         if (!refSerialOnline)
         {
-            chassisPower = 0;
+            chassisPowerLimit = 0;
         }
 
         // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != chassisPower)
+        // power limit rarely changes, this helps cut down on unnecessary array searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != (int) chassisPowerLimit)
         {
-            lastComputedMaxWheelSpeed.first = chassisPower;
+            lastComputedMaxWheelSpeed.first = (int) chassisPowerLimit;
             lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
+                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
         }
 
         return lastComputedMaxWheelSpeed.second;
+    }
+
+    static inline float getChassisPowerLimit(tap::Drivers *drivers)
+    {
+        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        {
+            return capacitorBank->getMaximumOutputCurrent() * 24.0f;
+        }
+
+        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
     }
 
     /**
@@ -151,6 +165,7 @@ public:
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
+    static can::capbank::CapacitorBank* capacitorBank;
 
     float desiredRotation = 0;
 

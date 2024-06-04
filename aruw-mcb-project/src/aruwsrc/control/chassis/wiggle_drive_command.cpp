@@ -122,7 +122,7 @@ const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() co
 {
     return WIGGLE_PARAMS_45W_CUTOFF;
     uint16_t powerConsumptionLimit =
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+        HolonomicChassisSubsystem::getChassisPowerLimit(drivers);
     if (powerConsumptionLimit <= 45 || !drivers->refSerial.getRefSerialReceivingData())
     {
         return WIGGLE_PARAMS_45W_CUTOFF;

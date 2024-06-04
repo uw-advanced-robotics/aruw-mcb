@@ -35,16 +35,7 @@ namespace control
 {
 float ControlOperatorInterface::applyChassisSpeedScaling(float value)
 {
-    if (isSlowMode())
-    {
-        value *= SPEED_REDUCTION_SCALAR;
-    }
     return value;
-}
-
-bool ControlOperatorInterface::isSlowMode()
-{
-    return drivers->remote.keyPressed(Remote::Key::CTRL);
 }
 
 /**
@@ -91,7 +82,7 @@ float ControlOperatorInterface::getChassisXInput()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -127,7 +118,7 @@ float ControlOperatorInterface::getChassisYInput()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalY = maxChassisSpeed *
                    limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -163,7 +154,7 @@ float ControlOperatorInterface::getChassisRInput()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalR = maxChassisSpeed *
                    limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
