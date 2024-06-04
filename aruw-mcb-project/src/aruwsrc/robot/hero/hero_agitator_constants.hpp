@@ -121,7 +121,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI * 2,
+        .targetIntegralChange = M_TWOPI,
         .desiredSetpoint = 6.0 * M_PI,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
