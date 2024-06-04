@@ -391,7 +391,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
-extern MultiShotCvCommandMapping leftMousePressedCtrlNotPressed;
+extern MultiShotCvCommandMapping leftMousePressedENotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
     drivers()->commandScheduler,
@@ -402,7 +402,7 @@ ClientDisplayCommand clientDisplayCommand(
     agitator,
     turret,
     imuCalibrateCommand,
-    &leftMousePressedCtrlNotPressed,
+    &leftMousePressedENotPressed,
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
@@ -441,18 +441,18 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
-MultiShotCvCommandMapping leftMousePressedCtrlNotPressed(
+MultiShotCvCommandMapping leftMousePressedENotPressed(
     *drivers(),
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::CTRL}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::E}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,
     &rotateAgitator);
 
-HoldRepeatCommandMapping leftMousePressedCtrlPressed(
+HoldRepeatCommandMapping leftMousePressedEPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::CTRL}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::E}),
     false);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -498,7 +498,7 @@ CycleStateCommandMapping<
         drivers(),
         RemoteMapState({Remote::Key::V}),
         MultiShotCvCommandMapping::SINGLE,
-        &leftMousePressedCtrlNotPressed,
+        &leftMousePressedENotPressed,
         &MultiShotCvCommandMapping::setShooterState);
 
 // Safe disconnect function
@@ -563,8 +563,8 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedCtrlPressed);
+    drivers->commandMapper.addMap(&leftMousePressedENotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedEPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);

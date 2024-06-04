@@ -425,16 +425,16 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-MultiShotCvCommandMapping leftMousePressedCtrlNotPressed(
+MultiShotCvCommandMapping leftMousePressedENotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::CTRL}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::E}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
-HoldRepeatCommandMapping leftMousePressedCtrlPressed(
+HoldRepeatCommandMapping leftMousePressedEPressed(
     drivers(),
     {&kicker::launchKickerNoHeatLimiting},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::CTRL}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::E}),
     false);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -532,8 +532,8 @@ void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedCtrlNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedCtrlPressed);
+    drivers->commandMapper.addMap(&leftMousePressedENotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedEPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
