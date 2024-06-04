@@ -222,10 +222,10 @@ void BooleanHudIndicators::initialize()
         std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]));
 
     RefSerialTransmitter::configCircle(
-        BOOLEAN_HUD_INDICATOR_WIDTH,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
         AMMO_INDICATOR_X,
         AMMO_INDICATOR_Y,
-        BOOLEAN_HUD_INDICATOR_RADIUS,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
         &booleanHudIndicatorGraphics[AMMO_AVAILABLE].graphicData);
 
     // config the border circle that bounds the booleanHudIndicatorGraphics
