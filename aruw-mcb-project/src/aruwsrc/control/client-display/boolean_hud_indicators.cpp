@@ -147,7 +147,7 @@ void BooleanHudIndicators::initialize()
     uint16_t hudIndicatorListCurrY = BOOLEAN_HUD_INDICATOR_LIST_START_Y;
 
     // Configure hopper cover hud indicator
-    for (int i = 0; i < NUM_BOOLEAN_HUD_INDICATORS; i++)
+    for (int i = 0; i < AMMO_AVAILABLE; i++)
     {
         // config the boolean HUD indicator circle (that will switch colors based on state)
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -159,26 +159,12 @@ void BooleanHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
-        if (i != AMMO_AVAILABLE)
-        {
-            RefSerialTransmitter::configCircle(
-                BOOLEAN_HUD_INDICATOR_WIDTH,
-                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-                hudIndicatorListCurrY,
-                BOOLEAN_HUD_INDICATOR_RADIUS,
-                &booleanHudIndicatorGraphics[i].graphicData);
-        }
-        else
-        {
-            hudIndicatorListCurrY -=
-                BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS * (AMMO_SIZE_SCALAR / 2);
-            RefSerialTransmitter::configCircle(
-                AMMO_BOOLEAN_HUD_INDICATOR_WIDTH,
-                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-                hudIndicatorListCurrY,
-                AMMO_BOOLEAN_HUD_INDICATOR_RADIUS,
-                &booleanHudIndicatorGraphics[i].graphicData);
-        }
+        RefSerialTransmitter::configCircle(
+            BOOLEAN_HUD_INDICATOR_WIDTH,
+            BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+            hudIndicatorListCurrY,
+            BOOLEAN_HUD_INDICATOR_RADIUS,
+            &booleanHudIndicatorGraphics[i].graphicData);
 
         // config the border circle that bounds the booleanHudIndicatorGraphics
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -190,24 +176,12 @@ void BooleanHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
-        if (i != AMMO_AVAILABLE)
-        {
-            RefSerialTransmitter::configCircle(
-                BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
-                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-                hudIndicatorListCurrY,
-                BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
-                &booleanHudIndicatorStaticGraphics[i].graphicData);
-        }
-        else
-        {
-            RefSerialTransmitter::configCircle(
-                AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
-                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-                hudIndicatorListCurrY,
-                AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
-                &booleanHudIndicatorStaticGraphics[i].graphicData);
-        }
+        RefSerialTransmitter::configCircle(
+            BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+            BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+            hudIndicatorListCurrY,
+            BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+            &booleanHudIndicatorStaticGraphics[i].graphicData);
 
         // config the label associated with the particular indicator
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -220,12 +194,6 @@ void BooleanHudIndicators::initialize()
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 
         const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]);
-
-        if (i == AMMO_AVAILABLE)
-        {
-            hudIndicatorListCurrY +=
-                BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS * (AMMO_SIZE_SCALAR / 2);
-        }
 
         RefSerialTransmitter::configCharacterMsg(
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
@@ -241,5 +209,60 @@ void BooleanHudIndicators::initialize()
         // just configured
         hudIndicatorListCurrY -= BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS;
     }
+
+    // Draw the ammo indicator in the center
+    // config the boolean HUD indicator circle (that will switch colors based on state)
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]));
+
+    RefSerialTransmitter::configCircle(
+        BOOLEAN_HUD_INDICATOR_WIDTH,
+        AMMO_INDICATOR_X,
+        AMMO_INDICATOR_Y,
+        BOOLEAN_HUD_INDICATOR_RADIUS,
+        &booleanHudIndicatorGraphics[AMMO_AVAILABLE].graphicData);
+
+    // config the border circle that bounds the booleanHudIndicatorGraphics
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorStaticGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
+
+    RefSerialTransmitter::configCircle(
+        BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+        AMMO_INDICATOR_X,
+        AMMO_INDICATOR_Y,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+        &booleanHudIndicatorStaticGraphics[AMMO_AVAILABLE].graphicData);
+
+    // config the label associated with the particular indicator
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorStaticLabelGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
+
+    const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]);
+
+    RefSerialTransmitter::configCharacterMsg(
+        BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
+        BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
+        AMMO_TEXT_X,
+        AMMO_TEXT_Y,
+        indicatorLabel,
+        &booleanHudIndicatorStaticLabelGraphics[AMMO_AVAILABLE]);
 }
 }  // namespace aruwsrc::control::client_display
