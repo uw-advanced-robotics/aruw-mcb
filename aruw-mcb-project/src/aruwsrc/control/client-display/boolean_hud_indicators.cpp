@@ -255,7 +255,8 @@ void BooleanHudIndicators::initialize()
         DEFAULT_GRAPHIC_LAYER,
         BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 
-    const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]);
+    const char *indicatorLabel =
+        std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]);
 
     RefSerialTransmitter::configCharacterMsg(
         BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
