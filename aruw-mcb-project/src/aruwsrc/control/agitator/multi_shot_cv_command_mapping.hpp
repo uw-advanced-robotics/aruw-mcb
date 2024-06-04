@@ -59,7 +59,8 @@ public:
     {
         SINGLE = 0,
         NO_HEATING,
-        FULL_AUTO_10HZ,
+        LIMITED_10HZ,
+        LIMITED_20HZ,
         FULL_AUTO,
         NUM_SHOOTER_STATES,
     };

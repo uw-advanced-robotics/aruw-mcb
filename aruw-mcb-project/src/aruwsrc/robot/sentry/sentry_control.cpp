@@ -634,6 +634,14 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
      &frictionWheelsOnGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft});
 
+GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft,
+     &cvOnTargetGovernorTurretLeft});
+
 // RIGHT shooting ======================
 
 // spin friction wheels commands

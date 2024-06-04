@@ -89,7 +89,11 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { agitatorMotor.setDesiredOutput(0); }
+    inline void refreshSafeDisconnect() override
+    {
+        agitatorMotor.setDesiredOutput(0);
+        clearJam();
+    }
 
     /**
      * @return The angle set in `setSetpoint`.
