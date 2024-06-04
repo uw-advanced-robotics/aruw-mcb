@@ -210,8 +210,8 @@ private:
     static constexpr uint16_t AMMO_INDICATOR_X = 960;
     static constexpr uint16_t AMMO_INDICATOR_Y = 825;
 
-    static constexpr uint16_t AMMO_TEXT_X = 800;
-    static constexpr uint16_t AMMO_TEXT_Y = AMMO_INDICATOR_Y;
+    static constexpr uint16_t AMMO_TEXT_X = 815;
+    static constexpr uint16_t AMMO_TEXT_Y = AMMO_INDICATOR_Y + 10;
 };
 }  // namespace aruwsrc::control::client_display
 
