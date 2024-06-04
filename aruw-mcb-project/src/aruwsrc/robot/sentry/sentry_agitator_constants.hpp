@@ -22,9 +22,9 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
-#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 
 // Do not include this file directly: use agitator_constants.hpp instead.
@@ -80,8 +80,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 300,
+    .jammingVelocityDifference = 2.0f * M_TWOPI,
+    .jammingTime = 200,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
@@ -94,17 +94,16 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
 };
 
-static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    // magic numbers are fudge factors
-    .targetUnjamIntegralChange = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .unjamSetpoint = 0.15f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
-    /// seconds.Convert to ms, Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(
-                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.2f * AGITATOR_MAX_ROF *
-                       (M_TWOPI / AGITATOR_NUM_POCKETS)) +
-                   100,
-    .targetCycleCount = 3,
+constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
+static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
+    AGITATOR_UNJAM_CONFIG = {
+        .targetUnjamIntegralChange = UNJAM_DISTANCE,
+        .unjamSetpoint = UNJAM_VELOCITY,
+        /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+        /// seconds.Convert to ms, Add 100 ms extra tolerance.
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
+        .targetCycleCount = 3,
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
