@@ -119,8 +119,11 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     {
         outOfAmmo = true;
         outOfAmmoTimer.restart(OUT_OF_AMMO_TOGGLE_PERIOD_MS);
-    } else {
-        if(outOfAmmoTimer.execute()){
+    }
+    else
+    {
+        if (outOfAmmoTimer.execute())
+        {
             outOfAmmo = !outOfAmmo;
         }
     }
@@ -156,12 +159,26 @@ void BooleanHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]));
 
-        RefSerialTransmitter::configCircle(
-            BOOLEAN_HUD_INDICATOR_WIDTH,
-            BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-            hudIndicatorListCurrY,
-            BOOLEAN_HUD_INDICATOR_RADIUS,
-            &booleanHudIndicatorGraphics[i].graphicData);
+        if (i != AMMO_AVAILABLE)
+        {
+            RefSerialTransmitter::configCircle(
+                BOOLEAN_HUD_INDICATOR_WIDTH,
+                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+                hudIndicatorListCurrY,
+                BOOLEAN_HUD_INDICATOR_RADIUS,
+                &booleanHudIndicatorGraphics[i].graphicData);
+        }
+        else
+        {
+            hudIndicatorListCurrY -=
+                BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS * (AMMO_SIZE_SCALAR / 2);
+            RefSerialTransmitter::configCircle(
+                AMMO_BOOLEAN_HUD_INDICATOR_WIDTH,
+                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+                hudIndicatorListCurrY,
+                AMMO_BOOLEAN_HUD_INDICATOR_RADIUS,
+                &booleanHudIndicatorGraphics[i].graphicData);
+        }
 
         // config the border circle that bounds the booleanHudIndicatorGraphics
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -173,12 +190,24 @@ void BooleanHudIndicators::initialize()
             DEFAULT_GRAPHIC_LAYER,
             BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
 
-        RefSerialTransmitter::configCircle(
-            BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
-            BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
-            hudIndicatorListCurrY,
-            BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
-            &booleanHudIndicatorStaticGraphics[i].graphicData);
+        if (i != AMMO_AVAILABLE)
+        {
+            RefSerialTransmitter::configCircle(
+                BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+                hudIndicatorListCurrY,
+                BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+                &booleanHudIndicatorStaticGraphics[i].graphicData);
+        }
+        else
+        {
+            RefSerialTransmitter::configCircle(
+                AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+                BOOLEAN_HUD_INDICATOR_LIST_CENTER_X,
+                hudIndicatorListCurrY,
+                AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+                &booleanHudIndicatorStaticGraphics[i].graphicData);
+        }
 
         // config the label associated with the particular indicator
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -191,6 +220,12 @@ void BooleanHudIndicators::initialize()
             BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
 
         const char *indicatorLabel = std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[i]);
+
+        if (i == AMMO_AVAILABLE)
+        {
+            hudIndicatorListCurrY +=
+                BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS * (AMMO_SIZE_SCALAR / 2);
+        }
 
         RefSerialTransmitter::configCharacterMsg(
             BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,

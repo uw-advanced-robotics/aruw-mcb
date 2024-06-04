@@ -134,7 +134,7 @@ private:
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
-                "AMMO ",
+                "BuY AMMO ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -201,8 +201,22 @@ private:
 
     bool outOfAmmo = false;
     // How often to toggle the out of ammo indicator
-    static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 100.0f;
+    static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 500.0f;
     tap::arch::PeriodicMilliTimer outOfAmmoTimer;
+
+    static constexpr uint16_t AMMO_SIZE_SCALAR = 6;
+    static constexpr uint16_t AMMO_BOOLEAN_HUD_INDICATOR_WIDTH =
+        BOOLEAN_HUD_INDICATOR_WIDTH * AMMO_SIZE_SCALAR;
+    /** The radius of the boolean indicator circles. */
+    static constexpr uint16_t AMMO_BOOLEAN_HUD_INDICATOR_RADIUS =
+        BOOLEAN_HUD_INDICATOR_RADIUS * AMMO_SIZE_SCALAR;
+
+    /** The width of the boolean HUD indicator's outline circle. */
+    static constexpr uint16_t AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH =
+        AMMO_BOOLEAN_HUD_INDICATOR_WIDTH;
+    /** The radius of the boolean HUD indicator outline circle. */
+    static constexpr uint16_t AMMO_BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS =
+        AMMO_BOOLEAN_HUD_INDICATOR_RADIUS;
 };
 }  // namespace aruwsrc::control::client_display
 
