@@ -117,18 +117,18 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
 
     if (haveAmmo())
     {
-        outOfAmmo = true;
+        hasAmmo = true;
         outOfAmmoTimer.restart(OUT_OF_AMMO_TOGGLE_PERIOD_MS);
     }
     else
     {
         if (outOfAmmoTimer.execute())
         {
-            outOfAmmo = !outOfAmmo;
+            hasAmmo = !hasAmmo;
         }
     }
 
-    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(outOfAmmo);
+    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(hasAmmo);
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;

@@ -202,7 +202,7 @@ private:
     Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 
-    bool outOfAmmo = false;
+    bool hasAmmo = false;
     // How often to toggle the out of ammo indicator
     static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 500.0f;
     tap::arch::PeriodicMilliTimer outOfAmmoTimer;
