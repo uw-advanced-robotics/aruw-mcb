@@ -20,6 +20,7 @@
 #ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -134,6 +135,14 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+#endif
+
+#if defined(TARGET_HERO_PERSEUS)
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
+#else
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 1;
 #endif
 
 }  // namespace aruwsrc::control::launcher
