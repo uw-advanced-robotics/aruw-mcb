@@ -27,12 +27,12 @@
 
 namespace tap::algorithms::transforms
 {
-Vector Vector::operator+(const Position& other) const
+inline Vector Vector::operator+(const Position& other) const
 {
     return Vector(this->coordinates_ + other.coordinates());
 }
 
-Vector Vector::operator+(const Vector& other) const
+inline Vector Vector::operator+(const Vector& other) const
 {
     return Vector(this->coordinates_ + other.coordinates_);
 }
