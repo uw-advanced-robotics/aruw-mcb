@@ -25,11 +25,11 @@
 #define TAPROOT_POSITION_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
-#include "tap/algorithms/transforms/vector.hpp"
 
 namespace tap::algorithms::transforms
 {
-// class Vector;
+// Forward declaration to avoid circular dependency
+class Vector;
 
 class Position
 {
@@ -55,7 +55,7 @@ public:
     inline float z() const { return coordinates_.data[2]; }
 
     /* Operators */
-    Vector operator-(const Vector& other) const;
+    Position operator-(const Vector& other) const;
 
     Vector operator-(const Position& other) const;
 
@@ -74,10 +74,7 @@ public:
         return a * (1 - t) + b * t;
     }
 
-    static inline float distance(const Position& a, const Position& b)
-    {
-        return (b - a).magnitude();
-    }
+    static float distance(const Position& a, const Position& b);
 
 private:
     CMSISMat<3, 1> coordinates_;

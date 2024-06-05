@@ -27,9 +27,9 @@
 
 namespace tap::algorithms::transforms
 {
-Vector Position::operator-(const Vector& other) const
+Position Position::operator-(const Vector& other) const
 {
-    return Vector(this->coordinates_ - other.coordinates());
+    return Position(this->coordinates_ - other.coordinates());
 }
 
 Vector Position::operator-(const Position& other) const
@@ -55,9 +55,9 @@ Position& Position::operator=(const Position& other)
 
 bool Position::operator==(const Position& other) const
 {
-    return this->coordinates_.data[0] == other.coordinates_.data[0] &&
-           this->coordinates_.data[1] == other.coordinates_.data[1] &&
-           this->coordinates_.data[2] == other.coordinates_.data[2];
+    return this->coordinates_.data == other.coordinates_.data;
 }
+
+float Position::distance(const Position& a, const Position& b) { return (b - a).magnitude(); }
 
 }  // namespace tap::algorithms::transforms
