@@ -20,6 +20,7 @@
 #ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -75,6 +76,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {0.0f, 0.0f},
     {4.0f, 1900.0f},
     {10.0f, 3850.0f},
+    {15.0f, 5750.0f},
     {16.0f, 6350.0f},
     {18.0f, 8500.0f},
 };
@@ -131,9 +133,17 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO_PERSEUS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+#endif
+
+#if defined(TARGET_HERO_PERSEUS)
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
+#else
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 1;
 #endif
 
 }  // namespace aruwsrc::control::launcher
