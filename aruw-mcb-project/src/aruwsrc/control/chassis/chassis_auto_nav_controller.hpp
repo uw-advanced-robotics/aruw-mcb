@@ -32,7 +32,6 @@
 
 namespace aruwsrc::chassis
 {
-
 class ChassisAutoNavController
 {
 public:
