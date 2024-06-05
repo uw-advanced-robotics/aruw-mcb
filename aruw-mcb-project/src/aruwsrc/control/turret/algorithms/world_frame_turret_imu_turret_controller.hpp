@@ -60,7 +60,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const SentryMinorOrientationProviderSubsystem &orientationProvider,
         TurretMotor &yawMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
