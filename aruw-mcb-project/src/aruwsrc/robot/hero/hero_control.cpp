@@ -1,4 +1,3 @@
-// REVERT CHANGES TO THIS FILE BEFORE MERGE, HAS AUTONAV TESTING CODE
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -214,18 +213,6 @@ BeybladeCommand beybladeCommand(
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
-
-AutoNavBeybladeCommand autoNavBeybladeCommand(
-    *drivers(),
-    chassis,
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    {.beybladeRotationalSpeedFractionOfMax = BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
-     .beybladeTranslationalSpeedMultiplier = BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
-     .beybladeRotationalSpeedMultiplierWhenTranslating = BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
-     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
-     .beybladeRampRate = BEYBLADE_RAMP_UPDATE_RAMP},
-    true);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -523,7 +510,7 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&autoNavBeybladeCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);

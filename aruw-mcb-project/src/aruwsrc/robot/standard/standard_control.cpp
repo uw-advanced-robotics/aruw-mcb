@@ -1,4 +1,3 @@
-// REVERT CHANGES TO THIS FILE BEFORE MERGE, HAS AUTONAV TESTING CODE
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -228,17 +227,6 @@ aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig sentryBeybladeConfi
         .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
         .beybladeRampRate = aruwsrc::chassis::BEYBLADE_RAMP_UPDATE_RAMP
     };
-
-aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
-    *drivers(),
-    chassis,
-    //turret.yawMotor,
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    sentryBeybladeConfig,
-    // chassis_rel::PITCH_PID_CONFIG, // DUMMY VALUE - NOT USED
-    false
-    );
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
@@ -557,7 +545,7 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&autonavBeybladeCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
 }

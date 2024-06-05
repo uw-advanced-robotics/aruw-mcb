@@ -390,7 +390,7 @@ private:
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
     aruwsrc::algorithms::AutoNavPath path;
-    AutoNavSetpointMessage lastSetpointData{.sequence_num = 0, .speed = 0.8f, .num_setpoints = 0, .setpoints = {}};
+    AutoNavSetpointMessage lastSetpointData{.sequence_num = 0, .speed = 0.0f, .num_setpoints = 0, .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},

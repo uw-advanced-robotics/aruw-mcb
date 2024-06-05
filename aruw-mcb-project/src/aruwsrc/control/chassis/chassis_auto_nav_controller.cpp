@@ -1,5 +1,22 @@
+/*
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #include "chassis_auto_nav_controller.hpp"
-
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::chassis
@@ -10,64 +27,24 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = Position(worldToChassis.getX(), worldToChassis.getY(), 0);
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
-
-    path.resetPath();
-    path.pushPoint(Position(0.0, 0.0, 0));  // sorry about this lol
-    path.pushPoint(Position(0.1, 0.0, 0));  // somehow this felt like less effort than using loops..
-    path.pushPoint(Position(0.2, 0.0, 0));
-    path.pushPoint(Position(0.3, 0.0, 0));
-    path.pushPoint(Position(0.4, 0.0, 0));
-    path.pushPoint(Position(0.5, 0.0, 0));
-    path.pushPoint(Position(0.6, 0.0, 0));
-    path.pushPoint(Position(0.7, 0.0, 0));
-    path.pushPoint(Position(0.7, 0.0, 0));
-    path.pushPoint(Position(0.7, 0.1, 0));
-    path.pushPoint(Position(0.7, 0.2, 0));
-    path.pushPoint(Position(0.7, 0.3, 0));
-    path.pushPoint(Position(0.7, 0.4, 0));
-    path.pushPoint(Position(0.7, 0.5, 0));
-    path.pushPoint(Position(0.7, 0.6, 0));
-    path.pushPoint(Position(0.7, 0.7, 0));
-    path.pushPoint(Position(0.6, 0.7, 0));
-    path.pushPoint(Position(0.5, 0.7, 0));
-    path.pushPoint(Position(0.4, 0.7, 0));
-    path.pushPoint(Position(0.3, 0.7, 0));
-    path.pushPoint(Position(0.2, 0.7, 0));
-    path.pushPoint(Position(0.1, 0.7, 0));
-    path.pushPoint(Position(0.0, 0.7, 0));
-    path.pushPoint(Position(0.0, 0.6, 0));
-    path.pushPoint(Position(0.0, 0.5, 0));
-    path.pushPoint(Position(0.0, 0.4, 0));
-    path.pushPoint(Position(0.0, 0.3, 0));
-    path.pushPoint(Position(0.0, 0.2, 0));
-    // path.pushPoint(Position(0.0, 0.1, 0));
-    // path.pushPoint(Position(0.0, 0.0, 0));
 }
-
-// debug declarations
-float closest;
-float mag = -1;
-Position currentPos = Position(0, 0, 0);
-Position setpoint = Position(0, 0, 0);
-Vector moveVector(-1, -1, 0);
-Vector chassisFrameMoveVector(0, 0, 0);
 
 void ChassisAutoNavController::runController(
     const float maxWheelSpeed,
     const bool movementEnabled,
     const bool beybladeEnabled)
 {
-    currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
+    Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
-    setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
+    Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
     // setpoint = currentPos + Position(LOOKAHEAD_DISTANCE, 0, 0);
     lastSetPoint = setpoint;
 
-    moveVector = Vector(0, 0, 0);
+    Vector moveVector = Vector(0, 0, 0);
 
     Vector posError = setpoint - currentPos;
-    mag = posError.magnitude();
+    float mag = posError.magnitude();
 
     float desiredSpeed =
         visionCoprocessor.getAutonavSpeed() *
@@ -108,7 +85,7 @@ void ChassisAutoNavController::runController(
     float r = rotateSpeedRamp.getValue();
 
     // convert world frame translation to chassis frame
-    chassisFrameMoveVector = worldToChassis.apply(moveVector);
+    Vector chassisFrameMoveVector = worldToChassis.apply(moveVector);
 
     // set outputs
     chassis.setDesiredOutput(
@@ -138,9 +115,9 @@ Position ChassisAutoNavController::calculateSetPoint(
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
-    closest = path.positionToClosestParameter(current);
+    float distOfClosest = path.positionToClosestParameter(current);
 
-    Position lookaheadPos = path.parametertoPosition(closest + lookaheadDistance);
+    Position lookaheadPos = path.parametertoPosition(distOfClosest + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return quadraticBezierInterpolation(

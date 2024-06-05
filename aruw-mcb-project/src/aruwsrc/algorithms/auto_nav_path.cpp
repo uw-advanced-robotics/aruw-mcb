@@ -39,9 +39,9 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
         Position p1 = setpointData[i];
         Position p2 = setpointData[i + 1];
 
-        float distance = Position::distance(p1, p2);  // segment distance
+        float distance = Position::distance(p1, p2);     // segment distance
         float paramOnSegment =
-            getClosestParameterOnSegment(pos, p1, p2);  // parameter along segment of closest point
+            getClosestParameterOnSegment(pos, p1, p2);   // parameter along segment of closest point
         Position closestPoint = Position::interpolate(
             p1,
             p2,
@@ -62,8 +62,6 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
 
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
-    // assert(!setpointData.empty());
-
     int pointIndex;
     float currParameter = 0;
     float segmentDistance = 0;
@@ -88,13 +86,6 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
         setpointData[pointIndex + 1],
         (parameter - currParameter) / segmentDistance);
 }
-
-// float AutoNavPath::parameterToSpeed(const float parameter) const
-// {
-//     // TODO: IMPLEMENT THIS!!
-//     // currently just test value
-//     return 0.8;
-// }
 
 float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, Position p2) const
 {

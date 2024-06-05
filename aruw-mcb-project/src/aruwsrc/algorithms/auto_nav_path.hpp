@@ -24,7 +24,6 @@ public:
     bool empty() const { return setpointData.empty(); }
     float positionToClosestParameter(const Position pos) const;
     Position parametertoPosition(const float parameter) const;
-    //float parameterToSpeed(const float parameter) const;
     bool hasChanged() const;
     void togglePathChanged();
 
@@ -36,8 +35,6 @@ public:
 private:
     std::deque<Position> setpointData;
     bool path_changed;
-
-    bool path_interpolated = false;  // DEBUG
 
     float getDistance(const Position p1, const Position p2) const;
 

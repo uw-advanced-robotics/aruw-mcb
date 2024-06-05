@@ -109,8 +109,6 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
     }
 }
 
-
-
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
     //TODO: update this to handle the new protocol:
