@@ -18,6 +18,8 @@
  */
 
 #include "deadwheel_chassis_kf_odometry.hpp"
+#include <queue>
+#include "aruwsrc/algorithms/moving_average.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -46,6 +48,13 @@ void DeadwheelChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
+float Vxd, Vyd;
+float V1d, V2d;
+float alpha = 0.001;
+std::queue<float> V1s, V2s;
+size_t windowPeriod = 5;
+float sum1, sum2;
+MovingAverage V1avg(windowPeriod, 0), V2avg(windowPeriod, 0);
 void DeadwheelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -56,10 +65,33 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    float V1 = deadwheelOdometry.getPerpendicularRPM();
-    float V2 = deadwheelOdometry.getParallelMotorRPM();
-    V1 = deadwheelOdometry.rpmToMetersPerSecond(V1);
-    V2 = deadwheelOdometry.rpmToMetersPerSecond(V2);
+    float fakeV1 = deadwheelOdometry.getPerpendicularRPM();
+    float fakeV2 = deadwheelOdometry.getParallelMotorRPM();
+    fakeV1 = deadwheelOdometry.rpmToMetersPerSecond(fakeV1);
+    fakeV2 = deadwheelOdometry.rpmToMetersPerSecond(fakeV2);
+    V1avg.update(fakeV1);
+    V2avg.update(fakeV2);
+    float V1 = V1avg.getVal();
+    float V2 = V2avg.getVal();
+    V1d = V1;
+    V2d = V2;
+    // sum1 += fakeV1;
+    // sum2 += fakeV2;
+    // V1s.push(fakeV1);
+    // V2s.push(fakeV2);
+    // if (V1s.size() > windowPeriod)
+    // {
+    //     sum1 -= V1s.front();
+    //     V1s.pop();
+    //     sum2 -= V2s.front();
+    //     V2s.pop();
+    // }
+    // // V1d += alpha * (fakeV1 - V1d);
+    // // V2d += alpha * (fakeV2 - V2d);
+    // V1d = sum1 / windowPeriod;
+    // V2d = sum2 / windowPeriod;
+    // float V1 = V1d;
+    // float V2 = V2d;
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;
@@ -67,6 +99,8 @@ void DeadwheelChassisKFOdometry::update()
     // relative to the forward direction of the robot
     float Vx = (((V1 - V2)) / M_SQRT2);
     float Vy = (((V1 + V2)) / M_SQRT2);
+    Vxd = Vx;
+    Vyd = Vy;
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();

@@ -124,11 +124,11 @@ void SentryImuCalibrateCommand::execute()
         case CalibrationState::LOCKING_TURRET:
         {
             bool turretsNotMoving = true;
-            for (auto &config : turretsAndControllers)
-            {
-                turretsNotMoving &=
-                    turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
-            }
+            // for (auto &config : turretsAndControllers)
+            // {
+            //     turretsNotMoving &=
+            //         turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
+            // }
 
             turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
