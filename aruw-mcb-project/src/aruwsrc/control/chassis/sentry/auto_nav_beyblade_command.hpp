@@ -54,7 +54,7 @@ public:
     AutoNavBeybladeCommand(
         const tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        const aruwsrc::chassis::ChassisAutoNavController autoNavController,
+        aruwsrc::chassis::ChassisAutoNavController& autoNavController,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -74,13 +74,12 @@ public:
 private:
     const tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
+    aruwsrc::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
 
     bool beybladeEnabled = false;
     bool movementEnabled = true;
-
-    aruwsrc::chassis::ChassisAutoNavController autoNavController;
 
 };  // class AutoNavBeybladeCommand
 

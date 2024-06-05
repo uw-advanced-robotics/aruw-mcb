@@ -34,7 +34,7 @@ namespace chassis
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
-    const aruwsrc::chassis::ChassisAutoNavController autoNavController,
+    aruwsrc::chassis::ChassisAutoNavController& autoNavController,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
