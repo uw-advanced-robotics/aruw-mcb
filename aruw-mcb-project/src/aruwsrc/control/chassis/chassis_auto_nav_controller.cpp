@@ -28,6 +28,13 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = worldToChassis.getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+
+    path.resetPath();
+    path.pushPoint(Position(0, 0, 0));
+    path.pushPoint(Position(0.75, 0, 0));
+    path.pushPoint(Position(0.75, 0.75, 0));
+    path.pushPoint(Position(0, 0.75, 0));
+    path.pushPoint(Position(0, 0.2, 0));
 }
 
 void ChassisAutoNavController::runController(
@@ -90,7 +97,7 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    if (!movementEnabled)  //! visionCoprocessor.isCvOnline() ||
     {
         return lastSetPoint;
     }

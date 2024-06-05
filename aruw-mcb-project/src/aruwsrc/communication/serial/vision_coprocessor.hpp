@@ -264,7 +264,7 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
+    mockable inline float getAutonavSpeed() const { return 0.8; }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
@@ -389,7 +389,7 @@ private:
     aruwsrc::algorithms::AutoNavPath autoNavPath;
     AutoNavSetpointMessage lastSetpointData{
         .sequence_num = 0,
-        .speed = 0.0f,
+        .speed = 0.8f,
         .num_setpoints = 0,
         .setpoints = {}};
 
