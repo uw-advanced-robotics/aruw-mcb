@@ -61,8 +61,7 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
     int pointIndex;
-    float currParameter = 0;
-    float segmentDistance = 0;
+    float currParameter = 0, segmentDistance = 0;
     for (pointIndex = 0; pointIndex < (int)setpointData.size() - 1; pointIndex++)
     {
         segmentDistance =
