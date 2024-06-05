@@ -46,29 +46,41 @@ void TurretMotor::updateMotorAngle()
     if (isOnline())
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
-        // startEncoderValueRad = config.startEncoderValue * M_2_PI / DjiMotor::ENC_RESOLUTION;
-        // float normalizedMinAngle = config.minAngle < 0? M_2_PI + config.minAngle : config.minAngle;
 
         float minAngleDiffFromStart = modm::toDegree(config.startAngle - config.minAngle);
-        minAngleDiffFromStart = minAngleDiffFromStart < 0? -minAngleDiffFromStart : minAngleDiffFromStart;
+        minAngleDiffFromStart =
+            minAngleDiffFromStart < 0 ? -minAngleDiffFromStart : minAngleDiffFromStart;  // abs val
 
         float maxAngleDiffFromStart = modm::toDegree(config.maxAngle - config.startAngle);
-        maxAngleDiffFromStart = maxAngleDiffFromStart < 0? -maxAngleDiffFromStart : maxAngleDiffFromStart;
-        
-        minAngleEncoder = config.startEncoderValue - DjiMotor::degreesToEncoder<int64_t>(minAngleDiffFromStart);
-        maxAngleEncoder = config.startEncoderValue + DjiMotor::degreesToEncoder<int64_t>(maxAngleDiffFromStart);
+        maxAngleDiffFromStart =
+            maxAngleDiffFromStart < 0 ? -maxAngleDiffFromStart : maxAngleDiffFromStart;  // abs val
+
+        minAngleEncoder =
+            config.startEncoderValue - DjiMotor::degreesToEncoder<int64_t>(minAngleDiffFromStart);
+        maxAngleEncoder =
+            config.startEncoderValue + DjiMotor::degreesToEncoder<int64_t>(maxAngleDiffFromStart);
 
         if (startValueNeedsCorrection)
         {
             if (config.limitMotorAngles)
             {
-                if (encoderUnwrapped > minAngleEncoder && encoderUnwrapped < maxAngleEncoder) {
+                if (encoderUnwrapped >= minAngleEncoder && encoderUnwrapped <= maxAngleEncoder)
+                {
                     adjustedStartEncoderValue = config.startEncoderValue;
-                } else if (encoderUnwrapped > maxAngleEncoder) {
-                    adjustedStartEncoderValue = config.startEncoderValue + DjiMotor::ENC_RESOLUTION;
-                } else if (encoderUnwrapped < minAngleEncoder) {
+                }
+                else if (encoderUnwrapped > maxAngleEncoder)
+                {
+                    adjustedStartEncoderValue =
+                        config.startEncoderValue +
+                        DjiMotor::ENC_RESOLUTION;  // currently assume within 1 revolution from
+                                                   // expected
+                }
+                else if (encoderUnwrapped < minAngleEncoder)
+                {
                     adjustedStartEncoderValue = config.startEncoderValue - DjiMotor::ENC_RESOLUTION;
-                } else {
+                }
+                else
+                {
                     adjustedStartEncoderValue = config.startEncoderValue;
                 }
             }
