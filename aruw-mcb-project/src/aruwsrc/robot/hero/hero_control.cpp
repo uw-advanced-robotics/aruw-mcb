@@ -182,7 +182,7 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -413,12 +413,12 @@ ClientDisplayCommand clientDisplayCommand(
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 // Cap Bank
-aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
+aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::can::capbank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
+aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
