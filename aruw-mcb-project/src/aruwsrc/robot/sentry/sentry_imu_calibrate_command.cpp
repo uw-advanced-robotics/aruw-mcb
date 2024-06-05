@@ -43,7 +43,12 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
     aruwsrc::virtualMCB::MCBLite &majorMCBLite,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
-    : imu::ImuCalibrateCommand(drivers, turretsAndControllers, &chassis),
+    : imu::ImuCalibrateCommand(
+          drivers,
+          turretsAndControllers,
+          &chassis,
+          SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD,
+          SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD),
       turretMajor(turretMajor),
       turretMajorController(turretMajorController),
       yawObserver(yawObserver),
@@ -77,7 +82,6 @@ void SentryImuCalibrateCommand::initialize()
 
 static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsystem &turret)
 {
-    // return true;
     return compareFloatClose(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
