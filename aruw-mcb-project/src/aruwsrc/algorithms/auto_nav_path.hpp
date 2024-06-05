@@ -6,8 +6,6 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 
-// #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms
@@ -18,13 +16,19 @@ public:
     AutoNavPath() : setpointData(), path_changed(false) {}
 
     void pushPoint(Position point);
-    void pushFront(Position point);
+
     void popPoint();
+
     void resetPath();
+
     bool empty() const { return setpointData.empty(); }
+
     float positionToClosestParameter(const Position pos) const;
+
     Position parametertoPosition(const float parameter) const;
+
     bool hasChanged() const;
+
     void togglePathChanged();
 
     inline float distTo(const Position& position, const float parameter) const

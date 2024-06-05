@@ -32,25 +32,14 @@ namespace aruwsrc
 namespace chassis
 {
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
-    tap::Drivers& drivers,
+    const tap::Drivers& drivers,
     HolonomicChassisSubsystem& chassis,
-    aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-    const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
-    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+    const aruwsrc::chassis::ChassisAutoNavController autoNavController,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
-      visionCoprocessor(visionCoprocessor),
-      transformerInterface(transformerInterface),
-      config(config),
-      autoNavOnlyInGame(autoNavOnlyInGame),
-      autoNavController(
-          chassis,
-          visionCoprocessor.getPath(),
-          visionCoprocessor,
-          drivers,
-          transformerInterface.getWorldToChassis(),
-          config)
+      autoNavController(autoNavController),
+      autoNavOnlyInGame(autoNavOnlyInGame)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers

@@ -81,9 +81,6 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
-
-#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -219,14 +216,6 @@ aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor);
-
-aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig sentryBeybladeConfig = {
-        .beybladeRotationalSpeedFractionOfMax = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX,
-        .beybladeTranslationalSpeedMultiplier = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER,
-        .beybladeRotationalSpeedMultiplierWhenTranslating = aruwsrc::chassis::BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING,
-        .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = aruwsrc::chassis::BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE,
-        .beybladeRampRate = aruwsrc::chassis::BEYBLADE_RAMP_UPDATE_RAMP
-    };
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),

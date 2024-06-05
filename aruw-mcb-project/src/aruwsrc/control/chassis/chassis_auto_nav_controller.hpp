@@ -36,21 +36,19 @@ namespace aruwsrc::chassis
 class ChassisAutoNavController
 {
 public:
-    // TODO: clean up what should be fields and what should be passed into runController
     inline ChassisAutoNavController(
-        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        aruwsrc::algorithms::AutoNavPath& path,
-        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         tap::Drivers& drivers,
+        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const Transform& worldToChassis,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config)
+        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig)
         : chassis(chassis),
-          path(path),
+          path(visionCoprocessor.getPath()),
           lastSetPoint(Position(-1, -1, 0)),
           visionCoprocessor(visionCoprocessor),
           drivers(drivers),
           worldToChassis(worldToChassis),
-          config(config)
+          beybladeConfig(beybladeConfig)
     {
     }
 
@@ -73,7 +71,8 @@ public:
             Position::interpolate(b, c, t),
             t);
     }
-    // private:
+
+private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
     Position lastSetPoint;
@@ -82,7 +81,7 @@ public:
 
     const Transform& worldToChassis;
 
-    aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config;
+    aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;

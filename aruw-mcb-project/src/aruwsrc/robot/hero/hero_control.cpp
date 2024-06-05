@@ -76,8 +76,6 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
-
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;

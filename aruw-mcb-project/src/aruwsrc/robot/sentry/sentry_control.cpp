@@ -366,6 +366,13 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    drivers()->visionCoprocessor,
+    transformer.getWorldToChassis(),
+    aruwsrc::sentry::chassis::beybladeConfig);
+
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
@@ -453,9 +460,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
 aruwsrc::chassis::AutoNavBeybladeCommand autonavBeybladeCommand(
     *drivers(),
     chassis,
-    drivers()->visionCoprocessor,
-    transformAdapter,
-    aruwsrc::sentry::chassis::beybladeConfig,
+    autoNavController,
     false);
 
 TurretMajorSentryControlCommand majorManualCommand(

@@ -52,11 +52,9 @@ class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
     AutoNavBeybladeCommand(
-        tap::Drivers& drivers,
+        const tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-        const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig config,
+        const aruwsrc::chassis::ChassisAutoNavController autoNavController,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -74,16 +72,12 @@ public:
     const char* getName() const override { return "autonav beyblade"; }
 
 private:
-    tap::Drivers& drivers;
+    const tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
-    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
-    const aruwsrc::algorithms::transforms::TransformerInterface& transformerInterface;
-
-    const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig& config;
 
     bool autoNavOnlyInGame;
 
-    bool beybladeEnabled = true;
+    bool beybladeEnabled = false;
     bool movementEnabled = true;
 
     aruwsrc::chassis::ChassisAutoNavController autoNavController;

@@ -10,8 +10,6 @@ using namespace aruwsrc::algorithms;
 
 void AutoNavPath::pushPoint(Position point) { setpointData.push_back(point); }
 
-void AutoNavPath::pushFront(Position point) { setpointData.push_front(point); }
-
 void AutoNavPath::popPoint() { setpointData.pop_front(); }
 
 void AutoNavPath::resetPath()
@@ -39,9 +37,9 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
         Position p1 = setpointData[i];
         Position p2 = setpointData[i + 1];
 
-        float distance = Position::distance(p1, p2);     // segment distance
+        float distance = Position::distance(p1, p2);  // segment distance
         float paramOnSegment =
-            getClosestParameterOnSegment(pos, p1, p2);   // parameter along segment of closest point
+            getClosestParameterOnSegment(pos, p1, p2);  // parameter along segment of closest point
         Position closestPoint = Position::interpolate(
             p1,
             p2,
