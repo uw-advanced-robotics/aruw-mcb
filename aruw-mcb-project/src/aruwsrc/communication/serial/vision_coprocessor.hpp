@@ -30,11 +30,11 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-#include "aruwsrc/algorithms/auto_nav_path.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -262,12 +262,7 @@ public:
         return lastAimData[turretID];
     }
 
-    // mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    // {
-    //     return lastSetpointData;
-    // }
-
-    mockable inline aruwsrc::algorithms::AutoNavPath& getPath() { return path; }
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
     mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
 
@@ -379,18 +374,24 @@ private:
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
     static constexpr uint8_t MAXSETPOINTS = 50;
-    struct AutoNavCoordinate {
+    struct AutoNavCoordinate
+    {
         float x;
         float y;
     };
-    struct AutoNavSetpointMessage {
+    struct AutoNavSetpointMessage
+    {
         uint32_t sequence_num;
         float speed;
         uint32_t num_setpoints;
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
-    aruwsrc::algorithms::AutoNavPath path;
-    AutoNavSetpointMessage lastSetpointData{.sequence_num = 0, .speed = 0.0f, .num_setpoints = 0, .setpoints = {}};
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequence_num = 0,
+        .speed = 0.0f,
+        .num_setpoints = 0,
+        .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},

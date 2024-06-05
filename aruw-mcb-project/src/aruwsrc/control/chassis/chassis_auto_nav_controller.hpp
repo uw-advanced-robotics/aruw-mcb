@@ -43,7 +43,7 @@ public:
         const Transform& worldToChassis,
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig)
         : chassis(chassis),
-          path(visionCoprocessor.getPath()),
+          path(visionCoprocessor.getAutoNavPath()),
           lastSetPoint(Position(-1, -1, 0)),
           visionCoprocessor(visionCoprocessor),
           drivers(drivers),
