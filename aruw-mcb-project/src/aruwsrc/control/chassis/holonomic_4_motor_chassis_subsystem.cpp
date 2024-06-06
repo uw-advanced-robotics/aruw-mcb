@@ -91,12 +91,9 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
         x,
         y,
         r,
-        10000
-        // getMaxWheelSpeed(
-        //     drivers->refSerial.getRefSerialReceivingData(),
-        //     drivers->refSerial.getRobotData().chassis.powerConsumptionLimit
-        //     ));
-    );
+        getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
 }
 
 void Holonomic4MotorChassisSubsystem::refresh()

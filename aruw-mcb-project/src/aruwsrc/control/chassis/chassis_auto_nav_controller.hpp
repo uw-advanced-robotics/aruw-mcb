@@ -35,6 +35,15 @@ namespace aruwsrc::chassis
 class ChassisAutoNavController
 {
 public:
+    // how much farther ahead along the path the robot movement aims for
+    const float LOOKAHEAD_DISTANCE = 0.2f;
+
+    // how long the controller takes to smoothly transition to an updated path
+    const uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
+
+    // distance from setpoint under which robot is considered "on target"
+    const float POS_ERROR_THRESHOLD = 0.01;
+
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
@@ -85,9 +94,6 @@ private:
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
-
-    float LOOKAHEAD_DISTANCE = 0.2f;
-    uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
 };
 }  // namespace aruwsrc::chassis
 

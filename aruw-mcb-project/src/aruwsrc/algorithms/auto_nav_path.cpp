@@ -34,11 +34,10 @@ void AutoNavPath::popPoint() { setpointData.pop_front(); }
 void AutoNavPath::resetPath()
 {
     setpointData.clear();
-    path_changed = true;
+    pathChanged = true;
 }
 
-bool AutoNavPath::hasChanged() const { return path_changed; }
-void AutoNavPath::togglePathChanged() { path_changed = !path_changed; }
+bool AutoNavPath::hasChanged() const { return pathChanged; }
 
 float AutoNavPath::positionToClosestParameter(const Position pos) const
 {
@@ -79,9 +78,9 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
 
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
-    int pointIndex;
+    size_t pointIndex;
     float currParameter = 0, segmentDistance = 0;
-    for (pointIndex = 0; pointIndex < (int)setpointData.size() - 1; pointIndex++)
+    for (pointIndex = 0; pointIndex < setpointData.size() - 1; pointIndex++)
     {
         segmentDistance =
             Position::distance(setpointData[pointIndex], setpointData[pointIndex + 1]);
@@ -92,7 +91,7 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
         currParameter += segmentDistance;
     }
 
-    if ((size_t)pointIndex + 2 > setpointData.size())
+    if (pointIndex + 2 > setpointData.size())
     {
         return setpointData.back();
     }

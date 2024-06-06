@@ -40,16 +40,15 @@ void ChassisAutoNavController::runController(
                                                // this constant with a function in the future
     Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
 
-    Vector moveVector = Vector(0, 0, 0);
+    Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
     Vector posError = setpoint - currentPos;
-    float mag = posError.magnitude();
 
     float desiredSpeed = visionCoprocessor.getAutonavSpeed();
 
-    if (mag > 0.01)
+    if (posError.magnitude() > POS_ERROR_THRESHOLD)
     {
-        moveVector = posError / lookaheadDist * desiredSpeed * chassis.mpsToRpm(1);
+        moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
@@ -70,7 +69,7 @@ void ChassisAutoNavController::runController(
         rampTarget *= beybladeConfig.beybladeRotationalSpeedMultiplierWhenTranslating;
     }
 
-    rotateSpeedRamp.setTarget(rampTarget);
+    rotateSpeedRamp.setTarget(beybladeEnabled ? rampTarget : 0);
     // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
     rotateSpeedRamp.update(beybladeConfig.beybladeRampRate);
     float r = rotateSpeedRamp.getValue();
@@ -79,10 +78,7 @@ void ChassisAutoNavController::runController(
     Vector chassisFrameMoveVector = worldToChassis.apply(moveVector);
 
     // set outputs
-    chassis.setDesiredOutput(
-        chassisFrameMoveVector.x(),
-        chassisFrameMoveVector.y(),
-        beybladeEnabled ? r : 0);
+    chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);
 }
 
 Position ChassisAutoNavController::calculateSetPoint(
@@ -102,7 +98,7 @@ Position ChassisAutoNavController::calculateSetPoint(
 
     if (path.hasChanged())
     {
-        path.togglePathChanged();
+        path.clearPathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 

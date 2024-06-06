@@ -37,7 +37,7 @@ namespace aruwsrc::algorithms
 class AutoNavPath
 {
 public:
-    AutoNavPath() : setpointData(), path_changed(false) {}
+    AutoNavPath() : setpointData(), pathChanged(false) {}
 
     /**
      * Appends the given point to the path.
@@ -75,7 +75,7 @@ public:
      */
     bool hasChanged() const;
 
-    void togglePathChanged();
+    inline void clearPathChanged() { pathChanged = false; }
 
     inline float distTo(const Position& position, const float parameter) const
     {
@@ -84,7 +84,7 @@ public:
 
 private:
     std::deque<Position> setpointData;
-    bool path_changed;
+    bool pathChanged;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
