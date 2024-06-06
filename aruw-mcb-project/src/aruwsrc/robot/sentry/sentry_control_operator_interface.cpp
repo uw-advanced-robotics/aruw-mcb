@@ -33,21 +33,23 @@ namespace control::sentry
 {
 bool SentryControlOperatorInterface::isTurretControlMode()
 {
-    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN);
+    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
+    Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
+
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN);
 }
 
 bool SentryControlOperatorInterface::isDriveMode()
 {
-    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID);
+    // return drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID);
+    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
+    Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
+
+    return (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
 
 /**
