@@ -107,7 +107,7 @@ Position ChassisAutoNavController::calculateSetPoint(
     Position lookaheadPos = path.parametertoPosition(distOfClosest + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
-        return quadraticBezierInterpolation(
+        return aruwsrc::algorithms::quadraticBezierInterpolation(
             lookaheadPos,
             current,
             lastSetPoint,

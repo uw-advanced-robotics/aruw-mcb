@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
+#include "aruwsrc/algorithms/interpolate.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
@@ -71,14 +72,6 @@ public:
         Position current,
         float interpolationParameter,
         bool movementEnabled);
-
-    static inline Position quadraticBezierInterpolation(Position a, Position b, Position c, float t)
-    {
-        return Position::interpolate(
-            Position::interpolate(a, b, t),
-            Position::interpolate(b, c, t),
-            t);
-    }
 
 private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
