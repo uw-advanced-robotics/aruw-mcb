@@ -26,7 +26,6 @@ using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms
 {
-
 inline Position quadraticBezierInterpolation(
     const Position& a,
     const Position& b,
