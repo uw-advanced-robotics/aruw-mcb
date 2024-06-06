@@ -617,6 +617,13 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
      &frictionWheelsOnGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft});
 
+GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft});
+
 // RIGHT shooting ======================
 
 // spin friction wheels commands
@@ -677,6 +684,13 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
      &frictionWheelsOnGovernorTurretRight,
      &cvOnTargetGovernorTurretRight});
 
+GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight});
+
 /* define command mappings --------------------------------------------------*/
 
 // auto nav + auto aim + cv gated fire
@@ -706,17 +720,15 @@ HoldCommandMapping leftUpRightDown(
 // manual aim and shoot
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {
-        &majorManualCommand,
-        &turretLeftManualCommand,
-        &turretRightManualCommand,
-        // TODO: this won't work for shooting, need a stop friction wheels command
-        // in everywhere we don't want to shoot
-        &turretLeftFrictionWheelSpinCommand,
-        &turretRightFrictionWheelSpinCommand,
-        &turretLeftRotateAndUnjamAgitator,
-        &turretRightRotateAndUnjamAgitator,
-    },
+    {&majorManualCommand,
+     &turretLeftManualCommand,
+     &turretRightManualCommand,
+     // TODO: this won't work for shooting, need a stop friction wheels command
+     // in everywhere we don't want to shoot
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand,
+     &turretLeftAgitatorManualSpin,
+     &turretRightAgitatorManualSpin},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // auto drive & auto aim
