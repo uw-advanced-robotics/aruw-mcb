@@ -609,6 +609,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
+GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft});
+    
 GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
@@ -669,6 +676,13 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRig
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
+GovernorLimitedCommand<3> turretRightRotateAndUnjamAgitatorWithHeatLimiting(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight});
+
 GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
@@ -699,8 +713,12 @@ HoldCommandMapping leftDown(
 HoldRepeatCommandMapping rightUp(
     drivers(),
     {
-        &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-        &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+        // &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+        // &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+        &turretLeftFrictionWheelSpinCommand,
+        &turretRightFrictionWheelSpinCommand,
+        &turretLeftRotateAndUnjamAgitatorWithHeatLimiting,
+        &turretRightRotateAndUnjamAgitatorWithHeatLimiting
     },
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);

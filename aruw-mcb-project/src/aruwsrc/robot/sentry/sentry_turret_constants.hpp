@@ -64,10 +64,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 120'000.0f,
-    .ki = 800.0f,
+    .kp = 180'000.0f,
+    .ki = 1'200.0f,
     .kd = 8'000.0f,
-    .maxICumulative = 4'500.0f,
+    .maxICumulative = 6'500.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -136,7 +136,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4780,
+    .startEncoderValue = 4763,
     .minAngle = modm::toRadian(-13),
     .maxAngle = modm::toRadian(35),
     .limitMotorAngles = true,
@@ -167,7 +167,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4727,
+    .startEncoderValue = 4763,
     .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
     .maxAngle = modm::toRadian(35),   // actual CAD limit 37
     .limitMotorAngles = true,
