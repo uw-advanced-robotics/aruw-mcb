@@ -19,8 +19,6 @@
 
 #include "deadwheel_chassis_kf_odometry.hpp"
 
-#include <queue>
-
 namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
@@ -66,8 +64,8 @@ void DeadwheelChassisKFOdometry::update()
     rawV2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
     V1avg.update(rawV1);
     V2avg.update(rawV2);
-    float V1 = V1avg.getVal();
-    float V2 = V2avg.getVal();
+    float V1 = V1avg.getValue();
+    float V2 = V2avg.getValue();
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;

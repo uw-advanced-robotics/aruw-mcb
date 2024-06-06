@@ -29,7 +29,7 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
-#include "aruwsrc/algorithms/moving_average.hpp"
+#include "modm/math/filter/moving_average.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -169,7 +169,7 @@ private:
 
     static constexpr size_t VEL_AVG_WINDOW = 15;
 
-    MovingAverage V1avg, V2avg;
+    modm::filter::MovingAverage<float, VEL_AVG_WINDOW> V1avg, V2avg;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
