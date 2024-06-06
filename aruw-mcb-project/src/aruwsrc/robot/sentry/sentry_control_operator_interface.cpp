@@ -43,7 +43,6 @@ bool SentryControlOperatorInterface::isTurretControlMode()
 
 bool SentryControlOperatorInterface::isDriveMode()
 {
-    // return drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID);
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
