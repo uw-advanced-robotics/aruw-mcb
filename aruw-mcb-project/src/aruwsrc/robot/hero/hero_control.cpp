@@ -389,8 +389,7 @@ ClientDisplayCommand clientDisplayCommand(
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    nullptr,
-    sentryResponseHandler);
+    nullptr);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -507,10 +506,6 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
