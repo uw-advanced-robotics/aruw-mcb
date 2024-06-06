@@ -56,7 +56,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 1989,
     .minAngle = modm::toRadian(55),
-    .maxAngle = modm::toRadian(107),
+    .maxAngle = modm::toRadian(115),
     .limitMotorAngles = true,
 };
 
@@ -81,7 +81,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 15.0f,
+    .kp = 35.0f,
     .ki = 0.0f,
     .kd = 0.3f,
     .maxICumulative = 0.0f,
