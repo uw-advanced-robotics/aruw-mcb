@@ -746,7 +746,9 @@ HoldCommandMapping leftDownRightUp(
     {&chassisDriveCommand,
      &turretCVCommand,
      &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 // manual drive & auto aim
