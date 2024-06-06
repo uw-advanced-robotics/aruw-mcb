@@ -58,7 +58,7 @@ void ChassisAutoNavController::runController(
         beybladeConfig.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
         beybladeConfig.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-    float rampTarget =
+    float beybladeRampTarget =
         rotationDirection * beybladeConfig.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
     // reduce the beyblade rotation when translating to allow for better translational speed
@@ -66,10 +66,10 @@ void ChassisAutoNavController::runController(
     // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
     if (moveVector.magnitude() > translationalSpeedThreshold)
     {
-        rampTarget *= beybladeConfig.beybladeRotationalSpeedMultiplierWhenTranslating;
+        beybladeRampTarget *= beybladeConfig.beybladeRotationalSpeedMultiplierWhenTranslating;
     }
 
-    rotateSpeedRamp.setTarget(beybladeEnabled ? rampTarget : 0);
+    rotateSpeedRamp.setTarget(beybladeEnabled ? beybladeRampTarget : 0);
     // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
     rotateSpeedRamp.update(beybladeConfig.beybladeRampRate);
     float r = rotateSpeedRamp.getValue();
