@@ -32,8 +32,6 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
-      V1avg(VEL_AVG_WINDOW),
-      V2avg(VEL_AVG_WINDOW),
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
