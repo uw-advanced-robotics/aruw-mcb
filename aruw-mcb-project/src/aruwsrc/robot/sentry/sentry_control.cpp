@@ -678,8 +678,24 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
      &cvOnTargetGovernorTurretRight});
 
 /* define command mappings --------------------------------------------------*/
-// HoldCommandMapping leftUpRightUp( /** auto drive + auto aim + cv gated fire */ )
-// HoldCommandMapping leftUpRightMid(/** auto drive + auto aim */)
+
+// auto nav + auto aim + cv gated fire
+HoldCommandMapping leftUpRightUp(
+    drivers(),
+    {// auto drive command
+     &turretCVCommand,
+     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+// auto nav + auto aim
+HoldCommandMapping leftUpRightMid(
+    drivers(),
+    {// auto drive command
+     &turretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
 
 // imu calibrate
 HoldCommandMapping leftUpRightDown(
@@ -809,6 +825,8 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
+    drivers->commandMapper.addMap(&leftUpRightUp);    // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
     drivers->commandMapper.addMap(&leftMidRightUp);    // auto drive & auto aim
