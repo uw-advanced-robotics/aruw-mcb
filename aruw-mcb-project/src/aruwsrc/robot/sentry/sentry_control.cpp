@@ -723,8 +723,6 @@ HoldCommandMapping leftMidRightUp(
     {&majorManualCommand,
      &turretLeftManualCommand,
      &turretRightManualCommand,
-     // TODO: this won't work for shooting, need a stop friction wheels command
-     // in everywhere we don't want to shoot
      &turretLeftFrictionWheelSpinCommand,
      &turretRightFrictionWheelSpinCommand,
      &turretLeftAgitatorManualSpin,
