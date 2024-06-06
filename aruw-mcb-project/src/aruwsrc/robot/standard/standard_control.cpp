@@ -389,8 +389,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
-aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
-
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -406,8 +404,7 @@ ClientDisplayCommand clientDisplayCommand(
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    sentryResponseHandler);
+    &chassisImuDriveCommand);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -545,10 +542,6 @@ void startStandardCommands(Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
