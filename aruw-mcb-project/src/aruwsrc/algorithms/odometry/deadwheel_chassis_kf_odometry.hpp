@@ -29,6 +29,7 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
+#include "aruwsrc/algorithms/moving_average.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -163,6 +164,11 @@ private:
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+
+    static constexpr size_t DEADWHEEL_MOV_AVG_WINDOW_SIZE = 5;
+
+    MovingAverage perpendicularVelAvg;
+    MovingAverage parallelVelAvg;
 
     const modm::Vector2f initPos;
 
