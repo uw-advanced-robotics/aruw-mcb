@@ -3,14 +3,12 @@
 
 #include <queue>
 
-
 class MovingAverage
 {
 public:
-    MovingAverage(size_t windowSize, float initVal) : windowSize(windowSize), sum(initVal * windowSize) {}
+    MovingAverage(size_t windowSize) : windowSize(windowSize), sum(0.0f) {}
     void update(float val)
     {
-        
         sum += val;
         vals.push(val);
         if (vals.size() > windowSize)
@@ -22,10 +20,10 @@ public:
     float getVal() const { return sum / windowSize; };
 
     const size_t windowSize;
+
 private:
     std::queue<float> vals;
     float sum;
 };
-
 
 #endif
