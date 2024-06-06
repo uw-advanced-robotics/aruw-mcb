@@ -703,19 +703,8 @@ HoldCommandMapping leftUpRightDown(
     {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-// auto drive & auto aim
-HoldCommandMapping leftMidRightUp(
-    drivers(),
-    {
-        &majorManualCommand,
-        &turretLeftManualCommand,
-        &turretRightManualCommand,
-        /** auto drive command */
-    },
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
-
 // manual aim and shoot
-HoldCommandMapping leftMidRightMid(
+HoldCommandMapping leftMidRightUp(
     drivers(),
     {
         &majorManualCommand,
@@ -727,6 +716,17 @@ HoldCommandMapping leftMidRightMid(
         &turretRightFrictionWheelSpinCommand,
         &turretLeftRotateAndUnjamAgitator,
         &turretRightRotateAndUnjamAgitator,
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+// auto drive & auto aim
+HoldCommandMapping leftMidRightMid(
+    drivers(),
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+        /** auto drive command */
     },
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
@@ -831,8 +831,8 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
-    drivers->commandMapper.addMap(&leftMidRightUp);    // auto drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightMid);   // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUp);    // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
