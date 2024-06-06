@@ -21,9 +21,6 @@
 
 #include <deque>
 
-#include "tap/algorithms/transforms/position.hpp"
-#include "tap/algorithms/transforms/vector.hpp"
-
 using tap::algorithms::transforms::Position;
 using namespace aruwsrc::algorithms;
 

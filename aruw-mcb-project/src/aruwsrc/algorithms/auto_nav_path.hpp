@@ -24,6 +24,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/position.hpp"
+#include "tap/algorithms/transforms/vector.hpp"
 
 using namespace tap::algorithms::transforms;
 
