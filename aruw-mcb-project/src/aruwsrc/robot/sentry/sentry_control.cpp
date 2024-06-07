@@ -615,7 +615,7 @@ GovernorLimitedCommand<3> turretLeftRotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft});
-    
+
 GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
