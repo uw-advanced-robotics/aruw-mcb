@@ -64,10 +64,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 90'000.0f,
-    .ki = 800.0f,
+    .kp = 180'000.0f,
+    .ki = 1'300.0f,
     .kd = 8'000.0f,
-    .maxICumulative = 900.0f,
+    .maxICumulative = 7'500.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -128,7 +128,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7510,
+    .startEncoderValue = 7509,
     .minAngle = modm::toRadian(-15),
     .maxAngle = modm::toRadian(195),
     .limitMotorAngles = true,
@@ -159,7 +159,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4850,
+    .startEncoderValue = 4839,
     .minAngle = modm::toRadian(-195),  // actual CAD limit is -200
     .maxAngle = modm::toRadian(15),    // actual CAD limit is -20
     .limitMotorAngles = true,
@@ -196,10 +196,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
     .kp = 90'000.0f,
-    .ki = 100.0f,
+    .ki = 200.0f,
     .kd = 6'000.0f,
-    .maxICumulative = 3'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxICumulative = 4'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
@@ -238,7 +238,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

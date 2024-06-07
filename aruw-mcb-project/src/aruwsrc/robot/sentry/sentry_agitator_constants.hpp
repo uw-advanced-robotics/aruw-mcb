@@ -106,7 +106,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
 
 /// Time in milliseconds to pause launching projectiles when the user requests the projectile
 /// launcher to be paused
