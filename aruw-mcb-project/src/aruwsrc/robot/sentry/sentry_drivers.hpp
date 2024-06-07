@@ -62,8 +62,8 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          chassisMcbLite(this, tap::communication::serial::Uart::Uart8),
-          turretMajorMcbLite(this, tap::communication::serial::Uart::Uart7)
+          chassisMcbLite(this, tap::communication::serial::Uart::Uart2),
+          turretMajorMcbLite(this, tap::communication::serial::Uart::Uart2)
     {
     }
 
