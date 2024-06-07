@@ -38,10 +38,12 @@
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
+#include "tap/communication/sensors/buzzer/buzzer.hpp"
 
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
+
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
@@ -119,6 +121,14 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+            if(!(((Drivers *)drivers)->turretMCBCanCommBus1.isConnected())){
+                tap::buzzer::playNote(&drivers->pwm, 1000);
+            } else {
+                tap::buzzer::silenceBuzzer(&drivers->pwm);
+            }
 #endif
         }
         modm::delay_us(10);
