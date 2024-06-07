@@ -123,7 +123,8 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-            if (!(((Drivers *)drivers)->turretMCBCanCommBus1.isConnected()))
+            bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
+            if (!turretMcbConnected)
             {
                 tap::buzzer::playNote(&drivers->pwm, 1000);
             }
