@@ -25,6 +25,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
+#include "sentry_minor_world_orientation_provider.hpp"
 #include "sentry_turret_minor_subsystem.hpp"
 
 namespace aruwsrc::sentry
@@ -45,10 +46,20 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
+        aruwsrc::control::turret::SentryMinorWorldOrientationProvider&
+            turretLeftOrientationProvider,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
+        aruwsrc::control::turret::SentryMinorWorldOrientationProvider&
+            turretRightOrientationProvider,
         const SentryTransformConfig& config);
 
     void updateTransforms();
+
+    inline void initialize()
+    {
+        turretRightOrientationProvider.initialize(getWorldToTurretMajor());
+        turretLeftOrientationProvider.initialize(getWorldToTurretMajor());
+    }
 
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
@@ -129,7 +140,9 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
+    aruwsrc::control::turret::SentryMinorWorldOrientationProvider& turretLeftOrientationProvider;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
+    aruwsrc::control::turret::SentryMinorWorldOrientationProvider& turretRightOrientationProvider;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;

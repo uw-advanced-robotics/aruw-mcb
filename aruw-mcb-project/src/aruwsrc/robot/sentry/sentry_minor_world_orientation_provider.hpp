@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SENTRY_MINOR_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
-#define SENTRY_MINOR_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
+#ifndef SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_HPP_
+#define SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -31,49 +31,48 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::turret
 {
 
-class SentryMinorOrientationProviderSubsystem : public tap::control::Subsystem
+class SentryMinorWorldOrientationProvider
 {
 public:
-    SentryMinorOrientationProviderSubsystem(
-        tap::Drivers* drivers,
+    SentryMinorWorldOrientationProvider(
         const TurretMotor& turretYawMotor,
         const aruwsrc::can::TurretMCBCanComm& turretMCB,
-        const transforms::Transform& worldToMajor,
         const SmoothPidConfig& yawCorrectionPidConfig);
 
-    void initialize() override;
+    void initialize(const transforms::Transform& worldToMajor);
 
-    void refresh() override;
+    void update();
 
     /**
      * Resets the system to assume everything is at zero
      */
     void zero();
 
-    inline Angle getYaw() const { return turretMCB.getYaw() + yawCorrection; }
+    inline WrappedFloat getYaw() const { return Angle(turretMCB.getYaw()) + yawCorrection; }
 
-    inline float getYawVel() const { return turretMCB.getYawVelocity(); }
+    inline float getYawVelocity() const { return turretMCB.getYawVelocity(); }
 
-    inline Angle getPitch() const
+    inline WrappedFloat getPitch() const
     {
-        return turretMCB.getPitch();
+        return Angle(turretMCB.getPitch());
     }  // todo: this might need correction too
 
-    inline float getPitchVel() const { return turretMCB.getPitchVelocity(); }
+    inline float getPitchVelocity() const { return turretMCB.getPitchVelocity(); }
 
-    inline Angle getRoll() const { return Angle(0); }
+    inline WrappedFloat getRoll() const { return Angle(turretMCB.getRollVelocity()); }
 
-    inline float getRollVel() const { return 0.0; }
+    inline float getRollVelocity() const { return turretMCB.getRollVelocity(); }
 
-    inline void refreshSafeDisconnect() override {}
-
-    const char* getName() const override
+    inline transforms::Orientation getOrientation() const
     {
-        return "Sentry Minor World Orientation Provider Subsystem";
+        return transforms::Orientation(
+            getRoll().getWrappedValue(),
+            getPitch().getWrappedValue(),
+            getYaw().getWrappedValue());
     }
 
 private:
-    Angle getBaselineYaw() const;
+    WrappedFloat getBaselineYaw() const;
 
     const TurretMotor& turretYawMotor;
     const aruwsrc::can::TurretMCBCanComm& turretMCB;
@@ -85,7 +84,7 @@ private:
 
     uint32_t prevtimeMillis{0};
 
-};  // class SentryMinorOrientationProviderSubsystem
+};  // class SentryMinorWorldOrientationProvider
 
 }  // namespace aruwsrc::control::turret
-#endif  // SENTRY_MINOR_ORIENTATION_PROVIDER_SUBSYSTEM_HPP_
+#endif  // SENTRY_MINOR_WORLD_ORIENTATION_PROVIDER_HPP_

@@ -62,7 +62,7 @@
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_launcher_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_minor_cv_on_target_governor.hpp"
-#include "aruwsrc/robot/sentry/sentry_minor_orientation_provider_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_minor_world_orientation_provider.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
@@ -302,11 +302,23 @@ SentryKFOdometry2DSubsystem chassisOdometry(
     INITIAL_CHASSIS_POSITION_Y,
     CENTER_TO_WHEELBASE_RADIUS);
 
+SentryMinorWorldOrientationProvider leftMinorWorldOrientationProvider(
+    turretLeft.yawMotor,
+    drivers()->turretMCBCanCommBus2,
+    aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
+
+SentryMinorWorldOrientationProvider rightMinorWorldOrientationProvider(
+    turretRight.yawMotor,
+    drivers()->turretMCBCanCommBus1,
+    aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
+
 SentryTransforms transformer(
     chassisOdometry,
     turretMajor,
     turretLeft,
+    leftMinorWorldOrientationProvider,
     turretRight,
+    rightMinorWorldOrientationProvider,
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
@@ -318,13 +330,6 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     chassisOdometry,
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
-
-SentryMinorOrientationProviderSubsystem leftMinorOrientationProviderSubsystem(
-    drivers(),
-    turretLeft.yawMotor,
-    drivers()->turretMCBCanCommBus2,
-    transformer.getWorldToTurretMajor(),
-    aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -347,13 +352,13 @@ SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_
 
 TurretMinorWorldControllers turretRightWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
+        rightMinorWorldOrientationProvider,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
         turretRightWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
+        rightMinorWorldOrientationProvider,
         turretRight.yawMotor,
         turretRightWorldYawPosPid,
         turretRightWorldYawVelPid)
@@ -362,13 +367,13 @@ TurretMinorWorldControllers turretRightWorldControllers{
 
 TurretMinorWorldControllers turretLeftWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        leftMinorWorldOrientationProvider,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
         turretLeftWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        leftMinorWorldOrientationProvider,
         turretLeft.yawMotor,
         turretLeftWorldYawPosPid,
         turretLeftWorldYawVelPid)

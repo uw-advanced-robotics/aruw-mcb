@@ -34,7 +34,7 @@ public:
     {
     }
 
-    inline void initialize() override{};
+    inline void initialize() override { transformer.initialize(); };
     inline void refresh() override { transformer.updateTransforms(); };
 
 private:

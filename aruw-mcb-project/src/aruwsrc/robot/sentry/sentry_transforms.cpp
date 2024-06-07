@@ -30,13 +30,17 @@ SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
     const SentryTurretMinorSubsystem& turretLeft,
+    SentryMinorWorldOrientationProvider& turretLeftOrientationProvider,
     const SentryTurretMinorSubsystem& turretRight,
+    SentryMinorWorldOrientationProvider& turretRightOrientationProvider,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
       turretLeft(turretLeft),
+      turretLeftOrientationProvider(turretLeftOrientationProvider),
       turretRight(turretRight),
+      turretRightOrientationProvider(turretRightOrientationProvider),
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
@@ -58,19 +62,29 @@ void SentryTransforms::updateTransforms()
     chassisToTurretMajor.updateRotation(0., 0., turretMajor.getChassisYaw());
 
     // Turret Major to Minors
-    turretMajorToTurretLeft.updateRotation(
-        0.,
-        turretLeft.pitchMotor.getAngleFromCenter(),
-        turretLeft.yawMotor.getAngleFromCenter());
-    turretMajorToTurretRight.updateRotation(
-        0.,
-        turretRight.pitchMotor.getAngleFromCenter(),
-        turretRight.yawMotor.getAngleFromCenter());
+    // turretMajorToTurretLeft.updateRotation(
+    //     0.,
+    //     turretLeft.pitchMotor.getAngleFromCenter(),
+    //     turretLeft.yawMotor.getAngleFromCenter());
+    // turretMajorToTurretRight.updateRotation(
+    //     0.,
+    //     turretRight.pitchMotor.getAngleFromCenter(),
+    //     turretRight.yawMotor.getAngleFromCenter());
 
     // World transforms
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
-    worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
-    worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+
+    // worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
+    // worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+    turretLeftOrientationProvider.update();
+    turretRightOrientationProvider.update();
+    worldToTurretLeft.updateRotation(turretLeftOrientationProvider.getOrientation());
+    worldToTurretRight.updateRotation(turretRightOrientationProvider.getOrientation());
+
+    turretMajorToTurretLeft.updateRotation(
+        worldToTurretMajor.getInverse().compose(worldToTurretLeft).getRotation());
+    turretMajorToTurretRight.updateRotation(
+        worldToTurretMajor.getInverse().compose(worldToTurretRight).getRotation());
 }
 
 }  // namespace aruwsrc::sentry

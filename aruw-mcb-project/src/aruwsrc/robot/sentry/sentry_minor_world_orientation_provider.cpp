@@ -17,38 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_minor_orientation_provider_subsystem.hpp"
+#include "sentry_minor_world_orientation_provider.hpp"
 
 namespace aruwsrc::control::turret
 {
 
-SentryMinorOrientationProviderSubsystem::SentryMinorOrientationProviderSubsystem(
-    tap::Drivers* drivers,
+SentryMinorWorldOrientationProvider::SentryMinorWorldOrientationProvider(
     const TurretMotor& turretYawMotor,
     const aruwsrc::can::TurretMCBCanComm& turretMCB,
-    const transforms::Transform& worldToMajor,
     const tap::algorithms::SmoothPidConfig& driftPidConfig)
-    : Subsystem(drivers),
-      turretYawMotor(turretYawMotor),
+    : turretYawMotor(turretYawMotor),
       turretMCB(turretMCB),
-      worldToMajor(worldToMajor),
+      worldToMajor(transforms::Transform::identity()),
       yawCorrectionPid(driftPidConfig)
 {
 }
 
-void SentryMinorOrientationProviderSubsystem::initialize()
+void SentryMinorWorldOrientationProvider::initialize(const transforms::Transform& worldToMajor)
 {
+    // TODO: IDK HOW TO ATTACH WORLDTOMAJOR
     prevtimeMillis = tap::arch::clock::getTimeMilliseconds();
     zero();
 }
 
-void SentryMinorOrientationProviderSubsystem::zero()
+void SentryMinorWorldOrientationProvider::zero()
 {
     yawCorrection = 0;
     yawCorrectionPid.reset();
 }
 
-void SentryMinorOrientationProviderSubsystem::refresh()
+void SentryMinorWorldOrientationProvider::update()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevtimeMillis;
@@ -60,9 +58,9 @@ void SentryMinorOrientationProviderSubsystem::refresh()
     prevtimeMillis = currTime;
 }
 
-Angle SentryMinorOrientationProviderSubsystem::getBaselineYaw() const
+WrappedFloat SentryMinorWorldOrientationProvider::getBaselineYaw() const
 {
-    return worldToMajor.getYaw() + turretYawMotor.getAngleFromCenter();
+    return turretYawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
 }  // namespace aruwsrc::control::turret
