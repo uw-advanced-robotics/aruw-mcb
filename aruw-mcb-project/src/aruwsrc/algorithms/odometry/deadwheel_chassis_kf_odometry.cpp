@@ -58,12 +58,9 @@ void DeadwheelChassisKFOdometry::update()
     // of the two omni wheels
     float rawV1 = deadwheelOdometry.getPerpendicularRPM();
     float rawV2 = deadwheelOdometry.getParallelMotorRPM();
-    rawV1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
-    rawV2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
-    V1avg.update(rawV1);
-    V2avg.update(rawV2);
-    float V1 = V1avg.getValue();
-    float V2 = V2avg.getValue();
+    float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
+    float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
+
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;

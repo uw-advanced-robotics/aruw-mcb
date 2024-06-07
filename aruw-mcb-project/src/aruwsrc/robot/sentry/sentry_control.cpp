@@ -38,6 +38,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -365,6 +366,13 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    drivers()->visionCoprocessor,
+    transformer.getWorldToChassis(),
+    aruwsrc::sentry::chassis::beybladeConfig);
+
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
@@ -449,6 +457,12 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     &turretLeftSolver);
 
 /* define commands ----------------------------------------------------------*/
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    false);
+
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -696,7 +710,7 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
     drivers(),
-    {// auto nav command
+    {&autoNavBeybladeCommand,
      &turretCVCommand,
      &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
@@ -707,8 +721,7 @@ HoldCommandMapping leftUpRightUp(
 // auto nav + auto aim
 HoldCommandMapping leftUpRightMid(
     drivers(),
-    {// auto nav command
-     &turretCVCommand},
+    {&autoNavBeybladeCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
 
 // imu calibrate
@@ -732,12 +745,10 @@ HoldCommandMapping leftMidRightUp(
 // auto nav + manual turret control
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {
-        &majorManualCommand,
-        &turretLeftManualCommand,
-        &turretRightManualCommand,
-        /** auto drive command */
-    },
+    {&majorManualCommand,
+     &turretLeftManualCommand,
+     &turretRightManualCommand,
+     &autoNavBeybladeCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
