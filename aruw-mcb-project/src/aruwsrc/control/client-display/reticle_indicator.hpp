@@ -72,21 +72,10 @@ private:
 
     static constexpr ReticleTuple TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES[]{
         ReticleTuple(50, 435, Tx::GraphicColor::YELLOW),  // 1 m
-        ReticleTuple(50, 430, Tx::GraphicColor::YELLOW),
-        ReticleTuple(70, 425, Tx::GraphicColor::YELLOW),
-        ReticleTuple(50, 420, Tx::GraphicColor::YELLOW),
-        ReticleTuple(50, 415, Tx::GraphicColor::YELLOW),
-        ReticleTuple(40, 410, Tx::GraphicColor::ORANGE),  // 3 m
-        ReticleTuple(40, 405, Tx::GraphicColor::ORANGE),
-        ReticleTuple(60, 400, Tx::GraphicColor::ORANGE),
-        ReticleTuple(40, 395, Tx::GraphicColor::ORANGE),
-        ReticleTuple(40, 390, Tx::GraphicColor::ORANGE),
+        ReticleTuple(30, 410, Tx::GraphicColor::ORANGE),  // 3 m
         ReticleTuple(10, 370, Tx::GraphicColor::YELLOW),  // 5 m
-        ReticleTuple(10, 365, Tx::GraphicColor::YELLOW),
-        ReticleTuple(30, 360, Tx::GraphicColor::YELLOW),
-        ReticleTuple(10, 355, Tx::GraphicColor::YELLOW),
-        ReticleTuple(10, 350, Tx::GraphicColor::YELLOW),
     };
+
     /** Size of TURRET_RETICLE_X_WIDTH_AND_Y_POS_COORDINATES (so its easier to understand when used
      * in context). */
     static constexpr size_t NUM_RETICLE_COORDINATES =
