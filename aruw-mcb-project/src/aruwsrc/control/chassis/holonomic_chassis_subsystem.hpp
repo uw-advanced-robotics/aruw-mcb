@@ -166,7 +166,7 @@ public:
         return mat * ratio;
     }
 
-    virtual float mpsToRpm(float mps) const;
+    virtual float mpsToRpm(float mps) const = 0;
 
 };  // class HolonomicChassisSubsystem
 
