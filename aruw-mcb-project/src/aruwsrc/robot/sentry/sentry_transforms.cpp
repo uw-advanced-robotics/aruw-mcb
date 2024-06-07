@@ -19,6 +19,8 @@
 
 #include "sentry_transforms.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
@@ -60,12 +62,13 @@ void SentryTransforms::updateTransforms()
     // Turret Major to Minors
     turretMajorToTurretLeft.updateRotation(
         0.,
-        turretLeft.pitchMotor.getAngleFromCenter(),
-        turretLeft.yawMotor.getAngleFromCenter());
+        turretLeft.getTurretMCB()->getPitch(),
+        turretLeft.getTurretMCB()->getYaw());
+
     turretMajorToTurretRight.updateRotation(
         0.,
-        turretRight.pitchMotor.getAngleFromCenter(),
-        turretRight.yawMotor.getAngleFromCenter());
+        turretRight.getTurretMCB()->getPitch(),
+        turretRight.getTurretMCB()->getYaw());
 
     // World transforms
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
