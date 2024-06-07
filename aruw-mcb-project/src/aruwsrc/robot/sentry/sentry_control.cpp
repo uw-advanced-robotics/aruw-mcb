@@ -696,7 +696,7 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
     drivers(),
-    {// auto drive command
+    {// auto nav command
      &turretCVCommand,
      &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
@@ -707,7 +707,7 @@ HoldCommandMapping leftUpRightUp(
 // auto nav + auto aim
 HoldCommandMapping leftUpRightMid(
     drivers(),
-    {// auto drive command
+    {// auto nav command
      &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
 
@@ -729,7 +729,7 @@ HoldCommandMapping leftMidRightUp(
      &turretRightAgitatorManualSpin},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
-// auto drive & auto aim
+// auto nav + manual turret control
 HoldCommandMapping leftMidRightMid(
     drivers(),
     {
@@ -750,7 +750,7 @@ HoldCommandMapping leftMidRightDown(
     },
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-// manul drive, auto aim, cv-gated fire
+// manual drive, auto aim, cv-gated fire
 HoldCommandMapping leftDownRightUp(
     drivers(),
     {&chassisDriveCommand,
