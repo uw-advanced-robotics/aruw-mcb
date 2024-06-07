@@ -25,10 +25,11 @@ namespace aruwsrc::control::turret
 SentryMinorWorldOrientationProvider::SentryMinorWorldOrientationProvider(
     const TurretMotor& turretYawMotor,
     const aruwsrc::can::TurretMCBCanComm& turretMCB,
+    tap::communication::sensors::imu::ImuInterface& majorImu,
     const tap::algorithms::SmoothPidConfig& driftPidConfig)
     : turretYawMotor(turretYawMotor),
       turretMCB(turretMCB),
-      worldToMajor(transforms::Transform::identity()),
+      majorImu(majorImu),
       yawCorrectionPid(driftPidConfig)
 {
 }
@@ -60,7 +61,7 @@ void SentryMinorWorldOrientationProvider::update()
 
 WrappedFloat SentryMinorWorldOrientationProvider::getBaselineYaw() const
 {
-    return turretYawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
+    return turretYawMotor.getChassisFrameMeasuredAngle() + majorImu.getYaw();
 }
 
 }  // namespace aruwsrc::control::turret

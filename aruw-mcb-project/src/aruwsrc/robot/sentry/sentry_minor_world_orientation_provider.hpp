@@ -37,6 +37,7 @@ public:
     SentryMinorWorldOrientationProvider(
         const TurretMotor& turretYawMotor,
         const aruwsrc::can::TurretMCBCanComm& turretMCB,
+        tap::communication::sensors::imu::ImuInterface& majorImu,
         const SmoothPidConfig& yawCorrectionPidConfig);
 
     void initialize(const transforms::Transform& worldToMajor);
@@ -76,7 +77,7 @@ private:
 
     const TurretMotor& turretYawMotor;
     const aruwsrc::can::TurretMCBCanComm& turretMCB;
-    const transforms::Transform& worldToMajor;
+    tap::communication::sensors::imu::ImuInterface& majorImu;
 
     tap::algorithms::SmoothPid yawCorrectionPid;
 

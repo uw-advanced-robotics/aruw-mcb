@@ -305,11 +305,13 @@ SentryKFOdometry2DSubsystem chassisOdometry(
 SentryMinorWorldOrientationProvider leftMinorWorldOrientationProvider(
     turretLeft.yawMotor,
     drivers()->turretMCBCanCommBus2,
+    drivers()->turretMajorMcbLite.imu,
     aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
 
 SentryMinorWorldOrientationProvider rightMinorWorldOrientationProvider(
     turretRight.yawMotor,
     drivers()->turretMCBCanCommBus1,
+    drivers()->turretMajorMcbLite.imu,
     aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
 
 SentryTransforms transformer(
