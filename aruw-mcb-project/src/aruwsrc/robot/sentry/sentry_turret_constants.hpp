@@ -52,8 +52,8 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR =
 static constexpr float TURRET_MINOR_OFFSET = 0.132f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
-    .kp = 0.05,
-    .ki = 0.05,
+    .kp = 0,
+    .ki = 0,
     .kd = 0,
     .maxICumulative = M_PI,
     .maxOutput = M_PI,

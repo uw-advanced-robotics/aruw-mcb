@@ -51,7 +51,7 @@ void SentryMinorWorldOrientationProvider::update()
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevtimeMillis;
 
-    yawCorrection = yawCorrectionPid.runControllerDerivateError(
+    yawCorrection += yawCorrectionPid.runControllerDerivateError(
         getYaw().minDifference(getBaselineYaw()),
         dt / 1000.0f);
 
@@ -60,7 +60,7 @@ void SentryMinorWorldOrientationProvider::update()
 
 WrappedFloat SentryMinorWorldOrientationProvider::getBaselineYaw() const
 {
-    return turretYawMotor.getChassisFrameMeasuredAngle() + majorImu.getYaw();
+    return turretYawMotor.getChassisFrameMeasuredAngle() + modm::toRadian(majorImu.getYaw());
 }
 
 }  // namespace aruwsrc::control::turret

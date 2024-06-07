@@ -160,7 +160,8 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     }
 
     currProcessingImuData.yaw = modm::toRadian(
-        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION) + M_PI;
+    currProcessingImuData.yaw = modm::Angle::normalize(currProcessingImuData.yaw);
     currProcessingImuData.rawYawVelocity = zAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.zAcceleration =
         static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
