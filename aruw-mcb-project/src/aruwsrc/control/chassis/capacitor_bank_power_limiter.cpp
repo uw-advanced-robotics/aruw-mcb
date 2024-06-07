@@ -81,7 +81,8 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return fallback;
     }
 
-    float setpoint = 0.9f * drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f;
+    float setpoint = 0.9f * drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
+                     24.0f;  // 0.9f accounts for efficiency of system
 
     if (this->capacitorBank->isSprinting())
     {
@@ -96,14 +97,15 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     const float K_P = 0.005;
 
     this->currentIntegrator += K_I * error;
-    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, 1.0f);
-
-    float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
 
     float lowVoltageRamp = std::clamp(
         (this->capacitorBank->getVoltage() - LOWEST_CAP_VOLTAGE) / VOLTAGE_RAMPDOWN_RANGE,
         0.0f,
         1.0f);
+
+    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, lowVoltageRamp);
+
+    float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
 
     return controlFractionOutput * lowVoltageRamp;
 }
