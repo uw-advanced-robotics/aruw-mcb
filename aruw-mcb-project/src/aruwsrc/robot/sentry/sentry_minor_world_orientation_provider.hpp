@@ -40,7 +40,7 @@ public:
         tap::communication::sensors::imu::ImuInterface& majorImu,
         const SmoothPidConfig& yawCorrectionPidConfig);
 
-    void initialize(const transforms::Transform& worldToMajor);
+    void initialize();
 
     void update();
 

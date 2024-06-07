@@ -34,9 +34,8 @@ SentryMinorWorldOrientationProvider::SentryMinorWorldOrientationProvider(
 {
 }
 
-void SentryMinorWorldOrientationProvider::initialize(const transforms::Transform& worldToMajor)
+void SentryMinorWorldOrientationProvider::initialize()
 {
-    // TODO: IDK HOW TO ATTACH WORLDTOMAJOR
     prevtimeMillis = tap::arch::clock::getTimeMilliseconds();
     zero();
 }

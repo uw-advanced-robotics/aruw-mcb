@@ -57,8 +57,8 @@ public:
 
     inline void initialize()
     {
-        turretRightOrientationProvider.initialize(getWorldToTurretMajor());
-        turretLeftOrientationProvider.initialize(getWorldToTurretMajor());
+        turretRightOrientationProvider.initialize();
+        turretLeftOrientationProvider.initialize();
     }
 
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
