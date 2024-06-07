@@ -44,7 +44,6 @@
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
 
-
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
@@ -124,9 +123,12 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-            if(!(((Drivers *)drivers)->turretMCBCanCommBus1.isConnected())){
+            if (!(((Drivers *)drivers)->turretMCBCanCommBus1.isConnected()))
+            {
                 tap::buzzer::playNote(&drivers->pwm, 1000);
-            } else {
+            }
+            else
+            {
                 tap::buzzer::silenceBuzzer(&drivers->pwm);
             }
 #endif
