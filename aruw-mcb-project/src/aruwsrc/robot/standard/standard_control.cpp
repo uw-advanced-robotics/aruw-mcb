@@ -30,7 +30,6 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
-#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
@@ -48,6 +47,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
@@ -118,8 +118,6 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
-
 tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
 tap::motor::DjiMotor yawMotor(
@@ -193,24 +191,6 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToEnemySupplierZoneCommand sendSentryGoToEnemySupplierZone(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToCenterPointCommand sendSentryGoToCenterPoint(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::HoldFireCommand sendSentryHoldFire(sentryRequestSubsystem);
-aruwsrc::communication::serial::ToggleMovementCommand sendSentryToggleMovement(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::ToggleBeybladeCommand sendSentryToggleBeyblade(
-    sentryRequestSubsystem);
-
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -319,7 +299,7 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
+UnjamSpokeAgitatorCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
@@ -389,8 +369,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
-aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
-
 extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -406,8 +384,7 @@ ClientDisplayCommand clientDisplayCommand(
     &cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
-    sentryResponseHandler);
+    &chassisImuDriveCommand);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -504,7 +481,6 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -519,7 +495,6 @@ void registerStandardSubsystems(Drivers *drivers)
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentryRequestSubsystem.initialize();
     turret.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
@@ -545,10 +520,6 @@ void startStandardCommands(Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
