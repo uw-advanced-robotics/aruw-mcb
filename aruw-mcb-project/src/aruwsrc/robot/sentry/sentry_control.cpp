@@ -527,7 +527,9 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     chassisOdometry,
     drivers()->turretMajorMcbLite,
-    drivers()->chassisMcbLite);
+    drivers()->chassisMcbLite,
+    leftMinorWorldOrientationProvider,
+    rightMinorWorldOrientationProvider);
 
 // Left
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
