@@ -696,7 +696,6 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
     drivers(),
-<<<<<<< HEAD
     {// auto drive command
      &turretCVCommand,
      &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
