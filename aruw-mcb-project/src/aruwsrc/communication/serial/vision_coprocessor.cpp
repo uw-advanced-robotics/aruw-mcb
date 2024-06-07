@@ -111,7 +111,24 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
-    memcpy(&lastSetpointData, &message.data, sizeof(AutoNavSetpointData));
+    struct AutoNavSetpointMessage setpointData;
+    memcpy(&setpointData, &message.data, sizeof(uint32_t) * 2 + sizeof(float));
+    memcpy(
+        &setpointData.setpoints,
+        &message.data[sizeof(uint32_t) * 2 + sizeof(float)],
+        sizeof(AutoNavCoordinate) * setpointData.num_setpoints);
+    if (lastSetpointData.sequence_num == setpointData.sequence_num)
+    {
+        return true;
+    }
+    // clears path and denotes that the path has changed
+    autoNavPath.resetPath();
+    for (uint32_t i = 0; i < setpointData.num_setpoints; i++)
+    {
+        autoNavPath.pushPoint(
+            Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
+    }
+    lastSetpointData = setpointData;
     return true;
 }
 

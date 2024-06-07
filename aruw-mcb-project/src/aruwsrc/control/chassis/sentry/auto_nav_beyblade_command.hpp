@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,16 +20,26 @@
 #ifndef AUTO_NAV_BEYBLADE_COMMAND_HPP_
 #define AUTO_NAV_BEYBLADE_COMMAND_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
+#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
+#include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -41,16 +51,10 @@ class HolonomicChassisSubsystem;
 class AutoNavBeybladeCommand : public tap::control::Command
 {
 public:
-    float POS_RAMP_RATE = 0.0008f;
-
     AutoNavBeybladeCommand(
-        tap::Drivers& drivers,
+        const tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        const aruwsrc::control::turret::TurretMotor& yawMotor,
-        const aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface& odometryInterface,
-        const aruwsrc::sentry::SentryBeybladeConfig config,
-        const tap::algorithms::SmoothPidConfig pidConfig,
+        aruwsrc::chassis::ChassisAutoNavController& autoNavController,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -68,28 +72,15 @@ public:
     const char* getName() const override { return "autonav beyblade"; }
 
 private:
-    float rotationDirection;
-
-    tap::algorithms::Ramp rotateSpeedRamp;
-    tap::algorithms::Ramp xRamp;
-    tap::algorithms::Ramp yRamp;
-
-    tap::Drivers& drivers;
+    const tap::Drivers& drivers;
     HolonomicChassisSubsystem& chassis;
-    const aruwsrc::control::turret::TurretMotor& yawMotor;
-    const aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
-    const tap::algorithms::odometry::Odometry2DInterface& odometryInterface;
-
-    const aruwsrc::sentry::SentryBeybladeConfig config;
+    aruwsrc::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
-    tap::algorithms::SmoothPid xPid;
-    tap::algorithms::SmoothPid yPid;
-
-    uint32_t prevTime = 0;
 
     bool beybladeEnabled = true;
     bool movementEnabled = true;
+
 };  // class AutoNavBeybladeCommand
 
 }  // namespace aruwsrc::chassis
