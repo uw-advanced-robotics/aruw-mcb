@@ -166,6 +166,8 @@ private:
 
     const modm::Vector2f initPos;
 
+    static constexpr size_t VEL_AVG_WINDOW = 15;
+
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame

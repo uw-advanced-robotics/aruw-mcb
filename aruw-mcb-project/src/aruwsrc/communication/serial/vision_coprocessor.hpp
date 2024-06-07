@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -29,6 +30,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -260,10 +262,9 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    {
-        return lastSetpointData;
-    }
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
+
+    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
@@ -372,7 +373,25 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    static constexpr uint8_t MAXSETPOINTS = 50;
+    struct AutoNavCoordinate
+    {
+        float x;
+        float y;
+    };
+    struct AutoNavSetpointMessage
+    {
+        uint32_t sequence_num;
+        float speed;
+        uint32_t num_setpoints;
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequence_num = 0,
+        .speed = 0.0f,
+        .num_setpoints = 0,
+        .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
