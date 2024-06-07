@@ -24,11 +24,11 @@
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 
-namespace aruwsrc::control::cap_bank
+namespace aruwsrc::control::capbank
 {
 CapBankToggleCommand::CapBankToggleCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
+    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem)
     : drivers(drivers),
       capBankSubsystem(capBankSubsystem)
 
@@ -44,4 +44,4 @@ void CapBankToggleCommand::end(bool) {}
 
 bool CapBankToggleCommand::isFinished() const { return true; }
 
-}  // namespace aruwsrc::control::cap_bank
+}  // namespace aruwsrc::control::capbank

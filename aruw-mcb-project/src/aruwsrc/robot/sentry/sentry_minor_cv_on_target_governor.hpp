@@ -138,7 +138,7 @@ public:
     {
         // Once started, CV will not stop the target command; it is allowed to run to completion.
         // This enables firing a whole round, or burst, without interruption.
-        return false;
+        return !(turretCVCommand.isAimingWithinLaunchingTolerance(turretID) && isGateSatisfied());
     }
 
 private:

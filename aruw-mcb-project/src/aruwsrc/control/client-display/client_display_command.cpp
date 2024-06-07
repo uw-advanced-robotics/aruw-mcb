@@ -47,7 +47,6 @@ ClientDisplayCommand::ClientDisplayCommand(
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
@@ -61,7 +60,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           agitatorSubsystem,
           imuCalibrateCommand,
-          sentryResponseHandler),
+          &drivers.refSerial),
       capBankIndicator(refSerialTransmitter, capBank),
       chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
       positionHudIndicators(

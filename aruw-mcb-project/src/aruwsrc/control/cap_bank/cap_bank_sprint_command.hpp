@@ -25,14 +25,14 @@
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
-namespace aruwsrc::control::cap_bank
+namespace aruwsrc::control::capbank
 {
 class CapBankSprintCommand : public tap::control::Command
 {
 public:
     CapBankSprintCommand(
         tap::Drivers* drivers,
-        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem,
         const aruwsrc::can::capbank::SprintMode sprintOption);
 
     void initialize() override;
@@ -49,9 +49,9 @@ private:
     const aruwsrc::can::capbank::SprintMode sprintOption;
 
     tap::Drivers* drivers;
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
 };  // class CapBankToggleCommand
 
-}  // namespace aruwsrc::control::cap_bank
+}  // namespace aruwsrc::control::capbank
 
 #endif  // CAP_BANK_SPRINT_COMMAND_HPP_

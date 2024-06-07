@@ -78,12 +78,15 @@ public:
     /**
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
+    const float velocityZeroThreshold;
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    const float positionZeroThreshold;
+
+    static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
 
     struct TurretIMUCalibrationConfig
     {
@@ -109,11 +112,17 @@ public:
      * turret and turret IMU information necessary for calibrating the IMU
      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
      * movement to 0).
+     * @param[in] velocityZeroThreshold Threshold around 0 where turret pitch and yaw velocity is
+     * considered to be 0, in radians/s.
+     * @param[in] positionZeroThreshold Threshold around 0 where turret pitch and yaw position from
+     * the center considered to be 0, in radians.
      */
     ImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        chassis::HolonomicChassisSubsystem *chassis);
+        chassis::HolonomicChassisSubsystem *chassis,
+        float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD);
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -174,23 +183,24 @@ protected:
     tap::arch::MilliTimeout calibrationLongTimeout;
 
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
+        const
     {
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
-                   ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+                   velocityZeroThreshold) &&
                compareFloatClose(
                    0.0f,
                    turret->yawMotor.getAngleFromCenter(),
-                   ImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
+                   positionZeroThreshold) &&
                (ignorePitch || (compareFloatClose(
                                     0.0f,
                                     turret->pitchMotor.getChassisFrameVelocity(),
-                                    ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+                                    velocityZeroThreshold) &&
                                 compareFloatClose(
                                     0.0f,
                                     turret->pitchMotor.getAngleFromCenter(),
-                                    ImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
+                                    positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu

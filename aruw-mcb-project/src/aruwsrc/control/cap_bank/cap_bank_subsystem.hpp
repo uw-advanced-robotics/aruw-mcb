@@ -30,7 +30,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::cap_bank
+namespace aruwsrc::control::capbank
 {
 class CapBankSubsystem : public tap::control::Subsystem
 {
@@ -56,6 +56,6 @@ private:
 
     int8_t messageTimer = 0;
 };
-}  // namespace aruwsrc::control::cap_bank
+}  // namespace aruwsrc::control::capbank
 
 #endif  // CAPACITOR_BANK_SUBSYSTEM_HPP_

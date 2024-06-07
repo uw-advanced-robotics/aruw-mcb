@@ -19,7 +19,7 @@
 
 #include "cap_bank_subsystem.hpp"
 
-namespace aruwsrc::control::cap_bank
+namespace aruwsrc::control::capbank
 {
 CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
@@ -56,4 +56,4 @@ void CapBankSubsystem::refresh()
     messageTimer++;
 }
 
-}  // namespace aruwsrc::control::cap_bank
+}  // namespace aruwsrc::control::capbank

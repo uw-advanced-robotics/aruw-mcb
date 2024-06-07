@@ -105,6 +105,11 @@ public:
      */
     mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
+    float mpsToRpm(float mps) const override
+    {
+        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
+    }
+
 protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 

@@ -22,11 +22,11 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 
-namespace aruwsrc::control::cap_bank
+namespace aruwsrc::control::capbank
 {
 CapBankSprintCommand::CapBankSprintCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem,
     const aruwsrc::can::capbank::SprintMode sprintOption)
     : sprintOption(sprintOption),
       drivers(drivers),
@@ -46,4 +46,4 @@ void CapBankSprintCommand::end(bool)
 
 bool CapBankSprintCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::control::cap_bank
+}  // namespace aruwsrc::control::capbank
