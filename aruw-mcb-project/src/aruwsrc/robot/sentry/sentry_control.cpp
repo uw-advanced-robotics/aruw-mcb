@@ -631,6 +631,13 @@ GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
      &frictionWheelsOnGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft});
 
+GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
+    {&turretLeftAgitator},
+    turretLeftRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretLeft,
+     &refSystemProjectileLaunchedGovernorTurretLeft,
+     &frictionWheelsOnGovernorTurretLeft});
+
 // RIGHT shooting ======================
 
 // spin friction wheels commands
@@ -691,40 +698,94 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
      &frictionWheelsOnGovernorTurretRight,
      &cvOnTargetGovernorTurretRight});
 
+GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
+    {&turretRightAgitator},
+    turretRightRotateAndUnjamAgitator,
+    {&heatLimitGovernorTurretRight,
+     &refSystemProjectileLaunchedGovernorTurretRight,
+     &frictionWheelsOnGovernorTurretRight});
+
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping leftUp(
+
+// auto nav + auto aim + cv gated fire
+HoldCommandMapping leftUpRightUp(
     drivers(),
-    {&turretCVCommand,
+    {// auto drive command
+     &turretCVCommand,
+     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+// auto nav + auto aim
+HoldCommandMapping leftUpRightMid(
+    drivers(),
+    {// auto drive command
+     &turretCVCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+
+// imu calibrate
+HoldCommandMapping leftUpRightDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+
+// manual aim and shoot
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {&majorManualCommand,
+     &turretLeftManualCommand,
+     &turretRightManualCommand,
      &turretLeftFrictionWheelSpinCommand,
      &turretRightFrictionWheelSpinCommand,
-     &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+     &turretLeftAgitatorManualSpin,
+     &turretRightAgitatorManualSpin},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
-HoldCommandMapping leftMid(
+// auto drive & auto aim
+HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+        /** auto drive command */
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-HoldCommandMapping leftDown(
+// manual aim
+HoldCommandMapping leftMidRightDown(
+    drivers(),
+    {
+        &majorManualCommand,
+        &turretLeftManualCommand,
+        &turretRightManualCommand,
+    },
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+// manul drive, auto aim, cv-gated fire
+HoldCommandMapping leftDownRightUp(
+    drivers(),
+    {&chassisDriveCommand,
+     &turretCVCommand,
+     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretLeftFrictionWheelSpinCommand,
+     &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+// manual drive & auto aim
+HoldCommandMapping leftDownRightMid(
+    drivers(),
+    {&turretCVCommand, &chassisDriveCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+
+// manual drive
+HoldCommandMapping leftDownRightDown(
     drivers(),
     {&chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-
-HoldRepeatCommandMapping rightUp(
-    drivers(),
-    {
-        &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-        &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-    },
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
-
-HoldCommandMapping rightDown(
-    drivers(),
-    {
-        &imuCalibrateCommand,
-    },
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -790,11 +851,17 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftMid);
-    drivers->commandMapper.addMap(&leftDown);
-    drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&leftUpRightUp);    // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
+    drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
+
+    drivers->commandMapper.addMap(&leftMidRightUp);    // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+
+    drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 }
 
 }  // namespace sentry_control
