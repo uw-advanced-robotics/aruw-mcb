@@ -680,10 +680,7 @@ GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping leftUp(
     drivers(),
-    {&turretCVCommand,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand,
-     &chassisDriveCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldCommandMapping leftMid(
