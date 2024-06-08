@@ -24,29 +24,33 @@ SentryStrategyMenu::SentryStrategyMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
     : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
-        vs, 
-        SENTRY_STRATEGY_MENU_ID, 
-        getMenuName()),
-        visionCoprocessor(visionCoprocessor)
+          vs,
+          SENTRY_STRATEGY_MENU_ID,
+          getMenuName()),
+      visionCoprocessor(visionCoprocessor)
 {
     addEntry(
         "IDLE",
         visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::IDLE),
         true);
     addEntry(
-        "DEFAULT_STATE_MACHINE",
-        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::DEFAULT_STATE_MACHINE),
+        "Default State Machine",
+        visionCoprocessor->getMutableMotionStrategyPtr(
+            SentryMotionStrategyType::DEFAULT_STATE_MACHINE),
         false);
     addEntry(
-        "PRACTICE_MATCH_STATE_MACHINE",
-        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::PRACTICE_MATCH_STATE_MACHINE),
+        "Practice Match State Machine",
+        visionCoprocessor->getMutableMotionStrategyPtr(
+            SentryMotionStrategyType::PRACTICE_MATCH_STATE_MACHINE),
         false);
     addEntry(
-        "TEST_STATE_MACHINE",
-        visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::TEST_STATE_MACHINE),
+        "Test State Machine",
+        visionCoprocessor->getMutableMotionStrategyPtr(
+            SentryMotionStrategyType::TEST_STATE_MACHINE),
         false);
 }
 
-void SentryStrategyMenu::openNextScreen() {};
+void openNextScreen(){};
 
+static const char *getMenuName() { return "Sentry Strategy Menu"; }
 }  // namespace aruwsrc::display

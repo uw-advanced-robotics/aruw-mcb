@@ -260,7 +260,10 @@ public:
         return lastSetpointData;
     }
 
-    mockable inline const MotionStrategyOptionsData& getLastMotionStratOptionsData() const { return lastMotionStratOptionsData; }
+    mockable inline const MotionStrategyOptionsData& getLastMotionStratOptionsData() const
+    {
+        return lastMotionStratOptionsData;
+    }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
