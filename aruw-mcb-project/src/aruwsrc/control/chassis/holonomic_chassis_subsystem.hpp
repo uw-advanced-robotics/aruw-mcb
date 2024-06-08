@@ -43,10 +43,6 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-#if defined(ALL_STANDARDS)
-#elif defined(TARGET_HERO_PERSEUS)
-#endif
-
 namespace aruwsrc
 {
 namespace chassis
@@ -101,7 +97,7 @@ public:
     {
         if (capacitorBank != nullptr && capacitorBank->isSprinting())
         {
-            return capacitorBank->getMaximumOutputCurrent() * 24.0f;
+            return capacitorBank->getMaximumOutputCurrent() * can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
         }
 
         return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;

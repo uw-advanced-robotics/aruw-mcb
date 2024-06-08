@@ -149,6 +149,9 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
 #endif
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
+    ((Drivers *)drivers)->capacitorBank.initialize();
+#endif
 #if defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this

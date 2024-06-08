@@ -20,6 +20,7 @@
 #ifndef CAPACITOR_BANK_HPP_
 #define CAPACITOR_BANK_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
@@ -29,7 +30,11 @@
 
 namespace aruwsrc::can::capbank
 {
-const uint16_t CAP_BANK_CAN_ID = 0x1EC;
+static constexpr float CAPACITOR_BANK_OUTPUT_VOLTAGE = 24.0f;
+static constexpr float CAPACITOR_BANK_EFFICIENCY = 0.9f;
+static constexpr float CAPACITOR_BANK_MIN_VOLTAGE = 8.0f;
+
+static constexpr uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
 enum MessageType
 {
@@ -37,6 +42,7 @@ enum MessageType
     STOP = 0x02,
     STATUS = 0x04,
     SET_CHARGE_SPEED = 0x08,
+    PING = 0x10,
 };
 
 enum State
@@ -53,7 +59,7 @@ enum State
 
 enum SprintMode
 {
-    REGULAR = 0,
+    NO_SPRINT = 0,
     HALF_SPRINT = 1,
     SPRINT = 2
 };
@@ -84,6 +90,7 @@ public:
 
     void start() const;
     void stop() const;
+    void ping() const;
     void setPowerLimit(uint16_t watts);
 
     int getAvailableEnergy() const { return this->availableEnergy; };
@@ -104,8 +111,13 @@ public:
         return this->getState() == State::RESET || this->getState() == State::DISABLED;
     }
 
+    bool isOnline() const
+    {
+        return !(this->getState() == State::UNKNOWN || this->heartbeat.isExpired());
+    }
+
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };
-    bool isSprinting() const { return this->sprint != SprintMode::REGULAR; };
+    bool isSprinting() const { return this->sprint != SprintMode::NO_SPRINT; };
 
     float getMaximumOutputCurrent() const;
 
@@ -121,7 +133,9 @@ private:
 
     bool connected = false;  // Set to true once any message from the cap bank is received
 
-    SprintMode sprint = SprintMode::REGULAR;
+    SprintMode sprint = SprintMode::NO_SPRINT;
+
+    tap::arch::MilliTimeout heartbeat;
 };
 }  // namespace aruwsrc::can::capbank
 

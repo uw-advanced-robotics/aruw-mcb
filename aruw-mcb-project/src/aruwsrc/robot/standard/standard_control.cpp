@@ -539,7 +539,6 @@ void initializeSubsystems()
     clientDisplay.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
-    drivers()->capacitorBank.initialize();
     capBankSubsystem.initialize();
 }
 

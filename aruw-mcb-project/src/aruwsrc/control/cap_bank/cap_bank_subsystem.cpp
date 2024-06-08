@@ -28,7 +28,8 @@ CapBankSubsystem::CapBankSubsystem(
       capacitorBank(capacitorBank),
       enabled(false)
 {
-    capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
+    capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
+    this->messageTimer.restart(40);
 }
 
 void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
@@ -38,22 +39,24 @@ void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
 
 void CapBankSubsystem::refresh()
 {
-    if (messageTimer > 20)
+    if (this->messageTimer.isExpired())
     {
-        messageTimer = 0;
+        messageTimer.restart(40);
 
         if (!this->enabled && !this->capacitorBank.isDisabled())
         {
-            this->capacitorBank.setSprinting(can::capbank::SprintMode::REGULAR);
+            this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
             this->capacitorBank.stop();
         }
         else if (this->enabled && !this->capacitorBank.isEnabled())
         {
             this->capacitorBank.start();
         }
+        else
+        {
+            this->capacitorBank.ping();
+        }
     }
-
-    messageTimer++;
 }
 
 }  // namespace aruwsrc::control::capbank

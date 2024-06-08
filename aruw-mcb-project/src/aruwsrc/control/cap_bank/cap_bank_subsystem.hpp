@@ -20,6 +20,7 @@
 #ifndef CAP_BANK_SUBSYSTEM_HPP_
 #define CAP_BANK_SUBSYSTEM_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
@@ -45,7 +46,10 @@ public:
 
     void changeSprintMode(aruwsrc::can::capbank::SprintMode mode);
 
-    void refreshSafeDisconnect() override { this->enabled = false; }
+    void refreshSafeDisconnect() override { 
+        this->enabled = false; 
+        this->capacitorBank.stop();
+    }
 
     void refresh() override;
 
@@ -54,7 +58,7 @@ private:
 
     bool enabled;
 
-    int8_t messageTimer = 0;
+    tap::arch::MilliTimeout messageTimer;
 };
 }  // namespace aruwsrc::control::capbank
 

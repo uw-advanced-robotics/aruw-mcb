@@ -41,7 +41,7 @@ void CapBankSprintCommand::execute() {}
 
 void CapBankSprintCommand::end(bool)
 {
-    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::REGULAR);
+    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::NO_SPRINT);
 }
 
 bool CapBankSprintCommand::isFinished() const { return false; }

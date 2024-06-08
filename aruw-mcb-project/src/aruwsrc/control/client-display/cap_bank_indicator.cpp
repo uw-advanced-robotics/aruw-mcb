@@ -55,7 +55,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
 
     if (capBank != nullptr)
     {
-        if (capBank->getState() != can::capbank::State::UNKNOWN)
+        if (capBank->isOnline())
         {
             capBankGraphics.graphicData[0].operation =
                 capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD

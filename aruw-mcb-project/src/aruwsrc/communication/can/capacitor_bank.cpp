@@ -44,9 +44,11 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[4])) / 1000.0;
             this->powerLimit = message.data[6];
             this->availableEnergy = tap::algorithms::limitVal(
-                1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(8, 2)),
+                1.0 / 2.0 * this->capacitance * (powf(this->voltage, 2) - powf(CAPACITOR_BANK_MIN_VOLTAGE, 2)),
                 0.0,
                 2000.0);
+            
+            this->heartbeat.restart(10);
             break;
         default:
             // Ignore unknown message IDs
@@ -85,6 +87,14 @@ void CapacitorBank::stop() const
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
+void CapacitorBank::ping() const
+{
+    modm::can::Message message(CAP_BANK_CAN_ID, 8);
+    message.setExtended(false);
+    message.data[0] = MessageType::PING;
+    this->drivers->can.sendMessage(this->canBus, message);
+}
+
 void CapacitorBank::setPowerLimit(uint16_t watts)
 {
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
@@ -95,12 +105,12 @@ void CapacitorBank::setPowerLimit(uint16_t watts)
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
+const float HALF_SPRINT_POWER_BOOST = 0.5f;
 float CapacitorBank::getMaximumOutputCurrent() const
 {
-    // Limit to twice the ref limit current.
     if (this->sprint == SprintMode::HALF_SPRINT)
     {
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / 24.0f * 1.5f;
+        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit / CAPACITOR_BANK_OUTPUT_VOLTAGE * (1.0f + HALF_SPRINT_POWER_BOOST);
     }
 
     float capacitorVoltage = this->getVoltage();

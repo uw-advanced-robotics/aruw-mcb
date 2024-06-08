@@ -506,7 +506,6 @@ void initializeSubsystems()
     turret.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
-    drivers()->capacitorBank.initialize();
     capBankSubsystem.initialize();
 }
 

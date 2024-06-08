@@ -33,6 +33,12 @@ class Drivers;
 
 namespace aruwsrc::chassis
 {
+
+static constexpr float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
+
+static constexpr float K_I = 0.002;
+static constexpr float K_P = 0.005;
+
 class CapacitorSelectingCurrentSensor
     : public tap::communication::sensors::current::CurrentSensorInterface
 {
@@ -69,9 +75,6 @@ private:
     CapacitorSelectingCurrentSensor sensor;
 
     tap::control::chassis::PowerLimiter fallback;
-
-    const float LOWEST_CAP_VOLTAGE = 8.0f;
-    const float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
 
     float currentIntegrator = 0;
 };

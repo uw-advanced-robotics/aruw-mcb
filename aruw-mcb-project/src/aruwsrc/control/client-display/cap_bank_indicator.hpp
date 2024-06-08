@@ -78,7 +78,7 @@ private:
     // cap voltage below which the indicator bar turns from yellow to orange
     static constexpr uint16_t VOLTAGE_SQUARED_ORANGE = pow(15, 2);
     // minimum displayed voltage of the supercapacitors (minimum usable voltage)
-    static constexpr uint16_t VOLTAGE_SQUARED_MIN = pow(8, 2);
+    static constexpr uint16_t VOLTAGE_SQUARED_MIN = pow(can::capbank::CAPACITOR_BANK_MIN_VOLTAGE, 2);
 
     const can::capbank::CapacitorBank *capBank;
 
