@@ -44,7 +44,8 @@ public:
         Module* moduleOne,
         Module* moduleTwo,
         const float wheelbaseRadius,
-        const float forwardMatrixArray[12]);
+        const float forwardMatrixArray[12],
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 

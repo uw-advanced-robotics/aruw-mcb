@@ -27,10 +27,12 @@
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
+#include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "about_menu.hpp"
+#include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
@@ -57,7 +59,8 @@ public:
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
         aruwsrc::virtualMCB::MCBLite *mcbLite1,
-        aruwsrc::virtualMCB::MCBLite *mcbLite2);
+        aruwsrc::virtualMCB::MCBLite *mcbLite2,
+        can::capbank::CapacitorBank *capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -85,11 +88,13 @@ private:
     MCBLiteMenu mcbLiteMenu2;
     AboutMenu aboutMenu;
     SentryStrategyMenu sentryStrategyMenu;
+    CapacitorBankMenu capBankMenu;
     serial::VisionCoprocessor *visionCoprocessor;
     can::TurretMCBCanComm *turretMCBCanCommBus1;
     can::TurretMCBCanComm *turretMCBCanCommBus2;
     aruwsrc::virtualMCB::MCBLite *mcbLite1;
     aruwsrc::virtualMCB::MCBLite *mcbLite2;
+    can::capbank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
     void addCVMenuCallback();
@@ -106,6 +111,7 @@ private:
     void addSentryStrategyMenuCallback();
     void addMCBLiteMenu1Callback();
     void addMCBLiteMenu2Callback();
+    void addCapacitorBankMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -67,7 +67,8 @@ public:
         Module* moduleRightFront,
         Module* moduleLeftBack,
         Module* moduleRightBack,
-        const float forwardMatrixArray[24]);
+        const float forwardMatrixArray[24],
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 
