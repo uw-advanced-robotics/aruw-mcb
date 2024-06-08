@@ -32,8 +32,6 @@ CapacitorBank::CapacitorBank(
 
 void CapacitorBank::processMessage(const modm::can::Message& message)
 {
-    this->connected = true;
-
     switch (static_cast<MessageType>(message.data[0]))
     {
         case MessageType::STATUS:  // Update message
@@ -69,7 +67,7 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
 void CapacitorBank::initialize()
 {
     this->attachSelfToRxHandler();
-    this->connected = false;
+    this->heartbeat.restart(0);
 }
 
 void CapacitorBank::start() const

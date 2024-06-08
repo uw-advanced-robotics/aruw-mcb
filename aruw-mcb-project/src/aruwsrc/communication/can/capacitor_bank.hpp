@@ -131,8 +131,6 @@ private:
     float voltage = 0;
     State state = State::UNKNOWN;
 
-    bool connected = false;  // Set to true once any message from the cap bank is received
-
     SprintMode sprint = SprintMode::NO_SPRINT;
 
     tap::arch::MilliTimeout heartbeat;

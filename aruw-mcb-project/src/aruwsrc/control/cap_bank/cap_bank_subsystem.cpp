@@ -39,7 +39,7 @@ void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
 
 void CapBankSubsystem::refresh()
 {
-    if (this->messageTimer.isExpired())
+    if (this->messageTimer.execute())
     {
         messageTimer.restart(40);
 
