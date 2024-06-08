@@ -50,7 +50,5 @@ SentryStrategyMenu::SentryStrategyMenu(
         false);
 }
 
-void openNextScreen(){};
-
-static const char *getMenuName() { return "Sentry Strategy Menu"; }
+void SentryStrategyMenu::openNextScreen(){};
 }  // namespace aruwsrc::display
