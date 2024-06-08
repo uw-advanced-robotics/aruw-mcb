@@ -23,6 +23,7 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -46,7 +47,8 @@ public:
         can::TurretMCBCanComm *turretMCBCanCommBus1,
         can::TurretMCBCanComm *turretMCBCanCommBus2,
         aruwsrc::virtualMCB::MCBLite *mcbLite1,
-        aruwsrc::virtualMCB::MCBLite *mcbLite2);
+        aruwsrc::virtualMCB::MCBLite *mcbLite2,
+        can::capbank::CapacitorBank *capacitorBank);
 
     void draw() override;
 
@@ -68,6 +70,7 @@ private:
     can::TurretMCBCanComm *turretMCBCanCommBus2;
     aruwsrc::virtualMCB::MCBLite *mcbLite1;
     aruwsrc::virtualMCB::MCBLite *mcbLite2;
+    can::capbank::CapacitorBank *capacitorBank;
 };
 }  // namespace display
 }  // namespace aruwsrc

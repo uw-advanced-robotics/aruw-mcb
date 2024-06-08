@@ -22,6 +22,9 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/display/oled_display.hpp"
+
 namespace aruwsrc::testbed
 {
 class Drivers : public tap::Drivers
@@ -31,9 +34,17 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers()
+        : tap::Drivers(),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, &capacitorBank),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
+    {
+    }
 
 public:
+    display::OledDisplay oledDisplay;
+    can::capbank::CapacitorBank capacitorBank;
+
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::testbed
 
