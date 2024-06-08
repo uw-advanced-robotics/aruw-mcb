@@ -33,7 +33,6 @@ class Drivers;
 
 namespace aruwsrc::chassis
 {
-
 static constexpr float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
 
 static constexpr float K_I = 0.002;

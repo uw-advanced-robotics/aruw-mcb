@@ -36,8 +36,7 @@ CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
 
 float CapacitorSelectingCurrentSensor::getCurrentMa() const
 {
-    if (this->capacitorBank == nullptr ||
-        !this->capacitorBank->isOnline())
+    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
     {
         return currentSensor->getCurrentMa();
     }
@@ -73,7 +72,7 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return 0;
     }
 
-        float fallback = this->fallback.getPowerLimitRatio();
+    float fallback = this->fallback.getPowerLimitRatio();
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline() ||
         this->capacitorBank->isDisabled() ||
         this->capacitorBank->getState() == can::capbank::State::SAFE)
@@ -81,7 +80,8 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return fallback;
     }
 
-    float setpoint = can::capbank::CAPACITOR_BANK_EFFICIENCY * drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
+    float setpoint = can::capbank::CAPACITOR_BANK_EFFICIENCY *
+                     drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
                      can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
 
     if (this->capacitorBank->isSprinting())
@@ -96,7 +96,8 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     this->currentIntegrator += K_I * error;
 
     float lowVoltageRamp = std::clamp(
-        (this->capacitorBank->getVoltage() - can::capbank::CAPACITOR_BANK_MIN_VOLTAGE) / VOLTAGE_RAMPDOWN_RANGE,
+        (this->capacitorBank->getVoltage() - can::capbank::CAPACITOR_BANK_MIN_VOLTAGE) /
+            VOLTAGE_RAMPDOWN_RANGE,
         0.0f,
         1.0f);
 

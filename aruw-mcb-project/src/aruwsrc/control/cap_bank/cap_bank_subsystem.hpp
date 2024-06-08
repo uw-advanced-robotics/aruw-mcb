@@ -46,8 +46,9 @@ public:
 
     void changeSprintMode(aruwsrc::can::capbank::SprintMode mode);
 
-    void refreshSafeDisconnect() override { 
-        this->enabled = false; 
+    void refreshSafeDisconnect() override
+    {
+        this->enabled = false;
         this->capacitorBank.stop();
     }
 

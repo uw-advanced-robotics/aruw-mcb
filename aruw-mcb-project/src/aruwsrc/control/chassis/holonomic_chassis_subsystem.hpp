@@ -97,7 +97,8 @@ public:
     {
         if (capacitorBank != nullptr && capacitorBank->isSprinting())
         {
-            return capacitorBank->getMaximumOutputCurrent() * can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+            return capacitorBank->getMaximumOutputCurrent() *
+                   can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
         }
 
         return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
