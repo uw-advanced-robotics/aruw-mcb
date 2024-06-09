@@ -382,24 +382,25 @@ private:
         float x;
         float y;
     };
+
     struct AutoNavSetpointMessage
     {
         // Header
-        uint32_t sequence_num;
+        uint32_t sequenceNum;
         float speed;
-        uint32_t num_setpoints;
+        uint32_t numSetpoints;
         // Setpoints
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
 
-    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 3 + sizeof(float);
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
 
     aruwsrc::algorithms::AutoNavPath autoNavPath;
     AutoNavSetpointMessage setpointData;
     AutoNavSetpointMessage lastSetpointData{
-        .sequence_num = 0,
+        .sequenceNum = 0,
         .speed = 0.0f,
-        .num_setpoints = 0,
+        .numSetpoints = 0,
         .setpoints = {}};
 
     ArucoResetData lastArucoData{
@@ -443,7 +444,6 @@ private:
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
-    aruwsrc::communication::serial::SentryVisionMessageType motionStrategy;
     bool sentryMotionStrategy[static_cast<uint8_t>(
         aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {1, 0, 0, 0};
 
@@ -457,7 +457,6 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
 };
 }  // namespace serial
 }  // namespace aruwsrc

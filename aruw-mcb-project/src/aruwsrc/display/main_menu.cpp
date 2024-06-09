@@ -75,6 +75,13 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
+#ifdef TARGET_SENTRY_HYDRA
+    addEntry(
+        SentryStrategyMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addSentryStrategyMenuCallback));
+#endif
     addEntry(
         MotorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -129,12 +136,6 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addAboutMenuCallback));
-    addEntry(
-        SentryStrategyMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addSentryStrategyMenuCallback));
-
     if (this->capacitorBank != nullptr)
         addEntry(
             CapacitorBankMenu::getMenuName(),

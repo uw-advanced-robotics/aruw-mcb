@@ -32,8 +32,8 @@ static constexpr float DEADWHEEL_RADIUS = 0.048f;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 3.074f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.074f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;  // 3.05
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.5f;  // 3.5
 
 // @todo generate this using the position offsets in the swerve module configs
 /**

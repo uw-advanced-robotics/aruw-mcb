@@ -113,17 +113,18 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
 {
     memcpy(&setpointData, &message.data, AUTO_NAV_SETPOINT_HEADER_SIZE);
     // @todo limit size to prevent buffer overflow
+    size_t copySize = setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
     memcpy(
         &setpointData.setpoints,
         &message.data[AUTO_NAV_SETPOINT_HEADER_SIZE],
-        sizeof(AutoNavCoordinate) * setpointData.num_setpoints);
-    if (lastSetpointData.sequence_num == setpointData.sequence_num)
+        sizeof(AutoNavCoordinate) * setpointData.numSetpoints);
+    if (lastSetpointData.sequenceNum == setpointData.sequenceNum)
     {
         return true;
     }
     // clears path and denotes that the path has changed
     autoNavPath.resetPath();
-    for (uint32_t i = 0; i < setpointData.num_setpoints; i++)
+    for (uint32_t i = 0; i < setpointData.numSetpoints; i++)
     {
         autoNavPath.pushPoint(
             Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
@@ -391,6 +392,8 @@ void VisionCoprocessor::sendSentryMotionStrategy()
         DJISerial::SerialMessage<sizeof(uint8_t)> sentryMotionStrategyMessage;
         sentryMotionStrategyMessage.messageType = CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY;
 
+        // @todo this is for if they're all 0. This should really not be a risk: the system should allow exactly one array to be 1
+        sentryMotionStrategyMessage.data[0] = 0;
         for (size_t i = 0; i < static_cast<size_t>(aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES); i++)
         {
             if (sentryMotionStrategy[i])
@@ -398,7 +401,6 @@ void VisionCoprocessor::sendSentryMotionStrategy()
                 sentryMotionStrategyMessage.data[0] = i;
                 break;
             }
-            // @todo unsafe if all are 0
         }
 
         sentryMotionStrategyMessage.setCRC16();
