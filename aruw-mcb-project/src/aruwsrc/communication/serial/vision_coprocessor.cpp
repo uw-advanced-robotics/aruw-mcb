@@ -73,9 +73,9 @@ void VisionCoprocessor::initializeCV()
     // Set up the interrupt for the vision coprocessor sync handler
     VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
-    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt();
-    VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
-        modm::platform::Gpio::InputTrigger::RisingEdge);
+    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt
+        VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
+            modm::platform::Gpio::InputTrigger::RisingEdge);
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
@@ -397,10 +397,7 @@ void VisionCoprocessor::sendSentryMotionStrategy()
         // @todo this is for if they're all 0. This should really not be a risk: the system should
         // allow exactly one array to be 1
         sentryMotionStrategyMessage.data[0] = 0;
-        for (size_t i = 0;
-             i < static_cast<size_t>(
-                     aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES);
-             i++)
+        for (size_t i = 0; i < num_motion_strat; i++)
         {
             if (sentryMotionStrategy[i])
             {
