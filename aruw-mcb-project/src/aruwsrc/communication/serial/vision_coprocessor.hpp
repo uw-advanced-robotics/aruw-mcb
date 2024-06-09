@@ -321,6 +321,7 @@ public:
      */
     inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
 
+    // @todo private should not be here
 private:
     enum TxMessageTypes
     {
@@ -332,16 +333,15 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
-        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 11
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
         CV_MESSAGE_TYPE_ARUCO_RESET = 10,
-        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -362,6 +362,9 @@ private:
     /// Time in ms between sending competition result status (as reported by the ref system).
     static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
 
+    /// Time in ms between sending competition result status (as reported by the ref system).
+    static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
@@ -381,12 +384,18 @@ private:
     };
     struct AutoNavSetpointMessage
     {
+        // Header
         uint32_t sequence_num;
         float speed;
         uint32_t num_setpoints;
+        // Setpoints
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
+
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 3 + sizeof(float);
+
     aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage setpointData;
     AutoNavSetpointMessage lastSetpointData{
         .sequence_num = 0,
         .speed = 0.0f,
@@ -414,6 +423,8 @@ private:
 
     tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
 
+    tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
+
     uint32_t lastSentRefereeWarningTime = 0;
 
     /**
@@ -432,8 +443,9 @@ private:
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
+    aruwsrc::communication::serial::SentryVisionMessageType motionStrategy;
     bool sentryMotionStrategy[static_cast<uint8_t>(
-        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {1, 0, 0, 0};
 
 #ifdef ENV_UNIT_TESTS
 public:

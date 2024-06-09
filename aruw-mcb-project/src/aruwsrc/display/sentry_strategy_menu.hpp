@@ -49,19 +49,19 @@ public:
     {
         addEntry(
             "None",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
+            &sentryMotionStrategy[static_cast<uint8_t>(SentryVisionMessageType::NONE)],
             true);
         addEntry(
-            "Go crazy",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
+            "Rush Base",
+            &sentryMotionStrategy[static_cast<uint8_t>(SentryVisionMessageType::RUSH_BASE)],
             false);
         addEntry(
-            "Go stupid",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
+            "Go Heal",
+            &sentryMotionStrategy[static_cast<uint8_t>(SentryVisionMessageType::GO_HEAL)],
             false);
         addEntry(
-            "AAH",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
+            "Rush Mid",
+            &sentryMotionStrategy[static_cast<uint8_t>(SentryVisionMessageType::RUSH_MID)],
             false);
     }
 
@@ -73,6 +73,9 @@ private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {1, 0, 0, 0};
 };
 }  // namespace aruwsrc::display
 
