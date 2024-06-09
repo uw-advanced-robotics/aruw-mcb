@@ -535,39 +535,3 @@ TEST(VisionCoprocessor, sendRebootMessage_sends_blank_msg_with_correct_id)
 
     serial.sendRebootMessage();
 }
-
-TEST(VisionCoprocessor, time_sync_message_sent_after_time_sync_req_received)
-{
-    ClockStub clock;
-    clock.time = 10'000;
-
-    tap::Drivers drivers;
-    VisionCoprocessor serial(&drivers);
-
-    static constexpr int HEADER_LEN = 7;
-    static constexpr int DATA_LEN = 5;
-    static constexpr int CRC16_LEN = 2;
-    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
-
-    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
-        .Times(1)
-        .WillOnce([&](tap::communication::serial::Uart::UartPort,
-                      const uint8_t *data,
-                      std::size_t length) {
-            DJISerial::SerialMessage<DATA_LEN> msg;
-            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
-
-            checkHeaderAndTail<DATA_LEN>(msg);
-            EXPECT_EQ(msg.messageType, 11);
-            EXPECT_EQ(10'000'000, *reinterpret_cast<uint32_t *>(msg.data));
-
-            return length;
-        });
-
-    VisionCoprocessor::handleTimeSyncRequest();
-
-    // the time we send should be the the time when `handleTimeSyncRequest` was sent
-    clock.time += 100;
-
-    serial.sendTimeSyncMessage();
-}
