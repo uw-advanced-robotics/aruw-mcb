@@ -45,7 +45,7 @@ void ChassisRelDrive::computeDesiredUserTranslation(
 
     const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+        HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
