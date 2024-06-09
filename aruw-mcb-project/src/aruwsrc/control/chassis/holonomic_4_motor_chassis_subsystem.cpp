@@ -36,11 +36,12 @@ namespace chassis
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId)
-    : HolonomicChassisSubsystem(drivers, currentSensor),
+    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
@@ -93,7 +94,7 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
         r,
         getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
 
 void Holonomic4MotorChassisSubsystem::refresh()

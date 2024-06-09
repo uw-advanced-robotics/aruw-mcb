@@ -32,18 +32,23 @@ namespace chassis
 modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
+can::capbank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
+
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    can::capbank::CapacitorBank* capacitorBank)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       currentSensor(currentSensor),
       chassisPowerLimiter(
           drivers,
           currentSensor,
+          capacitorBank,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)
 {
+    HolonomicChassisSubsystem::capacitorBank = capacitorBank;
 }
 
 // HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
@@ -81,7 +86,7 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     {
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
         // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
         // power(max revolve speed, 2)
