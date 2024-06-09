@@ -396,7 +396,6 @@ private:
     static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
 
     aruwsrc::algorithms::AutoNavPath autoNavPath;
-    AutoNavSetpointMessage setpointData;
     AutoNavSetpointMessage lastSetpointData{
         .sequenceNum = 0,
         .speed = 0.0f,

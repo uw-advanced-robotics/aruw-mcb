@@ -111,13 +111,15 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
+    AutoNavSetpointMessage setpointData;
     memcpy(&setpointData, &message.data, AUTO_NAV_SETPOINT_HEADER_SIZE);
     // @todo limit size to prevent buffer overflow
-    size_t copySize = setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
+    size_t numSetpoints =
+        setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
     memcpy(
         &setpointData.setpoints,
         &message.data[AUTO_NAV_SETPOINT_HEADER_SIZE],
-        sizeof(AutoNavCoordinate) * setpointData.numSetpoints);
+        sizeof(AutoNavCoordinate) * numSetpoints);
     if (lastSetpointData.sequenceNum == setpointData.sequenceNum)
     {
         return true;
@@ -392,9 +394,13 @@ void VisionCoprocessor::sendSentryMotionStrategy()
         DJISerial::SerialMessage<sizeof(uint8_t)> sentryMotionStrategyMessage;
         sentryMotionStrategyMessage.messageType = CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY;
 
-        // @todo this is for if they're all 0. This should really not be a risk: the system should allow exactly one array to be 1
+        // @todo this is for if they're all 0. This should really not be a risk: the system should
+        // allow exactly one array to be 1
         sentryMotionStrategyMessage.data[0] = 0;
-        for (size_t i = 0; i < static_cast<size_t>(aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES); i++)
+        for (size_t i = 0;
+             i < static_cast<size_t>(
+                     aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES);
+             i++)
         {
             if (sentryMotionStrategy[i])
             {
