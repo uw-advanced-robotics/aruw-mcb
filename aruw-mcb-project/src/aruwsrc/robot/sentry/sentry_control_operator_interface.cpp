@@ -96,7 +96,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        drivers->refSerial.getRobotData().chassis.power);
 
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -131,7 +131,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        drivers->refSerial.getRobotData().chassis.power);
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);

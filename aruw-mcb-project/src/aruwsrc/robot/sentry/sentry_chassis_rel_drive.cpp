@@ -44,7 +44,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
 
     const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        drivers->refSerial.getRobotData().chassis.power);
 
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
