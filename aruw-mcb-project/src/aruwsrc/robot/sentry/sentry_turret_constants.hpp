@@ -64,10 +64,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 1'300.0f,
-    .kd = 8'000.0f,
-    .maxICumulative = 7'500.0f,
+    .kp = 60'000.0f,
+    .ki = 1'000.0f,
+    .kd = 9'000.0f,
+    .maxICumulative = 3'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
