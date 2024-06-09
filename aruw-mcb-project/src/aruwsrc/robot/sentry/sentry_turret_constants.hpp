@@ -41,8 +41,8 @@ static constexpr uint8_t NUM_TURRETS = 2;
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
-static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.008f;
+static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 
 static constexpr float TURRET_CG_X = 32.5f;
 static constexpr float TURRET_CG_Z = 32.3f;
@@ -64,10 +64,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 1'300.0f,
-    .kd = 8'000.0f,
-    .maxICumulative = 7'500.0f,
+    .kp = 60'000.0f,
+    .ki = 1'000.0f,
+    .kd = 9'000.0f,
+    .maxICumulative = 3'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -82,7 +82,7 @@ namespace worldFrameCascadeController
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 7.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 1.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 6.0f,
     .tRDerivativeKalman = 40.0f,
@@ -109,7 +109,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 // Turret Major has a double DJI motor, so we need to have two CAN Buses
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
-// static constexpr boolean majorInverted = true;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
@@ -208,11 +207,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 13'500.0f,
+    .kp = 16'500.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -221,11 +220,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 35.0f,
-    .ki = 0.0f,
+    .kp = 24.0f,
+    .ki = 0.2f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 5.0f,
+    .maxICumulative = 1.6f,
+    .maxOutput = 12.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
