@@ -75,7 +75,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,  // @todo: check
+    .isAgitatorInverted = false,
     /**
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
