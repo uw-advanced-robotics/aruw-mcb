@@ -852,8 +852,8 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
-    drivers->commandMapper.addMap(&leftMidRightUp);    // manual aim and shoot
-    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & manual aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
