@@ -601,10 +601,9 @@ aruwsrc::control::launcher::
         turretLeft::barrelID);
 
 // Agitator commands (turret left)
-// ConstantVelocityAgitatorCommand turretLeftRotateAgitator(
-//     turretLeftAgitator,
-//     constants::AGITATOR_ROTATE_CONFIG);
-MoveIntegralCommand turretLeftRotateAgitator(turretLeftAgitator, constants::AGITATOR_ROTATE_CONFIG);
+ConstantVelocityAgitatorCommand turretLeftRotateAgitator(
+    turretLeftAgitator,
+    constants::AGITATOR_ROTATE_CONFIG);
 UnjamSpokeAgitatorCommand turretLeftUnjamAgitator(
     turretLeftAgitator,
     constants::AGITATOR_UNJAM_CONFIG);
@@ -681,12 +680,9 @@ aruwsrc::control::launcher::
         turretRight::barrelID);
 
 // Agitator commands (turret Right)
-MoveIntegralCommand turretRightRotateAgitator(
+ConstantVelocityAgitatorCommand turretRightRotateAgitator(
     turretRightAgitator,
     constants::AGITATOR_ROTATE_CONFIG);
-// ConstantVelocityAgitatorCommand turretRightRotateAgitator(
-//     turretRightAgitator,
-//     constants::AGITATOR_ROTATE_CONFIG);
 UnjamSpokeAgitatorCommand turretRightUnjamAgitator(
     turretRightAgitator,
     constants::AGITATOR_UNJAM_CONFIG);
