@@ -63,14 +63,14 @@ struct SwerveModuleConfig
     const float azimuthMotorGearing = 1;
 
     tap::algorithms::SmoothPidConfig drivePidConfig = {
-        .kp = 9.0f,
+        .kp = 10.0f,
         .ki = 0.8f,
         .kd = 0.0f,
-        .maxICumulative = 0.0f,
+        .maxICumulative = 1.0f,
         .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
         .tRDerivativeKalman = 100.0f,
         .tRProportionalKalman = 500.0f,
-        .errDeadzone = 0.0f,
+        .errDeadzone = 300.0f,  // for motor backlash
         .errorDerivativeFloor = 0.0f};
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {

@@ -62,7 +62,6 @@
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_launcher_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_minor_cv_on_target_governor.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
@@ -160,7 +159,11 @@ TurretMinorMotors turretRightMotors{
 
 };
 
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -398,20 +401,20 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     turretLeftFrictionWheels(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETLEFT,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETLEFT,
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm2(),
         turretLeft::barrelID);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     turretRightFrictionWheels(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETRIGHT,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETRIGHT,
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
 
 // Agitators
@@ -437,7 +440,7 @@ SentryBallisticsSolver turretRightSolver(
     turretRight.getTurretID());
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretRight(
-    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &turretRightSolver);
 
@@ -452,7 +455,7 @@ SentryBallisticsSolver turretLeftSolver(
     turretLeft.getTurretID());
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
-    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &turretLeftSolver);
 
@@ -576,7 +579,7 @@ SentryTurretCVCommand turretCVCommand(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictionWheelSpinCommand(
     drivers(),
     &turretLeftFrictionWheels,
-    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,
     false,
     turretLeft::barrelID);
 
@@ -644,7 +647,7 @@ GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFrictionWheelSpinCommand(
     drivers(),
     &turretRightFrictionWheels,
-    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,
     false,
     turretRight::barrelID);
 
@@ -859,8 +862,6 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    turretLeftRotateAgitator.enableConstantRotation(true);
-    turretRightRotateAgitator.enableConstantRotation(true);
 }
 
 /* register io mappings here ------------------------------------------------*/

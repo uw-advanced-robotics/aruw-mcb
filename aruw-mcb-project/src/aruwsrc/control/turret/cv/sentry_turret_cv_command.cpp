@@ -120,6 +120,7 @@ void SentryTurretCVCommand::execute()
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
+    // @todo: does not allow for independent turret aiming
     targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
                                                      rightBallisticsSolution != std::nullopt);
 
@@ -196,9 +197,6 @@ void SentryTurretCVCommand::execute()
                 lowPassFilter(majorSetpoint, majorScanValue.getWrappedValue(), SCAN_LOW_PASS_ALPHA);
             leftPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
             rightPitchSetpoint = SCAN_TURRET_MINOR_PITCH;
-
-            // temp = WrappedFloat(sentryTransforms.getWorldToTurretMajor().getYaw(), 0.0f, M_TWOPI)
-            //            .getWrappedValue();
 
             leftYawSetpoint = SCAN_TURRET_LEFT_YAW + majorSetpoint;
             leftYawSetpoint =

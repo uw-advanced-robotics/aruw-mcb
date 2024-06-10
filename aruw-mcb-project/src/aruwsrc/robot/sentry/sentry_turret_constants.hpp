@@ -181,11 +181,11 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 110'000.0f,
-    .ki = 100.0f,
+    .kp = 160'000.0f,
+    .ki = 200.0f,
     .kd = 6'000.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -194,11 +194,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 120'000.0f,
-    .ki = 200.0f,
+    .kp = 210'000.0f,
+    .ki = 400.0f,
     .kd = 6'000.0f,
-    .maxICumulative = 4'000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxICumulative = 6'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
