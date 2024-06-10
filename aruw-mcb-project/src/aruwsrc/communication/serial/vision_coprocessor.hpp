@@ -194,7 +194,7 @@ public:
         float y;
         long long timestamp;
     } modm_packed;
-    
+
     struct ArucoResetPacket
     {
         float x;
