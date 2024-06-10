@@ -427,7 +427,8 @@ private:
 
     tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
 
-    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
