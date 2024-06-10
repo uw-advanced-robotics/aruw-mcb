@@ -80,10 +80,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace worldFrameCascadeController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 7.0f,
-    .ki = 0.0f,
-    .kd = 1.0f,
-    .maxICumulative = 0.0f,
+    .kp = 9.0f,
+    .ki = 0.03f,
+    .kd = 0.2f,
+    .maxICumulative = 0.2f,
     .maxOutput = 6.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
