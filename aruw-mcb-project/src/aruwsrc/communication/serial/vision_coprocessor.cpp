@@ -424,12 +424,15 @@ void VisionCoprocessor::sendBulletsRemaining()
         const tap::communication::serial::RefSerialData::RobotId robotId =
             *&drivers->refSerial.getRobotData().robotId;
 
-        const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
-        #if defined(TARGET_HERO_PERSEUS)
-            const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
-        #else
-            const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
-        #endif
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+#if defined(TARGET_HERO_PERSEUS)
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
+#else
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+#endif
 
         memcpy(&bulletsRemainMessage.data, bulletsRemaining, sizeof(bulletsRemainMessage.data));
 
