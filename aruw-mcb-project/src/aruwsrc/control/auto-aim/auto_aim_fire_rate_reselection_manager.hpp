@@ -39,9 +39,10 @@ class AutoAimFireRateReselectionManager
     : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
-    static constexpr float LOW_RPS = 3;
-    static constexpr float MID_RPS = 10;
-    static constexpr float HIGH_RPS = 20;
+    // @todo move this to passed-in config
+    static constexpr float LOW_RPS = 5;
+    static constexpr float MID_RPS = 15;
+    static constexpr float HIGH_RPS = 30;
 
     /**
      * @param[in] visionCoprocessor reference to the vision coprocessor

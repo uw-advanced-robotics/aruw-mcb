@@ -54,6 +54,7 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
+#include "aruwsrc/control/turret/cv/sentry_turret_cv_command_adapter.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
@@ -576,6 +577,9 @@ SentryTurretCVCommand turretCVCommand(
     turretRightCVConfig,
     transformer);
 
+SentryTurretCVCommandAdapter turretLeftCVCommandAdapter(turretCVCommand, turretLeft::turretID);
+SentryTurretCVCommandAdapter turretRightCVCommandAdapter(turretCVCommand, turretRight::turretID);
+
 // LEFT shooting ======================
 
 // spin friction wheels commands
@@ -611,7 +615,7 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
     *drivers(),
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
-    sentryTurretCVCommand,
+    turretLeftCVCommandAdapter,
     turretLeft::turretID
 );
 
@@ -625,7 +629,7 @@ HeatLimitGovernor heatLimitGovernorTurretLeft(
 
 // rotates agitator when aiming at target and within heat limit
 SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
-    ((tap::Drivers *)(drivers())),
+    drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretLeft,
@@ -691,7 +695,7 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
     *drivers(),
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
-    sentryTurretCVCommand,
+    turretRightCVCommandAdapter,
     turretRight::turretID
 );
 
@@ -705,7 +709,7 @@ HeatLimitGovernor heatLimitGovernorTurretRight(
 
 // rotates agitator when aiming at target and within heat limit
 SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
-    ((tap::Drivers *)(drivers())),
+    drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretRight,
