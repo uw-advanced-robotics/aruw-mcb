@@ -182,12 +182,7 @@ public:
         float y;
         long long timestamp;
     } modm_packed;
-
-    struct MotionStrategyOptionsData
-    {
-        char motion_strategy_options[512];
-    } modm_packed;
-
+    
     struct ArucoResetPacket
     {
         float x;
@@ -258,11 +253,6 @@ public:
     mockable inline const AutoNavSetpointData& getLastSetpointData() const
     {
         return lastSetpointData;
-    }
-
-    mockable inline const MotionStrategyOptionsData& getLastMotionStratOptionsData() const
-    {
-        return lastMotionStratOptionsData;
     }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
