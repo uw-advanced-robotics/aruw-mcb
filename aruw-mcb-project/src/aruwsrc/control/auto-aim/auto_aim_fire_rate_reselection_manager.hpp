@@ -20,14 +20,13 @@
 #ifndef AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
 #define AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
 
-#include "tap/control/command.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
-
+#include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 namespace aruwsrc::control::auto_aim
 {
 /**
@@ -40,22 +39,21 @@ class AutoAimFireRateReselectionManager
     : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
-    // @todo move this to passed-in config
-    static constexpr float LOW_RPS = 5;
-    static constexpr float MID_RPS = 15;
-    static constexpr float HIGH_RPS = 30;
+    static constexpr float LOW_RPS = 3;
+    static constexpr float MID_RPS = 10;
+    static constexpr float HIGH_RPS = 20;
 
     /**
      * @param[in] visionCoprocessor reference to the vision coprocessor
      * @param[in] commandScheduler refence to the command scheduler
-     * @param[in] turretCVCommand command that does CV aiming
+     * @param[in] turretCVCommand
      * @param[in] turretID ID of the turret that this governor controls
      */
     AutoAimFireRateReselectionManager(
         tap::Drivers &drivers,
         serial::VisionCoprocessor &visionCoprocessor,
         tap::control::CommandScheduler &commandScheduler,
-        const tap::control::Command &turretCVCommand,
+        const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         const uint8_t turretID)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
@@ -111,7 +109,7 @@ private:
     tap::Drivers &drivers;
     serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
-    const tap::control::Command &turretCVCommand;
+    const aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     const uint8_t turretID;
 };
 }  // namespace aruwsrc::control::auto_aim

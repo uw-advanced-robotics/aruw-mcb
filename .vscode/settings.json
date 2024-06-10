@@ -74,9 +74,7 @@
         "compare": "cpp",
         "concepts": "cpp",
         "ranges": "cpp",
-        "stop_token": "cpp",
-        "numbers": "cpp",
-        "span": "cpp"
+        "stop_token": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
