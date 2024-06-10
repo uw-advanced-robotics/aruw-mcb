@@ -52,7 +52,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR =
 static constexpr float TURRET_MINOR_OFFSET = 0.132f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
-    .kp = 0.1,
+    .kp = 0.04,
     .ki = 0,
     .kd = 0,
     .maxICumulative = M_PI,
@@ -76,9 +76,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 120'000.0f,
+    .kp = 160'000.0f,
     .ki = 500.0f,
-    .kd = 9'000.0f,
+    .kd = 12'000.0f,
     .maxICumulative = 8'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
@@ -232,7 +232,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 24.0f,
+    .kp = 29.0f,
     .ki = 0.2f,
     .kd = 0.0f,
     .maxICumulative = 1.6f,
@@ -258,7 +258,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 30.0f,
+    .kp = 34.0f,
     .ki = 0.2f,
     .kd = 0.0f,
     .maxICumulative = 0.05f,
