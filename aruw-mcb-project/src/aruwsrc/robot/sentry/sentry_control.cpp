@@ -859,12 +859,13 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
+    // commands with higher priority must be added later
     // friction wheels spin (separated due to dumb design in command mapper system)
     drivers->commandMapper.addMap(&rightUp);
 
+    drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightUp);  // auto nav + auto aim + cv gated fire
     drivers->commandMapper.addMap(&leftUpRightUpAg);
-    drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
@@ -872,9 +873,9 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
+    drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
     drivers->commandMapper.addMap(&leftDownRightUp);  // manual drive, auto aim, gated-fire
     drivers->commandMapper.addMap(&leftDownRightUpAg);
-    drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
     drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 }
 
