@@ -22,8 +22,6 @@
 
 #include "tap/control/command.hpp"
 
-// @todo: make this not a subclass of command. See
-// https://aruw.slack.com/archives/C84GTRPSB/p1718012211193499
 namespace aruwsrc::control::turret::cv
 {
 class TurretCVCommandInterface : public tap::control::Command
