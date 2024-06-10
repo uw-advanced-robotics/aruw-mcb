@@ -36,6 +36,7 @@ namespace chassis
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
@@ -43,6 +44,7 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     : Holonomic4MotorChassisSubsystem(
           drivers,
           currentSensor,
+          capacitorBank,
           leftFrontMotorId,
           leftBackMotorId,
           rightFrontMotorId,

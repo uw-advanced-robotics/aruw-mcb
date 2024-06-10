@@ -161,13 +161,16 @@ private:
     tap::algorithms::SmoothPid azimuthPid;
 
     const float rotationVectorX, rotationVectorY;
-    float rotationSetpoint, speedSetpointRPM;  // pid setpoint, in radians and rpm respectively
+    float rotationSetpoint{0},
+        speedSetpointRPM{0};  // pid setpoint, in radians and rpm respectively
     float preScaledSpeedSetpoint{0}, preScaledRotationSetpoint{0}, newRawRotationSetpointRadians,
         newRotationSetpointRadians, moveVectorX, moveVectorY;
 
     // handles unwrapping desired rotation and reversing module (in radians, will always be a
     // multiple of PI)
     float rotationOffset{0};
+
+    float powerLimitFrac{1};
 
     modm::interpolation::Linear<modm::Pair<float, float>> angularBiasLUTInterpolator;
 

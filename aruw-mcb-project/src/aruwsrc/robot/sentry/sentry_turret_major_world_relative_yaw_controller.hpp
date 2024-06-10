@@ -25,6 +25,7 @@
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -44,13 +45,13 @@ class TurretMotor;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
- * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
- * determine the turret's world frame coordinates directly, making this controller better than the
- * `WorldFrameChassisImuTurretController`.
+ * World frame turret major yaw controller for the sentry.
  *
  * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
  * PID controller is desired motor output) to control the turret yaw.
+ *
+ * @note Includes turret minor torque compensation and uses chassis angular velocity. Has
+ * feedforward.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -58,22 +59,31 @@ class TurretMajorWorldFrameController final : public TurretYawControllerInterfac
 {
 public:
     /**
-     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
-     * information.
+     * @param[in] worldToMajor An self-updating reference to a transform from the world frame
+     *          to the chassis frame, used to determine the pose of the chassis relative to the
+     *          world frame.
+     * @param[in] chassis A chassis subsystem for getting angular velocity of the chassis.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] turretLeft The left turret minor.
+     * @param[in] turretRight The right turret minor.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
+     * @param[in] maxVelErrorInput Cap on the max error passed into velocity controller.
+     * @param[in] minorMajorTorqueRatio Gain on the torque compensation.
+     * @param[in] feedforwardGain Gain on the feedforward term of the final output.
      */
     TurretMajorWorldFrameController(
-        const tap::algorithms::transforms::Transform& worldToChassis,
+        const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         TurretMotor& yawMotor,
+        aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
         float maxVelErrorInput,
-        float minorMajorTorqueRatio);
+        float minorMajorTorqueRatio,
+        float feedforwardGain);
 
     void initialize() final;
 
@@ -109,11 +119,13 @@ public:
     };
 
 private:
-    const tap::algorithms::transforms::Transform& worldToChassis;
+    const tap::algorithms::transforms::Transform& worldToMajor;
 
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
     TurretMotor& yawMotor;
+
+    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU;
 
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
@@ -128,6 +140,8 @@ private:
     float maxVelErrorInput;
 
     float minorMajorTorqueRatio;
+
+    float feedforwardGain;
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

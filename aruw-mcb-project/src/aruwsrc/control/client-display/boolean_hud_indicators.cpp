@@ -48,14 +48,14 @@ BooleanHudIndicators::BooleanHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const tap::communication::serial::RefSerial *refSerial)
     : HudIndicator(refSerialTransmitter),
       commandScheduler(commandScheduler),
       hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
-      sentryResponseHandler(sentryResponseHandler),
+      refSerial(refSerial),
       booleanHudIndicatorDrawers{
           BooleanHUDIndicator(
               refSerialTransmitter,
@@ -73,12 +73,13 @@ BooleanHudIndicators::BooleanHudIndicators(
               0),
           BooleanHUDIndicator(
               refSerialTransmitter,
-              &booleanHudIndicatorGraphics[SENTRY_DRIVE_STATUS],
+              &booleanHudIndicatorGraphics[AMMO_AVAILABLE],
               updateGraphicColor<
-                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS]),
-                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[SENTRY_DRIVE_STATUS])>,
+                  std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]),
+                  std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE])>,
               0),
-      }
+      },
+      outOfAmmoTimer(OUT_OF_AMMO_TOGGLE_PERIOD_MS)
 {
 }
 
@@ -114,8 +115,20 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
     booleanHudIndicatorDrawers[SYSTEMS_CALIBRATING].setIndicatorState(
         commandScheduler.isCommandScheduled(&imuCalibrateCommand));
 
-    booleanHudIndicatorDrawers[SENTRY_DRIVE_STATUS].setIndicatorState(
-        sentryResponseHandler.getSentryMoving());
+    if (haveAmmo())
+    {
+        hasAmmo = true;
+        outOfAmmoTimer.restart(OUT_OF_AMMO_TOGGLE_PERIOD_MS);
+    }
+    else
+    {
+        if (outOfAmmoTimer.execute())
+        {
+            hasAmmo = !hasAmmo;
+        }
+    }
+
+    booleanHudIndicatorDrawers[AMMO_AVAILABLE].setIndicatorState(hasAmmo);
 
     // draw all the booleanHudIndicatorDrawers (only actually sends data if graphic changed)
     for (booleanHudIndicatorIndexUpdate = 0;
@@ -134,7 +147,7 @@ void BooleanHudIndicators::initialize()
     uint16_t hudIndicatorListCurrY = BOOLEAN_HUD_INDICATOR_LIST_START_Y;
 
     // Configure hopper cover hud indicator
-    for (int i = 0; i < NUM_BOOLEAN_HUD_INDICATORS; i++)
+    for (int i = 0; i < AMMO_AVAILABLE; i++)
     {
         // config the boolean HUD indicator circle (that will switch colors based on state)
         getUnusedGraphicName(booleanHudIndicatorName);
@@ -196,5 +209,61 @@ void BooleanHudIndicators::initialize()
         // just configured
         hudIndicatorListCurrY -= BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS;
     }
+
+    // Draw the ammo indicator in the center
+    // config the boolean HUD indicator circle (that will switch colors based on state)
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]));
+
+    RefSerialTransmitter::configCircle(
+        BOOLEAN_HUD_INDICATOR_WIDTH,
+        AMMO_INDICATOR_X,
+        AMMO_INDICATOR_Y,
+        BOOLEAN_HUD_INDICATOR_RADIUS,
+        &booleanHudIndicatorGraphics[AMMO_AVAILABLE].graphicData);
+
+    // config the border circle that bounds the booleanHudIndicatorGraphics
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorStaticGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_COLOR);
+
+    RefSerialTransmitter::configCircle(
+        BOOLEAN_HUD_INDICATOR_OUTLINE_WIDTH,
+        AMMO_INDICATOR_X,
+        AMMO_INDICATOR_Y,
+        BOOLEAN_HUD_INDICATOR_OUTLINE_RADIUS,
+        &booleanHudIndicatorStaticGraphics[AMMO_AVAILABLE].graphicData);
+
+    // config the label associated with the particular indicator
+    getUnusedGraphicName(booleanHudIndicatorName);
+
+    RefSerialTransmitter::configGraphicGenerics(
+        &booleanHudIndicatorStaticLabelGraphics[AMMO_AVAILABLE].graphicData,
+        booleanHudIndicatorName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        BOOLEAN_HUD_INDICATOR_LABEL_COLOR);
+
+    const char *indicatorLabel =
+        std::get<0>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AMMO_AVAILABLE]);
+
+    RefSerialTransmitter::configCharacterMsg(
+        BOOLEAN_HUD_INDICATOR_LABEL_CHAR_SIZE,
+        BOOLEAN_HUD_INDICATOR_LABEL_CHAR_LINE_WIDTH,
+        AMMO_TEXT_X,
+        AMMO_TEXT_Y,
+        indicatorLabel,
+        &booleanHudIndicatorStaticLabelGraphics[AMMO_AVAILABLE]);
 }
 }  // namespace aruwsrc::control::client_display

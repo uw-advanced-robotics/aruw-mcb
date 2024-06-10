@@ -40,11 +40,13 @@ WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface& operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface,
+    float turretPlateOffset)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       operatorInterface(operatorInterface),
+      turretPlateOffset(turretPlateOffset),
       rotationSpeedRamp(0)
 {
     addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(chassis));
@@ -68,7 +70,7 @@ void WiggleDriveCommand::execute()
         const float turretYawFromCenter = yawMotor->getAngleFromCenter();
         const WiggleParams& wiggleParams = getWiggleParams();
 
-        if (turretYawFromCenter > wiggleParams.turnaroundAngle)
+        if (turretYawFromCenter > wiggleParams.turnaroundAngle + turretPlateOffset)
         {
             if (rotationSign < 0)
             {
@@ -76,7 +78,7 @@ void WiggleDriveCommand::execute()
                 rotationSpeedRamp.setTarget(rotationSign * wiggleParams.rotationSpeed);
             }
         }
-        else if (turretYawFromCenter < -wiggleParams.turnaroundAngle)
+        else if (turretYawFromCenter < -wiggleParams.turnaroundAngle + turretPlateOffset)
         {
             if (rotationSign > 0)
             {
@@ -119,8 +121,7 @@ bool WiggleDriveCommand::isFinished() const { return false; }
 const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() const
 {
     return WIGGLE_PARAMS_45W_CUTOFF;
-    uint16_t powerConsumptionLimit =
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+    uint16_t powerConsumptionLimit = HolonomicChassisSubsystem::getChassisPowerLimit(drivers);
     if (powerConsumptionLimit <= 45 || !drivers->refSerial.getRefSerialReceivingData())
     {
         return WIGGLE_PARAMS_45W_CUTOFF;
