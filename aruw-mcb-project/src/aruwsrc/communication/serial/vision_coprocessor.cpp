@@ -170,7 +170,6 @@ void VisionCoprocessor::sendMessage()
     sendRefereeRealtimeData();
     sendRefereeCompetitionResult();
     sendRefereeWarning();
-    sendTimeSyncMessage();
     sendSentryMotionStrategy();
     sendBulletsRemaining();
 }
@@ -425,22 +424,14 @@ void VisionCoprocessor::sendBulletsRemaining()
         const tap::communication::serial::RefSerialData::RobotId robotId =
             *&drivers->refSerial.getRobotData().robotId;
 
-        switch (robotId)
-        {
-            case tap::communication::serial::RefSerialData::RobotId::RED_HERO:
-            case tap::communication::serial::RefSerialData::RobotId::BLUE_HERO:
-                memcpy(
-                    &bulletsRemainMessage.data,
-                    &drivers->refSerial.getRobotData().turret.bulletsRemaining42,
-                    sizeof(bulletsRemainMessage.data));
-                break;
-            default:
-                memcpy(
-                    &bulletsRemainMessage.data,
-                    &drivers->refSerial.getRobotData().turret.bulletsRemaining17,
-                    sizeof(bulletsRemainMessage.data));
-                break;
-        }
+        const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+        #if defined(TARGET_HERO_PERSEUS)
+            const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
+        #else
+            const uint16_t *bulletsRemaining = &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+        #endif
+
+        memcpy(&bulletsRemainMessage.data, bulletsRemaining, sizeof(bulletsRemainMessage.data));
 
         bulletsRemainMessage.setCRC16();
         drivers->uart.write(

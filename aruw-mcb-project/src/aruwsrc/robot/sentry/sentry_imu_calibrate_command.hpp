@@ -54,6 +54,18 @@ class SentryImuCalibrateCommand : public imu::ImuCalibrateCommand
 {
 public:
     /**
+     * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
+     */
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4);
+    /**
+     * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
+     * in radians.
+     *
+     * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
+     */
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+
+    /**
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
      * turret and turret IMU information necessary for calibrating the IMU

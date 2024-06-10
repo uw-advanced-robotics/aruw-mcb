@@ -32,7 +32,10 @@ MainMenu::MainMenu(
     tap::Drivers* drivers,
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
-    can::TurretMCBCanComm* turretMCBCanCommBus2)
+    can::TurretMCBCanComm* turretMCBCanCommBus2,
+    aruwsrc::virtualMCB::MCBLite* mcbLite1,
+    aruwsrc::virtualMCB::MCBLite* mcbLite2,
+    can::capbank::CapacitorBank* capacitorBank)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
@@ -45,11 +48,17 @@ MainMenu::MainMenu(
       imuMenu(stack, &drivers->mpu6500),
       turretStatusMenuBus1(stack, turretMCBCanCommBus1),
       turretStatusMenuBus2(stack, turretMCBCanCommBus2),
+      mcbLiteMenu1(stack, mcbLite1),
+      mcbLiteMenu2(stack, mcbLite2),
       aboutMenu(stack),
       sentryStrategyMenu(stack, visionCoprocessor),
+      capBankMenu(stack, capacitorBank),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
-      turretMCBCanCommBus2(turretMCBCanCommBus2)
+      turretMCBCanCommBus2(turretMCBCanCommBus2),
+      mcbLite1(mcbLite1),
+      mcbLite2(mcbLite2),
+      capacitorBank(capacitorBank)
 {
 }
 
@@ -66,6 +75,13 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
+#ifdef TARGET_SENTRY_HYDRA
+    addEntry(
+        SentryStrategyMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addSentryStrategyMenuCallback));
+#endif
     addEntry(
         MotorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -93,6 +109,18 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addTurretMCBMenuBus2Callback));
+    if (this->mcbLite1 != nullptr)
+        addEntry(
+            "MCB Lite Menu 1",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu1Callback));
+    if (this->mcbLite2 != nullptr)
+        addEntry(
+            "MCB Lite Menu 2",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu2Callback));
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -108,11 +136,12 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addAboutMenuCallback));
-    addEntry(
-        SentryStrategyMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addSentryStrategyMenuCallback));
+    if (this->capacitorBank != nullptr)
+        addEntry(
+            CapacitorBankMenu::getMenuName(),
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addCapacitorBankMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -187,6 +216,18 @@ void MainMenu::addTurretMCBMenuBus2Callback()
     getViewStack()->push(tsm);
 }
 
+void MainMenu::addMCBLiteMenu1Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu1) MCBLiteMenu(getViewStack(), mcbLite1);
+    getViewStack()->push(mlm);
+}
+
+void MainMenu::addMCBLiteMenu2Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu2) MCBLiteMenu(getViewStack(), mcbLite2);
+    getViewStack()->push(mlm);
+}
+
 void MainMenu::addAboutMenuCallback()
 {
     AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
@@ -198,6 +239,12 @@ void MainMenu::addSentryStrategyMenuCallback()
     SentryStrategyMenu* ssm =
         new (&sentryStrategyMenu) SentryStrategyMenu(getViewStack(), visionCoprocessor);
     getViewStack()->push(ssm);
+}
+
+void MainMenu::addCapacitorBankMenuCallback()
+{
+    CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
+    getViewStack()->push(cbm);
 }
 
 }  // namespace display

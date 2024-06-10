@@ -44,7 +44,8 @@ public:
         Module* moduleOne,
         Module* moduleTwo,
         const float wheelbaseRadius,
-        const float forwardMatrixArray[12]);
+        const float forwardMatrixArray[12],
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 
@@ -63,6 +64,8 @@ public:
     void refreshSafeDisconnect() override { setZeroRPM(); }
 
     Module* getModule(unsigned int i);
+
+    inline float mpsToRpm(float mps) const override { return modules[0]->wheel.mpsToRpm(mps); }
 
     /**
      * Used to index into the modules array and desiredModuleSpeeds matrix.

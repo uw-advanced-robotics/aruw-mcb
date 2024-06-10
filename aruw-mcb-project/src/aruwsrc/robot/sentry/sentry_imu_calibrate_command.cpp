@@ -43,7 +43,12 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
     aruwsrc::virtualMCB::MCBLite &majorMCBLite,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
-    : imu::ImuCalibrateCommand(drivers, turretsAndControllers, &chassis),
+    : imu::ImuCalibrateCommand(
+          drivers,
+          turretsAndControllers,
+          &chassis,
+          SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD,
+          SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD),
       turretMajor(turretMajor),
       turretMajorController(turretMajorController),
       yawObserver(yawObserver),
@@ -77,7 +82,6 @@ void SentryImuCalibrateCommand::initialize()
 
 static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsystem &turret)
 {
-    // return true;
     return compareFloatClose(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
@@ -88,7 +92,6 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
-size_t i;
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
@@ -191,11 +194,12 @@ void SentryImuCalibrateCommand::execute()
 
     turretMajorController.runController(
         dt,
-        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint() + odometryInterface.getYaw());
+        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
 }
 
 void SentryImuCalibrateCommand::end(bool)
 {
+    tap::buzzer::silenceBuzzer(&drivers->pwm);
     // TODO: this being commented out causes turrets to hold position when this deschedules
     // change if you want
     // for (auto &config : turretsAndControllers)

@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -29,6 +30,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -58,14 +60,22 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
+    defined(TARGET_STANDARD_CYGNUS)
+    // Hero slip ring cannot handle
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#endif
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
+    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -252,10 +262,9 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    {
-        return lastSetpointData;
-    }
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
+
+    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
@@ -305,6 +314,14 @@ public:
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
+    // @todo private should not be here
 private:
     enum TxMessageTypes
     {
@@ -316,7 +333,6 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
         CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14
@@ -326,11 +342,11 @@ private:
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
         CV_MESSAGE_TYPE_ARUCO_RESET = 10,
-        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
-    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
@@ -350,6 +366,9 @@ private:
     /// Time in ms between sending competition result status (as reported by the ref system).
     static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
 
+    /// Time in ms between sending sentry motion strategy message.
+    static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
@@ -361,7 +380,31 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    static constexpr uint8_t MAXSETPOINTS = 50;
+    struct AutoNavCoordinate
+    {
+        float x;
+        float y;
+    };
+
+    struct AutoNavSetpointMessage
+    {
+        // Header
+        uint32_t sequenceNum;
+        float speed;
+        uint32_t numSetpoints;
+        // Setpoints
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
+
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
+
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequenceNum = 0,
+        .speed = 0.0f,
+        .numSetpoints = 0,
+        .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
@@ -378,14 +421,11 @@ private:
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
-        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
-
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
-
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
 
     tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
@@ -404,16 +444,9 @@ private:
 
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
 
-    /**
-     * Sets the most recent aruco reset message's to updated field to false.
-     * This signals that the message has been consumed and should not be used
-     * for future resets.
-     */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
-
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
-        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {1, 0, 0, 0};
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -425,7 +458,6 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
     void sendBulletsRemaining();
 };
 }  // namespace serial

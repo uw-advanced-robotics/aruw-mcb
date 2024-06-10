@@ -32,8 +32,9 @@ SwerveChassisSubsystem::SwerveChassisSubsystem(
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
-    const float forwardMatrixArray[24])
-    : HolonomicChassisSubsystem(drivers, currentSensor),
+    const float forwardMatrixArray[24],
+    can::capbank::CapacitorBank* capacitorBank)
+    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {
@@ -78,7 +79,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
         r,
         getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
@@ -112,12 +113,6 @@ void SwerveChassisSubsystem::limitChassisPower()
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
-
-    // short circuit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        return;
-    }
 
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {

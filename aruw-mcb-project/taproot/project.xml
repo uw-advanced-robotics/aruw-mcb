@@ -16,8 +16,8 @@
     <option name="modm:platform:uart:1:buffer.tx">256</option>
     <option name="modm:platform:uart:2:buffer.rx">512</option>
     <option name="modm:platform:uart:2:buffer.tx">512</option>
-    <option name="modm:platform:uart:3:buffer.tx">1024</option>
-    <option name="modm:platform:uart:3:buffer.rx">1024</option>
+    <option name="modm:platform:uart:3:buffer.tx">2048</option>
+    <option name="modm:platform:uart:3:buffer.rx">2048</option>
     <option name="modm:platform:uart:6:buffer.rx">256</option>
     <option name="modm:platform:uart:6:buffer.tx">256</option>
     <option name="modm:platform:uart:7:buffer.tx">512</option>

@@ -87,7 +87,23 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 610,
+    .startEncoderValue = 4705,
+    .minAngle = modm::toRadian(48),
+    .maxAngle = modm::toRadian(115),
+    .limitMotorAngles = true,
+};
+#elif defined(TARGET_STANDARD_CYGNUS)
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 2693,
+    .minAngle = 0,
+    .maxAngle = M_PI,
+    .limitMotorAngles = false,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = M_PI_2,
+    .startEncoderValue = 3393,
     .minAngle = modm::toRadian(48),
     .maxAngle = modm::toRadian(115),
     .limitMotorAngles = true,
@@ -96,7 +112,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
 
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 // Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr float TURRET_CG_X = 35.76;
 static constexpr float TURRET_CG_Z = 52.25;
@@ -111,7 +127,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'000;
 
 namespace world_rel_turret_imu
 {
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10.0f,
     .ki = 0.0f,
@@ -127,10 +143,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 14.0f,
-    .ki = 0.0f,
+    .kp = 25.0f,
+    .ki = 0.15f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 0.6f,
     .maxOutput = 60.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
@@ -141,7 +157,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 22'000.0f,
+    .kp = 28'000.0f,
     .ki = 100.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
@@ -155,7 +171,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 22.0f,
+    .kp = 20.5f,
     .ki = 0.0f,
     .kd = 0.2f,
     .maxICumulative = 0.5f,
@@ -303,7 +319,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 229'183.1f,
     .ki = 0.0f,

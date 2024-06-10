@@ -41,6 +41,7 @@ public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        can::capbank::CapacitorBank* capacitorBank = nullptr,
         tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
         tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
         tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
@@ -103,6 +104,11 @@ public:
      *      https://www.hindawi.com/journals/js/2015/347379/.
      */
     mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
+
+    float mpsToRpm(float mps) const override
+    {
+        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
+    }
 
 protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
