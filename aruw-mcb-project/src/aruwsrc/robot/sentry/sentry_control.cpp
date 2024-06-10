@@ -62,7 +62,6 @@
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_launcher_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_minor_cv_on_target_governor.hpp"
 #include "aruwsrc/robot/sentry/sentry_minor_world_orientation_provider.hpp"
 #include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
@@ -161,9 +160,13 @@ TurretMinorMotors turretRightMotors{
 
 };
 
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
 {
     return drivers()->turretMCBCanCommBus1;
+}
+inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
+{
+    return drivers()->turretMCBCanCommBus2;
 }
 
 /* define subsystems --------------------------------------------------------*/
@@ -413,20 +416,20 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     turretLeftFrictionWheels(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETLEFT,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETLEFT,
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm2(),
         turretLeft::barrelID);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     turretRightFrictionWheels(
         drivers(),
-        aruwsrc::robot::sentry::launcher::LEFT_MOTOR_ID_TURRETRIGHT,
-        aruwsrc::robot::sentry::launcher::RIGHT_MOTOR_ID_TURRETRIGHT,
+        aruwsrc::control::launcher::LEFT_MOTOR_ID,
+        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm(),
+        &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
 
 // Agitators
@@ -452,7 +455,7 @@ SentryBallisticsSolver turretRightSolver(
     turretRight.getTurretID());
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretRight(
-    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &turretRightSolver);
 
@@ -467,7 +470,7 @@ SentryBallisticsSolver turretLeftSolver(
     turretLeft.getTurretID());
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
-    aruwsrc::robot::sentry::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &turretLeftSolver);
 
@@ -593,7 +596,7 @@ SentryTurretCVCommand turretCVCommand(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretLeftFrictionWheelSpinCommand(
     drivers(),
     &turretLeftFrictionWheels,
-    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,
     false,
     turretLeft::barrelID);
 
@@ -661,7 +664,7 @@ GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand turretRightFrictionWheelSpinCommand(
     drivers(),
     &turretRightFrictionWheels,
-    aruwsrc::robot::sentry::launcher::DESIRED_LAUNCH_SPEED,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,
     false,
     turretRight::barrelID);
 
@@ -724,16 +727,23 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
 
 /* define command mappings --------------------------------------------------*/
 
+HoldCommandMapping rightUp(
+    drivers(),
+    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
     drivers(),
-    {&autoNavBeybladeCommand,
-     &turretCVCommand,
-     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand},
+    {&autoNavBeybladeCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+HoldRepeatCommandMapping leftUpRightUpAg(
+    drivers(),
+    {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    false);
 
 // auto nav + auto aim
 HoldCommandMapping leftUpRightMid(
@@ -750,14 +760,15 @@ HoldCommandMapping leftUpRightDown(
 // manual aim and shoot
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&majorManualCommand,
-     &turretLeftManualCommand,
-     &turretRightManualCommand,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand,
-     &turretLeftAgitatorManualSpin,
-     &turretRightAgitatorManualSpin},
+    {&turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+// manual aim and shoot
+HoldRepeatCommandMapping leftMidRightUpAg(
+    drivers(),
+    {&turretLeftAgitatorManualSpin, &turretRightAgitatorManualSpin},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP),
+    false);
 
 // auto drive & auto aim
 HoldCommandMapping leftMidRightMid(
@@ -778,16 +789,18 @@ HoldCommandMapping leftMidRightDown(
     },
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-// manul drive, auto aim, cv-gated fire
+// manual drive, auto aim, cv-gated fire
 HoldCommandMapping leftDownRightUp(
     drivers(),
-    {&chassisDriveCommand,
-     &turretCVCommand,
-     &turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand},
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+HoldRepeatCommandMapping leftDownRightUpAg(
+    drivers(),
+    {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
+     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
+    false);
 
 // manual drive & auto aim
 HoldCommandMapping leftDownRightMid(
@@ -858,23 +871,28 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    turretLeftRotateAgitator.enableConstantRotation(true);
-    turretRightRotateAgitator.enableConstantRotation(true);
 }
 
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftUpRightUp);    // auto nav + auto aim + cv gated fire
-    drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
+    // commands with higher priority must be added later
+    // friction wheels spin (separated due to dumb design in command mapper system)
+    drivers->commandMapper.addMap(&rightUp);
+
+    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
+    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(&leftUpRightUpAg);
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
-    drivers->commandMapper.addMap(&leftMidRightUp);    // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
-    drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
-    drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightUpAg);
     drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 }
 

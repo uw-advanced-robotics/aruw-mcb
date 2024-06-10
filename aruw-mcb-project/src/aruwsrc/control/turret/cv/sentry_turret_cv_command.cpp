@@ -116,6 +116,7 @@ void SentryTurretCVCommand::execute()
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
+    // @todo: does not allow for independent turret aiming
     targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
                                                      rightBallisticsSolution != std::nullopt);
 
@@ -204,26 +205,13 @@ void SentryTurretCVCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    if (debug)
-    {
-        yawControllerMajor.runController(dt, debug_majorSetpoint);
+    yawControllerMajor.runController(dt, majorSetpoint);
 
-        turretLeftConfig.pitchController.runController(dt, debug_leftPitchSetpoint);
-        turretRightConfig.pitchController.runController(dt, debug_rightPitchSetpoint);
+    turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
+    turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
 
-        turretLeftConfig.yawController.runController(dt, debug_leftYawSetpoint);
-        turretRightConfig.yawController.runController(dt, debug_rightYawSetpoint);
-    }
-    else
-    {
-        yawControllerMajor.runController(dt, majorSetpoint);
-
-        turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
-        turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
-
-        turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
-        turretRightConfig.yawController.runController(dt, rightYawSetpoint);
-    }
+    turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
+    turretRightConfig.yawController.runController(dt, rightYawSetpoint);
 }
 
 bool SentryTurretCVCommand::isFinished() const

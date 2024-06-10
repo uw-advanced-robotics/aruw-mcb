@@ -76,10 +76,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 60'000.0f,
-    .ki = 1'000.0f,
+    .kp = 120'000.0f,
+    .ki = 500.0f,
     .kd = 9'000.0f,
-    .maxICumulative = 3'000.0f,
+    .maxICumulative = 8'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -184,7 +184,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
-static constexpr float default_launch_speed = 14.0f;
+static constexpr float default_launch_speed = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
@@ -193,11 +193,11 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 110'000.0f,
-    .ki = 100.0f,
+    .kp = 160'000.0f,
+    .ki = 200.0f,
     .kd = 6'000.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -206,11 +206,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 120'000.0f,
-    .ki = 200.0f,
+    .kp = 210'000.0f,
+    .ki = 400.0f,
     .kd = 6'000.0f,
-    .maxICumulative = 4'000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxICumulative = 6'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
