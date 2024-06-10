@@ -165,7 +165,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
 }
 inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
 {
-    return drivers()->turretMCBCanCommBus1;
+    return drivers()->turretMCBCanCommBus2;
 }
 
 /* define subsystems --------------------------------------------------------*/
