@@ -113,12 +113,6 @@ void HalfSwerveChassisSubsystem::limitChassisPower()
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
-    // short circuit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        return;
-    }
-
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i]->limitPower(powerLimitFrac);
