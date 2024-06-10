@@ -107,12 +107,11 @@ void HalfSwerveChassisSubsystem::refresh()
     }
 }
 
-float powerLimitFrac;
 void HalfSwerveChassisSubsystem::limitChassisPower()
 {
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
-    powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // short circuit if power limiting doesn't need to be applied
     if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
