@@ -358,8 +358,6 @@ private:
 
     AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
 
-    MotionStrategyOptionsData lastMotionStratOptionsData{'\0'};
-
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
