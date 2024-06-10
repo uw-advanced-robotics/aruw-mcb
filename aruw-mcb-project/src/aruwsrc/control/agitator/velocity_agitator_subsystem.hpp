@@ -77,9 +77,11 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { 
+    void refreshSafeDisconnect() override
+    {
         subsystemJamStatus = false;
-        agitatorMotor.setDesiredOutput(0); }
+        agitatorMotor.setDesiredOutput(0);
+    }
 
     void runHardwareTests() override;
 
