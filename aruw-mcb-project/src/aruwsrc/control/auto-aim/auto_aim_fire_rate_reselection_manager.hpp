@@ -85,11 +85,14 @@ public:
 
     inline control::agitator::FireRateReadinessState getFireRateReadinessState() final
     {
+// @todo: see TurretCVCommandInterface todo
+#ifndef TARGET_SENTRY_HYDRA
         if (!commandScheduler.isCommandScheduled(&turretCVCommand))
         {
             // Don't limit firing if in manual fire mode
             return control::agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING;
         }
+#endif
 
         if (!visionCoprocessor.isCvOnline())
         {
