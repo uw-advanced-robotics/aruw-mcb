@@ -108,10 +108,6 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
 
-/// Time in milliseconds to pause launching projectiles when the user requests the projectile
-/// launcher to be paused
-static constexpr uint32_t AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME = 8'000;
-
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // SENTRY_AGITATOR_CONSTANTS_HPP_
