@@ -712,16 +712,13 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
 
 HoldCommandMapping rightUp(
     drivers(),
-    {&turretLeftFrictionWheelSpinCommand,
-     &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-);
+    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
     drivers(),
-    {&autoNavBeybladeCommand,
-     &turretCVCommand},
+    {&autoNavBeybladeCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 HoldRepeatCommandMapping leftUpRightUpAg(
@@ -729,8 +726,7 @@ HoldRepeatCommandMapping leftUpRightUpAg(
     {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-    false
-);
+    false);
 
 // auto nav + auto aim
 HoldCommandMapping leftUpRightMid(
@@ -747,15 +743,13 @@ HoldCommandMapping leftUpRightDown(
 // manual aim and shoot
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&turretLeftManualCommand,
-     &turretRightManualCommand},
+    {&turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // manual aim and shoot
 HoldRepeatCommandMapping leftMidRightUpAg(
     drivers(),
-    {&turretLeftAgitatorManualSpin,
-     &turretRightAgitatorManualSpin},
+    {&turretLeftAgitatorManualSpin, &turretRightAgitatorManualSpin},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP),
     false);
 
@@ -781,8 +775,7 @@ HoldCommandMapping leftMidRightDown(
 // manual drive, auto aim, cv-gated fire
 HoldCommandMapping leftDownRightUp(
     drivers(),
-    {&chassisDriveCommand,
-     &turretCVCommand},
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 HoldRepeatCommandMapping leftDownRightUpAg(
@@ -790,8 +783,7 @@ HoldRepeatCommandMapping leftDownRightUpAg(
     {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
      &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
-    false
-);
+    false);
 
 // manual drive & auto aim
 HoldCommandMapping leftDownRightMid(
@@ -867,17 +859,21 @@ void startSentryCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerSentryIoMappings(Drivers *drivers)
 {
+    // friction wheels spin (separated due to dumb design in command mapper system)
+    drivers->commandMapper.addMap(&rightUp);
+
     drivers->commandMapper.addMap(&leftUpRightUp);    // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(&leftUpRightUpAg);
     drivers->commandMapper.addMap(&leftUpRightMid);   // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 
-    drivers->commandMapper.addMap(&rightUp);  // friction wheels spin (separated due to dumb design in command mapper system)
-    drivers->commandMapper.addMap(&leftMidRightUp);     // manual aim and shoot
-    drivers->commandMapper.addMap(&leftMidRightUpAg);   // manual aim and shoot
-    drivers->commandMapper.addMap(&leftMidRightMid);    // auto drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);   // manual aim
+    drivers->commandMapper.addMap(&leftMidRightUp);    // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUpAg);
+    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     drivers->commandMapper.addMap(&leftDownRightUp);    // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightUpAg);
     drivers->commandMapper.addMap(&leftDownRightMid);   // manual drive & auto aim
     drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 }
