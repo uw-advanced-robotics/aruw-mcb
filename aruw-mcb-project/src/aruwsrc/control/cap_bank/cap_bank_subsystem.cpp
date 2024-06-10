@@ -39,6 +39,12 @@ void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
 
 void CapBankSubsystem::refresh()
 {
+    if (drivers->refSerial.getRobotData().currentHp == 0)
+    {
+        this->capacitorBank.stop();
+        return;
+    }
+
     if (this->messageTimer.execute())
     {
         messageTimer.restart(40);
