@@ -38,6 +38,7 @@
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
+#include "tap/communication/sensors/buzzer/buzzer.hpp"
 
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
@@ -119,6 +120,18 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+            bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
+            if (!turretMcbConnected)
+            {
+                tap::buzzer::playNote(&drivers->pwm, 1000);
+            }
+            else
+            {
+                tap::buzzer::silenceBuzzer(&drivers->pwm);
+            }
 #endif
         }
         modm::delay_us(10);
