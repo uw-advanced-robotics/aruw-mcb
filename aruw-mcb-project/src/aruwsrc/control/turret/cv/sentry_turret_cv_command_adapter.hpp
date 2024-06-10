@@ -54,7 +54,7 @@ public:
 
     void end(bool) override {}
 
-    const char *getName() const override { return "turret CV"; }
+    const char* getName() const override { return "turret CV"; }
 
     bool getTurretID() const override { return turretID; }
 

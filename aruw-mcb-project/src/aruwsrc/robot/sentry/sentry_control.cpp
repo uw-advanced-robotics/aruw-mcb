@@ -104,7 +104,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
-
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
 aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
@@ -616,8 +615,7 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
     turretLeftCVCommandAdapter,
-    turretLeft::turretID
-);
+    turretLeft::turretID);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretLeft(fireRateReselectionManagerTurretLeft);
 
@@ -696,8 +694,7 @@ AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
     drivers()->visionCoprocessor,
     drivers()->commandScheduler,
     turretRightCVCommandAdapter,
-    turretRight::turretID
-);
+    turretRight::turretID);
 
 FireRateLimitGovernor fireRateLimitGovernorTurretRight(fireRateReselectionManagerTurretRight);
 
