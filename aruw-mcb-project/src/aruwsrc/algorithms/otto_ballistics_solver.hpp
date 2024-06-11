@@ -77,10 +77,17 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
+#ifdef TARGET_SENTRY_HYDRA
+    /// The width of a small armor plate, in m
+    static constexpr float PLATE_WIDTH = 0.15f;
+    /// The height of a small armor plate, in m
+    static constexpr float PLATE_HEIGHT = 0.15f;
+#else
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.1f;
     /// The height of a small armor plate, in m
     static constexpr float PLATE_HEIGHT = 0.1f;
+#endif
 
     /**
      * @return true if the specified yaw and pitch angle errors are small enough such that if a
