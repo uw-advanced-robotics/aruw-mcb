@@ -75,9 +75,9 @@ struct SwerveModuleConfig
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
         .kp = 62'000.0f,
-        .ki = 700.0f,
-        .kd = 0.0f,
-        .maxICumulative = 700.0f,
+        .ki = 1'400.0f,
+        .kd = 10.0f,
+        .maxICumulative = 4'500.0f,
         .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
         .errDeadzone = 0.0f,
         .errorDerivativeFloor = 0.0f,
