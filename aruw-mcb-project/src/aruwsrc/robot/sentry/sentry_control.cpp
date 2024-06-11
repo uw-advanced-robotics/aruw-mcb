@@ -35,6 +35,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
@@ -42,8 +43,10 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/match_running_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -100,6 +103,8 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace sentry_control
 {
+MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
+
 aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     drivers(),
     &drivers()->chassisMcbLite,
@@ -621,6 +626,15 @@ MoveUnjamIntegralComprisedCommand turretLeftRotateAndUnjamAgitator(
     turretLeftRotateAgitator,
     turretLeftUnjamAgitator);
 
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretLeft(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    turretCVCommand,
+    turretLeft::turretID);
+
+FireRateLimitGovernor fireRateLimitGovernorTurretLeft(fireRateReselectionManagerTurretLeft);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorTurretLeft(
     *drivers(),
@@ -629,7 +643,7 @@ HeatLimitGovernor heatLimitGovernorTurretLeft(
 
 // rotates agitator when aiming at target and within heat limit
 SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
-    ((tap::Drivers *)(drivers())),
+    drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretLeft,
@@ -643,13 +657,15 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLef
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
-GovernorLimitedCommand<4> turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<6> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft,
+    {&fireRateLimitGovernorTurretLeft,
+     &heatLimitGovernorTurretLeft,
      &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
-     &cvOnTargetGovernorTurretLeft});
+     &cvOnTargetGovernorTurretLeft,
+     &matchRunningGovernor});
 
 GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
     {&turretLeftAgitator},
@@ -689,6 +705,15 @@ MoveUnjamIntegralComprisedCommand turretRightRotateAndUnjamAgitator(
     turretRightRotateAgitator,
     turretRightUnjamAgitator);
 
+AutoAimFireRateReselectionManager fireRateReselectionManagerTurretRight(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    drivers()->commandScheduler,
+    turretCVCommand,
+    turretRight::turretID);
+
+FireRateLimitGovernor fireRateLimitGovernorTurretRight(fireRateReselectionManagerTurretRight);
+
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernorTurretRight(
     *drivers(),
@@ -697,7 +722,7 @@ HeatLimitGovernor heatLimitGovernorTurretRight(
 
 // rotates agitator when aiming at target and within heat limit
 SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
-    ((tap::Drivers *)(drivers())),
+    drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretRight,
@@ -710,13 +735,15 @@ RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRig
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
-GovernorLimitedCommand<4> turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting(
+GovernorLimitedCommand<6> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretRight,
+    {&fireRateLimitGovernorTurretRight,
+     &heatLimitGovernorTurretRight,
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight,
-     &cvOnTargetGovernorTurretRight});
+     &cvOnTargetGovernorTurretRight,
+     &matchRunningGovernor});
 
 GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
     {&turretRightAgitator},
@@ -740,8 +767,8 @@ HoldCommandMapping leftUpRightUp(
 
 HoldRepeatCommandMapping leftUpRightUpAg(
     drivers(),
-    {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    {&turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting,
+     &turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
     false);
 
@@ -797,8 +824,8 @@ HoldCommandMapping leftDownRightUp(
 
 HoldRepeatCommandMapping leftDownRightUpAg(
     drivers(),
-    {&turretLeftRotateAndUnjamAgitatorWithCVAndHeatLimiting,
-     &turretRightRotateAndUnjamAgitatorWithCVAndHeatLimiting},
+    {&turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting,
+     &turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
     false);
 
@@ -880,20 +907,20 @@ void registerSentryIoMappings(Drivers *drivers)
     // friction wheels spin (separated due to dumb design in command mapper system)
     drivers->commandMapper.addMap(&rightUp);
 
-    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
-    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
-    drivers->commandMapper.addMap(&leftUpRightUpAg);
-    drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
+    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightUpAg);
+    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
     drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
-    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
-    drivers->commandMapper.addMap(&leftDownRightUpAg);
-    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
+    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
+    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(&leftUpRightUpAg);
+    drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 }
 
 }  // namespace sentry_control

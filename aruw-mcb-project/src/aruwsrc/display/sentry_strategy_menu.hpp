@@ -40,32 +40,9 @@ class SentryStrategyMenu
 public:
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
-        : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
-              vs,
-              SENTRY_STRATEGY_MENU_ID,
-              getMenuName()),
-          visionCoprocessor(visionCoprocessor)
-    {
-        addEntry(
-            "None",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::NONE),
-            true);
-        addEntry(
-            "Rush Mid",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_MID),
-            false);
-        addEntry(
-            "Go Heal",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::GO_HEAL),
-            false);
-        addEntry(
-            "Rush Base",
-            visionCoprocessor->getMutableMotionStrategyPtr(SentryVisionMessageType::RUSH_BASE),
-            false);
-    }
+        aruwsrc::serial::VisionCoprocessor *visionCoprocessor);
 
-    void openNextScreen() override {}
+    void openNextScreen() override;
 
     static const char *getMenuName() { return "Sentry Strategy Menu"; }
 

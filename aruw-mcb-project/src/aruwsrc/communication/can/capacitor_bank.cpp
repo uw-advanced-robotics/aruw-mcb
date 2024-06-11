@@ -47,7 +47,7 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
                 0.0,
                 2000.0);
 
-            this->heartbeat.restart(40);
+            this->heartbeat.restart(80);
             break;
         default:
             // Ignore unknown message IDs

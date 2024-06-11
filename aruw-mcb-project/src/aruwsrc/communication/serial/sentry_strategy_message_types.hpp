@@ -66,13 +66,13 @@ enum class SentryResponseMessageType : uint16_t
 /**
  * Messages sent from MCB to vision
  */
-enum class SentryVisionMessageType : uint8_t
+enum class SentryMotionStrategyType : uint8_t
 {
-    NONE = 0,
-    RUSH_MID,
-    GO_HEAL,
-    RUSH_BASE,
-    NUM_MESSAGE_TYPES,
+    IDLE = 0,
+    DEFAULT_STATE_MACHINE,
+    PRACTICE_MATCH_STATE_MACHINE,
+    TEST_STATE_MACHINE,
+    NUM_MESSAGE_TYPES
 };
 }  // namespace aruwsrc::communication::serial
 

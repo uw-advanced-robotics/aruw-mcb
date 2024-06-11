@@ -115,12 +115,6 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
-    // short circuit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        return;
-    }
-
     // total velocity error for all wheels
     float totalError = 0.0f;
     for (int i = 0; i < NUM_MOTORS; i++)
