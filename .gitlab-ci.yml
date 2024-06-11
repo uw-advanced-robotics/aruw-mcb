@@ -22,7 +22,6 @@ variables:
   ARTIFACT_PATH: isolated-deploy
   GIT_SUBMODULE_STRATEGY: normal
   BUILD_PATH: aruw-mcb-project/build
-  DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
   DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
   ADDITIONAL_CI_BUILD_ARGS: -j${NUM_JOBS} additional-ccflags=-Werror
@@ -103,7 +102,7 @@ before_script:
     - scons build robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS
     - scons size robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../taproot-scripts/parse_metrics.py -i size.txt -o metrics.txt --identifier $ROBOT
-    - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
+    - cp build/hardware/TARGET_$ROBOT/scons-release/aruw-mcb.elf ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$ROBOT-mcb"
     paths:
@@ -135,7 +134,7 @@ before_script:
   script:
     - cd aruw-mcb-project
     - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/TARGET_$ROBOT/scons-fast/aruw-mcb-tests.elf
   cache:
     key: test-binaries
     untracked: true
@@ -205,7 +204,7 @@ before_script:
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/TARGET_STANDARD_SPIDER/scons-fast/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
