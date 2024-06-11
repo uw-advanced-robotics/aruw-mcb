@@ -31,6 +31,19 @@ VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "DART",
                         "TESTBED" ]
 
+ROBOTS = {
+    "STANDARD_ELSA": "standard",
+    "STANDARD_SPIDER": "standard",
+    "STANDARD_ORION": "standard",
+    "STANDARD_CYGNUS": "standard",
+    "DRONE": "drone",
+    "ENGINEER": "engineer",
+    "SENTRY_HYDRA": "sentry",
+    "HERO_PERSEUS": "hero",
+    "DART": "dart",
+    "TESTBED": "testbed"
+}
+
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")
 
