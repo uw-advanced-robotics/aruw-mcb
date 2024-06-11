@@ -172,9 +172,9 @@ private:
     {
 #if defined(TARGET_HERO_PERSEUS)
 
-        return refSerial->getRobotData().turret.bulletsRemaining42 > 2;
+        return refSerial->getRobotData().turret.bulletsRemaining42 > 2 || refSerial->getRobotData().turret.bulletsRemaining42 < 1000;
 #else
-        return refSerial->getRobotData().turret.bulletsRemaining17 > 10;
+        return refSerial->getRobotData().turret.bulletsRemaining17 > 10 || refSerial->getRobotData().turret.bulletsRemaining17 < 1000;
 #endif
     }
 
