@@ -16,7 +16,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 import subprocess
-from os.path import abspath
+from os.path import abspath, dirname, join
 import datetime as dt
 
 Import("env")
@@ -61,10 +61,13 @@ env_cpy = env.Clone()
 
 # Append on the global robot target build flag
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
+
+# Create a specific build env for the about menu, so that the whole codebase doesn't need a recompile.
+env_cpy_about_menu = env_cpy.Clone()
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
 
 
 if args["COMPILE_SRC"]:
@@ -74,6 +77,9 @@ else:
     rawSrcs = []
 
 for source in rawSrcs:
-    sources.append(env_cpy.Object(source))
+    if source == join("aruwsrc", "display", "about_menu.cpp"):
+        sources.append(env_cpy_about_menu.Object(source))
+    else:
+        sources.append(env_cpy.Object(source))
 
 Return('sources')
