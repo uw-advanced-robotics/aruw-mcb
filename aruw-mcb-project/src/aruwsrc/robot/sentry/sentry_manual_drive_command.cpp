@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/chassis/new_sentry/sentry_manual_drive_command.hpp"
+#include "sentry_manual_drive_command.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_rel_drive.hpp"
-#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "sentry_chassis_rel_drive.hpp"
+#include "sentry_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::sentry;
 

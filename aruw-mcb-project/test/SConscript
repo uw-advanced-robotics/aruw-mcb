@@ -15,15 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
-from os.path import abspath
+from os.path import abspath, dirname, join
+from build_tools import extract_robot_type
 
 Import("env")
 Import("args")
 Import("sources")
 
+mock_directory = join("aruwsrc", "mock")
+robot_directory = join("aruwsrc", "robot")
+robot_class = extract_robot_type.ROBOTS[args["ROBOT_TYPE"][len("TARGET_"):]]
+mock_class_directory = join(mock_directory, robot_class)
+class_directory = join(robot_directory, robot_class)
 
 if args["TARGET_ENV"] == "tests":
-    print("etss")
     env_cpy = env.Clone()
 
     # Append on the global robot target build flag
@@ -35,6 +40,16 @@ if args["TARGET_ENV"] == "tests":
         rawSrcs = []
 
     for source in rawSrcs:
+        if source.startswith(mock_directory):
+            directory = dirname(source)
+            if not(directory == mock_directory or directory == mock_class_directory):
+                continue
+
+        if source.startswith(robot_directory):
+            directory = dirname(source)
+            if not(directory == robot_directory or directory == class_directory):
+                continue
+
         sources.append(env_cpy.Object(source))
 
 Return('sources')
