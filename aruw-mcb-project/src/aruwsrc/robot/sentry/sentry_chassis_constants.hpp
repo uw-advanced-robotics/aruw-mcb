@@ -73,7 +73,7 @@ aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
 };
 
 aruwsrc::chassis::SwerveModuleConfig leftBackSwerveConfig = {
-    .azimuthZeroOffset = 7484 - (3 * DjiMotor::ENC_RESOLUTION / 8),  // 7489
+    .azimuthZeroOffset = 4474,
     .positionWithinChassisX = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,
