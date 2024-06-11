@@ -29,7 +29,7 @@ CapBankSubsystem::CapBankSubsystem(
       enabled(false)
 {
     capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
-    this->messageTimer.restart(40);
+    this->messageTimer.restart(20);
 }
 
 void CapBankSubsystem::changeSprintMode(can::capbank::SprintMode mode)
@@ -41,7 +41,7 @@ void CapBankSubsystem::refresh()
 {
     if (this->messageTimer.execute())
     {
-        messageTimer.restart(40);
+        messageTimer.restart(20);
 
         if (!this->enabled && !this->capacitorBank.isDisabled())
         {
