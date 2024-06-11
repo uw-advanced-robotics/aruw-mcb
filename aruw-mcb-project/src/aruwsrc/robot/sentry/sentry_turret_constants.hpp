@@ -258,10 +258,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 34.0f,
+    .kp = 38.0f,
     .ki = 0.2f,
     .kd = 0.0f,
-    .maxICumulative = 0.05f,
+    .maxICumulative = 0.07f,
     .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
