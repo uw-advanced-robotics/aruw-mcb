@@ -36,7 +36,6 @@ struct SwerveModuleConfig
 {
     // @todo not really generic over future swerve designs?
     const float WHEEL_DIAMETER_M = 0.1016f;
-    const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
     // in encoder clicks, defines "forward" direction of the module
     // @todo why does this default?
