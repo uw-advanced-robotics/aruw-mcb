@@ -39,7 +39,7 @@ args = parse_args.parse_args()
 
 # Define a new SCons environment and set up basic build variables
 env = DefaultEnvironment(ENV=os.environ)
-env["CONFIG_BUILD_BASE"] = abspath(join(BUILD_PATH, args["TARGET_ENV"], args["ROBOT_TYPE"]))
+env["CONFIG_BUILD_BASE"] = abspath(join(BUILD_PATH, args["TARGET_ENV"]))
 env["CONFIG_PROJECT_NAME"] = PROJECT_NAME
 env["CONFIG_ARTIFACT_PATH"] = join(env["CONFIG_BUILD_BASE"], "artifact")
 env["CONFIG_PROFILE"] = args["BUILD_PROFILE"]
@@ -55,7 +55,9 @@ sources = []
 # Building all libraries (read from sconscript files located in provided dirs)
 # Ensure that modm is first, since Taproot depends on modm
 # Append include path to environment so both src/test environments have access to them
-env.SConscript(dirs=[TAPROOT_PATH, SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
+env.SConscript(dirs=[TAPROOT_PATH], exports=["env", "args", "sources"])
+env["BUILDPATH"] = join(env["CONFIG_BUILD_BASE"], "scons-" + ARGUMENTS.get("profile", "release"), args["ROBOT_TYPE"])
+env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
 
 
 # Tests must be included as sources (rather than built as a separate library) in order for
