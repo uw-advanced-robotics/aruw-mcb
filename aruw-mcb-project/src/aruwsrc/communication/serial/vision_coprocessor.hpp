@@ -342,6 +342,7 @@ private:
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
         CV_MESSAGE_TYPE_ARUCO_RESET = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
+        CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -364,6 +365,9 @@ private:
 
     /// Time in ms between sending sentry motion strategy message.
     static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
+    /** Time in ms between sending the bullets remaining message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_BULLETS_REMAINING_MSG = 100;
 
     static VisionCoprocessor* visionCoprocessorInstance;
 
@@ -423,6 +427,9 @@ private:
 
     tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
 
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
+
     uint32_t lastSentRefereeWarningTime = 0;
 
     /**
@@ -454,6 +461,7 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
+    void sendBulletsRemaining();
 };
 }  // namespace serial
 }  // namespace aruwsrc
