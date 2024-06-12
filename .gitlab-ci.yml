@@ -22,7 +22,6 @@ variables:
   ARTIFACT_PATH: isolated-deploy
   GIT_SUBMODULE_STRATEGY: normal
   BUILD_PATH: aruw-mcb-project/build
-  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
   ADDITIONAL_CI_BUILD_ARGS: -j${NUM_JOBS} additional-ccflags=-Werror
 

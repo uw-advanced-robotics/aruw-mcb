@@ -56,15 +56,21 @@ sources = []
 # Ensure that modm is first, since Taproot depends on modm
 # Append include path to environment so both src/test environments have access to them
 env.SConscript(dirs=[TAPROOT_PATH], exports=["env", "args", "sources"])
+
+# We include the tests as library to improve build times for CI.
+if args["TARGET_ENV"] == "tests":
+    source_files = env.FindSourceFiles("taproot/test")
+    files = [env.Object(file) for file in source_files]
+
+    # Construct a static library
+    library = env.StaticLibrary(target="taproot-test", source=files)
+    env.AppendUnique(LIBS=[library])
+    env.AppendUnique(LIBPATH=[abspath(str(library[0].get_dir()))])
+
+# Now we can add the src and test.
+# We modify the "BUILDPATH" environment variable to have the code for each robot have its own directory.
 env["BUILDPATH"] = join(env["CONFIG_BUILD_BASE"], "scons-" + ARGUMENTS.get("profile", "release"), args["ROBOT_TYPE"])
 env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
-
-
-# Tests must be included as sources (rather than built as a separate library) in order for
-# googletest to identify any tests that need to be run. Not an issue for us since we don't
-# normally run tests in taproot from this project, but in general this is an issue.
-if args["TARGET_ENV"] == "tests":
-    sources.extend(env.FindSourceFiles("taproot/test"))
 
 
 print("Configured {0} parallel build jobs (-j{0}), {1}"
