@@ -84,7 +84,7 @@ public:
      * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
      */
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.08f);  // 0.2
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.12f);
 
     /**
      * The number of times refresh is called without receiving valid CV data to when

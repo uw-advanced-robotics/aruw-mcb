@@ -357,10 +357,10 @@ private:
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
 
     /// Time in ms between sending referee real time message.
-    static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 5'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_REF_REAL_TIME_DATA = 250;
 
     /// Time in ms between sending competition result status (as reported by the ref system).
-    static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 500;
 
     /// Time in ms between sending sentry motion strategy message.
     static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
