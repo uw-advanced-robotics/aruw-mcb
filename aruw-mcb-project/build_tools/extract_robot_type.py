@@ -31,7 +31,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "DART",
                         "TESTBED" ]
 
-ROBOTS = {
+ROBOT_CLASS = {
     "STANDARD_ELSA": "standard",
     "STANDARD_SPIDER": "standard",
     "STANDARD_ORION": "standard",
@@ -43,6 +43,9 @@ ROBOTS = {
     "DART": "dart",
     "TESTBED": "testbed"
 }
+
+# Make sure that all robots have a class
+assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")

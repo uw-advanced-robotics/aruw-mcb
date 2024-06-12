@@ -79,7 +79,7 @@ else:
     rawSrcs = []
 
 robot_directory = join("aruwsrc", "robot")
-robot_class = extract_robot_type.ROBOTS[args["ROBOT_TYPE"][len("TARGET_"):]]
+robot_class = extract_robot_type.ROBOT_CLASS[args["ROBOT_TYPE"][len("TARGET_"):]]
 class_directory = join(robot_directory, robot_class)
 
 sim_directory = join("aruwsrc", "sim-initialization")
