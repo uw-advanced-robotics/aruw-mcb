@@ -32,12 +32,12 @@ SentryStrategyMenu::SentryStrategyMenu(
     addEntry(
         "IDLE",
         visionCoprocessor->getMutableMotionStrategyPtr(SentryMotionStrategyType::IDLE),
-        true);
+        false);
     addEntry(
         "DEFAULT_STATE_MACHINE",
         visionCoprocessor->getMutableMotionStrategyPtr(
             SentryMotionStrategyType::DEFAULT_STATE_MACHINE),
-        false);
+        true);
     addEntry(
         "PRACTICE_MATCH_STATE_MACHINE",
         visionCoprocessor->getMutableMotionStrategyPtr(
