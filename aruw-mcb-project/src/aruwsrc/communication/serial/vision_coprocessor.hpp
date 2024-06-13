@@ -450,8 +450,8 @@ private:
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
         aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {
-        1,
         0,
+        1,
         0,
         0};
 
