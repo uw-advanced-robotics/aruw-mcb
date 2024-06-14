@@ -56,7 +56,8 @@ public:
     ChassisOrientationIndicator(
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem);
+        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+        const std::vector<tap::control::Command *> avoidanceCommands);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -73,8 +74,10 @@ private:
     static constexpr uint16_t CHASSIS_LENGTH = 100;
     /** The width of the animated chassis, in pixels. */
     static constexpr uint16_t CHASSIS_WIDTH = 70;
-    /** The color of the animated chassis. */
-    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_COLOR = Tx::GraphicColor::YELLOW;
+    /** The color of the animated chassis when there is avoidance. */
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_AVOIDANCE_COLOR = Tx::GraphicColor::YELLOW;
+    /** The color of the animated chassis when there is no avoidance. */
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_STILL_COLOR = Tx::GraphicColor::PURPLISH_RED;
     /** The color of the animated turret barrel in the chassis orientation graphic. */
     static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::WHITE;
     /** The width of the animated turret barrel, in pixels. */
@@ -85,6 +88,7 @@ private:
     tap::Drivers &drivers;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
+    const std::vector<tap::control::Command *> avoidanceCommands;
     /**
      * Vector with origin `(0, 0)` and length CHASSIS_LENGTH / 2. The turret drawn on the screen is
      * considered to be pointing up in the y axis (of the screen). This vector can be rotated around
@@ -96,6 +100,8 @@ private:
     /** Previous chassis orientation. Should be a local variable but cannot since it is in a
      * protothread. */
     modm::Vector2i chassisOrientationPrev;
+
+    bool prevAvoidance;
     /**
      * Two graphics that represent chassis orientation. The first graphic is the line representing
      * the turret, and the second graphic is a thick line that represents the chassis and is rotated

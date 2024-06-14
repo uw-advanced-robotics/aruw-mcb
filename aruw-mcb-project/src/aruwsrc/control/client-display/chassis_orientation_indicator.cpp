@@ -30,10 +30,12 @@ namespace aruwsrc::control::client_display
 ChassisOrientationIndicator::ChassisOrientationIndicator(
     tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem)
+    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+    const std::vector<tap::control::Command *> avoidanceCommands)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
-      turretSubsystem(turretSubsystem)
+      turretSubsystem(turretSubsystem),
+      avoidanceCommands(avoidanceCommands)
 {
 }
 
@@ -51,8 +53,14 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::sendInitialGraphics()
 
 modm::ResumableResult<bool> ChassisOrientationIndicator::update()
 {
-    RF_BEGIN(1);
+    bool avoidance = false, modified = false;
+    // This needs to be outside RF because of the loop variable
+    for (auto currentCommand: this->avoidanceCommands)
+    {
+        avoidance |= drivers.commandScheduler.isCommandScheduled(currentCommand);
+    }
 
+    RF_BEGIN(1);
     // update chassisOrientation if turret is online
     // otherwise don't rotate chassis
     chassisOrientation.rotate(
@@ -71,11 +79,21 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
             CHASSIS_CENTER_X - chassisOrientation.x,
             CHASSIS_CENTER_Y - chassisOrientation.y,
             &chassisOrientationGraphics.graphicData[0]);
-        RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
+        modified = true;
 
         chassisOrientationPrev = chassisOrientation;
     }
 
+    modified |= this->prevAvoidance != avoidance;
+    this->prevAvoidance = avoidance;
+
+    if (modified)
+    {
+        chassisOrientationGraphics.graphicData->color = static_cast<uint8_t>(
+            avoidance ? CHASSIS_ORIENTATION_AVOIDANCE_COLOR : CHASSIS_ORIENTATION_STILL_COLOR);
+        
+        RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
+    }
     // reset rotated orientation back to forward orientation so next time chassisOrientation
     // is rotated by `getYawAngleFromCenter` the rotation is relative to the forward.
     chassisOrientation.set(0, CHASSIS_LENGTH / 2);
@@ -99,7 +117,7 @@ void ChassisOrientationIndicator::initialize()
         chassisOrientationName,
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        CHASSIS_ORIENTATION_COLOR);
+        CHASSIS_ORIENTATION_STILL_COLOR);
 
     RefSerialTransmitter::configLine(
         CHASSIS_WIDTH,

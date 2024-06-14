@@ -387,6 +387,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     agitator,
     turret,
+    {&wiggleCommand, &beybladeCommand},
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
