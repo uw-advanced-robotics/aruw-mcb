@@ -452,7 +452,6 @@ private:
         aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {
         0,
         1,
-        0,
         0};
 
 #ifdef ENV_UNIT_TESTS
