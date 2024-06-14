@@ -22,7 +22,6 @@
 #include "chassis_drive_command_mock.hpp"
 #include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
-#include "grabber_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
 #include "mecanum_chassis_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
@@ -33,14 +32,12 @@
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
-#include "tow_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
 #include "turret_motor_mock.hpp"
 #include "turret_subsystem_mock.hpp"
 #include "vision_coprocessor_mock.hpp"
-#include "x_axis_subsystem_mock.hpp"
 #include "x_drive_chassis_subsystem_mock.hpp"
 
 // A file for listing all mock constructors and destructors since doing
@@ -153,12 +150,6 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}
 
-GrabberSubsystemMock::GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
-    : engineer::GrabberSubsystem(drivers, pin)
-{
-}
-GrabberSubsystemMock::~GrabberSubsystemMock() {}
-
 OledDisplayMock::OledDisplayMock(
     tap::Drivers *drivers,
     aruwsrc::serial::VisionCoprocessor *vc,
@@ -209,22 +200,6 @@ SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
 }
 SentryRequestSubsystemMock::~SentryRequestSubsystemMock() {}
 
-TowSubsystemMock::TowSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::OutputPin leftTowPin,
-    tap::gpio::Digital::OutputPin rightTowPin,
-    tap::gpio::Digital::InputPin leftTowLimitSwitchPin,
-    tap::gpio::Digital::InputPin rightTowLimitSwitchPin)
-    : aruwsrc::engineer::TowSubsystem(
-          drivers,
-          leftTowPin,
-          rightTowPin,
-          leftTowLimitSwitchPin,
-          rightTowLimitSwitchPin)
-{
-}
-TowSubsystemMock::~TowSubsystemMock() {}
-
 TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
     : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
 {
@@ -236,12 +211,6 @@ RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
 {
 }
 RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
-
-XAxisSubsystemMock::XAxisSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin)
-    : engineer::XAxisSubsystem(drivers, pin)
-{
-}
-XAxisSubsystemMock::~XAxisSubsystemMock() {}
 
 VisionCoprocessorMock::VisionCoprocessorMock(tap::Drivers *drivers)
     : serial::VisionCoprocessor(drivers)
