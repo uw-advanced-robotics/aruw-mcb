@@ -454,7 +454,7 @@ SentryBallisticsSolver turretRightSolver(
     transformer,
     turretRightFrictionWheels,
     turretMajor,
-    turretRight::default_launch_speed,
+    turretRight::DEFAULT_LAUNCH_SPEED,
     0.f,  // turret minor pitch offset
     TURRET_MINOR_OFFSET,
     turretRight.getTurretID());
@@ -469,7 +469,7 @@ SentryBallisticsSolver turretLeftSolver(
     transformer,
     turretLeftFrictionWheels,
     turretMajor,
-    turretLeft::default_launch_speed,
+    turretLeft::DEFAULT_LAUNCH_SPEED,
     0.f,  // turret minor pitch offset
     TURRET_MINOR_OFFSET,
     turretLeft.getTurretID());

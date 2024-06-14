@@ -186,6 +186,7 @@ void VisionCoprocessor::sendMessage()
     sendRefereeCompetitionResult();
     sendRefereeWarning();
     sendSentryMotionStrategy();
+    sendBulletsRemaining();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -411,5 +412,32 @@ void VisionCoprocessor::sendSentryMotionStrategy()
             VISION_COPROCESSOR_TX_UART_PORT,
             reinterpret_cast<uint8_t*>(&sentryMotionStrategyMessage),
             sizeof(sentryMotionStrategyMessage));
+    }
+}
+
+void VisionCoprocessor::sendBulletsRemaining()
+{
+    if (sendBulletsRemainingTimeout.execute())
+    {
+        DJISerial::SerialMessage<sizeof(RefSerialData::Rx::TurretData::bulletsRemaining17)>
+            bulletsRemainMessage;
+        bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
+
+#if defined(TARGET_HERO_PERSEUS)
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
+#else
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+#endif
+
+        memcpy(&bulletsRemainMessage.data, bulletsRemaining, sizeof(bulletsRemainMessage.data));
+
+        bulletsRemainMessage.setCRC16();
+
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&bulletsRemainMessage),
+            sizeof(bulletsRemainMessage));
     }
 }
