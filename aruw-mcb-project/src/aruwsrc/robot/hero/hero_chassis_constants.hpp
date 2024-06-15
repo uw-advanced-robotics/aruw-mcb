@@ -42,6 +42,9 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {80, 6'700},
     {100, 7'000},
     {120, 8'000},
+    {150, 10'000},
+    {180, 12'000},
+    {240, 16'000}
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
