@@ -403,7 +403,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 229'183.1f,
     .ki = 0.0f,
@@ -420,6 +420,35 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 229'183.1f,
+    .ki = 0.0f,
+    .kd = 7'448.5f,
+    .maxICumulative = 0.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 10.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 2.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+#elif defined(TARGET_STANDARD_CYGNUS)
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 229'183.1f,
+    .ki = 0.0f,
+    .kd = 10'886.2f,
+    .maxICumulative = 0.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 70.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
+    .kp = 198'183.1f,
     .ki = 0.0f,
     .kd = 7'448.5f,
     .maxICumulative = 0.0f,
