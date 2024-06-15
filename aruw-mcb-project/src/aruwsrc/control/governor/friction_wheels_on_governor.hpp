@@ -63,8 +63,11 @@ public:
 
 private:
     aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel;
-
+#if defined(TARGET_HERO_PERSEUS)
+    static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.95;
+#else
     static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.9;
+#endif
     static constexpr float MAXIMUM_SPEED_THRESHOLD_FRACTION = 1.02;
 };
 }  // namespace aruwsrc::control::governor
