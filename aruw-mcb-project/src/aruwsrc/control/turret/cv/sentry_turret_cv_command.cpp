@@ -126,18 +126,7 @@ void SentryTurretCVCommand::execute()
     targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
                                                      rightBallisticsSolution != std::nullopt);
 
-    const GameData gameData = refSerial.getGameData();
-
-    if ((gameData.gameType != GameType::UNKNOWN) && (gameData.gameStage != GameStage::IN_GAME))
-    {
-        // Don't scan before the match starts, just look cool or smth
-        majorSetpoint = Angle(0);
-        leftYawSetpoint = Angle(M_PI_2);
-        rightYawSetpoint = Angle(-M_PI_2);
-        leftPitchSetpoint = Angle(0);
-        rightPitchSetpoint = Angle(0);
-    }
-    else if (targetFound)
+    if (targetFound)
     {
         // Turret minor control
         // If target spotted
@@ -174,6 +163,7 @@ void SentryTurretCVCommand::execute()
     {
         withinAimingToleranceLeft = false;
         withinAimingToleranceRight = false;
+        const GameData gameData = refSerial.getGameData();
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -182,6 +172,16 @@ void SentryTurretCVCommand::execute()
             lostTargetCounter++;
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
+        }
+        else if (
+            (gameData.gameType != GameType::UNKNOWN) && (gameData.gameStage != GameStage::IN_GAME))
+        {
+            // Don't scan before the match starts, just look cool or smth
+            majorSetpoint = Angle(0);
+            leftYawSetpoint = Angle(M_PI_2);
+            rightYawSetpoint = Angle(-M_PI_2);
+            leftPitchSetpoint = Angle(0);
+            rightPitchSetpoint = Angle(0);
         }
         else
         {
