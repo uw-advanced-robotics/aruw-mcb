@@ -40,7 +40,7 @@ public:
     const float LOOKAHEAD_DISTANCE = 0.2f;
 
     // how long the controller takes to smoothly transition to an updated path
-    const uint32_t PATH_TRANSITION_TIME_MILLIS = 750;
+    const uint32_t PATH_TRANSITION_TIME_MILLIS = 350;
 
     // distance from setpoint under which robot is considered "on target"
     const float POS_ERROR_THRESHOLD = 0.01;
