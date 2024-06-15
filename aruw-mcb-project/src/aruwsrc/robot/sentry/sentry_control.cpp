@@ -589,6 +589,7 @@ SentryTurretCVCommand::TurretConfig turretRightCVConfig(
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
+    drivers()->refSerial,
     turretMajor,
     turretMajorWorldYawController,
     turretLeftCVConfig,
