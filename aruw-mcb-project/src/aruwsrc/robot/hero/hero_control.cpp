@@ -389,7 +389,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     waterwheelAgitator,
     turret,
-    {&wiggleCommand, &beybladeCommand},
+    {&beybladeCommand},
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
