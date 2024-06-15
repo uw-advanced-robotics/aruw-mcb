@@ -43,11 +43,6 @@ SentryStrategyMenu::SentryStrategyMenu(
         visionCoprocessor->getMutableMotionStrategyPtr(
             SentryMotionStrategyType::PRACTICE_MATCH_STATE_MACHINE),
         false);
-    addEntry(
-        "TEST_STATE_MACHINE",
-        visionCoprocessor->getMutableMotionStrategyPtr(
-            SentryMotionStrategyType::TEST_STATE_MACHINE),
-        false);
 }
 
 void SentryStrategyMenu::openNextScreen(){};

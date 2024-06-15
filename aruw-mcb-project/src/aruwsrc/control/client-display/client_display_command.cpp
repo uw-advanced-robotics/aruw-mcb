@@ -41,6 +41,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
+    const std::vector<tap::control::Command *> avoidanceCommands,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
@@ -62,7 +63,11 @@ ClientDisplayCommand::ClientDisplayCommand(
           imuCalibrateCommand,
           &drivers.refSerial),
       capBankIndicator(refSerialTransmitter, capBank),
-      chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
+      chassisOrientationIndicator(
+          drivers,
+          refSerialTransmitter,
+          robotTurretSubsystem,
+          avoidanceCommands),
       positionHudIndicators(
           drivers,
           visionCoprocessor,
