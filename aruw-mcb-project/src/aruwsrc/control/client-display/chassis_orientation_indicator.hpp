@@ -20,6 +20,8 @@
 #ifndef CHASSIS_ORIENTATION_INDICATOR_HPP_
 #define CHASSIS_ORIENTATION_INDICATOR_HPP_
 
+#include <vector>
+
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -75,9 +77,11 @@ private:
     /** The width of the animated chassis, in pixels. */
     static constexpr uint16_t CHASSIS_WIDTH = 70;
     /** The color of the animated chassis when there is avoidance. */
-    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_AVOIDANCE_COLOR = Tx::GraphicColor::YELLOW;
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_AVOIDANCE_COLOR =
+        Tx::GraphicColor::YELLOW;
     /** The color of the animated chassis when there is no avoidance. */
-    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_STILL_COLOR = Tx::GraphicColor::PURPLISH_RED;
+    static constexpr Tx::GraphicColor CHASSIS_ORIENTATION_STILL_COLOR =
+        Tx::GraphicColor::PURPLISH_RED;
     /** The color of the animated turret barrel in the chassis orientation graphic. */
     static constexpr Tx::GraphicColor CHASSIS_BARREL_COLOR = Tx::GraphicColor::WHITE;
     /** The width of the animated turret barrel, in pixels. */

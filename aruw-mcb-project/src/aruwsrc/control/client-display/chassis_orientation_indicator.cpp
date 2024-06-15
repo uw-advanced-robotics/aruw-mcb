@@ -55,7 +55,7 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
 {
     bool avoidance = false, modified = false;
     // This needs to be outside RF because of the loop variable
-    for (auto currentCommand: this->avoidanceCommands)
+    for (auto currentCommand : this->avoidanceCommands)
     {
         avoidance |= drivers.commandScheduler.isCommandScheduled(currentCommand);
     }
@@ -91,7 +91,7 @@ modm::ResumableResult<bool> ChassisOrientationIndicator::update()
     {
         chassisOrientationGraphics.graphicData->color = static_cast<uint8_t>(
             avoidance ? CHASSIS_ORIENTATION_AVOIDANCE_COLOR : CHASSIS_ORIENTATION_STILL_COLOR);
-        
+
         RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
     }
     // reset rotated orientation back to forward orientation so next time chassisOrientation
