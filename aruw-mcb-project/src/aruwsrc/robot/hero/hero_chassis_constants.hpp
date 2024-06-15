@@ -133,8 +133,13 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.70f;
  * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
  * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
  */
+#if defined(TARGET_HERO_PERSEUS)
+static constexpr float
+    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.7f;
+#else
 static constexpr float
     BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
+#endif
 
 /**
  * The fraction to cut rotation speed while moving and beyblading
