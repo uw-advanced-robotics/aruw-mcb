@@ -34,7 +34,7 @@ void AutoNavPath::resetPath()
     pathChanged = true;
 }
 
-bool AutoNavPath::hasChanged() const { return pathChanged; }
+bool AutoNavPath::hasChanged() const { return false; }
 
 float AutoNavPath::positionToClosestParameter(const Position pos) const
 {

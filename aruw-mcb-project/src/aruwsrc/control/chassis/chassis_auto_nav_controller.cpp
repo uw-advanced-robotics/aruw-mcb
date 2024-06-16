@@ -22,12 +22,20 @@
 
 namespace aruwsrc::chassis
 {
+
+// Position between the two walls near base and center (meters)
+static constexpr float SENTRY_GOAL_X = 3.7875;
+static constexpr float SENTRY_GOAL_Y = 2.2627;
+
 void ChassisAutoNavController::initialize()
 {
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
     lastSetPoint = worldToChassis.getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+
+    // Sentry start measured is 
+    path.pushPoint(Position(SENTRY_GOAL_X, SENTRY_GOAL_Y, 0));
 }
 
 void ChassisAutoNavController::runController(

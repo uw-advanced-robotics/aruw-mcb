@@ -111,28 +111,28 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
 bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
 {
-    AutoNavSetpointMessage setpointData;
-    memcpy(&setpointData, &message.data, AUTO_NAV_SETPOINT_HEADER_SIZE);
-    // @todo limit size to prevent buffer overflow
-    size_t numSetpoints =
-        setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
-    memcpy(
-        &setpointData.setpoints,
-        &message.data[AUTO_NAV_SETPOINT_HEADER_SIZE],
-        sizeof(AutoNavCoordinate) * numSetpoints);
-    if (lastSetpointData.sequenceNum == setpointData.sequenceNum)
-    {
-        return true;
-    }
-    // clears path and denotes that the path has changed
-    autoNavPath.resetPath();
-    for (uint32_t i = 0; i < setpointData.numSetpoints; i++)
-    {
-        autoNavPath.pushPoint(
-            Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
-    }
-    lastSetpointData = setpointData;
-    return true;
+    // AutoNavSetpointMessage setpointData;
+    // memcpy(&setpointData, &message.data, AUTO_NAV_SETPOINT_HEADER_SIZE);
+    // // @todo limit size to prevent buffer overflow
+    // size_t numSetpoints =
+    //     setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
+    // memcpy(
+    //     &setpointData.setpoints,
+    //     &message.data[AUTO_NAV_SETPOINT_HEADER_SIZE],
+    //     sizeof(AutoNavCoordinate) * numSetpoints);
+    // if (lastSetpointData.sequenceNum == setpointData.sequenceNum)
+    // {
+    //     return true;
+    // }
+    // // clears path and denotes that the path has changed
+    // autoNavPath.resetPath();
+    // for (uint32_t i = 0; i < setpointData.numSetpoints; i++)
+    // {
+    //     autoNavPath.pushPoint(
+    //         Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
+    // }
+    // lastSetpointData = setpointData;
+    // return true;
 }
 
 bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
