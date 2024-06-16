@@ -28,11 +28,15 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     Module* moduleOne,
     Module* moduleTwo,
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
     float wheelbaseRadius,
     const float forwardMatrixArray[12],
     can::capbank::CapacitorBank* capacitorBank)
     : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       modules{moduleOne, moduleTwo},
+      parallelWheel(parallelWheel),
+      perpendicularWheel(perpendicularWheel),
       wheelbaseRadius(wheelbaseRadius),
       forwardMatrix(forwardMatrixArray)
 {
@@ -50,6 +54,8 @@ bool HalfSwerveChassisSubsystem::allMotorsOnline() const
 {
     bool online = true;
     for (unsigned int i = 0; i < NUM_MODULES; i++) online &= modules[i]->allMotorsOnline();
+    online &= parallelWheel->isMotorOnline();
+    online &= perpendicularWheel->isMotorOnline();
     return online;
 }
 

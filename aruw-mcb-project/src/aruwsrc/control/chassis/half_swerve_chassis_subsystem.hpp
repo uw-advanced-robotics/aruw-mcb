@@ -19,6 +19,8 @@
 #ifndef HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 #define HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_
 
+#include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
+
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/subsystem.hpp"
 
@@ -43,6 +45,8 @@ public:
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         Module* moduleOne,
         Module* moduleTwo,
+        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
+        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
         const float wheelbaseRadius,
         const float forwardMatrixArray[12],
         can::capbank::CapacitorBank* capacitorBank = nullptr);
@@ -94,6 +98,9 @@ private:
     const unsigned int NUM_MODULES{2};
     std::array<Module*, 2> modules;
 #endif
+
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
 
     /**
      * Stores the desired wheel rpm of each of the modules in a matrix, indexed by ModuleIndex
