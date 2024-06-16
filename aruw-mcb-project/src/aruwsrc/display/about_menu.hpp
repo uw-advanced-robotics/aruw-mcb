@@ -20,10 +20,6 @@
 #ifndef ABOUT_MENU_HPP_
 #define ABOUT_MENU_HPP_
 
-#define STRINGIFYMACRO(s) MACROSTR(s)
-#define MACROSTR(s) #s
-
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
 
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -42,31 +38,6 @@ namespace aruwsrc::display
 class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-#if defined(TARGET_STANDARD_ELSA)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ELSA";
-#elif defined(TARGET_DRONE)
-    static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
-#elif defined(TARGET_ENGINEER)
-    static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTRY_HYDRA)
-    static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_HYDRA";
-#elif defined(TARGET_HERO_CYCLONE)
-    static constexpr char ROBOT_NAME[] = "TARGET_HERO_PERSEUS";
-#elif defined(TARGET_STANDARD_SPIDER)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_SPIDER";
-#elif defined(TARGET_STANDARD_ORION)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ORION";
-#elif defined(TARGET_STANDARD_CYGNUS)
-    static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_CYGNUS";
-#else
-    static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
-#endif
-
-    static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
-    static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
-    static constexpr char LAST_DATE[] = STRINGIFYMACRO(BUILD_DATE);
-    static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
-
     AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
     void draw() override;
 

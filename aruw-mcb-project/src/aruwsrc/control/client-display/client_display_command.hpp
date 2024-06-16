@@ -84,6 +84,8 @@ public:
      * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
      * to the turret and to print turret angles (if turret chassis relative angles are being
      * printed).
+     * @param[in] avoidanceCommand Commands that indicate if the robot is in an avoidance drive
+     * mode, such as beyblade or wiggle.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
@@ -107,6 +109,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
+        const std::vector<tap::control::Command *> avoidanceCommands,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,

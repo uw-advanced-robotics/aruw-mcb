@@ -35,16 +35,22 @@ using namespace tap::arch::clock;
 using namespace tap::algorithms;
 using namespace aruwsrc::algorithms;
 
+using GameType = tap::communication::serial::RefSerialData::Rx::GameType;
+using GameStage = tap::communication::serial::RefSerialData::Rx::GameStage;
+using GameData = tap::communication::serial::RefSerialData::Rx::GameData;
+
 namespace aruwsrc::control::sentry
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
     serial::VisionCoprocessor &visionCoprocessor,
+    tap::communication::serial::RefSerial &refSerial,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
     aruwsrc::sentry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
+      refSerial(refSerial),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
       turretLeftConfig(turretLeftConfig),
@@ -120,10 +126,10 @@ void SentryTurretCVCommand::execute()
     targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
                                                      rightBallisticsSolution != std::nullopt);
 
-    // Turret minor control
-    // If target spotted
     if (targetFound)
     {
+        // Turret minor control
+        // If target spotted
         exitScanMode();
 
         if (leftBallisticsSolution != std::nullopt)
@@ -157,6 +163,7 @@ void SentryTurretCVCommand::execute()
     {
         withinAimingToleranceLeft = false;
         withinAimingToleranceRight = false;
+        const GameData gameData = refSerial.getGameData();
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -165,6 +172,16 @@ void SentryTurretCVCommand::execute()
             lostTargetCounter++;
             // Pitch and yaw setpoint already at reasonable default value
             // by this point
+        }
+        else if (
+            (gameData.gameType != GameType::UNKNOWN) && (gameData.gameStage != GameStage::IN_GAME))
+        {
+            // Don't scan before the match starts, just look cool or smth
+            majorSetpoint = Angle(0);
+            leftYawSetpoint = Angle(M_PI_2);
+            rightYawSetpoint = Angle(-M_PI_2);
+            leftPitchSetpoint = Angle(0);
+            rightPitchSetpoint = Angle(0);
         }
         else
         {
