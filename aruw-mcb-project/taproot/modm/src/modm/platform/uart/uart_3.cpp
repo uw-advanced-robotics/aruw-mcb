@@ -23,8 +23,8 @@
 
 namespace
 {
-	static modm::atomic::Queue<uint8_t, 2048> rxBuffer;
-	static modm::atomic::Queue<uint8_t, 2048> txBuffer;
+	static modm::atomic::Queue<uint8_t, 4096> rxBuffer;
+	static modm::atomic::Queue<uint8_t, 4096> txBuffer;
 }
 namespace modm::platform
 {
