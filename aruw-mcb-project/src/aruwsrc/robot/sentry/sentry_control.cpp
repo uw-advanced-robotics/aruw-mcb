@@ -648,7 +648,8 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretLeft,
-    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    SentryCvOnTargetGovernorMode::ON_TARGET,
+    // SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretLeft::turretID);
 
 // TODO:: see if this actually does stuff, test later.
@@ -727,7 +728,8 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretRight,
-    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    SentryCvOnTargetGovernorMode::ON_TARGET,
+    // SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretRight::turretID);
 
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
