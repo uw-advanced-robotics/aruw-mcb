@@ -295,6 +295,8 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     &currentSensor,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
+    &leftOmni,
+    &rightOmni,
     CENTER_TO_WHEELBASE_RADIUS,
     HALF_SWERVE_FORWARD_MATRIX);
 

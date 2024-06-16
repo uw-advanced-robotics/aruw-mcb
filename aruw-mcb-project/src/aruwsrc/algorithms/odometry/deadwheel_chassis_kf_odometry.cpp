@@ -66,8 +66,13 @@ void DeadwheelChassisKFOdometry::update()
     V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;
     // It is assumed that the wheels are rotated 45 degrees
     // relative to the forward direction of the robot
-    float Vx = (((V1 - V2)) / M_SQRT2);
-    float Vy = (((V1 + V2)) / M_SQRT2);
+    float Vx = 0;
+    float Vy = 0;
+    if (deadwheelOdometry.allMotorsOnline())
+    {
+        float Vx = (((V1 - V2)) / M_SQRT2);
+        float Vy = (((V1 + V2)) / M_SQRT2);
+    }
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();
