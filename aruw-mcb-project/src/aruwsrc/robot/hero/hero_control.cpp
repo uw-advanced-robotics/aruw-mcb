@@ -484,12 +484,12 @@ PressCommandMapping cShiftPressed(
     RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
 HoldCommandMapping shiftPressed(
     drivers(),
-    {&capBankHalfSprintCommand},
+    {&capBankSprintCommand},
     RemoteMapState({Remote::Key::SHIFT}));
 
 HoldCommandMapping ctrlPressed(
     drivers(),
-    {&capBankSprintCommand},
+    {&capBankHalfSprintCommand},
     RemoteMapState({Remote::Key::CTRL}));
 
 // Safe disconnect function
