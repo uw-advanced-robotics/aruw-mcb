@@ -79,9 +79,9 @@ public:
 
 #ifdef TARGET_SENTRY_HYDRA
     /// The width of a small armor plate, in m
-    static constexpr float PLATE_WIDTH = 0.15f;
+    static constexpr float PLATE_WIDTH = 0.25f;
     /// The height of a small armor plate, in m
-    static constexpr float PLATE_HEIGHT = 0.15f;
+    static constexpr float PLATE_HEIGHT = 0.2f;
 #else
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.1f;

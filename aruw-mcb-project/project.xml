@@ -19,10 +19,10 @@
     <option name="taproot:modm-project.xml:modm_hal_options">
         modm:platform:uart:1:buffer.rx 256
         modm:platform:uart:1:buffer.tx 256
-        modm:platform:uart:2:buffer.rx 512
-        modm:platform:uart:2:buffer.tx 512
-        modm:platform:uart:3:buffer.tx 4096
-        modm:platform:uart:3:buffer.rx 4096
+        modm:platform:uart:2:buffer.rx 9192
+        modm:platform:uart:2:buffer.tx 9192
+        modm:platform:uart:3:buffer.tx 9192
+        modm:platform:uart:3:buffer.rx 9192
         modm:platform:uart:6:buffer.rx 256
         modm:platform:uart:6:buffer.tx 256
         modm:platform:uart:7:buffer.tx 512

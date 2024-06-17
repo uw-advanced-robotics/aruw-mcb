@@ -36,8 +36,8 @@ class Usart2 : public UartBase, public ::modm::Uart
 public:
 	using Hal = UsartHal2;
 	// Expose jinja template parameters to be checked by e.g. drivers or application
-	static constexpr size_t RxBufferSize = 512;
-	static constexpr size_t TxBufferSize = 512;
+	static constexpr size_t RxBufferSize = 9192;
+	static constexpr size_t TxBufferSize = 9192;
 
 public:
 	template< template<Peripheral _> class... Signals >

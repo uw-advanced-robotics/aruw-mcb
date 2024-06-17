@@ -68,11 +68,11 @@ void DeadwheelChassisKFOdometry::update()
     // relative to the forward direction of the robot
     float Vx = 0;
     float Vy = 0;
-    if (deadwheelOdometry.allMotorsOnline())
-    {
-        float Vx = (((V1 - V2)) / M_SQRT2);
-        float Vy = (((V1 + V2)) / M_SQRT2);
-    }
+    // if (deadwheelOdometry.allMotorsOnline())
+    // {
+        Vx = (((V1 - V2)) / M_SQRT2);
+        Vy = (((V1 + V2)) / M_SQRT2);
+    // }
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();
