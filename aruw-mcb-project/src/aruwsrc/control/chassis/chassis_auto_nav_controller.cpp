@@ -86,14 +86,9 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    if (!visionCoprocessor.isCvOnline() || !movementEnabled || path.empty())
     {
         return lastSetPoint;
-    }
-
-    if (path.empty())
-    {
-        return current;
     }
 
     if (path.hasChanged())
