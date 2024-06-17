@@ -70,8 +70,8 @@ void DeadwheelChassisKFOdometry::update()
     float Vy = 0;
     if (deadwheelOdometry.allMotorsOnline())
     {
-        float Vx = (((V1 - V2)) / M_SQRT2);
-        float Vy = (((V1 + V2)) / M_SQRT2);
+        Vx = (((V1 - V2)) / M_SQRT2);
+        Vy = (((V1 + V2)) / M_SQRT2);
     }
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
