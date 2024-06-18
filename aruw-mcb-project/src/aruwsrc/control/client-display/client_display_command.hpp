@@ -37,6 +37,7 @@
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
+#include "ref_system_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
@@ -139,6 +140,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    RefSystemIndicators refSystemHudIndicators;
 
     bool restarting = true;
 

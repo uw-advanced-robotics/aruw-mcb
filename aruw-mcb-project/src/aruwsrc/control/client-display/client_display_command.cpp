@@ -81,7 +81,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
+      refSystemHudIndicators(refSerialTransmitter, drivers.refSerial)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -103,6 +104,7 @@ void ClientDisplayCommand::restartHud()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+    refSystemHudIndicators.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -131,6 +133,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
+    PT_CALL(refSystemHudIndicators.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -141,6 +144,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
+        PT_CALL(refSystemHudIndicators.update());
         PT_YIELD();
     }
     // Breaking out of the loop successfully calls this method,
