@@ -60,7 +60,7 @@ public:
 
     inline float getPitchVelocity() const { return turretMCB.getPitchVelocity(); }
 
-    inline WrappedFloat getRoll() const { return Angle(turretMCB.getRollVelocity()); }
+    inline WrappedFloat getRoll() const { return Angle(turretMCB.getRoll()); }
 
     inline float getRollVelocity() const { return turretMCB.getRollVelocity(); }
 
