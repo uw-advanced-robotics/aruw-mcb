@@ -54,6 +54,13 @@ modm::ResumableResult<bool> RefSystemIndicators::update()
 #if defined(TARGET_HERO_PERSEUS)
     int heroAmmoCount = refSerial.getRobotData().turret.bulletsRemaining42;
 
+    if (heroAmmoCount == lastHeroAmmoCount)
+    {
+        return;
+    }
+
+    lastHeroAmmoCount = heroAmmoCount;
+
     const char *heroAmmoCountStr =
         std::to_string(heroAmmoCount).append(std::string(heroAmmoCount < 10 ? " " : "")).c_str();
 

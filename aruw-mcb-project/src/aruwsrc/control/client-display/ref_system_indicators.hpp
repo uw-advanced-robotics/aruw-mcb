@@ -71,6 +71,8 @@ private:
      * A graphic that shows the amount of hero shots remaining.
      */
     Tx::GraphicCharacterMessage heroAmmoCountTextGraphic;
+
+    int lastHeroAmmoCount{0};
 };
 }  // namespace aruwsrc::control::client_display
 
