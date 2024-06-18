@@ -556,7 +556,7 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&leftMousePressedVPressed); // same behavior as leftMousePressedBPressed
+    drivers->commandMapper.addMap(&leftMousePressedVPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
