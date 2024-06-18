@@ -83,6 +83,7 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+    // @todo i dont know if it's better or worse that this docstring is right
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
