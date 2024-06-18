@@ -235,7 +235,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
     .kp = 29.0f,
     .ki = 0.2f,
     .kd = 0.0f,
-    .maxICumulative = 1.6f,
+    .maxICumulative = 0.3f,
     .maxOutput = 7.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
