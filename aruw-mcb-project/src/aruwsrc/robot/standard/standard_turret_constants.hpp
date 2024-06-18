@@ -255,7 +255,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 20.5f,
+    .kp = 20.0f,
     .ki = 0.0f,
     .kd = 0.2f,
     .maxICumulative = 0.5f,
@@ -448,10 +448,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 198'183.1f,
-    .ki = 0.0f,
-    .kd = 7'448.5f,
-    .maxICumulative = 0.0f,
+    .kp = 100'000.0f,
+    .ki = 10.0f,
+    .kd = 7'000.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
