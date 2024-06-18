@@ -441,6 +441,12 @@ HoldRepeatCommandMapping leftMousePressedBPressed(
     {&kicker::launchKickerNoHeatLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     false);
+// Same thing as leftMousePressedBPressed; used for ease of access.
+HoldRepeatCommandMapping leftMousePressedVPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
+    false);
 HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
@@ -550,6 +556,7 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&leftMousePressedVPressed); // same behavior as leftMousePressedBPressed
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
