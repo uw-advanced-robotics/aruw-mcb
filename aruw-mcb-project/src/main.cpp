@@ -50,15 +50,6 @@ static constexpr float MAHONY_KP = 0.1f;
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
-// Place any sort of input/output initialization here. For example, place
-// serial init stuff here.
-static void initializeIo(tap::Drivers *drivers);
-
-// Anything that you would like to be called place here. It will be called
-// very frequently. Use PeriodicMilliTimers if you don't want something to be
-// called as frequently.
-static void updateIo(tap::Drivers *drivers);
-
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
 #elif defined(ALL_SENTRIES)
@@ -74,6 +65,15 @@ using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
 #endif
+
+// Place any sort of input/output initialization here. For example, place
+// serial init stuff here.
+static void initializeIo(Drivers *drivers);
+
+// Anything that you would like to be called place here. It will be called
+// very frequently. Use PeriodicMilliTimers if you don't want something to be
+// called as frequently.
+static void updateIo(Drivers *drivers);
 
 int main()
 {
@@ -138,7 +138,7 @@ int main()
     return 0;
 }
 
-static void initializeIo(tap::Drivers *drivers)
+static void initializeIo(Drivers *drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -151,29 +151,29 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->refSerial.initialize();
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
-    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
+    drivers->visionCoprocessor.initializeCV();
+    drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
-    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
+    drivers->mpu6500.setCalibrationSamples(2000);
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
-    ((Drivers *)drivers)->capacitorBank.initialize();
+    drivers->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
+    drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
-    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
-    ((Drivers *)drivers)->chassisMcbLite.initialize();
-    ((Drivers *)drivers)->turretMajorMcbLite.initialize();
+    drivers->mpu6500.setCalibrationSamples(4000);
+    drivers->chassisMcbLite.initialize();
+    drivers->turretMajorMcbLite.initialize();
 #endif
 }
 
-static void updateIo(tap::Drivers *drivers)
+static void updateIo(Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
@@ -181,18 +181,18 @@ static void updateIo(tap::Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    drivers->oledDisplay.updateDisplay();
 #endif
 
 #ifdef ALL_STANDARDS
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 #endif
 #ifdef TARGET_HERO_PERSEUS
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 #endif
 #ifdef TARGET_SENTRY_HYDRA
-    ((Drivers *)drivers)->chassisMcbLite.updateSerial();
-    ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+    drivers->chassisMcbLite.updateSerial();
+    drivers->turretMajorMcbLite.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 #endif
 }
