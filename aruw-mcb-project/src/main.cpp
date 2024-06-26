@@ -184,15 +184,12 @@ static void updateIo(Drivers *drivers)
     drivers->oledDisplay.updateDisplay();
 #endif
 
-#ifdef ALL_STANDARDS
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
 #endif
-#ifdef TARGET_HERO_PERSEUS
-    drivers->visionCoprocessor.updateSerial();
-#endif
+
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
-    drivers->visionCoprocessor.updateSerial();
 #endif
 }
