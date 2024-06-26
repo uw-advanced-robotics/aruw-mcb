@@ -40,9 +40,6 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
-#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
-#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -376,9 +373,6 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     launchKicker,
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
-
-// @todo remove
-aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
     *drivers(),
