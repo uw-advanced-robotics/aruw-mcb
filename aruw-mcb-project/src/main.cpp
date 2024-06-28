@@ -75,6 +75,9 @@ static void initializeIo(Drivers *drivers);
 // called as frequently.
 static void updateIo(Drivers *drivers);
 
+// Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
+static void checkTurretMcbDisconnection(Drivers *drivers);
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -122,15 +125,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-            bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-            if (!turretMcbConnected)
-            {
-                tap::buzzer::playNote(&drivers->pwm, 1000);
-            }
-            else
-            {
-                tap::buzzer::silenceBuzzer(&drivers->pwm);
-            }
+            checkTurretMcbDisconnection(drivers);
 #endif
         }
         modm::delay_us(10);
@@ -192,4 +187,17 @@ static void updateIo(Drivers *drivers)
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
 #endif
+}
+
+static void checkTurretMcbDisconnection(Drivers *drivers)
+{
+    bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
+    if (!turretMcbConnected)
+    {
+        tap::buzzer::playNote(&drivers->pwm, 1000);
+    }
+    else
+    {
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
+    }
 }
