@@ -41,7 +41,10 @@ public:
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
 
-    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode) const { this->capacitorBank.setSprinting(mode); }
+    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode) const
+    {
+        this->capacitorBank.setSprinting(mode);
+    }
 
     void refreshSafeDisconnect() override
     {

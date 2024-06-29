@@ -37,15 +37,15 @@ public:
     CapacitorBankMock(tap::Drivers* drivers, tap::can::CanBus canBus, const float capacitance);
     virtual ~CapacitorBankMock();
 
-    MOCK_METHOD( void, initialize, (), (override));
+    MOCK_METHOD(void, initialize, (), (override));
 
-    MOCK_METHOD( void, start, (), (const override));
+    MOCK_METHOD(void, start, (), (const override));
 
-    MOCK_METHOD( void, stop, (), (const override));
+    MOCK_METHOD(void, stop, (), (const override));
 
-    MOCK_METHOD( void, ping, (), (const override));
+    MOCK_METHOD(void, ping, (), (const override));
 
-    MOCK_METHOD( void, setPowerLimit, (uint16_t watts), (override));
+    MOCK_METHOD(void, setPowerLimit, (uint16_t watts), (override));
 };  // class CapacitorBankMock
 }  // namespace aruwsrc::mock
 
