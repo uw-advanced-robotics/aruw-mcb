@@ -41,23 +41,26 @@ public:
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
 
-    void toggleCapacitors() { this->enabled = !this->enabled; }
-    void toggleDischarge() { this->enabled = false; }
-
-    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode);
+    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode) const { this->capacitorBank.setSprinting(mode); }
 
     void refreshSafeDisconnect() override
     {
-        this->enabled = false;
+        this->disableCapacitors();
         this->capacitorBank.stop();
     }
 
     void refresh() override;
 
+    void enableCapacitors() { this->capacitorsEnabled = true; }
+    void disableCapacitors() { this->capacitorsEnabled = false; }
+    void toggleCapacitors() { this->capacitorsEnabled = !this->capacitorsEnabled; }
+
+    bool enabled() const { return this->capacitorsEnabled; }
+
 private:
     can::capbank::CapacitorBank& capacitorBank;
 
-    bool enabled;
+    bool capacitorsEnabled;
 
     tap::arch::MilliTimeout messageTimer;
 };

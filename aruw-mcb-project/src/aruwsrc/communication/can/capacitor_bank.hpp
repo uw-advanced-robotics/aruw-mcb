@@ -122,7 +122,9 @@ public:
 
     float getMaximumOutputCurrent() const;
 
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     const float capacitance;
 
     uint16_t powerLimit = 0;

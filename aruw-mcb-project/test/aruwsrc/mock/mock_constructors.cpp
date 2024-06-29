@@ -82,7 +82,7 @@ BeybladeCommandMock::BeybladeCommandMock(
 BeybladeCommandMock::~BeybladeCommandMock() {}
 
 CapacitorBankMock::CapacitorBankMock(
-    tap::Drivers* drivers,
+    tap::Drivers *drivers,
     tap::can::CanBus canBus,
     const float capacitance)
     : CapacitorBank(drivers, canBus, capacitance)

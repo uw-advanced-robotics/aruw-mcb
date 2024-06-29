@@ -25,21 +25,160 @@
 #include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
-
 #include "aruwsrc/mock/capacitor_bank_mock.hpp"
+
+using namespace testing;
 
 using namespace aruwsrc::mock;
 using namespace aruwsrc::can::capbank;
 using namespace aruwsrc::control::capbank;
 
-TEST(CapBankSubsystem, constructor_sets_sprint_to_no_sprint)
+class CapBankSubsystemTests : public Test
 {
-    tap::Drivers drivers;
-    testing::NiceMock<CapacitorBankMock> capBank(&drivers, tap::can::CanBus::CAN_BUS1, 1.0);
+public:
+    CapBankSubsystemTests() : drivers(), capBank(&drivers, tap::can::CanBus::CAN_BUS1, 1.0), clock()
+    {
+    }
 
-    capBank.setSprinting(SprintMode::SPRINT); // Make sure that the caps are in the WRONG state to verify its set
+    tap::Drivers drivers;
+    testing::NiceMock<CapacitorBankMock> capBank;
+    tap::arch::clock::ClockStub clock;
+};
+
+TEST_F(CapBankSubsystemTests, constructor_sets_sprint_to_no_sprint)
+{
+    // Make sure that the caps are in the WRONG state to verify its set
+    capBank.setSprinting(SprintMode::SPRINT);
+
     CapBankSubsystem dut(&drivers, capBank);
 
     EXPECT_FALSE(capBank.isSprinting());
 }
 
+TEST_F(CapBankSubsystemTests, disabled_and_stop_called_in_safe_disconnect)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.enableCapacitors();
+
+    EXPECT_CALL(capBank, stop);
+
+    dut.refreshSafeDisconnect();
+
+    EXPECT_FALSE(dut.enabled());
+}
+
+TEST_F(CapBankSubsystemTests, no_cap_update_when_message_timer_does_not_increase)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    dut.refresh();
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_ping_when_not_changing_state)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.disableCapacitors();
+    capBank.state = State::DISABLED;
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(2);
+
+    clock.time = 21;
+    dut.refresh();
+    clock.time = 42;
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_start_when_enabling)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.enableCapacitors();
+    capBank.state = State::DISABLED;
+
+    EXPECT_CALL(capBank, start).Times(1);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    clock.time = 21;
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_start_when_enabling_then_ping_when_changed)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.enableCapacitors();
+    capBank.state = State::DISABLED;
+
+    EXPECT_CALL(capBank, start).Times(1);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    clock.time = 21;
+    dut.refresh();
+
+    capBank.state = State::CHARGE_DISCHARGE;
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(1);
+    clock.time = 42;
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_stop_when_disabling)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.disableCapacitors();
+    capBank.state = State::CHARGE_DISCHARGE;
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(1);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    clock.time = 21;
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_stop_when_disabling_then_ping_when_changed)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.disableCapacitors();
+    capBank.state = State::CHARGE_DISCHARGE;
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(1);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    clock.time = 21;
+    dut.refresh();
+
+    capBank.state = State::DISABLED;
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(0);
+    EXPECT_CALL(capBank, ping).Times(1);
+    clock.time = 42;
+    dut.refresh();
+}
+
+TEST_F(CapBankSubsystemTests, expect_no_sprint_when_disabling)
+{
+    CapBankSubsystem dut(&drivers, capBank);
+    dut.disableCapacitors();
+    capBank.state = State::CHARGE_DISCHARGE;
+    capBank.setSprinting(SprintMode::SPRINT);
+
+    EXPECT_CALL(capBank, start).Times(0);
+    EXPECT_CALL(capBank, stop).Times(1);
+    EXPECT_CALL(capBank, ping).Times(0);
+
+    clock.time = 21;
+    dut.refresh();
+    EXPECT_FALSE(capBank.isSprinting());
+}
