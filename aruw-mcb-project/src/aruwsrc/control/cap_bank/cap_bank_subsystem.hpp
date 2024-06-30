@@ -70,6 +70,8 @@ private:
     bool capacitorsEnabled;
 
     tap::arch::MilliTimeout messageTimer;
+
+    bool testing;
 };
 }  // namespace aruwsrc::control::capbank
 

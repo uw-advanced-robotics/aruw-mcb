@@ -26,9 +26,10 @@ CapBankSubsystem::CapBankSubsystem(
     can::capbank::CapacitorBank& capacitorBank)
     : Subsystem(drivers),
       capacitorBank(capacitorBank),
-      capacitorsEnabled(false)
+      capacitorsEnabled(false),
+      testing(false)
 {
-    capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
+    this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
     this->messageTimer.restart(20);
 }
 
@@ -38,7 +39,7 @@ void CapBankSubsystem::refresh()
     {
         messageTimer.restart(20);
 
-        if (!this->enabled() && !this->capacitorBank.isDisabled() && this->isHardwareTestComplete())
+        if (!this->enabled() && !this->capacitorBank.isDisabled() && !this->testing)
         {
             this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
             this->capacitorBank.stop();
@@ -54,13 +55,21 @@ void CapBankSubsystem::refresh()
     }
 }
 
-void CapBankSubsystem::onHardwareTestStart() { this->enableCapacitors(); }
+void CapBankSubsystem::onHardwareTestStart()
+{
+    this->enableCapacitors();
+    this->testing = true;
+}
 
-void CapBankSubsystem::onHardwareTestComplete() { this->disableCapacitors(); }
+void CapBankSubsystem::onHardwareTestComplete()
+{
+    this->disableCapacitors();
+    this->testing = false;
+}
 
 void CapBankSubsystem::runHardwareTests()
 {
-    if (capacitorBank.getVoltage() > 12.0f) this->setHardwareTestsComplete();
+    if (this->capacitorBank.getVoltage() > 12.0f) this->setHardwareTestsComplete();
 }
 
 }  // namespace aruwsrc::control::capbank
