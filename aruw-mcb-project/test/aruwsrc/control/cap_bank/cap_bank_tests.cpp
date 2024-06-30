@@ -71,6 +71,7 @@ TEST_F(CapBankTests, status_is_received)
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
     message.data[1] = State::RESET;
+    memset(message.data + 2, 0, 6);
 
     EXPECT_NE(capBank.getState(), State::RESET);
 
@@ -85,6 +86,7 @@ TEST_F(CapBankTests, when_receiving_status_do_not_update_power_when_no_ref)
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
     message.data[1] = State::RESET;
+    memset(message.data + 2, 0, 6);
 
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
 
@@ -104,6 +106,7 @@ TEST_F(CapBankTests, when_receiving_status_update_power_when_ref)
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
     message.data[1] = State::RESET;
+    memset(message.data + 2, 0, 6);
 
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(true));
 
@@ -123,6 +126,7 @@ TEST_F(CapBankTests, capbank_goes_offline_when_heartbeat_expires)
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
     message.data[1] = State::RESET;
+    memset(message.data + 2, 0, 6);
 
     capBank.processMessage(message);
     EXPECT_TRUE(capBank.isOnline());
@@ -138,6 +142,7 @@ TEST_F(CapBankTests, heartbeat_is_reset_when_receiving_status)
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
     message.data[1] = State::RESET;
+    memset(message.data + 2, 0, 6);
 
     capBank.processMessage(message);
     EXPECT_TRUE(capBank.isOnline());
