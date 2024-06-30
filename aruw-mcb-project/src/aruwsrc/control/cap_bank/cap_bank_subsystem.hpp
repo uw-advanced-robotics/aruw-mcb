@@ -60,6 +60,10 @@ public:
 
     bool enabled() const { return this->capacitorsEnabled; }
 
+    void runHardwareTests() override;
+    void onHardwareTestStart() override;
+    void onHardwareTestComplete() override;
+
 private:
     can::capbank::CapacitorBank& capacitorBank;
 

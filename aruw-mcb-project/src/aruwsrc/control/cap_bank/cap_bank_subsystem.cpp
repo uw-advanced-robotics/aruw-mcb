@@ -38,7 +38,7 @@ void CapBankSubsystem::refresh()
     {
         messageTimer.restart(20);
 
-        if (!this->enabled() && !this->capacitorBank.isDisabled())
+        if (!this->enabled() && !this->capacitorBank.isDisabled() && this->isHardwareTestComplete())
         {
             this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
             this->capacitorBank.stop();
@@ -52,6 +52,15 @@ void CapBankSubsystem::refresh()
             this->capacitorBank.ping();
         }
     }
+}
+
+void CapBankSubsystem::onHardwareTestStart() { this->enableCapacitors(); }
+
+void CapBankSubsystem::onHardwareTestComplete() { this->disableCapacitors(); }
+
+void CapBankSubsystem::runHardwareTests()
+{
+    if (capacitorBank.getVoltage() > 12.0f) this->setHardwareTestsComplete();
 }
 
 }  // namespace aruwsrc::control::capbank
