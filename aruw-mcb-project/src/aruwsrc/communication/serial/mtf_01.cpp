@@ -19,10 +19,46 @@
 
 #include "mtf_01.hpp"
 
+using tap::communication::serial::Uart;
+
 namespace aruwsrc::communication::serial
 {
-    MTF01::initialize(){
+MTF01::MTF01(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port)
+    : drivers(drivers),
+      port(port)
+{
+}
 
+void MTF01::initialize()
+{
+    switch (this->port)
+    {
+        case Uart::UartPort::Uart1:
+            drivers->uart.init<Uart::UartPort::Uart1, BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart2:
+            drivers->uart.init<Uart::UartPort::Uart2, BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart3:
+            drivers->uart.init<Uart::UartPort::Uart3, BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart6:
+            drivers->uart.init<Uart::UartPort::Uart6, BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart7:
+            drivers->uart.init<Uart::UartPort::Uart7, BAUDRATE>();
+            break;
+        case Uart::UartPort::Uart8:
+            drivers->uart.init<Uart::UartPort::Uart8, BAUDRATE>();
+            break;
+        default:
+            break;
     }
+}
+
+void MTF01::read(){
+    uint8_t data;
+    
+}
 
 };  // namespace aruwsrc::communication::serial

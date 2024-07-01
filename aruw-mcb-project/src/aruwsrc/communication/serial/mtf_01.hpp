@@ -24,7 +24,7 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::commuinication::serial
+namespace aruwsrc::communication::serial
 {
 
 struct mtf01
@@ -125,6 +125,8 @@ class MTF01 : public mtf01
 public:
     MTF01(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port);
 
+    static constexpr int BAUDRATE = 115'200;
+
     void initialize();
 
     void read();
@@ -136,7 +138,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    tap::communication::serial::Uart::UartPort port;
+    const tap::communication::serial::Uart::UartPort port;
 
     struct MicrolinkMessage currentMessage;
     struct MicrolinkMessage processedMessage;
@@ -144,4 +146,4 @@ private:
 
 }  // namespace aruwsrc::commuinication::serial
 
-#endif
+#endif // MTF_01_HPP_
