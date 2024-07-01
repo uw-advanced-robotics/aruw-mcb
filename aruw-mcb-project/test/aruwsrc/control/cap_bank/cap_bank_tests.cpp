@@ -91,9 +91,9 @@ TEST_F(CapBankTests, when_receiving_status_do_not_update_power_when_no_ref)
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
 
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
-    EXPECT_CALL(drivers.refSerial, getRobotData).Times(0).WillRepeatedly(ReturnRef(robotData));
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(0);
 
-    robotData.chassis.power = 100;
+    robotData.chassis.powerConsumptionLimit = 100;
 
     EXPECT_CALL(drivers.can, sendMessage).Times(0);
 
@@ -113,7 +113,7 @@ TEST_F(CapBankTests, when_receiving_status_update_power_when_ref)
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     EXPECT_CALL(drivers.refSerial, getRobotData).WillRepeatedly(ReturnRef(robotData));
 
-    robotData.chassis.power = 100;
+    robotData.chassis.powerConsumptionLimit = 100;
 
     EXPECT_CALL(drivers.can, sendMessage);
 
