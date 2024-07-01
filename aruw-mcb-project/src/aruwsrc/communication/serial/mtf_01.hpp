@@ -123,11 +123,7 @@ struct mtf01
 class MTF01 : public mtf01
 {
 public:
-    MTF01(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port)
-        : drivers(drivers),
-          port(port)
-    {
-    }
+    MTF01(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port);
 
     void initialize();
 
