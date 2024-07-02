@@ -173,7 +173,7 @@ static void initializeIo(tap::Drivers *drivers)
 #endif
 
 #if defined(TARGET_TESTBED)
-((Drivers *)drivers)->opticalFlow.initialize();
+    ((Drivers *)drivers)->opticalFlow.initialize();
 #endif
 }
 
@@ -201,6 +201,6 @@ static void updateIo(tap::Drivers *drivers)
 #endif
 
 #if defined(TARGET_TESTBED)
-((Drivers *)drivers)->opticalFlow.read();
+    ((Drivers *)drivers)->opticalFlow.read();
 #endif
 }

@@ -26,7 +26,6 @@
 
 namespace aruwsrc::communication::serial
 {
-
 struct mtf01
 {
     struct MicrolinkMessage
@@ -147,7 +146,7 @@ private:
     enum ParsingState
     {
         SERIAL_HEADER_SEARCH,  /// A header byte has not yet been received.
-        PROCESS_FRAME_HEADER  /// A header is received and the message is being processed.
+        PROCESS_FRAME_HEADER   /// A header is received and the message is being processed.
     };
 
     ParsingState state = SERIAL_HEADER_SEARCH;
