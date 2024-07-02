@@ -142,8 +142,17 @@ private:
 
     struct MicrolinkMessage currentMessage;
     struct MicrolinkMessage processedMessage;
+    int currentFrameIndex = 0;
+
+    enum ParsingState
+    {
+        SERIAL_HEADER_SEARCH,  /// A header byte has not yet been received.
+        PROCESS_FRAME_HEADER  /// A header is received and the message is being processed.
+    };
+
+    ParsingState state = SERIAL_HEADER_SEARCH;
 };
 
-}  // namespace aruwsrc::commuinication::serial
+}  // namespace aruwsrc::communication::serial
 
-#endif // MTF_01_HPP_
+#endif  // MTF_01_HPP_

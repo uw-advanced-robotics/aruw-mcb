@@ -19,6 +19,8 @@
 
 #include "mtf_01.hpp"
 
+#define READ(data, length) drivers->uart.read(this->port, data, length)
+
 using tap::communication::serial::Uart;
 
 namespace aruwsrc::communication::serial
@@ -56,9 +58,43 @@ void MTF01::initialize()
     }
 }
 
-void MTF01::read(){
-    uint8_t data;
-    
+void MTF01::read()
+{
+    switch (state)
+    {
+        case ParsingState::SERIAL_HEADER_SEARCH:
+            while (state == ParsingState::SERIAL_HEADER_SEARCH && READ(&currentMessage.header, 1))
+            {
+                if (currentMessage.header == static_cast<uint8_t>(MTF01::ExpectedMessage::HEADER))
+                {
+                    state = ParsingState::PROCESS_FRAME_HEADER;
+                    currentFrameIndex = 1;
+                    break;
+                }
+                currentFrameIndex = 0;
+            }
+            break;
+        case ParsingState::PROCESS_FRAME_HEADER:
+            currentFrameIndex += READ(
+                reinterpret_cast<uint8_t *>(&currentMessage) + currentFrameIndex,
+                MTF01::NUM_BYTES_MESSAGE - currentFrameIndex);
+            if (currentFrameIndex == MTF01::NUM_BYTES_MESSAGE)
+            {
+                currentFrameIndex = 0;
+                bool valid = validateMessage(currentMessage);
+                if (valid)
+                {
+                    processedMessage = currentMessage;
+                }
+                state = ParsingState::SERIAL_HEADER_SEARCH;
+            }
+            else if (currentFrameIndex >= MTF01::NUM_BYTES_MESSAGE)
+            {
+                currentFrameIndex = 0;
+                state = ParsingState::SERIAL_HEADER_SEARCH;
+            }
+            break;
+    }
 }
 
 };  // namespace aruwsrc::communication::serial
