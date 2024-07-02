@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -61,17 +61,20 @@ public:
      *      the state of this command mapping has changed.
      * @param[in] stateChangedFn Function pointer that must be an instance function of the template
      *      parameter `C`.
+     * @param[in] reverseMapState Optional map state that will decrement the state
      */
     CycleStateCommandMapping(
         tap::Drivers *drivers,
         const tap::control::RemoteMapState &rms,
         T initialState,
         C *stateChangeObject,
-        StateChangedFn stateChangedFn)
+        StateChangedFn stateChangedFn,
+        std::optional<tap::control::RemoteMapState> reverseMapState = std::nullopt)
         : tap::control::CommandMapping(drivers, {}, rms),
           state(initialState),
           stateChangeObject(stateChangeObject),
-          stateChangedFn(stateChangedFn)
+          stateChangedFn(stateChangedFn),
+          reverseMapState(reverseMapState)
     {
     }
 
@@ -93,17 +96,32 @@ public:
                 (stateChangeObject->*stateChangedFn)(state);
             }
         }
+        else if (
+            reverseMapState.has_value() && reverseMapState.value().stateSubsetOf(currState) &&
+            !(reverseMapState.value().getNegKeysUsed() &&
+              negKeysSubset(reverseMapState.value(), currState)))
+        {
+            // mapping pressed, state needs updating first time pressed
+            if (!pressed)
+            {
+                int newState = static_cast<int>(state) - 1;
+                state = static_cast<T>(newState < 0 ? N - 1 : newState % N);
+                pressed = true;
+                (stateChangeObject->*stateChangedFn)(state);
+            }
+        }
         else
         {
             pressed = false;
         }
     }
 
-private:
+protected:
     bool pressed = false;
     T state;
     C *stateChangeObject;
     StateChangedFn stateChangedFn;
+    std::optional<RemoteMapState> reverseMapState;
 };
 }  // namespace aruwsrc::control
 
