@@ -22,8 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
-#include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/communication/serial/mtf_01.hpp"
 
 namespace aruwsrc::testbed
 {
@@ -34,9 +33,10 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), opticalFlow(this, tap::communication::serial::Uart::Uart7) {}
 
 public:
+    communication::serial::MTF01 opticalFlow;
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 

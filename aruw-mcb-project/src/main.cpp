@@ -171,6 +171,10 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->chassisMcbLite.initialize();
     ((Drivers *)drivers)->turretMajorMcbLite.initialize();
 #endif
+
+#if defined(TARGET_TESTBED)
+((Drivers *)drivers)->opticalFlow.initialize();
+#endif
 }
 
 static void updateIo(tap::Drivers *drivers)
@@ -194,5 +198,9 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->chassisMcbLite.updateSerial();
     ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+
+#if defined(TARGET_TESTBED)
+((Drivers *)drivers)->opticalFlow.read();
 #endif
 }
