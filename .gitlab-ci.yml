@@ -298,6 +298,26 @@ before_script:
   variables:
     ROBOT: DART
 
+# Testbed Build
+
+"Testbed: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: TESTBED
+  
+"Testbed: Sim Build":
+  extends:
+    - .sim_build
+  variables:
+    ROBOT: TESTBED
+
+"Testbed: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: TESTBED
+
 # Pages deploy
 
 "Generate Docs":
