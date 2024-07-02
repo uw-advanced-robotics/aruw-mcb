@@ -27,7 +27,7 @@ CapBankSubsystem::CapBankSubsystem(
     : Subsystem(drivers),
       capacitorBank(capacitorBank),
       capacitorsEnabled(false),
-      testing(false)
+      inHardwareTest(false)
 {
     this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
     this->messageTimer.restart(20);
@@ -39,7 +39,7 @@ void CapBankSubsystem::refresh()
     {
         messageTimer.restart(20);
 
-        if (!this->enabled() && !this->capacitorBank.isDisabled() && !this->testing)
+        if (!this->enabled() && !this->capacitorBank.isDisabled() && !this->inHardwareTest)
         {
             this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
             this->capacitorBank.stop();
@@ -58,13 +58,13 @@ void CapBankSubsystem::refresh()
 void CapBankSubsystem::onHardwareTestStart()
 {
     this->enableCapacitors();
-    this->testing = true;
+    this->inHardwareTest = true;
 }
 
 void CapBankSubsystem::onHardwareTestComplete()
 {
     this->disableCapacitors();
-    this->testing = false;
+    this->inHardwareTest = false;
 }
 
 void CapBankSubsystem::runHardwareTests()

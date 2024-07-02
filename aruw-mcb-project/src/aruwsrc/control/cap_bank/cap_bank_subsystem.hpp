@@ -71,7 +71,7 @@ private:
 
     tap::arch::MilliTimeout messageTimer;
 
-    bool testing;
+    bool inHardwareTest;
 };
 }  // namespace aruwsrc::control::capbank
 
