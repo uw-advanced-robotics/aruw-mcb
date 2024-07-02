@@ -20,6 +20,8 @@
 #ifndef CYCLE_STATE_COMMAND_MAPPING_HPP_
 #define CYCLE_STATE_COMMAND_MAPPING_HPP_
 
+#include <optional>
+
 #include "tap/control/command_mapping.hpp"
 
 namespace tap
@@ -121,7 +123,7 @@ protected:
     T state;
     C *stateChangeObject;
     StateChangedFn stateChangedFn;
-    std::optional<RemoteMapState> reverseMapState;
+    std::optional<tap::control::RemoteMapState> reverseMapState;
 };
 }  // namespace aruwsrc::control
 
