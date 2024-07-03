@@ -29,14 +29,14 @@ using namespace tap::communication::sensors::imu;
 namespace aruwsrc::algorithms::odometry
 {
 OpticalFlowCFOdometry::OpticalFlowCFOdometry(
-    MTF01 &opticaFlow,
+    MTF01 &optical_flow,
     ImuInterface &imu,
     float alpha,
-    float offsetDeg)
-    : opticalFlow(opticalFlow),
+    float of_offset_degrees)
+    : optical_flow(optical_flow),
       imu(imu),
       alpha(alpha),
-      offsetDeg(offsetDeg),
+      of_offset_degrees(of_offset_degrees),
       currVelocity(0, 0, 0),
       currPosition(0, 0, 0)
 {
@@ -53,15 +53,15 @@ void OpticalFlowCFOdometry::update()
     float imu_accel_x = imu.getAx();
     float imu_accel_y = imu.getAy();
     rotateVector(&imu_accel_x, &imu_accel_y, modm::toRadian(imu.getYaw()));
-    Vector imu_accel = Vector(imu_accel_x, imu_accel_y, 0);
+    Vector imu_accel = Vector(imu_accel_x, imu_accel_y, 0); // filterAndComputeAccelVector();
 
     Vector delta_vel = imu_accel * 0.002;
     Vector imu_vel_est = currVelocity + delta_vel;
 
     // Compute the optical flow velocity estimate
-    float of_vel_x = opticalFlow.getRelativeVelocity().x();
-    float of_vel_y = opticalFlow.getRelativeVelocity().y();
-    rotateVector(&of_vel_x, &of_vel_y, modm::toRadian(offsetDeg + imu.getYaw()));
+    float of_vel_x = optical_flow.getRelativeVelocity().x();
+    float of_vel_y = optical_flow.getRelativeVelocity().y();
+    rotateVector(&of_vel_x, &of_vel_y, modm::toRadian(of_offset_degrees + imu.getYaw()));
     Vector of_vel = Vector(of_vel_x, of_vel_y, 0);
 
     // Combine the two velocity estimates using alpha
