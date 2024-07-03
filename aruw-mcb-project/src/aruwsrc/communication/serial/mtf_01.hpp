@@ -20,9 +20,10 @@
 #ifndef MTF_01_HPP_
 #define MTF_01_HPP_
 
-#include "tap/algorithms/transforms/vector.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
+
+#include "modm/math/geometry/vector.hpp"
 
 namespace aruwsrc::communication::serial
 {
@@ -71,7 +72,6 @@ struct mtf01
 
     int headerAndStuffWasWrong = 0;
     int failedCRC = 0;
-    uint8_t expectedChecksum = 0;
 
 protected:
     // Checks message headers and CRC
@@ -111,7 +111,6 @@ protected:
             checksum += reinterpret_cast<const uint8_t *>(&msg)[i];
         }
 
-        expectedChecksum = checksum;
         if (checksum != msg.checksum)
         {
             failedCRC++;
@@ -122,13 +121,13 @@ protected:
     }
 
     // Returns translation in meters per second
-    static tap::algorithms::transforms::Vector getVelocity(const MicrolinkMessage &msg)
+    static modm::Vector2f getVelocity(const MicrolinkMessage &msg)
     {
-        float distance_m = msg.payload.distance / 1000.0;
+        float distance_m = msg.payload.distance / 1000.0;  // Conversion to meters from mm
         float x = msg.payload.optical_flow_vel_x * distance_m /
                   100.0;  // Conversion to cm/s and then to m/s
         float y = msg.payload.optical_flow_vel_y * distance_m / 100.0;
-        return tap::algorithms::transforms::Vector(x, y, 0);
+        return modm::Vector2f(x, y);
     }
 };
 
@@ -148,9 +147,14 @@ public:
 
     void read();
 
-    inline tap::algorithms::transforms::Vector getRelativeVelocity()
+    inline modm::Vector2f getRelativeVelocity()
     {
         return mtf01::getVelocity(processedMessage);
+    }
+
+    inline uint8_t getFlowQuality()
+    {
+        return processedMessage.payload.optical_flow_quality;
     }
 
 private:

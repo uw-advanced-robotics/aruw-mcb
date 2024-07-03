@@ -58,9 +58,6 @@ void MTF01::initialize()
     }
 }
 
-int readingHeader = 0;
-int gotFrameHeader = 0;
-
 void MTF01::read()
 {
     switch (state)
@@ -68,10 +65,8 @@ void MTF01::read()
         case ParsingState::SERIAL_HEADER_SEARCH:
             while (state == ParsingState::SERIAL_HEADER_SEARCH && READ(&currentMessage.header, 1))
             {
-                readingHeader++;
                 if (currentMessage.header == static_cast<uint8_t>(MTF01::ExpectedMessage::HEADER))
                 {
-                    gotFrameHeader++;
                     state = ParsingState::PROCESS_FRAME_HEADER;
                     currentFrameIndex = 1;
                     break;

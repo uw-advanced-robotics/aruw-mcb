@@ -21,14 +21,13 @@
 #define OPTICAL_FLOW_CF_ODOMETRY_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/algorithms/transforms/vector.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "modm/math/geometry/vector.hpp"
 
 #include "aruwsrc/communication/serial/mtf_01.hpp"
 #include "modm/math/filter/median.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::algorithms::transforms;
 using namespace aruwsrc::communication::serial;
 using namespace tap::communication::sensors::imu;
 
@@ -55,8 +54,8 @@ private:
     float alpha;
     const float of_offset_degrees;
 
-    Vector currVelocity;
-    Vector currPosition;
+    modm::Vector2f currVelocity;
+    modm::Vector2f currPosition;
     uint32_t prev_time;
 
     // Accelerometer filtration
@@ -66,24 +65,19 @@ private:
     modm::filter::Median<float, NUM_SAMPLES> accel_x_filter;
     modm::filter::Median<float, NUM_SAMPLES> accel_y_filter;
 
-    // 1 means no smoothing, 0 means no change
-    static constexpr float LOW_PASS_ALPHA = 1.0f;
 
-    float curr_Ax;
-    float curr_Ay;
-
-    Vector filterAndComputeAccelVector()
+    modm::Vector2f filterAndComputeAccelVector()
     {
         accel_x_filter.append(imu.getAx());
         accel_x_filter.update();
+        float Ax = accel_x_filter.getValue();
+
         accel_y_filter.append(imu.getAy());
         accel_y_filter.update();
+        float Ay = accel_y_filter.getValue();
 
-        curr_Ax = lowPassFilter(curr_Ax, accel_x_filter.getValue(), LOW_PASS_ALPHA);
-        curr_Ay = lowPassFilter(curr_Ay, accel_y_filter.getValue(), LOW_PASS_ALPHA);
-
-        rotateVector(&curr_Ax, &curr_Ay, modm::toRadian(imu.getYaw()));
-        return Vector(curr_Ax, curr_Ay, 0);
+        rotateVector(&Ax, &Ay, modm::toRadian(imu.getYaw()));
+        return modm::Vector2f(Ax, Ay);
     }
 };
 

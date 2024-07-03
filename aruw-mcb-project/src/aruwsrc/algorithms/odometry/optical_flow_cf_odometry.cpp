@@ -20,7 +20,6 @@
 #include "optical_flow_cf_odometry.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::algorithms::transforms;
 using namespace aruwsrc::communication::serial;
 using namespace tap::communication::sensors::imu;
 
@@ -34,9 +33,7 @@ OpticalFlowCFOdometry::OpticalFlowCFOdometry(
     : optical_flow(optical_flow),
       imu(imu),
       alpha(alpha),
-      of_offset_degrees(of_offset_degrees),
-      currVelocity(0, 0, 0),
-      currPosition(0, 0, 0)
+      of_offset_degrees(of_offset_degrees)
 {
 }
 
@@ -70,18 +67,15 @@ OpticalFlowCFOdometry::OpticalFlowCFOdometry(
 //     currPosition = currPosition + delta_pos;
 // }
 
-Vector of_vel = Vector(0, 0, 0);
 void OpticalFlowCFOdometry::update()
 {
     // Compute the optical flow velocity estimate
-    float of_vel_x = optical_flow.getRelativeVelocity().x();
-    float of_vel_y = optical_flow.getRelativeVelocity().y();
-    rotateVector(&of_vel_x, &of_vel_y, modm::toRadian(of_offset_degrees + imu.getYaw()));
-    of_vel = Vector(of_vel_x, of_vel_y, 0);
+    modm::Vector2f of_vel = optical_flow.getRelativeVelocity();
+    rotateVector(&of_vel.x, &of_vel.y, modm::toRadian(of_offset_degrees + imu.getYaw()));
 
     // Compute the position estimate
-    Vector delta_pos = of_vel * 0.002;
-    // currPosition = currPosition + delta_pos;
+    modm::Vector2f delta_pos = of_vel * 0.002;
+    currPosition = currPosition + delta_pos;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
