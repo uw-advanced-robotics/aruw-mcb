@@ -81,7 +81,7 @@ void OpticalFlowCFOdometry::update()
 
     // Compute the position estimate
     Vector delta_pos = of_vel * 0.002;
-    currPosition = currPosition + delta_pos;
+    // currPosition = currPosition + delta_pos;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
