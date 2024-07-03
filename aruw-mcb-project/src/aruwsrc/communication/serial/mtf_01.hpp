@@ -73,6 +73,7 @@ struct mtf01
     int failedCRC = 0;
     uint8_t expectedChecksum = 0;
 
+protected:
     // Checks message headers and CRC
     bool validateMessage(const MicrolinkMessage &msg)
     {
