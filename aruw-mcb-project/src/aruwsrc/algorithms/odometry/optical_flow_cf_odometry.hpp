@@ -20,12 +20,14 @@
 #ifndef OPTICAL_FLOW_CF_ODOMETRY_HPP_
 #define OPTICAL_FLOW_CF_ODOMETRY_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
 #include "aruwsrc/communication/serial/mtf_01.hpp"
 #include "modm/math/filter/median.hpp"
 
+using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::communication::serial;
 using namespace tap::communication::sensors::imu;

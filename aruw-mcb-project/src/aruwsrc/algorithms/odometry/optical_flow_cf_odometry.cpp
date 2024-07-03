@@ -19,8 +19,6 @@
 
 #include "optical_flow_cf_odometry.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::communication::serial;
@@ -47,28 +45,42 @@ OpticalFlowCFOdometry::OpticalFlowCFOdometry(
  * Filter the accel data
  */
 
+// void OpticalFlowCFOdometry::update()
+// {
+//     // Compute the accelerometers' velocity estimate by modifying current velocity estimate
+//     float imu_accel_x = imu.getAx();
+//     float imu_accel_y = imu.getAy();
+//     rotateVector(&imu_accel_x, &imu_accel_y, modm::toRadian(imu.getYaw()));
+//     Vector imu_accel = Vector(imu_accel_x, imu_accel_y, 0); // filterAndComputeAccelVector();
+
+//     Vector delta_vel = imu_accel * 0.002;
+//     Vector imu_vel_est = currVelocity + delta_vel;
+
+//     // Compute the optical flow velocity estimate
+//     float of_vel_x = optical_flow.getRelativeVelocity().x();
+//     float of_vel_y = optical_flow.getRelativeVelocity().y();
+//     rotateVector(&of_vel_x, &of_vel_y, modm::toRadian(of_offset_degrees + imu.getYaw()));
+//     Vector of_vel = Vector(of_vel_x, of_vel_y, 0);
+
+//     // Combine the two velocity estimates using alpha
+//     currVelocity = of_vel * alpha + imu_vel_est * (1 - alpha);
+
+//     // Compute the position estimate
+//     Vector delta_pos = currVelocity * 0.002;
+//     currPosition = currPosition + delta_pos;
+// }
+
+Vector of_vel = Vector(0, 0, 0);
 void OpticalFlowCFOdometry::update()
 {
-    // Compute the accelerometers' velocity estimate by modifying current velocity estimate
-    float imu_accel_x = imu.getAx();
-    float imu_accel_y = imu.getAy();
-    rotateVector(&imu_accel_x, &imu_accel_y, modm::toRadian(imu.getYaw()));
-    Vector imu_accel = Vector(imu_accel_x, imu_accel_y, 0); // filterAndComputeAccelVector();
-
-    Vector delta_vel = imu_accel * 0.002;
-    Vector imu_vel_est = currVelocity + delta_vel;
-
     // Compute the optical flow velocity estimate
     float of_vel_x = optical_flow.getRelativeVelocity().x();
     float of_vel_y = optical_flow.getRelativeVelocity().y();
     rotateVector(&of_vel_x, &of_vel_y, modm::toRadian(of_offset_degrees + imu.getYaw()));
-    Vector of_vel = Vector(of_vel_x, of_vel_y, 0);
-
-    // Combine the two velocity estimates using alpha
-    currVelocity = of_vel * alpha + imu_vel_est * (1 - alpha);
+    of_vel = Vector(of_vel_x, of_vel_y, 0);
 
     // Compute the position estimate
-    Vector delta_pos = currVelocity * 0.002;
+    Vector delta_pos = of_vel * 0.002;
     currPosition = currPosition + delta_pos;
 }
 
