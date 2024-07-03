@@ -71,8 +71,7 @@ struct mtf01
 
     int headerAndStuffWasWrong = 0;
     int failedCRC = 0;
-    int32_t expectedChecksum = 0;
-    int checksumDifference = 0;
+    uint8_t expectedChecksum = 0;
 
     // Checks message headers and CRC
     bool validateMessage(const MicrolinkMessage &msg)
@@ -104,28 +103,14 @@ struct mtf01
         }
 
         // Checksum calculation
-        int32_t checksum = 0;
-
-        checksum += msg.header;
-        checksum += msg.device_id;
-        checksum += msg.system_id;
-        checksum += msg.msg_id;
-        checksum += msg.seq;
-        checksum += msg.data_length;
-        checksum += msg.payload.time_ms;
-        checksum += msg.payload.distance;
-        checksum += msg.payload.distance_strength;
-        checksum += msg.payload.distance_precision;
-        checksum += msg.payload.distance_status;
-        checksum += msg.payload.reserved;
-        checksum += msg.payload.optical_flow_x;
-        checksum += msg.payload.optical_flow_y;
-        checksum += msg.payload.optical_flow_quality;
-        checksum += msg.payload.optical_flow_valid;
-        checksum += msg.payload.reserved2;
+        uint8_t checksum = 0;
+        int length = NUM_BYTES_MESSAGE - 3;  // Exclude checksum, status, and payload_count
+        for (int i = 0; i < length; i++)
+        {
+            checksum += reinterpret_cast<const uint8_t *>(&msg)[i];
+        }
 
         expectedChecksum = checksum;
-        checksumDifference = msg.checksum - checksum;
         if (checksum != msg.checksum)
         {
             failedCRC++;
