@@ -38,20 +38,24 @@ struct mtf01
         uint8_t data_length;
         struct payload
         {
-            uint32_t timestamp_ms;
-            uint32_t distance_mm;  // Minimum value of 1, 0 for invalid
-            uint8_t distance_strength;
-            uint8_t distance_precision;  // Smaller value indicates higher accuracy
-            uint8_t distance_valid;
-            uint8_t reserved;
-            int16_t optical_flow_x;  // Speed (cm/s) = flow_vel * distance
-            int16_t optical_flow_y;
-            uint8_t optical_flow_quality;  // Bigger values indicates higher quality
-            uint8_t optical_flow_valid;
-            uint16_t reserved2;
+            uint32_t time_ms;              /// System time in ms
+            uint32_t distance;             /// distance(mm), 0 Indicates unavailable
+            uint8_t distance_strength;     /// signal strength
+            uint8_t distance_precision;    /// distance precision, smaller values better
+            uint8_t distance_status;       /// distance status
+            uint8_t reserved1;             /// reserved
+            int16_t optical_flow_vel_x;    /// optical flow velocity in x, cm/s when mutiplied by
+                                           /// distance in m
+            int16_t optical_flow_vel_y;    /// optical flow velocity in y
+            uint8_t optical_flow_quality;  /// optical flow quality, bigger values better
+            uint8_t optical_flow_status;   /// optical flow status
+            uint16_t reserved2;            /// reserved
         };
         payload payload;
-        int32_t checksum;
+        uint8_t checksum;
+        uint8_t status;  // These values are defined in the protocol, but are documented in the
+                         // MicoLink documentation
+        uint8_t payload_count;
     } modm_packed;
 
     static constexpr uint8_t NUM_BYTES_MESSAGE = sizeof(MicrolinkMessage);
@@ -108,18 +112,18 @@ struct mtf01
         checksum += msg.msg_id;
         checksum += msg.seq;
         checksum += msg.data_length;
-        checksum += msg.payload.timestamp_ms;
-        checksum += msg.payload.distance_mm;
+        checksum += msg.payload.time_ms;
+        checksum += msg.payload.distance;
         checksum += msg.payload.distance_strength;
         checksum += msg.payload.distance_precision;
-        checksum += msg.payload.distance_valid;
+        checksum += msg.payload.distance_status;
         checksum += msg.payload.reserved;
         checksum += msg.payload.optical_flow_x;
         checksum += msg.payload.optical_flow_y;
         checksum += msg.payload.optical_flow_quality;
         checksum += msg.payload.optical_flow_valid;
-        checksum += msg.payload.reserved2
-;
+        checksum += msg.payload.reserved2;
+
         expectedChecksum = checksum;
         checksumDifference = msg.checksum - checksum;
         if (checksum != msg.checksum)
@@ -134,10 +138,10 @@ struct mtf01
     // Returns translation in meters per second
     static tap::algorithms::transforms::Vector getVelocity(const MicrolinkMessage &msg)
     {
-        float distance_m = msg.payload.distance_mm / 1000.0;
-        float x =
-            msg.payload.optical_flow_x * distance_m / 100.0;  // Conversion to cm/s and then to m/s
-        float y = msg.payload.optical_flow_y * distance_m / 100.0;
+        float distance_m = msg.payload.distance / 1000.0;
+        float x = msg.payload.optical_flow_vel_x * distance_m /
+                  100.0;  // Conversion to cm/s and then to m/s
+        float y = msg.payload.optical_flow_vel_y * distance_m / 100.0;
         return tap::algorithms::transforms::Vector(x, y, 0);
     }
 };
