@@ -51,7 +51,7 @@ struct mtf01
             uint16_t reserved2;
         };
         payload payload;
-        int16_t checksum;
+        int32_t checksum;
     } modm_packed;
 
     static constexpr uint8_t NUM_BYTES_MESSAGE = sizeof(MicrolinkMessage);
@@ -67,7 +67,7 @@ struct mtf01
 
     int headerAndStuffWasWrong = 0;
     int failedCRC = 0;
-    int16_t expectedChecksum = 0;
+    int32_t expectedChecksum = 0;
     int checksumDifference = 0;
 
     // Checks message headers and CRC
@@ -100,7 +100,7 @@ struct mtf01
         }
 
         // Checksum calculation
-        int16_t checksum = 0;
+        int32_t checksum = 0;
 
         checksum += msg.header;
         checksum += msg.device_id;
