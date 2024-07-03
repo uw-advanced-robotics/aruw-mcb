@@ -42,16 +42,16 @@ struct mtf01
             uint32_t distance_mm;  // Minimum value of 1, 0 for invalid
             uint8_t distance_strength;
             uint8_t distance_precision;  // Smaller value indicates higher accuracy
-            bool distance_valid;
+            uint8_t distance_valid;
             uint8_t reserved;
-            uint16_t optical_flow_x;  // Speed (cm/s) = flow_vel * distance
-            uint16_t optical_flow_y;
+            int16_t optical_flow_x;  // Speed (cm/s) = flow_vel * distance
+            int16_t optical_flow_y;
             uint8_t optical_flow_quality;  // Bigger values indicates higher quality
-            bool optical_flow_valid;
+            uint8_t optical_flow_valid;
             uint16_t reserved2;
         };
         payload payload;
-        uint8_t checksum;
+        int16_t checksum;
     } modm_packed;
 
     static constexpr uint8_t NUM_BYTES_MESSAGE = sizeof(MicrolinkMessage);
@@ -65,38 +65,66 @@ struct mtf01
         PAYLOAD_LENGTH = 0x14
     };
 
+    int headerAndStuffWasWrong = 0;
+    int failedCRC = 0;
+    int16_t expectedChecksum = 0;
+    int checksumDifference = 0;
+
     // Checks message headers and CRC
-    static bool validateMessage(const MicrolinkMessage &msg)
+    bool validateMessage(const MicrolinkMessage &msg)
     {
         if (msg.header != static_cast<uint8_t>(ExpectedMessage::HEADER))
         {
+            headerAndStuffWasWrong++;
             return false;
         }
         if (msg.device_id != static_cast<uint8_t>(ExpectedMessage::DEVICE_ID))
         {
+            headerAndStuffWasWrong++;
             return false;
         }
         if (msg.system_id != static_cast<uint8_t>(ExpectedMessage::SYSTEM_ID))
         {
+            headerAndStuffWasWrong++;
             return false;
         }
         if (msg.msg_id != static_cast<uint8_t>(ExpectedMessage::MSG_ID))
         {
+            headerAndStuffWasWrong++;
             return false;
         }
         if (msg.data_length != static_cast<uint8_t>(ExpectedMessage::PAYLOAD_LENGTH))
         {
+            headerAndStuffWasWrong++;
             return false;
         }
 
         // Checksum calculation
-        int checksum = 0;
-        for (int i = 0; i < NUM_BYTES_MESSAGE - 1; i++)
-        {
-            checksum += ((uint8_t *)&msg)[i];
-        }
+        int16_t checksum = 0;
+
+        checksum += msg.header;
+        checksum += msg.device_id;
+        checksum += msg.system_id;
+        checksum += msg.msg_id;
+        checksum += msg.seq;
+        checksum += msg.data_length;
+        checksum += msg.payload.timestamp_ms;
+        checksum += msg.payload.distance_mm;
+        checksum += msg.payload.distance_strength;
+        checksum += msg.payload.distance_precision;
+        checksum += msg.payload.distance_valid;
+        checksum += msg.payload.reserved;
+        checksum += msg.payload.optical_flow_x;
+        checksum += msg.payload.optical_flow_y;
+        checksum += msg.payload.optical_flow_quality;
+        checksum += msg.payload.optical_flow_valid;
+        checksum += msg.payload.reserved2
+;
+        expectedChecksum = checksum;
+        checksumDifference = msg.checksum - checksum;
         if (checksum != msg.checksum)
         {
+            failedCRC++;
             return false;
         }
 
