@@ -44,7 +44,6 @@ OpticalFlowCFOdometry::OpticalFlowCFOdometry(
 
 /**
  * Todos:
- * Rotate the frame of the optical flow velocity to the frame of the IMU
  * Filter the accel data
  */
 
