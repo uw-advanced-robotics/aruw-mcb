@@ -48,6 +48,8 @@ public:
 
     void update();
 
+    void updateWithAccel();
+
 private:
     MTF01 &optical_flow;
     ImuInterface &imu;
@@ -78,6 +80,12 @@ private:
 
         rotateVector(&Ax, &Ay, modm::toRadian(imu.getYaw()));
         return modm::Vector2f(Ax, Ay);
+    }
+
+    inline void updateDt_ms(uint32_t* dt){
+        uint32_t curr_time = tap::arch::clock::getTimeMilliseconds();
+        *dt = curr_time - prev_time;
+        prev_time = curr_time;
     }
 };
 
