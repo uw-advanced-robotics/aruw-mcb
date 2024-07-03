@@ -43,8 +43,8 @@ public:
     OpticalFlowCFOdometry(
         MTF01 &optical_flow,
         ImuInterface &imu,
-        float alpha,
-        float of_offset_degrees);
+        float alpha = 0.95,
+        float of_offset_degrees = 0);
 
     void update();
 

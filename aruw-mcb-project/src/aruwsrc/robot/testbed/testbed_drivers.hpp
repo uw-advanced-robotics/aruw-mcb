@@ -37,7 +37,7 @@ public:
     Drivers()
         : tap::Drivers(),
           opticalFlow(this, tap::communication::serial::Uart::Uart7),
-          odometry(opticalFlow, this->mpu6500, 0, 0)
+          odometry(opticalFlow, this->mpu6500)
     {
     }
 
