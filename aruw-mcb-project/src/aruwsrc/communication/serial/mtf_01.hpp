@@ -123,9 +123,9 @@ protected:
     // Returns translation in meters per second
     static modm::Vector2f getVelocity(const MicrolinkMessage &msg)
     {
-        float distance_m = msg.payload.distance / 1000.0;  // Conversion to meters from mm
-        float x = msg.payload.optical_flow_vel_x * distance_m /
-                  100.0;  // Conversion to cm/s and then to m/s
+        float distance_m = msg.payload.distance / 1000.0f;  // Conversion to meters from mm
+        // Conversion to cm/s and then to m/s
+        float x = msg.payload.optical_flow_vel_x * distance_m / 100.0;
         float y = msg.payload.optical_flow_vel_y * distance_m / 100.0;
         return modm::Vector2f(x, y);
     }
@@ -147,15 +147,9 @@ public:
 
     void read();
 
-    inline modm::Vector2f getRelativeVelocity()
-    {
-        return mtf01::getVelocity(processedMessage);
-    }
+    inline modm::Vector2f getRelativeVelocity() { return mtf01::getVelocity(processedMessage); }
 
-    inline uint8_t getFlowQuality()
-    {
-        return processedMessage.payload.optical_flow_quality;
-    }
+    inline uint8_t getFlowQuality() { return processedMessage.payload.optical_flow_quality; }
 
 private:
     tap::Drivers *drivers;

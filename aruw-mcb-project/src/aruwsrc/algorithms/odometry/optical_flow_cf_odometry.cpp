@@ -60,17 +60,18 @@ void OpticalFlowCFOdometry::updateWithAccel()
     currPosition = currPosition + delta_pos;
 }
 
+modm::Vector2f of_vel, delta_pos;
 void OpticalFlowCFOdometry::update()
 {
     uint32_t dt;
     updateDt_ms(&dt);
 
     // Compute the optical flow velocity estimate
-    modm::Vector2f of_vel = optical_flow.getRelativeVelocity();
+    of_vel = optical_flow.getRelativeVelocity();
     rotateVector(&of_vel.x, &of_vel.y, modm::toRadian(of_offset_degrees + imu.getYaw()));
 
     // Compute the position estimate
-    modm::Vector2f delta_pos = of_vel * (dt / 1000.0f);
+    delta_pos = of_vel * (dt / 1000.0f);
     currPosition = currPosition + delta_pos;
 }
 
