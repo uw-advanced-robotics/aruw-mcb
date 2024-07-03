@@ -132,6 +132,10 @@ int main()
                 tap::buzzer::silenceBuzzer(&drivers->pwm);
             }
 #endif
+
+#if defined(TARGET_TESTBED)
+            drivers->odometry.update();
+#endif
         }
         modm::delay_us(10);
     }

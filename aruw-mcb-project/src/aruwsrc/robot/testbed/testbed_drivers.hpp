@@ -22,6 +22,7 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/optical_flow_cf_odometry.hpp"
 #include "aruwsrc/communication/serial/mtf_01.hpp"
 
 namespace aruwsrc::testbed
@@ -33,10 +34,16 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), opticalFlow(this, tap::communication::serial::Uart::Uart7) {}
+    Drivers()
+        : tap::Drivers(),
+          opticalFlow(this, tap::communication::serial::Uart::Uart7),
+          odometry(opticalFlow, this->mpu6500, 0, 0)
+    {
+    }
 
 public:
     communication::serial::MTF01 opticalFlow;
+    algorithms::odometry::OpticalFlowCFOdometry odometry;
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
