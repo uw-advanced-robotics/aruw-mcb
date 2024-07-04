@@ -62,11 +62,17 @@ private:
     static constexpr float DT = 0.002f;
 
     // clang-format off
-    // This is just physics
+
+    /**
+     * This is just physics
+     * x = x0 + v0 * t + 0.5 * a * t^2
+     * v = v0 + a * t
+     * a = a
+     */
     static constexpr float KF_A[STATES * STATES] = {
-        1.0f, DT,   0.5f * DT * DT,
-        0.0f, 1.0f, DT,
-        0.0f, 0.0f, 1.0f
+        1E0,  DT,   0.5f * DT * DT,
+        0.0f, 1E0,  DT,
+        0.0f, 0.0f, 1E0
     };
 
     // Observations directly correlate to the state
@@ -76,29 +82,32 @@ private:
     };
 
     // These values are what Sparkfun use, we should trust physics
+    // Idk why each integration has 100-fold less variance than the previous one
     static constexpr float KF_Q[STATES * STATES] = {
-        1E8,  0.0f, 0.0f,
-        0.0f, 1E6,  0.0f,
-        0.0f, 0.0f, 1E4
+        1E-8, 0.0f, 0.0f,
+        0.0f, 1E-6, 0.0f,
+        0.0f, 0.0f, 1E-4
     };
 
+    // This should be measured from static data on the robot
     static constexpr float OPTICAL_FLOW_STD_DEV = 0.016f; // m/s
     static constexpr float ACCELEROMETER_STD_DEV = 0.1f; // m/s^2
 
+    static constexpr float OPT_FLOW_SQUARE = OPTICAL_FLOW_STD_DEV * OPTICAL_FLOW_STD_DEV;
+    static constexpr float ACCEL_SQUARE = ACCELEROMETER_STD_DEV * ACCELEROMETER_STD_DEV;
+
     static constexpr float KF_R[INPUTS * INPUTS] = {
-        OPTICAL_FLOW_STD_DEV * OPTICAL_FLOW_STD_DEV, 0.0f,
-        0.0f, ACCELEROMETER_STD_DEV * ACCELEROMETER_STD_DEV
+        OPT_FLOW_SQUARE, 0.0f,
+        0.0f,           ACCEL_SQUARE
     };
 
+    // This is variance of the initial state, idk
     static constexpr float KF_P0[STATES * STATES] = {
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f
+        1E0, 0.0f, 0.0f,
+        0.0f, 1E0, 0.0f,
+        0.0f, 0.0f, 1E0
     };
-
     // clang-format on
-
-    uint32_t prev_time;
 };
 
 }  // namespace aruwsrc::algorithms::odometry
