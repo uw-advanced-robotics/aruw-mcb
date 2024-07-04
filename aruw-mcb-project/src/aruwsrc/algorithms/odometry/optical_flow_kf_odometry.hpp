@@ -53,6 +53,12 @@ private:
     ImuInterface &imu;
     const float of_offset_degrees;
 
+    modm::Vector2f estimated_position = {0.0f, 0.0f};
+    modm::Vector2f estimated_velocity = {0.0f, 0.0f};
+    modm::Vector2f estimated_acceleration = {0.0f, 0.0f};
+
+    // KALMAN FILTER STUFF
+
     static constexpr int STATES = 3;  // position, velocity, acceleration
     static constexpr int INPUTS = 2;  // optical flow, accelerometer
 

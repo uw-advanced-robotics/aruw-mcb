@@ -22,7 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/odometry/optical_flow_cf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/optical_flow_kf_odometry.hpp"
 #include "aruwsrc/communication/serial/mtf_01.hpp"
 
 namespace aruwsrc::testbed
@@ -43,7 +43,7 @@ public:
 
 public:
     communication::serial::MTF01 opticalFlow;
-    algorithms::odometry::OpticalFlowCFOdometry odometry;
+    algorithms::odometry::OpticalFlowKFOdometry odometry;
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 

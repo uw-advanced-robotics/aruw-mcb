@@ -55,6 +55,15 @@ void OpticalFlowKFOdometry::update()
 
     xKF.performUpdate(xY);
     yKF.performUpdate(yY);
+
+    estimated_position.x = xKF.getStateVectorAsMatrix()[0];
+    estimated_position.y = yKF.getStateVectorAsMatrix()[0];
+
+    estimated_velocity.x = xKF.getStateVectorAsMatrix()[1];
+    estimated_velocity.y = yKF.getStateVectorAsMatrix()[1];
+
+    estimated_acceleration.x = xKF.getStateVectorAsMatrix()[2];
+    estimated_acceleration.y = yKF.getStateVectorAsMatrix()[2];
 }
 
 void OpticalFlowKFOdometry::reset()
