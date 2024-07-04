@@ -39,9 +39,14 @@ namespace aruwsrc::algorithms::odometry
 class OpticalFlowKFOdometry
 {
 public:
-    OpticalFlowKFOdometry(MTF01 &optical_flow, ImuInterface &imu);
+    OpticalFlowKFOdometry(
+        MTF01 &optical_flow,
+        ImuInterface &imu,
+        const float of_offset_degrees = 0.0f);
 
     void update();
+
+    void reset();
 
 private:
     MTF01 &optical_flow;
@@ -77,13 +82,21 @@ private:
         0.0f, 0.0f, 1E4
     };
 
-    // These should be std-dev ^ 2
     static constexpr float OPTICAL_FLOW_STD_DEV = 0.016f; // m/s
     static constexpr float ACCELEROMETER_STD_DEV = 0.1f; // m/s^2
+
     static constexpr float KF_R[INPUTS * INPUTS] = {
         OPTICAL_FLOW_STD_DEV * OPTICAL_FLOW_STD_DEV, 0.0f,
         0.0f, ACCELEROMETER_STD_DEV * ACCELEROMETER_STD_DEV
     };
+
+    static constexpr float KF_P0[STATES * STATES] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f
+    };
+
+    // clang-format on
 
     uint32_t prev_time;
 };
