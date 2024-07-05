@@ -75,6 +75,9 @@ using namespace aruwsrc::dart;
 using namespace aruwsrc::testbed;
 #endif
 
+modm::Vector2f initPos(0.0f, 0.0f);
+float ax, ay;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -135,6 +138,9 @@ int main()
 
 #if defined(TARGET_TESTBED)
             drivers->odometry.update();
+            initPos += drivers->opticalFlow.getRelativeVelocity() * (1.0f / MAIN_LOOP_FREQUENCY);
+            ax = drivers->mpu6500.getAx();
+            ay = drivers->mpu6500.getAy();
 #endif
         }
         modm::delay_us(10);
