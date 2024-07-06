@@ -285,7 +285,7 @@ private:
     /**
      * Use to convert the raw acceleration into more conventional degrees / second^2
      */
-    static constexpr float ACCELERATION_SENSITIVITY = 8192.0f;
+    static constexpr float ACCELERATION_SENSITIVITY = 4096.0f;
 
     /**
      * The number of samples we take while calibrating in order to determine the mpu offsets.

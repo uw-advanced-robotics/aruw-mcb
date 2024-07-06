@@ -76,6 +76,7 @@ using namespace aruwsrc::testbed;
 #endif
 
 modm::Vector2f initPos(0.0f, 0.0f);
+modm::Vector2f computedVelocity;
 float ax, ay;
 
 int main()
@@ -141,6 +142,7 @@ int main()
             initPos += drivers->opticalFlow.getRelativeVelocity() * (1.0f / MAIN_LOOP_FREQUENCY);
             ax = drivers->mpu6500.getAx();
             ay = drivers->mpu6500.getAy();
+            computedVelocity = drivers->opticalFlow.getRelativeVelocity();
 #endif
         }
         modm::delay_us(10);
