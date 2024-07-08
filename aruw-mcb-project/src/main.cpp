@@ -77,7 +77,7 @@ using namespace aruwsrc::testbed;
 
 modm::Vector2f initPos(0.0f, 0.0f);
 modm::Vector2f computedVelocity;
-float ax, ay;
+float ax, ay, heading;
 
 int main()
 {
@@ -137,11 +137,12 @@ int main()
             }
 #endif
 
-#if defined(TARGET_TESTBED)
+#if defined(TARGET_TESTBED) || defined(ALL_STANDARDS)
             drivers->odometry.update();
             initPos += drivers->opticalFlow.getRelativeVelocity() * (1.0f / MAIN_LOOP_FREQUENCY);
             ax = drivers->mpu6500.getAx();
             ay = drivers->mpu6500.getAy();
+            heading = drivers->mpu6500.getYaw();
             computedVelocity = drivers->opticalFlow.getRelativeVelocity();
 #endif
         }
@@ -184,7 +185,8 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->turretMajorMcbLite.initialize();
 #endif
 
-#if defined(TARGET_TESTBED)
+#if defined(TARGET_TESTBED) || defined(ALL_STANDARDS)
+    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
     ((Drivers *)drivers)->opticalFlow.initialize();
 #endif
 }
@@ -212,7 +214,7 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
 #endif
 
-#if defined(TARGET_TESTBED)
+#if defined(TARGET_TESTBED) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->opticalFlow.read();
 #endif
 }

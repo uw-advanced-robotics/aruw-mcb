@@ -37,6 +37,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/communication/serial/mtf_01.hpp"
 #endif
 
 namespace aruwsrc::standard
@@ -63,7 +64,8 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
+          opticalFlow(this, tap::communication::serial::Uart::Uart7)
     {
     }
 
@@ -83,6 +85,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
+    communication::serial::MTF01 opticalFlow;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard
