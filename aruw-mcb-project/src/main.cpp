@@ -138,7 +138,6 @@ int main()
 #endif
 
 #if defined(TARGET_TESTBED) || defined(ALL_STANDARDS)
-            drivers->odometry.update();
             initPos += drivers->opticalFlow.getRelativeVelocity() * (1.0f / MAIN_LOOP_FREQUENCY);
             ax = drivers->mpu6500.getAx();
             ay = drivers->mpu6500.getAy();
