@@ -87,7 +87,7 @@ float AutoNavPath::estimateRobotProgress(const Position robotPos, const float la
 
     float currParameter = 0.0f;
 
-    float minDistance = F32_MAX;
+    // float minDistance = F32_MAX;
     float minParam = 0.0f;
 
     float prevDistance = F32_MAX;
@@ -123,7 +123,7 @@ float AutoNavPath::estimateRobotProgress(const Position robotPos, const float la
             // negative peak detection, last segment was a local minimum
             if (fabs(prevParam - lastRobotParam) < fabs(minParam - lastRobotParam))
             {
-                minDistance = prevDistance;
+                // minDistance = prevDistance;
                 minParam = prevParam;
             }
         }
@@ -137,7 +137,7 @@ float AutoNavPath::estimateRobotProgress(const Position robotPos, const float la
     {
         if (fabs(prevParam - lastRobotParam) <= fabs(minParam - lastRobotParam))
         {
-            minDistance = prevDistance;
+            // minDistance = prevDistance;
             minParam = prevParam;
         }
     }
