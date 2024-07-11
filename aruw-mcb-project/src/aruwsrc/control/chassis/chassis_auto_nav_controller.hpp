@@ -53,6 +53,7 @@ public:
         const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig)
         : chassis(chassis),
           path(visionCoprocessor.getAutoNavPath()),
+          lastParameter(0),
           lastSetPoint(Position(-1, -1, 0)),
           visionCoprocessor(visionCoprocessor),
           drivers(drivers),
@@ -77,6 +78,7 @@ private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
     Position lastSetPoint;
+    float lastParameter;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 

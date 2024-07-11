@@ -67,6 +67,15 @@ public:
     float positionToClosestParameter(const Position pos) const;
 
     /**
+     * Finds the most appropriate position along the path to the given position and previous
+     * parameter and returns that position's arc length parameterized value (its distance along the
+     * path).
+     *
+     * TODO: rename this abomination
+     */
+    float estimateRobotProgress(const Position pos, const float prevParam) const;
+
+    /**
      * Returns the point the given distance along the path.
      */
     Position parametertoPosition(const float parameter) const;
