@@ -78,6 +78,7 @@ using namespace aruwsrc::testbed;
 modm::Vector2f initPos(0.0f, 0.0f);
 modm::Vector2f computedVelocity;
 float ax, ay, heading;
+bool calibrate;
 
 int main()
 {
@@ -144,6 +145,10 @@ int main()
             heading = drivers->mpu6500.getYaw();
             computedVelocity = drivers->opticalFlow.getRelativeVelocity();
 #endif
+        }
+        if(calibrate){
+            drivers->mpu6500.requestCalibration();
+            calibrate = false;
         }
         modm::delay_us(10);
     }
