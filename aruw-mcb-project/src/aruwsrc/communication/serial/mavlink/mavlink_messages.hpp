@@ -216,6 +216,50 @@ struct Attitude
 
 // Stuff directly from mavlink c library v2
 
+// stuff to get crc extra
+
+static const mavlink_msg_entry* get_msg_entry(uint32_t msgid)
+{
+    /*
+      use a bisection search to find the right entry. A perfect hash may be better
+      Note that this assumes the table is sorted by msgid
+    */
+    uint32_t low = 0, high = sizeof(mavlink_message_crcs) / sizeof(mavlink_message_crcs[0]) - 1;
+    while (low < high)
+    {
+        uint32_t mid = (low + 1 + high) / 2;
+        if (msgid < mavlink_message_crcs[mid].msgid)
+        {
+            high = mid - 1;
+            continue;
+        }
+        if (msgid > mavlink_message_crcs[mid].msgid)
+        {
+            low = mid;
+            continue;
+        }
+        low = mid;
+        break;
+    }
+    if (mavlink_message_crcs[low].msgid != msgid)
+    {
+        // msgid is not in the table
+        return nullptr;
+    }
+    return &mavlink_message_crcs[low];
+}
+
+/*
+  return the crc_extra value for a message
+*/
+static inline uint8_t get_crc_extra(const uint32_t msgid)
+{
+    const mavlink_msg_entry* e = get_msg_entry(msgid);
+    return e ? e->crc_extra : 0;
+}
+
+// Stuff for computing CRC
+
 #define X25_INIT_CRC 0xffff
 #define X25_VALIDATE_CRC 0xf0b8
 
