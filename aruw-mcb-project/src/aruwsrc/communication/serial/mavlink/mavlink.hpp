@@ -23,6 +23,8 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
+#include "mavlink_messages.hpp"
+
 namespace aruwsrc::communication::serial::mavlink
 {
 /**
