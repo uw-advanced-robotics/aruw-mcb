@@ -261,7 +261,6 @@ static inline uint8_t get_crc_extra(const uint32_t msgid)
 // Stuff for computing CRC
 
 #define X25_INIT_CRC 0xffff
-#define X25_VALIDATE_CRC 0xf0b8
 
 /**
  * @brief Accumulate the CRC16_MCRF4XX checksum by adding one char at a time.
