@@ -35,6 +35,7 @@ namespace aruwsrc::communication::serial::mavlink
  */
 class MavlinkParser
 {
+public:
     struct FrameHeader
     {
         uint8_t frame_head_byte;
@@ -73,6 +74,10 @@ class MavlinkParser
 
     static constexpr uint8_t MAX_PAYLOAD_SIZE = 255;
     using RecievedSerialMessage = MavlinkMessage<MAX_PAYLOAD_SIZE>;
+
+    MavlinkParser(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+
+    void initialize();
 };
 }  // namespace aruwsrc::communication::serial::mavlink
 
