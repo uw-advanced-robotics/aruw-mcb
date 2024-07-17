@@ -17,11 +17,10 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MAVLINK_HPP_
-#define MAVLINK_HPP_
+#ifndef MAVLINK_MESSAGES_HPP_
+#define MAVLINK_MESSAGES_HPP_
 
-#include "tap/communication/serial/uart.hpp"
-#include "tap/drivers.hpp"
+#include <cstdint>
 
 namespace aruwsrc::communication::serial::mavlink
 {
@@ -191,53 +190,30 @@ static const mavlink_msg_entry mavlink_message_crcs[] = {
     {52002, 24, 1, 1, 0, 0, 0},      {52003, 166, 26, 26, 0, 0, 0},
     {52004, 39, 1, 1, 0, 0, 0},      {52005, 145, 1, 1, 0, 0, 0}};
 
-/**
- * Generic MAVLink 2 parser that works over UART.
- *
- * Extend this class and implement messageReceiveCallback to process specific messages.
- * More info at: https://mavlink.io/en/guide/mavlink_2.html
- */
-class MavlinkParser
+// Message ID: 32
+struct LocalPositionNED
 {
-    struct FrameHeader
-    {
-        uint8_t frame_head_byte;
-        uint8_t payload_len;
-        uint8_t incompat_flags;
-        uint8_t compat_flags;
-        uint8_t seq;
-        uint8_t sysid;
-        uint8_t compid;
-        uint32_t msgid : 24;
-    } modm_packed;
-
-    static const uint8_t SERIAL_HEAD_BYTE = 0xFD;
-
-    template <int PAYLOAD_SIZE>
-    struct MavlinkMessage
-    {
-        explicit MavlinkMessage(uint8_t seq = 0, uint8_t sysid = 2, uint8_t compid = 25)
-        {
-            header.frame_head_byte = SERIAL_HEAD_BYTE;
-            header.seq = seq;
-            header.incompat_flags = 0;
-            header.sysid = sysid;
-            header.compid = compid;
-        }
-
-        void setCRC()
-        {
-            crc = 0;  // TODO
-        }
-
-        FrameHeader header;
-        uint8_t payload[PAYLOAD_SIZE];
-        uint16_t crc;
-    } modm_packed;
-
-    static constexpr uint8_t MAX_PAYLOAD_SIZE = 255;
-    using RecievedSerialMessage = MavlinkMessage<MAX_PAYLOAD_SIZE>;
+    uint32_t time_boot_ms; /*< [ms] Timestamp (time since system boot).*/
+    float x;               /*< [m] X Position*/
+    float y;               /*< [m] Y Position*/
+    float z;               /*< [m] Z Position*/
+    float vx;              /*< [m/s] X Speed*/
+    float vy;              /*< [m/s] Y Speed*/
+    float vz;              /*< [m/s] Z Speed*/
 };
+
+// Message ID: 30
+struct Attitude
+{
+    uint32_t time_boot_ms; /*< [ms] Timestamp (time since system boot).*/
+    float roll;            /*< [rad] Roll angle*/
+    float pitch;           /*< [rad] Pitch angle*/
+    float yaw;             /*< [rad] Yaw angle*/
+    float rollspeed;       /*< [rad/s] Roll angular speed*/
+    float pitchspeed;      /*< [rad/s] Pitch angular speed*/
+    float yawspeed;        /*< [rad/s] Yaw angular speed*/
+};
+
 }  // namespace aruwsrc::communication::serial::mavlink
 
-#endif  // MAVLINK_HPP_
+#endif  // MAVLINK_MESSAGES_HPP_
