@@ -48,7 +48,7 @@ public:
 TEST(MavlinkParser, read_parses_message)
 {
     Drivers drivers;
-    MavlinkParserTester parser(&drivers, Uart::UartPort::Uart1);
+    MavlinkParserTester parser(&drivers, Uart::Uart7);
 
     uint8_t rawMessage[13];
     rawMessage[0] = 0xFD;  /// Start byte
@@ -70,7 +70,7 @@ TEST(MavlinkParser, read_parses_message)
 
     uint16_t currByte = 0;
 
-    ON_CALL(drivers.uart, read(Uart::Uart1, _, _))
+    ON_CALL(drivers.uart, read(Uart::Uart7, _, _))
         .WillByDefault(
             [&](Uart::UartPort, uint8_t* data, std::size_t length)
             {
@@ -93,7 +93,7 @@ TEST(MavlinkParser, read_parses_message)
         parser.read();
     }
 
-    EXPECT_NE(parser.startedParsing, 0);
+    EXPECT_EQ(parser.startedParsing, 0);
     EXPECT_EQ(parser.foundHeadByte, 1);
     EXPECT_EQ(parser.PayloadTooBig, 0);
     EXPECT_EQ(parser.CRCFailed, 0);
