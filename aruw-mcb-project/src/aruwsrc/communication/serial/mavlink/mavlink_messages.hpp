@@ -24,6 +24,9 @@
 
 namespace aruwsrc::communication::serial::mavlink
 {
+
+// Stuff directly from mavlink c library v2
+
 struct mavlink_msg_entry
 {
     uint32_t msgid;
@@ -213,7 +216,12 @@ struct Attitude
     float yawspeed;        /*< [rad/s] Yaw angular speed*/
 };
 
-// Stuff directly from mavlink c library v2
+// stuff to send commands
+
+// Message ID: 76
+struct CommandLong {
+    
+};
 
 // stuff to get crc extra
 

@@ -66,7 +66,7 @@ public:
 
         void setCRC()
         {
-            crc = crc_calculate((uint8_t*)&header, sizeof(header));
+            crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1);
             crc_accumulate(payload, header.payload_len, &crc);
             uint8_t crc_extra = get_crc_extra(header.msgid);
             crc_accumulate(&crc_extra, 1, &crc);
@@ -102,6 +102,11 @@ public:
      *      just been received by this class.
      */
     virtual void messageReceiveCallback(ReceivedSerialMessage& message) = 0;
+
+    /**
+     * Sends mavlink message 511 to the drone to get messages back at a specified interval
+     */
+    void sendIntervalCommand(uint32_t msgid, uint32_t interval);
 
 protected:
     tap::Drivers* drivers;
