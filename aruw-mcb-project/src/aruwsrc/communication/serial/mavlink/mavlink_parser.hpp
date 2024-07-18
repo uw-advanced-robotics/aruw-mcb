@@ -108,6 +108,7 @@ public:
      */
     mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval) {
         msgid = interval;
+        interval = msgid;
     };
 
 #ifndef ENV_UNIT_TESTS
