@@ -24,7 +24,6 @@
 
 namespace aruwsrc::communication::serial::mavlink
 {
-
 struct mavlink_msg_entry
 {
     uint32_t msgid;
@@ -305,7 +304,6 @@ static inline uint16_t crc_calculate(const uint8_t* pBuffer, uint16_t length)
     }
     return crcTmp;
 }
-
 }  // namespace aruwsrc::communication::serial::mavlink
 
 #endif  // MAVLINK_MESSAGES_HPP_

@@ -25,6 +25,8 @@
 
 #include "mavlink_messages.hpp"
 
+using namespace tap::communication::serial;
+
 namespace aruwsrc::communication::serial::mavlink
 {
 /**
@@ -75,12 +77,57 @@ public:
         uint16_t crc;
     } modm_packed;
 
+    static const uint8_t HEAD_BYTE = 0xFD;
+
     static constexpr uint8_t MAX_PAYLOAD_SIZE = 255;
-    using RecievedSerialMessage = MavlinkMessage<MAX_PAYLOAD_SIZE>;
+    using ReceivedSerialMessage = MavlinkMessage<MAX_PAYLOAD_SIZE>;
 
-    MavlinkParser(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
+    MavlinkParser(tap::Drivers* drivers, Uart::UartPort port);
 
+    /**
+     * Initializes assigned serial port to the specified baudrate
+     */
     void initialize();
+
+    /**
+     * Parses incoming messages. Needs to be called periodically
+     */
+    void read();
+
+    /**
+     * Called when a complete message is received. A derived class must
+     * implement this in order to handle incoming messages properly.
+     *
+     * @param[in] completeMessage a reference to the full message that has
+     *      just been received by this class.
+     */
+    virtual void messageReceiveCallback(ReceivedSerialMessage& message) = 0;
+
+private:
+    tap::Drivers* drivers;
+    Uart::UartPort port;
+
+    enum ParsingState
+    {
+        HEADER_SEARCH,            /// A header byte has not yet been received.
+        PROCESSING_FRAME_HEADER,  /// A header is received and the frame header is being processed.
+        PROCESS_PAYLOAD,          /// The data is being processed.
+        PROCESS_CRC               /// The CRC is being processed.
+    };
+
+    ParsingState state;
+
+    /// Message in middle of being constructed.
+    ReceivedSerialMessage newMessage;
+
+    /// Most recent complete message.
+    ReceivedSerialMessage mostRecentMessage;
+
+    int currByte;
+
+    static constexpr uint32_t BAUD_RATE = 57600;
+
+    bool validateCRC(ReceivedSerialMessage& message);
 };
 }  // namespace aruwsrc::communication::serial::mavlink
 
