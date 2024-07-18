@@ -37,7 +37,8 @@ MavlinkParser::MavlinkParser(tap::Drivers* drivers, Uart::UartPort port)
     : drivers(drivers),
       port(port),
       newMessage(),
-      mostRecentMessage()
+      mostRecentMessage(),
+      state(HEADER_SEARCH)
 {
 }
 
