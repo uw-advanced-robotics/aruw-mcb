@@ -128,6 +128,10 @@ private:
     static constexpr uint32_t BAUD_RATE = 57600;
 
     bool validateCRC(ReceivedSerialMessage& message);
+
+
+    // DEBUG VARIABLES
+    int startedParsing, foundHeadByte, PayloadTooBig, CRCFailed;
 };
 }  // namespace aruwsrc::communication::serial::mavlink
 

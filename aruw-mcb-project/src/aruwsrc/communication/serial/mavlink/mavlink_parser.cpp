@@ -66,6 +66,7 @@ void MavlinkParser::initialize()
 
 void MavlinkParser::read()
 {
+    startedParsing++;
     switch (state)
     {
         case HEADER_SEARCH:
@@ -75,6 +76,7 @@ void MavlinkParser::read()
                 {
                     state = PROCESSING_FRAME_HEADER;
                     currByte = 1;
+                    foundHeadByte++;
                 }
             }
             break;
@@ -86,6 +88,7 @@ void MavlinkParser::read()
             {
                 if (newMessage.header.payload_len > MAX_PAYLOAD_SIZE)
                 {
+                    PayloadTooBig++;
                     state = HEADER_SEARCH;
                     currByte = 0;
                     break;
@@ -112,6 +115,7 @@ void MavlinkParser::read()
             {
                 if (!validateCRC(newMessage))
                 {
+                    CRCFailed++;
                     state = HEADER_SEARCH;
                     currByte = 0;
                     break;
