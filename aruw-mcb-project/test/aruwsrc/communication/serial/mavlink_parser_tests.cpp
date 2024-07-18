@@ -65,8 +65,12 @@ TEST(MavlinkParser, read_parses_message)
     rawMessage[9] = 0;
     rawMessage[10] = 7;  /// Payload
     // Now for CRC
-    uint16_t crc = crc_calculate(&rawMessage[1], 10);
+    uint16_t crc = crc_calculate(rawMessage + 1, 10);
+    std::cout << "The crc value before magic is: " << crc << std::endl;
+    crc_accumulate(39, &crc);  // Don't forget about the magic number
     convertToLittleEndian(static_cast<uint16_t>(crc), &rawMessage[11]);
+
+    std::cout << "The crc value is: " << crc << std::endl;
 
     uint16_t currByte = 0;
 
@@ -88,7 +92,7 @@ TEST(MavlinkParser, read_parses_message)
                 return 1;
             });
 
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 25; i++)
     {
         parser.read();
     }
@@ -101,8 +105,6 @@ TEST(MavlinkParser, read_parses_message)
     EXPECT_EQ(parser.readAWholePayload, 1);
     EXPECT_EQ(parser.readAWholeMessage, 1);
     EXPECT_EQ(parser.currByte, 1);
-
-
 
     EXPECT_EQ(0xFD, parser.newMessage.header.frame_head_byte);
     EXPECT_EQ(1, parser.newMessage.header.payload_len);

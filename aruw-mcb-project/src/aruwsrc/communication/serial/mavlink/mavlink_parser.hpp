@@ -62,6 +62,7 @@ public:
             header.incompat_flags = 0;
             header.sysid = sysid;
             header.compid = compid;
+            memset(payload, 0, PAYLOAD_SIZE);
         }
 
         void setCRC()

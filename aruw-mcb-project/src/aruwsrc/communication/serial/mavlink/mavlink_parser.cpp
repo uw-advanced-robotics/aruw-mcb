@@ -90,11 +90,16 @@ void MavlinkParser::read()
             }
             break;
         case PROCESSING_FRAME_HEADER:
+            std::cout << "In frame header, reading header for length: " << sizeof(newMessage.header) << " currByte is "
+                      << currByte << std::endl;
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage) + currByte,
-                sizeof(newMessage.header) - currByte);
-            if (currByte == sizeof(newMessage.header))
+                sizeof(newMessage.header) - 1 - currByte);
+            if (currByte == sizeof(newMessage.header) - 1)
             {
+                std::cout << "Finished reading header" << std::endl;
+                std::cout << "Last value is " << static_cast<int>(newMessage.header.msgid)
+                          << std::endl;
                 readAllOfAHeader++;
                 currByte = 0;
                 if (newMessage.header.payload_len > MAX_PAYLOAD_SIZE)
@@ -108,11 +113,17 @@ void MavlinkParser::read()
             }
             break;
         case PROCESS_PAYLOAD:
+            std::cout << "Reading payload for length:"
+                      << static_cast<int>(newMessage.header.payload_len) << " currByte is "
+                      << currByte << std::endl;
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage.payload) + currByte,
                 newMessage.header.payload_len - currByte);
+            std::cout << "Curr byte is " << currByte << std::endl;
+            std::cout << "Payload is " << newMessage.payload[0] << std::endl;
             if (currByte == newMessage.header.payload_len)
             {
+                std::cout << "Read whole payload" << std::endl;
                 state = PROCESS_CRC;
                 currByte = 0;
                 readAWholePayload++;
@@ -122,8 +133,17 @@ void MavlinkParser::read()
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage.crc) + currByte,
                 sizeof(newMessage.crc) - currByte);
-            if (currByte == sizeof(newMessage.crc) - 1)
+            std::cout << "Curr byte is " << currByte << " and size of CRC is: "  << sizeof(newMessage.crc) << std::endl;
+            if (currByte == sizeof(newMessage.crc))
             {
+                std::cout << "Read a whole message" << std::endl;
+                // Print it out in hex
+                for (size_t i = 0; i < sizeof(newMessage); i++)
+                {
+                    std::cout << std::hex << (int)*((uint8_t*)&newMessage + i) << " ";
+                }
+                std::cout << std::dec << std::endl;
+
                 readAWholeMessage++;
                 if (!validateCRC(newMessage))
                 {
@@ -145,10 +165,16 @@ void MavlinkParser::read()
 
 bool MavlinkParser::validateCRC(ReceivedSerialMessage& message)
 {
+    std::cout << "Validating CRC of len: " << sizeof(message.header) - 2 + message.header.payload_len << std::endl;
     uint16_t crc = crc_calculate(
-        (uint8_t*)&message + 1,
-        sizeof(message.header) - 1 + message.header.payload_len);
+        (uint8_t*)&message.header + 1,
+        sizeof(message.header) - 2 + message.header.payload_len);
+
+    std::cout << "CRC value before the magic number: " << crc << std::endl;
+
+
     uint8_t crc_extra = get_crc_extra(message.header.msgid);
+    std::cout << "The CRC extra is: " << static_cast<int>(crc_extra) << std::endl;
     crc_accumulate(crc_extra, &crc);
     std::cout << "Calculated CRC: " << crc << " Message CRC: " << message.crc << std::endl;
     return crc == message.crc;

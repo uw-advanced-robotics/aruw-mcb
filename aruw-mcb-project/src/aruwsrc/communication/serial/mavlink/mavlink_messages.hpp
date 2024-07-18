@@ -21,6 +21,7 @@
 #define MAVLINK_MESSAGES_HPP_
 
 #include <cstdint>
+#include <iostream>
 
 namespace aruwsrc::communication::serial::mavlink
 {
@@ -227,33 +228,45 @@ struct CommandLong {
 
 static const mavlink_msg_entry* get_msg_entry(uint32_t msgid)
 {
-    /*
-      use a bisection search to find the right entry. A perfect hash may be better
-      Note that this assumes the table is sorted by msgid
-    */
-    uint32_t low = 0, high = sizeof(mavlink_message_crcs) / sizeof(mavlink_message_crcs[0]) - 1;
-    while (low < high)
+    // Screw the binary search, just iterate over the array
+    for (const mavlink_msg_entry& e : mavlink_message_crcs)
     {
-        uint32_t mid = (low + 1 + high) / 2;
-        if (msgid < mavlink_message_crcs[mid].msgid)
+        std::cout << "Looking at msg " << e.msgid << std::endl;
+        if (e.msgid == msgid)
         {
-            high = mid - 1;
-            continue;
+            return &e;
         }
-        if (msgid > mavlink_message_crcs[mid].msgid)
-        {
-            low = mid;
-            continue;
-        }
-        low = mid;
-        break;
     }
-    if (mavlink_message_crcs[low].msgid != msgid)
-    {
-        // msgid is not in the table
-        return nullptr;
-    }
-    return &mavlink_message_crcs[low];
+
+    return nullptr;
+
+    // /*
+    //   use a bisection search to find the right entry. A perfect hash may be better
+    //   Note that this assumes the table is sorted by msgid
+    // */
+    // uint32_t low = 0, high = sizeof(mavlink_message_crcs) / sizeof(mavlink_message_crcs[0]) - 1;
+    // while (low < high)
+    // {
+    //     uint32_t mid = (low + 1 + high) / 2;
+    //     if (msgid < mavlink_message_crcs[mid].msgid)
+    //     {
+    //         high = mid - 1;
+    //         continue;
+    //     }
+    //     if (msgid > mavlink_message_crcs[mid].msgid)
+    //     {
+    //         low = mid;
+    //         continue;
+    //     }
+    //     low = mid;
+    //     break;
+    // }
+    // if (mavlink_message_crcs[low].msgid != msgid)
+    // {
+    //     // msgid is not in the table
+    //     return nullptr;
+    // }
+    // return &mavlink_message_crcs[low];
 }
 
 /*
@@ -308,6 +321,7 @@ static inline uint16_t crc_calculate(const uint8_t* pBuffer, uint16_t length)
     crc_init(&crcTmp);
     while (length--)
     {
+        std::cout << std::dec << "Adding in value " << static_cast<int>(*pBuffer) << std::endl;
         crc_accumulate(*pBuffer++, &crcTmp);
     }
     return crcTmp;
