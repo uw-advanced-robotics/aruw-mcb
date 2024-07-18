@@ -19,6 +19,8 @@
 
 #include "mavlink_parser.hpp"
 
+#include <iostream>
+
 using namespace tap::communication::serial;
 
 /**
@@ -33,7 +35,9 @@ namespace aruwsrc::communication::serial::mavlink
 {
 MavlinkParser::MavlinkParser(tap::Drivers* drivers, Uart::UartPort port)
     : drivers(drivers),
-      port(port)
+      port(port),
+      newMessage(),
+      mostRecentMessage()
 {
 }
 
@@ -67,11 +71,14 @@ void MavlinkParser::initialize()
 void MavlinkParser::read()
 {
     startedParsing++;
+    std::cout << "Attempting a read, state is " << state << std::endl;
+
     switch (state)
     {
         case HEADER_SEARCH:
             while (state == HEADER_SEARCH && READ(&newMessage.header.frame_head_byte, 1))
             {
+                std::cout << "The read value is " << newMessage.header.frame_head_byte << std::endl;
                 if (newMessage.header.frame_head_byte == HEAD_BYTE)
                 {
                     state = PROCESSING_FRAME_HEADER;
