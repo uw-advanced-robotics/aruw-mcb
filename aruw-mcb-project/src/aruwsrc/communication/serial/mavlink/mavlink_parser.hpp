@@ -106,7 +106,9 @@ public:
     /**
      * Sends mavlink message 511 to the drone to get messages back at a specified interval
      */
-    mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval) {};
+    mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval) {
+        msgid = interval;
+    };
 
 #ifndef ENV_UNIT_TESTS
 protected:

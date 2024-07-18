@@ -26,7 +26,7 @@ MavlinkTelemetry::MavlinkTelemetry(tap::Drivers* drivers, Uart::UartPort port)
 {
 }
 
-void MavlinkTelemetry::messageReceiveCallback(ReceivedSerialMessage& message)
+void MavlinkTelemetry::messageReceiveCallback(const ReceivedSerialMessage& message)
 {
     switch (message.header.msgid)
     {
