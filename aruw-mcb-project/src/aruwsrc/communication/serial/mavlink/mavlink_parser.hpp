@@ -64,7 +64,10 @@ public:
 
         void setCRC()
         {
-            crc = 0;  // TODO
+            crc = crc_calculate((uint8_t*)&header, sizeof(header));
+            crc_accumulate(payload, header.payload_len, &crc);
+            uint8_t crc_extra = get_crc_extra(header.msgid);
+            crc_accumulate(&crc_extra, 1, &crc);
         }
 
         FrameHeader header;
