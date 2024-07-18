@@ -87,12 +87,12 @@ public:
     /**
      * Initializes assigned serial port to the specified baudrate
      */
-    void initialize();
+    mockable void initialize();
 
     /**
      * Parses incoming messages. Needs to be called periodically
      */
-    void read();
+    mockable void read();
 
     /**
      * Called when a complete message is received. A derived class must
@@ -101,14 +101,17 @@ public:
      * @param[in] completeMessage a reference to the full message that has
      *      just been received by this class.
      */
-    virtual void messageReceiveCallback(ReceivedSerialMessage& message) = 0;
+    virtual void messageReceiveCallback(const ReceivedSerialMessage& message) = 0;
 
     /**
      * Sends mavlink message 511 to the drone to get messages back at a specified interval
      */
-    void sendIntervalCommand(uint32_t msgid, uint32_t interval);
+    mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval);
 
+#ifndef ENV_UNIT_TESTS
 protected:
+#endif
+
     tap::Drivers* drivers;
     Uart::UartPort port;
 

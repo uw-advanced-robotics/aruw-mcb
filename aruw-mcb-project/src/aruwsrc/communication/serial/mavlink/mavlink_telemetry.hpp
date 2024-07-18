@@ -33,7 +33,7 @@ class MavlinkTelemetry : public MavlinkParser
 public:
     MavlinkTelemetry(tap::Drivers* drivers, Uart::UartPort port);
 
-    void messageReceiveCallback(ReceivedSerialMessage& message);
+    void messageReceiveCallback(const ReceivedSerialMessage& message);
 
     static constexpr int MAVLINK_MSG_ID_LOCAL_POSITION_NED = 32;
     static constexpr int MAVLINK_MSG_ID_ATTITUDE = 30;
