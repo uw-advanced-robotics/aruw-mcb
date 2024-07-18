@@ -106,7 +106,8 @@ public:
     /**
      * Sends mavlink message 511 to the drone to get messages back at a specified interval
      */
-    mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval) {
+    mockable void sendIntervalCommand(uint32_t msgid, uint32_t interval)
+    {
         msgid = interval;
         interval = msgid;
     };
@@ -141,7 +142,8 @@ protected:
     bool validateCRC(ReceivedSerialMessage& message);
 
     // DEBUG VARIABLES
-    int startedParsing, foundHeadByte, PayloadTooBig, CRCFailed;
+    int startedParsing = 0, foundHeadByte = 0, readAllOfAHeader = 0, PayloadTooBig = 0,
+        readAWholePayload = 0, readAWholeMessage = 0, CRCFailed = 0;
 };
 }  // namespace aruwsrc::communication::serial::mavlink
 

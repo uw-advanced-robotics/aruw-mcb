@@ -93,19 +93,26 @@ TEST(MavlinkParser, read_parses_message)
         parser.read();
     }
 
+    EXPECT_NE(parser.startedParsing, 0);
     EXPECT_EQ(parser.foundHeadByte, 1);
     EXPECT_EQ(parser.PayloadTooBig, 0);
     EXPECT_EQ(parser.CRCFailed, 0);
+    EXPECT_EQ(parser.readAllOfAHeader, 1);
+    EXPECT_EQ(parser.readAWholePayload, 1);
+    EXPECT_EQ(parser.readAWholeMessage, 1);
+    EXPECT_EQ(parser.currByte, 1);
 
-    EXPECT_EQ(0xFD, parser.lastMsg.header.frame_head_byte);
-    EXPECT_EQ(1, parser.lastMsg.header.payload_len);
-    EXPECT_EQ(2, parser.lastMsg.header.incompat_flags);
-    EXPECT_EQ(3, parser.lastMsg.header.compid);
-    EXPECT_EQ(4, parser.lastMsg.header.seq);
-    EXPECT_EQ(5, parser.lastMsg.header.sysid);
-    EXPECT_EQ(6, parser.lastMsg.header.compid);
-    EXPECT_EQ(30, parser.lastMsg.header.msgid);
-    EXPECT_EQ(7, parser.lastMsg.payload[0]);
 
-    EXPECT_EQ(crc, parser.lastMsg.crc);
+
+    EXPECT_EQ(0xFD, parser.newMessage.header.frame_head_byte);
+    EXPECT_EQ(1, parser.newMessage.header.payload_len);
+    EXPECT_EQ(2, parser.newMessage.header.incompat_flags);
+    EXPECT_EQ(3, parser.newMessage.header.compat_flags);
+    EXPECT_EQ(4, parser.newMessage.header.seq);
+    EXPECT_EQ(5, parser.newMessage.header.sysid);
+    EXPECT_EQ(6, parser.newMessage.header.compid);
+    EXPECT_EQ(30, parser.newMessage.header.msgid);
+    EXPECT_EQ(7, parser.newMessage.payload[0]);
+
+    EXPECT_EQ(crc, parser.newMessage.crc);
 }

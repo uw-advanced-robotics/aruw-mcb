@@ -86,11 +86,12 @@ void MavlinkParser::read()
                 sizeof(newMessage.header) - currByte);
             if (currByte == sizeof(newMessage.header))
             {
+                readAllOfAHeader++;
+                currByte = 0;
                 if (newMessage.header.payload_len > MAX_PAYLOAD_SIZE)
                 {
                     PayloadTooBig++;
                     state = HEADER_SEARCH;
-                    currByte = 0;
                     break;
                 }
 
@@ -105,6 +106,7 @@ void MavlinkParser::read()
             {
                 state = PROCESS_CRC;
                 currByte = 0;
+                readAWholePayload++;
             }
             break;
         case PROCESS_CRC:
@@ -113,6 +115,7 @@ void MavlinkParser::read()
                 sizeof(newMessage.crc) - currByte);
             if (currByte == sizeof(newMessage.crc))
             {
+                readAWholeMessage++;
                 if (!validateCRC(newMessage))
                 {
                     CRCFailed++;
