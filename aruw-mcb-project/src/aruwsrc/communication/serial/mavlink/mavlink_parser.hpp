@@ -103,7 +103,7 @@ public:
      */
     virtual void messageReceiveCallback(ReceivedSerialMessage& message) = 0;
 
-private:
+protected:
     tap::Drivers* drivers;
     Uart::UartPort port;
 
@@ -128,7 +128,6 @@ private:
     static constexpr uint32_t BAUD_RATE = 57600;
 
     bool validateCRC(ReceivedSerialMessage& message);
-
 
     // DEBUG VARIABLES
     int startedParsing, foundHeadByte, PayloadTooBig, CRCFailed;
