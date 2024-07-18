@@ -160,7 +160,7 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -170,6 +170,9 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
     ((Drivers *)drivers)->chassisMcbLite.initialize();
     ((Drivers *)drivers)->turretMajorMcbLite.initialize();
+#endif
+#if defined(TARGET_TESTBED)
+    ((Drivers *)drivers)->mavlinkTelemetry.initialize();
 #endif
 }
 
@@ -194,5 +197,8 @@ static void updateIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->chassisMcbLite.updateSerial();
     ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
     ((Drivers *)drivers)->visionCoprocessor.updateSerial();
+#endif
+#if defined(TARGET_TESTBED)
+    ((Drivers *)drivers)->mavlinkTelemetry.read();
 #endif
 }

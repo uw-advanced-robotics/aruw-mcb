@@ -69,7 +69,7 @@ public:
             crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1);
             crc_accumulate(payload, header.payload_len, &crc);
             uint8_t crc_extra = get_crc_extra(header.msgid);
-            crc_accumulate(&crc_extra, 1, &crc);
+            crc_accumulate(crc_extra, &crc);
         }
 
         FrameHeader header;

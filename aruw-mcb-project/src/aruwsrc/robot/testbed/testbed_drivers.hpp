@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/serial/mavlink/mavlink_telemetry.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::testbed
@@ -34,9 +35,14 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers()
+        : tap::Drivers(),
+          mavlinkTelemetry(this, tap::communication::serial::Uart::UartPort::Uart7)
+    {
+    }
 
 public:
+    aruwsrc::communication::serial::mavlink::MavlinkTelemetry mavlinkTelemetry;
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
