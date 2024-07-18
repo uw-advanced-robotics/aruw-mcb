@@ -36,9 +36,9 @@ namespace aruwsrc::communication::serial::mavlink
 MavlinkParser::MavlinkParser(tap::Drivers* drivers, Uart::UartPort port)
     : drivers(drivers),
       port(port),
+      state(HEADER_SEARCH),
       newMessage(),
-      mostRecentMessage(),
-      state(HEADER_SEARCH)
+      mostRecentMessage()
 {
 }
 
@@ -72,7 +72,8 @@ void MavlinkParser::initialize()
 void MavlinkParser::read()
 {
     startedParsing++;
-    std::cout << "Attempting a read, state is " << state << std::endl;
+    std::cout << "Attempting a read, state is " << state << " Curr byte is  " << currByte
+              << std::endl;
 
     switch (state)
     {
@@ -121,7 +122,7 @@ void MavlinkParser::read()
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage.crc) + currByte,
                 sizeof(newMessage.crc) - currByte);
-            if (currByte == sizeof(newMessage.crc))
+            if (currByte == sizeof(newMessage.crc) - 1)
             {
                 readAWholeMessage++;
                 if (!validateCRC(newMessage))
@@ -149,6 +150,7 @@ bool MavlinkParser::validateCRC(ReceivedSerialMessage& message)
         sizeof(message.header) - 1 + message.header.payload_len);
     uint8_t crc_extra = get_crc_extra(message.header.msgid);
     crc_accumulate(crc_extra, &crc);
+    std::cout << "Calculated CRC: " << crc << " Message CRC: " << message.crc << std::endl;
     return crc == message.crc;
 }
 

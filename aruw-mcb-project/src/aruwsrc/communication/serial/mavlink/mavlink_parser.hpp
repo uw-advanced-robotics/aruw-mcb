@@ -127,7 +127,7 @@ protected:
         PROCESS_CRC               /// The CRC is being processed.
     };
 
-    ParsingState state = HEADER_SEARCH;
+    ParsingState state;
 
     /// Message in middle of being constructed.
     ReceivedSerialMessage newMessage;
