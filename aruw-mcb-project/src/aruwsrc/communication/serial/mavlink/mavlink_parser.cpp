@@ -72,8 +72,6 @@ void MavlinkParser::initialize()
 void MavlinkParser::read()
 {
     startedParsing++;
-    // std::cout << "Attempting a read, state is " << state << " Curr byte is  " << currByte
-    //           << std::endl;
     switch (state)
     {
         case HEADER_SEARCH:
@@ -102,13 +100,6 @@ void MavlinkParser::read()
 
                 readAllOfAHeader++;
                 currByte = 0;
-                if (newMessage.header.payload_len > MAX_PAYLOAD_SIZE)
-                {
-                    PayloadTooBig++;
-                    state = HEADER_SEARCH;
-                    break;
-                }
-
                 state = PROCESS_PAYLOAD_AND_CRC;
             }
             break;
@@ -118,7 +109,7 @@ void MavlinkParser::read()
             int desired_length = newMessage.header.payload_len + sizeof(newMessage.crc);
 
             std::cout << "Reading payload for length: "
-                      << static_cast<int>(newMessage.header.payload_len) << " currByte is "
+                      << desired_length << " currByte is "
                       << currByte << std::endl;
 
             currByte += READ(
