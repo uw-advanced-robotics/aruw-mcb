@@ -143,7 +143,7 @@ protected:
 
     // DEBUG VARIABLES
     int startedParsing = 0, foundHeadByte = 0, readAllOfAHeader = 0, PayloadTooBig = 0,
-        readAWholePayload = 0, readAWholeMessage = 0, CRCFailed = 0;
+        readAWholeMessage = 0, CRCFailed = 0;
 };
 }  // namespace aruwsrc::communication::serial::mavlink
 

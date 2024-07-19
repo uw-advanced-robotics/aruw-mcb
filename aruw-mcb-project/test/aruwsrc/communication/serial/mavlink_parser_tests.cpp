@@ -105,7 +105,6 @@ TEST(MavlinkParser, read_parses_message)
     EXPECT_EQ(parser.PayloadTooBig, 0);
     EXPECT_EQ(parser.CRCFailed, 0);
     EXPECT_EQ(parser.readAllOfAHeader, 1);
-    EXPECT_EQ(parser.readAWholePayload, 1);
     EXPECT_EQ(parser.readAWholeMessage, 1);
 
     EXPECT_EQ(0xFD, parser.newMessage.header.frame_head_byte);

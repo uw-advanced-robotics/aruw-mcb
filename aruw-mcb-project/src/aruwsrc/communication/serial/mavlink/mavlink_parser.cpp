@@ -77,6 +77,7 @@ void MavlinkParser::read()
     switch (state)
     {
         case HEADER_SEARCH:
+        {
             while (state == HEADER_SEARCH && READ(&newMessage.header.frame_head_byte, 1))
             {
                 if (newMessage.header.frame_head_byte == HEAD_BYTE)
@@ -87,7 +88,9 @@ void MavlinkParser::read()
                 }
             }
             break;
+        }
         case PROCESSING_FRAME_HEADER:
+        {
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage) + currByte,
                 sizeof(newMessage.header) - currByte);
@@ -109,7 +112,9 @@ void MavlinkParser::read()
                 state = PROCESS_PAYLOAD_AND_CRC;
             }
             break;
+        }
         case PROCESS_PAYLOAD_AND_CRC:
+        {
             int desired_length = newMessage.header.payload_len + sizeof(newMessage.crc);
 
             std::cout << "Reading payload for length: "
@@ -148,29 +153,7 @@ void MavlinkParser::read()
                 mostRecentMessage = newMessage;
             }
             break;
-        // case PROCESS_CRC:
-        //     currByte += READ(
-        //         reinterpret_cast<uint8_t*>(&newMessage.crc) + currByte,
-        //         sizeof(newMessage.crc) - currByte);
-        //     std::cout << "Curr byte is " << currByte
-        //               << " and size of CRC is: " << sizeof(newMessage.crc) << std::endl;
-        //     if (currByte == sizeof(newMessage.crc))
-        //     {
-        //         if (!validateCRC(newMessage))
-        //         {
-        //             CRCFailed++;
-        //             state = HEADER_SEARCH;
-        //             currByte = 0;
-        //             break;
-        //         }
-        //         messageReceiveCallback(newMessage);
-        //         mostRecentMessage = newMessage;
-        //         state = HEADER_SEARCH;
-        //         currByte = 0;
-        //     }
-        //     break;
-        default:
-            break;
+        }
     }
 }
 
