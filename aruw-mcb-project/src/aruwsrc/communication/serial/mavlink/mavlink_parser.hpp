@@ -47,7 +47,8 @@ public:
         uint8_t seq;
         uint8_t sysid;
         uint8_t compid;
-        uint32_t msgid : 24;
+        uint8_t msgid[3];
+        uint32_t msgid_value() const { return msgid[2] << 16 | msgid[1] << 8 | msgid[0]; }
     } modm_packed;
 
     static const uint8_t SERIAL_HEAD_BYTE = 0xFD;
@@ -62,14 +63,13 @@ public:
             header.incompat_flags = 0;
             header.sysid = sysid;
             header.compid = compid;
-            memset(payload, 0, PAYLOAD_SIZE);
+            memset(payload, 1, PAYLOAD_SIZE);
         }
 
         void setCRC()
         {
-            crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1);
-            crc_accumulate(payload, header.payload_len, &crc);
-            uint8_t crc_extra = get_crc_extra(header.msgid);
+            crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1 + header.payload_len);
+            uint8_t crc_extra = get_crc_extra(header.msgid_value());
             crc_accumulate(crc_extra, &crc);
         }
 

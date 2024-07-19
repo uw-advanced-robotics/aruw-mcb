@@ -28,7 +28,7 @@ MavlinkTelemetry::MavlinkTelemetry(tap::Drivers* drivers, Uart::UartPort port)
 
 void MavlinkTelemetry::messageReceiveCallback(const ReceivedSerialMessage& message)
 {
-    switch (message.header.msgid)
+    switch (message.header.msgid_value())
     {
         case MAVLINK_MSG_ID_LOCAL_POSITION_NED:
             memcpy(&position, message.payload, sizeof(LocalPositionNED));

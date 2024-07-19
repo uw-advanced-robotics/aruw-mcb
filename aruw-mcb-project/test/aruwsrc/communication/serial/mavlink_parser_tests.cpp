@@ -72,6 +72,8 @@ TEST(MavlinkParser, read_parses_message)
 
     std::cout << "The crc value is: " << crc << std::endl;
 
+    std::cout << "Size of frame header is: " << sizeof(MavlinkParser::FrameHeader) << std::endl;
+
     uint16_t currByte = 0;
 
     ON_CALL(drivers.uart, read(Uart::Uart7, _, _))
@@ -88,6 +90,8 @@ TEST(MavlinkParser, read_parses_message)
                     return 0;
                 }
                 *data = rawMessage[currByte];
+                std::cout << "Curr byte: " << currByte << std::endl;
+                std::cout << "Read byte: " << (int)*data << std::endl;
                 currByte++;
                 return 1;
             });
