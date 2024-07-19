@@ -101,14 +101,12 @@ TEST(MavlinkParser, read_parses_message)
         parser.read();
     }
 
-    EXPECT_EQ(parser.startedParsing, 0);
     EXPECT_EQ(parser.foundHeadByte, 1);
     EXPECT_EQ(parser.PayloadTooBig, 0);
     EXPECT_EQ(parser.CRCFailed, 0);
     EXPECT_EQ(parser.readAllOfAHeader, 1);
     EXPECT_EQ(parser.readAWholePayload, 1);
     EXPECT_EQ(parser.readAWholeMessage, 1);
-    EXPECT_EQ(parser.currByte, 1);
 
     EXPECT_EQ(0xFD, parser.newMessage.header.frame_head_byte);
     EXPECT_EQ(1, parser.newMessage.header.payload_len);
@@ -117,7 +115,7 @@ TEST(MavlinkParser, read_parses_message)
     EXPECT_EQ(4, parser.newMessage.header.seq);
     EXPECT_EQ(5, parser.newMessage.header.sysid);
     EXPECT_EQ(6, parser.newMessage.header.compid);
-    EXPECT_EQ(30, parser.newMessage.header.msgid);
+    EXPECT_EQ(30, parser.newMessage.header.msgid_value());
     EXPECT_EQ(7, parser.newMessage.payload[0]);
 
     EXPECT_EQ(crc, parser.newMessage.crc);

@@ -88,8 +88,9 @@ void MavlinkParser::read()
             }
             break;
         case PROCESSING_FRAME_HEADER:
-            currByte +=
-                READ(reinterpret_cast<uint8_t*>(&newMessage) + currByte, sizeof(newMessage.header) - currByte);
+            currByte += READ(
+                reinterpret_cast<uint8_t*>(&newMessage) + currByte,
+                sizeof(newMessage.header) - currByte);
             if (currByte == sizeof(newMessage.header))
             {
                 std::cout << "Finished reading header" << std::endl;
@@ -105,44 +106,21 @@ void MavlinkParser::read()
                     break;
                 }
 
-                state = PROCESS_PAYLOAD;
+                state = PROCESS_PAYLOAD_AND_CRC;
             }
             break;
-        case PROCESS_PAYLOAD:
+        case PROCESS_PAYLOAD_AND_CRC:
+            int desired_length = newMessage.header.payload_len + sizeof(newMessage.crc);
+
             std::cout << "Reading payload for length: "
                       << static_cast<int>(newMessage.header.payload_len) << " currByte is "
                       << currByte << std::endl;
 
-            std::cout << "Message is at: " << &newMessage << std::endl;
-
-            // Show at what address its being written
-            std::cout << "Payload is at: " << &newMessage.payload + currByte << std::endl;
-
             currByte += READ(
                 reinterpret_cast<uint8_t*>(&newMessage.payload) + currByte,
-                newMessage.header.payload_len - currByte);
+                desired_length - currByte);
 
-            std::cout << "Curr byte is " << currByte << std::endl;
-            std::cout << "Payload is " << newMessage.payload[0] << std::endl;
-            std::cout << "The next point is somehow " << std::hex << newMessage.payload[1]
-                      << std::dec << std::endl;
-
-            if (currByte == newMessage.header.payload_len)
-            {
-                std::cout << "Read whole payload" << std::endl;
-                state = PROCESS_CRC;
-                currByte = 0;
-                readAWholePayload++;
-            }
-
-            break;
-        case PROCESS_CRC:
-            currByte += READ(
-                reinterpret_cast<uint8_t*>(&newMessage.crc) + currByte,
-                sizeof(newMessage.crc) - currByte);
-            std::cout << "Curr byte is " << currByte
-                      << " and size of CRC is: " << sizeof(newMessage.crc) << std::endl;
-            if (currByte == sizeof(newMessage.crc))
+            if (currByte == desired_length)
             {
                 std::cout << "Read a whole message" << std::endl;
                 // Print it out in hex
@@ -153,19 +131,44 @@ void MavlinkParser::read()
                 std::cout << std::dec << std::endl;
 
                 readAWholeMessage++;
+                state = HEADER_SEARCH;
+                currByte = 0;
+
+                // Move and check CRC
+                memcpy(
+                    &newMessage.crc,
+                    &newMessage.payload[newMessage.header.payload_len],
+                    sizeof(newMessage.crc));
                 if (!validateCRC(newMessage))
                 {
                     CRCFailed++;
-                    state = HEADER_SEARCH;
-                    currByte = 0;
                     break;
                 }
                 messageReceiveCallback(newMessage);
                 mostRecentMessage = newMessage;
-                state = HEADER_SEARCH;
-                currByte = 0;
             }
             break;
+        // case PROCESS_CRC:
+        //     currByte += READ(
+        //         reinterpret_cast<uint8_t*>(&newMessage.crc) + currByte,
+        //         sizeof(newMessage.crc) - currByte);
+        //     std::cout << "Curr byte is " << currByte
+        //               << " and size of CRC is: " << sizeof(newMessage.crc) << std::endl;
+        //     if (currByte == sizeof(newMessage.crc))
+        //     {
+        //         if (!validateCRC(newMessage))
+        //         {
+        //             CRCFailed++;
+        //             state = HEADER_SEARCH;
+        //             currByte = 0;
+        //             break;
+        //         }
+        //         messageReceiveCallback(newMessage);
+        //         mostRecentMessage = newMessage;
+        //         state = HEADER_SEARCH;
+        //         currByte = 0;
+        //     }
+        //     break;
         default:
             break;
     }

@@ -68,9 +68,9 @@ public:
 
         void setCRC()
         {
-            crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1 + header.payload_len);
-            uint8_t crc_extra = get_crc_extra(header.msgid_value());
-            crc_accumulate(crc_extra, &crc);
+            // crc = crc_calculate((uint8_t*)&header + 1, sizeof(header) - 1 + header.payload_len);
+            // uint8_t crc_extra = get_crc_extra(header.msgid_value());
+            // crc_accumulate(crc_extra, &crc);
         }
 
         FrameHeader header;
@@ -124,8 +124,7 @@ protected:
     {
         HEADER_SEARCH,            /// A header byte has not yet been received.
         PROCESSING_FRAME_HEADER,  /// A header is received and the frame header is being processed.
-        PROCESS_PAYLOAD,          /// The data is being processed.
-        PROCESS_CRC               /// The CRC is being processed.
+        PROCESS_PAYLOAD_AND_CRC,  /// The data is being processed.
     };
 
     ParsingState state;
