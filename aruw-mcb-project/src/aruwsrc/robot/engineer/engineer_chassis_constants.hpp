@@ -56,7 +56,8 @@ static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 static constexpr tap::gpio::Analog::Pin CURRENT_SENSOR_PIN = tap::gpio::Analog::Pin::S;
 
 /// @see power_limiter.hpp for what these mean
-static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
+// Since there is no power limiting on the engineer, these values are set very high
+static constexpr float STARTING_ENERGY_BUFFER = 1000.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
