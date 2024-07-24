@@ -75,6 +75,9 @@ using namespace aruwsrc::dart;
 using namespace aruwsrc::testbed;
 #endif
 
+#include "aruwsrc/control/imu/madgwick.hpp"
+aruwsrc::control::imu::Madgwick madgwick(0.1, MAIN_LOOP_FREQUENCY);
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -102,6 +105,14 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+
+            madgwick.updateIMU(
+                modm::toRadian(drivers->mpu6500.getGx()),
+                modm::toRadian(drivers->mpu6500.getGy()),
+                modm::toRadian(drivers->mpu6500.getGz()),
+                drivers->mpu6500.getAx(),
+                drivers->mpu6500.getAy(),
+                drivers->mpu6500.getAz());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
