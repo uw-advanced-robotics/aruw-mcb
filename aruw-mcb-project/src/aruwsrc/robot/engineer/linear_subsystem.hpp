@@ -46,6 +46,8 @@ class LinearSubsystem : public tap::control::Subsystem
 public:
     LinearSubsystem(tap::Drivers* drivers, const LinearSubsystemConfig& config, tap::motor::MotorInterface* motor);
 
+    void initialize() override;
+
     void refresh() override;
 
     void refreshSafeDisconnect() override;
@@ -61,7 +63,7 @@ public:
         return std::abs(positionPid.getLastError()) <= setpointTolerance;
     }
 
-private:
+protected:
     LinearSubsystemConfig config;
     tap::motor::MotorInterface* motor;
 

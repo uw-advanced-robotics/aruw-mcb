@@ -35,6 +35,11 @@ LinearSubsystem::LinearSubsystem(
 {
 }
 
+void LinearSubsystem::initialize(){
+    motor->initialize();
+    positionPid.reset();
+}
+
 void LinearSubsystem::refresh(){
     positionPid.update(setpoint - motor->getEncoderUnwrapped());
     motor->setDesiredOutput(positionPid.getValue() + feedforward);
