@@ -19,17 +19,11 @@
 
 #if defined(TARGET_ENGINEER)
 
-#include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/engineer/extend_xaxis_command.hpp"
-#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
-#include "aruwsrc/robot/engineer/squeeze_grabber_command.hpp"
-#include "aruwsrc/robot/engineer/tow_subsystem.hpp"
-#include "aruwsrc/robot/engineer/xaxis_subsystem.hpp"
 
 using namespace tap::gpio;
 using tap::control::CommandMapper;
@@ -47,22 +41,8 @@ namespace aruwsrc
 {
 namespace control
 {
-static constexpr Digital::OutputPin GRABBER_PIN = Digital::OutputPin::E;
-static constexpr Digital::OutputPin X_AXIS_PIN = Digital::OutputPin::F;
-static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
-static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
-static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
-static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
 /* define subsystems --------------------------------------------------------*/
-GrabberSubsystem grabber(drivers(), GRABBER_PIN);
-XAxisSubsystem xAxis(drivers(), X_AXIS_PIN);
-TowSubsystem tower(
-    drivers(),
-    TOWER_LEFT_PIN,
-    TOWER_RIGHT_PIN,
-    TOWER_LEFT_LIMIT_SWITCH,
-    TOWER_RIGHT_LIMIT_SWITCH);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -73,11 +53,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
-{
-    drivers->commandScheduler.registerSubsystem(&grabber);
-    drivers->commandScheduler.registerSubsystem(&xAxis);
-}
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers) {}
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
