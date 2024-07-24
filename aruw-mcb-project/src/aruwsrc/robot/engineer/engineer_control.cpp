@@ -21,6 +21,8 @@
 
 #include "tap/control/command_scheduler.hpp"
 
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
@@ -41,6 +43,14 @@ namespace engineer_control
 {
 
 /* define subsystems --------------------------------------------------------*/
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
+aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
 /* define commands ----------------------------------------------------------*/
 
