@@ -38,19 +38,23 @@ struct LinearSubsystemConfig
 };
 
 /**
- * Abstract class for creating a linear-axis subsystem
+ * Abstract class for creating a linear-axis subsystem.
+ * Contains a positional PID controller meant to control a motor.
  */
 class LinearSubsystem : public tap::control::Subsystem
 {
 public:
     LinearSubsystem(tap::Drivers* drivers, const LinearSubsystemConfig& config, tap::motor::MotorInterface* motor);
 
-    // Primary method to be overriden by subclasses so that setpoint units can be converted
-    virtual void setSetpoint(float setpoint);
-
     void refresh() override;
 
     void refreshSafeDisconnect() override;
+
+    // Primary method to be overriden by subclasses so that setpoint units can be converted
+    virtual void setSetpoint(float setpoint);
+
+    // Returns the current position of the motor in setpoint units
+    virtual float getPosition();
 
     inline bool atSetpoint()
     {

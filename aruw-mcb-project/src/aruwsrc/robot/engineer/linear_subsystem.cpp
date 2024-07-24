@@ -35,4 +35,13 @@ LinearSubsystem::LinearSubsystem(
 {
 }
 
+void LinearSubsystem::refresh(){
+    positionPid.update(setpoint - motor->getEncoderUnwrapped());
+    motor->setDesiredOutput(positionPid.getValue() + feedforward);
+}
+
+void LinearSubsystem::refreshSafeDisconnect(){
+    motor->setDesiredOutput(0);
+}
+
 }  // namespace aruwsrc::robot::engineer
