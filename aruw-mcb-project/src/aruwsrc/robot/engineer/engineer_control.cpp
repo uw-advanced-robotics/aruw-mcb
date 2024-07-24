@@ -25,9 +25,9 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
-using namespace tap::gpio;
 using tap::control::CommandMapper;
 using namespace aruwsrc::engineer;
+using namespace aruwsrc::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -37,9 +37,7 @@ using namespace aruwsrc::engineer;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace aruwsrc
-{
-namespace control
+namespace engineer_control
 {
 
 /* define subsystems --------------------------------------------------------*/
@@ -63,21 +61,20 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
-}  // namespace control
 
-}  // namespace aruwsrc
+}  // namespace engineer_control
 
 namespace aruwsrc::engineer
 {
 void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &aruwsrc::control::remoteSafeDisconnectFunction);
-    aruwsrc::control::initializeSubsystems();
-    aruwsrc::control::registerEngineerSubsystems(drivers);
-    aruwsrc::control::setDefaultEngineerCommands(drivers);
-    aruwsrc::control::startEngineerCommands(drivers);
-    aruwsrc::control::registerEngineerIoMappings(drivers);
+        &engineer_control::remoteSafeDisconnectFunction);
+    engineer_control::initializeSubsystems();
+    engineer_control::registerEngineerSubsystems(drivers);
+    engineer_control::setDefaultEngineerCommands(drivers);
+    engineer_control::startEngineerCommands(drivers);
+    engineer_control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
 
