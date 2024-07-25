@@ -27,26 +27,36 @@ LinearSubsystem::LinearSubsystem(
     const LinearSubsystemConfig& config,
     tap::motor::MotorInterface* motor)
     : tap::control::Subsystem(drivers),
-      config(config),
       motor(motor),
       positionPid(config.p, config.i, config.d, config.maxErrorSum, config.maxOutput),
       setpointTolerance(config.setpointTolerance),
-      feedforward(config.feedforward)
+      feedforward(config.feedforward),
+      setpointToEncoderScalar(config.setpointToEncoderScalar)
 {
 }
 
-void LinearSubsystem::initialize(){
+void LinearSubsystem::initialize()
+{
     motor->initialize();
     positionPid.reset();
 }
 
-void LinearSubsystem::refresh(){
+void LinearSubsystem::refresh()
+{
     positionPid.update(setpoint - motor->getEncoderUnwrapped());
     motor->setDesiredOutput(positionPid.getValue() + feedforward);
 }
 
-void LinearSubsystem::refreshSafeDisconnect(){
-    motor->setDesiredOutput(0);
+void LinearSubsystem::refreshSafeDisconnect() { motor->setDesiredOutput(0); }
+
+void LinearSubsystem::setSetpoint(float setpoint)
+{
+    this->setpoint = setpoint * setpointToEncoderScalar;
+}
+
+float LinearSubsystem::getPosition()
+{
+    return motor->getEncoderUnwrapped() / setpointToEncoderScalar;
 }
 
 }  // namespace aruwsrc::robot::engineer

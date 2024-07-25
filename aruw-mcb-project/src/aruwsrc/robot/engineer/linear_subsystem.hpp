@@ -33,8 +33,9 @@ struct LinearSubsystemConfig
     float d;
     float maxErrorSum;
     float maxOutput;  // This value does not include the feedforward term
-    uint32_t feedforward;
-    float setpointTolerance;
+    uint32_t feedforward = 0;
+    float setpointTolerance = 0.0f;
+    float setpointToEncoderScalar = 1.0f;
 };
 
 /**
@@ -44,7 +45,10 @@ struct LinearSubsystemConfig
 class LinearSubsystem : public tap::control::Subsystem
 {
 public:
-    LinearSubsystem(tap::Drivers* drivers, const LinearSubsystemConfig& config, tap::motor::MotorInterface* motor);
+    LinearSubsystem(
+        tap::Drivers* drivers,
+        const LinearSubsystemConfig& config,
+        tap::motor::MotorInterface* motor);
 
     void initialize() override;
 
@@ -52,25 +56,23 @@ public:
 
     void refreshSafeDisconnect() override;
 
-    // Primary method to be overriden by subclasses so that setpoint units can be converted
     virtual void setSetpoint(float setpoint);
 
-    // Returns the current position of the motor in setpoint units
     virtual float getPosition();
 
-    inline bool atSetpoint()
-    {
-        return std::abs(positionPid.getLastError()) <= setpointTolerance;
-    }
+    inline bool atSetpoint() { return std::abs(positionPid.getLastError()) <= setpointTolerance; }
+
+    const char* getName() const override { return "Linear axis Subsystem"; }
 
 protected:
-    LinearSubsystemConfig config;
     tap::motor::MotorInterface* motor;
 
     modm::Pid<float> positionPid;
     float setpoint;
     float setpointTolerance;
     uint32_t feedforward;
+
+    float setpointToEncoderScalar;
 
 };  // class LinearSubsystem
 
