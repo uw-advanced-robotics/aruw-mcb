@@ -24,7 +24,7 @@
 
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
 struct LinearSubsystemConfig
 {

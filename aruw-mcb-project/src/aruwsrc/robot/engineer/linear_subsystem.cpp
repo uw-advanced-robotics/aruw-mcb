@@ -19,7 +19,7 @@
 
 #include "linear_subsystem.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
 
 LinearSubsystem::LinearSubsystem(
