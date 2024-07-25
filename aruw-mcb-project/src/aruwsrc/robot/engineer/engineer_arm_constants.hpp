@@ -36,6 +36,50 @@ static constexpr LinearSubsystemConfig xAxisConfig = {
     .setpointToEncoderScalar = 1.0f,
 };
 
-}
+static constexpr LinearSubsystemConfig LiftConfig = {
+    .p = 0.0f,
+    .i = 0.0f,
+    .d = 0.0f,
+    .maxErrorSum = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .feedforward = 0.1,  // TODO: Find out correct value for this
+    .setpointTolerance = 0.0f,
+    .setpointToEncoderScalar = 1.0f,
+};
+
+static constexpr LinearSubsystemConfig yawConfig = {
+    .p = 0.0f,
+    .i = 0.0f,
+    .d = 0.0f,
+    .maxErrorSum = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .feedforward = 0,
+    .setpointTolerance = 0.0f,
+    .setpointToEncoderScalar = 1.0f,
+};
+
+static constexpr LinearSubsystemConfig pitchConfig = {
+    .p = 0.0f,
+    .i = 0.0f,
+    .d = 0.0f,
+    .maxErrorSum = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .feedforward = 0,
+    .setpointTolerance = 0.0f,
+    .setpointToEncoderScalar = 1.0f,
+};
+
+static constexpr LinearSubsystemConfig rollConfig = {
+    .p = 0.0f,
+    .i = 0.0f,
+    .d = 0.0f,
+    .maxErrorSum = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .feedforward = 0,
+    .setpointTolerance = 0.0f,
+    .setpointToEncoderScalar = 1.0f,
+};
+
+}  // namespace aruwsrc::engineer
 
 #endif

@@ -25,7 +25,11 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+
+#include "engineer_arm_constants.hpp"
+#include "engineer_drivers.hpp"
+#include "linear_subsystem.hpp"
+#include "pitch_subsystem.hpp"
 
 using tap::control::CommandMapper;
 using namespace aruwsrc::engineer;
@@ -51,6 +55,8 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+
+LinearSubsystem xAxis(drivers(), xAxisConfig, nullptr);
 
 /* define commands ----------------------------------------------------------*/
 
