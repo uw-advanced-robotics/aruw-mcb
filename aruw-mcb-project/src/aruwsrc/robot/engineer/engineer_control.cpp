@@ -45,7 +45,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace engineer_control
 {
-
 /* define subsystems --------------------------------------------------------*/
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,

@@ -76,5 +76,5 @@ protected:
 
 };  // class LinearSubsystem
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif  // LINEAR_SUBSYSTEM_HPP_

@@ -21,7 +21,6 @@
 
 namespace aruwsrc::engineer
 {
-
 LinearSubsystem::LinearSubsystem(
     tap::Drivers* drivers,
     const LinearSubsystemConfig& config,
@@ -59,4 +58,4 @@ float LinearSubsystem::getPosition()
     return motor->getEncoderUnwrapped() / setpointToEncoderScalar;
 }
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer

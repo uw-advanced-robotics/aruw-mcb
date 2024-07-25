@@ -50,5 +50,5 @@ public:
     const char* getName() const override { return "Pitch Subsystem"; }
 };  // class PitchSubsystem
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif  // ARM_SUBSYSTEM_HPP_
