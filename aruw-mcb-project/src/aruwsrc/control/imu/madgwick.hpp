@@ -62,7 +62,7 @@ public:
     float getYaw()
     {
         if (!anglesComputed) computeAngles();
-        return yaw * 57.29578f;
+        return yaw * 57.29578f + 180;
     }
 
     void getQuaternion(float *w, float *x, float *y, float *z)

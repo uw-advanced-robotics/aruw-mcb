@@ -77,6 +77,12 @@ using namespace aruwsrc::testbed;
 
 #include "aruwsrc/control/imu/madgwick.hpp"
 aruwsrc::control::imu::Madgwick madgwick(0.1, MAIN_LOOP_FREQUENCY);
+float headingMahony = 0;
+float headingMadgwick = 0;
+
+
+bool reset = false;
+
 
 int main()
 {
@@ -107,12 +113,21 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
             madgwick.updateIMU(
-                modm::toRadian(drivers->mpu6500.getGx()),
-                modm::toRadian(drivers->mpu6500.getGy()),
-                modm::toRadian(drivers->mpu6500.getGz()),
+                drivers->mpu6500.getGx(),
+                drivers->mpu6500.getGy(),
+                drivers->mpu6500.getGz(),
                 drivers->mpu6500.getAx(),
                 drivers->mpu6500.getAy(),
                 drivers->mpu6500.getAz());
+            
+            headingMadgwick = madgwick.getYaw();
+            headingMahony = drivers->mpu6500.getYaw();
+
+            if(reset){
+                reset = false;
+                drivers->mpu6500.mahonyAlgorithm.reset();
+                madgwick.setQuaternion(1, 0, 0, 0);
+            }
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());

@@ -279,6 +279,8 @@ public:
 
     inline void setCalibrationSamples(float samples) { MPU6500_OFFSET_SAMPLES = samples; }
 
+    Mahony mahonyAlgorithm;
+
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;
 
@@ -325,8 +327,6 @@ private:
     uint8_t rx = 0;  ///< Byte used for reading data in the read protothread
 
     RawData raw;
-
-    Mahony mahonyAlgorithm;
 
     imu_heater::ImuHeater imuHeater;
 
