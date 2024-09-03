@@ -46,8 +46,14 @@ void ChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
+bool resetOdo = false;
 void ChassisKFOdometry::update()
 {
+    if(resetOdo){
+        reset();
+        resetOdo = false;
+    }
+
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
         chassisYaw = 0;

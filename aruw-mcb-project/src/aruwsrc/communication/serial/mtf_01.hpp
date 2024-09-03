@@ -120,9 +120,9 @@ protected:
         return true;
     }
 
-    // The spec sheet says the below computation should be correct, but it's off by 10x
-    static constexpr float X_FUDGE_FACTOR = 10.0f;
-    static constexpr float Y_FUDGE_FACTOR = 10.0f;
+    // The spec sheet says the below computation should be correct, but it's off by 10x. Not relevant for MTF-02
+    static constexpr float X_FUDGE_FACTOR = 1.0f;
+    static constexpr float Y_FUDGE_FACTOR = 1.0f;
 
     // Returns translation in meters per second
     static modm::Vector2f getVelocity(const MicrolinkMessage &msg)
