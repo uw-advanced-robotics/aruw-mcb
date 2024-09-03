@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -28,10 +28,11 @@
 namespace aruwsrc::algorithms
 {
 /**
- * A PID controller for velocity control. Running the control does not set output based on error,
- * but instead changes the output.
+ * A PIDF controller for velocity control.
+ * 
+ * This controller works in 2 ways, if there is a feedforward term, it acts as a position PID controller, 
  */
-class VelocityPid
+class PIDEController
 {
 public:
     struct Config
@@ -42,19 +43,26 @@ public:
         float feedforward;
         float max_output;
         float max_integral;
-        float error_deadband;
     };
 
-    VelocityPid(Config& config);
+    PIDEController(Config& config);
 
-    float runController(float error);
+    float setSetpoint(float setpoint)
+    {
+        if(this->setpoint != setpoint){
+            current_value_integral = 0;
+        }
+        this->setpoint = setpoint;
+    }
 
-    float runController(float error, float error_derivative, float feedforward, float dt);
+    float runController(float measurement, float dt);
 
 private:
-    Config& config_;
+    Config& config;
+    float setpoint = 0;
     float output = 0;
     float current_value_integral = 0;
+    float last_error = 0;
 };
 
 }  // namespace aruwsrc::algorithms
