@@ -44,7 +44,7 @@ public:
         float compensatedFeedforward = feedforward * cosf(setpointRadians);
 
         positionPid.update(setpoint - motor->getEncoderUnwrapped());
-        motor->setDesiredOutput(positionPid.getValue() + feedforward);
+        motor->setDesiredOutput(positionPid.getValue() + compensatedFeedforward);
     }
 };  // class PitchSubsystem
 

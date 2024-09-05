@@ -21,6 +21,7 @@
 
 #include "tap/control/command_scheduler.hpp"
 
+#include "arm/arm_superstructure.hpp"
 #include "arm/joint_subsystem.hpp"
 #include "arm/pitch_subsystem.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -34,6 +35,7 @@
 using tap::control::CommandMapper;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::control;
+using namespace aruwsrc::engineer::arm;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -56,6 +58,12 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
 JointSubsystem xAxis(drivers(), xAxisConfig, nullptr, "X axis joint");
+JointSubsystem lift(drivers(), LiftConfig, nullptr, "Lift joint");
+PitchSubsystem pitch(drivers(), pitchConfig, nullptr);
+JointSubsystem yaw(drivers(), yawConfig, nullptr, "Yaw joint");
+JointSubsystem roll(drivers(), rollConfig, nullptr, "Roll joint");
+
+ArmSuperstructure superstructure(&xAxis, &lift, &yaw, &pitch, &roll);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -63,7 +71,15 @@ JointSubsystem xAxis(drivers(), xAxisConfig, nullptr, "X axis joint");
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
+void initializeSubsystems()
+{
+    chassis.initialize();
+    xAxis.initialize();
+    lift.initialize();
+    pitch.initialize();
+    yaw.initialize();
+    roll.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers) {}
