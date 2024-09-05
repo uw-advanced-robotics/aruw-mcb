@@ -21,6 +21,8 @@
 
 #include "tap/control/command_scheduler.hpp"
 
+#include "arm/joint_subsystem.hpp"
+#include "arm/pitch_subsystem.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -28,8 +30,6 @@
 
 #include "engineer_arm_constants.hpp"
 #include "engineer_drivers.hpp"
-#include "linear_subsystem.hpp"
-#include "pitch_subsystem.hpp"
 
 using tap::control::CommandMapper;
 using namespace aruwsrc::engineer;
@@ -55,7 +55,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
-LinearSubsystem xAxis(drivers(), xAxisConfig, nullptr);
+JointSubsystem xAxis(drivers(), xAxisConfig, nullptr, "X axis joint");
 
 /* define commands ----------------------------------------------------------*/
 
