@@ -20,11 +20,11 @@
 #ifndef ENGINEER_ARM_CONSTANTS_HPP_
 #define ENGINEER_ARM_CONSTANTS_HPP_
 
-#include "linear_subsystem.hpp"
+#include "arm/joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
-static constexpr LinearSubsystemConfig xAxisConfig = {
+static constexpr JointSubsystemConfig xAxisConfig = {
     .p = 0.0f,
     .i = 0.0f,
     .d = 0.0f,
@@ -35,7 +35,7 @@ static constexpr LinearSubsystemConfig xAxisConfig = {
     .setpointToEncoderScalar = 1.0f,
 };
 
-static constexpr LinearSubsystemConfig LiftConfig = {
+static constexpr JointSubsystemConfig LiftConfig = {
     .p = 0.0f,
     .i = 0.0f,
     .d = 0.0f,
@@ -46,7 +46,7 @@ static constexpr LinearSubsystemConfig LiftConfig = {
     .setpointToEncoderScalar = 1.0f,
 };
 
-static constexpr LinearSubsystemConfig yawConfig = {
+static constexpr JointSubsystemConfig yawConfig = {
     .p = 0.0f,
     .i = 0.0f,
     .d = 0.0f,
@@ -57,7 +57,7 @@ static constexpr LinearSubsystemConfig yawConfig = {
     .setpointToEncoderScalar = 1.0f,
 };
 
-static constexpr LinearSubsystemConfig pitchConfig = {
+static constexpr JointSubsystemConfig pitchConfig = {
     .p = 0.0f,
     .i = 0.0f,
     .d = 0.0f,
@@ -68,7 +68,7 @@ static constexpr LinearSubsystemConfig pitchConfig = {
     .setpointToEncoderScalar = 1.0f,
 };
 
-static constexpr LinearSubsystemConfig rollConfig = {
+static constexpr JointSubsystemConfig rollConfig = {
     .p = 0.0f,
     .i = 0.0f,
     .d = 0.0f,

@@ -17,43 +17,49 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "linear_subsystem.hpp"
+#include "joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
-LinearSubsystem::LinearSubsystem(
+JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
-    const LinearSubsystemConfig& config,
-    tap::motor::MotorInterface* motor)
+    const JointSubsystemConfig& config,
+    tap::motor::MotorInterface* motor,
+    const char* jointName)
     : tap::control::Subsystem(drivers),
       motor(motor),
       positionPid(config.p, config.i, config.d, config.maxErrorSum, config.maxOutput),
       setpointTolerance(config.setpointTolerance),
       feedforward(config.feedforward),
-      setpointToEncoderScalar(config.setpointToEncoderScalar)
+      setpointToEncoderScalar(config.setpointToEncoderScalar),
+      name(jointName)
 {
 }
 
-void LinearSubsystem::initialize()
+void JointSubsystem::initialize()
 {
     motor->initialize();
     positionPid.reset();
 }
 
-void LinearSubsystem::refresh()
+void JointSubsystem::refresh()
 {
     positionPid.update(setpoint - motor->getEncoderUnwrapped());
     motor->setDesiredOutput(positionPid.getValue() + feedforward);
 }
 
-void LinearSubsystem::refreshSafeDisconnect() { motor->setDesiredOutput(0); }
+void JointSubsystem::refreshSafeDisconnect() { motor->setDesiredOutput(0); }
 
-void LinearSubsystem::setSetpoint(float setpoint)
+void JointSubsystem::setSetpoint(float setpoint)
 {
     this->setpoint = setpoint * setpointToEncoderScalar;
 }
 
-float LinearSubsystem::getPosition()
+float JointSubsystem::getSetpoint(){
+    return setpoint / setpointToEncoderScalar;
+}
+
+float JointSubsystem::getPosition()
 {
     return motor->getEncoderUnwrapped() / setpointToEncoderScalar;
 }

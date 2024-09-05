@@ -26,7 +26,7 @@
 
 namespace aruwsrc::engineer
 {
-struct LinearSubsystemConfig
+struct JointSubsystemConfig
 {
     float p;
     float i;
@@ -42,13 +42,14 @@ struct LinearSubsystemConfig
  * Abstract class for creating a linear-axis subsystem.
  * Contains a positional PID controller meant to control a motor.
  */
-class LinearSubsystem : public tap::control::Subsystem
+class JointSubsystem : public tap::control::Subsystem
 {
 public:
-    LinearSubsystem(
+    JointSubsystem(
         tap::Drivers* drivers,
-        const LinearSubsystemConfig& config,
-        tap::motor::MotorInterface* motor);
+        const JointSubsystemConfig& config,
+        tap::motor::MotorInterface* motor,
+        const char* jointName);
 
     void initialize() override;
 
@@ -56,13 +57,17 @@ public:
 
     void refreshSafeDisconnect() override;
 
-    virtual void setSetpoint(float setpoint);
+    void setSetpoint(float setpoint);
 
-    virtual float getPosition();
+    float getSetpoint();
+
+    float getPosition();
 
     inline bool atSetpoint() { return std::abs(positionPid.getLastError()) <= setpointTolerance; }
 
-    const char* getName() const override { return "Linear axis Subsystem"; }
+    bool isOnline() { return motor->isMotorOnline(); }
+
+    const char* getName() const override { return name; }
 
 protected:
     tap::motor::MotorInterface* motor;
@@ -74,7 +79,9 @@ protected:
 
     float setpointToEncoderScalar;
 
-};  // class LinearSubsystem
+    const char* name;
+
+};  // class JointSubsystem
 
 }  // namespace aruwsrc::engineer
 #endif  // LINEAR_SUBSYSTEM_HPP_

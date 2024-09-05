@@ -19,18 +19,18 @@
 #ifndef PITCH_SUBSYSTEM_HPP_
 #define PITCH_SUBSYSTEM_HPP_
 
-#include "linear_subsystem.hpp"
+#include "joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
-class PitchSubsystem : public LinearSubsystem
+class PitchSubsystem : public JointSubsystem
 {
 public:
     PitchSubsystem(
         tap::Drivers* drivers,
-        const LinearSubsystemConfig& config,
+        const JointSubsystemConfig& config,
         tap::motor::MotorInterface* motor)
-        : LinearSubsystem(drivers, config, motor)
+        : JointSubsystem(drivers, config, motor, "Pitch joint")
     {
     }
 
@@ -46,8 +46,6 @@ public:
         positionPid.update(setpoint - motor->getEncoderUnwrapped());
         motor->setDesiredOutput(positionPid.getValue() + feedforward);
     }
-
-    const char* getName() const override { return "Pitch Subsystem"; }
 };  // class PitchSubsystem
 
 }  // namespace aruwsrc::engineer
