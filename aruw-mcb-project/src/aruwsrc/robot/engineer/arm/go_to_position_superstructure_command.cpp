@@ -16,40 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef ARM_SUPERSTRUCTURE_HPP_
-#define ARM_SUPERSTRUCTURE_HPP_
 
-#include "joint_subsystem.hpp"
-#include "pitch_subsystem.hpp"
+#include "go_to_position_superstructure_command.hpp"
 
 namespace aruwsrc::engineer::arm
 {
 
-class ArmSuperstructure
+GoToPositionSuperstructure::GoToPositionSuperstructure(
+    ArmSuperstructure* superstructure,
+    Position position)
+    : superstructure(superstructure),
+      position(position)
 {
-public:
-    // Takes in 5 joints, lift reach yaw pitch roll
+    addSubsystemRequirement(superstructure->liftJoint);
+    addSubsystemRequirement(superstructure->reachJoint);
+    addSubsystemRequirement(superstructure->yawJoint);
+    addSubsystemRequirement(superstructure->pitchJoint);
+    addSubsystemRequirement(superstructure->rollJoint);
+}
 
-    ArmSuperstructure(
-        JointSubsystem* lift,
-        JointSubsystem* reach,
-        JointSubsystem* yaw,
-        PitchSubsystem* pitch,
-        JointSubsystem* roll);
+void GoToPositionSuperstructure::initialize()
+{
+    superstructure->goToPosition(position.lift, position.reach, position.yaw, position.pitch, position.roll);
+}
 
-    void goToPosition(float lift, float reach, float yaw, float pitch, float roll);
-
-    bool atSetpoint();
-
-    bool isOnline();
-
-    JointSubsystem* liftJoint;
-    JointSubsystem* reachJoint;
-    JointSubsystem* yawJoint;
-    PitchSubsystem* pitchJoint;
-    JointSubsystem* rollJoint;
-};
-
-}  // namespace aruwsrc::engineer::arm
-
-#endif
+} // aruwsrc::engineer::arm

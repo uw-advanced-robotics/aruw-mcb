@@ -45,7 +45,7 @@ void ArmSuperstructure::goToPosition(float lift, float reach, float yaw, float p
     rollJoint->setSetpoint(roll);
 }
 
-bool ArmSuperstructure::reachedPosition()
+bool ArmSuperstructure::atSetpoint()
 {
     return liftJoint->atSetpoint() && reachJoint->atSetpoint() && yawJoint->atSetpoint() &&
            pitchJoint->atSetpoint() && rollJoint->atSetpoint();
