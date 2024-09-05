@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef LINEAR_SUBSYSTEM_HPP_
-#define LINEAR_SUBSYSTEM_HPP_
+#ifndef JOINT_SUBSYSTEM_HPP_
+#define JOINT_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"

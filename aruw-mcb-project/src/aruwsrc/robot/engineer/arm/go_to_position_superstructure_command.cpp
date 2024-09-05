@@ -21,7 +21,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-
 GoToPositionSuperstructure::GoToPositionSuperstructure(
     ArmSuperstructure* superstructure,
     Position position)
@@ -37,7 +36,8 @@ GoToPositionSuperstructure::GoToPositionSuperstructure(
 
 void GoToPositionSuperstructure::initialize()
 {
-    superstructure->goToPosition(position.lift, position.reach, position.yaw, position.pitch, position.roll);
+    superstructure
+        ->goToPosition(position.lift, position.reach, position.yaw, position.pitch, position.roll);
 }
 
-} // aruwsrc::engineer::arm
+}  // namespace aruwsrc::engineer::arm

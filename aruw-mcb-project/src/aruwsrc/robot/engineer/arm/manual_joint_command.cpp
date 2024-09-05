@@ -21,7 +21,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-
 ManualJointCommand::ManualJointCommand(JointSubsystem* joint, setpointFunc func)
     : joint(joint),
       func(func)

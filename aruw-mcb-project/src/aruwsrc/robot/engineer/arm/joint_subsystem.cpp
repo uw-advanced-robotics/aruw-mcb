@@ -55,9 +55,7 @@ void JointSubsystem::setSetpoint(float setpoint)
     this->setpoint = setpoint * setpointToEncoderScalar;
 }
 
-float JointSubsystem::getSetpoint(){
-    return setpoint / setpointToEncoderScalar;
-}
+float JointSubsystem::getSetpoint() { return setpoint / setpointToEncoderScalar; }
 
 float JointSubsystem::getPosition()
 {

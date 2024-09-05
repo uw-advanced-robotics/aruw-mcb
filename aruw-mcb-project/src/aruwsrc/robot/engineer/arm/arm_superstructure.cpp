@@ -21,7 +21,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-
 ArmSuperstructure::ArmSuperstructure(
     JointSubsystem* lift,
     JointSubsystem* reach,

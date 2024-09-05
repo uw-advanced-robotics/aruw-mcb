@@ -25,8 +25,7 @@
 
 namespace aruwsrc::engineer::arm
 {
-
-    using setpointFunc = float (*)();
+using setpointFunc = float (*)();
 
 class ManualJointCommand : public tap::control::Command
 {

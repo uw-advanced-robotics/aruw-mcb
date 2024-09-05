@@ -24,7 +24,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-
 class ArmSuperstructure
 {
 public:
