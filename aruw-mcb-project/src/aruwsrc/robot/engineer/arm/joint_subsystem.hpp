@@ -67,7 +67,7 @@ public:
 
     float getPosition();
 
-    inline bool atSetpoint() { return std::abs(positionPid.getLastError()) <= setpointTolerance; }
+    inline bool atSetpoint() { return std::abs(positionPid.getLastError()) <= config.setpointTolerance; }
 
     bool isOnline() { return motor->isMotorOnline(); }
 
