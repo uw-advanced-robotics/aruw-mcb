@@ -38,8 +38,8 @@ struct JointSubsystemConfig
     float setpointTolerance = 0.0f;
     float setpointToEncoderScalar = 1.0f;
 
-    float lowerBound = -FLT_MAX;
-    float upperBound = FLT_MAX;
+    float lowerBound;
+    float upperBound;
 };
 
 /**
@@ -67,7 +67,10 @@ public:
 
     float getPosition();
 
-    inline bool atSetpoint() { return std::abs(positionPid.getLastError()) <= config.setpointTolerance; }
+    inline bool atSetpoint()
+    {
+        return std::abs(positionPid.getLastError()) <= config.setpointTolerance;
+    }
 
     bool isOnline() { return motor->isMotorOnline(); }
 

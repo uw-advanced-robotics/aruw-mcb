@@ -33,6 +33,8 @@ static constexpr JointSubsystemConfig xAxisConfig = {
     .feedforward = 0,
     .setpointTolerance = 0.0f,
     .setpointToEncoderScalar = 1.0f,
+    .lowerBound = 0.0f,
+    .upperBound = 1000.0f,
 };
 
 static constexpr JointSubsystemConfig LiftConfig = {
@@ -44,6 +46,8 @@ static constexpr JointSubsystemConfig LiftConfig = {
     .feedforward = 1,  // TODO: Find out correct value for this
     .setpointTolerance = 0.0f,
     .setpointToEncoderScalar = 1.0f,
+    .lowerBound = 0.0f,
+    .upperBound = 1000.0f,
 };
 
 static constexpr JointSubsystemConfig yawConfig = {
@@ -55,6 +59,8 @@ static constexpr JointSubsystemConfig yawConfig = {
     .feedforward = 0,
     .setpointTolerance = 0.0f,
     .setpointToEncoderScalar = 1.0f,
+    .lowerBound = -135.0f,
+    .upperBound = 135.0f,
 };
 
 static constexpr JointSubsystemConfig pitchConfig = {
@@ -63,9 +69,11 @@ static constexpr JointSubsystemConfig pitchConfig = {
     .d = 0.0f,
     .maxErrorSum = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
-    .feedforward = 0,
+    .feedforward = 0, // TODO: Figure out correct value for this
     .setpointTolerance = 0.0f,
     .setpointToEncoderScalar = 1.0f,
+    .lowerBound = -90.0f,
+    .upperBound = 0.0f
 };
 
 static constexpr JointSubsystemConfig rollConfig = {
@@ -77,6 +85,8 @@ static constexpr JointSubsystemConfig rollConfig = {
     .feedforward = 0,
     .setpointTolerance = 0.0f,
     .setpointToEncoderScalar = 1.0f,
+    .lowerBound = -45.0f,
+    .upperBound = 45.0f
 };
 
 }  // namespace aruwsrc::engineer
