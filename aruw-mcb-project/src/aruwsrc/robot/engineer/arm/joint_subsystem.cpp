@@ -29,9 +29,7 @@ JointSubsystem::JointSubsystem(
     : tap::control::Subsystem(drivers),
       motor(motor),
       positionPid(config.p, config.i, config.d, config.maxErrorSum, config.maxOutput),
-      setpointTolerance(config.setpointTolerance),
-      feedforward(config.feedforward),
-      setpointToEncoderScalar(config.setpointToEncoderScalar),
+      config(config),
       name(jointName)
 {
 }
@@ -45,21 +43,22 @@ void JointSubsystem::initialize()
 void JointSubsystem::refresh()
 {
     positionPid.update(setpoint - motor->getEncoderUnwrapped());
-    motor->setDesiredOutput(positionPid.getValue() + feedforward);
+    motor->setDesiredOutput(positionPid.getValue() + config.feedforward);
 }
 
 void JointSubsystem::refreshSafeDisconnect() { motor->setDesiredOutput(0); }
 
 void JointSubsystem::setSetpoint(float setpoint)
 {
-    this->setpoint = setpoint * setpointToEncoderScalar;
+    setpoint = std::clamp(setpoint, config.lowerBound, config.upperBound);
+    this->setpoint = setpoint * config.setpointToEncoderScalar;
 }
 
-float JointSubsystem::getSetpoint() { return setpoint / setpointToEncoderScalar; }
+float JointSubsystem::getSetpoint() { return setpoint / config.setpointToEncoderScalar; }
 
 float JointSubsystem::getPosition()
 {
-    return motor->getEncoderUnwrapped() / setpointToEncoderScalar;
+    return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
 }
 
 }  // namespace aruwsrc::engineer

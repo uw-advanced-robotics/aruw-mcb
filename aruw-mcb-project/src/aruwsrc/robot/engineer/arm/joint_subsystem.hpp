@@ -34,8 +34,12 @@ struct JointSubsystemConfig
     float maxErrorSum;
     float maxOutput;  // This value does not include the feedforward term
     uint32_t feedforward = 0;
+
     float setpointTolerance = 0.0f;
     float setpointToEncoderScalar = 1.0f;
+
+    float lowerBound = -FLT_MAX;
+    float upperBound = FLT_MAX;
 };
 
 /**
@@ -71,13 +75,10 @@ public:
 
 protected:
     tap::motor::MotorInterface* motor;
+    JointSubsystemConfig config;
 
     modm::Pid<float> positionPid;
     float setpoint;
-    float setpointTolerance;
-    uint32_t feedforward;
-
-    float setpointToEncoderScalar;
 
     const char* name;
 
