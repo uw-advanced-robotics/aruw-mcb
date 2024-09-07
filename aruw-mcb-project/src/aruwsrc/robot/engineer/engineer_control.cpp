@@ -28,15 +28,16 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "grabber/grabber_subsystem.hpp"
 
 #include "engineer_arm_constants.hpp"
 #include "engineer_drivers.hpp"
 
 using tap::control::CommandMapper;
-using namespace aruwsrc::engineer;
 using namespace aruwsrc::control;
+using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::arm;
-
+using namespace aruwsrc::engineer::grabber;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -64,6 +65,8 @@ JointSubsystem yaw(drivers(), yawConfig, nullptr, "Yaw joint");
 JointSubsystem roll(drivers(), rollConfig, nullptr, "Roll joint");
 
 ArmSuperstructure superstructure(&xAxis, &lift, &yaw, &pitch, &roll);
+
+GrabberSubsystem grabber(drivers(), nullptr);
 
 /* define commands ----------------------------------------------------------*/
 
