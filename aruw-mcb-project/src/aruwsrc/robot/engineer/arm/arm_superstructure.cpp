@@ -56,4 +56,14 @@ bool ArmSuperstructure::isOnline()
            pitchJoint->isOnline() && rollJoint->isOnline();
 }
 
+Position ArmSuperstructure::getPosition()
+{
+    return {
+        liftJoint->getPosition(),
+        reachJoint->getPosition(),
+        yawJoint->getPosition(),
+        pitchJoint->getPosition(),
+        rollJoint->getPosition()};
+}
+
 }  // namespace aruwsrc::engineer::arm

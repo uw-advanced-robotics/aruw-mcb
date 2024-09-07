@@ -21,6 +21,9 @@
 #define IK_SERIAL_HPP_
 
 #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/robot/engineer/arm/arm_superstructure.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -48,32 +51,32 @@ class IKSerial : public tap::communication::serial::DJISerial
 {
 public:
     IKSerial(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port)
-        : DJISerial(drivers, port)
+        : DJISerial(drivers, port), port(port)
     {
     }
 
-    void messageReceiveCallback(const ReceivedSerialMessage &completeMessage) override
-    {
-        if (completeMessage.messageType == IK_SOLUTION_MESSAGE_ID)
-        {
-            memcpy(&ikSolution, completeMessage.data, sizeof(IKSolution));
-        }
-        else if (completeMessage.messageType == SLOT_DELTA_MESSAGE_ID)
-        {
-            memcpy(&slotDelta, completeMessage.data, sizeof(SlotDelta));
-        }
-    }
+    void messageReceiveCallback(const ReceivedSerialMessage &completeMessage) override;
+
+    void sendJointPositions();
 
     IKSolution getIKSolution() const { return ikSolution; }
 
     SlotDelta getSlotDelta() const { return slotDelta; }
 
+    void attachSuperstructure(aruwsrc::engineer::arm::ArmSuperstructure *superstructure)
+    {
+        this->superstructure = superstructure;
+    }
+
     static constexpr uint8_t IK_SOLUTION_MESSAGE_ID = 0x01;
     static constexpr uint8_t SLOT_DELTA_MESSAGE_ID = 0x02;
+    static constexpr uint8_t JOINT_POSITION_MESSAGE_ID = 0x03;
 
 private:
+    tap::communication::serial::Uart::UartPort port;
     IKSolution ikSolution;
     SlotDelta slotDelta;
+    aruwsrc::engineer::arm::ArmSuperstructure *superstructure;
 };
 }  // namespace aruwsrc::engineer
 #endif  // IK_SERIAL_HPP_

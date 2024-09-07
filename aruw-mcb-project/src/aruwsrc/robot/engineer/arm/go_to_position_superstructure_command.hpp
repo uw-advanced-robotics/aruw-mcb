@@ -25,14 +25,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-struct Position
-{
-    float lift;
-    float reach;
-    float yaw;
-    float pitch;
-    float roll;
-};
 
 class GoToPositionSuperstructure : public tap::control::Command
 {

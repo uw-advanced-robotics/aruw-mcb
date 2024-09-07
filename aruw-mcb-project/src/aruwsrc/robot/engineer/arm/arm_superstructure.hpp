@@ -24,6 +24,15 @@
 
 namespace aruwsrc::engineer::arm
 {
+struct Position
+{
+    float lift;
+    float reach;
+    float yaw;
+    float pitch;
+    float roll;
+};
+
 class ArmSuperstructure
 {
 public:
@@ -37,6 +46,8 @@ public:
         JointSubsystem* roll);
 
     void goToPosition(float lift, float reach, float yaw, float pitch, float roll);
+
+    Position getPosition();
 
     bool atSetpoint();
 
