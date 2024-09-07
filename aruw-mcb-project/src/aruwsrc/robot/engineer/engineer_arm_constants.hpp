@@ -22,7 +22,7 @@
 
 #include "arm/joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::arm
 {
 static constexpr JointSubsystemConfig xAxisConfig = {
     .p = 0.0f,

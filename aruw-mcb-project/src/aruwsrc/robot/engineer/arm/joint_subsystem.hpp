@@ -24,7 +24,7 @@
 
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::arm
 {
 struct JointSubsystemConfig
 {
@@ -89,5 +89,5 @@ protected:
 
 };  // class JointSubsystem
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::arm
 #endif  // LINEAR_SUBSYSTEM_HPP_

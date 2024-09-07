@@ -19,7 +19,7 @@
 
 #include "joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::arm
 {
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
@@ -61,4 +61,4 @@ float JointSubsystem::getPosition()
     return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
 }
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::arm
