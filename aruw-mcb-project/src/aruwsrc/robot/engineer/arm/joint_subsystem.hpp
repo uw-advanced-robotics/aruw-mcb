@@ -55,6 +55,8 @@ public:
         tap::motor::MotorInterface* motor,
         const char* jointName);
 
+    ~JointSubsystem() {}
+
     void initialize() override;
 
     void refresh() override;

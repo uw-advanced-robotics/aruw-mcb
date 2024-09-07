@@ -21,9 +21,10 @@
 
 #include "tap/control/command_scheduler.hpp"
 
-#include "arm/arm_superstructure.hpp"
 #include "arm/joint_subsystem.hpp"
 #include "arm/pitch_subsystem.hpp"
+#include "arm/arm_superstructure.hpp"
+
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -77,11 +78,11 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     chassis.initialize();
-    xAxis.initialize();
-    lift.initialize();
-    pitch.initialize();
-    yaw.initialize();
-    roll.initialize();
+    // xAxis.initialize();
+    // lift.initialize();
+    // pitch.initialize();
+    // yaw.initialize();
+    // roll.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
