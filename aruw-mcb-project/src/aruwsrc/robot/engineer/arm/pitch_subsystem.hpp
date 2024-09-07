@@ -21,7 +21,7 @@
 
 #include "joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::arm
 {
 class PitchSubsystem : public JointSubsystem
 {
