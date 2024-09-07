@@ -40,8 +40,8 @@ public:
      */
     void refresh() override
     {
-        float setpointRadians = setpoint / setpointToEncoderScalar;
-        float compensatedFeedforward = feedforward * cosf(setpointRadians);
+        float setpointRadians = setpoint / config.setpointToEncoderScalar;
+        float compensatedFeedforward = config.feedforward * cosf(setpointRadians);
 
         positionPid.update(setpoint - motor->getEncoderUnwrapped());
         motor->setDesiredOutput(positionPid.getValue() + compensatedFeedforward);

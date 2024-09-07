@@ -25,7 +25,6 @@
 
 namespace aruwsrc::engineer::grabber
 {
-
 class SuckItCommand : public tap::control::Command
 {
 public:

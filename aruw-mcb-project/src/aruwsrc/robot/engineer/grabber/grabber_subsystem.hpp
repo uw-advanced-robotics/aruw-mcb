@@ -25,7 +25,6 @@
 
 namespace aruwsrc::engineer::grabber
 {
-
 class GrabberSubsystem : public tap::control::Subsystem
 {
 public:

@@ -51,7 +51,8 @@ class IKSerial : public tap::communication::serial::DJISerial
 {
 public:
     IKSerial(tap::Drivers *drivers, tap::communication::serial::Uart::UartPort port)
-        : DJISerial(drivers, port), port(port)
+        : DJISerial(drivers, port),
+          port(port)
     {
     }
 
