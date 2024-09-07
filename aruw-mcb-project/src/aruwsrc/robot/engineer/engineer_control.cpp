@@ -21,15 +21,15 @@
 
 #include "tap/control/command_scheduler.hpp"
 
-#include "arm/joint_subsystem.hpp"
-#include "arm/pitch_subsystem.hpp"
-#include "arm/arm_superstructure.hpp"
+#include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
+// #include "aruwsrc/robot/engineer/arm/pitch_subsystem.hpp"
+// #include "aruwsrc/robot/engineer/arm/arm_superstructure.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "grabber/grabber_subsystem.hpp"
+// #include "aruwsrc/robot/engineer/grabber/grabber_subsystem.hpp"
 
 #include "engineer_arm_constants.hpp"
 #include "engineer_drivers.hpp"
@@ -38,7 +38,7 @@ using tap::control::CommandMapper;
 using namespace aruwsrc::control;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::arm;
-using namespace aruwsrc::engineer::grabber;
+// using namespace aruwsrc::engineer::grabber;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -59,15 +59,17 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
-JointSubsystem xAxis(drivers(), xAxisConfig, nullptr, "X axis joint");
-JointSubsystem lift(drivers(), LiftConfig, nullptr, "Lift joint");
-PitchSubsystem pitch(drivers(), pitchConfig, nullptr);
-JointSubsystem yaw(drivers(), yawConfig, nullptr, "Yaw joint");
-JointSubsystem roll(drivers(), rollConfig, nullptr, "Roll joint");
+tap::motor::DjiMotor temp(drivers(), tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "temp");
 
-ArmSuperstructure superstructure(&xAxis, &lift, &yaw, &pitch, &roll);
+JointSubsystem xAxis(drivers(), xAxisConfig, &temp, "X axis joint");
+// JointSubsystem lift(drivers(), LiftConfig, nullptr, "Lift joint");
+// PitchSubsystem pitch(drivers(), pitchConfig, nullptr);
+// JointSubsystem yaw(drivers(), yawConfig, nullptr, "Yaw joint");
+// JointSubsystem roll(drivers(), rollConfig, nullptr, "Roll joint");
 
-GrabberSubsystem grabber(drivers(), nullptr);
+// ArmSuperstructure superstructure(&xAxis, &lift, &yaw, &pitch, &roll);
+
+// GrabberSubsystem grabber(drivers(), nullptr);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -77,7 +79,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
+    // chassis.initialize();
     // xAxis.initialize();
     // lift.initialize();
     // pitch.initialize();
@@ -86,7 +88,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers) {}
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *) {}
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
