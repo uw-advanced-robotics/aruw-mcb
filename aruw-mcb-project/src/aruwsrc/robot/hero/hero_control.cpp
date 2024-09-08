@@ -79,6 +79,9 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
+#include "aruwsrc/control/test_subsystem.hpp"
+#include "aruwsrc/robot/engineer/tester_subsystem.hpp"
+
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
@@ -133,6 +136,9 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 ClientDisplaySubsystem clientDisplay(drivers());
+
+aruwsrc::engineer::arm::TestSubsystem testSubsystem(drivers());
+aruwsrc::TesterSubsystem testerSubsystem(drivers());
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),

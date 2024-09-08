@@ -21,18 +21,6 @@
 
 namespace aruwsrc::engineer::arm
 {
-JointSubsystem::JointSubsystem(
-    tap::Drivers* drivers,
-    const JointSubsystemConfig& config,
-    tap::motor::MotorInterface* motor,
-    const char* jointName)
-    : tap::control::Subsystem(drivers),
-      motor(motor),
-      positionPid(config.p, config.i, config.d, config.maxErrorSum, config.maxOutput),
-      config(config),
-      name(jointName)
-{
-}
 
 void JointSubsystem::initialize()
 {
@@ -40,25 +28,23 @@ void JointSubsystem::initialize()
     positionPid.reset();
 }
 
-void JointSubsystem::refresh()
-{
-    positionPid.update(setpoint - motor->getEncoderUnwrapped());
-    motor->setDesiredOutput(positionPid.getValue() + config.feedforward);
-}
+// void JointSubsystem::refresh()
+// {
+//     positionPid.update(setpoint - motor->getEncoderUnwrapped());
+//     motor->setDesiredOutput(positionPid.getValue() + config.feedforward);
+// }
 
-void JointSubsystem::refreshSafeDisconnect() { motor->setDesiredOutput(0); }
+// void JointSubsystem::setSetpoint(float setpoint)
+// {
+//     setpoint = std::clamp(setpoint, config.lowerBound, config.upperBound);
+//     this->setpoint = setpoint * config.setpointToEncoderScalar;
+// }
 
-void JointSubsystem::setSetpoint(float setpoint)
-{
-    setpoint = std::clamp(setpoint, config.lowerBound, config.upperBound);
-    this->setpoint = setpoint * config.setpointToEncoderScalar;
-}
+// float JointSubsystem::getSetpoint() { return setpoint / config.setpointToEncoderScalar; }
 
-float JointSubsystem::getSetpoint() { return setpoint / config.setpointToEncoderScalar; }
-
-float JointSubsystem::getPosition()
-{
-    return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
-}
+// float JointSubsystem::getPosition()
+// {
+//     return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
+// }
 
 }  // namespace aruwsrc::engineer::arm

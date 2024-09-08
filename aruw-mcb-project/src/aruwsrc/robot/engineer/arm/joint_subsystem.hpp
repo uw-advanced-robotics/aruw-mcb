@@ -53,28 +53,33 @@ public:
         tap::Drivers* drivers,
         const JointSubsystemConfig& config,
         tap::motor::MotorInterface* motor,
-        const char* jointName);
-
-    ~JointSubsystem() {}
+        const char* jointName)
+        : tap::control::Subsystem(drivers),
+          motor(motor),
+          config(config),
+          positionPid(config.p, config.i, config.d, config.maxErrorSum, config.maxOutput),
+          name(jointName)
+    {
+    }
 
     void initialize() override;
 
-    void refresh() override;
+    // void refresh() override;
 
-    void refreshSafeDisconnect() override;
+    void refreshSafeDisconnect() override { motor->setDesiredOutput(0); }
 
-    void setSetpoint(float setpoint);
+    // void setSetpoint(float setpoint);
 
-    float getSetpoint();
+    // float getSetpoint();
 
-    float getPosition();
+    // float getPosition();
 
-    inline bool atSetpoint()
-    {
-        return std::abs(positionPid.getLastError()) <= config.setpointTolerance;
-    }
+    // inline bool atSetpoint()
+    // {
+    //     return std::abs(positionPid.getLastError()) <= config.setpointTolerance;
+    // }
 
-    bool isOnline() { return motor->isMotorOnline(); }
+    // bool isOnline() { return motor->isMotorOnline(); }
 
     const char* getName() const override { return name; }
 
@@ -90,4 +95,4 @@ protected:
 };  // class JointSubsystem
 
 }  // namespace aruwsrc::engineer::arm
-#endif  // LINEAR_SUBSYSTEM_HPP_
+#endif  // JOINT_SUBSYSTEM_HPP_

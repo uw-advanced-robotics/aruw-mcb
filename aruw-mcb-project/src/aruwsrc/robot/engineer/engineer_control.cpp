@@ -25,6 +25,8 @@
 // #include "aruwsrc/robot/engineer/arm/pitch_subsystem.hpp"
 // #include "aruwsrc/robot/engineer/arm/arm_superstructure.hpp"
 
+#include "aruwsrc/robot/engineer/arm/test_subsystem.hpp"
+
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -61,7 +63,10 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
 tap::motor::DjiMotor temp(drivers(), tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "temp");
 
-JointSubsystem xAxis(drivers(), xAxisConfig, &temp, "X axis joint");
+
+TestSubsystem testSubsystem(drivers());
+
+// JointSubsystem xAxis(drivers(), xAxisConfig, &temp, "X axis joint");
 // JointSubsystem lift(drivers(), LiftConfig, nullptr, "Lift joint");
 // PitchSubsystem pitch(drivers(), pitchConfig, nullptr);
 // JointSubsystem yaw(drivers(), yawConfig, nullptr, "Yaw joint");
