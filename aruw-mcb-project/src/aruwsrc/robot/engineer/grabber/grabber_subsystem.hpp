@@ -30,11 +30,11 @@ class GrabberSubsystem : public tap::control::Subsystem
 public:
     GrabberSubsystem(
         tap::Drivers* drivers,
-        aruwsrc::control::pneumatic::GpioSolenoid* grabberSolenoid);
-
-    void initialize() override {}
-
-    void refresh() override {}
+        aruwsrc::control::pneumatic::GpioSolenoid* grabberSolenoid)
+        : tap::control::Subsystem(drivers),
+          pump(grabberSolenoid)
+    {
+    }
 
     void refreshSafeDisconnect() override { pump->off(); }
 

@@ -64,22 +64,22 @@ public:
 
     void initialize() override;
 
-    // void refresh() override;
+    void refresh() override;
 
     void refreshSafeDisconnect() override { motor->setDesiredOutput(0); }
 
-    // void setSetpoint(float setpoint);
+    void setSetpoint(float setpoint);
 
-    // float getSetpoint();
+    float getSetpoint();
 
-    // float getPosition();
+    float getPosition();
 
-    // inline bool atSetpoint()
-    // {
-    //     return std::abs(positionPid.getLastError()) <= config.setpointTolerance;
-    // }
+    inline bool atSetpoint()
+    {
+        return std::abs(positionPid.getLastError()) <= config.setpointTolerance;
+    }
 
-    // bool isOnline() { return motor->isMotorOnline(); }
+    bool isOnline() { return motor->isMotorOnline(); }
 
     const char* getName() const override { return name; }
 

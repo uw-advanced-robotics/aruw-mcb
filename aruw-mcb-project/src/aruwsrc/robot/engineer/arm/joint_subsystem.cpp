@@ -28,23 +28,23 @@ void JointSubsystem::initialize()
     positionPid.reset();
 }
 
-// void JointSubsystem::refresh()
-// {
-//     positionPid.update(setpoint - motor->getEncoderUnwrapped());
-//     motor->setDesiredOutput(positionPid.getValue() + config.feedforward);
-// }
+void JointSubsystem::refresh()
+{
+    positionPid.update(setpoint - motor->getEncoderUnwrapped());
+    motor->setDesiredOutput(positionPid.getValue() + config.feedforward);
+}
 
-// void JointSubsystem::setSetpoint(float setpoint)
-// {
-//     setpoint = std::clamp(setpoint, config.lowerBound, config.upperBound);
-//     this->setpoint = setpoint * config.setpointToEncoderScalar;
-// }
+void JointSubsystem::setSetpoint(float setpoint)
+{
+    setpoint = std::clamp(setpoint, config.lowerBound, config.upperBound);
+    this->setpoint = setpoint * config.setpointToEncoderScalar;
+}
 
-// float JointSubsystem::getSetpoint() { return setpoint / config.setpointToEncoderScalar; }
+float JointSubsystem::getSetpoint() { return setpoint / config.setpointToEncoderScalar; }
 
-// float JointSubsystem::getPosition()
-// {
-//     return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
-// }
+float JointSubsystem::getPosition()
+{
+    return motor->getEncoderUnwrapped() / config.setpointToEncoderScalar;
+}
 
 }  // namespace aruwsrc::engineer::arm
