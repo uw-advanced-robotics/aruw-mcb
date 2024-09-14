@@ -87,6 +87,30 @@ static constexpr JointSubsystemConfig rollConfig = {
     .lowerBound = -45.0f,
     .upperBound = 45.0f};
 
-}  // namespace aruwsrc::engineer
+static constexpr Position homePosition = {
+    .lift = 0.0f,
+    .reach = 0.0f,
+    .yaw = 0.0f,
+    .pitch = 0.0f,
+    .roll = 0.0f,
+};
+
+static constexpr Position intakePosition = {
+    .lift = 0.0f,
+    .reach = 0.0f,
+    .yaw = 0.0f,
+    .pitch = 0.0f,
+    .roll = 0.0f,
+};
+
+static constexpr Position centerTunnelPosition = {
+    .lift = 0.0f,
+    .reach = 0.0f,
+    .yaw = 0.0f,
+    .pitch = 0.0f,
+    .roll = 0.0f,
+};
+
+}  // namespace aruwsrc::engineer::arm
 
 #endif
