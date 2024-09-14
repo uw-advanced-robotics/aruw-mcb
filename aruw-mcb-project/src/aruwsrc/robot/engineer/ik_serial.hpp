@@ -54,6 +54,7 @@ public:
         : DJISerial(drivers, port),
           port(port)
     {
+        positionMessage.messageType = JOINT_POSITION_MESSAGE_ID;
     }
 
     void messageReceiveCallback(const ReceivedSerialMessage &completeMessage) override;
@@ -78,6 +79,9 @@ private:
     IKSolution ikSolution;
     SlotDelta slotDelta;
     aruwsrc::engineer::arm::ArmSuperstructure *superstructure;
+
+    DJISerial::SerialMessage<sizeof(aruwsrc::engineer::arm::Position)> positionMessage;
+
 };
 }  // namespace aruwsrc::engineer
 #endif  // IK_SERIAL_HPP_

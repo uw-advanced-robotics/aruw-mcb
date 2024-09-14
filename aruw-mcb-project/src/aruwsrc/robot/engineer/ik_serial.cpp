@@ -43,8 +43,6 @@ void IKSerial::sendJointPositions()
     }
 
     aruwsrc::engineer::arm::Position position = superstructure->getPosition();
-    DJISerial::SerialMessage<sizeof(position)> positionMessage;
-    positionMessage.messageType = JOINT_POSITION_MESSAGE_ID;
     memcpy(positionMessage.data, &position, sizeof(position));
     positionMessage.setCRC16();
     drivers->uart.write(
