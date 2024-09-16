@@ -22,7 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/mock/tow_subsystem_mock.hpp"
+#include "aruwsrc/mock/engineer/tow_subsystem_mock.hpp"
 #include "aruwsrc/robot/engineer/manual_tow_command.hpp"
 
 using aruwsrc::engineer::ManualTowCommand;

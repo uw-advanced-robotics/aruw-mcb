@@ -47,6 +47,9 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -111,8 +114,6 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
-
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
@@ -120,7 +121,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-MecanumChassisSubsystem chassis(drivers(), &currentSensor);
+MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -179,17 +180,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-/* define commands ----------------------------------------------------------*/
+aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
-// @todo: keybindings
-aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
-    sentryRequestSubsystem);
+/* define commands ----------------------------------------------------------*/
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -396,15 +389,27 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     waterwheelAgitator,
     turret,
+    {&beybladeCommand},
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
     &chassisAutorotateCommand,
     nullptr,
-    sentryResponseHandler);
+    &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+
+// Cap Bank
+aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::SPRINT);
+aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -425,16 +430,22 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressedVNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&kicker::launchKickerNoHeatLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
+// Same thing as leftMousePressedBPressed; used for ease of access.
+HoldRepeatCommandMapping leftMousePressedVPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
     false);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -472,13 +483,27 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
+// cap bank
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&capBankToggleCommand},
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+HoldCommandMapping shiftPressed(
+    drivers(),
+    {&capBankSprintCommand},
+    RemoteMapState({Remote::Key::SHIFT}));
+
+HoldCommandMapping ctrlPressed(
+    drivers(),
+    {&capBankHalfSprintCommand},
+    RemoteMapState({Remote::Key::CTRL}));
+
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentryRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -488,12 +513,12 @@ void initializeSubsystems()
     turret.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
+    capBankSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -503,6 +528,7 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -521,10 +547,6 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -532,8 +554,9 @@ void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&leftMousePressedVPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
@@ -543,6 +566,9 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&bCtrlPressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace hero_control
 

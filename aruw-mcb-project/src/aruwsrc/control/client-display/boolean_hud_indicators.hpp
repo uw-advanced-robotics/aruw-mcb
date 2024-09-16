@@ -20,7 +20,9 @@
 #ifndef BOOLEAN_HUD_INDICATORS_HPP_
 #define BOOLEAN_HUD_INDICATORS_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -51,8 +53,7 @@ public:
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
-     * @param[in] sentryResponseHandler Global sentry response handler that contains the current
-     * movement state of the sentry.
+     * @param[in] refSerial Ref system data to get ammo count.
      */
     BooleanHudIndicators(
         tap::control::CommandScheduler &commandScheduler,
@@ -61,7 +62,7 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler);
+        const tap::communication::serial::RefSerial *refSerial);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -110,8 +111,8 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates whether or not the sentry is moving. */
-        SENTRY_DRIVE_STATUS,
+        /** Indicates there is ammo. */
+        AMMO_AVAILABLE,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -133,7 +134,7 @@ private:
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
             BooleanHUDIndicatorTuple(
-                "SEN DRIVE ",
+                "BuY AMMO ",
                 Tx::GraphicColor::GREEN,
                 Tx::GraphicColor::PURPLISH_RED),
         };
@@ -163,10 +164,21 @@ private:
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
 
     /**
-     * SentryResponseHandler that provides information about whether or not the sentry is
-     * moving.
+     * Ref Serial provides referee system data to get whether or not there is ammo remaining.
      */
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler;
+    const tap::communication::serial::RefSerial *refSerial;
+
+    inline bool haveAmmo()
+    {
+#if defined(TARGET_HERO_PERSEUS)
+
+        return refSerial->getRobotData().turret.bulletsRemaining42 > 2 &&
+               refSerial->getRobotData().turret.bulletsRemaining42 < 1000;
+#else
+        return refSerial->getRobotData().turret.bulletsRemaining17 > 10 &&
+               refSerial->getRobotData().turret.bulletsRemaining17 < 1000;
+#endif
+    }
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
@@ -191,6 +203,17 @@ private:
      */
     Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
+
+    bool hasAmmo = false;
+    // How often to toggle the out of ammo indicator
+    static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 500.0f;
+    tap::arch::PeriodicMilliTimer outOfAmmoTimer;
+
+    static constexpr uint16_t AMMO_INDICATOR_X = 960;
+    static constexpr uint16_t AMMO_INDICATOR_Y = 825;
+
+    static constexpr uint16_t AMMO_TEXT_X = 815;
+    static constexpr uint16_t AMMO_TEXT_Y = AMMO_INDICATOR_Y + 10;
 };
 }  // namespace aruwsrc::control::client_display
 

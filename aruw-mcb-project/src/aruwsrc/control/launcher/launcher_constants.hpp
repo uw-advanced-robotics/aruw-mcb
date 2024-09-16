@@ -20,6 +20,7 @@
 #ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -42,10 +43,7 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#if defined(TARGET_SENTRY_HYDRA)
-static constexpr tap::can::CanBus TURRET0_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-static constexpr tap::can::CanBus TURRET1_CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-#else
+#ifndef TARGET_SENTRY_HYDRA
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
@@ -58,6 +56,12 @@ static constexpr float LAUNCHER_PID_KI = 0.3f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
+#elif defined(TARGET_SENTRY_HYDRA)
+static constexpr float LAUNCHER_PID_KP = 30.0f;
+static constexpr float LAUNCHER_PID_KI = 0.4f;
+static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
@@ -75,6 +79,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {0.0f, 0.0f},
     {4.0f, 1900.0f},
     {10.0f, 3850.0f},
+    {15.0f, 5750.0f},
     {16.0f, 6350.0f},
     {18.0f, 8500.0f},
 };
@@ -105,9 +110,10 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {15.0f, 4400.0f},
-    {18.0f, 4850.0f},
-    {30.0f, 6900.0f},
+    {15.0f, 4900.0f},
+    {18.0f, 6050.0f},
+    {27.5f, 7000.0f},
+    {30.0f, 7700.0f},
     {32.0f, 8400.0f},
 };
 #elif defined(TARGET_STANDARD_ELSA)
@@ -131,9 +137,17 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_HERO_PERSEUS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 130'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
 #elif defined(TARGET_SENTRY_HYDRA)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
+#endif
+
+#if defined(TARGET_HERO_PERSEUS)
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
+#else
+static constexpr float LAUNCHER_SPEED =
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 1;
 #endif
 
 }  // namespace aruwsrc::control::launcher

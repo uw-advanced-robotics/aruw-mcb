@@ -64,51 +64,6 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
     frictionWheelSpinRefLimitedCommand.execute();
 }
 
-TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_1_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(30));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_2_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(30));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(barrelSpeedLimit17ID2_used_when_ref_serial_online_barrel_42mm_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(16));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
 TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_serial_online)
 {
     FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
@@ -135,25 +90,6 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
 
     refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(launch_speed_changes_when_ref_serial_online_and_barrel_speed_changes)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        0,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(30));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-
-    refSerialOnline = true;
 
     frictionWheelSpinRefLimitedCommand.execute();
 }
