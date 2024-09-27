@@ -22,8 +22,8 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/contiguous_float.hpp"
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
@@ -67,7 +67,8 @@ public:
 
     /**
      * @see TurretControllerInterface for more details.
-     * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
+     * @param[in] desiredSetpoint The unwrapped yaw desired setpoint in the world frame. Clamped
+     * within chassis frame turret angle limits if applicable.
      */
     void runController(const uint32_t dt, const float desiredSetpoint) final;
 

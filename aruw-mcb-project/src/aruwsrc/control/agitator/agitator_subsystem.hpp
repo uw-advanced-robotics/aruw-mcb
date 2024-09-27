@@ -89,7 +89,11 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { agitatorMotor.setDesiredOutput(0); }
+    inline void refreshSafeDisconnect() override
+    {
+        agitatorMotor.setDesiredOutput(0);
+        clearJam();
+    }
 
     /**
      * @return The angle set in `setSetpoint`.
@@ -163,7 +167,7 @@ public:
 
     void onHardwareTestStart() override;
 
-    mockable const char* getName() override { return "Agitator"; }
+    mockable const char* getName() const override { return "Agitator"; }
 
 protected:
     /**

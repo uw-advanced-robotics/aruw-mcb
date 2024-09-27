@@ -19,16 +19,34 @@ from SCons.Script import *
 
 from .parse_args import USAGE
 
-VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
-                        "STANDARD_ELSA",
+# TODO: Make this sync up with check.py and c_cpp_properties.json if possible
+VALID_ROBOT_TYPES   = [ "STANDARD_ELSA",
                         "STANDARD_SPIDER",
+                        "STANDARD_ORION",
+                        "STANDARD_CYGNUS",
                         "DRONE",
                         "ENGINEER",
-                        "SENTRY_BEEHIVE",
-                        "HERO_CYCLONE",
+                        "SENTRY_HYDRA",
+                        "HERO_PERSEUS",
                         "DART",
                         "TESTBED",
                         "MOTOR_TESTER" ]
+
+ROBOT_CLASS = {
+    "STANDARD_ELSA": "standard",
+    "STANDARD_SPIDER": "standard",
+    "STANDARD_ORION": "standard",
+    "STANDARD_CYGNUS": "standard",
+    "DRONE": "drone",
+    "ENGINEER": "engineer",
+    "SENTRY_HYDRA": "sentry",
+    "HERO_PERSEUS": "hero",
+    "DART": "dart",
+    "TESTBED": "testbed"
+}
+
+# Make sure that all robots have a class
+assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
 
 def get_robot_type():
     robot_type = ARGUMENTS.get("robot")

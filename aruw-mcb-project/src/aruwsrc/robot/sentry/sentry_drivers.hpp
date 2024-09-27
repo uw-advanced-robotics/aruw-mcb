@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -33,9 +33,10 @@
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::sentry
@@ -51,10 +52,18 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
+          oledDisplay(
+              this,
+              &visionCoprocessor,
+              &turretMCBCanCommBus1,
+              &turretMCBCanCommBus2,
+              &chassisMcbLite,
+              &turretMajorMcbLite),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          chassisMcbLite(this, tap::communication::serial::Uart::Uart8),
+          turretMajorMcbLite(this, tap::communication::serial::Uart::Uart7)
     {
     }
 
@@ -67,12 +76,14 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    control::ControlOperatorInterface controlOperatorInterface;
+    control::sentry::SentryControlOperatorInterface controlOperatorInterface;
     serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    aruwsrc::virtualMCB::MCBLite chassisMcbLite;
+    aruwsrc::virtualMCB::MCBLite turretMajorMcbLite;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

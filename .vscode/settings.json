@@ -69,7 +69,14 @@
         "valarray": "cpp",
         "variant": "cpp",
         "SConstruct": "python",
-        "SConscript": "python"
+        "SConscript": "python",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "ranges": "cpp",
+        "stop_token": "cpp",
+        "numbers": "cpp",
+        "span": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
@@ -97,4 +104,15 @@
         ]
     },
     "git.autoRepositoryDetection": false,
+    // For file templates (see extensions section in README.md)
+    "auto-snippets.snippets": [
+        {
+            "pattern": "**/*_command.hpp",
+            "snippet": "declare-command"
+        },
+        {
+            "pattern": "**/*_subsystem.hpp",
+            "snippet": "declare-subsystem"
+        },
+    ]
 }

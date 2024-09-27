@@ -36,11 +36,12 @@ namespace chassis
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId)
-    : HolonomicChassisSubsystem(drivers, currentSensor),
+    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
@@ -93,7 +94,7 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
         r,
         getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
 
 void Holonomic4MotorChassisSubsystem::refresh()
@@ -113,12 +114,6 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
-
-    // short circuit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        return;
-    }
 
     // total velocity error for all wheels
     float totalError = 0.0f;

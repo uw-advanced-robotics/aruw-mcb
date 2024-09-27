@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -29,6 +30,9 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
+#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -56,19 +60,32 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
+    defined(TARGET_STANDARD_CYGNUS)
+    // Hero slip ring cannot handle
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#endif
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
+    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
      */
     // MCB has power inlet facing forward
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+#elif defined(TARGET_SENTRY_HYDRA)
+    // MCB is on a diagonal
+    // @todo: ensure this is correct
+    static constexpr float MCB_ROTATION_OFFSET = 0;
 #else
     // MCB has power inlet facing backwards
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
@@ -148,13 +165,12 @@ public:
      */
     struct ChassisOdometryData
     {
-        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
-        float xPos;          ///< x position of the chassis (in m).
-        float yPos;          ///< y position of the chassis (in m).
-        float zPos;          ///< z position of the chassis (in m).
-        float pitch;         ///< world frame pitch of the chassis (in rad).
-        float yaw;           ///< world frame yaw of the chassis (in rad).
-        float roll;          ///< world frame roll of the chassis (in rad).
+        float xPos;   ///< x position of the chassis in the world frame (in m).
+        float yPos;   ///< y position of the chassis in the world frame (in m).
+        float zPos;   ///< z position of the chassis in the world frame (in m).
+        float roll;   ///< world frame roll of the chassis (in rad).
+        float pitch;  ///< world frame pitch of the chassis (in rad).
+        float yaw;    ///< world frame yaw of the chassis (in rad).
     } modm_packed;
 
     /**
@@ -162,14 +178,45 @@ public:
      */
     struct TurretOdometryData
     {
-        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
-        float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
-                             ///< rad).
-        float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+        float xPos;   ///< x position of the turret in the world frame (in m).
+        float yPos;   ///< y position of the turret in the world frame (in m).
+        float zPos;   ///< z position of the turret in the world frame (in m).
+        float roll;   ///< roll of turret
+        float pitch;  ///< Pitch angle of turret relative to plane parallel to the ground (in
+                      ///< rad).
+        float yaw;    ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+    } modm_packed;
+
+    struct AutoNavSetpointData
+    {
+        bool pathFound;
+        float x;
+        float y;
+        long long timestamp;
+    } modm_packed;
+
+    struct ArucoResetPacket
+    {
+        float x;
+        float y;
+        float z;
+        float quatW;
+        float quatX;
+        float quatY;
+        float quatZ;
+        long long timestamp;
+        uint8_t turretId;
+    } modm_packed;
+
+    struct ArucoResetData
+    {
+        ArucoResetPacket data;
+        bool updated;  // whether or not this was received on the current cycle
     } modm_packed;
 
     struct OdometryData
     {
+        uint32_t timestamp;
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
@@ -215,6 +262,12 @@ public:
         return lastAimData[turretID];
     }
 
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
+
+    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
+
+    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+
     mockable inline bool getSomeTurretHasTarget() const
     {
         bool hasTarget = false;
@@ -235,26 +288,10 @@ public:
         return hasTarget;
     }
 
-    mockable inline void attachOdometryInterface(
-        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
+    mockable inline void attachTransformer(
+        aruwsrc::algorithms::transforms::TransformerInterface* transformer)
     {
-        this->odometryInterface = odometryInterface;
-    }
-
-    /**
-     * Specify the turret orientation for auto-aim to reference based on the target robot.
-     *
-     * @param[in] turretOrientationInterface The interface that provides turret information to the
-     * vision coprocessor
-     * @param[in] turretID The turret ID of the orientation interface that will be used to identify
-     * the turret.
-     */
-    mockable inline void attachTurretOrientationInterface(
-        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
-        uint8_t turretID)
-    {
-        assert(turretID < control::turret::NUM_TURRETS);
-        turretOrientationInterfaces[turretID] = turretOrientationInterface;
+        this->transformer = transformer;
     }
 
     mockable void sendShutdownMessage();
@@ -263,11 +300,28 @@ public:
 
     mockable void sendSelectNewTargetMessage();
 
+    mockable void sendSentryMotionStrategy();
+
     static inline void handleTimeSyncRequest()
     {
         visionCoprocessorInstance->risingEdgeTime = tap::arch::clock::getTimeMicroseconds();
     }
 
+    // This is for compatibility with the OLED menu
+    bool* getMutableMotionStrategyPtr(
+        aruwsrc::communication::serial::SentryMotionStrategyType messageType)
+    {
+        return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
+    }
+
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
+    // @todo private should not be here
 private:
     enum TxMessageTypes
     {
@@ -279,17 +333,20 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 11
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
+        CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
-    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
     static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
@@ -306,6 +363,12 @@ private:
     /// Time in ms between sending competition result status (as reported by the ref system).
     static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
 
+    /// Time in ms between sending sentry motion strategy message.
+    static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
+    /** Time in ms between sending the bullets remaining message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_BULLETS_REMAINING_MSG = 100;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
@@ -317,24 +380,55 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
+    static constexpr uint8_t MAXSETPOINTS = 50;
+    struct AutoNavCoordinate
+    {
+        float x;
+        float y;
+    };
+
+    struct AutoNavSetpointMessage
+    {
+        // Header
+        uint32_t sequenceNum;
+        float speed;
+        uint32_t numSetpoints;
+        // Setpoints
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
+
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
+
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequenceNum = 0,
+        .speed = 0.0f,
+        .numSetpoints = 0,
+        .setpoints = {}};
+
+    ArucoResetData lastArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
-
-    aruwsrc::control::turret::TurretOrientationInterface*
-        turretOrientationInterfaces[control::turret::NUM_TURRETS];
+    aruwsrc::algorithms::transforms::TransformerInterface* transformer;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
-
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
 
     tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
+
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
@@ -349,6 +443,14 @@ private:
      */
     bool decodeToTurretAimData(const ReceivedSerialMessage& message);
 
+    bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+
+    // Current motion strategy for sentry
+    bool sentryMotionStrategy[static_cast<uint8_t>(
+        aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {0, 1, 0};
+
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
@@ -359,7 +461,7 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
+    void sendBulletsRemaining();
 };
 }  // namespace serial
 }  // namespace aruwsrc

@@ -26,10 +26,12 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     tap::control::Command &launchCommand,
     const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
-    governor::CvOnTargetGovernor &cvOnTargetGovernor)
+    governor::CvOnTargetGovernor &cvOnTargetGovernor,
+    std::optional<ConstantVelocityAgitatorCommand *> command)
     : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
-      cvOnTargetGovernor(cvOnTargetGovernor)
+      cvOnTargetGovernor(cvOnTargetGovernor),
+      command(command)
 {
 }
 
@@ -40,23 +42,38 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     float fireRate = 0.0f;
 
     auto launchMode = cvOnTargetGovernor.inShotTimingMode() ? FULL_AUTO : this->launchMode;
+    bool enableConstantRotation = false;
     switch (launchMode)
     {
         case SINGLE:
             timesToReschedule = 1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
             break;
-        case FULL_AUTO_10HZ:
+        case NO_HEATING:
+            timesToReschedule = -1;
+            fireRate = getCurrentBarrelCoolingRate();
+            break;
+        case LIMITED_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
+            break;
+        case LIMITED_20HZ:
+            timesToReschedule = -1;
+            fireRate = 20;
             break;
         case FULL_AUTO:
             timesToReschedule = -1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            enableConstantRotation = true;
             break;
         default:
             assert(false);
             break;
+    }
+
+    if (command.has_value())
+    {
+        command.value()->enableConstantRotation(enableConstantRotation);
     }
 
     if (fireRateReselectionManager.has_value())
@@ -67,5 +84,14 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     setMaxTimesToSchedule(timesToReschedule);
 
     tap::control::HoldRepeatCommandMapping::executeCommandMapping(currState);
+
+    if (!held)
+    {
+        if (command.has_value())
+        {
+            command.value()->enableConstantRotation(false);
+        }
+    }
 }
+
 }  // namespace aruwsrc::control::agitator

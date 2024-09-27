@@ -16,7 +16,10 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 import subprocess
-from os.path import abspath
+from os.path import abspath, dirname, join
+import datetime as dt
+
+from build_tools import extract_robot_type
 
 Import("env")
 Import("args")
@@ -28,16 +31,30 @@ IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/robot/**/*_control.cpp", "ar
 
 ignored_files = []
 ignored_dirs = []
+def get_output(command):
+    return (subprocess.check_output(command).decode('UTF-8')).strip()
 try:
-    get_user_name = ((subprocess.check_output(["git", "config", "user.name"]).decode('UTF-8'))).strip()
+    get_user_name = get_output(["git", "config", "user.name"])
 except subprocess.CalledProcessError as error:
     get_user_name = "Unknown"
     print(error.output)
 try:
-    get_sha = ((subprocess.check_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])).decode('UTF-8')).strip()
+    get_sha = get_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])
 except subprocess.CalledProcessError as error:
     get_sha = "Unknown"
     print(error.output)
+try:
+    now = dt.datetime.now()
+    get_date = f"{now.month:02}-{now.day:02}"  # Including time causes scons to recompile all files whenever time changes
+except subprocess.CalledProcessError as error:
+    get_date = "Unknown"
+    print(error.output)
+try:
+    get_branch_name = get_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+except subprocess.CalledProcessError as error:
+    get_branch_name = "Unknown"
+    print(error.output)
+
 
 if args["TARGET_ENV"] == "tests":
     ignored_files.extend(IGNORED_FILES_WHILE_TESTING)
@@ -46,8 +63,13 @@ env_cpy = env.Clone()
 
 # Append on the global robot target build flag
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
-env_cpy.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+
+# Create a specific build env for the about menu, so that the whole codebase doesn't need a recompile.
+env_cpy_about_menu = env_cpy.Clone()
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
 
 
 if args["COMPILE_SRC"]:
@@ -56,7 +78,25 @@ if args["COMPILE_SRC"]:
 else:
     rawSrcs = []
 
+robot_directory = join("aruwsrc", "robot")
+robot_class = extract_robot_type.ROBOT_CLASS[args["ROBOT_TYPE"][len("TARGET_"):]]
+class_directory = join(robot_directory, robot_class)
+
+sim_directory = join("aruwsrc", "sim-initialization")
+
 for source in rawSrcs:
-    sources.append(env_cpy.Object(source))
+    # Only compile robot-specific sources
+    if source.startswith(robot_directory):
+        directory = dirname(source)
+        if not(directory == robot_directory or directory == class_directory):
+            continue
+    if source.startswith(sim_directory):
+        if not source.endswith(f"{robot_class}_sim.cpp"):
+            continue
+
+    if source == join("aruwsrc", "display", "about_menu.cpp"):
+        sources.append(env_cpy_about_menu.Object(source))
+    else:
+        sources.append(env_cpy.Object(source))
 
 Return('sources')

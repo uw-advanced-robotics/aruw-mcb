@@ -21,7 +21,6 @@
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
 namespace aruwsrc::virtualMCB
@@ -30,7 +29,7 @@ VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
-    SerialMCBLite* motorHandler,
+    MCBLite* mcbLite,
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
@@ -43,19 +42,16 @@ VirtualDjiMotor::VirtualDjiMotor(
           name,
           encoderWrapped,
           encoderRevolutions),
-      motorHandler(motorHandler)
+      mcbLite(mcbLite)
 {
 }
 
 void VirtualDjiMotor::initialize()
 {
-    motorHandler->motorTxHandler.addMotorToManager(this);
+    mcbLite->motorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
 }
 
-void VirtualDjiMotor::attachSelfToRxHandler()
-{
-    motorHandler->canRxHandler.attachReceiveHandler(this);
-}
+void VirtualDjiMotor::attachSelfToRxHandler() { mcbLite->canRxHandler.attachReceiveHandler(this); }
 
 }  // namespace aruwsrc::virtualMCB

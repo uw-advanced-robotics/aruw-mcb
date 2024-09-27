@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_CYCLONE)
+#if defined(TARGET_HERO_PERSEUS)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -34,6 +34,9 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -44,13 +47,16 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/control/chassis/chassis_diagonal_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -89,6 +95,7 @@ using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
+using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::hero;
 
 /*
@@ -107,8 +114,6 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::communication::serial::SentryRequestSubsystem sentryRequestSubsystem(drivers());
-
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
@@ -116,7 +121,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(
@@ -143,18 +148,9 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_PITCH_MOTOR,
-    false,
+    true,
     "Pitch Turret");
-tap::motor::DoubleDjiMotor yawMotor(
-    drivers(),
-    YAW_BACK_MOTOR_ID,
-    YAW_FRONT_MOTOR_ID,
-    CAN_BUS_YAW_MOTORS,
-    CAN_BUS_YAW_MOTORS,
-    true,
-    true,
-    "Yaw Front Turret",
-    "Yaw Back Turret");
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -164,6 +160,12 @@ HeroTurretSubsystem turret(
     &getTurretMCBCanComm());
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+
+// transforms
+StandardAndHeroTransformer transformer(odometrySubsystem, turret);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+
+StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -178,17 +180,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-/* define commands ----------------------------------------------------------*/
+aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
-// @todo: keybindings
-aruwsrc::communication::serial::NoMotionStrategyCommand sendSentryNoMotionStrategy(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToFriendlyBaseCommand sendSentryGoToFriendlyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToEnemyBaseCommand sendSentryGoToEnemyBase(
-    sentryRequestSubsystem);
-aruwsrc::communication::serial::GoToSupplierZoneCommand sendSentryGoToSupplierZone(
-    sentryRequestSubsystem);
+/* define commands ----------------------------------------------------------*/
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -198,12 +192,12 @@ ChassisImuDriveCommand chassisImuDriveCommand(
 
 ChassisDriveCommand chassisDriveCommand(drivers(), &drivers()->controlOperatorInterface, &chassis);
 
-ChassisDiagonalDriveCommand chassisDiagonalDriveCommand(
+ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 BeybladeCommand beybladeCommand(
     drivers(),
@@ -234,14 +228,8 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
-    *drivers(),
-    turret.yawMotor,
-    world_rel_chassis_imu::YAW_PID_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPid(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_CONFIG,
-    world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
@@ -249,6 +237,11 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     turret.yawMotor,
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
+
+algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+    *drivers(),
+    turret.yawMotor,
+    world_rel_chassis_imu::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
@@ -261,10 +254,14 @@ algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTu
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
-tap::algorithms::FuzzyPD worldFrameYawTurretImuPosPidCv(
-    world_rel_turret_imu::YAW_FUZZY_POS_PD_AUTO_AIM_CONFIG,
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
+    world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
     getTurretMCBCanComm(),
@@ -272,7 +269,15 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
+algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    getTurretMCBCanComm(),
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
+    worldFramePitchTurretImuVelPidCv);
+
 // turret commands
+// @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for
+// this
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -289,7 +294,7 @@ cv::TurretCVCommand turretCVCommand(
     &drivers()->controlOperatorInterface,
     &turret,
     &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuController,
+    &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
@@ -372,6 +377,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+// @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
 ClientDisplayCommand clientDisplayCommand(
@@ -383,15 +389,27 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     waterwheelAgitator,
     turret,
+    {&beybladeCommand},
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
     &beybladeCommand,
-    &chassisDiagonalDriveCommand,
-    &chassisImuDriveCommand,
-    sentryResponseHandler);
+    &chassisAutorotateCommand,
+    nullptr,
+    &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+
+// Cap Bank
+aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::SPRINT);
+aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
@@ -412,16 +430,22 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressedVNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&kicker::launchKickerNoHeatLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
+// Same thing as leftMousePressedBPressed; used for ease of access.
+HoldRepeatCommandMapping leftMousePressedVPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
     false);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -448,17 +472,9 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping qPressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::Q}));
-PressCommandMapping ePressed(
-    drivers(),
-    {&chassisImuDriveCommand},
-    RemoteMapState({Remote::Key::E}));
 PressCommandMapping xPressed(
     drivers(),
-    {&chassisDiagonalDriveCommand},
+    {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -467,13 +483,27 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
+// cap bank
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&capBankToggleCommand},
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+HoldCommandMapping shiftPressed(
+    drivers(),
+    {&capBankSprintCommand},
+    RemoteMapState({Remote::Key::SHIFT}));
+
+HoldCommandMapping ctrlPressed(
+    drivers(),
+    {&capBankHalfSprintCommand},
+    RemoteMapState({Remote::Key::CTRL}));
+
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    sentryRequestSubsystem.initialize();
     chassis.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
@@ -482,12 +512,13 @@ void initializeSubsystems()
     waterwheelAgitator.initialize();
     turret.initialize();
     buzzer.initialize();
+    transformSubsystem.initialize();
+    capBankSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&sentryRequestSubsystem);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -496,12 +527,14 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&chassisDiagonalDriveCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
@@ -513,12 +546,7 @@ void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->visionCoprocessor.attachOdometryInterface(&odometrySubsystem);
-    drivers->visionCoprocessor.attachTurretOrientationInterface(&turret, 0);
-
-    drivers->refSerial.attachRobotToRobotMessageHandler(
-        aruwsrc::communication::serial::SENTRY_RESPONSE_MESSAGE_ID,
-        &sentryResponseHandler);
+    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -526,8 +554,9 @@ void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&leftMousePressedVPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
@@ -535,13 +564,11 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&ePressed);
     drivers->commandMapper.addMap(&xPressed);
-    // drivers->commandMapper.addMap(&cPressed);
-    // drivers->commandMapper.addMap(&gPressedCtrlNotPressed);
-    // drivers->commandMapper.addMap(&gCtrlPressed);
     drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace hero_control
 

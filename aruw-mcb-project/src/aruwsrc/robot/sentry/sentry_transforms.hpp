@@ -22,13 +22,17 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+#include "modm/math/geometry/location_2d.hpp"
+
+#include "sentry_turret_minor_subsystem.hpp"
 
 namespace aruwsrc::sentry
 {
 class SentryTransforms
 {
+    friend class SentryTransformAdapter;
+
 public:
     struct SentryTransformConfig
     {
@@ -40,8 +44,8 @@ public:
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-        const aruwsrc::control::turret::TurretSubsystem& turretLeft,
-        const aruwsrc::control::turret::TurretSubsystem& turretRight,
+        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
+        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
         const SentryTransformConfig& config);
 
     void updateTransforms();
@@ -63,6 +67,24 @@ public:
         return worldToTurretRight;
     };
 
+    inline const tap::algorithms::transforms::Transform& getChassisToMajor() const
+    {
+        return chassisToTurretMajor;
+    };
+
+    // If you pass a wrong turretID, the right turret will automatically be returned.
+    inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
+    {
+        if (turretID == turretLeft.getTurretID())
+        {
+            return worldToTurretLeft;
+        }
+        else
+        {
+            return worldToTurretRight;
+        }
+    }
+
     inline const tap::algorithms::transforms::Transform& getMajorToTurretLeft() const
     {
         return turretMajorToTurretLeft;
@@ -73,13 +95,41 @@ public:
         return turretMajorToTurretRight;
     };
 
+    inline const tap::algorithms::transforms::Transform& getMajorToMinor(uint8_t turretId) const
+    {
+        if (turretId == turretLeft.getTurretID())
+        {
+            return turretMajorToTurretLeft;
+        }
+        else
+        {
+            return turretMajorToTurretRight;
+        }
+    };
+
+    inline uint32_t getLastComputedOdometryTime() const
+    {
+        return chassisOdometry.getLastComputedOdometryTime();
+    }
+
+    inline modm::Vector2f getChassisVelocity2d() const
+    {
+        return chassisOdometry.getCurrentVelocity2D();
+    }
+
+protected:
+    inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
+    {
+        return chassisOdometry;
+    }
+
 private:
     SentryTransformConfig config;
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-    const aruwsrc::control::turret::TurretSubsystem& turretMinorGirlboss;
-    const aruwsrc::control::turret::TurretSubsystem& turretMinorMalewife;
+    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
+    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;

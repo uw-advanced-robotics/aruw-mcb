@@ -149,11 +149,11 @@ class TurretOnlineTest : public ChassisAutorotateCommandTest,
 {
 public:
     TurretOnlineTest()
-        : yawAngleFromCenter(ContiguousFloat(
+        : yawAngleFromCenter(WrappedFloat(
                                  GetParam().yawAngle - turret.yawMotor.getConfig().startAngle,
                                  -M_PI,
                                  M_PI)
-                                 .getValue()),
+                                 .getWrappedValue()),
           cac(&drivers,
               &(controlOperatorInterface),
               &chassis,
@@ -191,7 +191,7 @@ public:
     float yawAngleFromCenter;
 
     ChassisAutorotateCommand cac;
-    ContiguousFloat turretAngleActual;
+    WrappedFloat turretAngleActual;
 };
 
 TEST_P(TurretOnlineTest, execute_rotated_xy)
@@ -237,7 +237,7 @@ TEST_P(TurretOnlineTest, execute_autorotation_works)
 
     if (GetParam().chassisSymmetry != ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE &&
         !GetParam().yawLimited &&
-        turretAngleActual.difference(GetParam().yawSetpoint) >
+        turretAngleActual.minDifference(GetParam().yawSetpoint) >
             (M_PI - ChassisAutorotateCommand::TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         shouldAutorotate = false;

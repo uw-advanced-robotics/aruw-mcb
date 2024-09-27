@@ -103,8 +103,8 @@ protected:
     WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController;
     WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
     TurretUserWorldRelativeCommand turretCmd;
-    ContiguousFloat currentYawValue;
-    ContiguousFloat currentPitchValue;
+    WrappedFloat currentYawValue;
+    WrappedFloat currentPitchValue;
     float yawSetpoint;
     float pitchSetpoint;
     bool turretOnline = false;

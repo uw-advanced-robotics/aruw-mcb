@@ -31,8 +31,12 @@ namespace aruwsrc::control::imu
 ImuCalibrateCommand::ImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-    chassis::HolonomicChassisSubsystem *chassis)
+    chassis::HolonomicChassisSubsystem *chassis,
+    float velocityZeroThreshold,
+    float positionZeroThreshold)
     : tap::control::Command(),
+      velocityZeroThreshold(velocityZeroThreshold),
+      positionZeroThreshold(positionZeroThreshold),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
       chassis(chassis)
@@ -74,28 +78,6 @@ void ImuCalibrateCommand::initialize()
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
-}
-
-static inline bool turretReachedCenterAndNotMoving(
-    turret::TurretSubsystem *turret,
-    bool ignorePitch)
-{
-    return compareFloatClose(
-               0.0f,
-               turret->yawMotor.getChassisFrameVelocity(),
-               ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(
-               0.0f,
-               turret->yawMotor.getAngleFromCenter(),
-               ImuCalibrateCommand::POSITION_ZERO_THRESHOLD) &&
-           (ignorePitch || (compareFloatClose(
-                                0.0f,
-                                turret->pitchMotor.getChassisFrameVelocity(),
-                                ImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-                            compareFloatClose(
-                                0.0f,
-                                turret->pitchMotor.getAngleFromCenter(),
-                                ImuCalibrateCommand::POSITION_ZERO_THRESHOLD)));
 }
 
 void ImuCalibrateCommand::execute()
@@ -160,12 +142,19 @@ void ImuCalibrateCommand::execute()
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
+                calibrationState = CalibrationState::BUZZING;
+            }
+            buzzerTimer.restart(1000);
+            break;
+        case CalibrationState::BUZZING:
+            if (buzzerTimer.isExpired())
+            {
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
             }
-
+            tap::buzzer::playNote(&drivers->pwm, 1000);
             break;
-
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
             break;
     }
 

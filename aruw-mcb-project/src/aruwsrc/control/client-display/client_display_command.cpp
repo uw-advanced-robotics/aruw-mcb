@@ -41,13 +41,14 @@ ClientDisplayCommand::ClientDisplayCommand(
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
+    const std::vector<tap::control::Command *> avoidanceCommands,
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     const chassis::BeybladeCommand *chassisBeybladeCmd,
     const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
     const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -60,8 +61,13 @@ ClientDisplayCommand::ClientDisplayCommand(
           frictionWheelSubsystem,
           agitatorSubsystem,
           imuCalibrateCommand,
-          sentryResponseHandler),
-      chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
+          &drivers.refSerial),
+      capBankIndicator(refSerialTransmitter, capBank),
+      chassisOrientationIndicator(
+          drivers,
+          refSerialTransmitter,
+          robotTurretSubsystem,
+          avoidanceCommands),
       positionHudIndicators(
           drivers,
           visionCoprocessor,
@@ -92,6 +98,7 @@ void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
     booleanHudIndicators.initialize();
+    capBankIndicator.initialize();
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
@@ -119,6 +126,7 @@ bool ClientDisplayCommand::run()
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
+    PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
@@ -128,6 +136,7 @@ bool ClientDisplayCommand::run()
     while (!this->restarting)
     {
         PT_CALL(booleanHudIndicators.update());
+        PT_CALL(capBankIndicator.update());
         PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());

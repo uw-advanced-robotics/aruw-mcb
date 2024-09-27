@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -47,8 +47,7 @@ VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
       risingEdgeTime(0),
       lastAimData(),
-      odometryInterface(nullptr),
-      turretOrientationInterfaces{}
+      transformer(nullptr)
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -74,24 +73,20 @@ void VisionCoprocessor::initializeCV()
     // Set up the interrupt for the vision coprocessor sync handler
     VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
-    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt();
-    VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
-        modm::platform::Gpio::InputTrigger::RisingEdge);
+    VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt
+        VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
+            modm::platform::Gpio::InputTrigger::RisingEdge);
 #endif
 
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
-#if defined(TARGET_HERO_CYCLONE)
-    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 900'000>();
-    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 900'000>();
-#else
-    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, 1'000'000>();
-    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, 1'000'000>();
-#endif
+    drivers->uart.init<VISION_COPROCESSOR_TX_UART_PORT, VISION_COPROCESSOR_BAUD_RATE>();
+    drivers->uart.init<VISION_COPROCESSOR_RX_UART_PORT, VISION_COPROCESSOR_BAUD_RATE>();
 }
 
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+
     switch (completeMessage.messageType)
     {
         case CV_MESSAGE_TYPE_TURRET_AIM:
@@ -99,9 +94,53 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToTurretAimData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT:
+        {
+            decodeToAutoNavSetpointData(completeMessage);
+            return;
+        }
+        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        {
+            decodeToArucoResetData(completeMessage);
+            return;
+        }
         default:
             return;
     }
+}
+
+bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage& message)
+{
+    AutoNavSetpointMessage setpointData;
+    memcpy(&setpointData, &message.data, AUTO_NAV_SETPOINT_HEADER_SIZE);
+    // @todo limit size to prevent buffer overflow
+    size_t numSetpoints =
+        setpointData.numSetpoints <= MAXSETPOINTS ? setpointData.numSetpoints : MAXSETPOINTS;
+    memcpy(
+        &setpointData.setpoints,
+        &message.data[AUTO_NAV_SETPOINT_HEADER_SIZE],
+        sizeof(AutoNavCoordinate) * numSetpoints);
+    if (lastSetpointData.sequenceNum == setpointData.sequenceNum)
+    {
+        return true;
+    }
+    // clears path and denotes that the path has changed
+    autoNavPath.resetPath();
+    for (uint32_t i = 0; i < setpointData.numSetpoints; i++)
+    {
+        autoNavPath.pushPoint(
+            Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
+    }
+    lastSetpointData = setpointData;
+    return true;
+}
+
+bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
+{
+    // copy packet into data field
+    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastArucoData.updated = true;
+    return true;
 }
 
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
@@ -146,7 +185,8 @@ void VisionCoprocessor::sendMessage()
     sendRefereeRealtimeData();
     sendRefereeCompetitionResult();
     sendRefereeWarning();
-    sendTimeSyncMessage();
+    sendSentryMotionStrategy();
+    sendBulletsRemaining();
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
@@ -176,58 +216,6 @@ void VisionCoprocessor::sendRebootMessage()
         sizeof(rebootMessage));
 }
 
-void VisionCoprocessor::sendOdometryData()
-{
-    assert(odometryInterface != nullptr);
-
-    DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
-    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
-
-    odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
-
-    modm::Location2D<float> location = odometryInterface->getCurrentLocation2D();
-
-    float pitch = modm::toRadian(drivers->mpu6500.getPitch());
-    float roll = modm::toRadian(drivers->mpu6500.getRoll());
-    // transform the pitch/roll from the chassis frame to the world frame
-    tap::algorithms::rotateVector(&pitch, &roll, -location.getOrientation() - MCB_ROTATION_OFFSET);
-
-    // chassis odometry
-    odometryData->chassisOdometry.timestamp = getTimeMicroseconds();
-    odometryData->chassisOdometry.xPos = location.getX();
-    odometryData->chassisOdometry.yPos = location.getY();
-    odometryData->chassisOdometry.zPos = 0.0f;
-#if defined(ALL_SENTRIES)
-    odometryData->chassisOdometry.pitch = 0;
-    odometryData->chassisOdometry.roll = 0;
-    odometryData->chassisOdometry.yaw = 0;
-#else
-    odometryData->chassisOdometry.pitch = pitch;
-    odometryData->chassisOdometry.roll = roll;
-    odometryData->chassisOdometry.yaw = location.getOrientation();
-#endif
-
-    // number of turrets
-    odometryData->numTurrets = control::turret::NUM_TURRETS;
-
-    // turret odometry
-    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
-    {
-        assert(turretOrientationInterfaces[i] != nullptr);
-        odometryData->turretOdometry[i].timestamp =
-            turretOrientationInterfaces[i]->getLastMeasurementTimeMicros();
-        odometryData->turretOdometry[i].pitch = turretOrientationInterfaces[i]->getWorldPitch();
-        odometryData->turretOdometry[i].yaw = turretOrientationInterfaces[i]->getWorldYaw();
-    }
-
-    odometryMessage.setCRC16();
-
-    drivers->uart.write(
-        VISION_COPROCESSOR_TX_UART_PORT,
-        reinterpret_cast<uint8_t*>(&odometryMessage),
-        sizeof(odometryMessage));
-}
-
 void VisionCoprocessor::sendRobotTypeData()
 {
     if (sendRobotIdTimeout.execute())
@@ -241,6 +229,50 @@ void VisionCoprocessor::sendRobotTypeData()
             reinterpret_cast<uint8_t*>(&robotTypeMessage),
             sizeof(robotTypeMessage));
     }
+}
+
+void VisionCoprocessor::sendOdometryData()
+{
+    assert(transformer != nullptr);
+
+    DJISerial::SerialMessage<sizeof(OdometryData)> odometryMessage;
+    OdometryData* odometryData = reinterpret_cast<OdometryData*>(&odometryMessage.data);
+
+    odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
+
+    auto& worldToChassis = transformer->getWorldToChassis();
+
+    // chassis odometry
+    odometryData->timestamp = getTimeMicroseconds();
+    odometryData->chassisOdometry.xPos = worldToChassis.getX();
+    odometryData->chassisOdometry.yPos = worldToChassis.getY();
+    odometryData->chassisOdometry.zPos = worldToChassis.getZ();
+    odometryData->chassisOdometry.pitch = worldToChassis.getPitch();
+    odometryData->chassisOdometry.roll = worldToChassis.getRoll();
+    odometryData->chassisOdometry.yaw = worldToChassis.getYaw();
+
+    odometryData->numTurrets = aruwsrc::control::turret::NUM_TURRETS;
+
+    // turret odometry
+    for (size_t i = 0; i < MODM_ARRAY_SIZE(odometryData->turretOdometry); i++)
+    {
+        auto& worldToTurret = transformer->getWorldToTurret(i);
+
+        odometryData->turretOdometry[i].xPos = worldToTurret.getX();
+        odometryData->turretOdometry[i].yPos = worldToTurret.getY();
+        odometryData->turretOdometry[i].zPos = worldToTurret.getZ();
+        odometryData->turretOdometry[i].roll = worldToTurret.getRoll();
+        odometryData->turretOdometry[i].pitch = worldToTurret.getPitch();
+        odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
+    }
+
+    // @debug write into a class-variable for debugging, don't actually send to vision
+
+    odometryMessage.setCRC16();
+    drivers->uart.write(
+        VISION_COPROCESSOR_TX_UART_PORT,
+        reinterpret_cast<uint8_t*>(&odometryMessage),
+        sizeof(odometryMessage));
 }
 
 void VisionCoprocessor::sendHealthMessage()
@@ -340,29 +372,6 @@ void VisionCoprocessor::sendRefereeWarning()
     }
 }
 
-void VisionCoprocessor::sendTimeSyncMessage()
-{
-    uint32_t newRisingEdgeTime = risingEdgeTime;
-
-    if (prevRisingEdgeTime != newRisingEdgeTime)
-    {
-        prevRisingEdgeTime = newRisingEdgeTime;
-
-        DJISerial::SerialMessage<sizeof(uint32_t) + sizeof(uint8_t)> timeSyncResponseMessage;
-
-        timeSyncResponseMessage.messageType = CV_MESSAGE_TYPE_TIME_SYNC_RESP;
-
-        *reinterpret_cast<uint32_t*>(timeSyncResponseMessage.data) = risingEdgeTime;
-        *reinterpret_cast<uint8_t*>(timeSyncResponseMessage.data + sizeof(uint32_t)) = 0;
-        timeSyncResponseMessage.setCRC16();
-
-        drivers->uart.write(
-            VISION_COPROCESSOR_TX_UART_PORT,
-            reinterpret_cast<uint8_t*>(&timeSyncResponseMessage),
-            sizeof(timeSyncResponseMessage));
-    }
-}
-
 void VisionCoprocessor::sendSelectNewTargetMessage()
 {
     DJISerial::SerialMessage<4> selectNewTargetMessage;
@@ -376,4 +385,59 @@ void VisionCoprocessor::sendSelectNewTargetMessage()
         VISION_COPROCESSOR_TX_UART_PORT,
         reinterpret_cast<uint8_t*>(&selectNewTargetMessage),
         sizeof(selectNewTargetMessage));
+}
+
+void VisionCoprocessor::sendSentryMotionStrategy()
+{
+    if (sendMotionStrategyTimeout.execute())
+    {
+        const int num_motion_strat = sizeof(sentryMotionStrategy);
+        DJISerial::SerialMessage<sizeof(uint8_t)> sentryMotionStrategyMessage;
+        sentryMotionStrategyMessage.messageType = CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY;
+
+        // @todo this is for if they're all 0. This should really not be a risk: the system should
+        // allow exactly one array to be 1
+        sentryMotionStrategyMessage.data[0] = 0;
+        for (size_t i = 0; i < num_motion_strat; i++)
+        {
+            if (sentryMotionStrategy[i])
+            {
+                sentryMotionStrategyMessage.data[0] = i;
+                break;
+            }
+        }
+
+        sentryMotionStrategyMessage.setCRC16();
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&sentryMotionStrategyMessage),
+            sizeof(sentryMotionStrategyMessage));
+    }
+}
+
+void VisionCoprocessor::sendBulletsRemaining()
+{
+    if (sendBulletsRemainingTimeout.execute())
+    {
+        DJISerial::SerialMessage<sizeof(RefSerialData::Rx::TurretData::bulletsRemaining17)>
+            bulletsRemainMessage;
+        bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
+
+#if defined(TARGET_HERO_PERSEUS)
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
+#else
+        const uint16_t* bulletsRemaining =
+            &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
+#endif
+
+        memcpy(&bulletsRemainMessage.data, bulletsRemaining, sizeof(bulletsRemainMessage.data));
+
+        bulletsRemainMessage.setCRC16();
+
+        drivers->uart.write(
+            VISION_COPROCESSOR_TX_UART_PORT,
+            reinterpret_cast<uint8_t*>(&bulletsRemainMessage),
+            sizeof(bulletsRemainMessage));
+    }
 }

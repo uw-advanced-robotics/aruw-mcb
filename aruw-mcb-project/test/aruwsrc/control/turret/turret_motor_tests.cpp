@@ -137,7 +137,7 @@ TEST_F(TurretMotorTest, getChassisFrameMeasuredAngle__returns_default_when_yaw_m
 
     EXPECT_NEAR(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue(),
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
         1E-3);
 }
 
@@ -161,7 +161,7 @@ TEST_F(
     {
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
-        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().difference(angle), 1E-3);
+        EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle), 1E-3);
     }
 }
 
@@ -223,24 +223,24 @@ TEST_F(
 TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
     uint16_t minEncoderValue =
-        ContiguousFloat(
+        WrappedFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI +
                 1,
             0,
             DjiMotor::ENC_RESOLUTION)
-            .getValue();
+            .getWrappedValue();
 
     uint16_t maxEncoderValue =
-        ContiguousFloat(
+        WrappedFloat(
             TURRET_MOTOR_CONFIG.startEncoderValue +
                 +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle) *
                     DjiMotor::ENC_RESOLUTION / M_TWOPI -
                 1,
             0,
             DjiMotor::ENC_RESOLUTION)
-            .getValue();
+            .getWrappedValue();
 
     InSequence seq;
     EXPECT_CALL(motor, setDesiredOutput(-1000));
@@ -265,7 +265,7 @@ TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_of
 
     EXPECT_NE(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue());
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue());
 
     // Now turret offline
     motorOnline = false;
@@ -274,7 +274,7 @@ TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_of
 
     EXPECT_NEAR(
         TURRET_MOTOR_CONFIG.startAngle,
-        turretMotor.getChassisFrameMeasuredAngle().getValue(),
+        turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
         1E-3);
 }
 
@@ -497,7 +497,11 @@ protected:
             controllerFrameExpectedTarget = turretController.convertChassisAngleToControllerFrame(
                 tm.getSetpointWithinTurretRange(chassisFrameExpectedTarget));
 
-            EXPECT_NEAR(controllerFrameExpectedTarget, unwrappedTargetAngle, 1e-5f);
+            EXPECT_NEAR(
+                0.0f,
+                WrappedFloat(unwrappedTargetAngle, 0, M_TWOPI)
+                    .minDifference(controllerFrameExpectedTarget),
+                1e-5f);
         }
         else
         {
