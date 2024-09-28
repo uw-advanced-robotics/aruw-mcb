@@ -42,7 +42,8 @@ ROBOT_CLASS = {
     "SENTRY_HYDRA": "sentry",
     "HERO_PERSEUS": "hero",
     "DART": "dart",
-    "TESTBED": "testbed"
+    "TESTBED": "testbed",
+    "MOTOR_TESTER": "testbed"
 }
 
 # Make sure that all robots have a class
