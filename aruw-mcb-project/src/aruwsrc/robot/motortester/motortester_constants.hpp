@@ -25,6 +25,7 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -33,16 +34,17 @@ namespace aruwsrc::motortester::constants
 // position PID terms
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 5'000.0f,
-    .ki = 0.0001f,
+    .kp = 3'000.0f,
+    .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 16'000.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 8;    // 10;   // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
+static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
+static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 36.0f,
@@ -53,29 +55,29 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = M_TWOPI,
+    .jammingVelocityDifference = 2.0f * M_TWOPI,
     .jammingTime = 200,  // Fudge factor because it's unjamming more than it should; used to be 100
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS), // Tells how far to rotate forward per agitate command.
-    .desiredSetpoint =
-        225.0f / 60.0f * M_TWOPI,  // AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
+    // magic numbers are fudge factors
+    .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
+    .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-static constexpr tap::control::setpoint::UnjamIntegralCommand::Config AGITATOR_UNJAM_CONFIG = {
-    .targetUnjamIntegralChange = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.6, // Tells how far to rotate backwards per unjam instance.
-    .unjamSetpoint = 0.1f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
-    /// seconds.Convert to ms, Add 100 ms extra tolerance.
-    .maxWaitTime = static_cast<uint32_t>(
-                       1000.0f * (M_TWOPI / AGITATOR_NUM_POCKETS) / 0.2f * AGITATOR_MAX_ROF *
-                       (M_TWOPI / AGITATOR_NUM_POCKETS)) +
-                   100,
-    .targetCycleCount = 3,
+constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
+static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
+    AGITATOR_UNJAM_CONFIG = {
+        .targetUnjamIntegralChange = UNJAM_DISTANCE,
+        .unjamSetpoint = UNJAM_VELOCITY,
+        /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+        /// seconds.Convert to ms, Add 100 ms extra tolerance.
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
+        .targetCycleCount = 3,
 };
 
 tap::algorithms::SmoothPidConfig m2006VelocityPidConfig =

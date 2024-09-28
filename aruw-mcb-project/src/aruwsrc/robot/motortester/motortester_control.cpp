@@ -27,6 +27,7 @@
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motortester/constant_rpm_command.hpp"
@@ -39,6 +40,7 @@
 using namespace aruwsrc::motortester;
 using namespace aruwsrc::motortester::constants;
 using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
 using namespace tap::control::setpoint;
 // using namespace tap::control;
 
@@ -126,7 +128,7 @@ StickRpmCommand wheelManual(
 // base rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamAgitator(agitator, AGITATOR_UNJAM_CONFIG);
+UnjamSpokeAgitatorCommand unjamAgitator(agitator, AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
