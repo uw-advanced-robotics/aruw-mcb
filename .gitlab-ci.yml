@@ -76,7 +76,7 @@ before_script:
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
-            aruwsrc/robot/motortester/motortester_control.cpp
+            aruwsrc/robot/motor_tester/motor_tester_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py

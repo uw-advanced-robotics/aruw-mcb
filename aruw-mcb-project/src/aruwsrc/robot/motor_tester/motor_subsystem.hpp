@@ -8,7 +8,7 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::motortester
+namespace aruwsrc::motor_tester
 {
 
 class MotorSubsystem : public tap::control::Subsystem
@@ -65,6 +65,6 @@ private:
     uint32_t prevTime = 0;
 };
 
-}  // namespace aruwsrc::motortester
+}  // namespace aruwsrc::motor_tester
 
 #endif

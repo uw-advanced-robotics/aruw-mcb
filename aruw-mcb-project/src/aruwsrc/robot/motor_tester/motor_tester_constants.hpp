@@ -29,7 +29,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::motortester::constants
+namespace aruwsrc::motor_tester::constants
 {
 // position PID terms
 // PID terms for standard
@@ -90,6 +90,6 @@ tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig =
 tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
     {.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-}  // namespace aruwsrc::motortester::constants
+}  // namespace aruwsrc::motor_tester::constants
 
-#endif  // MOTORTESTER_CONSTANTS_HPP_
+#endif  // MOTOR_TESTER_CONSTANTS_HPP_

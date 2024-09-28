@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTORTESTER_DRIVERS_HPP_
-#define MOTORTESTER_DRIVERS_HPP_
+#ifndef MOTOR_TESTER_DRIVERS_HPP_
+#define MOTOR_TESTER_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::motortester
+namespace aruwsrc::motor_tester
 {
 class Drivers : public tap::Drivers
 {
@@ -35,6 +35,6 @@ public:
 
 public:
 };  // class aruwsrc::MotortesterDrivers
-}  // namespace aruwsrc::motortester
+}  // namespace aruwsrc::motor_tester
 
-#endif  // MOTORTESTER_DRIVERS_HPP_
+#endif  // MOTOR_TESTER_DRIVERS_HPP_

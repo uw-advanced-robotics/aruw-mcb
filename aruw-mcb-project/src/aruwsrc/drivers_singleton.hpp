@@ -46,8 +46,8 @@ namespace aruwsrc::dart
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 namespace aruwsrc::testbed
 #elif defined(TARGET_MOTOR_TESTER)
-#include "aruwsrc/robot/motortester/motortester_drivers.hpp"
-namespace aruwsrc::motortester
+#include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
+namespace aruwsrc::motor_tester
 #endif
 {
 /**

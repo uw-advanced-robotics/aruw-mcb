@@ -74,7 +74,7 @@ using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
 #elif defined(TARGET_MOTOR_TESTER)
-using namespace aruwsrc::motortester;
+using namespace aruwsrc::motor_tester;
 #endif
 
 int main()

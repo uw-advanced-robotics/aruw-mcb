@@ -142,7 +142,7 @@ class BuildTarget(Enum):
     ENGINEER = "ENGINEER"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
-    MOTORTESTER = "MOTOR_TESTER"
+    MOTOR_TESTER = "MOTOR_TESTER"
 
 
 def build_mcb(target : Optional[BuildTarget] = None):

@@ -1,6 +1,6 @@
 #include "constant_rpm_command.hpp"
 
-namespace aruwsrc::motortester
+namespace aruwsrc::motor_tester
 {
 
 ConstantRpmCommand::ConstantRpmCommand(MotorSubsystem* subsystem, float rpm, float pulleyRatio)
@@ -15,4 +15,4 @@ void ConstantRpmCommand::execute() { motorSubsystem->setDesiredRPM(rpm / pulleyR
 
 void ConstantRpmCommand::end(bool) { motorSubsystem->stop(); }
 
-}  // namespace aruwsrc::motortester
+}  // namespace aruwsrc::motor_tester

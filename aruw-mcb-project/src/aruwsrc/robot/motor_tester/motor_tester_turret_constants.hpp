@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTORTESTER_TURRET_CONSTANTS_HPP_
-#define MOTORTESTER_TURRET_CONSTANTS_HPP_
+#ifndef MOTOR_TESTER_TURRET_CONSTANTS_HPP_
+#define MOTOR_TESTER_TURRET_CONSTANTS_HPP_
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -34,4 +34,4 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 }  // namespace aruwsrc::control::turret
 
-#endif  // MOTORTESTER_TURRET_CONSTANTS_HPP_
+#endif  // MOTOR_TESTER_TURRET_CONSTANTS_HPP_

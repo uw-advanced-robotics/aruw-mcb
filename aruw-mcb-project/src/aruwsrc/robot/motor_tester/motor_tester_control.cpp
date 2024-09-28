@@ -30,15 +30,15 @@
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/motortester/constant_rpm_command.hpp"
-#include "aruwsrc/robot/motortester/motor_subsystem.hpp"
-#include "aruwsrc/robot/motortester/motortester_constants.hpp"
-#include "aruwsrc/robot/motortester/motortester_drivers.hpp"
-#include "aruwsrc/robot/motortester/stick_rpm_command.hpp"
+#include "aruwsrc/robot/motor_tester/constant_rpm_command.hpp"
+#include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
+#include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
-using namespace aruwsrc::motortester;
-using namespace aruwsrc::motortester::constants;
+using namespace aruwsrc::motor_tester;
+using namespace aruwsrc::motor_tester::constants;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::agitator;
 using namespace tap::control::setpoint;
@@ -52,7 +52,7 @@ using namespace tap::control::setpoint;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace motortester_control
+namespace motor_tester_control
 {
 
 // // m2006
@@ -214,17 +214,17 @@ void registerIoMappings(Drivers* drivers)
     wheelMotorSubsystem.setDefaultCommand(&wheelManual);
 }
 
-}  // namespace motortester_control
+}  // namespace motor_tester_control
 
-namespace aruwsrc::motortester
+namespace aruwsrc::motor_tester
 {
-void initSubsystemCommands(aruwsrc::motortester::Drivers* drivers)
+void initSubsystemCommands(aruwsrc::motor_tester::Drivers* drivers)
 {
-    motortester_control::registerSubsystems(drivers);
-    motortester_control::initializeSubsystems();
-    motortester_control::registerIoMappings(drivers);
+    motor_tester_control::registerSubsystems(drivers);
+    motor_tester_control::initializeSubsystems();
+    motor_tester_control::registerIoMappings(drivers);
 }
 
-}  // namespace aruwsrc::motortester
+}  // namespace aruwsrc::motor_tester
 
 #endif
