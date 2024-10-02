@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef PLATE_HIT_TRACKER_HPP_
+#define PLATE_HIT_TRACKER_HPP_
+
 #include <tap/architecture/timeout.hpp>
 
 #include "tap/drivers.hpp"
@@ -54,3 +57,4 @@ private:
 };
 
 }  // namespace aruwsrc::communication::serial
+#endif  // PLATE_HIT_TRACKER_HPP_
