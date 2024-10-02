@@ -26,7 +26,9 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
-    const float centerToWheelDistance)
+    const float parallelCenterToWheelDistance,
+    const float parallelWheelChassisRelativeAngleDegrees,
+    const float perpendicularWheelChassisRelativeAngleDegrees)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
@@ -35,7 +37,9 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       chassisAccelerationToMeasurementCovarianceInterpolator(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
-      centerToWheelDistance(centerToWheelDistance)
+      parallelCenterToWheelDistance(parallelCenterToWheelDistance),
+      parallelWheelChassisRelativeAngle(parallelWheelChassisRelativeAngleDegrees),
+      perpendicularWheelChassisRelativeAngle(perpendicularWheelChassisRelativeAngleDegrees)
 {
     reset();
 }
@@ -63,11 +67,10 @@ void DeadwheelChassisKFOdometry::update()
 
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
-    V2 -= modm::toRadian(imu.getGz()) * centerToWheelDistance;
-    // It is assumed that the wheels are rotated 45 degrees
-    // relative to the forward direction of the robot
-    float Vx = (((V1 - V2)) / M_SQRT2);
-    float Vy = (((V1 + V2)) / M_SQRT2);
+    V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
+    // Rotate the velocities based on the wheel rotations
+    float Vx = (((V1 - V2)) * modm::toRadian(parallelWheelChassisRelativeAngle));
+    float Vy = (((V1 + V2)) * modm::toRadian(perpendicularWheelChassisRelativeAngle));
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();
