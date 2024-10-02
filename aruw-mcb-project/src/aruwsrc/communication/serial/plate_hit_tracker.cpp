@@ -47,7 +47,7 @@ void PlateHitTracker::update()
 
 bool PlateHitTracker::isHitRecently() { return hitRecently; }
 
-PlateHitData PlateHitTracker::getLastHitData()
+PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData()
 {
     PlateHitData hitData;
     hitData.plateID = lastHitPlateID;

@@ -25,6 +25,14 @@ namespace aruwsrc::communication::serial
 {
 class PlateHitTracker
 {
+    struct PlateHitData
+    {
+        int plateID;
+        float hitAngleChassisRadians;
+        float hitAngleWorldRadians;
+        int timestamp;
+    };
+
 public:
     PlateHitTracker(tap::Drivers *drivers);
     PlateHitData getRecentHitData();
@@ -43,14 +51,6 @@ private:
     int lastHitPlateID;
     tap::arch::MilliTimeout hitTimer;
     const int HIT_EXPIRE_TIME = 1000;
-};
-
-struct PlateHitData
-{
-    int plateID;
-    float hitAngleChassisRadians;
-    float hitAngleWorldRadians;
-    int timestamp;
 };
 
 }  // namespace aruwsrc::communication::serial
