@@ -377,9 +377,9 @@ before_script:
   variables:
     ROBOT: DART
 
-# Testbed Build
+# Motor Tester Build
 
-"Testbed: MCB Build":
+"Motor Tester: MCB Build":
   extends:
     - .mcb_build
   variables:
