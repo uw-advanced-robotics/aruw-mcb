@@ -39,8 +39,6 @@ namespace aruwsrc::communication::serial
             bool hitRecently;
             float lastDPS;
             int lastHitPlateID;
-            float hitAngleChassisRadians;
-            float hitAngleWorldRadians;
             tap::arch::MilliTimeout hitTimer;
             const int HIT_EXPIRE_TIME = 1000;
     };
