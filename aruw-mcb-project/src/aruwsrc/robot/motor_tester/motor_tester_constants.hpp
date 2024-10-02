@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_AGITATOR_CONSTANTS_HPP_
-#define STANDARD_AGITATOR_CONSTANTS_HPP_
+#ifndef MOTOR_TESTER_CONSTANTS_HPP_
+#define MOTOR_TESTER_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
