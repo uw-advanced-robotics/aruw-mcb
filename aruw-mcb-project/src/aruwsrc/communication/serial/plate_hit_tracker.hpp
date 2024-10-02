@@ -17,38 +17,40 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tap/drivers.hpp"
-
 #include <tap/architecture/timeout.hpp>
+
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::communication::serial
 {
-    class PlateHitTracker {
-        public:
-            PlateHitTracker(tap::Drivers  *drivers);
-            PlateHitData getRecentHitData();
-            PlateHitData getLastHitData();
-            bool isHitRecently();
-        private:
-            void initalize();
-            void update();
-            tap::Drivers *drivers;
-            int dataTimestamp;
-            float hitAngle_chassisRelative_radians;
-            float hitAngle_worldRelative_radians;
-            bool hitRecently;
-            float lastDPS;
-            int lastHitPlateID;
-            tap::arch::MilliTimeout hitTimer;
-            const int HIT_EXPIRE_TIME = 1000;
-    };
+class PlateHitTracker
+{
+public:
+    PlateHitTracker(tap::Drivers *drivers);
+    PlateHitData getRecentHitData();
+    PlateHitData getLastHitData();
+    bool isHitRecently();
 
-    struct PlateHitData
-    {
-        int plateID;
-        float hitAngleChassisRadians;
-        float hitAngleWorldRadians;
-        int timestamp;
-    };
+private:
+    void initalize();
+    void update();
+    tap::Drivers *drivers;
+    int dataTimestamp;
+    float hitAngle_chassisRelative_radians;
+    float hitAngle_worldRelative_radians;
+    bool hitRecently;
+    float lastDPS;
+    int lastHitPlateID;
+    tap::arch::MilliTimeout hitTimer;
+    const int HIT_EXPIRE_TIME = 1000;
+};
 
-}
+struct PlateHitData
+{
+    int plateID;
+    float hitAngleChassisRadians;
+    float hitAngleWorldRadians;
+    int timestamp;
+};
+
+}  // namespace aruwsrc::communication::serial
