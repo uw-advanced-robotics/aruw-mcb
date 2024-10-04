@@ -43,7 +43,7 @@ ROBOT_CLASS = {
     "HERO_PERSEUS": "hero",
     "DART": "dart",
     "TESTBED": "testbed",
-    "MOTOR_TESTER": "testbed"
+    "MOTOR_TESTER": "motor_tester"
 }
 
 # Make sure that all robots have a class

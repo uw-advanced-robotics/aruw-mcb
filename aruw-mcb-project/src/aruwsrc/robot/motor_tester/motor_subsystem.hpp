@@ -54,7 +54,7 @@ public:
         this->motor.setDesiredOutput(0);
     }
 
-    const char* getName() override { return "Motor"; }
+    const char* getName() const override { return "Motor"; }
 
 private:
     tap::motor::MotorInterface& motor;
