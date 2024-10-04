@@ -107,11 +107,11 @@ WrappedFloat rightPitchSetpoint(Angle(0));
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
-    float majorSetpoint = yawControllerMajor.getSetpoint();
-    float leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
-    float rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
-    float leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
-    float rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
+    majorSetpoint = yawControllerMajor.getSetpoint();
+    leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
+    rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
+    leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
+    rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
