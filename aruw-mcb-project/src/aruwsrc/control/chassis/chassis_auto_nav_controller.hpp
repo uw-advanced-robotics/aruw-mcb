@@ -77,8 +77,8 @@ public:
 private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath& path;
-    Position lastSetPoint;
     float lastParameter;
+    Position lastSetPoint;
     aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 
