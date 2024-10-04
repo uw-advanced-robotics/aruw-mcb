@@ -44,8 +44,9 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 8;    // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 30.0f;  // balls per second
+static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
+static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 namespace turretLeft
 {
@@ -75,7 +76,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
     .gearRatio = 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,  // @todo: check
+    .isAgitatorInverted = false,
     /**
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
@@ -89,9 +90,9 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     // magic numbers are fudge factors
-    .targetIntegralChange = 1.2f * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
     .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
-    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.25f,
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
 constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
@@ -107,10 +108,6 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
 };
 
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
-
-/// Time in milliseconds to pause launching projectiles when the user requests the projectile
-/// launcher to be paused
-static constexpr uint32_t AGITATOR_PAUSE_PROJECTILE_LAUNCHING_TIME = 8'000;
 
 }  // namespace aruwsrc::control::agitator::constants
 

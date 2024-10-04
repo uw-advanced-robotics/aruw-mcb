@@ -34,6 +34,7 @@
 #include "modm/processing/protothread.hpp"
 
 #include "boolean_hud_indicators.hpp"
+#include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
@@ -83,6 +84,8 @@ public:
      * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
      * to the turret and to print turret angles (if turret chassis relative angles are being
      * printed).
+     * @param[in] avoidanceCommand Commands that indicate if the robot is in an avoidance drive
+     * mode, such as beyblade or wiggle.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
@@ -95,6 +98,7 @@ public:
      * will never be selected as the current chassis command.
      * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
      * will never be selected as the current chassis command.
+     * @param[in] capBank A pointer to the capacitor bank for the robot.
      */
     ClientDisplayCommand(
         tap::Drivers &drivers,
@@ -105,12 +109,14 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
+        const std::vector<tap::control::Command *> avoidanceCommands,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
         const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
 
@@ -128,6 +134,7 @@ private:
     tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
     BooleanHudIndicators booleanHudIndicators;
+    CapBankIndicator capBankIndicator;
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;

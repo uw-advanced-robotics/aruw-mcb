@@ -21,6 +21,7 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -29,6 +30,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -260,10 +262,9 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
-    {
-        return lastSetpointData;
-    }
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
+
+    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
@@ -308,7 +309,7 @@ public:
 
     // This is for compatibility with the OLED menu
     bool* getMutableMotionStrategyPtr(
-        aruwsrc::communication::serial::SentryVisionMessageType messageType)
+        aruwsrc::communication::serial::SentryMotionStrategyType messageType)
     {
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
@@ -320,6 +321,7 @@ public:
      */
     inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
 
+    // @todo private should not be here
 private:
     enum TxMessageTypes
     {
@@ -331,16 +333,16 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
-        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 11
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
         CV_MESSAGE_TYPE_ARUCO_RESET = 10,
-        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
+        CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -361,6 +363,12 @@ private:
     /// Time in ms between sending competition result status (as reported by the ref system).
     static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
 
+    /// Time in ms between sending sentry motion strategy message.
+    static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
+    /** Time in ms between sending the bullets remaining message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_BULLETS_REMAINING_MSG = 100;
+
     static VisionCoprocessor* visionCoprocessorInstance;
 
     volatile uint32_t risingEdgeTime = 0;
@@ -372,7 +380,31 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    static constexpr uint8_t MAXSETPOINTS = 50;
+    struct AutoNavCoordinate
+    {
+        float x;
+        float y;
+    };
+
+    struct AutoNavSetpointMessage
+    {
+        // Header
+        uint32_t sequenceNum;
+        float speed;
+        uint32_t numSetpoints;
+        // Setpoints
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
+
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
+
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequenceNum = 0,
+        .speed = 0.0f,
+        .numSetpoints = 0,
+        .setpoints = {}};
 
     ArucoResetData lastArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
@@ -389,11 +421,14 @@ private:
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
-
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
 
     tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
+
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
@@ -414,7 +449,7 @@ private:
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
-        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+        aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {0, 1, 0};
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -426,7 +461,7 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
+    void sendBulletsRemaining();
 };
 }  // namespace serial
 }  // namespace aruwsrc

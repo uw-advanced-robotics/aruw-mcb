@@ -41,8 +41,8 @@ static constexpr uint8_t NUM_TURRETS = 2;
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
-static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.008f;
+static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 
 static constexpr float TURRET_CG_X = 32.5f;
 static constexpr float TURRET_CG_Z = 32.3f;
@@ -76,10 +76,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 180'000.0f,
-    .ki = 1'300.0f,
-    .kd = 8'000.0f,
-    .maxICumulative = 7'500.0f,
+    .kp = 160'000.0f,
+    .ki = 500.0f,
+    .kd = 12'000.0f,
+    .maxICumulative = 8'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -92,10 +92,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace worldFrameCascadeController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 7.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .kp = 9.0f,
+    .ki = 0.03f,
+    .kd = 0.2f,
+    .maxICumulative = 0.2f,
     .maxOutput = 6.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -121,7 +121,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 // Turret Major has a double DJI motor, so we need to have two CAN Buses
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
-// static constexpr boolean majorInverted = true;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
@@ -148,14 +147,14 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4780,
+    .startEncoderValue = 4797,
     .minAngle = modm::toRadian(-13),
     .maxAngle = modm::toRadian(35),
     .limitMotorAngles = true,
 };
 
 static constexpr float majorToTurretR = 0.145;
-static constexpr float default_launch_speed = 14.0f;
+static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
 }  // namespace turretLeft
@@ -179,13 +178,13 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4727,
+    .startEncoderValue = 4762,
     .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
     .maxAngle = modm::toRadian(35),   // actual CAD limit 37
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
-static constexpr float default_launch_speed = 14.0f;
+static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
@@ -194,11 +193,11 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 80'000.0f,
-    .ki = 100.0f,
+    .kp = 160'000.0f,
+    .ki = 200.0f,
     .kd = 6'000.0f,
     .maxICumulative = 2'000.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -207,11 +206,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 90'000.0f,
-    .ki = 200.0f,
+    .kp = 210'000.0f,
+    .ki = 400.0f,
     .kd = 6'000.0f,
-    .maxICumulative = 4'000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxICumulative = 6'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
@@ -220,11 +219,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 13'500.0f,
+    .kp = 16'500.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 28'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -233,11 +232,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 25.0f,
-    .ki = 0.0f,
+    .kp = 29.0f,
+    .ki = 0.2f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 5.0f,
+    .maxICumulative = 1.6f,
+    .maxOutput = 12.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -259,10 +258,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 25.0f,
-    .ki = 1.0f,
+    .kp = 34.0f,
+    .ki = 0.2f,
     .kd = 0.0f,
-    .maxICumulative = 0.1f,
+    .maxICumulative = 0.05f,
     .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,

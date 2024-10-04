@@ -57,10 +57,12 @@ public:
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
               nullptr,
-              nullptr),
+              nullptr,
+              &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500)
+          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
     {
     }
 
@@ -79,6 +81,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    can::capbank::CapacitorBank capacitorBank;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero

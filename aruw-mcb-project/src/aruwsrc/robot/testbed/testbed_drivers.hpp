@@ -22,6 +22,9 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/display/oled_display.hpp"
+
 namespace aruwsrc::testbed
 {
 class Drivers : public tap::Drivers
@@ -34,7 +37,7 @@ public:
     Drivers() : tap::Drivers() {}
 
 public:
-};  // class aruwsrc::StandardDrivers
+};  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
 #endif  // STANDARD_DRIVERS_HPP_
