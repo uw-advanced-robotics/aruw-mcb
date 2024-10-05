@@ -58,7 +58,7 @@ namespace motor_tester_control
 // // m2006
 tap::motor::DjiMotor leftChannelMotor(
     drivers(),
-    tap::motor::MOTOR2,          // id 2
+    tap::motor::MOTOR3,          // id 3
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
     "LMotor");
@@ -76,7 +76,7 @@ tap::motor::DjiMotor rightChannelMotor(
 // 6020
 tap::motor::DjiMotor wheelChannelMotor(
     drivers(),
-    tap::motor::MOTOR7,          // id 3
+    tap::motor::MOTOR7,          // id 3+4
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
     "WMotor");
@@ -103,21 +103,17 @@ MotorSubsystem wheelMotorSubsystem(
 // Commands
 // ----------
 
-ConstantRpmCommand leftSwitchUpRpm(&leftMotorSubsystem, 225.0f);
 StickRpmCommand leftManual(
     &leftMotorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     500.0f);
-ConstantRpmCommand leftSwitchDownRpm(&leftMotorSubsystem, 187.5f);
 
-ConstantRpmCommand rightSwitchUpRpm(&rightMotorSubsystem, 180.0f);  // 32.0f / 110.0f
 StickRpmCommand rightManual(
     &rightMotorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
     482.0f);
-ConstantRpmCommand rightSwitchDownRpm(&rightMotorSubsystem, 150.0f);  // 32.0f / 152.0f
 
 StickRpmCommand wheelManual(
     &wheelMotorSubsystem,
@@ -125,7 +121,7 @@ StickRpmCommand wheelManual(
     tap::communication::serial::Remote::Channel::WHEEL,
     320.0f);
 
-// base rotate/unjam commands
+// agitator rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
 
 UnjamSpokeAgitatorCommand unjamAgitator(agitator, AGITATOR_UNJAM_CONFIG);
@@ -148,54 +144,19 @@ tap::control::HoldRepeatCommandMapping leftSwitchUp(
         tap::communication::serial::Remote::SwitchState::UP),
     true);
 
-tap::control::HoldCommandMapping leftSwitchMid(
-    drivers(),
-    {&leftManual},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&leftSwitchDownRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
-
-tap::control::HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&rightSwitchUpRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping rightSwitchMid(
-    drivers(),
-    {&rightManual},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&rightSwitchDownRpm},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
-
 // inits
 
 void initializeSubsystems()
 {
     agitator.initialize();
-    // leftMotorSubsystem.initialize();
+    leftMotorSubsystem.initialize();
     rightMotorSubsystem.initialize();
     wheelMotorSubsystem.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
@@ -204,14 +165,10 @@ void registerSubsystems(Drivers* drivers)
 void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchMid);
-
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&rightSwitchMid);
 
     wheelMotorSubsystem.setDefaultCommand(&wheelManual);
+    leftMotorSubsystem.setDefaultCommand(&leftManual);
+    rightMotorSubsystem.setDefaultCommand(&rightManual);
 }
 
 }  // namespace motor_tester_control
