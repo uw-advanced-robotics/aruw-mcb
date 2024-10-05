@@ -23,9 +23,11 @@
 // mm tasty imports
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/algorithms/ramp.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
 
+using namespace tap::communication::serial;
 namespace aruwsrc
 {
 namespace control
@@ -39,14 +41,19 @@ namespace control
 class ControlOperatorInterface
 {
 public:
+    static constexpr Remote::Key LOW_DPI_MODE_KEY = Remote::Key::G;
     static constexpr int16_t USER_MOUSE_YAW_MAX = 1000;
     static constexpr int16_t USER_MOUSE_PITCH_MAX = 1000;
-    static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
-    static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
+    // static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
+    // static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
 #if defined(TARGET_HERO_PERSEUS)
+    static constexpr float USER_MOUSE_YAW_SCALAR = 2.0f * (1.0f / USER_MOUSE_YAW_MAX);
+    static constexpr float USER_MOUSE_PITCH_SCALAR = 2.0f * (1.0f / USER_MOUSE_PITCH_MAX);
+    static constexpr float USER_MOUSE_YAW_SCALAR_LOW_DPI = 0.1f * (1.0f / USER_MOUSE_YAW_MAX);
+    static constexpr float USER_MOUSE_PITCH_SCALAR_LOW_DPI = 0.1f * (1.0f / USER_MOUSE_PITCH_MAX);
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
@@ -59,6 +66,10 @@ public:
     static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
     static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
 #else  // TARGET_STANDARD, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+    static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
+    static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
+    static constexpr float USER_MOUSE_YAW_SCALAR_LOW_DPI = (1.0f / USER_MOUSE_YAW_MAX);
+    static constexpr float USER_MOUSE_PITCH_SCALAR_LOW_DPI = (1.0f / USER_MOUSE_PITCH_MAX);
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
@@ -119,6 +130,16 @@ public:
      *      clear lower and upper bound.
      */
     mockable float getTurretPitchInput(uint8_t turretID);
+
+    /**
+     * @returns the value used to scale turret yaw movement from horizontal movement.
+     */
+    mockable float getUserMouseYawScalar();
+
+    /**
+     * @returns the value used to scale turret pitch movement from vertical movement.
+     */
+    mockable float getUserMousePitchScalar();
 
     /**
      * @returns the value used for sentiel drive speed, between
