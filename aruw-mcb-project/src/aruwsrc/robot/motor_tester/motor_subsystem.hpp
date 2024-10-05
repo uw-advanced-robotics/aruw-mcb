@@ -28,7 +28,6 @@
 
 namespace aruwsrc::motor_tester
 {
-
 class MotorSubsystem : public tap::control::Subsystem
 {
 public:

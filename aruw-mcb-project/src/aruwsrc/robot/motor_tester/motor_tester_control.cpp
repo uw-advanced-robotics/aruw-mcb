@@ -54,8 +54,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace motor_tester_control
 {
-
-// // m2006
+// m2006
 tap::motor::DjiMotor leftChannelMotor(
     drivers(),
     tap::motor::MOTOR3,          // id 3

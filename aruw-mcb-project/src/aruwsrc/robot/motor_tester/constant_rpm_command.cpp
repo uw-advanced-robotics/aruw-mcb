@@ -21,7 +21,6 @@
 
 namespace aruwsrc::motor_tester
 {
-
 ConstantRpmCommand::ConstantRpmCommand(MotorSubsystem* subsystem, float rpm, float pulleyRatio)
     : motorSubsystem(subsystem),
       rpm(rpm),

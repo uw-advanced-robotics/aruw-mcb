@@ -26,7 +26,6 @@
 
 namespace aruwsrc::motor_tester
 {
-
 class ConstantRpmCommand : public tap::control::Command
 {
 public:
