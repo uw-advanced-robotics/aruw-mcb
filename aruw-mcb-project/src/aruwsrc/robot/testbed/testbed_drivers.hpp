@@ -34,18 +34,10 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers()
-        : tap::Drivers(),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, &capacitorBank),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
-    {
-    }
+    Drivers() : tap::Drivers() {}
 
 public:
-    display::OledDisplay oledDisplay;
-    can::capbank::CapacitorBank capacitorBank;
-
-};  // class aruwsrc::StandardDrivers
+};  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
 #endif  // STANDARD_DRIVERS_HPP_
