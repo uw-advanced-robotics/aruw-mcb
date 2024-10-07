@@ -96,7 +96,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 5'000.0f,
-    .ki = 0.0001f,
+    .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = DjiMotor::MAX_OUTPUT_C610,
