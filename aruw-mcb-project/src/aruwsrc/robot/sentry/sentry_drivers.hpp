@@ -63,7 +63,8 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart8),
-          turretMajorMcbLite(this, tap::communication::serial::Uart::Uart7)
+          turretMajorMcbLite(this, tap::communication::serial::Uart::Uart7),
+        plateHitTracker(this)
     {
     }
 
@@ -84,6 +85,7 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::virtualMCB::MCBLite chassisMcbLite;
     aruwsrc::virtualMCB::MCBLite turretMajorMcbLite;
+    communication::serial::PlateHitTracker plateHitTracker;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

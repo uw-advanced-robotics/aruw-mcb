@@ -62,7 +62,8 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358)
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
+            plateHitTracker(this)
     {
     }
 
@@ -82,6 +83,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
+    communication::serial::PlateHitTracker plateHitTracker;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero
