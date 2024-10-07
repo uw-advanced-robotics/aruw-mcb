@@ -24,7 +24,8 @@ namespace aruwsrc::communication::serial
 PlateHitTracker::PlateHitTracker(tap::Drivers *drivers)
     : drivers(drivers),
       BLUR_CONVOLVE_MATRIX(BLUR_CONVOLVE_MATRIX_DATA)
-{}
+{
+}
 
 void PlateHitTracker::initalize()
 {
@@ -36,7 +37,8 @@ void PlateHitTracker::initalize()
 }
 
 /**
- * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the main loop.
+ * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the
+ * main loop.
  */
 void PlateHitTracker::update()
 {
@@ -50,7 +52,8 @@ void PlateHitTracker::update()
         lastHitPlateID = static_cast<int>(this->drivers->refSerial.getRobotData().damagedArmorId);
 
         hitAngle_chassisRelative_radians = lastHitPlateID * M_PI / 2;
-        hitAngle_worldRelative_radians = (lastHitPlateID * M_PI / 2) + modm::toRadian(this->drivers->mpu6500.getYaw());
+        hitAngle_worldRelative_radians =
+            (lastHitPlateID * M_PI / 2) + modm::toRadian(this->drivers->mpu6500.getYaw());
 
         // Update bins
         bins.data[modm::toDegree(hitAngle_worldRelative_radians) / (360 / BIN_NUMBER)] += 1;
@@ -70,39 +73,47 @@ PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData()
     return hitData;
 }
 
-tap::algorithms::CMSISMat<10,1> PlateHitTracker::normaliseBins(tap::algorithms::CMSISMat<10,1> mat){
+tap::algorithms::CMSISMat<10, 1> PlateHitTracker::normaliseBins(
+    tap::algorithms::CMSISMat<10, 1> mat)
+{
     float sum = 0;
-    for(int i = 0; i < BIN_NUMBER; i++){
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
         sum += mat.data[i];
     }
-    for(int i = 0; i < BIN_NUMBER; i++){
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
         mat.data[i] = mat.data[i] / sum;
     }
     return mat;
-
 }
-tap::algorithms::CMSISMat<10,1> PlateHitTracker::blurBins(tap::algorithms::CMSISMat<10,1> mat){
+tap::algorithms::CMSISMat<10, 1> PlateHitTracker::blurBins(tap::algorithms::CMSISMat<10, 1> mat)
+{
     return BLUR_CONVOLVE_MATRIX * mat;
 }
 
-float PlateHitTracker::getPeakAngleDegrees(){
+float PlateHitTracker::getPeakAngleDegrees()
+{
     bins = normaliseBins(bins);
     bins = blurBins(bins);
     float max = 0;
     int maxIndex = 0;
-    for(int i = 0; i < BIN_NUMBER; i++){
-        if(bins.data[i] > max){
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
+        if (bins.data[i] > max)
+        {
             max = bins.data[i];
             maxIndex = i;
         }
     }
 
-    lastPeakAngleDegrees = ((((360 / BIN_NUMBER) * 2)) + (maxIndex * (360 / BIN_NUMBER))) + 
-                           ((((360 / BIN_NUMBER) * 2) + ((maxIndex + 1) * (360 / BIN_NUMBER))) * (bins.data[maxIndex + 1])) -
-                           ((((360 / BIN_NUMBER) * 2) + ((maxIndex - 1) * (360 / BIN_NUMBER))) * (bins.data[maxIndex - 1]));
+    lastPeakAngleDegrees = ((((360 / BIN_NUMBER) * 2)) + (maxIndex * (360 / BIN_NUMBER))) +
+                           ((((360 / BIN_NUMBER) * 2) + ((maxIndex + 1) * (360 / BIN_NUMBER))) *
+                            (bins.data[maxIndex + 1])) -
+                           ((((360 / BIN_NUMBER) * 2) + ((maxIndex - 1) * (360 / BIN_NUMBER))) *
+                            (bins.data[maxIndex - 1]));
 
     return lastPeakAngleDegrees;
 }
-
 
 }  // namespace aruwsrc::communication::serial

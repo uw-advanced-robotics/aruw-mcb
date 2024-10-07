@@ -64,7 +64,7 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart8),
           turretMajorMcbLite(this, tap::communication::serial::Uart::Uart7),
-        plateHitTracker(this)
+          plateHitTracker(this)
     {
     }
 

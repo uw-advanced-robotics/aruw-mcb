@@ -63,7 +63,7 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
-            plateHitTracker(this)
+          plateHitTracker(this)
     {
     }
 

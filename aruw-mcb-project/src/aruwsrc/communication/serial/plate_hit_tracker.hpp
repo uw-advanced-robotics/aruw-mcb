@@ -2,9 +2,11 @@
 #define PLATE_HIT_TRACKER_HPP_
 
 #include <tap/architecture/timeout.hpp>
-#include "modm/math/matrix.hpp"
+
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/drivers.hpp"
+
+#include "modm/math/matrix.hpp"
 
 namespace aruwsrc::communication::serial
 {
@@ -17,9 +19,9 @@ class PlateHitTracker
         float hitAngleWorldRadians;
         int timestamp;
     };
+
 public:
-    PlateHitTracker(
-        tap::Drivers *drivers);
+    PlateHitTracker(tap::Drivers *drivers);
     PlateHitData getRecentHitData();
     PlateHitData getLastHitData();
     bool isHitRecently();
@@ -28,8 +30,8 @@ public:
     float getPeakAngleDegrees();
 
 private:
-    tap::algorithms::CMSISMat<10,1> normaliseBins(tap::algorithms::CMSISMat<10,1> mat);
-    tap::algorithms::CMSISMat<10,1> blurBins(tap::algorithms::CMSISMat<10,1> mat);
+    tap::algorithms::CMSISMat<10, 1> normaliseBins(tap::algorithms::CMSISMat<10, 1> mat);
+    tap::algorithms::CMSISMat<10, 1> blurBins(tap::algorithms::CMSISMat<10, 1> mat);
     tap::Drivers *drivers;
     int dataTimestamp;
     float hitAngle_chassisRelative_radians;
@@ -44,7 +46,8 @@ private:
     const float DECAY_FACTOR = 0.95;
     float lastPeakAngleDegrees;
 
-    const tap::algorithms::CMSISMat<10,10> BLUR_CONVOLVE_MATRIX;
+    const tap::algorithms::CMSISMat<10, 10> BLUR_CONVOLVE_MATRIX;
+    // clang-format off
     static constexpr float BLUR_CONVOLVE_MATRIX_DATA[100] = {
         0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25,
         0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
@@ -57,6 +60,7 @@ private:
         0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25,
         0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25, 0.5  
     };
+    // clang-format on
 };
 
 }  // namespace aruwsrc::communication::serial
