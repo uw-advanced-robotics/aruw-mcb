@@ -134,18 +134,6 @@ int main()
                 tap::buzzer::silenceBuzzer(&drivers->pwm);
             }
 #endif
-
-#if defined(TARGET_TESTBED)
-            // drivers->spinMotor.setDesiredOutput(
-            //     drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL)
-            //     *
-            //     drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_VERTICAL)
-            //     * 16'000);
-#endif
-
-#if defined(TARGET_MOTOR_TESTER)
-            // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
         }
         modm::delay_us(10);
     }
