@@ -36,6 +36,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/communication/serial/plate_hit_tracker.hpp"
 #endif
 
 namespace aruwsrc::hero
