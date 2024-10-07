@@ -35,17 +35,6 @@ StickRpmCommand::StickRpmCommand(
 void StickRpmCommand::execute()
 {
     float stick = remote->getChannel(this->channel);
-
-    // math for this (unused atm but still): https://www.desmos.com/calculator/ip8m03ugmo
-    // float deadenedStick = 0;
-    // if (stick > STICK_DEADZONE)
-    // {
-    //     deadenedStick = (stick - STICK_DEADZONE) / (1 - STICK_DEADZONE);
-    // }
-    // else if (stick < -STICK_DEADZONE)
-    // {
-    //     deadenedStick = (stick + STICK_DEADZONE) / (1 - STICK_DEADZONE);
-    // }
     motorSubsystem->setDesiredRPM(maxRpm * stick);
 }
 
