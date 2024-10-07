@@ -34,10 +34,10 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/communication/serial/plate_hit_tracker.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
-#include "aruwsrc/communication/serial/plate_hit_tracker.hpp"
 #endif
 
 namespace aruwsrc::sentry
