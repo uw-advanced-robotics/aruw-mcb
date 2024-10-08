@@ -75,8 +75,10 @@ static void initializeIo(Drivers *drivers);
 // called as frequently.
 static void updateIo(Drivers *drivers);
 
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
+#endif
 
 int main()
 {
@@ -189,6 +191,7 @@ static void updateIo(Drivers *drivers)
 #endif
 }
 
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
@@ -201,3 +204,4 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
         tap::buzzer::silenceBuzzer(&drivers->pwm);
     }
 }
+#endif
