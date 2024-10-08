@@ -392,9 +392,6 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    nullptr,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());

@@ -90,12 +90,6 @@ public:
      * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
      * HUD).
      * @param[in] cvOnTargetManager @see MatrixHudIndicators
-     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
-     * never be selected as the current chassis command.
-     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
-     * will never be selected as the current chassis command.
-     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
-     * will never be selected as the current chassis command.
      * @param[in] capBank A pointer to the capacitor bank for the robot.
      */
     ClientDisplayCommand(
@@ -110,9 +104,6 @@ public:
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-        const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-        const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
         const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
