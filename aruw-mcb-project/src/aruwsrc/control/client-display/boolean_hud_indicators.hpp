@@ -25,11 +25,8 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -46,10 +43,6 @@ public:
      * Construct a BooleanHudIndicators object.
      *
      * @param[in] commandScheduler  CommandScheduler instance.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
-     * that may be nullptr if no hopper exists.
-     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
-     * are on or off.
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
      * calibrated.
@@ -58,11 +51,8 @@ public:
     BooleanHudIndicators(
         tap::control::CommandScheduler &commandScheduler,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const tap::communication::serial::RefSerial *refSerial);
+        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -111,8 +101,6 @@ private:
         SYSTEMS_CALIBRATING = 0,
         /** Indicates the agitator is online and not jammed. */
         AGITATOR_STATUS_HEALTHY,
-        /** Indicates there is ammo. */
-        AMMO_AVAILABLE,
         /** Should always be the last value, the number of enum values listed in this enum (as such,
            the first element in this enum should be 0 and subsequent ones should increment by 1
            each). */
@@ -126,30 +114,16 @@ private:
     static constexpr BooleanHUDIndicatorTuple
         BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[NUM_BOOLEAN_HUD_INDICATORS]{
             BooleanHUDIndicatorTuple(
-                "SYS CALIB ",
+                "IMU CALIB ",
                 Tx::GraphicColor::PURPLISH_RED,  // Purple/Red when calibrating
                 Tx::GraphicColor::GREEN),        // Green when not calibrating
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,
-                Tx::GraphicColor::PURPLISH_RED),
-            BooleanHUDIndicatorTuple(
-                "BuY AMMO ",
-                Tx::GraphicColor::GREEN,
-                Tx::GraphicColor::PURPLISH_RED),
+                Tx::GraphicColor::PURPLISH_RED)
         };
 
     tap::control::CommandScheduler &commandScheduler;
-
-    /**
-     * Hopper subsystem that provides information about whether or not the cover is open or closed.
-     */
-    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
-
-    /**
-     * Friction wheel subsystem that provides info about if they are on/off.
-     */
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
 
     /**
      * Agitator that provides info about if it is jammed or offline.
@@ -162,23 +136,6 @@ private:
      * ImuCalbirateCommand that provides information about if the IMUs are being calibrated.
      */
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
-
-    /**
-     * Ref Serial provides referee system data to get whether or not there is ammo remaining.
-     */
-    const tap::communication::serial::RefSerial *refSerial;
-
-    inline bool haveAmmo()
-    {
-#if defined(TARGET_HERO_PERSEUS)
-
-        return refSerial->getRobotData().turret.bulletsRemaining42 > 2 &&
-               refSerial->getRobotData().turret.bulletsRemaining42 < 1000;
-#else
-        return refSerial->getRobotData().turret.bulletsRemaining17 > 10 &&
-               refSerial->getRobotData().turret.bulletsRemaining17 < 1000;
-#endif
-    }
 
     /**
      * Graphic message that will represent a dot on the screen that will be present or not,
@@ -203,17 +160,6 @@ private:
      */
     Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
-
-    bool hasAmmo = false;
-    // How often to toggle the out of ammo indicator
-    static constexpr float OUT_OF_AMMO_TOGGLE_PERIOD_MS = 500.0f;
-    tap::arch::PeriodicMilliTimer outOfAmmoTimer;
-
-    static constexpr uint16_t AMMO_INDICATOR_X = 960;
-    static constexpr uint16_t AMMO_INDICATOR_Y = 825;
-
-    static constexpr uint16_t AMMO_TEXT_X = 815;
-    static constexpr uint16_t AMMO_TEXT_Y = AMMO_INDICATOR_Y + 10;
 };
 }  // namespace aruwsrc::control::client_display
 

@@ -76,8 +76,6 @@ public:
      * @param[in] drivers Global drivers instance.
      * @param[in] commandScheduler CommandScheduler instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
-     * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
@@ -105,7 +103,6 @@ public:
         tap::control::CommandScheduler &commandScheduler,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
-        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,

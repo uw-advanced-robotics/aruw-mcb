@@ -385,7 +385,6 @@ ClientDisplayCommand clientDisplayCommand(
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
-    nullptr,
     frictionWheels,
     waterwheelAgitator,
     turret,

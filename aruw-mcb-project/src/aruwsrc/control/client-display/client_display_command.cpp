@@ -37,7 +37,6 @@ ClientDisplayCommand::ClientDisplayCommand(
     tap::control::CommandScheduler &commandScheduler,
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
-    const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
@@ -57,11 +56,8 @@ ClientDisplayCommand::ClientDisplayCommand(
       booleanHudIndicators(
           commandScheduler,
           refSerialTransmitter,
-          hopperSubsystem,
-          frictionWheelSubsystem,
           agitatorSubsystem,
-          imuCalibrateCommand,
-          &drivers.refSerial),
+          imuCalibrateCommand),
       capBankIndicator(refSerialTransmitter, capBank),
       chassisOrientationIndicator(
           drivers,
