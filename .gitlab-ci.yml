@@ -306,12 +306,6 @@ before_script:
   variables:
     ROBOT: TESTBED
   
-"Testbed: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: TESTBED
-
 "Testbed: Test Build":
   extends:
     - .test_build
