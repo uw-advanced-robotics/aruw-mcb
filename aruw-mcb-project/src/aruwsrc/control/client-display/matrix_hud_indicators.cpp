@@ -23,10 +23,9 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/util_macros.hpp"
-
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 using namespace tap::communication::referee;
 using namespace tap::communication::serial;
@@ -72,11 +71,11 @@ MatrixHudIndicators::MatrixHudIndicators(
       cvOnTargetGovernor(cvOnTargetGovernor),
       matrixHudIndicatorDrawers
 {
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[SHOOTER_STATE],
-            updateGraphicYLocation,
-            0),
+    StateHUDIndicator<uint16_t>(
+        refSerialTransmitter,
+        &matrixHudIndicatorGraphics[SHOOTER_STATE],
+        updateGraphicYLocation,
+        0),
 #if defined(DISPLAY_FIRING_MODE)
         StateHUDIndicator<uint16_t>(
             refSerialTransmitter,

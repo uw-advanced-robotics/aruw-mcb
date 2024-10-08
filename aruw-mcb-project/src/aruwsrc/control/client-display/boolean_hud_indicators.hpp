@@ -120,8 +120,7 @@ private:
             BooleanHUDIndicatorTuple(
                 "AGI ",
                 Tx::GraphicColor::GREEN,
-                Tx::GraphicColor::PURPLISH_RED)
-        };
+                Tx::GraphicColor::PURPLISH_RED)};
 
     tap::control::CommandScheduler &commandScheduler;
 

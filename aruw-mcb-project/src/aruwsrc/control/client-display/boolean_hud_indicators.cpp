@@ -64,8 +64,7 @@ BooleanHudIndicators::BooleanHudIndicators(
               updateGraphicColor<
                   std::get<1>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY]),
                   std::get<2>(BOOLEAN_HUD_INDICATOR_LABELS_AND_COLORS[AGITATOR_STATUS_HEALTHY])>,
-              0)
-      }
+              0)}
 {
 }
 

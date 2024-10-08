@@ -46,7 +46,7 @@ namespace aruwsrc::control::client_display
  *
  * ```
  *  SHOT
- *  
+ *
  *  REDY
  *  +----+
  *  |LOAD|
