@@ -74,7 +74,6 @@ using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
 #endif
-float temp = 0.0f;
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -99,7 +98,6 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            temp = drivers->mpu6500.getTemp();
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
@@ -162,7 +160,7 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -185,7 +183,6 @@ static void updateIo(tap::Drivers *drivers)
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->plateHitTracker.update();
-    ((Drivers *)drivers)->plateHitTracker.getPeakAngleDegrees();  // @todo remove this
 #endif
 
 #ifdef ALL_STANDARDS
