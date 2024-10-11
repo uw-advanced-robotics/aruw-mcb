@@ -157,16 +157,13 @@ static void initializeIo(tap::Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
+    ((Drivers *)drivers)->plateHitTracker.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
     ((Drivers *)drivers)->capacitorBank.initialize();
-#endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED) || \
-    defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->plateHitTracker.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->turretMCBCanCommBus2.init();
