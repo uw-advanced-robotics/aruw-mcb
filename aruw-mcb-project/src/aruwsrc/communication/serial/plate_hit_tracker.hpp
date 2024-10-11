@@ -20,13 +20,15 @@
 #ifndef PLATE_HIT_TRACKER_HPP_
 #define PLATE_HIT_TRACKER_HPP_
 
-#include <tap/architecture/timeout.hpp>
-#include "tap/algorithms/cmsis_mat.hpp"
-#include "tap/drivers.hpp"
-#include <tap/algorithms/wrapped_float.hpp>
-#include "modm/math/matrix.hpp"
 #include <aruwsrc/algorithms/odometry/transformer_interface.hpp>
+#include <tap/algorithms/wrapped_float.hpp>
+#include <tap/architecture/timeout.hpp>
+
+#include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
+
+#include "modm/math/matrix.hpp"
 namespace aruwsrc::communication::serial
 {
 class PlateHitTracker
@@ -46,24 +48,23 @@ class PlateHitTracker
     };
 
 public:
-/**
- * @brief PlateHitTracker
- * @param drivers Robot drivers
- * @param transforms TransformerInterface for getting the robot's orientation
- * @brief Checks refSerial for hit data and adds them to a matrix of bins
- * each bin in 45 degrees around the robot
- * bin 0 => 337.5 to 22.5 \n 
- * bin 1 => 22.5 to 67.5\n
- * bin 2 => 67.5 to 112.5\n
- * bin 3 => 112.5 to 157.5\n
- * bin 4 => 157.5 to 202.5\n
- * bin 5 => 202.5 to 247.5\n
- * bin 6 => 247.5 to 292.5\n
- * bin 7 => 292.5 to 337.5\n
- * Final product is a list of peaks and their positions around the robot
- */
-    PlateHitTracker(
-        tap::Drivers *drivers);
+    /**
+     * @brief PlateHitTracker
+     * @param drivers Robot drivers
+     * @param transforms TransformerInterface for getting the robot's orientation
+     * @brief Checks refSerial for hit data and adds them to a matrix of bins
+     * each bin in 45 degrees around the robot
+     * bin 0 => 337.5 to 22.5 \n
+     * bin 1 => 22.5 to 67.5\n
+     * bin 2 => 67.5 to 112.5\n
+     * bin 3 => 112.5 to 157.5\n
+     * bin 4 => 157.5 to 202.5\n
+     * bin 5 => 202.5 to 247.5\n
+     * bin 6 => 247.5 to 292.5\n
+     * bin 7 => 292.5 to 337.5\n
+     * Final product is a list of peaks and their positions around the robot
+     */
+    PlateHitTracker(tap::Drivers *drivers);
     PlateHitData getRecentHitData();
     PlateHitData getLastHitData();
     bool isHitRecently();
@@ -74,7 +75,7 @@ public:
     void update();
 
     mockable inline void attachTransformer(
-    aruwsrc::algorithms::transforms::TransformerInterface *transformer)
+        aruwsrc::algorithms::transforms::TransformerInterface *transformer)
     {
         this->transformer = transformer;
     }
