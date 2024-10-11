@@ -74,7 +74,7 @@ using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
 #endif
-
+float temp = 0.0f;
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -99,6 +99,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
+            temp = drivers->mpu6500.getTemp();
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
@@ -165,7 +166,7 @@ static void initializeIo(tap::Drivers *drivers)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->plateHitTracker.initalize();
+    ((Drivers *)drivers)->plateHitTracker.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->turretMCBCanCommBus2.init();

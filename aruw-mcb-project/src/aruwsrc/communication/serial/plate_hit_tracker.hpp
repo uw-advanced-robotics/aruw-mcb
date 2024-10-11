@@ -21,12 +21,12 @@
 #define PLATE_HIT_TRACKER_HPP_
 
 #include <tap/architecture/timeout.hpp>
-
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/drivers.hpp"
-
+#include <tap/algorithms/wrapped_float.hpp>
 #include "modm/math/matrix.hpp"
-
+#include <aruwsrc/algorithms/odometry/transformer_interface.hpp>
+#include "tap/control/subsystem.hpp"
 namespace aruwsrc::communication::serial
 {
 class PlateHitTracker
@@ -39,18 +39,50 @@ class PlateHitTracker
         int timestamp;
     };
 
+    struct PlateHitBinData
+    {
+        float degrees;
+        float magnitude;
+    };
+
 public:
-    PlateHitTracker(tap::Drivers *drivers);
+/**
+ * @brief PlateHitTracker
+ * @param drivers Robot drivers
+ * @param transforms TransformerInterface for getting the robot's orientation
+ * @brief Checks refSerial for hit data and adds them to a matrix of bins
+ * each bin in 45 degrees around the robot
+ * bin 0 => 337.5 to 22.5 \n 
+ * bin 1 => 22.5 to 67.5\n
+ * bin 2 => 67.5 to 112.5\n
+ * bin 3 => 112.5 to 157.5\n
+ * bin 4 => 157.5 to 202.5\n
+ * bin 5 => 202.5 to 247.5\n
+ * bin 6 => 247.5 to 292.5\n
+ * bin 7 => 292.5 to 337.5\n
+ * Final product is a list of peaks and their positions around the robot
+ */
+    PlateHitTracker(
+        tap::Drivers *drivers);
     PlateHitData getRecentHitData();
     PlateHitData getLastHitData();
     bool isHitRecently();
-    void initalize();
-    void update();
     float getPeakAngleDegrees();
 
+    void initialize();
+
+    void update();
+
+    mockable inline void attachTransformer(
+    aruwsrc::algorithms::transforms::TransformerInterface *transformer)
+    {
+        this->transformer = transformer;
+    }
+    std::array<PlateHitBinData, 10> getPeakData();
+
 private:
-    tap::algorithms::CMSISMat<10, 1> normaliseBins(tap::algorithms::CMSISMat<10, 1> mat);
-    tap::algorithms::CMSISMat<10, 1> blurBins(tap::algorithms::CMSISMat<10, 1> mat);
+    tap::algorithms::CMSISMat<8, 1> normaliseBins(tap::algorithms::CMSISMat<8, 1> mat);
+    tap::algorithms::CMSISMat<8, 1> blurBins(tap::algorithms::CMSISMat<8, 1> mat);
     tap::Drivers *drivers;
     int dataTimestamp;
     float hitAngle_chassisRelative_radians;
@@ -59,26 +91,25 @@ private:
     float lastDPS;
     int lastHitPlateID;
     tap::arch::MilliTimeout hitTimer;
-    const int HIT_EXPIRE_TIME = 1000;
-    const uint8_t BIN_NUMBER = 10;
-    tap::algorithms::CMSISMat<10, 1> bins;
-    const float DECAY_FACTOR = 0.95;
+    const int HIT_EXPIRE_TIME = 5;
+    const uint8_t BIN_NUMBER = 8;
+    tap::algorithms::CMSISMat<8, 1> bins;
+    const float DECAY_FACTOR = 0.99995;
     float lastPeakAngleDegrees;
-
-    const tap::algorithms::CMSISMat<10, 10> BLUR_CONVOLVE_MATRIX;
+    aruwsrc::algorithms::transforms::TransformerInterface *transformer;
+    const tap::algorithms::CMSISMat<8, 8> BLUR_CONVOLVE_MATRIX;
     // clang-format off
-    static constexpr float BLUR_CONVOLVE_MATRIX_DATA[100] = {
-        0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25,
-        0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25,
-        0.25, 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0.25, 0.5  
+    static constexpr float BLUR_CONVOLVE_MATRIX_DATA[64] = {
+        0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0.25,
+        0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   ,
+        0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   ,
+        0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   ,
+        0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   ,
+        0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   ,
+        0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25,
+        0.25, 0   , 0   , 0   , 0   , 0   , 0.25, 0.5  
     };
+
     // clang-format on
 };
 
