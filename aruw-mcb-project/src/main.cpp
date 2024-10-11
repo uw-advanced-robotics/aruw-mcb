@@ -151,7 +151,6 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->visionCoprocessor.initializeCV();
     ((Drivers *)drivers)->turretMCBCanCommBus1.init();
@@ -165,7 +164,8 @@ static void initializeIo(tap::Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED) || defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_TESTBED) || \
+    defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->plateHitTracker.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -188,7 +188,7 @@ static void updateIo(tap::Drivers *drivers)
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
     ((Drivers *)drivers)->plateHitTracker.update();
-    ((Drivers *)drivers)->plateHitTracker.getPeakAngleDegrees(); // @todo remove this
+    ((Drivers *)drivers)->plateHitTracker.getPeakAngleDegrees();  // @todo remove this
 #endif
 
 #ifdef ALL_STANDARDS
