@@ -21,7 +21,6 @@
 
 namespace aruwsrc::communication::serial
 {
-
 PlateHitTracker::PlateHitTracker(tap::Drivers *drivers)
     : drivers(drivers),
       transformer(nullptr),
