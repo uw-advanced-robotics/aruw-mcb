@@ -29,7 +29,7 @@
 #include "tap/drivers.hpp"
 
 #include "modm/math/matrix.hpp"
-namespace aruwsrc::communication::serial
+namespace aruwsrc::algorithms
 {
 class PlateHitTracker
 {
@@ -114,5 +114,5 @@ private:
     // clang-format on
 };
 
-}  // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::algorithms
 #endif  // PLATE_HIT_TRACKER_HPP_

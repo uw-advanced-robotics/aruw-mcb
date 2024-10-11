@@ -19,7 +19,7 @@
 
 #include "plate_hit_tracker.hpp"
 
-namespace aruwsrc::communication::serial
+namespace aruwsrc::algorithms
 {
 PlateHitTracker::PlateHitTracker(tap::Drivers *drivers)
     : drivers(drivers),
@@ -142,4 +142,4 @@ std::array<PlateHitTracker::PlateHitBinData, 10> PlateHitTracker::getPeakData()
     return peakData;
 }
 
-}  // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::algorithms
