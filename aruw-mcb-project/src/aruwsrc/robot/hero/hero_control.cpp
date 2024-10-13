@@ -79,6 +79,11 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
+#include "aruwsrc/control/sweep/sweep_subsystem.hpp"
+#include "aruwsrc/control/sweep/sweep_command.hpp"
+
+using namespace aruwsrc::control::sweep;
+
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
@@ -411,6 +416,17 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     capBankSubsystem,
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
+
+tap::motor::DjiMotor sweepMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_YAW_MOTOR,
+    false,
+    "Sweep Motor");
+
+SweepSubsystem sweepSubsystem(drivers(), &sweepMotor);
+SweepCommand sweepCommand(&sweepSubsystem);
+
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchDown(
     drivers(),
@@ -536,7 +552,6 @@ void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
 }

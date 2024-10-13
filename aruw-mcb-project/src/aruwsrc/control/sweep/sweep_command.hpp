@@ -29,7 +29,9 @@ namespace aruwsrc::control::sweep
 class SweepCommand : public tap::control::Command
 {
 public:
-    SweepCommand(SweepSubsystem* subsystem) : tap::control::Command(), subsystem(subsystem) {}
+    SweepCommand(SweepSubsystem* subsystem) : tap::control::Command(), subsystem(subsystem) {
+        addSubsystemRequirement(subsystem);
+    }
 
     void initialize() override;
 
