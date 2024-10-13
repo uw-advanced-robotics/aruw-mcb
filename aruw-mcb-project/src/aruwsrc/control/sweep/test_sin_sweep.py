@@ -23,7 +23,4 @@ while(freq < endFreq):
 print(currTime)
     
 plt.plot(freqVals)
-# Make the x axis logarithmic
-plt.xscale('log')
-
 plt.show()

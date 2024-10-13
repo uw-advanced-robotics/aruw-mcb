@@ -34,7 +34,7 @@ public:
     {
     }
 
-    void initialize() override { motor->initialize(); }
+    void initialize() override { }
 
     void refresh() override {}
 

@@ -35,7 +35,7 @@ public:
 
     void execute() override;
 
-    void end(bool interrupted) override { subsystem->motor->setDesiredOutput(0); }
+    void end(bool) override { subsystem->motor->setDesiredOutput(0); }
 
     bool isFinished() const override { return currentFrequency > endFrequency; }
 
