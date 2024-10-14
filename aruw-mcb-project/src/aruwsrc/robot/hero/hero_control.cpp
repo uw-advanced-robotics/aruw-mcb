@@ -552,7 +552,7 @@ void registerHeroSubsystems(Drivers *drivers)
 void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
