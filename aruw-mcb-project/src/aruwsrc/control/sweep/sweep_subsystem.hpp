@@ -29,20 +29,23 @@ class SweepSubsystem : public tap::control::Subsystem
 {
 public:
     SweepSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
-        : tap::control::Subsystem(drivers),
-          motor(motor)
+        : tap::control::Subsystem(drivers)
     {
+        this->motor = motor;
     }
 
     void initialize() override { }
 
-    void refresh() override {}
+    void refresh() override {
+        encoderPosition = motor->getEncoderUnwrapped();
+    }
 
     void refreshSafeDisconnect() override { motor->setDesiredOutput(0); }
 
     const char* getName() const override { return "Sweep Subsystem"; }
 
     tap::motor::DjiMotor* motor;
+    int encoderPosition = 0;
 
 };  // class SweepSubsystem
 

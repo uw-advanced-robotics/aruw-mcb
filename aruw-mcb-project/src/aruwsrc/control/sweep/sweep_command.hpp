@@ -29,7 +29,9 @@ namespace aruwsrc::control::sweep
 class SweepCommand : public tap::control::Command
 {
 public:
-    SweepCommand(SweepSubsystem* subsystem) : tap::control::Command(), subsystem(subsystem) {
+    SweepCommand(SweepSubsystem* subsystem) : tap::control::Command()
+    {
+        this->subsystem = subsystem;
         addSubsystemRequirement(subsystem);
     }
 
@@ -37,11 +39,17 @@ public:
 
     void execute() override;
 
-    void end(bool) override { subsystem->motor->setDesiredOutput(0); }
+    void end(bool) override
+    {
+        subsystem->motor->setDesiredOutput(0);
+        commandRunning = false;
+    }
 
     bool isFinished() const override { return currentFrequency > endFrequency; }
 
     const char* getName() const override { return "Sweeping"; }
+
+bool commandRunning = false;
 
 private:
     SweepSubsystem* subsystem;

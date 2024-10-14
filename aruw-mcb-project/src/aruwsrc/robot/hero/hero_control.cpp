@@ -417,14 +417,7 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 
-tap::motor::DjiMotor sweepMotor(
-    drivers(),
-    YAW_MOTOR_ID,
-    CAN_BUS_YAW_MOTOR,
-    false,
-    "Sweep Motor");
-
-SweepSubsystem sweepSubsystem(drivers(), &sweepMotor);
+SweepSubsystem sweepSubsystem(drivers(), &yawMotor);
 SweepCommand sweepCommand(&sweepSubsystem);
 
 /* define command mappings --------------------------------------------------*/
