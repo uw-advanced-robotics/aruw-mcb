@@ -434,7 +434,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerHeatAndCVLimited},
+    {&sweepCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
@@ -545,15 +545,14 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    drivers->commandScheduler.registerSubsystem(&sweepSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
-    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
-    kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
+
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
