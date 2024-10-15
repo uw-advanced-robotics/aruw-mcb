@@ -109,10 +109,6 @@ float VelocityAgitatorSubsystem::getUncalibratedAgitatorAngle() const
            agitatorMotor.getEncoderUnwrapped() / config.gearRatio;
 }
 
-void VelocityAgitatorSubsystem::runHardwareTests() {}
-
-void VelocityAgitatorSubsystem::onHardwareTestStart() {}
-
 void VelocityAgitatorSubsystem::runVelocityPidControl()
 {
     const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();

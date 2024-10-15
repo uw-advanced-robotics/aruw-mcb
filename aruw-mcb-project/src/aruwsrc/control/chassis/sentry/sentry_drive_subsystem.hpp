@@ -84,12 +84,6 @@ public:
 
     void refresh() override;
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
-    void onHardwareTestComplete() override;
-
     const char* getName() const override { return "Sentry Drive"; }
 
     inline int getNumChassisMotors() const override { return NUM_CHASSIS_MOTORS; }

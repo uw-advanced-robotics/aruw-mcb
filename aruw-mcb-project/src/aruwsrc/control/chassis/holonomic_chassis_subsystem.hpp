@@ -158,7 +158,7 @@ public:
 
     const char* getName() const override { return "Chassis"; }
 
-    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
+    // mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 

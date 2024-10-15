@@ -89,7 +89,7 @@ public:
 
     const char* getName() const override { return "Turret"; }
 
-    void onHardwareTestStart() override;
+    // void onHardwareTestStart() override;
 
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 

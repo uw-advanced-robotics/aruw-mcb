@@ -47,19 +47,19 @@ float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
 
-void HopperSubsystem::runHardwareTests()
-{
-    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-        this->setHardwareTestsComplete();
-}
+// void HopperSubsystem::runHardwareTests()
+// {
+//     if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
+//         this->setHardwareTestsComplete();
+// }
 
-void HopperSubsystem::onHardwareTestStart()
-{
-    testTime = tap::arch::clock::getTimeMicroseconds();
-    this->setOpen();
-}
+// void HopperSubsystem::onHardwareTestStart()
+// {
+//     testTime = tap::arch::clock::getTimeMicroseconds();
+//     this->setOpen();
+// }
 
-void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
+// void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
 
 }  // namespace control
 

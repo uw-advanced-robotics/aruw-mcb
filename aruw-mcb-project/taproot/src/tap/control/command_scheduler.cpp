@@ -23,6 +23,8 @@
 
 #include "command_scheduler.hpp"
 
+#include <numeric>
+
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -171,22 +173,6 @@ void CommandScheduler::run()
     uint32_t runStart = arch::clock::getTimeMicroseconds();
 #endif
 
-    if (runningHardwareTests)
-    {
-        // Call runHardwareTests on all subsystems in the registeredSubsystemBitmap
-        // if a hardware test is not already complete
-        for (auto it = subMapBegin(); it != subMapEnd(); it++)
-        {
-            Subsystem *sub = *it;
-            if (!sub->isHardwareTestComplete())
-            {
-                sub->runHardwareTests();
-            }
-            sub->refresh();
-        }
-        return;
-    }
-
     if (safeDisconnected())
     {
         // End all commands running. They were interrupted by the remote disconnecting.
@@ -256,11 +242,6 @@ void CommandScheduler::addCommand(Command *commandToAdd)
 {
     if (safeDisconnected())
     {
-        return;
-    }
-    else if (runningHardwareTests)
-    {
-        RAISE_ERROR(drivers, "attempting to add command while running tests");
         return;
     }
     else if (commandToAdd == nullptr)
@@ -363,35 +344,63 @@ bool CommandScheduler::isSubsystemRegistered(const Subsystem *subsystem) const
             registeredSubsystemBitmap);
 }
 
-void CommandScheduler::startHardwareTests()
+void CommandScheduler::runAllHardwareTests()
 {
-    // End all commands that are currently being run
-    runningHardwareTests = true;
-    for (auto it = cmdMapBegin(); it != cmdMapEnd(); it++)
-    {
-        (*it)->end(true);
-    }
-
-    // Clear command bitmap (now all commands are removed)
-    addedCommandBitmap = 0;
-    // No more subsystems associated with commands, so clear this bitmap as well
-    subsystemsAssociatedWithCommandBitmap = 0;
-
-    // Start hardware tests
     for (auto it = subMapBegin(); it != subMapEnd(); it++)
     {
-        (*it)->setHardwareTestsIncomplete();
+        this->runHardwareTest(*it);
     }
 }
 
-void CommandScheduler::stopHardwareTests()
+void CommandScheduler::runHardwareTest(const Subsystem *subsystem)
 {
-    // Stop all hardware tests
+    Command *testCommand = subsystem->getTestCommand();
+    if (testCommand != nullptr)
+    {
+        this->addCommand(testCommand);
+    }
+}
+
+void CommandScheduler::stopAllHardwareTests()
+{
+    Command *testCommand;
+    // Start hardware tests
     for (auto it = subMapBegin(); it != subMapEnd(); it++)
     {
-        (*it)->setHardwareTestsComplete();
+        // schedule the test command if it exists
+        if ((testCommand = (*it)->getTestCommand()) != nullptr)
+        {
+            this->removeCommand(testCommand, true);
+        }
     }
-    runningHardwareTests = false;
+}
+
+void CommandScheduler::stopHardwareTest(const Subsystem *subsystem)
+{
+    Command *testCommand = subsystem->getTestCommand();
+    if (testCommand != nullptr)
+    {
+        this->removeCommand(testCommand, true);
+    }
+}
+
+int CommandScheduler::runningHardwareTests()
+{
+    int total = 0;
+    for (auto it = subMapBegin(); it != subMapEnd(); it++)
+    {
+        if (this->runningTest(*it))
+        {
+            total += 1;
+        }
+    }
+
+    return total;
+}
+
+bool CommandScheduler::runningTest(const Subsystem *subsystem)
+{
+    return this->isCommandScheduled(subsystem->getTestCommand());
 }
 
 int CommandScheduler::subsystemListSize() const
