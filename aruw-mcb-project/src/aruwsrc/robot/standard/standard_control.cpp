@@ -410,15 +410,16 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping rightSwitchMiddle(
     drivers(),
-    {&stopFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&spinFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
+
 HoldCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
@@ -546,7 +547,7 @@ void setDefaultStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    frictionWheels.setDefaultCommand(&stopFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -560,7 +561,7 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);

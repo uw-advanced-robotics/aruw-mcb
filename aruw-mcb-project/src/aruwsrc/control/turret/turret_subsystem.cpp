@@ -62,10 +62,10 @@ void TurretSubsystem::refresh()
     pitchMotor.updateMotorAngle();
 }
 
-void TurretSubsystem::onHardwareTestStart()
-{
-    yawMotor.setMotorOutput(0);
-    pitchMotor.setMotorOutput(0);
-}
+// void TurretSubsystem::onHardwareTestStart()
+// {
+//     yawMotor.setMotorOutput(0);
+//     pitchMotor.setMotorOutput(0);
+// }
 
 }  // namespace aruwsrc::control::turret

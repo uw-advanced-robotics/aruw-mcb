@@ -55,8 +55,10 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       desiredRpmRamp(0),
       leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
       rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
-      turretMCB(turretMCB)
+      turretMCB(turretMCB),
+      frictionTestCommand(this)
 {
+    this->setTestCommand(&frictionTestCommand);
 }
 
 void FrictionWheelSubsystem::initialize()
@@ -99,18 +101,38 @@ void FrictionWheelSubsystem::refresh()
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 
-void FrictionWheelSubsystem::runHardwareTests()
-{
-    if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
-}
+// void FrictionWheelSubsystem::runHardwareTests()
+// {
+//     if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
+// }
 
-void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredLaunchSpeed(15); }
+// void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredLaunchSpeed(15); }
 
-void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSpeed(0); }
+// void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSpeed(0); }
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+}
+
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem* subsystem) : subsystem(subsystem)
+{
+    this->addSubsystemRequirement(subsystem);
+}
+
+void FrictionWheelTestCommand::initialize()
+{
+    this->subsystem->setDesiredLaunchSpeed(15);
+}
+
+void FrictionWheelTestCommand::end(bool)
+{
+    this->subsystem->setDesiredLaunchSpeed(0);
+}
+
+bool FrictionWheelTestCommand::isFinished() const
+{
+    return abs(this->subsystem->rightWheel.getShaftRPM()) > 4000.0f;
 }
 
 }  // namespace aruwsrc::control::launcher
