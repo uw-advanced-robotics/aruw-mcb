@@ -40,20 +40,6 @@ void XAxisSubsystem::setExtended(bool isExtended)
 
 bool XAxisSubsystem::isExtended() const { return extended; }
 
-void XAxisSubsystem::runHardwareTests()
-{
-    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-        this->setHardwareTestsComplete();
-}
-
-void XAxisSubsystem::onHardwareTestStart()
-{
-    testTime = tap::arch::clock::getTimeMicroseconds();
-    this->setExtended(!isExtended());
-}
-
-void XAxisSubsystem::onHardwareTestComplete() { this->setExtended(!isExtended()); }
-
 }  // namespace engineer
 
 }  // namespace aruwsrc

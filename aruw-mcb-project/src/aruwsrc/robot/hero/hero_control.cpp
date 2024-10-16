@@ -415,7 +415,7 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
 HoldCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MIDDLE));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&kicker::launchKickerHeatAndCVLimited},
