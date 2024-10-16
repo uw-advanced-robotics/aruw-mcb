@@ -92,26 +92,14 @@ void SentryTurretCVCommand::computeAimSetpoints(
         solution.distance);
 }
 
-WrappedFloat debug_majorSetpoint(Angle(0));
-WrappedFloat debug_leftPitchSetpoint(Angle(0));
-WrappedFloat debug_rightPitchSetpoint(Angle(0));
-WrappedFloat debug_leftYawSetpoint(Angle(0));
-WrappedFloat debug_rightYawSetpoint(Angle(0));
-bool debug = false;
-
-WrappedFloat majorSetpoint(Angle(0));
-WrappedFloat leftYawSetpoint(Angle(0));
-WrappedFloat rightYawSetpoint(Angle(0));
-WrappedFloat leftPitchSetpoint(Angle(0));
-WrappedFloat rightPitchSetpoint(Angle(0));
 void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
-    majorSetpoint = yawControllerMajor.getSetpoint();
-    leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
-    rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
-    leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
-    rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
+    WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
+    WrappedFloat leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
+    WrappedFloat rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
+    WrappedFloat leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
+    WrappedFloat rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
     auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
