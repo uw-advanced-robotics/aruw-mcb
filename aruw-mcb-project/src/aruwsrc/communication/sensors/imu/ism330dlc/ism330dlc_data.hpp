@@ -19,9 +19,9 @@ class ism330dlcData{
         OUTZ_H_G = 0x27,
 
         // accelerometer
-        OUTX_L_XL = 0x28
-        OUTX_H_XL = 0x29
-        OUTY_L_XL = 0x2A
+        OUTX_L_XL = 0x28,
+        OUTX_H_XL = 0x29,
+        OUTY_L_XL = 0x2A,
         OUTY_H_XL = 0x2B,
         OUTZ_L_XL = 0x2C,
         OUTZ_H_XL = 0x2D
