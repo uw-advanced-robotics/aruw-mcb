@@ -101,34 +101,20 @@ void FrictionWheelSubsystem::refresh()
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 
-// void FrictionWheelSubsystem::runHardwareTests()
-// {
-//     if (abs(rightWheel.getShaftRPM()) > 4000.0f) this->setHardwareTestsComplete();
-// }
-
-// void FrictionWheelSubsystem::onHardwareTestStart() { this->setDesiredLaunchSpeed(15); }
-
-// void FrictionWheelSubsystem::onHardwareTestComplete() { this->setDesiredLaunchSpeed(0); }
-
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
 
-FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem* subsystem) : subsystem(subsystem)
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
+    : subsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);
 }
 
-void FrictionWheelTestCommand::initialize()
-{
-    this->subsystem->setDesiredLaunchSpeed(15);
-}
+void FrictionWheelTestCommand::initialize() { this->subsystem->setDesiredLaunchSpeed(15); }
 
-void FrictionWheelTestCommand::end(bool)
-{
-    this->subsystem->setDesiredLaunchSpeed(0);
-}
+void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpeed(0); }
 
 bool FrictionWheelTestCommand::isFinished() const
 {

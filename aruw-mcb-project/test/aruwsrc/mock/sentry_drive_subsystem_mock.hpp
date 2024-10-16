@@ -40,7 +40,6 @@ public:
     MOCK_METHOD(void, setDesiredRpm, (float), (override));
     MOCK_METHOD(float, getDesiredRpm, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
-    MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (const override));
 };
 }  // namespace aruwsrc::mock

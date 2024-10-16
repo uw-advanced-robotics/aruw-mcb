@@ -26,14 +26,16 @@ namespace aruwsrc
 namespace control
 {
 HopperSubsystem::HopperSubsystem(
-    tap::Drivers *drivers,
+    tap::Drivers* drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float open,
     float close,
     float pwmRampSpeed)
     : tap::control::Subsystem(drivers),
-      hopper(drivers, pwmPin, open, close, pwmRampSpeed)
+      hopper(drivers, pwmPin, open, close, pwmRampSpeed),
+      hopperTestCommand(this)
 {
+    this->setTestCommand(&hopperTestCommand);
     hopper.setTargetPwm(close);
 }
 
@@ -47,20 +49,23 @@ float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
 
-// void HopperSubsystem::runHardwareTests()
-// {
-//     if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-//         this->setHardwareTestsComplete();
-// }
+HopperTestCommand::HopperTestCommand(HopperSubsystem* subsystem) : subsystem(subsystem)
+{
+    this->addSubsystemRequirement(subsystem);
+}
 
-// void HopperSubsystem::onHardwareTestStart()
-// {
-//     testTime = tap::arch::clock::getTimeMicroseconds();
-//     this->setOpen();
-// }
+void HopperTestCommand::initialize()
+{
+    this->subsystem->setOpen();
+    this->startTime = tap::arch::clock::getTimeMilliseconds();
+}
 
-// void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
+void HopperTestCommand::end(bool) { this->subsystem->setClose(); }
 
+bool HopperTestCommand::isFinished() const
+{
+    return tap::arch::clock::getTimeMilliseconds() - this->startTime > 1000;
+}
 }  // namespace control
 
 }  // namespace aruwsrc

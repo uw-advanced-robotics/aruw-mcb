@@ -52,23 +52,23 @@ class FrictionWheelSubsystem;
 class FrictionWheelTestCommand : public tap::control::Command
 {
 public:
-    FrictionWheelTestCommand(FrictionWheelSubsystem* subsystem);
+    FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem);
 
     bool isReady() override { return true; };
 
     void initialize() override;
 
-    void execute() override {};
+    void execute() override{};
 
     void end(bool) override;
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "friction wheel test command"; }
+    const char *getName() const override { return "friction wheel test command"; }
 
 private:
-    FrictionWheelSubsystem* subsystem;
-}; // class FrictionWheelTestCommand
+    FrictionWheelSubsystem *subsystem;
+};  // class FrictionWheelTestCommand
 
 /**
  * A subsystem which regulates the speed of a two wheel shooter system using velocity PID
@@ -76,7 +76,8 @@ private:
  */
 class FrictionWheelSubsystem : public tap::control::Subsystem
 {
-friend class FrictionWheelTestCommand;
+    friend class FrictionWheelTestCommand;
+
 public:
     /**
      * Creates a new friction wheel subsystem
