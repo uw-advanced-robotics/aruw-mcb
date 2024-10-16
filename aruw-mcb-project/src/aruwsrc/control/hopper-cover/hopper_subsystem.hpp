@@ -26,6 +26,7 @@
 #ifndef HOPPER_SUBSYSTEM_HPP_
 #define HOPPER_SUBSYSTEM_HPP_
 
+#include "tap/control/command.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/servo.hpp"
@@ -38,6 +39,31 @@ namespace aruwsrc
 {
 namespace control
 {
+class HopperSubsystem;
+
+class HopperTestCommand : public tap::control::Command
+{
+public:
+    HopperTestCommand(HopperSubsystem* subsystem);
+
+    bool isReady() override { return true; };
+
+    void initialize() override;
+
+    void execute() override{};
+
+    void end(bool) override;
+
+    bool isFinished() const override;
+
+    const char* getName() const override { return "hopper test command"; }
+
+private:
+    HopperSubsystem* subsystem;
+    uint64_t startTime;
+
+};  // class HopperTestCommand
+
 class HopperSubsystem : public tap::control::Subsystem
 {
 public:
@@ -58,7 +84,7 @@ public:
      *                 a PWM value (between 0 and 1)
      */
     HopperSubsystem(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         tap::gpio::Pwm::Pin pwmPin,
         float open,
         float close,
@@ -76,16 +102,12 @@ public:
 
     void refresh() override;
 
-    // void runHardwareTests() override;
-
-    // void onHardwareTestStart() override;
-
-    // void onHardwareTestComplete() override;
-
-    const char *getName() const override { return "Hopper"; }
+    const char* getName() const override { return "Hopper"; }
 
 private:
     tap::motor::Servo hopper;
+
+    HopperTestCommand hopperTestCommand;
 
     /*
      * return the angle defined as open as a PWM value
@@ -96,8 +118,6 @@ private:
      * return the angle defined as close as a PWM value
      */
     float getClosePWM();
-
-    uint64_t testTime;
 };
 
 }  // namespace control

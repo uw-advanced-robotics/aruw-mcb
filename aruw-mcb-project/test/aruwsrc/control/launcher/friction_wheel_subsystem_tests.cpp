@@ -46,15 +46,17 @@ protected:
     FrictionWheelSubsystem frictionWheels;
 };
 
-TEST_F(FrictionWheelSubsystemTest, onHardwareTestStart__sets_desired_speed_nonzero)
+TEST_F(FrictionWheelSubsystemTest, initalizingHardwareTestCommand__sets_desired_speed_nonzero)
 {
-    frictionWheels.onHardwareTestStart();
+    frictionWheels.setDesiredLaunchSpeed(0);
+    frictionWheels.getTestCommand()->initialize();
     EXPECT_NEAR(15.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 
-TEST_F(FrictionWheelSubsystemTest, onHardwareTestComplete__sets_desired_speed_zero)
+TEST_F(FrictionWheelSubsystemTest, endingHardwareTestCommand__sets_desired_speed_zero)
 {
-    frictionWheels.onHardwareTestComplete();
+    frictionWheels.setDesiredLaunchSpeed(15);
+    frictionWheels.getTestCommand()->end(true);
     EXPECT_NEAR(0.0f, frictionWheels.getDesiredLaunchSpeed(), 1E-3);
 }
 

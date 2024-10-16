@@ -44,29 +44,32 @@ namespace agitator
 class AgitatorTestCommand : public tap::control::Command
 {
 public:
-    AgitatorTestCommand(tap::control::setpoint::SetpointSubsystem* subsystem) : subsystem(subsystem) {}
+    AgitatorTestCommand(tap::control::setpoint::SetpointSubsystem* subsystem) : subsystem(subsystem)
+    {
+        this->addSubsystemRequirement(subsystem);
+    }
 
     bool isReady() override { return true; };
 
-    void initialize() override
-    {
-        subsystem->setSetpoint(subsystem->getCurrentValue() + M_PI / 2);
-    };
+    void initialize() override { subsystem->setSetpoint(subsystem->getCurrentValue() + M_PI / 2); };
 
-    void execute() override {};
+    void execute() override{};
 
-    void end(bool) override {};
+    void end(bool) override{};
 
     bool isFinished() const override
     {
-        return tap::algorithms::compareFloatClose(this->subsystem->getSetpoint(), this->subsystem->getCurrentValue(), M_PI / 16);
+        return tap::algorithms::compareFloatClose(
+            this->subsystem->getSetpoint(),
+            this->subsystem->getCurrentValue(),
+            M_PI / 16);
     };
 
     const char* getName() const override { return "agitator test command"; }
 
 private:
     tap::control::setpoint::SetpointSubsystem* subsystem;
-}; // class AgitatorTestCommand
+};  // class AgitatorTestCommand
 
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
