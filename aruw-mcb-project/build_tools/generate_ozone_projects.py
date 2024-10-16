@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 import subprocess
 
@@ -27,12 +27,12 @@ def run_ozone(env, source, ip="1.1.1.1"):
     # if robot_name not in VALID_ROBOT_TYPES:
     #     raise SystemExit('Invalid Robot Type')
     def call_run_ozone(target, source, env):
-        jdebug = f"{env["BUILDPATH"]}/{env["CONFIG_PROJECT_NAME"]}.jdebug"
+        jdebug = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
         import sys
         if sys.platform == "win32":
             os.startfile(jdebug)
         elif sys.platform == "darwin":
-            subprocess.call(['open', jdebug])
+            subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
         else:
             subprocess.call(['xdg-open', jdebug])
 
@@ -48,9 +48,11 @@ def generate_ozone(env, ip="1.1.1.1"):
         with open("./build_tools/example_ozone_project/example.jdebug") as r:
             project_content = r.read()
 
-        project_content = project_content.replace("${ROBOT_IP}", ip)
+        project_file_path = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
 
-        project_file_path = f"{env["BUILDPATH"]}/{env["CONFIG_PROJECT_NAME"]}.jdebug"
+        project_content = project_content.replace("${ROBOT_IP}", ip)
+        project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])
+        project_content = project_content.replace("${BUILD_DIR_LOWER}", env['BUILDPATH'].lower())
 
         target.append(env.File(project_file_path))
         target.append(env.File(f"{project_file_path}.user"))

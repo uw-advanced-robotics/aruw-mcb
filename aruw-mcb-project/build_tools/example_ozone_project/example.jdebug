@@ -22,6 +22,8 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
+  Project.AddPathSubstitute ("${BUILD_DIR}", "$(ProjectDir)");
+  Project.AddPathSubstitute ("${BUILD_DIR_LOWER}", "$(ProjectDir)");
   Project.SetDevice ("STM32F427II");
   Project.SetHostIF ("IP", "${ROBOT_IP}");
   Project.SetTargetIF ("SWD");
