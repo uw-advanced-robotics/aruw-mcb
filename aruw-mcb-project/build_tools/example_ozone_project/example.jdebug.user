@@ -9,3 +9,4 @@ TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", Visibl
 TableHeader="Data Sampling Setup", SortCol="Min", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[343;100;100;100;100;100;100;100;100]
 TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[220;134;100;100;348]
+WatchedExpression="drivers", Window=Watched Data 1
