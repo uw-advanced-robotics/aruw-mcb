@@ -95,7 +95,7 @@ if args["COMPILE_SRC"]:
         env.Alias("size", env.Size(program))
         env.Alias("gdb", env.DebugGdbRemote(program))
         env.Alias("run", [env.ProgramOpenOcd(program)])
-        env.Alias("ozone", env.GenerateOzoneConfig(program))
+        env.Alias("ozone", env.RunOzoneConfig(program))
         env.Alias("all", ["build", "size"])
         env.Default("all")  # For the hardware target env, "all" runs if you don't
                             # specify anything (i.e. just type "scons")

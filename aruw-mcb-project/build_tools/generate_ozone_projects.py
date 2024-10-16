@@ -16,6 +16,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 from dotenv import load_dotenv
 import os
+import subprocess
 
 from os.path import join, abspath
 
@@ -26,30 +27,45 @@ def run_ozone(env, source, ip="1.1.1.1"):
     # if robot_name not in VALID_ROBOT_TYPES:
     #     raise SystemExit('Invalid Robot Type')
     def call_run_ozone(target, source, env):
-        project_root_path = env["BUILDPATH"]
-        
+        jdebug = f"{env["BUILDPATH"]}/{env["CONFIG_PROJECT_NAME"]}.jdebug"
+        import sys
+        if sys.platform == "win32":
+            os.startfile(jdebug)
+        elif sys.platform == "darwin":
+            subprocess.call(['open', jdebug])
+        else:
+            subprocess.call(['xdg-open', jdebug])
+
+    
+    action = Action(call_run_ozone)
+    return env.AlwaysBuild(env.Alias("ozone_run", [generate_ozone(env), source], action))
+
+def generate_ozone(env, ip="1.1.1.1"):
+    # if robot_name not in VALID_ROBOT_TYPES:
+    #     raise SystemExit('Invalid Robot Type')
+    def call_generate_ozone(target, source, env):
         project_content = ""
         with open("./build_tools/example_ozone_project/example.jdebug") as r:
             project_content = r.read()
 
-        project_content = project_content.replace("${FILE_PATH}", project_root_path)
         project_content = project_content.replace("${ROBOT_IP}", ip)
 
-        project_file_path = os.path.join(project_root_path, f"{env["CONFIG_PROJECT_NAME"]}.jdebug")
+        project_file_path = f"{env["BUILDPATH"]}/{env["CONFIG_PROJECT_NAME"]}.jdebug"
 
-        with open(f"{project_root_path}/{env["CONFIG_PROJECT_NAME"]}.jdebug", "w+") as w:
+        target.append(env.File(project_file_path))
+        target.append(env.File(f"{project_file_path}.user"))
+
+        with open(f"{project_file_path}", "w+") as w:
             w.write(project_content)
 
         with open("./build_tools/example_ozone_project/example.jdebug.user") as w:
             project_user_content = w.read()
 
-        with open(f"{project_root_path}/{env["CONFIG_PROJECT_NAME"]}.jdebug.user", "w+") as w:
+        with open(f"{project_file_path}.user", "w+") as w:
             w.write(project_user_content)
 
-        os.startfile(project_file_path)
-    action = Action(call_run_ozone)
-    return env.AlwaysBuild(env.Alias("ozone_generate", source, action))
-
+    action = Action(call_generate_ozone)
+    return env.AlwaysBuild(env.Alias("ozone_generate", '', action))
 # def generate_project_with_presets(robot_name):
 #     load_dotenv()
 
@@ -72,9 +88,8 @@ def run_ozone(env, source, ip="1.1.1.1"):
 # generate_project_with_presets("SENTRY_HYDRA")
 
 def generate(env, **kw):
-	env.AddMethod(run_ozone, "GenerateOzoneConfig")
-	# env.AddMethod(debug_openocd, "DebugOpenOcd")
-	# env.AddMethod(reset_openocd, "ResetOpenOcd")
+    env.AddMethod(run_ozone, "RunOzoneConfig")
+    env.AddMethod(generate_ozone, "GenerateOzoneConfig")
      
 def exists(env):
      return True
