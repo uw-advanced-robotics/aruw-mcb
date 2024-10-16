@@ -49,7 +49,7 @@ public:
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HERO_PERSEUS) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 2.0f;
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
     /**
