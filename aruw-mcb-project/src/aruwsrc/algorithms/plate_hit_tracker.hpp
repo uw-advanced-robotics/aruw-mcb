@@ -22,7 +22,6 @@
 
 #include <aruwsrc/algorithms/odometry/transformer_interface.hpp>
 #include <tap/algorithms/wrapped_float.hpp>
-#include <tap/architecture/timeout.hpp>
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/control/subsystem.hpp"
@@ -43,7 +42,7 @@ class PlateHitTracker
 
     struct PlateHitBinData
     {
-        float degrees;
+        float radians;
         float magnitude;
     };
 
@@ -65,10 +64,8 @@ public:
      * Final product is a list of peaks and their positions around the robot
      */
     PlateHitTracker(tap::Drivers *drivers);
-    PlateHitData getRecentHitData();
     PlateHitData getLastHitData();
-    bool isHitRecently();
-    float getPeakAngleDegrees();
+    float getPeakAngleRadians();
 
     void initialize();
 
@@ -79,11 +76,28 @@ public:
     {
         this->transformer = transformer;
     }
-    std::array<PlateHitBinData, 10> getPeakData();
 
 private:
-    tap::algorithms::CMSISMat<8, 1> normaliseBins(tap::algorithms::CMSISMat<8, 1> mat);
-    tap::algorithms::CMSISMat<8, 1> blurBins(tap::algorithms::CMSISMat<8, 1> mat);
+    static constexpr float BLUR_FACTOR = 0.5;
+    static constexpr uint8_t BIN_NUMBER = 8;
+
+    // clang-format off
+        static constexpr float A = 0.5; 
+        static constexpr float B = (1 - A) / 2; // Derived from 2B + A = 1
+        static constexpr float BLUR_CONVOLVE_MATRIX_DATA[BIN_NUMBER*BIN_NUMBER] = {
+            A , B, 0 , 0 , 0 , 0 , 0 , B,
+            B , A , B, 0 , 0 , 0 , 0 , 0,
+            0 , B , A , B, 0 , 0 , 0 , 0,
+            0 , 0 , B , A , B, 0 , 0 , 0,
+            0 , 0 , 0 , B , A , B, 0 , 0,
+            0 , 0 , 0 , 0 , B , A , B, 0,
+            0 , 0 , 0 , 0 , 0 , B , A , B,
+            B , 0 , 0 , 0 , 0 , 0 , B , A
+        };
+    // clang-format on
+    const float DECAY_FACTOR = 0.99995;
+
+    // Variables
     tap::Drivers *drivers;
     int dataTimestamp;
     float hitAngle_chassisRelative_radians;
@@ -91,27 +105,16 @@ private:
     bool hitRecently;
     float lastDPS;
     int lastHitPlateID;
-    tap::arch::MilliTimeout hitTimer;
-    const int HIT_EXPIRE_TIME = 5;
-    const uint8_t BIN_NUMBER = 8;
-    tap::algorithms::CMSISMat<8, 1> bins;
-    const float DECAY_FACTOR = 0.99995;
     float lastPeakAngleDegrees;
-    aruwsrc::algorithms::transforms::TransformerInterface *transformer;
-    const tap::algorithms::CMSISMat<8, 8> BLUR_CONVOLVE_MATRIX;
-    // clang-format off
-    static constexpr float BLUR_CONVOLVE_MATRIX_DATA[64] = {
-        0.5 , 0.25, 0   , 0   , 0   , 0   , 0   , 0.25,
-        0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   , 0   ,
-        0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   , 0   ,
-        0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   , 0   ,
-        0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0.25, 0.5 , 0.25,
-        0.25, 0   , 0   , 0   , 0   , 0   , 0.25, 0.5  
-    };
 
-    // clang-format on
+    aruwsrc::algorithms::transforms::TransformerInterface *transformer;
+    tap::algorithms::CMSISMat<BIN_NUMBER, 1> bins;
+    const tap::algorithms::CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
+
+    PlateHitTracker::PlateHitBinData *getBinData();
+    tap::algorithms::CMSISMat<BIN_NUMBER, 1> normaliseBins(
+        tap::algorithms::CMSISMat<BIN_NUMBER, 1> mat);
+    tap::algorithms::CMSISMat<BIN_NUMBER, 1> blurBins(tap::algorithms::CMSISMat<BIN_NUMBER, 1> mat);
 };
 
 }  // namespace aruwsrc::algorithms
