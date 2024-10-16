@@ -85,9 +85,14 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
+#include "aruwsrc/control/sweep/sweep_subsystem.hpp"
+#include "aruwsrc/control/sweep/sweep_command.hpp"
+
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
+
+using namespace aruwsrc::control::sweep;
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -197,6 +202,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
+SweepSubsystem sweepSubsystem(drivers(), &yawMotor);
+SweepCommand sweepCommand(&sweepSubsystem);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -418,7 +426,7 @@ HoldCommandMapping rightSwitchDown(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    {&sweepCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 HoldCommandMapping leftSwitchDown(
@@ -526,6 +534,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    drivers->commandScheduler.registerSubsystem(&sweepSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -546,9 +555,7 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

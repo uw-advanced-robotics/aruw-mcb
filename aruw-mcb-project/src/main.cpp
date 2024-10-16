@@ -75,6 +75,9 @@ using namespace aruwsrc::dart;
 using namespace aruwsrc::testbed;
 #endif
 
+float startTime = 0.0f;
+float timeTaken = 0.0f;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -99,6 +102,7 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
+            startTime = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
@@ -132,6 +136,7 @@ int main()
                 tap::buzzer::silenceBuzzer(&drivers->pwm);
             }
 #endif
+            timeTaken = tap::arch::clock::getTimeMicroseconds() - startTime;
         }
         modm::delay_us(10);
     }
