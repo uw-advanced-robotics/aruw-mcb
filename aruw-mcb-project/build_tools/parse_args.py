@@ -16,13 +16,13 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 from SCons.Script import *
-from . import extract_robot_type
+from build_tools import extract_robot_type
 
 
 CMD_LINE_ARGS                       = 1
 TEST_BUILD_TARGET_ACCEPTED_ARGS     = ["build-tests", "run-tests", "run-tests-gcov"]
 SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
-HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all"]
+HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all", "ozone"]
 VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES               = ["true", "false"]
 VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
