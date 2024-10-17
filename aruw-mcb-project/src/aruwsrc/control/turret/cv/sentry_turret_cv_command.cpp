@@ -75,17 +75,6 @@ void SentryTurretCVCommand::computeAimSetpoints(
     *desiredYawSetpoint = Angle(solution.yawAngle);
     *desiredPitchSetpoint = Angle(solution.pitchAngle);
 
-    // convert world-relative setpoints to turret major frame
-
-    /**
-     * the setpoint returned by the ballistics solver is between [0, 2*PI)
-     * the desired setpoint is unwrapped when motor angles are limited, so find the setpoint
-     * that is closest to the unwrapped measured angle.
-     */
-    // *desiredYawSetpoint = config.turretSubsystem.yawMotor.unwrapTargetAngle(*desiredYawSetpoint);
-    // *desiredPitchSetpoint =
-    //     config.turretSubsystem.pitchMotor.unwrapTargetAngle(*desiredPitchSetpoint);
-
     *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
         config.yawController.getMeasurement().minDifference(*desiredYawSetpoint),
         config.pitchController.getMeasurement().minDifference(*desiredPitchSetpoint),
@@ -105,8 +94,8 @@ void SentryTurretCVCommand::execute()
     auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
     // @todo: does not allow for independent turret aiming
-    targetFound = visionCoprocessor.isCvOnline() && (leftBallisticsSolution != std::nullopt &&
-                                                     rightBallisticsSolution != std::nullopt);
+    targetFound =
+        (leftBallisticsSolution != std::nullopt && rightBallisticsSolution != std::nullopt);
 
     // Turret minor control
     // If target spotted
@@ -134,12 +123,8 @@ void SentryTurretCVCommand::execute()
                 &withinAimingToleranceRight);
         }
 
-        // sus: one of these could be std::nullopt ?
-        WrappedFloat leftYawWrapped(leftBallisticsSolution->yawAngle, 0, M_TWOPI);
-        WrappedFloat rightYawWrapped(rightBallisticsSolution->yawAngle, 0, M_TWOPI);
-
         // major averaging
-        majorSetpoint = leftYawWrapped.minInterpolate(rightYawWrapped, 0.5);
+        majorSetpoint = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
     }
     else
     {
@@ -174,18 +159,12 @@ void SentryTurretCVCommand::execute()
             majorSetpoint = majorSetpoint.minInterpolate(
                 majorScanValue,
                 SCAN_LOW_PASS_ALPHA);  // lowpass filter
+
             leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
             rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
 
-            // temp = WrappedFloat(sentryTransforms.getWorldToTurretMajor().getYaw(), 0.0f, M_TWOPI)
-            //            .getWrappedValue();
-
             leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
-            // leftYawSetpoint =
-            //     turretLeftConfig.turretSubsystem.yawMotor.unwrapTargetAngle(leftYawSetpoint);
             rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
-            // rightYawSetpoint =
-            //     turretRightConfig.turretSubsystem.yawMotor.unwrapTargetAngle(rightYawSetpoint);
         }
     }
 
