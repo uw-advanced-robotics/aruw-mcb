@@ -18,7 +18,6 @@ import os
 import subprocess
 
 from SCons.Script import *
-from extract_robot_type import VALID_ROBOT_TYPES
 
 def run_ozone(env, source):
     def call_run_ozone(target, source, env):
