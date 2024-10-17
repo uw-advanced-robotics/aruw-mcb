@@ -14,11 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-#from dotenv import load_dotenv
 import os
 import subprocess
-
-from os.path import join, abspath
 
 from SCons.Script import *
 from extract_robot_type import VALID_ROBOT_TYPES
