@@ -61,9 +61,9 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -458,7 +458,10 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zPressed(drivers(), {&turretUTurnCommandLimited}, RemoteMapState({Remote::Key::Z}));
+PressCommandMapping zPressed(
+    drivers(),
+    {&turretUTurnCommandLimited},
+    RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),

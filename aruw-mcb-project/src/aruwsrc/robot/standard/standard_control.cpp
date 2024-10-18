@@ -63,10 +63,10 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
 #include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
@@ -463,7 +463,10 @@ HoldCommandMapping rightMousePressed(
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
-PressCommandMapping zPressed(drivers(), {&turretUTurnCommandLimited}, RemoteMapState({Remote::Key::Z}));
+PressCommandMapping zPressed(
+    drivers(),
+    {&turretUTurnCommandLimited},
+    RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),

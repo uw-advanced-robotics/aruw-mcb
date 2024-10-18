@@ -20,14 +20,13 @@
 #ifndef IMU_CALIBRATE_DONE_GOVERNOR_HPP_
 #define IMU_CALIBRATE_DONE_GOVERNOR_HPP_
 
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+
 namespace aruwsrc::control::governor
 {
-
-
 /**
  * A governor that allows a Command to run when a IMUCalibrateCommand is not scheduled
  */
@@ -35,10 +34,10 @@ class IMUCalibrateDoneGovernor : public tap::control::governor::CommandGovernorI
 {
 public:
     IMUCalibrateDoneGovernor(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         aruwsrc::control::imu::ImuCalibrateCommand& imuCalibrateCommand)
         : drivers(drivers),
-            imuCalibrateCommand(imuCalibrateCommand)
+          imuCalibrateCommand(imuCalibrateCommand)
     {
     }
 
@@ -49,7 +48,6 @@ public:
     bool isReady() final_mockable
     {
         return !(drivers->commandScheduler.isCommandScheduled(&imuCalibrateCommand));
-
     }
 
     bool isFinished() final_mockable
@@ -60,9 +58,8 @@ public:
 
 private:
     bool enabled = true;
-    tap::Drivers *drivers;
+    tap::Drivers* drivers;
     aruwsrc::control::imu::ImuCalibrateCommand& imuCalibrateCommand;
-    
 };
 }  // namespace aruwsrc::control::governor
 
