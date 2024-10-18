@@ -71,7 +71,10 @@ if args["TARGET_ENV"] == "tests":
 # We modify the "BUILDPATH" environment variable to have the code for each robot have its own directory.
 env["BUILDPATH"] = join(env["CONFIG_BUILD_BASE"], "scons-" + ARGUMENTS.get("profile", "release"), args["ROBOT_TYPE"])
 env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
-
+env.Append(toolpath=[
+    abspath(r"build_tools"),
+])
+env.Tool("generate_ozone_projects")
 
 print("Configured {0} parallel build jobs (-j{0}), {1}"
     .format(GetOption("num_jobs"), args["ROBOT_TYPE"]))
@@ -92,6 +95,7 @@ if args["COMPILE_SRC"]:
         env.Alias("size", env.Size(program))
         env.Alias("gdb", env.DebugGdbRemote(program))
         env.Alias("run", [env.ProgramOpenOcd(program)])
+        env.Alias("ozone", env.RunOzoneConfig(program))
         env.Alias("all", ["build", "size"])
         env.Default("all")  # For the hardware target env, "all" runs if you don't
                             # specify anything (i.e. just type "scons")
