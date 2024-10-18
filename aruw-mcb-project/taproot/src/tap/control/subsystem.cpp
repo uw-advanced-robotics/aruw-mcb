@@ -23,8 +23,6 @@
 
 #include "subsystem.hpp"
 
-#include "tap/drivers.hpp"
-
 #include "command_scheduler.hpp"
 
 namespace tap
@@ -40,12 +38,6 @@ Subsystem::Subsystem(Drivers* drivers)
 
 Subsystem::~Subsystem() { CommandScheduler::destructSubsystem(this); }
 
-void Subsystem::registerAndInitialize()
-{
-    initialize();
-    drivers->commandScheduler.registerSubsystem(this);
-}
-
 void Subsystem::setDefaultCommand(Command* command)
 {
     if (command != nullptr)
@@ -54,7 +46,7 @@ void Subsystem::setDefaultCommand(Command* command)
     }
 }
 
-const char* Subsystem::getName() const { return "Subsystem"; }
+const char* Subsystem::getName() { return "Subsystem"; }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 Subsystem::Subsystem()
