@@ -55,27 +55,31 @@ class Ism330dlc : public tap::communication::sensors::imu::ImuInterface, public 
 
     mockable void periodicIMUUpdate();
 
+    inline void setAccSensitivity(int index) {AccSensitivityScalar = AccCountToAccTable[i];}
+    void computeOffsets();
+
     inline const char *getName() const override;
-    inline float getAx() override;
-    inline float getAy() override;
-    inline float getAz() override;
-    inline float getGx() override;
-    inline float getGy() override;
-    inline float getGz() override;
-    inline float getTemp() override;
-    inline float getYaw() override;
-    inline float getPitch() override;
-    inline float getRoll() override;
+    inline float getAx() override {return data.accG[ImuData::X];}
+    inline float getAy() override {return data.accG[ImuData::Y];}
+    inline float getAz() override {return data.accG[ImuData::Z];}
+    inline float getGx() override {return data.gyroDegPerSec[ImuData::X];}
+    inline float getGy() override {return data.gyroDegPerSec[ImuData::Y];}
+    inline float getGz() override {return data.gyroDegPerSec[ImuData::Z];}
+    inline float getTemp() override {return 0.f;}
+    inline float getYaw() override {return 0.f;}
+    inline float getPitch() override {return 0.f;}
+    inline float getRoll() override {return 0.f;}
 
 
 private:
     ImuState imuState = ImuState::IMU_NOT_CONNECTED;
 
-    float AccelerationSensitivityScalar;
+    float AccSensitivityScalar_;
 
     uint8_t rxBuff[14] = {};
     
-	modm::ResumableResult<bool> read(ism330dlcData::Register reg, int size);
+	modm::ResumableResult<bool>
+    read(ism330dlcData::Register reg, uint8_t* data, int size);
 
 };
 }

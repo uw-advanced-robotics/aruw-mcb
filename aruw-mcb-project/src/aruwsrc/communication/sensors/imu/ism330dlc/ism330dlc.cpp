@@ -3,65 +3,94 @@
 namespace aruwsrc::communication::sensors::imu
 {
 
-void Ism330dlc::periodicIMUUpdate()
+template<class I2cMaster>
+void Ism330dlc<I2cMaster>::periodicIMUUpdate()
 {
-    
-    read
+    uint8_t rxBuff[6] = {};
+
+    prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+
+    // We read starting from the lowest accelerometer register address since
+    // all of our registers are contiguous
+    read(OUTX_L_XL, rxBuff, 6 * sizeof(uint8_t));
+    data.accRaw[ImuData::X] = bigEndianInt16ToFloat(rxBuff);
+    data.accRaw[ImuData::Y] = bigEndianInt16ToFloat(rxBuff + 2);
+    data.accRaw[ImuData::Z] = bigEndianInt16ToFloat(rxBuff + 4);
+
+    read(OUTX_L_G, rxBuff, 6 * sizeof(uint8_t));
+    data.gyroRaw[ImuData::X] = bigEndianInt16ToFloat(rxBuff);
+    data.gyroRaw[ImuData::Y] = bigEndianInt16ToFloat(rxBuff + 2);
+    data.gyroRaw[ImuData::Z] = bigEndianInt16ToFloat(rxBuff + 4);
+
+    read(OUT_TEMP_L, rxBuff, 2 * sizeof(uint8_t));
+    data.temperature = parseTemp(rxBuff[0], rxBuff[1]);
+
+    if (imuState == ImuState::IMU_CALIBRATING)
+    {
+        computeOffsets();
+    }
+    else
+    {
+        data.gyroDegPerSec[ImuData::X] =
+            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::X] - data.gyroOffsetRaw[ImuData::X]);
+        data.gyroDegPerSec[ImuData::Y] =
+            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::Y] - data.gyroOffsetRaw[ImuData::Y]);
+        data.gyroDegPerSec[ImuData::Z] =
+            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::Z] - data.gyroOffsetRaw[ImuData::Z]);
+
+        data.accG[ImuData::X] =
+            AccSensitivityScalar_ * (data.accRaw[ImuData::X] - data.accOffsetRaw[ImuData::X]);
+        data.accG[ImuData::Y] =
+            AccSensitivityScalar_ * (data.accRaw[ImuData::Y] - data.accOffsetRaw[ImuData::Y]);
+        data.accG[ImuData::Z] =
+            AccSensitivityScalar_ * (data.accRaw[ImuData::Z] - data.accOffsetRaw[ImuData::Z]);
+
+        mahonyAlgorithm.updateIMU(
+            data.gyroDegPerSec[ImuData::X],
+            data.gyroDegPerSec[ImuData::Y],
+            data.gyroDegPerSec[ImuData::Z],
+            data.accG[ImuData::X],
+            data.accG[ImuData::Y],
+            data.accG[ImuData::Z]);
+    }
+
+    imuHeater.runTemperatureController(data.temperature);
 }
 
-float Ism330dlc::getAx()
-{
-    return data.accG[ImuData::X];
-}
+// void computeOffsets()
+// {
+//     // calibrationSample++;
 
-float Ism330dlc::getAy()
-{
-    return data.accG[ImuData::Y];
-}
+//     data.gyroOffsetRaw[ImuData::X] += data.gyroRaw[ImuData::X];
+//     data.gyroOffsetRaw[ImuData::Y] += data.gyroRaw[ImuData::Y];
+//     data.gyroOffsetRaw[ImuData::Z] += data.gyroRaw[ImuData::Z];
+//     data.accOffsetRaw[ImuData::X] += data.accRaw[ImuData::X];
+//     data.accOffsetRaw[ImuData::Y] += data.accRaw[ImuData::Y];
+//     data.accOffsetRaw[ImuData::Z] +=
+//         data.accRaw[ImuData::Z] - (tap::algorithms::ACCELERATION_GRAVITY / ACC_G_PER_ACC_COUNT);
 
-float Ism330dlc::getAz()
-{
-    return data.accG[ImuData::Z];
-}
+//     if (calibrationSample >= BMI088_OFFSET_SAMPLES)
+//     {
+//         calibrationSample = 0;
+//         data.gyroOffsetRaw[ImuData::X] /= BMI088_OFFSET_SAMPLES;
+//         data.gyroOffsetRaw[ImuData::Y] /= BMI088_OFFSET_SAMPLES;
+//         data.gyroOffsetRaw[ImuData::Z] /= BMI088_OFFSET_SAMPLES;
+//         data.accOffsetRaw[ImuData::X] /= BMI088_OFFSET_SAMPLES;
+//         data.accOffsetRaw[ImuData::Y] /= BMI088_OFFSET_SAMPLES;
+//         data.accOffsetRaw[ImuData::Z] /= BMI088_OFFSET_SAMPLES;
+//         imuState = ImuState::IMU_CALIBRATED;
+//         mahonyAlgorithm.reset();
+//     }
+// }
 
-float Ism330dlc::getGx() {
-    return data.gyroDegPerSec[ImuData::X];
-}
-
-float Ism330dlc::getGy() {
-    return data.gyroDegPerSec[ImuData::Y];
-}
-
-float Ism330dlc::getGz() {
-    return data.gyroDegPerSec[ImuData::Z];
-}
-
-float Ism330dlc::getRoll() {
-    return data.angularRate[ImuData::X];
-}
-
-float Ism330dlc::getPitch()
-{
-    return data.angularRate[ImuData::Y];
-}
-
-float Ism330dlc::getYaw()
-{
-    return data.angularRate[ImuData::Z];
-}
-
-
-float Ism330dlc::getTemp()
-{
-    return data.temperature;
-}
-
-
-modm::ResumableResult<bool> Ism330dlc::read(ism330dlcData::Register reg, int size) {
+template<class I2cMaster>
+modm::ResumableResult<bool>
+Ism330dlc<I2cMaster>::read(ism330dlcData::Register reg, uint8_t* data, int size) {
     RF_BEGIN();
 
-    rxBuff[0] = reg;
-    this->transaction.configureWriteRead(buffer, 1, buffer + 1, size);
+    // idk does this work??
+    rxBuff[0] = static_cast<uint8_t>(reg);
+    this->transaction.configureWriteRead(rxBuff, 1, data, size);
 
     RF_CALL(this->runTransaction());
 
