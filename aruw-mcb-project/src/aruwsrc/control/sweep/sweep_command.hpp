@@ -49,7 +49,7 @@ public:
 
     const char* getName() const override { return "Sweeping"; }
 
-bool commandRunning = false;
+    bool commandRunning = false;
 
 private:
     SweepSubsystem* subsystem;
@@ -58,7 +58,7 @@ private:
 
     float timeDifference = 0;
 
-    float frequencySweepRate = 0.01;
+    float frequencySweepRate = 0.001;
     float startFrequency = 0, endFrequency = 250, currentFrequency;
     float setpoint = 0;
 
