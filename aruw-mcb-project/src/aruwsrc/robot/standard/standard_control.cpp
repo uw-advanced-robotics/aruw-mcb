@@ -127,9 +127,7 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#if defined(TARGET_STANDARD_ELSA)
-    true,
-#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
+#if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
     defined(TARGET_STANDARD_CYGNUS)
     false,
 #else

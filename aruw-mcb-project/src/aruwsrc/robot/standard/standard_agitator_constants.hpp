@@ -90,7 +90,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 
-#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ELSA)
+#elif defined(TARGET_STANDARD_SPIDER)
 
 // position PID terms
 // PID terms for standard
