@@ -116,14 +116,6 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 7700.0f},
     {32.0f, 8400.0f},
 };
-#elif defined(TARGET_STANDARD_ELSA)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4450.0f},
-    {18.0f, 4900.0f},
-    {30.0f, 7050.0f},
-    {32.0f, 8400.0f},
-};
 #else  // TARGET_DRONE, TARGET_ENGINEER
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
