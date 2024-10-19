@@ -27,8 +27,8 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float parallelCenterToWheelDistance,
-    const float parallelWheelChassisRelativeAngleDegrees,
-    const float perpendicularWheelChassisRelativeAngleDegrees)
+    const float parallelWheelChassisRelativeAngleRadians,
+    const float perpendicularWheelChassisRelativeAngleRadians)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
@@ -38,8 +38,8 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
-      parallelWheelChassisRelativeAngle(parallelWheelChassisRelativeAngleDegrees),
-      perpendicularWheelChassisRelativeAngle(perpendicularWheelChassisRelativeAngleDegrees)
+      parallelWheelChassisRelativeAngleRadians(parallelWheelChassisRelativeAngleRadians),
+      perpendicularWheelChassisRelativeAngleRadians(perpendicularWheelChassisRelativeAngleRadians)
 {
     reset();
 }
@@ -69,10 +69,10 @@ void DeadwheelChassisKFOdometry::update()
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
-    float Vx = (((V1 - V2)) * modm::toRadian(parallelWheelChassisRelativeAngle));
-    float Vy = (((V1 + V2)) * modm::toRadian(perpendicularWheelChassisRelativeAngle));
+    float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
+    float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
-    // Get acceleration from IMU
+    // Get acceleration from IMUx
     float ax = imu.getAx();
     float ay = imu.getAy();
 

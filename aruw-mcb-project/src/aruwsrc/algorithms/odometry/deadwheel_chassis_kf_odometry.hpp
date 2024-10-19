@@ -199,8 +199,8 @@ private:
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
     const float parallelCenterToWheelDistance;
-    const float parallelWheelChassisRelativeAngle;
-    const float perpendicularWheelChassisRelativeAngle;
+    const float parallelWheelChassisRelativeAngleRadians;
+    const float perpendicularWheelChassisRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
