@@ -48,14 +48,14 @@ void PlateHitTracker::update()
 
         lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
 
-        lastHitData.hitAngle_chassisRelative_radians = lastHitData.plateID * M_PI / 2;
-        lastHitData.hitAngle_worldRelative_radians = transformer->getWorldToChassis().getYaw() +
-                                                     lastHitData.hitAngle_chassisRelative_radians;
+        lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
+        lastHitData.hitAngle_worldRelative_radians = Angle(
+            transformer->getWorldToChassis().getYaw() +
+            lastHitData.hitAngle_chassisRelative_radians.getWrappedValue());
 
         // Update bins
-        WrappedFloat selectedBin =
-            WrappedFloat(lastHitData.hitAngle_worldRelative_radians, 0, 2 * M_PI);
-        int binIndex = static_cast<int>(selectedBin.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
+        int binIndex = static_cast<int>(
+            lastHitData.hitAngle_worldRelative_radians.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
         bins.data[binIndex] += newHitData.receivedDps - lastHitData.lastDPS;

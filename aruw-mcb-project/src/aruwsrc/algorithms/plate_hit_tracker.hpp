@@ -41,8 +41,8 @@ class PlateHitTracker
     {
         int plateID;
         float lastDPS;
-        float hitAngle_chassisRelative_radians;
-        float hitAngle_worldRelative_radians;
+        Angle hitAngle_chassisRelative_radians;
+        Angle hitAngle_worldRelative_radians;
         uint32_t timestamp;
         PlateHitData()
             : plateID(-1),
