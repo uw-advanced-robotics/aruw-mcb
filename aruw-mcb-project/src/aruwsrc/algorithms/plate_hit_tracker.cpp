@@ -34,7 +34,6 @@ void PlateHitTracker::initialize()
     lastHitData.lastDPS = -1;
     lastHitData.hitAngle_chassisRelative_radians = -1;
     lastHitData.hitAngle_worldRelative_radians = -1;
-    lastHitData.peakAngleDegrees = -1;
 }
 
 /**
@@ -70,7 +69,6 @@ void PlateHitTracker::update()
     lastHitData.lastDPS = newHitData.receivedDps;
 }
 
-PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData() { return lastHitData; }
 
 CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
 {
@@ -120,29 +118,6 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
         [](const PlateHitBinData& a, const PlateHitBinData& b)
         { return a.magnitude > b.magnitude; });
     return peaks;
-}
-
-float PlateHitTracker::getPeakAngleRadians()
-{
-    auto peaks = getPeakAnglesRadians();
-    if (peaks.empty())
-    {
-        return 0;
-    }
-
-    float max = 0;
-    int maxIndex = 0;
-    for (int i = 0; i < peaks.size(); i++)
-    {
-        if (peaks[i].magnitude > max)
-        {
-            max = peaks[i].magnitude;
-            maxIndex = i;
-        }
-    }
-
-    lastHitData.peakAngleDegrees = peaks[maxIndex].radians;
-    return peaks[maxIndex].radians;
 }
 
 PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()

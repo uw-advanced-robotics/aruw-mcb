@@ -43,7 +43,6 @@ class PlateHitTracker
         float timestamp;
         float hitAngle_chassisRelative_radians;
         float hitAngle_worldRelative_radians;
-        float peakAngleDegrees;
     };
 
     struct PlateHitBinData
@@ -70,9 +69,10 @@ public:
      * Final product is a list of peaks and their positions around the robot
      */
     PlateHitTracker(tap::Drivers *drivers);
-    PlateHitData getLastHitData();
+
+    mockable inline PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData() { return lastHitData; }
+    
     std::vector<PlateHitBinData> getPeakAnglesRadians();
-    float getPeakAngleRadians();
 
     void initialize();
 
