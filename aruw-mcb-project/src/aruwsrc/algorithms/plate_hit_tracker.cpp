@@ -56,8 +56,8 @@ void PlateHitTracker::update()
         lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
 
         lastHitData.hitAngle_chassisRelative_radians = lastHitData.plateID * M_PI / 2;
-        lastHitData.hitAngle_worldRelative_radians =
-            transformer->getWorldToChassis().getYaw() + lastHitData.hitAngle_chassisRelative_radians;
+        lastHitData.hitAngle_worldRelative_radians = transformer->getWorldToChassis().getYaw() +
+                                                     lastHitData.hitAngle_chassisRelative_radians;
 
         // Update bins
         WrappedFloat selectedBin =
@@ -70,10 +70,7 @@ void PlateHitTracker::update()
     lastHitData.lastDPS = newHitData.receivedDps;
 }
 
-PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData()
-{
-    return lastHitData;
-}
+PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData() { return lastHitData; }
 
 CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
 {
@@ -92,10 +89,7 @@ CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
     }
     return mat;
 }
-CMSISMat<8, 1> PlateHitTracker::blurBins(CMSISMat<8, 1> mat)
-{
-    return BLUR_CONVOLVE_MATRIX * mat;
-}
+CMSISMat<8, 1> PlateHitTracker::blurBins(CMSISMat<8, 1> mat) { return BLUR_CONVOLVE_MATRIX * mat; }
 
 std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadians()
 {
@@ -118,10 +112,13 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
             peaks.push_back(peakData[i]);
         }
     }
-    // sort by magnitude, so that index 0 is the biggest peak (where we are getting damaged the most)
-    std::sort(peaks.begin(), peaks.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
-        return a.magnitude > b.magnitude;
-    });
+    // sort by magnitude, so that index 0 is the biggest peak (where we are getting damaged the
+    // most)
+    std::sort(
+        peaks.begin(),
+        peaks.end(),
+        [](const PlateHitBinData& a, const PlateHitBinData& b)
+        { return a.magnitude > b.magnitude; });
     return peaks;
 }
 
@@ -147,7 +144,6 @@ float PlateHitTracker::getPeakAngleRadians()
     lastHitData.peakAngleDegrees = peaks[maxIndex].radians;
     return peaks[maxIndex].radians;
 }
-
 
 PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
 {
