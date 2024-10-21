@@ -105,11 +105,9 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
     }
     // sort by magnitude, so that index 0 is the biggest peak (where we are getting damaged the
     // most)
-    std::sort(
-        peaks.begin(),
-        peaks.end(),
-        [](const PlateHitBinData& a, const PlateHitBinData& b)
-        { return a.magnitude > b.magnitude; });
+    std::sort(peaks.begin(), peaks.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
+        return a.magnitude > b.magnitude;
+    });
     return peaks;
 }
 
