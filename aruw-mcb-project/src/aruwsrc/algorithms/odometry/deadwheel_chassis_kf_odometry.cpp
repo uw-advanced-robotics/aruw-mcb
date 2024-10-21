@@ -72,7 +72,7 @@ void DeadwheelChassisKFOdometry::update()
     float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
     float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
-    // Get acceleration from IMUx
+    // Get acceleration from IMU
     float ax = imu.getAx();
     float ay = imu.getAy();
 
