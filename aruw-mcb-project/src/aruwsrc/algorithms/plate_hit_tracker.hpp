@@ -93,9 +93,9 @@ public:
     {
         this->transformer = transformer;
     }
-    static constexpr uint8_t BIN_NUMBER = 8;
 
 private:
+    static constexpr uint8_t BIN_NUMBER = 8;
     static constexpr float BLUR_FACTOR = 0.5;
 
     // clang-format off
