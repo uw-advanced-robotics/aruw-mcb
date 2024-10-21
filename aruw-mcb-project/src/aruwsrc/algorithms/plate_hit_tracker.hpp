@@ -39,7 +39,7 @@ class PlateHitTracker
     struct PlateHitData
     {
         int plateID;
-        float lastDPS;
+        float lastDps;
         Angle hitAngle_chassisRelative_radians;
         Angle hitAngle_worldRelative_radians;
         uint32_t timestamp;
