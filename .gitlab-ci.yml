@@ -186,20 +186,6 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
 
-# Standard (Elsa) build
-
-"Standard (Elsa): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
 # Standard (Orion) build
 
 "Standard (Orion): MCB Build":
