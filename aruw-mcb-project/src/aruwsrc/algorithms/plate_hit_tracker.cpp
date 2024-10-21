@@ -28,13 +28,7 @@ PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
 {
 }
 
-void PlateHitTracker::initialize()
-{
-    lastHitData.plateID = -1;
-    lastHitData.lastDPS = -1;
-    lastHitData.hitAngle_chassisRelative_radians = -1;
-    lastHitData.hitAngle_worldRelative_radians = -1;
-}
+void PlateHitTracker::initialize() {}
 
 /**
  * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the
@@ -69,7 +63,6 @@ void PlateHitTracker::update()
     lastHitData.lastDPS = newHitData.receivedDps;
 }
 
-
 CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
 {
     float sum = 0;
@@ -102,11 +95,11 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
         if (peakData[i].magnitude > peakData[prevIndex].magnitude &&
             peakData[i].magnitude > peakData[nextIndex].magnitude)
         {
-            float peakAngleRaw = peakData[i].radians -
-                                 (peakData[prevIndex].radians * peakData[prevIndex].magnitude) +
-                                 (peakData[nextIndex].radians * peakData[nextIndex].magnitude);
-            WrappedFloat peakAngleWrapped(peakAngleRaw, 0, 2 * M_PI);
-            peakData[i].radians = peakAngleWrapped.getWrappedValue();
+            Angle peakAngleRaw = Angle(
+                peakData[i].radians.getWrappedValue() -
+                (peakData[prevIndex].radians.getWrappedValue() * peakData[prevIndex].magnitude) +
+                (peakData[nextIndex].radians.getWrappedValue() * peakData[nextIndex].magnitude));
+            peakData[i].radians = peakAngleRaw;
             peaks.push_back(peakData[i]);
         }
     }

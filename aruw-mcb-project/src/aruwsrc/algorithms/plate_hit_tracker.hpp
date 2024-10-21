@@ -29,6 +29,7 @@
 
 #include "modm/math/matrix.hpp"
 
+using tap::algorithms::Angle;
 using tap::algorithms::CMSISMat;
 using tap::algorithms::WrappedFloat;
 
@@ -38,17 +39,26 @@ class PlateHitTracker
 {
     struct PlateHitData
     {
-        uint8_t plateID;
+        int plateID;
         float lastDPS;
-        float timestamp;
         float hitAngle_chassisRelative_radians;
         float hitAngle_worldRelative_radians;
+        uint32_t timestamp;
+        PlateHitData()
+            : plateID(-1),
+              lastDPS(-1),
+              hitAngle_chassisRelative_radians(0),
+              hitAngle_worldRelative_radians(0),
+              timestamp(-1)
+        {
+        }
     };
 
     struct PlateHitBinData
     {
-        float radians;
+        Angle radians;
         float magnitude;
+        PlateHitBinData() : radians(0), magnitude(0) {}
     };
 
 public:
@@ -70,8 +80,8 @@ public:
      */
     PlateHitTracker(tap::Drivers *drivers);
 
-    mockable inline PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData() { return lastHitData; }
-    
+    mockable inline PlateHitData getLastHitData() { return lastHitData; }
+
     std::vector<PlateHitBinData> getPeakAnglesRadians();
 
     void initialize();
