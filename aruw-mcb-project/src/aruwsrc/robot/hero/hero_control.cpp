@@ -472,10 +472,6 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping xPressed(
-    drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
     RemoteMapState({Remote::Key::R}),
@@ -564,7 +560,6 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
