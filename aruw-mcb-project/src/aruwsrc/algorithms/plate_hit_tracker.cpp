@@ -30,10 +30,11 @@ PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
 
 void PlateHitTracker::initialize()
 {
-    dataTimestamp = -1;
-    hitAngle_chassisRelative_radians = -1;
-    hitAngle_worldRelative_radians = -1;
-    hitRecently = false;
+    lastHitData.plateID = -1;
+    lastHitData.lastDPS = -1;
+    lastHitData.hitAngle_chassisRelative_radians = -1;
+    lastHitData.hitAngle_worldRelative_radians = -1;
+    lastHitData.peakAngleDegrees = -1;
 }
 
 /**
@@ -47,39 +48,34 @@ void PlateHitTracker::update()
         return;
     }
     bins = bins * DECAY_FACTOR;
-    if (this->drivers->refSerial.getRobotData().receivedDps > lastDPS)
+    auto newHitData = this->drivers->refSerial.getRobotData();
+    if (newHitData.receivedDps > lastHitData.lastDPS)
     {
-        dataTimestamp = this->drivers->refSerial.getRobotData().robotDataReceivedTimestamp;
-        hitRecently = true;
-        lastHitPlateID = static_cast<int>(this->drivers->refSerial.getRobotData().damagedArmorId);
+        lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
 
-        hitAngle_chassisRelative_radians = lastHitPlateID * M_PI / 2;
-        hitAngle_worldRelative_radians =
-            transformer->getWorldToChassis().getYaw() + hitAngle_chassisRelative_radians;
+        lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
+
+        lastHitData.hitAngle_chassisRelative_radians = lastHitData.plateID * M_PI / 2;
+        lastHitData.hitAngle_worldRelative_radians =
+            transformer->getWorldToChassis().getYaw() + lastHitData.hitAngle_chassisRelative_radians;
 
         // Update bins
-        tap::algorithms::WrappedFloat selectedBin =
-            tap::algorithms::WrappedFloat(hitAngle_worldRelative_radians, 0, 2 * M_PI);
+        WrappedFloat selectedBin =
+            WrappedFloat(lastHitData.hitAngle_worldRelative_radians, 0, 2 * M_PI);
         int binIndex = static_cast<int>(selectedBin.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
-        bins.data[binIndex] += abs(this->drivers->refSerial.getRobotData().receivedDps - lastDPS);
-        bins = normaliseBins(bins);
+        bins.data[binIndex] += newHitData.receivedDps - lastHitData.lastDPS;
     }
-    lastDPS = this->drivers->refSerial.getRobotData().receivedDps;
+    lastHitData.lastDPS = newHitData.receivedDps;
 }
 
 PlateHitTracker::PlateHitData PlateHitTracker::getLastHitData()
 {
-    PlateHitData hitData;
-    hitData.plateID = lastHitPlateID;
-    hitData.hitAngleChassisRadians = hitAngle_chassisRelative_radians;
-    hitData.hitAngleWorldRadians = hitAngle_worldRelative_radians;
-    hitData.timestamp = dataTimestamp;
-    return hitData;
+    return lastHitData;
 }
 
-tap::algorithms::CMSISMat<8, 1> PlateHitTracker::normaliseBins(tap::algorithms::CMSISMat<8, 1> mat)
+CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
 {
     float sum = 0;
     for (int i = 0; i < BIN_NUMBER; i++)
@@ -96,41 +92,69 @@ tap::algorithms::CMSISMat<8, 1> PlateHitTracker::normaliseBins(tap::algorithms::
     }
     return mat;
 }
-tap::algorithms::CMSISMat<8, 1> PlateHitTracker::blurBins(tap::algorithms::CMSISMat<8, 1> mat)
+CMSISMat<8, 1> PlateHitTracker::blurBins(CMSISMat<8, 1> mat)
 {
     return BLUR_CONVOLVE_MATRIX * mat;
 }
 
-float PlateHitTracker::getPeakAngleRadians()
+std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadians()
 {
     auto peakData = getBinData();
+    std::vector<PlateHitBinData> peaks;
+
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
+        int prevIndex = (i - 1 + BIN_NUMBER) % BIN_NUMBER;
+        int nextIndex = (i + 1) % BIN_NUMBER;
+
+        if (peakData[i].magnitude > peakData[prevIndex].magnitude &&
+            peakData[i].magnitude > peakData[nextIndex].magnitude)
+        {
+            float peakAngleRaw = peakData[i].radians -
+                                 (peakData[prevIndex].radians * peakData[prevIndex].magnitude) +
+                                 (peakData[nextIndex].radians * peakData[nextIndex].magnitude);
+            WrappedFloat peakAngleWrapped(peakAngleRaw, 0, 2 * M_PI);
+            peakData[i].radians = peakAngleWrapped.getWrappedValue();
+            peaks.push_back(peakData[i]);
+        }
+    }
+    // sort by magnitude, so that index 0 is the biggest peak (where we are getting damaged the most)
+    std::sort(peaks.begin(), peaks.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
+        return a.magnitude > b.magnitude;
+    });
+    return peaks;
+}
+
+float PlateHitTracker::getPeakAngleRadians()
+{
+    auto peaks = getPeakAnglesRadians();
+    if (peaks.empty())
+    {
+        return 0;
+    }
+
     float max = 0;
     int maxIndex = 0;
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < peaks.size(); i++)
     {
-        if (peakData[i].magnitude > max)
+        if (peaks[i].magnitude > max)
         {
-            max = peakData[i].magnitude;
+            max = peaks[i].magnitude;
             maxIndex = i;
         }
     }
 
-    int8_t prevBin = (maxIndex - 1 < 0) ? 9 : maxIndex - 1;
-    int8_t nextBin = (maxIndex + 1 > 9) ? 0 : maxIndex + 1;
-
-    float peakAngleRaw = peakData[maxIndex].radians -
-                         (peakData[prevBin].radians * peakData[prevBin].magnitude) +
-                         (peakData[nextBin].radians * peakData[nextBin].magnitude);
-    tap::algorithms::WrappedFloat peakAngleWrapped(peakAngleRaw, 0, 2 * M_PI);
-
-    lastPeakAngleDegrees = peakAngleWrapped.getWrappedValue();
-    return peakAngleWrapped.getWrappedValue();
+    lastHitData.peakAngleDegrees = peaks[maxIndex].radians;
+    return peaks[maxIndex].radians;
 }
+
 
 PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
 {
     static PlateHitBinData peakData[BIN_NUMBER];
-    tap::algorithms::CMSISMat<8, 1> temp = blurBins(bins);
+
+    CMSISMat<BIN_NUMBER, 1> temp = normaliseBins(bins);
+    temp = blurBins(temp);
     for (int i = 0; i < BIN_NUMBER; i++)
     {
         peakData[i].radians = modm::toRadian(i * 45);

@@ -28,16 +28,22 @@
 #include "tap/drivers.hpp"
 
 #include "modm/math/matrix.hpp"
+
+using tap::algorithms::CMSISMat;
+using tap::algorithms::WrappedFloat;
+
 namespace aruwsrc::algorithms
 {
 class PlateHitTracker
 {
     struct PlateHitData
     {
-        int plateID;
-        float hitAngleChassisRadians;
-        float hitAngleWorldRadians;
-        int timestamp;
+        uint8_t plateID;
+        float lastDPS;
+        float timestamp;
+        float hitAngle_chassisRelative_radians;
+        float hitAngle_worldRelative_radians;
+        float peakAngleDegrees;
     };
 
     struct PlateHitBinData
@@ -65,6 +71,7 @@ public:
      */
     PlateHitTracker(tap::Drivers *drivers);
     PlateHitData getLastHitData();
+    std::vector<PlateHitBinData> getPeakAnglesRadians();
     float getPeakAngleRadians();
 
     void initialize();
@@ -76,10 +83,10 @@ public:
     {
         this->transformer = transformer;
     }
+    static constexpr uint8_t BIN_NUMBER = 8;
 
 private:
     static constexpr float BLUR_FACTOR = 0.5;
-    static constexpr uint8_t BIN_NUMBER = 8;
 
     // clang-format off
         static constexpr float A = 0.5; 
@@ -99,22 +106,15 @@ private:
 
     // Variables
     tap::Drivers *drivers;
-    int dataTimestamp;
-    float hitAngle_chassisRelative_radians;
-    float hitAngle_worldRelative_radians;
-    bool hitRecently;
-    float lastDPS;
-    int lastHitPlateID;
-    float lastPeakAngleDegrees;
+    PlateHitData lastHitData;
 
     aruwsrc::algorithms::transforms::TransformerInterface *transformer;
-    tap::algorithms::CMSISMat<BIN_NUMBER, 1> bins;
-    const tap::algorithms::CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
+    CMSISMat<BIN_NUMBER, 1> bins;
+    const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
 
     PlateHitTracker::PlateHitBinData *getBinData();
-    tap::algorithms::CMSISMat<BIN_NUMBER, 1> normaliseBins(
-        tap::algorithms::CMSISMat<BIN_NUMBER, 1> mat);
-    tap::algorithms::CMSISMat<BIN_NUMBER, 1> blurBins(tap::algorithms::CMSISMat<BIN_NUMBER, 1> mat);
+    CMSISMat<BIN_NUMBER, 1> normaliseBins(CMSISMat<BIN_NUMBER, 1> mat);
+    CMSISMat<BIN_NUMBER, 1> blurBins(CMSISMat<BIN_NUMBER, 1> mat);
 };
 
 }  // namespace aruwsrc::algorithms
