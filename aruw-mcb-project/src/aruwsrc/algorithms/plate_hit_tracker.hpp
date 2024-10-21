@@ -31,7 +31,6 @@
 
 using tap::algorithms::Angle;
 using tap::algorithms::CMSISMat;
-using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::algorithms
 {
