@@ -81,7 +81,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           chassisAutorotateCmd,
           chassisImuDriveCommand),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
+      heroAssistIndicator(refSerialTransmitter, drivers.refSerial)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -103,6 +104,10 @@ void ClientDisplayCommand::restartHud()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+
+#if defined(TARGET_HERO_PERSEUS)
+    heroAssistIndicator.initialize();
+#endif
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -132,6 +137,10 @@ bool ClientDisplayCommand::run()
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
+#if defined(TARGET_HERO_PERSEUS)
+    PT_CALL(heroAssistIndicator.sendInitialGraphics());
+#endif
+
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
@@ -141,6 +150,10 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
+#if defined(TARGET_HERO_PERSEUS)
+        PT_CALL(heroAssistIndicator.update());
+#endif
+
         PT_YIELD();
     }
     // Breaking out of the loop successfully calls this method,

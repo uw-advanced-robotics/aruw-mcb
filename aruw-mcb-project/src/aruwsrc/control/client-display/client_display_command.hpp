@@ -40,6 +40,9 @@
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
+
+#include "hero_assist_indicator.hpp"
+
 namespace tap::control
 {
 class Subsystem;
@@ -139,6 +142,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    HeroAssistIndicator heroAssistIndicator;
 
     bool restarting = true;
 
