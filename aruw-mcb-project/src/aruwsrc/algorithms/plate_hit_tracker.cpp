@@ -42,7 +42,7 @@ void PlateHitTracker::update()
     }
     bins = bins * DECAY_FACTOR;
     auto newHitData = this->drivers->refSerial.getRobotData();
-    if (newHitData.receivedDps > lastHitData.lastDPS)
+    if (newHitData.receivedDps > lastHitData.lastDps)
     {
         lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
 
@@ -58,9 +58,9 @@ void PlateHitTracker::update()
             lastHitData.hitAngle_worldRelative_radians.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
-        bins.data[binIndex] += newHitData.receivedDps - lastHitData.lastDPS;
+        bins.data[binIndex] += newHitData.receivedDps - lastHitData.lastDps;
     }
-    lastHitData.lastDPS = newHitData.receivedDps;
+    lastHitData.lastDps = newHitData.receivedDps;
 }
 
 CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)

@@ -45,7 +45,7 @@ class PlateHitTracker
         uint32_t timestamp;
         PlateHitData()
             : plateID(-1),
-              lastDPS(-1),
+              lastDps(-1),
               hitAngle_chassisRelative_radians(0),
               hitAngle_worldRelative_radians(0),
               timestamp(-1)
