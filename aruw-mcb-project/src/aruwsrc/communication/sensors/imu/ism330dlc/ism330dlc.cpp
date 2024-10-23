@@ -23,88 +23,41 @@ void Ism330dlc<I2cMaster>::periodicIMUUpdate()
     data.gyroRaw[ImuData::Z] = bigEndianInt16ToFloat(rxBuff + 4);
 
     read(OUT_TEMP_L, rxBuff, 2 * sizeof(uint8_t));
-    data.temperature = parseTemp(rxBuff[0], rxBuff[1]);
+    float temperatureRaw = bigEndianInt16ToFloat(rxBuff);
 
-    if (imuState == ImuState::IMU_CALIBRATING)
-    {
-        computeOffsets();
-    }
-    else
-    {
-        data.gyroDegPerSec[ImuData::X] =
-            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::X] - data.gyroOffsetRaw[ImuData::X]);
-        data.gyroDegPerSec[ImuData::Y] =
-            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::Y] - data.gyroOffsetRaw[ImuData::Y]);
-        data.gyroDegPerSec[ImuData::Z] =
-            GYRO_DS_PER_GYRO_COUNT * (data.gyroRaw[ImuData::Z] - data.gyroOffsetRaw[ImuData::Z]);
+    data.temperature = temperatureRaw * CELSIUS_PER_COUNT;
+    
+    data.gyroDegPerSec[ImuData::X] = gyroFs * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::X];
+    data.gyroDegPerSec[ImuData::Y] = gyroFs * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::Y];
+    data.gyroDegPerSec[ImuData::Z] = gyroFs * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::Z];
 
-        data.accG[ImuData::X] =
-            AccSensitivityScalar_ * (data.accRaw[ImuData::X] - data.accOffsetRaw[ImuData::X]);
-        data.accG[ImuData::Y] =
-            AccSensitivityScalar_ * (data.accRaw[ImuData::Y] - data.accOffsetRaw[ImuData::Y]);
-        data.accG[ImuData::Z] =
-            AccSensitivityScalar_ * (data.accRaw[ImuData::Z] - data.accOffsetRaw[ImuData::Z]);
-
-        mahonyAlgorithm.updateIMU(
-            data.gyroDegPerSec[ImuData::X],
-            data.gyroDegPerSec[ImuData::Y],
-            data.gyroDegPerSec[ImuData::Z],
-            data.accG[ImuData::X],
-            data.accG[ImuData::Y],
-            data.accG[ImuData::Z]);
-    }
-
-    imuHeater.runTemperatureController(data.temperature);
+    data.acc[ImuData::X] = accFs * ACC_PER_COUNT * data.accRaw[ImuData::X];
+    data.acc[ImuData::Y] = accFs * ACC_PER_COUNT * data.accRaw[ImuData::Y];
+    data.acc[ImuData::Z] = accFs * ACC_PER_COUNT * data.accRaw[ImuData::Z];
 }
-
-// void computeOffsets()
-// {
-//     // calibrationSample++;
-
-//     data.gyroOffsetRaw[ImuData::X] += data.gyroRaw[ImuData::X];
-//     data.gyroOffsetRaw[ImuData::Y] += data.gyroRaw[ImuData::Y];
-//     data.gyroOffsetRaw[ImuData::Z] += data.gyroRaw[ImuData::Z];
-//     data.accOffsetRaw[ImuData::X] += data.accRaw[ImuData::X];
-//     data.accOffsetRaw[ImuData::Y] += data.accRaw[ImuData::Y];
-//     data.accOffsetRaw[ImuData::Z] +=
-//         data.accRaw[ImuData::Z] - (tap::algorithms::ACCELERATION_GRAVITY / ACC_G_PER_ACC_COUNT);
-
-//     if (calibrationSample >= BMI088_OFFSET_SAMPLES)
-//     {
-//         calibrationSample = 0;
-//         data.gyroOffsetRaw[ImuData::X] /= BMI088_OFFSET_SAMPLES;
-//         data.gyroOffsetRaw[ImuData::Y] /= BMI088_OFFSET_SAMPLES;
-//         data.gyroOffsetRaw[ImuData::Z] /= BMI088_OFFSET_SAMPLES;
-//         data.accOffsetRaw[ImuData::X] /= BMI088_OFFSET_SAMPLES;
-//         data.accOffsetRaw[ImuData::Y] /= BMI088_OFFSET_SAMPLES;
-//         data.accOffsetRaw[ImuData::Z] /= BMI088_OFFSET_SAMPLES;
-//         imuState = ImuState::IMU_CALIBRATED;
-//         mahonyAlgorithm.reset();
-//     }
-// }
 
 template<class I2cMaster>
 modm::ResumableResult<bool>
 Ism330dlc<I2cMaster>::read(ism330dlcData::Register reg, uint8_t* data, int size) {
     RF_BEGIN();
 
-    // idk does this work??
-    rxBuff[0] = static_cast<uint8_t>(reg);
+    data[0] = static_cast<uint8_t>(reg);
     this->transaction.configureWriteRead(rxBuff, 1, data, size);
 
-    RF_CALL(this->runTransaction());
+    RF_CALL_END_RETURN(this->runTransaction());
+}
 
-    // T result;
 
-    // if constexpr (std::is_same_v<T, uint8_t>)
-    // {
-    //     result = buffer[1];
-    // } else
-    // {
-    //     result = buffer[1] << 8 | buffer[2];
-    // }
+// Data to write should start at data[1], as data[0] will be overwritten with register address
+template<std::unsigned_integral T>
+modm::ResumableResult<bool>
+write(ism330dlcData::Register reg, uint8_t* data, int size)
+{
+    RF_BEGIN();
+    data[0] = static_cast<uint8_t>(reg);
 
-    // RF_END_RETURN(result);
+    this->transaction.configureWrite(data, size);
+
     RF_END_RETURN_CALL(this->runTransaction());
 }
 }

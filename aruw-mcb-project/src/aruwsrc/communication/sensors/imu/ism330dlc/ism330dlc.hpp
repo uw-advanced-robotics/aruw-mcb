@@ -45,11 +45,9 @@ class Ism330dlc : public tap::communication::sensors::imu::ImuInterface, public 
         };
 
         float gyroRaw[3] = {};
-        float accOffsetRaw[3] = {};
-        float gyroOffsetRaw[3] = {};
-        float accG[3] = {};
-        float gyroDegPerSec[3] = {};
-        float angularRate[3] = {};
+        float accRaw[3] = {};
+        float acc[3] = {};
+        float gyro[3] = {};
         float temperature;
     } data;
 
@@ -58,14 +56,14 @@ class Ism330dlc : public tap::communication::sensors::imu::ImuInterface, public 
     inline void setAccSensitivity(int index) {AccSensitivityScalar = AccCountToAccTable[i];}
     void computeOffsets();
 
-    inline const char *getName() const override;
-    inline float getAx() override {return data.accG[ImuData::X];}
-    inline float getAy() override {return data.accG[ImuData::Y];}
-    inline float getAz() override {return data.accG[ImuData::Z];}
-    inline float getGx() override {return data.gyroDegPerSec[ImuData::X];}
-    inline float getGy() override {return data.gyroDegPerSec[ImuData::Y];}
-    inline float getGz() override {return data.gyroDegPerSec[ImuData::Z];}
-    inline float getTemp() override {return 0.f;}
+    inline const char *getName() const override { return "ism330dlc"; };
+    inline float getAx() override {return data.acc[ImuData::X];}
+    inline float getAy() override {return data.acc[ImuData::Y];}
+    inline float getAz() override {return data.acc[ImuData::Z];}
+    inline float getGx() override {return data.gyro[ImuData::X];}
+    inline float getGy() override {return data.gyro[ImuData::Y];}
+    inline float getGz() override {return data.gyro[ImuData::Z];}
+    inline float getTemp() override {return data.temperature;}
     inline float getYaw() override {return 0.f;}
     inline float getPitch() override {return 0.f;}
     inline float getRoll() override {return 0.f;}

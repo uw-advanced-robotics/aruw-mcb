@@ -12,7 +12,10 @@ namespace aruwsrc::communication::sensors::imu {
 class ism330dlcData
 {
 public:
-    
+    constexpr static float CELSIUS_PER_COUNT = 1.0f / 256.0f;
+    constexpr static float ACC_MPS_PER_COUNT = 0.061 * tap::algorithms::ACCELERATION_GRAVITY / 1000.0f;
+    constexpr static float GYRO_DPS_PER_COUNT = 4.375f / 1000.0f;
+
     // see page 37 of data sheet
     enum Register : uint8_t {
         // temperature
@@ -36,15 +39,24 @@ public:
         OUTZ_H_XL = 0x2D
     };
 
-    // Table containing the scalars to convert raw accelerometer data to m/s^2.
-    // AccSensitivtyScalars[0] is for the condition where FS = ±2 
-    // AccSensitivtyScalars[1] is for the condition where FS = ±4
-    // AccSensitivtyScalars[2] is for the condition where FS = ±8
-    // AccSensitivtyScalars[3] is for the condition where FS = ±16
-    float AccCountToAccTable[4] = {0.061 * tap::algorithms::ACCELERATION_GRAVITY / 1000, 
-                                      0.122 * tap::algorithms::ACCELERATION_GRAVITY / 1000,
-                                      0.244 * tap::algorithms::ACCELERATION_GRAVITY / 1000,
-                                      0.488 * tap::algorithms::ACCELERATION_GRAVITY / 1000};
+    // Used to scale ACC_PER_COUNT based on the current acceleration-full-scale setting
+    enum accFs : uint8_t {
+        FS_2G = 1,
+        FS_4G = 2,
+        FS_8G = 4,
+        FS_16G = 8
+    };
+
+    enum gyroFs : uint8_t {
+        FS_125DPS = 1,
+        FS_250DPS = 2,
+        FS_500DPS = 4,
+        FS_1000DPS = 8,
+        FS_2000DPS = 16
+    };
+
+    accFs accFsSetting = accFs::FS_2G;
+    gyroFs gyroFsSetting = gyroFs::FS_125DPS;
 
 };
 
