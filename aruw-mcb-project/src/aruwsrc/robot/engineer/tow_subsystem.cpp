@@ -67,24 +67,5 @@ bool TowSubsystem::getRightLeftLimitSwitchTriggered() const
     return drivers->digital.read(RIGHT_TOW_LIMIT_SWITCH_PIN);
 }
 
-void TowSubsystem::runHardwareTests()
-{
-    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-        this->setHardwareTestsComplete();
-}
-
-void TowSubsystem::onHardwareTestStart()
-{
-    testTime = tap::arch::clock::getTimeMicroseconds();
-    this->setLeftClamped(!getLeftClamped());
-    this->setRightClamped(!getRightClamped());
-}
-
-void TowSubsystem::onHardwareTestComplete()
-{
-    this->setLeftClamped(!getLeftClamped());
-    this->setRightClamped(!getRightClamped());
-}
-
 }  // namespace engineer
 }  // namespace aruwsrc

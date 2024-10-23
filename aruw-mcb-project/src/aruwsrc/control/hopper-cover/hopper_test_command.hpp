@@ -17,24 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GRABBER_SUBSYSTEM_MOCK_HPP_
-#define GRABBER_SUBSYSTEM_MOCK_HPP_
+#ifndef HOPPER_TEST_COMMAND_HPP_
+#define HOPPER_TEST_COMMAND_HPP_
 
-#include <gmock/gmock.h>
+#include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
-
-namespace aruwsrc::mock
+namespace aruwsrc
 {
-class GrabberSubsystemMock : public engineer::GrabberSubsystem
+namespace control
 {
-    GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
-    virtual ~GrabberSubsystemMock();
+class HopperSubsystem;
 
-    MOCK_METHOD(void, setSqueezed, (bool), (override));
-    MOCK_METHOD(bool, isSqueezed, (), (const override));
-    MOCK_METHOD(const char *, getName, (), (const override));
-};
-}  // namespace aruwsrc::mock
+class HopperTestCommand : public tap::control::Command
+{
+public:
+    HopperTestCommand(HopperSubsystem* subsystem);
 
-#endif  // GRABBER_SUBSYSTEM_MOCK_HPP_
+    bool isReady() override { return true; };
+
+    void initialize() override;
+
+    void execute() override{};
+
+    void end(bool) override;
+
+    bool isFinished() const override;
+
+    const char* getName() const override { return "hopper test command"; }
+
+private:
+    HopperSubsystem* subsystem;
+    uint64_t startTime;
+
+};  // class HopperTestCommand
+
+}  // namespace control
+
+}  // namespace aruwsrc
+
+#endif  // HOPPER_TEST_COMMAND_HPP_
