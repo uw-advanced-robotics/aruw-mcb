@@ -35,6 +35,8 @@ namespace aruwsrc::communication::sensors::imu
 {
 template<class I2cMaster>
 class Ism330dlc : public tap::communication::sensors::imu::ImuInterface, public ism330dlcData, public modm::I2cDevice<I2cMaster> {
+public:
+    Ism330dlc(I2cMaster &i2c, uint8_t address) : modm::I2cDevice<I2cMaster>(i2c, address) {}
 
     struct ImuData {
         enum Axis

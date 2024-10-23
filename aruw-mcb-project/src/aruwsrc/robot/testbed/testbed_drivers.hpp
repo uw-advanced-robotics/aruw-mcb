@@ -21,6 +21,7 @@
 #define TESTBED_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330dlc/ism330dlc.hpp"
 
 namespace aruwsrc::testbed
 {
@@ -31,9 +32,11 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), imu(this) {}
 
 public:
+    aruwsrc::communication::sensors::imu::Ism330dlc imu;
+
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
