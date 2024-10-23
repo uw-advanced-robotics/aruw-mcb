@@ -31,6 +31,7 @@
 
 using tap::algorithms::Angle;
 using tap::algorithms::CMSISMat;
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::algorithms
 {
@@ -40,14 +41,14 @@ class PlateHitTracker
     {
         int plateID;
         float lastDps;
-        Angle hitAngle_chassisRelative_radians;
-        Angle hitAngle_worldRelative_radians;
+        WrappedFloat hitAngle_chassisRelative_radians;
+        WrappedFloat hitAngle_worldRelative_radians;
         uint32_t timestamp;
         PlateHitData()
             : plateID(-1),
               lastDps(-1),
-              hitAngle_chassisRelative_radians(0),
-              hitAngle_worldRelative_radians(0),
+              hitAngle_chassisRelative_radians(Angle(0)),
+              hitAngle_worldRelative_radians(Angle(0)),
               timestamp(-1)
         {
         }
@@ -55,9 +56,9 @@ class PlateHitTracker
 
     struct PlateHitBinData
     {
-        Angle radians;
+        WrappedFloat radians;
         float magnitude;
-        PlateHitBinData() : radians(0), magnitude(0) {}
+        PlateHitBinData() : radians(Angle(0)), magnitude(0) {}
     };
 
 public:
