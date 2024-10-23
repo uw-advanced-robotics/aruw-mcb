@@ -60,12 +60,6 @@ public:
 
     void refresh() override {}
 
-    void runHardwareTests() override {}
-
-    void onHardwareTestStart() override {}
-
-    void onHardwareTestComplete() override {}
-
     const char *getName() const override { return "turret MCB hopper"; }
 
     bool getIsHopperOpen() const { return hopperOpen; }

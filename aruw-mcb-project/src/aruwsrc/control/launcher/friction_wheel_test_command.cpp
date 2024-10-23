@@ -16,25 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "friction_wheel_test_command.hpp"
 
-#ifndef GRABBER_SUBSYSTEM_MOCK_HPP_
-#define GRABBER_SUBSYSTEM_MOCK_HPP_
+#include "friction_wheel_subsystem.hpp"
 
-#include <gmock/gmock.h>
-
-#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
-
-namespace aruwsrc::mock
+namespace aruwsrc::control::launcher
 {
-class GrabberSubsystemMock : public engineer::GrabberSubsystem
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
+    : subsystem(subsystem)
 {
-    GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
-    virtual ~GrabberSubsystemMock();
+    this->addSubsystemRequirement(subsystem);
+}
 
-    MOCK_METHOD(void, setSqueezed, (bool), (override));
-    MOCK_METHOD(bool, isSqueezed, (), (const override));
-    MOCK_METHOD(const char *, getName, (), (const override));
-};
-}  // namespace aruwsrc::mock
+void FrictionWheelTestCommand::initialize() { this->subsystem->setDesiredLaunchSpeed(15); }
 
-#endif  // GRABBER_SUBSYSTEM_MOCK_HPP_
+void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpeed(0); }
+
+bool FrictionWheelTestCommand::isFinished() const
+{
+    return abs(this->subsystem->rightWheel.getShaftRPM()) > 4000.0f;
+}
+
+}  // namespace aruwsrc::control::launcher
