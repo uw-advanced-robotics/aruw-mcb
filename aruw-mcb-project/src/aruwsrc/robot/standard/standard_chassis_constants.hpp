@@ -100,12 +100,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076;
 
-#if defined(TARGET_STANDARD_ELSA)
-
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
-
-#elif defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_STANDARD_SPIDER)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;

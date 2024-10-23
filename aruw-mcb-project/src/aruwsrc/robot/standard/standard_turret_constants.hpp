@@ -44,23 +44,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-#if defined(TARGET_STANDARD_ELSA)
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 1100,
-    .minAngle = 0,
-    .maxAngle = M_PI,
-    .limitMotorAngles = false,
-};
-
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 7500,
-    .minAngle = modm::toRadian(60),
-    .maxAngle = modm::toRadian(115),
-    .limitMotorAngles = true,
-};
-#elif defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
     .startEncoderValue = 656,
@@ -117,7 +101,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr float TURRET_CG_X = 35.76;
 static constexpr float TURRET_CG_Z = 52.25;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -11'500;
-#elif defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_SPIDER)
+#elif defined(TARGET_STANDARD_SPIDER)
 static constexpr float TURRET_CG_X = 30.17;
 static constexpr float TURRET_CG_Z = 34.02;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'000;
@@ -295,7 +279,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-#elif defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_SPIDER)
+#elif defined(TARGET_STANDARD_SPIDER)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 22.0f,
     .ki = 0.0f,
@@ -461,7 +445,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-#elif defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ELSA)
+#elif defined(TARGET_STANDARD_SPIDER)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 229'183.1f,
     .ki = 0.0f,
