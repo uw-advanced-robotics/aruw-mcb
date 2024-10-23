@@ -46,7 +46,7 @@ void ChassisAutoNavController::runController(
 
     float desiredSpeed = visionCoprocessor.getAutonavSpeed();
 
-    if (posError.magnitude() > POS_ERROR_THRESHOLD)
+    if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
         moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
     }
