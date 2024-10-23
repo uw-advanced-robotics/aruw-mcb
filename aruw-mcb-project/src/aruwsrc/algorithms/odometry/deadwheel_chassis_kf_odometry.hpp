@@ -187,6 +187,9 @@ private:
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
 
+    float Vx = 0;
+    float Vy = 0;
+
     /// Chassis measured change in velocity since the last time `update` was called, in the chassis
     /// frame
     modm::Vector2f chassisMeasuredDeltaVelocity;
@@ -204,6 +207,11 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
+    void updateChassisStateWithLowPassFilter(float Vx, float Vy);
+
+    float CHASSIS_VELOCITY_LOW_PASS_ALPHA = 0.09f;
+    modm::Vector2f filteredVelocity;
+    modm::Location2D<float> filteredLocation;
 };
 }  // namespace aruwsrc::algorithms::odometry
 

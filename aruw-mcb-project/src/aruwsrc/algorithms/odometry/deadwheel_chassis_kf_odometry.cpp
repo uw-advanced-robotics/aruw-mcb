@@ -66,11 +66,11 @@ void DeadwheelChassisKFOdometry::update()
     float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
 
     // Calculate velocities in the robot's frame of reference
-    // Correct for roation of the robot
+    // Correct for rotation of the robot
     V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
-    float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
-    float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
+    Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
+    Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
     // Get acceleration from IMU
     float ax = imu.getAx();
@@ -91,6 +91,9 @@ void DeadwheelChassisKFOdometry::update()
     // Perform the Kalman filter update
     kf.performUpdate(y);
     updateChassisStateFromKF(chassisYaw);
+
+    // Perform the low pass filter update
+    updateChassisStateWithLowPassFilter(Vx, Vy);
 }
 
 void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
@@ -103,6 +106,31 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 
     location.setOrientation(chassisYaw);
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
+}
+
+void DeadwheelChassisKFOdometry::updateChassisStateWithLowPassFilter(float Vx, float Vy)
+{
+    // Apply low pass filter to velocities
+    static float filteredVx = 0.0f;
+    static float filteredVy = 0.0f;
+
+    filteredVx = tap::algorithms::lowPassFilter(filteredVx, Vx, CHASSIS_VELOCITY_LOW_PASS_ALPHA);
+    filteredVy = tap::algorithms::lowPassFilter(filteredVy, Vy, CHASSIS_VELOCITY_LOW_PASS_ALPHA);
+
+    // Update the filtered velocity and position
+    filteredVelocity.x = filteredVx;
+    filteredVelocity.y = filteredVy;
+
+    // Assuming a simple integration for position update
+    static float prevTime = tap::arch::clock::getTimeMicroseconds();
+    float curTime = tap::arch::clock::getTimeMicroseconds();
+    float dt = (curTime - prevTime) * 1E-6; // Convert microseconds to seconds
+    prevTime = curTime;
+
+    filteredLocation.setPosition(
+        filteredLocation.getX() + filteredVx * dt,
+        filteredLocation.getY() + filteredVy * dt);
+    filteredLocation.setOrientation(chassisYaw);
 }
 
 void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
