@@ -202,6 +202,16 @@ before_script:
         coverage_format: cobertura
         path: cobertura.xml
     expire_in: 2 weeks
+  cache:
+    key: robot-STANDARD_SPIDER-$CI_COMMIT_REF_SLUG-tests
+    paths:
+      - aruw-mcb-project/build/tests/scons-fast/modm/**/*.*
+      - aruw-mcb-project/build/tests/scons-fast/src/tap/**/*.*
+      - aruw-mcb-project/build/tests/scons-fast/test/tap/**/*.*
+      - aruw-mcb-project/build/tests/scons-fast/TARGET_STANDARD_SPIDER/**/*.*
+    fallback_keys:
+      - robot-STANDARD_SPIDER-develop-tests
+    when: 'always'
 
 # Standard (Orion) build
 
