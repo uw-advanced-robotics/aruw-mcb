@@ -380,7 +380,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    static constexpr uint8_t MAXSETPOINTS = 50;
+    static constexpr uint8_t MAXSETPOINTS = 100;
     struct AutoNavCoordinate
     {
         float x;
