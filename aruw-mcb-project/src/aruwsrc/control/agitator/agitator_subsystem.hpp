@@ -30,47 +30,17 @@
 #endif
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/control/command.hpp"
 #include "tap/control/setpoint/algorithms/setpoint_continuous_jam_checker.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
+#include "agitator_test_command.hpp"
 
 namespace aruwsrc
 {
 namespace agitator
 {
-class AgitatorTestCommand : public tap::control::Command
-{
-public:
-    AgitatorTestCommand(tap::control::setpoint::SetpointSubsystem* subsystem) : subsystem(subsystem)
-    {
-        this->addSubsystemRequirement(subsystem);
-    }
-
-    bool isReady() override { return true; };
-
-    void initialize() override { subsystem->setSetpoint(subsystem->getCurrentValue() + M_PI / 2); };
-
-    void execute() override{};
-
-    void end(bool) override{};
-
-    bool isFinished() const override
-    {
-        return tap::algorithms::compareFloatClose(
-            this->subsystem->getSetpoint(),
-            this->subsystem->getCurrentValue(),
-            M_PI / 16);
-    };
-
-    const char* getName() const override { return "agitator test command"; }
-
-private:
-    tap::control::setpoint::SetpointSubsystem* subsystem;
-};  // class AgitatorTestCommand
-
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
  * that operates using a position controller. While this subsystem provides

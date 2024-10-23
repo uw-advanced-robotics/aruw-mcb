@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -17,36 +18,48 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hopper_subsystem.hpp"
+/*
+   Hopper subsystem is made of a servo that will spin
+   to two certain angles determined by the user as
+   the open position and the close position
+*/
+
+#ifndef HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
+#define HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
+
+#include "tap/control/command.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
-HopperSubsystem::HopperSubsystem(
-    tap::Drivers* drivers,
-    tap::gpio::Pwm::Pin pwmPin,
-    float open,
-    float close,
-    float pwmRampSpeed)
-    : tap::control::Subsystem(drivers),
-      hopper(drivers, pwmPin, open, close, pwmRampSpeed),
-      hopperTestCommand(this)
+class HopperSubsystem;
+
+class HopperTestCommand : public tap::control::Command
 {
-    this->setTestCommand(&hopperTestCommand);
-    hopper.setTargetPwm(close);
-}
+public:
+    HopperTestCommand(HopperSubsystem* subsystem);
 
-void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
+    bool isReady() override { return true; };
 
-void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
+    void initialize() override;
 
-void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
+    void execute() override{};
 
-float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
+    void end(bool) override;
 
-float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
+    bool isFinished() const override;
+
+    const char* getName() const override { return "hopper test command"; }
+
+private:
+    HopperSubsystem* subsystem;
+    uint64_t startTime;
+
+};  // class HopperTestCommand
 
 }  // namespace control
 
 }  // namespace aruwsrc
+
+#endif  // HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_

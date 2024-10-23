@@ -105,20 +105,4 @@ float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) c
 {
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
-
-FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
-    : subsystem(subsystem)
-{
-    this->addSubsystemRequirement(subsystem);
-}
-
-void FrictionWheelTestCommand::initialize() { this->subsystem->setDesiredLaunchSpeed(15); }
-
-void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpeed(0); }
-
-bool FrictionWheelTestCommand::isFinished() const
-{
-    return abs(this->subsystem->rightWheel.getShaftRPM()) > 4000.0f;
-}
-
 }  // namespace aruwsrc::control::launcher

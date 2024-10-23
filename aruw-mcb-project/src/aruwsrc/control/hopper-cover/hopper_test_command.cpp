@@ -17,36 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "hopper_test_command.hpp"
+
+#include "tap/architecture/clock.hpp"
+
 #include "hopper_subsystem.hpp"
 
 namespace aruwsrc
 {
 namespace control
 {
-HopperSubsystem::HopperSubsystem(
-    tap::Drivers* drivers,
-    tap::gpio::Pwm::Pin pwmPin,
-    float open,
-    float close,
-    float pwmRampSpeed)
-    : tap::control::Subsystem(drivers),
-      hopper(drivers, pwmPin, open, close, pwmRampSpeed),
-      hopperTestCommand(this)
+HopperTestCommand::HopperTestCommand(HopperSubsystem* subsystem) : subsystem(subsystem)
 {
-    this->setTestCommand(&hopperTestCommand);
-    hopper.setTargetPwm(close);
+    this->addSubsystemRequirement(subsystem);
 }
 
-void HopperSubsystem::setOpen() { hopper.setTargetPwm(hopper.getMaxPWM()); }
+void HopperTestCommand::initialize()
+{
+    this->subsystem->setOpen();
+    this->startTime = tap::arch::clock::getTimeMilliseconds();
+}
 
-void HopperSubsystem::setClose() { hopper.setTargetPwm(hopper.getMinPWM()); }
+void HopperTestCommand::end(bool) { this->subsystem->setClose(); }
 
-void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
-
-float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
-
-float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
-
+bool HopperTestCommand::isFinished() const
+{
+    return tap::arch::clock::getTimeMilliseconds() - this->startTime > 1000;
+}
 }  // namespace control
 
 }  // namespace aruwsrc

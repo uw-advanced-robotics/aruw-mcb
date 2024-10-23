@@ -26,7 +26,6 @@
 #ifndef HOPPER_SUBSYSTEM_HPP_
 #define HOPPER_SUBSYSTEM_HPP_
 
-#include "tap/control/command.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/servo.hpp"
@@ -35,34 +34,12 @@
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
+#include "hopper_test_command.hpp"
+
 namespace aruwsrc
 {
 namespace control
 {
-class HopperSubsystem;
-
-class HopperTestCommand : public tap::control::Command
-{
-public:
-    HopperTestCommand(HopperSubsystem* subsystem);
-
-    bool isReady() override { return true; };
-
-    void initialize() override;
-
-    void execute() override{};
-
-    void end(bool) override;
-
-    bool isFinished() const override;
-
-    const char* getName() const override { return "hopper test command"; }
-
-private:
-    HopperSubsystem* subsystem;
-    uint64_t startTime;
-
-};  // class HopperTestCommand
 
 class HopperSubsystem : public tap::control::Subsystem
 {

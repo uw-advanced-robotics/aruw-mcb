@@ -21,7 +21,6 @@
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/ramp.hpp"
-#include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
@@ -33,6 +32,7 @@
 
 #include "modm/math/filter/pid.hpp"
 
+#include "friction_wheel_test_command.hpp"
 #include "launcher_constants.hpp"
 
 namespace aruwsrc
@@ -47,29 +47,6 @@ class TurretMCBCanComm;
 
 namespace aruwsrc::control::launcher
 {
-class FrictionWheelSubsystem;
-
-class FrictionWheelTestCommand : public tap::control::Command
-{
-public:
-    FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem);
-
-    bool isReady() override { return true; };
-
-    void initialize() override;
-
-    void execute() override{};
-
-    void end(bool) override;
-
-    bool isFinished() const override;
-
-    const char *getName() const override { return "friction wheel test command"; }
-
-private:
-    FrictionWheelSubsystem *subsystem;
-};  // class FrictionWheelTestCommand
-
 /**
  * A subsystem which regulates the speed of a two wheel shooter system using velocity PID
  * controllers. Allows the user to specify the desired launch speed of the shooter.
