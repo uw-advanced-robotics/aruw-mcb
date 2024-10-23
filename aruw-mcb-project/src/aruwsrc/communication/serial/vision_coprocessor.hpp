@@ -402,7 +402,7 @@ private:
     aruwsrc::algorithms::AutoNavPath autoNavPath;
     AutoNavSetpointMessage lastSetpointData{
         .sequenceNum = 0,
-        .speed = 0.0f,
+        .speed = 0.5f,
         .numSetpoints = 0,
         .setpoints = {}};
 
