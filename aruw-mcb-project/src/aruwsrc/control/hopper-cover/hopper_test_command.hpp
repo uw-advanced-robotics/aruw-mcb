@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
-#define HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
+#ifndef HOPPER_TEST_COMMAND_HPP_
+#define HOPPER_TEST_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -55,4 +55,4 @@ private:
 
 }  // namespace aruwsrc
 
-#endif  // HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
+#endif  // HOPPER_TEST_COMMAND_HPP_
