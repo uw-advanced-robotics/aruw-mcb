@@ -113,6 +113,7 @@ before_script:
     key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
     paths:
       - aruw-mcb-project/build/hardware/scons-release/TARGET_$ROBOT/
+      - aruw-mcb-project/.sconsign.dblite
     fallback_keys:
       - robot-$ROBOT-develop
     when: 'always'
@@ -130,6 +131,7 @@ before_script:
     key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
     paths:
       - aruw-mcb-project/build/tests/scons-fast/TARGET_$ROBOT/
+      - aruw-mcb-project/.sconsign.dblite
     fallback_keys:
       - robot-$ROBOT-develop-test
     when: 'always'
@@ -151,6 +153,7 @@ before_script:
     paths:
       - aruw-mcb-project/build/hardware/scons-release/modm/
       - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/.sconsign.dblite
     fallback_keys:
       - mcb-libs-develop
     when: 'always'
@@ -169,6 +172,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/modm/
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/.sconsign.dblite
     fallback_keys:
       - mcb-test-libs-develop
     when: 'always'
@@ -209,6 +213,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
       - aruw-mcb-project/build/tests/scons-fast/TARGET_STANDARD_SPIDER/
+      - aruw-mcb-project/.sconsign.dblite
     fallback_keys:
       - robot-STANDARD_SPIDER-develop-tests
     when: 'always'
