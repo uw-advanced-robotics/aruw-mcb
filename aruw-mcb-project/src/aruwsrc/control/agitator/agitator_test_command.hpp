@@ -20,10 +20,9 @@
 #ifndef AGITATOR_TEST_COMMAND_HPP_
 #define AGITATOR_TEST_COMMAND_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
-#include "tap/algorithms/math_user_utils.hpp"
-
 
 namespace aruwsrc
 {

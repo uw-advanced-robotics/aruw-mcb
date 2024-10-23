@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -17,12 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-/*
-   Hopper subsystem is made of a servo that will spin
-   to two certain angles determined by the user as
-   the open position and the close position
-*/
 
 #ifndef HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_
 #define HOPPER_TEST_COMMAND_SUBSYSTEM_HPP_

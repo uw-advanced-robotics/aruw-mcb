@@ -35,6 +35,7 @@
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
+
 #include "agitator_test_command.hpp"
 
 namespace aruwsrc

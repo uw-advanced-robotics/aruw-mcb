@@ -40,7 +40,6 @@ namespace aruwsrc
 {
 namespace control
 {
-
 class HopperSubsystem : public tap::control::Subsystem
 {
 public:
