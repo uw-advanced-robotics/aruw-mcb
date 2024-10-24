@@ -39,7 +39,9 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
           yawObserver,
           imu,
           modm::Vector2f(initialXPos, initialYPos),
-          centerToWheelDistance)
+          centerToWheelDistance,
+          (1 / M_SQRT2),
+          (1 / M_SQRT2))
 {
 }
 

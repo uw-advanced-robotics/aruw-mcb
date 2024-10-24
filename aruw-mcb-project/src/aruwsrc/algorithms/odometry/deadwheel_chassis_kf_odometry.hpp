@@ -52,13 +52,25 @@ public:
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
      * @param initPos Initial position of chassis when robot boots
+     * @param parallelCenterToWheelDistance Distance from the center of the chassis to the center of
+     * the parallel deadwheel
+     * @param parallelWheelChassisRelativeAngleDegrees Angle between the parallel deadwheel and
+     * "forward" on the chassis
+     * @param perpendicularWheelChassisRelativeAngleDegrees Angle between the perpendicular
+     * deadwheel and "forward" on the chassis
+     * @brief The parallel deadwheel is the deadwheel that is tangent to the edge of the chassis.
+     * The perpendicular deadwheel is the deadwheel that is perpendicular to the edge of the
+     * chassis. When moving in the direction of the parallel deadwheel, the perpendicular deadwheel
+     * should not move, and vice versa
      */
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
-        const float centerToWheelDistance);
+        const float parallelCenterToWheelDistance,
+        const float parallelWheelChassisRelativeAngleDegrees,
+        const float perpendicularWheelChassisRelativeAngleDegrees);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -186,7 +198,9 @@ private:
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
 
-    const float centerToWheelDistance;
+    const float parallelCenterToWheelDistance;
+    const float parallelWheelChassisRelativeAngleRadians;
+    const float perpendicularWheelChassisRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);

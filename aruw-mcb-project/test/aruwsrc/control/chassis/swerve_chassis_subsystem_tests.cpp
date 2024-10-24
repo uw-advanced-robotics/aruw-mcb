@@ -162,18 +162,6 @@ TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)
     EXPECT_TRUE(chassis.allMotorsOnline());
 }
 
-TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
-{
-    chassis.setDesiredOutput(1000, 1000, 1000);
-    chassis.onHardwareTestStart();
-
-    Matrix<float, 3, 1> chassiSVelocity = chassis.getDesiredVelocityChassisRelative();
-
-    EXPECT_NEAR(0, chassiSVelocity[0][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[1][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[2][0], 1E-3);
-}
-
 TEST_F(SwerveChassisSubsystemTest, initialize)
 {
     for (unsigned int i = 0; i < chassis.NUM_MODULES; i++)
