@@ -64,6 +64,8 @@ using namespace aruwsrc::engineer;
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
+#elif defined(TARGET_MOTOR_TESTER)
+using namespace aruwsrc::motor_tester;
 #endif
 
 // Place any sort of input/output initialization here. For example, place
