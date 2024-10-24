@@ -37,7 +37,6 @@ ClientDisplayCommand::ClientDisplayCommand(
     tap::control::CommandScheduler &commandScheduler,
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
-    const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
@@ -45,9 +44,6 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-    const chassis::BeybladeCommand *chassisBeybladeCmd,
-    const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
@@ -57,11 +53,8 @@ ClientDisplayCommand::ClientDisplayCommand(
       booleanHudIndicators(
           commandScheduler,
           refSerialTransmitter,
-          hopperSubsystem,
-          frictionWheelSubsystem,
           agitatorSubsystem,
-          imuCalibrateCommand,
-          &drivers.refSerial),
+          imuCalibrateCommand),
       capBankIndicator(refSerialTransmitter, capBank),
       chassisOrientationIndicator(
           drivers,
@@ -72,14 +65,10 @@ ClientDisplayCommand::ClientDisplayCommand(
           drivers,
           visionCoprocessor,
           refSerialTransmitter,
-          hopperSubsystem,
           frictionWheelSubsystem,
           robotTurretSubsystem,
           multiShotHandler,
-          cvOnTargetManager,
-          chassisBeybladeCmd,
-          chassisAutorotateCmd,
-          chassisImuDriveCommand),
+          cvOnTargetManager),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter)
 {

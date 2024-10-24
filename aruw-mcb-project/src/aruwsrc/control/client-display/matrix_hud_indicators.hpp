@@ -24,12 +24,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
@@ -50,12 +45,12 @@ namespace aruwsrc::control::client_display
  * The matrix indicator looks something like this:
  *
  * ```
- *   CHAS   SHOT
+ *  SHOT
+ *
+ *  REDY
  *  +----+
- *  |BEYB|  REDY
- *  +----+ +----+
- *   FLLW  |LOAD|
- *         +----+
+ *  |LOAD|
+ *  +----+
  * ```
  *
  * In the example above, the chassis is beyblading and the launcher is loading.
@@ -67,8 +62,6 @@ public:
      * Construct a MatrixHudIndicators object.
      *
      * @param[in] drivers Global drivers instance.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
-     * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
@@ -77,25 +70,15 @@ public:
      * @param[in] cvOnTargetGovernor This governor is checked to see whether or not projectile
      * launching is being gated by CV. May be nullptr if no governor exists in the system (in which
      * case it is assumed that no CV launch limiting is being performed).
-     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
-     * never be selected as the current chassis command in the HUD.
-     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
-     * will never be selected as the current chassis command in the HUD.
-     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
-     * will never be selected as the current chassis command in the HUD.
      */
     MatrixHudIndicators(
         tap::Drivers &drivers,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
-        const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-        const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand);
+        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -136,10 +119,8 @@ private:
     /** Enum values representing various columns in the matrix indicator. */
     enum MatrixHUDIndicatorIndex
     {
-        /** The current command controlling the chassis. */
-        CHASSIS_STATE = 0,
         /** The current reloading and flywheel state of the firing system. */
-        SHOOTER_STATE,
+        SHOOTER_STATE = 0,
 #if defined(DISPLAY_FIRING_MODE)
         /** The current projectile launching state (single, burst, full auto). TODO */
         FIRING_MODE,
@@ -160,16 +141,12 @@ private:
      * drawing. */
     static constexpr const char
         *MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[NUM_MATRIX_HUD_INDICATORS][2] = {
-            {"CHAS", "BEYB\nFLLW\nMIMU"},
             {"SHOT", "REDY\nLOAD\nFOFF"},
 #if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\nCONST\n10Hz\n20Hz\nMAX\n"},
 #endif
             {"CV  ", "GATE\nNOGT\nOFFL"}
         };
-
-    /** Number of possible chassis states associated with MatrixHUDIndicatorIndex::CHASSIS_STATE. */
-    static constexpr int NUM_CHASSIS_STATES = 4;
 
     /** Enum representing different states that the shooting mechanism can be in. Corresponds to
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[FIRING_MODE]. */
@@ -204,8 +181,6 @@ private:
 
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
 
-    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem;
-
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
@@ -213,16 +188,6 @@ private:
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
-
-    /**
-     * List of commands that will be checked for in the scheduler when determining which drive
-     * command is being run.
-     */
-    std::array<const tap::control::Command *, NUM_CHASSIS_STATES> driveCommands;
-
-    /** Index in `driveCommands` that is currently being displayed. Start at -1, indicating no drive
-     * command has been selected and displayed. */
-    int currDriveCommandIndex = -1;
 
     /** Array of graphic messages to be used by the `matrixHudIndicatorDrawers`. */
     Tx::Graphic1Message matrixHudIndicatorGraphics[NUM_MATRIX_HUD_INDICATORS];

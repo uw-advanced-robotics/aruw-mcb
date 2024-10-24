@@ -67,8 +67,6 @@
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
-#include "aruwsrc/control/hopper-cover/open_turret_mcb_hopper_cover_command.hpp"
-#include "aruwsrc/control/hopper-cover/turret_mcb_hopper_cover_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -178,8 +176,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 ClientDisplaySubsystem clientDisplay(drivers());
-
-TurretMCBHopperSubsystem hopperCover(drivers(), getTurretMCBCanComm());
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -381,7 +377,6 @@ ClientDisplayCommand clientDisplayCommand(
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
-    &hopperCover,
     frictionWheels,
     agitator,
     turret,
@@ -389,9 +384,6 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    &chassisImuDriveCommand,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -518,7 +510,6 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&hopperCover);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -535,7 +526,6 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
-    hopperCover.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
