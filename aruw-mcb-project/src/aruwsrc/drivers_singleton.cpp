@@ -35,6 +35,8 @@ namespace aruwsrc::engineer
 namespace aruwsrc::dart
 #elif defined(TARGET_TESTBED)
 namespace aruwsrc::testbed
+#elif defined(TARGET_MOTOR_TESTER)
+namespace aruwsrc::motor_tester
 #endif
 {
 /**

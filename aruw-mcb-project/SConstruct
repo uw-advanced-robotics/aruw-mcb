@@ -57,6 +57,10 @@ sources = []
 # Append include path to environment so both src/test environments have access to them
 env.SConscript(dirs=[TAPROOT_PATH], exports=["env", "args", "sources"])
 
+# Setup SCons to use directory based caching, not global
+from  SCons.SConsign import File
+File(None)
+
 # We include the tests as library to improve build times for CI.
 if args["TARGET_ENV"] == "tests":
     source_files = env.FindSourceFiles("taproot/test")
@@ -71,7 +75,10 @@ if args["TARGET_ENV"] == "tests":
 # We modify the "BUILDPATH" environment variable to have the code for each robot have its own directory.
 env["BUILDPATH"] = join(env["CONFIG_BUILD_BASE"], "scons-" + ARGUMENTS.get("profile", "release"), args["ROBOT_TYPE"])
 env.SConscript(dirs=[SRC_PATH, TEST_PATH], exports=["env", "args", "sources"])
-
+env.Append(toolpath=[
+    abspath(r"build_tools"),
+])
+env.Tool("generate_ozone_projects")
 
 print("Configured {0} parallel build jobs (-j{0}), {1}"
     .format(GetOption("num_jobs"), args["ROBOT_TYPE"]))
@@ -92,6 +99,7 @@ if args["COMPILE_SRC"]:
         env.Alias("size", env.Size(program))
         env.Alias("gdb", env.DebugGdbRemote(program))
         env.Alias("run", [env.ProgramOpenOcd(program)])
+        env.Alias("ozone", env.RunOzoneConfig(program))
         env.Alias("all", ["build", "size"])
         env.Default("all")  # For the hardware target env, "all" runs if you don't
                             # specify anything (i.e. just type "scons")

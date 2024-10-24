@@ -385,7 +385,6 @@ ClientDisplayCommand clientDisplayCommand(
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
-    nullptr,
     frictionWheels,
     waterwheelAgitator,
     turret,
@@ -393,9 +392,6 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    nullptr,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -412,10 +408,10 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping rightSwitchMiddle(
     drivers(),
-    {&stopFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&spinFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&kicker::launchKickerHeatAndCVLimited},
@@ -430,16 +426,22 @@ HoldCommandMapping leftSwitchUp(
     {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
+MultiShotCvCommandMapping leftMousePressedBNotPressedVNotPressed(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V}),
     std::nullopt,
     kicker::cvOnTargetGovernor);
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&kicker::launchKickerNoHeatLimiting},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+    false);
+// Same thing as leftMousePressedBPressed; used for ease of access.
+HoldRepeatCommandMapping leftMousePressedVPressed(
+    drivers(),
+    {&kicker::launchKickerNoHeatLimiting},
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
     false);
 HoldCommandMapping rightMousePressed(
     drivers(),
@@ -529,7 +531,7 @@ void registerHeroSubsystems(Drivers *drivers)
 void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    frictionWheels.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
@@ -546,10 +548,11 @@ void startHeroCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&leftMousePressedVPressed);
     drivers->commandMapper.addMap(&rightMousePressed);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);

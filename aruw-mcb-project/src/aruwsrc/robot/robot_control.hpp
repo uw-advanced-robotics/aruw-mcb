@@ -23,6 +23,7 @@
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
@@ -41,6 +42,8 @@ namespace aruwsrc::engineer
 namespace aruwsrc::dart
 #elif defined(TARGET_TESTBED)
 namespace aruwsrc::testbed
+#elif defined(TARGET_MOTOR_TESTER)
+namespace aruwsrc::motor_tester
 #endif
 {
 void initSubsystemCommands(Drivers *drivers);
