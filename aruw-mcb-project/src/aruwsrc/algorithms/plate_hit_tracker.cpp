@@ -48,7 +48,7 @@ void PlateHitTracker::update()
 
         lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
 
-        lastHitData.hitAngle_chassisRelative_radians = Angle(1 * M_PI / 2);
+        lastHitData.hitAngle_chassisRelative_radians = Angle(0 * M_PI / 2);
         lastHitData.hitAngle_worldRelative_radians = Angle(
             transformer->getWorldToChassis().getYaw() +
             lastHitData.hitAngle_chassisRelative_radians.getWrappedValue());
