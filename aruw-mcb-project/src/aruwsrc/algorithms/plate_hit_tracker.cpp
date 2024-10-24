@@ -95,9 +95,12 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
         if (peakData[i].magnitude > peakData[prevIndex].magnitude &&
             peakData[i].magnitude > peakData[nextIndex].magnitude)
         {
-            WrappedFloat peakAngleRaw = (peakData[i].radians 
-            + (peakData[i].radians.minDifference(peakData[nextIndex].radians) * peakData[nextIndex].magnitude) 
-            + (peakData[i].radians.minDifference(peakData[prevIndex].radians) * peakData[prevIndex].magnitude));
+            WrappedFloat peakAngleRaw =
+                (peakData[i].radians +
+                 (peakData[i].radians.minDifference(peakData[nextIndex].radians) *
+                  peakData[nextIndex].magnitude) +
+                 (peakData[i].radians.minDifference(peakData[prevIndex].radians) *
+                  peakData[prevIndex].magnitude));
             peakData[i].radians = peakAngleRaw;
             peaks.push_back(peakData[i]);
         }
