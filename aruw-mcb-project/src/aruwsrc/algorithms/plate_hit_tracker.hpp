@@ -128,4 +128,5 @@ private:
 };
 
 }  // namespace aruwsrc::algorithms
+
 #endif  // PLATE_HIT_TRACKER_HPP_
