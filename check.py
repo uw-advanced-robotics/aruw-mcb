@@ -141,6 +141,7 @@ class BuildTarget(Enum):
     ENGINEER = "ENGINEER"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
+    MOTOR_TESTER = "MOTOR_TESTER"
     all = "all"
 
 
