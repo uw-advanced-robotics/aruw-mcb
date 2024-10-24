@@ -114,18 +114,6 @@ before_script:
     key: mcb-binaries
     untracked: true
 
-.sim_build:
-  stage: Build
-  only: *default_only
-  except: *default_except
-  needs: ["Sim Lib Build"]
-  script:
-    - cd aruw-mcb-project
-    - scons build-sim profile=fast robot=$ROBOT -j${NUM_JOBS}
-  cache:
-    key: sim-binaries
-    untracked: true
-
 .test_build:
   stage: Tests
   only: *default_only
@@ -157,18 +145,6 @@ before_script:
     paths:
       - $BUILD_PATH
 
-"Sim Lib Build":
-  stage: Build Libraries
-  only: *default_only
-  except: *default_except
-  needs: []
-  script:
-    - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=sim profile=fast -j${NUM_JOBS}
-  cache:
-    paths:
-      - $BUILD_PATH
-
 "Test Lib Build":
   stage: Build Libraries
   only: *default_only
@@ -186,12 +162,6 @@ before_script:
 "Standard (Spider): MCB Build":
   extends:
     - .mcb_build
-  variables:
-    ROBOT: STANDARD_SPIDER
-
-"Standard (Spider): Sim Build":
-  extends:
-    - .sim_build
   variables:
     ROBOT: STANDARD_SPIDER
 
@@ -217,37 +187,11 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
 
-# Standard (Elsa) build
-
-"Standard (Elsa): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
 # Standard (Orion) build
 
 "Standard (Orion): MCB Build":
   extends:
     - .mcb_build
-  variables:
-    ROBOT: STANDARD_ORION
-
-"Standard (Orion): Sim Build":
-  extends:
-    - .sim_build
   variables:
     ROBOT: STANDARD_ORION
 
@@ -265,12 +209,6 @@ before_script:
   variables:
     ROBOT: STANDARD_CYGNUS
 
-"Standard (Cygnus): Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: STANDARD_CYGNUS
-
 "Standard (Cygnus): Test Build":
   extends:
     - .test_build
@@ -282,12 +220,6 @@ before_script:
 "Drone: MCB Build":
   extends:
     - .mcb_build
-  variables:
-    ROBOT: DRONE
-
-"Drone: Sim Build":
-  extends:
-    - .sim_build
   variables:
     ROBOT: DRONE
 
@@ -305,12 +237,6 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
-"Engineer: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: ENGINEER
-
 "Engineer: Test Build":
   extends:
     - .test_build
@@ -322,12 +248,6 @@ before_script:
 "Hero: MCB Build":
   extends:
     - .mcb_build
-  variables:
-    ROBOT: HERO_PERSEUS
-
-"Hero: Sim Build":
-  extends:
-    - .sim_build
   variables:
     ROBOT: HERO_PERSEUS
 
@@ -345,12 +265,6 @@ before_script:
   variables:
     ROBOT: SENTRY_HYDRA
 
-"Sentry: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: SENTRY_HYDRA
-
 "Sentry: Test Build":
   extends:
     - .test_build
@@ -365,17 +279,25 @@ before_script:
   variables:
     ROBOT: DART
 
-"Dart: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: DART
-
 "Dart: Test Build":
   extends:
     - .test_build
   variables:
     ROBOT: DART
+
+# Testbed Build
+
+"Testbed: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: TESTBED
+  
+"Testbed: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: TESTBED
 
 # Motor Tester Build
 

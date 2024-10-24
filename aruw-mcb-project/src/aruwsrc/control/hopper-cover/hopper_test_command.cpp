@@ -17,24 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GRABBER_SUBSYSTEM_MOCK_HPP_
-#define GRABBER_SUBSYSTEM_MOCK_HPP_
+#include "hopper_test_command.hpp"
 
-#include <gmock/gmock.h>
+#include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/robot/engineer/grabber_subsystem.hpp"
+#include "hopper_subsystem.hpp"
 
-namespace aruwsrc::mock
+namespace aruwsrc
 {
-class GrabberSubsystemMock : public engineer::GrabberSubsystem
+namespace control
 {
-    GrabberSubsystemMock(tap::Drivers *drivers, tap::gpio::Digital::OutputPin pin);
-    virtual ~GrabberSubsystemMock();
+HopperTestCommand::HopperTestCommand(HopperSubsystem* subsystem) : subsystem(subsystem)
+{
+    this->addSubsystemRequirement(subsystem);
+}
 
-    MOCK_METHOD(void, setSqueezed, (bool), (override));
-    MOCK_METHOD(bool, isSqueezed, (), (const override));
-    MOCK_METHOD(const char *, getName, (), (const override));
-};
-}  // namespace aruwsrc::mock
+void HopperTestCommand::initialize()
+{
+    this->subsystem->setOpen();
+    this->startTime = tap::arch::clock::getTimeMilliseconds();
+}
 
-#endif  // GRABBER_SUBSYSTEM_MOCK_HPP_
+void HopperTestCommand::end(bool) { this->subsystem->setClose(); }
+
+bool HopperTestCommand::isFinished() const
+{
+    return tap::arch::clock::getTimeMilliseconds() - this->startTime > 1000;
+}
+}  // namespace control
+
+}  // namespace aruwsrc
