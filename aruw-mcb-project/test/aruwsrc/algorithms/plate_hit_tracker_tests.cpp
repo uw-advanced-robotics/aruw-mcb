@@ -99,3 +99,26 @@ TEST(PlateHitTracker, returns_peak_at_bin_one){
     auto peakAngles = hitTracker.getPeakAnglesRadians();
     EXPECT_EQ(peakAngles[0].radians.getWrappedValue(), 0);
 }
+
+TEST(PlateHitTracker, detects_collision) {
+    tap::Drivers drivers;
+    tap::communication::serial::RefSerialData::Rx::RobotData data;
+    data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
+
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    hitTracker.attachTransformer(&transformer);
+
+    tap::algorithms::transforms::Transform transform(0, 0, 0, 0, 0, 0);
+
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(2).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
+
+    hitTracker.update();
+    data.receivedDps = 2;
+    hitTracker.update();
+
+    auto hitData = hitTracker.getLastHitData();
+    EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::COLLISION);
+}

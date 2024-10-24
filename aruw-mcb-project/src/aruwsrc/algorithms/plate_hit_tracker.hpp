@@ -37,6 +37,13 @@ namespace aruwsrc::algorithms
 {
 class PlateHitTracker
 {
+    public:
+    enum class ProjectileType
+    {
+        _17_MM,
+        _42_MM,
+        COLLISION
+    };
     struct PlateHitData
     {
         int plateID;
@@ -44,12 +51,14 @@ class PlateHitTracker
         WrappedFloat hitAngle_chassisRelative_radians;
         WrappedFloat hitAngle_worldRelative_radians;
         uint32_t timestamp;
+        ProjectileType projectileType;
         PlateHitData()
             : plateID(-1),
               lastDps(-1),
               hitAngle_chassisRelative_radians(Angle(0)),
               hitAngle_worldRelative_radians(Angle(0)),
-              timestamp(-1)
+              timestamp(-1),
+              projectileType(ProjectileType::COLLISION)
         {
         }
     };
@@ -119,7 +128,7 @@ private:
     PlateHitData lastHitData;
 
     aruwsrc::algorithms::transforms::TransformerInterface *transformer;
-    CMSISMat<BIN_NUMBER, 1> bins;
+    CMSISMat<BIN_NUMBER, 1> bins{};
     const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
 
     PlateHitTracker::PlateHitBinData *getBinData();

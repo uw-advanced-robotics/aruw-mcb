@@ -28,7 +28,8 @@ PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
 {
 }
 
-void PlateHitTracker::initialize() {}
+void PlateHitTracker::initialize() {
+}
 
 /**
  * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the
@@ -58,7 +59,20 @@ void PlateHitTracker::update()
             lastHitData.hitAngle_worldRelative_radians.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
-        bins.data[binIndex] += newHitData.receivedDps - lastHitData.lastDps;
+        float damage = newHitData.receivedDps - lastHitData.lastDps;
+        bins.data[binIndex] += damage;
+        if (damage > 0 && damage < 5)
+        {
+            lastHitData.projectileType = ProjectileType::COLLISION;
+        }
+        else if (damage >= 5 && damage <= 10)
+        {
+            lastHitData.projectileType = ProjectileType::_17_MM;
+        }
+        else
+        {
+            lastHitData.projectileType = ProjectileType::_42_MM;
+        }
     }
     lastHitData.lastDps = newHitData.receivedDps;
 }
