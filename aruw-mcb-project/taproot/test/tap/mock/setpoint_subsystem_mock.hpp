@@ -55,7 +55,6 @@ public:
     MOCK_METHOD(bool, isCalibrated, (), (override));
     MOCK_METHOD(bool, isOnline, (), (override));
     MOCK_METHOD(float, getVelocity, (), (override));
-    MOCK_METHOD(void, refreshSafeDisconnect, (), ());
 };
 
 }  // namespace mock

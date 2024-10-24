@@ -64,12 +64,6 @@ public:
     virtual void initialize() {}
 
     /**
-     * Calls initialize and registers the subsystem with the command scheduler passed
-     *  in through the driver.
-     */
-    void registerAndInitialize();
-
-    /**
      * Sets the default Command of the Subsystem. The default Command will be
      * automatically scheduled when no other Commands are scheduled that require
      * the Subsystem. Default Commands should generally not end on their own, i.e.
@@ -103,44 +97,37 @@ public:
      */
     virtual void refresh() {}
 
-    /**
-     * Called in the scheduler's run function before removing commands
-     * when safe disconnecting. This function should contain code that
-     * safely shuts down the subsystem (i.e. shutting off motors). All
-     * subsystems must implement this virtual function.
-     */
-    virtual void refreshSafeDisconnect() {}
+    mockable inline bool isHardwareTestComplete() const { return hardwareTestsComplete; }
 
-    /**
-     * Sets the test command of the `Subsystem`. The test command can be run
-     * by calling `CommandScheduler::runHardwareTests`.
-     *
-     * Test commands must keep track of their state so that `Command::isFinished`
-     * continues to return true after the command has ended.
-     *
-     * @param testCommand the test Command to associate with this subsystem
-     */
-    mockable void setTestCommand(Command* testCommand);
+    mockable inline void setHardwareTestsIncomplete()
+    {
+        hardwareTestsComplete = false;
+        onHardwareTestStart();
+    }
 
-    /**
-     * Gets the test command for this subsystem. Returns `nullptr` if no test
-     * command is currently associated with the subsystem.
-     *
-     * @return the test command associated with this subsystem
-     */
-    mockable inline Command* getTestCommand() const { return testCommand; }
+    mockable inline void setHardwareTestsComplete()
+    {
+        hardwareTestsComplete = true;
+        onHardwareTestComplete();
+    }
 
-    virtual const char* getName() const;
+    virtual void runHardwareTests() { setHardwareTestsComplete(); }
+
+    virtual const char* getName();
 
     mockable inline int getGlobalIdentifier() const { return globalIdentifier; }
 
 protected:
     Drivers* drivers;
 
+    bool hardwareTestsComplete = false;
+
+    virtual void onHardwareTestStart() {}
+
+    virtual void onHardwareTestComplete() {}
+
 private:
     Command* defaultCommand;
-
-    Command* testCommand;
 
     /**
      * An identifier unique to a subsystem that will be assigned to it automatically upon

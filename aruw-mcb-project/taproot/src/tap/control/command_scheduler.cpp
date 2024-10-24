@@ -171,6 +171,22 @@ void CommandScheduler::run()
     uint32_t runStart = arch::clock::getTimeMicroseconds();
 #endif
 
+    if (runningHardwareTests)
+    {
+        // Call runHardwareTests on all subsystems in the registeredSubsystemBitmap
+        // if a hardware test is not already complete
+        for (auto it = subMapBegin(); it != subMapEnd(); it++)
+        {
+            Subsystem *sub = *it;
+            if (!sub->isHardwareTestComplete())
+            {
+                sub->runHardwareTests();
+            }
+            sub->refresh();
+        }
+        return;
+    }
+
     if (safeDisconnected())
     {
         // End all commands running. They were interrupted by the remote disconnecting.
@@ -198,15 +214,7 @@ void CommandScheduler::run()
         // Refresh subsystems in the registeredSubsystemBitmap
         for (auto it = subMapBegin(); it != subMapEnd(); it++)
         {
-            // Call appropriate refresh function for each of the subsystems
-            if (safeDisconnected())
-            {
-                (*it)->refreshSafeDisconnect();
-            }
-            else
-            {
-                (*it)->refresh();
-            }
+            (*it)->refresh();
 
             Command *defaultCmd;
             // If the remote is connected given the scheduler is in safe disconnect mode and
@@ -240,6 +248,11 @@ void CommandScheduler::addCommand(Command *commandToAdd)
 {
     if (safeDisconnected())
     {
+        return;
+    }
+    else if (runningHardwareTests)
+    {
+        RAISE_ERROR(drivers, "attempting to add command while running tests");
         return;
     }
     else if (commandToAdd == nullptr)
@@ -342,63 +355,35 @@ bool CommandScheduler::isSubsystemRegistered(const Subsystem *subsystem) const
             registeredSubsystemBitmap);
 }
 
-void CommandScheduler::runAllHardwareTests()
+void CommandScheduler::startHardwareTests()
 {
-    for (auto it = subMapBegin(); it != subMapEnd(); it++)
+    // End all commands that are currently being run
+    runningHardwareTests = true;
+    for (auto it = cmdMapBegin(); it != cmdMapEnd(); it++)
     {
-        this->runHardwareTest(*it);
+        (*it)->end(true);
     }
-}
 
-void CommandScheduler::runHardwareTest(const Subsystem *subsystem)
-{
-    Command *testCommand = subsystem->getTestCommand();
-    if (testCommand != nullptr)
-    {
-        this->addCommand(testCommand);
-    }
-}
+    // Clear command bitmap (now all commands are removed)
+    addedCommandBitmap = 0;
+    // No more subsystems associated with commands, so clear this bitmap as well
+    subsystemsAssociatedWithCommandBitmap = 0;
 
-void CommandScheduler::stopAllHardwareTests()
-{
-    Command *testCommand;
     // Start hardware tests
     for (auto it = subMapBegin(); it != subMapEnd(); it++)
     {
-        // schedule the test command if it exists
-        if ((testCommand = (*it)->getTestCommand()) != nullptr)
-        {
-            this->removeCommand(testCommand, true);
-        }
+        (*it)->setHardwareTestsIncomplete();
     }
 }
 
-void CommandScheduler::stopHardwareTest(const Subsystem *subsystem)
+void CommandScheduler::stopHardwareTests()
 {
-    Command *testCommand = subsystem->getTestCommand();
-    if (testCommand != nullptr)
-    {
-        this->removeCommand(testCommand, true);
-    }
-}
-
-int CommandScheduler::countRunningHardwareTests()
-{
-    int total = 0;
+    // Stop all hardware tests
     for (auto it = subMapBegin(); it != subMapEnd(); it++)
     {
-        if (this->runningTest(*it))
-        {
-            total += 1;
-        }
+        (*it)->setHardwareTestsComplete();
     }
-
-    return total;
-}
-
-bool CommandScheduler::runningTest(const Subsystem *subsystem)
-{
-    return this->isCommandScheduled(subsystem->getTestCommand());
+    runningHardwareTests = false;
 }
 
 int CommandScheduler::subsystemListSize() const
