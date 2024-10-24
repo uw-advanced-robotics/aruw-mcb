@@ -135,7 +135,7 @@ PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
     temp = blurBins(temp);
     for (int i = 0; i < BIN_NUMBER; i++)
     {
-        peakData[i].radians = Angle(modm::toRadian(i * 45));
+        peakData[i].radians = Angle(i * M_PI_4);
         peakData[i].magnitude = temp.data[i];
     }
     return peakData;
