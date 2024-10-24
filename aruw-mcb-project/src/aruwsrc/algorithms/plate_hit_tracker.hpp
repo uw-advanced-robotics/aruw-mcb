@@ -82,7 +82,7 @@ public:
 
     mockable inline PlateHitData getLastHitData() { return lastHitData; }
 
-    std::vector<PlateHitBinData> getPeakAnglesRadians();
+    mockable std::vector<PlateHitBinData> getPeakAnglesRadians();
 
     void initialize();
 
