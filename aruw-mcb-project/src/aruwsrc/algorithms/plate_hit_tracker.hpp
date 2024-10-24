@@ -37,7 +37,7 @@ namespace aruwsrc::algorithms
 {
 class PlateHitTracker
 {
-    public:
+public:
     enum class ProjectileType
     {
         _17_MM,
