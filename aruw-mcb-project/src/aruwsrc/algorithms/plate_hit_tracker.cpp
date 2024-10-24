@@ -28,7 +28,7 @@ PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
 {
 }
 
-void PlateHitTracker::initialize() {}
+void PlateHitTracker::initialize() { lastHitData = PlateHitData(); }
 
 /**
  * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the
