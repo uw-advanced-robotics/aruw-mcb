@@ -26,6 +26,8 @@
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 
+#include "cap_bank_test_command.hpp"
+
 namespace tap
 {
 class Drivers;
@@ -35,6 +37,8 @@ namespace aruwsrc::control::capbank
 {
 class CapBankSubsystem : public tap::control::Subsystem
 {
+    friend class CapBankTestCommand;
+
 public:
     CapBankSubsystem(tap::Drivers* drivers, can::capbank::CapacitorBank& capacitorBank);
 
@@ -60,10 +64,6 @@ public:
 
     bool enabled() const { return this->capacitorsEnabled; }
 
-    void runHardwareTests() override;
-    void onHardwareTestStart() override;
-    void onHardwareTestComplete() override;
-
 private:
     can::capbank::CapacitorBank& capacitorBank;
 
@@ -71,7 +71,7 @@ private:
 
     tap::arch::MilliTimeout messageTimer;
 
-    bool inHardwareTest;
+    CapBankTestCommand capBankTestCommand;
 };
 }  // namespace aruwsrc::control::capbank
 

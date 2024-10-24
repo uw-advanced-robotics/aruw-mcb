@@ -16,42 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "cap_bank_test_command.hpp"
 
 #include "cap_bank_subsystem.hpp"
 
 namespace aruwsrc::control::capbank
 {
-CapBankSubsystem::CapBankSubsystem(
-    tap::Drivers* drivers,
-    can::capbank::CapacitorBank& capacitorBank)
-    : Subsystem(drivers),
-      capacitorBank(capacitorBank),
-      capacitorsEnabled(false),
-      capBankTestCommand(this)
+CapBankTestCommand::CapBankTestCommand(CapBankSubsystem *subsystem) : subsystem(subsystem)
 {
-    this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
-    this->messageTimer.restart(20);
+    this->addSubsystemRequirement(subsystem);
 }
 
-void CapBankSubsystem::refresh()
-{
-    if (this->messageTimer.execute())
-    {
-        messageTimer.restart(20);
+void CapBankTestCommand::initialize() { this->subsystem->enableCapacitors(); }
 
-        if (!this->enabled() && !this->capacitorBank.isDisabled())
-        {
-            this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
-            this->capacitorBank.stop();
-        }
-        else if (this->enabled() && !this->capacitorBank.isEnabled())
-        {
-            this->capacitorBank.start();
-        }
-        else
-        {
-            this->capacitorBank.ping();
-        }
-    }
+void CapBankTestCommand::end(bool) { this->subsystem->disableCapacitors(); }
+
+bool CapBankTestCommand::isFinished() const
+{
+    return this->subsystem->capacitorBank.getVoltage() > 12.0f;
 }
+
 }  // namespace aruwsrc::control::capbank
