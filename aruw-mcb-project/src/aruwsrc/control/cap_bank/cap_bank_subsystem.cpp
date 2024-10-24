@@ -29,6 +29,7 @@ CapBankSubsystem::CapBankSubsystem(
       capacitorsEnabled(false),
       capBankTestCommand(this)
 {
+    this->setTestCommand(&this->capBankTestCommand);
     this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
     this->messageTimer.restart(20);
 }
