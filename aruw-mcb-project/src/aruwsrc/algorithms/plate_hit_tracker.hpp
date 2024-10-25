@@ -46,14 +46,14 @@ public:
     };
     struct PlateHitData
     {
-        int plateID;
+        u_int8_t plateID;
         float lastDps;
         WrappedFloat hitAngle_chassisRelative_radians;
         WrappedFloat hitAngle_worldRelative_radians;
         uint32_t timestamp;
         ProjectileType projectileType;
         PlateHitData()
-            : plateID(-1),
+            : plateID(0),
               lastDps(-1),
               hitAngle_chassisRelative_radians(Angle(0)),
               hitAngle_worldRelative_radians(Angle(0)),

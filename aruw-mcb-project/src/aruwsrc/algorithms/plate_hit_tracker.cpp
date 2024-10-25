@@ -46,7 +46,8 @@ void PlateHitTracker::update()
     {
         lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
 
-        lastHitData.plateID = 0;
+        lastHitData.plateID = static_cast<std::underlying_type_t
+                            <tap::communication::serial::RefSerialData::Rx::ArmorId>>(newHitData.damagedArmorId);
 
         lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
 
