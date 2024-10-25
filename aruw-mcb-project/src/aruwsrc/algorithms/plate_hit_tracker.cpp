@@ -102,7 +102,7 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
     // If we have already calculated the peak angles, return the cached previous data
     if (calculatedPeakAngles) return prevPeakBinData;
     auto peakData = getBinData();
-    std::vector<PlateHitBinData> peaks;
+    prevPeakBinData.clear();
 
     for (int i = 0; i < BIN_NUMBER; i++)
     {
@@ -119,16 +119,16 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
                  (peakData[i].radians.minDifference(peakData[prevIndex].radians) *
                   peakData[prevIndex].magnitude));
             peakData[i].radians = peakAngleRaw;
-            peaks.push_back(peakData[i]);
+            prevPeakBinData.push_back(peakData[i]);
         }
     }
     // sort by magnitude, so that index 0 is the biggest peak (where we are getting damaged the
     // most)
-    std::sort(peaks.begin(), peaks.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
+    std::sort(prevPeakBinData.begin(), prevPeakBinData.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
         return a.magnitude > b.magnitude;
     });
     calculatedPeakAngles = true;
-    return peaks;
+    return prevPeakBinData;
 }
 
 PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
