@@ -16,13 +16,13 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 from SCons.Script import *
-from . import extract_robot_type
+from build_tools import extract_robot_type
 
 
 CMD_LINE_ARGS                       = 1
 TEST_BUILD_TARGET_ACCEPTED_ARGS     = ["build-tests", "run-tests", "run-tests-gcov"]
 SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
-HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all"]
+HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all", "ozone"]
 VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES               = ["true", "false"]
 VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
@@ -36,9 +36,11 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
         - \"build-sim\": build all code for the simulated environment, for the current host platform.\n\
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
+        - \"ozone\": builds the code and launches ozone, defaulting to using USB for robot connection.\n\
+            - \"ip=<IP>\": sets the IP address of the robot to connect to.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of the following:\n\
-            - STANDARD_ELSA, STANDARD_SPIDER, STANDARD_ORION, STANDARD_CYGNUS, DRONE, ENGINEER, SENTRY_HYDRA, HERO_PERSEUS, DART\n\
+            - STANDARD_SPIDER, STANDARD_ORION, STANDARD_CYGNUS, DRONE, ENGINEER, SENTRY_HYDRA, HERO_PERSEUS, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 

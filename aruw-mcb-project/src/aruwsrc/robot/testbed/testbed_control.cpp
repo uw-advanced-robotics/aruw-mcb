@@ -19,8 +19,6 @@
 
 #if defined(TARGET_TESTBED)
 
-#include "tap/motor/dji_motor.hpp"
-
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
@@ -43,10 +41,7 @@ void initializeSubsystems() {}
 
 namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
-{
-    testbed_control::initializeSubsystems();
-}
+void initSubsystemCommands(aruwsrc::testbed::Drivers *) { testbed_control::initializeSubsystems(); }
 
 }  // namespace aruwsrc::testbed
 
