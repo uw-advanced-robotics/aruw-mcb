@@ -42,12 +42,10 @@ void PlateHitTracker::update()
     }
     bins = bins * DECAY_FACTOR;
     auto newHitData = this->drivers->refSerial.getRobotData();
+    lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
     if (newHitData.receivedDps > lastHitData.lastDps)
     {
         lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
-
-        lastHitData.plateID = static_cast<std::underlying_type_t
-                            <tap::communication::serial::RefSerialData::Rx::ArmorId>>(newHitData.damagedArmorId);
 
         lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
 
@@ -62,7 +60,7 @@ void PlateHitTracker::update()
         // Magnitude is based on damage
         float damage = newHitData.receivedDps - lastHitData.lastDps;
         bins.data[binIndex] += damage;
-        if (damage > 0 && damage < 5)
+        if (newHitData.damageType == tap::communication::serial::RefSerialData::Rx::DamageType::COLLISION)
         {
             lastHitData.projectileType = ProjectileType::COLLISION;
         }

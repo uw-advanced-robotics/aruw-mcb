@@ -117,6 +117,7 @@ TEST(PlateHitTracker, detects_collision) {
 
     hitTracker.update();
     data.receivedDps = 2;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::COLLISION;
     hitTracker.update();
 
     auto hitData = hitTracker.getLastHitData();
