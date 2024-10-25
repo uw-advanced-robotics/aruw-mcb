@@ -348,7 +348,7 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &rightOmni,
     DEADWHEEL_RADIUS);
 
-SentryKFOdometry2DSubsystem chassisOdometry(
+SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     chassisYawObserver,
