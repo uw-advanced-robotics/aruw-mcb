@@ -132,8 +132,12 @@ private:
     const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
 
     PlateHitTracker::PlateHitBinData *getBinData();
+
     CMSISMat<BIN_NUMBER, 1> normaliseBins(CMSISMat<BIN_NUMBER, 1> mat);
     CMSISMat<BIN_NUMBER, 1> blurBins(CMSISMat<BIN_NUMBER, 1> mat);
+
+    bool calculatedBinData = false;
+    PlateHitTracker::PlateHitBinData *binData;
 };
 
 }  // namespace aruwsrc::algorithms

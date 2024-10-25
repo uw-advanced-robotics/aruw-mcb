@@ -112,6 +112,7 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
@@ -182,7 +183,6 @@ static void updateIo(Drivers *drivers)
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
-    ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
