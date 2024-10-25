@@ -137,25 +137,26 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E0, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E0, 0  , 0  , 0  , 0  ,
-        0  , 0  , 5E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E0, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E0, 0  ,
-        0  , 0  , 0  , 0  , 0  , 5E0,
+        1E-1, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E-1, 0  , 0  , 0  , 0  ,
+        0  , 0  , 5E-1, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E-1, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E-1, 0  ,
+        0  , 0  , 0  , 0  , 0  , 5E-1,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        1.0, 0  , 0  , 0  ,
-        0  , 1.2, 0  , 0  ,
-        0  , 0  , 1.0, 0  ,
-        0  , 0  , 0  , 1.2,
+        1E-2, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1E-2, 0,
+        0, 0, 0, 1
     };
+
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E0, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E0, 0  , 0  , 0  , 0  ,
+        1E-2, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E-2, 0  , 0  , 0  , 0  ,
         0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E0, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E0, 0  ,
+        0  , 0  , 0  , 1E-2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E-2, 0  ,
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
@@ -204,6 +205,9 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
+
+    float inputVelcoityX = 0;
+    float inputVelcoityY = 0;
 };
 }  // namespace aruwsrc::algorithms::odometry
 
