@@ -43,6 +43,10 @@ TEST(PlateHitTracker, dps_less_than_last_call_never_checks_transform_after_initi
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 0;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
+    
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
     NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
@@ -62,6 +66,9 @@ TEST(PlateHitTracker, dps_greater_than_last_call_checks_transform_after_initial_
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 0;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
     NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
@@ -81,6 +88,9 @@ TEST(PlateHitTracker, returns_peak_at_bin_one){
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
     data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
@@ -104,6 +114,9 @@ TEST(PlateHitTracker, detects_collision) {
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
     data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
@@ -129,6 +142,9 @@ TEST(PlateHitTracker, detects_17) {
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
     data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
     NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
@@ -152,6 +168,9 @@ TEST(PlateHitTracker, detects_42) {
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
     data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
