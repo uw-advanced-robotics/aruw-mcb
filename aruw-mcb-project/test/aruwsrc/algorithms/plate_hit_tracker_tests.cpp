@@ -195,4 +195,3 @@ TEST(PlateHitTracker, detects_42)
     auto hitData = hitTracker.getLastHitData();
     EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::_42_MM);
 }
-
