@@ -86,13 +86,14 @@ public:
 
     void processMessage(const modm::can::Message& message) override;
 
-    void initialize();
+    mockable void initialize();
 
-    void start() const;
-    void stop() const;
-    void ping() const;
-    void setPowerLimit(uint16_t watts);
+    mockable void start() const;
+    mockable void stop() const;
+    mockable void ping() const;
+    mockable void setPowerLimit(uint16_t watts);
 
+public:
     int getAvailableEnergy() const { return this->availableEnergy; };
     float getCurrent() const { return this->current; };
     float getVoltage() const { return this->voltage; };
@@ -121,7 +122,9 @@ public:
 
     float getMaximumOutputCurrent() const;
 
+#ifndef ENV_UNIT_TESTS
 private:
+#endif
     const float capacitance;
 
     uint16_t powerLimit = 0;
