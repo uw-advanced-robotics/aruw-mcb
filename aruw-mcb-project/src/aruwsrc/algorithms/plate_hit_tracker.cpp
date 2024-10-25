@@ -46,9 +46,10 @@ void PlateHitTracker::update()
     {
         lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
 
-        lastHitData.plateID = static_cast<u_int8_t>(newHitData.damagedArmorId);
+        lastHitData.plateID = 0;
 
         lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
+
         lastHitData.hitAngle_worldRelative_radians = Angle(
             transformer->getWorldToChassis().getYaw() +
             lastHitData.hitAngle_chassisRelative_radians.getWrappedValue());
