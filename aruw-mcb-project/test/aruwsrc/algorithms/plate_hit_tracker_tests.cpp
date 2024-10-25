@@ -19,11 +19,10 @@
 
 #include <gtest/gtest.h>
 
-#include "aruwsrc/algorithms/plate_hit_tracker.hpp"
-
-#include "tap/drivers.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
+#include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/mock/transformer_interface_mock.hpp"
 
 using namespace testing;
@@ -46,7 +45,7 @@ TEST(PlateHitTracker, dps_less_than_last_call_never_checks_transform_after_initi
     data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
     data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
     data.robotDataReceivedTimestamp = 0;
-    
+
     aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
 
     NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
@@ -58,7 +57,7 @@ TEST(PlateHitTracker, dps_less_than_last_call_never_checks_transform_after_initi
     EXPECT_CALL(transformer, getWorldToChassis).Times(1).WillOnce(ReturnRef(transform));
 
     hitTracker.update();
-    hitTracker.update(); // Checking this call doesn't call transformer
+    hitTracker.update();  // Checking this call doesn't call transformer
 }
 
 TEST(PlateHitTracker, dps_greater_than_last_call_checks_transform_after_initial_call)
@@ -81,10 +80,11 @@ TEST(PlateHitTracker, dps_greater_than_last_call_checks_transform_after_initial_
 
     hitTracker.update();
     data.receivedDps = 1;
-    hitTracker.update(); // Checking this call calls transformer
+    hitTracker.update();  // Checking this call calls transformer
 }
 
-TEST(PlateHitTracker, returns_peak_at_bin_one){
+TEST(PlateHitTracker, returns_peak_at_bin_one)
+{
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
@@ -110,7 +110,8 @@ TEST(PlateHitTracker, returns_peak_at_bin_one){
     EXPECT_EQ(peakAngles[0].radians.getWrappedValue(), 0);
 }
 
-TEST(PlateHitTracker, detects_collision) {
+TEST(PlateHitTracker, detects_collision)
+{
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
@@ -134,10 +135,13 @@ TEST(PlateHitTracker, detects_collision) {
     hitTracker.update();
 
     auto hitData = hitTracker.getLastHitData();
-    EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::COLLISION);
+    EXPECT_EQ(
+        hitData.projectileType,
+        aruwsrc::algorithms::PlateHitTracker::ProjectileType::COLLISION);
 }
 
-TEST(PlateHitTracker, detects_17) {
+TEST(PlateHitTracker, detects_17)
+{
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
@@ -164,7 +168,8 @@ TEST(PlateHitTracker, detects_17) {
     EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::_17_MM);
 }
 
-TEST(PlateHitTracker, detects_42) {
+TEST(PlateHitTracker, detects_42)
+{
     tap::Drivers drivers;
     tap::communication::serial::RefSerialData::Rx::RobotData data;
     data.receivedDps = 1;
