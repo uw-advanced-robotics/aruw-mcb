@@ -28,7 +28,10 @@ CapacitorBank::CapacitorBank(
     tap::can::CanBus canBus,
     const float capacitance)
     : tap::can::CanRxListener(drivers, CAP_BANK_CAN_ID, canBus),
-      capacitance(capacitance){};
+      capacitance(capacitance),
+      powerLimit(0)
+{
+}
 
 void CapacitorBank::processMessage(const modm::can::Message& message)
 {
