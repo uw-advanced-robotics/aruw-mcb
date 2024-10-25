@@ -73,7 +73,7 @@ void PlateHitTracker::update()
         {
             lastHitData.projectileType = ProjectileType::_17_MM;
         }
-        calculatedBinData = false;
+        calculatedPeakAngles = false;
     }
     lastHitData.lastDps = newHitData.receivedDps;
 }
@@ -99,8 +99,9 @@ CMSISMat<8, 1> PlateHitTracker::blurBins(CMSISMat<8, 1> mat) { return BLUR_CONVO
 
 std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadians()
 {
-    auto peakData = binData;
-    if (!calculatedBinData) peakData = getBinData();
+    // If we have already calculated the peak angles, return the cached previous data
+    if (calculatedPeakAngles) return prevPeakBinData;
+    auto peakData = getBinData();
     std::vector<PlateHitBinData> peaks;
 
     for (int i = 0; i < BIN_NUMBER; i++)
@@ -126,6 +127,7 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
     std::sort(peaks.begin(), peaks.end(), [](const PlateHitBinData& a, const PlateHitBinData& b) {
         return a.magnitude > b.magnitude;
     });
+    calculatedPeakAngles = true;
     return peaks;
 }
 
@@ -140,7 +142,6 @@ PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
         peakData[i].radians = Angle(i * M_PI_4);
         peakData[i].magnitude = temp.data[i];
     }
-    calculatedBinData = true;
     return peakData;
 }
 

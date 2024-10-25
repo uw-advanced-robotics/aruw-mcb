@@ -89,15 +89,15 @@ public:
      */
     PlateHitTracker(tap::Drivers *drivers);
 
-    mockable inline PlateHitData getLastHitData() { return lastHitData; }
+    inline PlateHitData getLastHitData() { return lastHitData; }
 
-    mockable std::vector<PlateHitBinData> getPeakAnglesRadians();
+    std::vector<PlateHitBinData> getPeakAnglesRadians();
 
     void initialize();
 
     void update();
 
-    mockable inline void attachTransformer(
+    inline void attachTransformer(
         aruwsrc::algorithms::transforms::TransformerInterface *transformer)
     {
         this->transformer = transformer;
@@ -136,8 +136,8 @@ private:
     CMSISMat<BIN_NUMBER, 1> normaliseBins(CMSISMat<BIN_NUMBER, 1> mat);
     CMSISMat<BIN_NUMBER, 1> blurBins(CMSISMat<BIN_NUMBER, 1> mat);
 
-    bool calculatedBinData = false;
-    PlateHitTracker::PlateHitBinData *binData;
+    bool calculatedPeakAngles = false;
+    std::vector<PlateHitBinData> prevPeakBinData;
 };
 
 }  // namespace aruwsrc::algorithms
