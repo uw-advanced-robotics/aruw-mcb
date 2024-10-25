@@ -123,3 +123,51 @@ TEST(PlateHitTracker, detects_collision) {
     auto hitData = hitTracker.getLastHitData();
     EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::COLLISION);
 }
+
+TEST(PlateHitTracker, detects_17) {
+    tap::Drivers drivers;
+    tap::communication::serial::RefSerialData::Rx::RobotData data;
+    data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
+
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    hitTracker.attachTransformer(&transformer);
+
+    tap::algorithms::transforms::Transform transform(0, 0, 0, 0, 0, 0);
+
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(2).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
+
+    hitTracker.update();
+    data.receivedDps = 10;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    hitTracker.update();
+
+    auto hitData = hitTracker.getLastHitData();
+    EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::_17_MM);
+}
+
+TEST(PlateHitTracker, detects_42) {
+    tap::Drivers drivers;
+    tap::communication::serial::RefSerialData::Rx::RobotData data;
+    data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
+
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    hitTracker.attachTransformer(&transformer);
+
+    tap::algorithms::transforms::Transform transform(0, 0, 0, 0, 0, 0);
+
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(2).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
+
+    hitTracker.update();
+    data.receivedDps = 99;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    hitTracker.update();
+
+    auto hitData = hitTracker.getLastHitData();
+    EXPECT_EQ(hitData.projectileType, aruwsrc::algorithms::PlateHitTracker::ProjectileType::_42_MM);
+}

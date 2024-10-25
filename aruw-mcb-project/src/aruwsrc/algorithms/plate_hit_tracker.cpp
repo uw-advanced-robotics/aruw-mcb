@@ -64,13 +64,13 @@ void PlateHitTracker::update()
         {
             lastHitData.projectileType = ProjectileType::COLLISION;
         }
-        else if (damage >= 5 && damage <= 10)
+        else if (damage >= 90)
         {
-            lastHitData.projectileType = ProjectileType::_17_MM;
+            lastHitData.projectileType = ProjectileType::_42_MM;
         }
         else
         {
-            lastHitData.projectileType = ProjectileType::_42_MM;
+            lastHitData.projectileType = ProjectileType::_17_MM;
         }
     }
     lastHitData.lastDps = newHitData.receivedDps;
