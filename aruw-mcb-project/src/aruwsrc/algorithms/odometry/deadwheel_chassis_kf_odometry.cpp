@@ -65,8 +65,6 @@ void DeadwheelChassisKFOdometry::update()
     float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
     float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
 
-
-
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
@@ -74,27 +72,18 @@ void DeadwheelChassisKFOdometry::update()
     float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
     float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
 
-    
-
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 
-    inputVelcoityX = Vx;
-    inputVelcoityY = Vy;
-    
     // Get acceleration from IMU
     float ax = imu.getAx();
     float ay = imu.getAy();
-    
 
     // Rotate acceleration to the world frame
     float accelXWorld, accelYWorld;
     tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
     accelXWorld = ax;
     accelYWorld = ay;
-    imuAccelerationX = ax;
-    imuAccelerationY = ay;
-    inputVelocityCalculateXAcceleration = Vx - prevChassisVelocity[0][0];
-    inputVelocityCalculateXAcceleration = Vy - prevChassisVelocity[1][0];
+
     // The measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(Vx, Vy);
 

@@ -205,13 +205,6 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
-
-    float inputVelcoityX = 0;
-    float inputVelcoityY = 0;
-    float imuAccelerationX = 0;
-    float imuAccelerationY = 0;
-    float inputVelocityCalculateXAcceleration = 0;
-    float inputVelocityCalculateYAcceleration = 0;
 };
 }  // namespace aruwsrc::algorithms::odometry
 
