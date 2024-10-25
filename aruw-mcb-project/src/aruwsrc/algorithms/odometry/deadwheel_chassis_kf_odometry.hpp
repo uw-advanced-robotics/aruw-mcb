@@ -145,10 +145,10 @@ private:
         0  , 0  , 0  , 0  , 0  , 5E0,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        4.9E-5, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 4.9E-5, 0,
-        0, 0, 0, 1
+        7.49565672e-05, 0, 0, 0,
+        0, 7.35872941e-04, 0, 0,
+        0, 0, 7.81982345e-05, 0,
+        0, 0, 0, 5.69132363e-04
     };
 
     static constexpr float KF_P0[STATES_SQUARED] = {
@@ -208,6 +208,10 @@ private:
 
     float inputVelcoityX = 0;
     float inputVelcoityY = 0;
+    float imuAccelerationX = 0;
+    float imuAccelerationY = 0;
+    float inputVelocityCalculateXAcceleration = 0;
+    float inputVelocityCalculateYAcceleration = 0;
 };
 }  // namespace aruwsrc::algorithms::odometry
 

@@ -84,13 +84,17 @@ void DeadwheelChassisKFOdometry::update()
     // Get acceleration from IMU
     float ax = imu.getAx();
     float ay = imu.getAy();
+    
 
     // Rotate acceleration to the world frame
     float accelXWorld, accelYWorld;
     tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
     accelXWorld = ax;
     accelYWorld = ay;
-
+    imuAccelerationX = ax;
+    imuAccelerationY = ay;
+    inputVelocityCalculateXAcceleration = Vx - prevChassisVelocity[0][0];
+    inputVelocityCalculateXAcceleration = Vy - prevChassisVelocity[1][0];
     // The measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(Vx, Vy);
 
