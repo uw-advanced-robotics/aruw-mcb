@@ -303,7 +303,7 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &rightOmni,
     DEADWHEEL_RADIUS);
 
-SentryKFOdometry2DSubsystem chassisOdometry(
+SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     chassisYawObserver,
@@ -325,7 +325,7 @@ SentryMinorWorldOrientationProvider rightMinorWorldOrientationProvider(
     aruwsrc::control::turret::IMU_SYNC_PID_CONFIG);
 
 SentryTransforms transformer(
-    chassisOdometry,
+    odometrySubsystem,
     turretMajor,
     turretLeft,
     leftMinorWorldOrientationProvider,
@@ -339,7 +339,7 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     *drivers(),
     drivers()->visionCoprocessor,
     chassisYawObserver,
-    chassisOdometry,
+    odometrySubsystem,
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
@@ -547,7 +547,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
-    chassisOdometry,
+    odometrySubsystem,
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite,
     leftMinorWorldOrientationProvider,
@@ -849,7 +849,7 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    chassisOdometry.initialize();
+    odometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
 
@@ -870,7 +870,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
-    drivers->commandScheduler.registerSubsystem(&chassisOdometry);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 
@@ -898,6 +898,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->plateHitTracker.attachTransformer(&transformAdapter);
 }
 
 /* register io mappings here ------------------------------------------------*/
