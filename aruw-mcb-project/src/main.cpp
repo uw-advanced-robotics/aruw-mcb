@@ -156,7 +156,6 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
-    ((Drivers *)drivers)->plateHitTracker.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);

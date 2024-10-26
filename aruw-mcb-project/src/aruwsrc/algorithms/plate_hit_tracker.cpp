@@ -28,8 +28,6 @@ PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
 {
 }
 
-void PlateHitTracker::initialize() { lastHitData = PlateHitData(); }
-
 /**
  * @brief Updates the plate hit tracker with the latest data from the robot. Should be called in the
  * main loop.
@@ -49,9 +47,9 @@ void PlateHitTracker::update()
 
         lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
 
-        lastHitData.hitAngle_worldRelative_radians = Angle(
-            transformer->getWorldToChassis().getYaw() +
-            lastHitData.hitAngle_chassisRelative_radians.getWrappedValue());
+        lastHitData.hitAngle_worldRelative_radians = 
+            lastHitData.hitAngle_chassisRelative_radians +
+            transformer->getWorldToChassis().getYaw();
 
         // Update bins
         int binIndex = static_cast<int>(

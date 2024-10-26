@@ -99,8 +99,6 @@ public:
 
     std::vector<PlateHitBinData> getPeakAnglesRadians();
 
-    void initialize();
-
     void update();
 
     inline void attachTransformer(
