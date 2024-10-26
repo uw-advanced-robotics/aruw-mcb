@@ -203,7 +203,8 @@ BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    1.0f);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),

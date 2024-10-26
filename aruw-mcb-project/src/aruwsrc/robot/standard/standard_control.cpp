@@ -224,7 +224,8 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    0.5f);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(

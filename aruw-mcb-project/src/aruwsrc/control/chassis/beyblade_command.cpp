@@ -41,11 +41,13 @@ BeybladeCommand::BeybladeCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface& operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface,
+    float rotationMultiplier)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
-      operatorInterface(operatorInterface)
+      operatorInterface(operatorInterface),
+      rotationMultiplier(rotationMultiplier)
 {
     addSubsystemRequirement(chassis);
 }
@@ -94,7 +96,7 @@ void BeybladeCommand::execute()
             BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
 
         float rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
+            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed * rotationMultiplier;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
