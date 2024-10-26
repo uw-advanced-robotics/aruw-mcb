@@ -147,12 +147,12 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        float pos = WrappedFloat::intersectionRange(
+        float pos = WrappedFloat::rangeOverlap(
             measurement,
             setpoint,
             Angle(config.maxAngle),
             Angle(config.minAngle));
-        float neg = WrappedFloat::intersectionRange(
+        float neg = WrappedFloat::rangeOverlap(
             setpoint,
             measurement,
             Angle(config.maxAngle),
@@ -160,11 +160,11 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 
         if (pos < neg)
         {
-            return measurement.positiveDifference(setpoint);
+            return (setpoint - measurement).getWrappedValue();
         }
         else if (pos > neg)
         {
-            return measurement.negativeDifference(setpoint);
+            return (measurement - setpoint).getWrappedValue();
         }
         else
         {
