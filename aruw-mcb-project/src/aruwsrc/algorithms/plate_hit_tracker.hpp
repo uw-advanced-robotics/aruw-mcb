@@ -67,7 +67,13 @@ public:
     {
         WrappedFloat radians;
         float magnitude;
-        PlateHitBinData() : radians(Angle(0)), magnitude(0) {}
+        ProjectileType projectileType;
+        PlateHitBinData()
+            : radians(Angle(0)),
+              magnitude(0),
+              projectileType(ProjectileType::COLLISION)
+        {
+        }
     };
 
 public:
@@ -108,18 +114,18 @@ private:
     static constexpr float BLUR_FACTOR = 0.5;
 
     // clang-format off
-        static constexpr float A = 0.5; 
-        static constexpr float B = (1 - A) / 2; // Derived from 2B + A = 1
-        static constexpr float BLUR_CONVOLVE_MATRIX_DATA[BIN_NUMBER*BIN_NUMBER] = {
-            A , B, 0 , 0 , 0 , 0 , 0 , B,
-            B , A , B, 0 , 0 , 0 , 0 , 0,
-            0 , B , A , B, 0 , 0 , 0 , 0,
-            0 , 0 , B , A , B, 0 , 0 , 0,
-            0 , 0 , 0 , B , A , B, 0 , 0,
-            0 , 0 , 0 , 0 , B , A , B, 0,
-            0 , 0 , 0 , 0 , 0 , B , A , B,
-            B , 0 , 0 , 0 , 0 , 0 , B , A
-        };
+    static constexpr float A = 0.5; 
+    static constexpr float B = (1 - A) / 2; // Derived from 2B + A = 1
+    static constexpr float BLUR_CONVOLVE_MATRIX_DATA[BIN_NUMBER*BIN_NUMBER] = {
+        A , B, 0 , 0 , 0 , 0 , 0 , B,
+        B , A , B, 0 , 0 , 0 , 0 , 0,
+        0 , B , A , B, 0 , 0 , 0 , 0,
+        0 , 0 , B , A , B, 0 , 0 , 0,
+        0 , 0 , 0 , B , A , B, 0 , 0,
+        0 , 0 , 0 , 0 , B , A , B, 0,
+        0 , 0 , 0 , 0 , 0 , B , A , B,
+        B , 0 , 0 , 0 , 0 , 0 , B , A
+    };
     // clang-format on
     const float DECAY_FACTOR = 0.99995;
 
@@ -130,7 +136,7 @@ private:
     aruwsrc::algorithms::transforms::TransformerInterface *transformer;
     CMSISMat<BIN_NUMBER, 1> bins{};
     const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
-
+    std::array<ProjectileType, BIN_NUMBER> lastProjectileTypePerBin = {ProjectileType::COLLISION};
     PlateHitTracker::PlateHitBinData *getBinData();
 
     CMSISMat<BIN_NUMBER, 1> normaliseBins(CMSISMat<BIN_NUMBER, 1> mat);

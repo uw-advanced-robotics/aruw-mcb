@@ -225,3 +225,63 @@ TEST(PlateHitTracker, returns_peak_at_bin_and_three)
     EXPECT_EQ(peakAngles[0].radians.getWrappedValue(), 0);
     EXPECT_NEAR(peakAngles[1].radians.getWrappedValue(), M_PI, 1e-3);
 }
+
+TEST(PlateHitTracker, peak_projectile_type_is_17)
+{
+    tap::Drivers drivers;
+    tap::communication::serial::RefSerialData::Rx::RobotData data;
+    data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
+
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    hitTracker.attachTransformer(&transformer);
+
+    tap::algorithms::transforms::Transform transform(0, 0, 0, 0, 0, 0);
+
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(2).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
+
+    hitTracker.update();
+    data.receivedDps = 10;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    hitTracker.update();
+
+    auto peakAngles = hitTracker.getPeakAnglesRadians();
+    EXPECT_EQ(
+        peakAngles[0].projectileType,
+        aruwsrc::algorithms::PlateHitTracker::ProjectileType::_17_MM);
+}
+
+TEST(PlateHitTracker, peak_projectile_type_is_42)
+{
+    tap::Drivers drivers;
+    tap::communication::serial::RefSerialData::Rx::RobotData data;
+    data.receivedDps = 1;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    data.robotDataReceivedTimestamp = 0;
+    data.damagedArmorId = tap::communication::serial::RefSerialData::Rx::ArmorId::FRONT;
+    aruwsrc::algorithms::PlateHitTracker hitTracker(&drivers);
+
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    hitTracker.attachTransformer(&transformer);
+
+    tap::algorithms::transforms::Transform transform(0, 0, 0, 0, 0, 0);
+
+    EXPECT_CALL(drivers.refSerial, getRobotData).Times(2).WillRepeatedly(ReturnRef(data));
+    EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
+
+    hitTracker.update();
+    data.receivedDps = 100;
+    data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
+    hitTracker.update();
+
+    auto peakAngles = hitTracker.getPeakAnglesRadians();
+    EXPECT_EQ(
+        peakAngles[0].projectileType,
+        aruwsrc::algorithms::PlateHitTracker::ProjectileType::_42_MM);
+}

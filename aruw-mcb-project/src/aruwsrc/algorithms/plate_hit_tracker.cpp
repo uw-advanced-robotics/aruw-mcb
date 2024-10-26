@@ -73,6 +73,7 @@ void PlateHitTracker::update()
         {
             lastHitData.projectileType = ProjectileType::_17_MM;
         }
+        lastProjectileTypePerBin[binIndex] = lastHitData.projectileType;
         calculatedPeakAngles = false;
     }
     lastHitData.lastDps = newHitData.receivedDps;
@@ -144,6 +145,7 @@ PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
     {
         peakData[i].radians = Angle(i * M_PI_4);
         peakData[i].magnitude = temp.data[i];
+        peakData[i].projectileType = lastProjectileTypePerBin[i];
     }
     return peakData;
 }
