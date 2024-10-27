@@ -32,10 +32,9 @@
 namespace aruwsrc::control::client_display
 {
 /**
- * Adds text to show in bright yellow the number of bullets currently the robot has and the amount
- * of 42mm needed to kill the base.
+ * Adds text to show in bright yellow the number of bullets currently the robot has
  */
-class HeroAssistIndicator : public HudIndicator, protected modm::Resumable<5>
+class HeroAssistIndicator : public HudIndicator, protected modm::Resumable<3>
 {
 public:
     /**
@@ -52,24 +51,17 @@ public:
 
     void initialize() override final;
 
-    modm::ResumableResult<bool> updateBulletsRemaining();
-    modm::ResumableResult<bool> updateNum42Needed();
-
 private:
     // X position of the text
     static constexpr uint16_t TEXT_X = 1300;
-    // Y position of the text for bullets remaining
-    static constexpr uint16_t BULLETS_Y = 1000;
-    // Y position of the text for 42mm needed
-    static constexpr uint16_t NUM_42_NEEDED_Y = 950;
+    // Y position of the text
+    static constexpr uint16_t TEXT_Y = 950;
     // WIDTH of the text
     static constexpr uint16_t TEXT_WIDTH = 15;
 
     Tx::GraphicCharacterMessage bulletsRemainingGraphics;
-    Tx::GraphicCharacterMessage num42NeededGraphics;
 
     int lastBullets = -1;
-    int lastNum42Needed = -1;
 
     const tap::communication::serial::RefSerial &refSerial;
 
