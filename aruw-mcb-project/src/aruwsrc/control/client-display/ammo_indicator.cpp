@@ -25,9 +25,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-AmmoIndicator::AmmoIndicator(
-    RefSerialTransmitter &refSerialTransmitter,
-    const RefSerial &refSerial)
+AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const RefSerial &refSerial)
     : HudIndicator(refSerialTransmitter),
       refSerial(refSerial)
 {

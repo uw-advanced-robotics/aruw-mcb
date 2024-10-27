@@ -22,12 +22,11 @@
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
-
-#include "tap/communication/serial/ref_serial.hpp"
 
 namespace aruwsrc::control::client_display
 {
@@ -42,8 +41,9 @@ public:
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    AmmoIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-                        const tap::communication::serial::RefSerial &refSerial);
+    AmmoIndicator(
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        const tap::communication::serial::RefSerial &refSerial);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
@@ -64,7 +64,6 @@ private:
     int lastBullets = -1;
 
     const tap::communication::serial::RefSerial &refSerial;
-
 };
 
 }  // namespace aruwsrc::control::client_display
