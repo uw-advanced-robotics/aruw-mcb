@@ -71,7 +71,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           cvOnTargetManager),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
-      heroAssistIndicator(refSerialTransmitter, drivers.refSerial)
+      ammoIndicator(refSerialTransmitter, drivers.refSerial)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -95,7 +95,7 @@ void ClientDisplayCommand::restartHud()
     visionHudIndicators.initialize();
 
 #if defined(TARGET_HERO_PERSEUS)
-    heroAssistIndicator.initialize();
+    ammoIndicator.initialize();
 #endif
 
     // We can successfully restart the thread
@@ -127,7 +127,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(visionHudIndicators.sendInitialGraphics());
 
 #if defined(TARGET_HERO_PERSEUS)
-    PT_CALL(heroAssistIndicator.sendInitialGraphics());
+    PT_CALL(ammoIndicator.sendInitialGraphics());
 #endif
 
     // If we try to restart the hud, break out of the loop
@@ -140,7 +140,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
 #if defined(TARGET_HERO_PERSEUS)
-        PT_CALL(heroAssistIndicator.update());
+        PT_CALL(ammoIndicator.update());
 #endif
 
         PT_YIELD();

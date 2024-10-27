@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hero_assist_indicator.hpp"
+#include "ammo_indicator.hpp"
 
 #include "tap/drivers.hpp"
 
@@ -25,7 +25,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-HeroAssistIndicator::HeroAssistIndicator(
+AmmoIndicator::AmmoIndicator(
     RefSerialTransmitter &refSerialTransmitter,
     const RefSerial &refSerial)
     : HudIndicator(refSerialTransmitter),
@@ -33,7 +33,7 @@ HeroAssistIndicator::HeroAssistIndicator(
 {
 }
 
-void HeroAssistIndicator::initialize()
+void AmmoIndicator::initialize()
 {
     uint8_t bulletsRemainingName[3];
 
@@ -54,7 +54,7 @@ void HeroAssistIndicator::initialize()
         &bulletsRemainingGraphics);
 }
 
-modm::ResumableResult<bool> HeroAssistIndicator::sendInitialGraphics()
+modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0)
 
@@ -63,7 +63,7 @@ modm::ResumableResult<bool> HeroAssistIndicator::sendInitialGraphics()
     RF_END();
 }
 
-modm::ResumableResult<bool> HeroAssistIndicator::update()
+modm::ResumableResult<bool> AmmoIndicator::update()
 {
     int ammoCount = refSerial.getRobotData().turret.bulletsRemaining42;
     if (ammoCount == lastBullets)

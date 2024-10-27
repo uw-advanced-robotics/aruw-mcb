@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HERO_ASSIST_INDICATOR_HPP_
-#define HERO_ASSIST_INDICATOR_HPP_
+#ifndef AMMO_INDICATOR_HPP_
+#define AMMO_INDICATOR_HPP_
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
@@ -34,15 +34,15 @@ namespace aruwsrc::control::client_display
 /**
  * Adds text to show in bright yellow the number of bullets currently the robot has
  */
-class HeroAssistIndicator : public HudIndicator, protected modm::Resumable<3>
+class AmmoIndicator : public HudIndicator, protected modm::Resumable<3>
 {
 public:
     /**
-     * Construct a HeroAssistIndicator object.
+     * Construct a AmmoIndicator object.
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    HeroAssistIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+    AmmoIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
                         const tap::communication::serial::RefSerial &refSerial);
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
@@ -69,4 +69,4 @@ private:
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // HERO_ASSIST_INDICATOR_HPP_
+#endif  // AMMO_INDICATOR_HPP_

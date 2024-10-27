@@ -33,15 +33,13 @@
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
 
+#include "ammo_indicator.hpp"
 #include "boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
-
-
-#include "hero_assist_indicator.hpp"
 
 namespace tap::control
 {
@@ -130,7 +128,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
-    HeroAssistIndicator heroAssistIndicator;
+    AmmoIndicator ammoIndicator;
 
     bool restarting = true;
 
