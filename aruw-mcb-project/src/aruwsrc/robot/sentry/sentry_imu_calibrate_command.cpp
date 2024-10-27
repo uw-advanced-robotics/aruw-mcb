@@ -42,9 +42,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
     aruwsrc::virtualMCB::MCBLite &majorMCBLite,
-    aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
-    aruwsrc::control::turret::SentryMinorWorldOrientationProvider &leftWorldObserver,
-    aruwsrc::control::turret::SentryMinorWorldOrientationProvider &rightWorldObserver)
+    aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
     : imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
@@ -56,9 +54,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
       majorMCBLite(majorMCBLite),
-      chassisMCBLite(chassisMCBLite),
-      leftWorldObserver(leftWorldObserver),
-      rightWorldObserver(rightWorldObserver)
+      chassisMCBLite(chassisMCBLite)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -72,8 +68,6 @@ void SentryImuCalibrateCommand::initialize()
 {
     // reset odometry
     yawObserver.overrideChassisYaw(0);
-    leftWorldObserver.zero();
-    rightWorldObserver.zero();
     odometryInterface.reset();
 
     ImuCalibrateCommand::initialize();

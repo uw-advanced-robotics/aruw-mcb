@@ -34,7 +34,6 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_minor_world_orientation_provider.hpp"
 namespace aruwsrc::control::imu
 {
 /**
@@ -83,9 +82,7 @@ public:
         aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
         aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
         aruwsrc::virtualMCB::MCBLite &majorMCBLite,
-        aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
-        aruwsrc::control::turret::SentryMinorWorldOrientationProvider &leftWorldObserver,
-        aruwsrc::control::turret::SentryMinorWorldOrientationProvider &rightWorldObserver);
+        aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
 
@@ -105,8 +102,6 @@ protected:
     aruwsrc::virtualMCB::MCBLite &majorMCBLite;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
 
-    aruwsrc::control::turret::SentryMinorWorldOrientationProvider &leftWorldObserver;
-    aruwsrc::control::turret::SentryMinorWorldOrientationProvider &rightWorldObserver;
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
 }  // namespace aruwsrc::control::imu

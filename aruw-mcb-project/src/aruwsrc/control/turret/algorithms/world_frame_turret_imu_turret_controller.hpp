@@ -26,7 +26,6 @@
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/robot/sentry/sentry_minor_world_orientation_provider.hpp"
 
 #include "turret_controller_interface.hpp"
 
@@ -61,7 +60,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const SentryMinorWorldOrientationProvider &orientationProvider,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -93,7 +92,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
-    const SentryMinorWorldOrientationProvider &orientationProvider;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
@@ -124,7 +123,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
-        const SentryMinorWorldOrientationProvider &orientationProvider,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -155,7 +154,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
-    const SentryMinorWorldOrientationProvider &orientationProvider;
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
