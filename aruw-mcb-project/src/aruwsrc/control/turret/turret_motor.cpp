@@ -164,7 +164,7 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         }
         else if (pos > neg)
         {
-            return (measurement - setpoint).getWrappedValue();
+            return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
         else
         {
