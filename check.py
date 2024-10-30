@@ -141,33 +141,28 @@ class BuildTarget(Enum):
     ENGINEER = "ENGINEER"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
+    MOTOR_TESTER = "MOTOR_TESTER"
+    all = "all"
 
 
 def build_mcb(target : Optional[BuildTarget] = None):
     print(f"Checking MCB build for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_mcb(t)
     else:
         run(["pipenv", "run", "scons", "build", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
 
 
 def build_and_run_tests(target : Optional[BuildTarget] = None):
     print(f"Checking tests for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_and_run_tests(t)
     else:
-        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
-
-
-def build_sim(target : Optional[BuildTarget] = None):
-    print(f"Checking sim build for {target.value if target else 'all'}...")
-    if not target:
-        for t in BuildTarget:
-            build_mcb(t)
-    else:
-        run(["pipenv", "run", "scons", "build-sim", "profile=fast", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
+        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}"], cwd=PROJECT_DIR)
 
 
 action_to_method : Dict[str, Callable] = {
@@ -178,8 +173,7 @@ action_to_method : Dict[str, Callable] = {
     # "taproot" : check_taproot_submodule,
     "lbuild" : run_lbuild,
     "build" : build_mcb,
-    "test" : build_and_run_tests,
-    "sim" : build_sim,
+    "test" : build_and_run_tests
 }
 
 
@@ -212,7 +206,6 @@ def main():
         run_lbuild()
         build_mcb()
         build_and_run_tests()
-        build_sim()
 
     # TODO: idk how docs work
 

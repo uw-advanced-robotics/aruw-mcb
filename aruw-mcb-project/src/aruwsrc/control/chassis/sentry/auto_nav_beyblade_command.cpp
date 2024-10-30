@@ -61,6 +61,10 @@ void AutoNavBeybladeCommand::execute()
     {
         autoNavController.runController(maxWheelSpeed, movementEnabled, beybladeEnabled);
     }
+    else
+    {
+        chassis.setDesiredOutput(0., 0., 0.);
+    }
 }
 
 void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }

@@ -33,7 +33,6 @@ class GrabberSubsystemMock : public engineer::GrabberSubsystem
 
     MOCK_METHOD(void, setSqueezed, (bool), (override));
     MOCK_METHOD(bool, isSqueezed, (), (const override));
-    MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (const override));
 };
 }  // namespace aruwsrc::mock

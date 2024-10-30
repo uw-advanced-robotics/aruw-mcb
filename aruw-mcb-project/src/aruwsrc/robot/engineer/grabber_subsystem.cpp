@@ -40,20 +40,6 @@ void GrabberSubsystem::setSqueezed(bool isGrabberSqueezed)
 
 bool GrabberSubsystem::isSqueezed() const { return isGrabberSqueezed; }
 
-void GrabberSubsystem::runHardwareTests()
-{
-    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-        this->setHardwareTestsComplete();
-}
-
-void GrabberSubsystem::onHardwareTestStart()
-{
-    testTime = tap::arch::clock::getTimeMicroseconds();
-    this->setSqueezed(!isGrabberSqueezed);
-}
-
-void GrabberSubsystem::onHardwareTestComplete() { this->setSqueezed(!isGrabberSqueezed); }
-
 }  // namespace engineer
 
 }  // namespace aruwsrc

@@ -19,21 +19,21 @@
 
 #include "hopper_subsystem.hpp"
 
-#include "tap/architecture/clock.hpp"
-
 namespace aruwsrc
 {
 namespace control
 {
 HopperSubsystem::HopperSubsystem(
-    tap::Drivers *drivers,
+    tap::Drivers* drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float open,
     float close,
     float pwmRampSpeed)
     : tap::control::Subsystem(drivers),
-      hopper(drivers, pwmPin, open, close, pwmRampSpeed)
+      hopper(drivers, pwmPin, open, close, pwmRampSpeed),
+      hopperTestCommand(this)
 {
+    this->setTestCommand(&hopperTestCommand);
     hopper.setTargetPwm(close);
 }
 
@@ -46,20 +46,6 @@ void HopperSubsystem::refresh() { hopper.updateSendPwmRamp(); }
 float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
-
-void HopperSubsystem::runHardwareTests()
-{
-    if (tap::arch::clock::getTimeMicroseconds() - testTime > 1000000)
-        this->setHardwareTestsComplete();
-}
-
-void HopperSubsystem::onHardwareTestStart()
-{
-    testTime = tap::arch::clock::getTimeMicroseconds();
-    this->setOpen();
-}
-
-void HopperSubsystem::onHardwareTestComplete() { this->setClose(); }
 
 }  // namespace control
 

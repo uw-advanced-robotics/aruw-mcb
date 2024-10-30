@@ -64,6 +64,8 @@ using namespace aruwsrc::engineer;
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
+#elif defined(TARGET_MOTOR_TESTER)
+using namespace aruwsrc::motor_tester;
 #endif
 
 // Place any sort of input/output initialization here. For example, place
@@ -110,6 +112,7 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
@@ -178,7 +181,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-    drivers->oledDisplay.updateDisplay();
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
