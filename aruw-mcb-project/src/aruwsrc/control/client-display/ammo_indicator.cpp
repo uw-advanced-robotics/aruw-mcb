@@ -31,8 +31,10 @@ AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const R
 {
 }
 
+bool initialized = false;
 void AmmoIndicator::initialize()
 {
+    initialized = true;
     uint8_t bulletsRemainingName[3];
 
     getUnusedGraphicName(bulletsRemainingName);
@@ -52,12 +54,14 @@ void AmmoIndicator::initialize()
         &bulletsRemainingGraphics);
 }
 
+int initialGraphicsSent = 0;
 modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0)
 
     RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
-
+    initialGraphicsSent++;
+    
     RF_END();
 }
 

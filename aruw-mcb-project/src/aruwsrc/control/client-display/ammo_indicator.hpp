@@ -45,11 +45,12 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const tap::communication::serial::RefSerial &refSerial);
 
+    void initialize() override final;
+
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
     modm::ResumableResult<bool> update() override final;
 
-    void initialize() override final;
 
 private:
     // X position of the text
