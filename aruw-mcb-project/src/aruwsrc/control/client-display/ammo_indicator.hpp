@@ -51,7 +51,6 @@ public:
 
     modm::ResumableResult<bool> update() override final;
 
-
 private:
     // X position of the text
     static constexpr uint16_t TEXT_X = 1300;
@@ -68,7 +67,8 @@ private:
 
     const tap::communication::serial::RefSerial &refSerial;
 
-    static constexpr int TEXT_BUFFER_SIZE = 9;
+    // Size of AMMO: is 7, plus 3 more digits for the number of bullets
+    static constexpr int TEXT_BUFFER_SIZE = 10;
     const char *bulletsRemainingText = "AMMO: ";
     char bulletsRemainingTextBuffer[TEXT_BUFFER_SIZE];
 };
