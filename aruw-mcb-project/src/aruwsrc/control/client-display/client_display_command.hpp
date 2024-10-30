@@ -33,6 +33,7 @@
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
 
+#include "ammo_indicator.hpp"
 #include "boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
@@ -127,6 +128,7 @@ private:
     MatrixHudIndicators positionHudIndicators;
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
+    AmmoIndicator ammoIndicator;
 
     bool restarting = true;
 
