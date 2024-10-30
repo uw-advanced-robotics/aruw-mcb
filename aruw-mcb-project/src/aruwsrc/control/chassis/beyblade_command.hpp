@@ -71,6 +71,7 @@ private:
 
     float rotationDirection;
     float rotationMultiplier;
+    float lastHitTime;
 
 };  // class BeybladeCommand
 
