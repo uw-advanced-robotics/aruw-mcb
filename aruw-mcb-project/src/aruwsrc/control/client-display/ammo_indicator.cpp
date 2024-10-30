@@ -48,17 +48,15 @@ void AmmoIndicator::initialize()
         TEXT_WIDTH,
         TEXT_X,
         TEXT_Y,
-        "temp",
+        "",
         &bulletsRemainingGraphics);
 }
 
-int initialGraphicsSent = 0;
 modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0)
 
     RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
-    initialGraphicsSent++;
 
     RF_END();
 }
@@ -67,6 +65,7 @@ modm::ResumableResult<bool> AmmoIndicator::update()
 {
     RF_BEGIN(1);
 
+    // Access the correct field depending on the robot type
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
         refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
     {
@@ -77,6 +76,7 @@ modm::ResumableResult<bool> AmmoIndicator::update()
         bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
     }
 
+    // Appends the current bullet count to the "AMMO: " text
     snprintf(
         bulletsRemainingTextBuffer,
         TEXT_BUFFER_SIZE,
@@ -84,16 +84,19 @@ modm::ResumableResult<bool> AmmoIndicator::update()
         bulletsRemainingText,
         bulletCount);
 
-    // Set the graphic state and update data
+    // If we previously deleted the graphic, we need to add it back
+    // If not, we are trying to update the ammo count
     bulletsRemainingGraphics.graphicData.operation =
         bulletsRemainingGraphics.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
                                                                              : Tx::GRAPHIC_MODIFY;
 
+    // Copy over the text into the graphics message
     strncpy(bulletsRemainingGraphics.msg, bulletsRemainingTextBuffer, TEXT_BUFFER_SIZE);
 
-    // Sets the length of the string
+    // Updates the length of the string, needed as on initialization it is 0 length string
     bulletsRemainingGraphics.graphicData.endAngle = TEXT_BUFFER_SIZE;
 
+    // Actually send the graphic
     RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
 
     RF_END();

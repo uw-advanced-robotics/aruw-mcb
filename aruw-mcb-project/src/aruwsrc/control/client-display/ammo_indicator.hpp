@@ -31,7 +31,8 @@
 namespace aruwsrc::control::client_display
 {
 /**
- * Adds text to show in bright yellow the number of bullets currently the robot has
+ * Adds text to show in bright yellow the number of bullets currently the robot has.
+ * Displays up to 3 digits, in the format "AMMO: 123" or "AMMO: -12".
  */
 class AmmoIndicator : public HudIndicator, protected modm::Resumable<3>
 {
