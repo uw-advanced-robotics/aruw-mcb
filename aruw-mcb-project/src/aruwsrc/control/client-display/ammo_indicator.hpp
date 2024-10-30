@@ -67,7 +67,7 @@ private:
 
     const tap::communication::serial::RefSerial &refSerial;
 
-    // Size of AMMO: is 7, plus 3 more digits for the number of bullets
+    // Size of "AMMO: " is 7, plus 3 more digits for the number of bullets
     static constexpr int TEXT_BUFFER_SIZE = 10;
     const char *bulletsRemainingText = "AMMO: ";
     char bulletsRemainingTextBuffer[TEXT_BUFFER_SIZE];
