@@ -63,14 +63,9 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
     RF_END();
 }
 
-int updateCount = 0;
-int updateOuter = 0;
 modm::ResumableResult<bool> AmmoIndicator::update()
 {
-    updateOuter++;
-
     RF_BEGIN(1);
-    updateCount++;
 
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
         refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
@@ -85,7 +80,7 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     snprintf(
         bulletsRemainingTextBuffer,
         TEXT_BUFFER_SIZE,
-        "%s%hu",
+        "%s%hd",
         bulletsRemainingText,
         bulletCount);
 
