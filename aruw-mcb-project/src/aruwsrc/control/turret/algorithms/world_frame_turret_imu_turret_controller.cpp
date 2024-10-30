@@ -148,7 +148,7 @@ static inline void updateWorldFrameSetpoint(
             turretMotor.getChassisFrameSetpoint());
     }
 }
-float posErrorDB;
+
 /**
  * Runs a world frame cascade (position -> velocity) PID controller.
  *
@@ -171,18 +171,12 @@ static inline float runWorldFrameTurretImuController(
     const uint32_t dt,
     const TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
-    tap::algorithms::SmoothPid &velocityPid,
-    bool debug)
+    tap::algorithms::SmoothPid &velocityPid)
 {
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameAngleSetpoint, worldFrameAngleMeasurement);
     const float positionPidOutput =
         positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
-
-    if (debug)
-    {
-        posErrorDB = positionControllerError;
-    }
 
     const float velocityControllerError = positionPidOutput - worldFrameVelocityMeasured;
     const float velocityPidOutput =
@@ -245,8 +239,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
         dt,
         turretMotor,
         positionPid,
-        velocityPid,
-        true);
+        velocityPid);
 
     turretMotor.setMotorOutput(pidOut);
 }
@@ -348,8 +341,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         dt,
         turretMotor,
         positionPid,
-        velocityPid,
-        false);
+        velocityPid);
 
     pidOut += computeGravitationalForceOffset(
         TURRET_CG_X,
