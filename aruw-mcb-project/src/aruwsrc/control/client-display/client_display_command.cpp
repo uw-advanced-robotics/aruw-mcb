@@ -93,10 +93,7 @@ void ClientDisplayCommand::restartHud()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
-
-#if defined(TARGET_HERO_PERSEUS)
     ammoIndicator.initialize();
-#endif
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -125,10 +122,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
-
-#if defined(TARGET_HERO_PERSEUS)
     PT_CALL(ammoIndicator.sendInitialGraphics());
-#endif
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -139,9 +133,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
-#if defined(TARGET_HERO_PERSEUS)
         PT_CALL(ammoIndicator.update());
-#endif
 
         PT_YIELD();
     }

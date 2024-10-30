@@ -31,10 +31,8 @@ AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const R
 {
 }
 
-bool initialized = false;
 void AmmoIndicator::initialize()
 {
-    initialized = true;
     uint8_t bulletsRemainingName[3];
 
     getUnusedGraphicName(bulletsRemainingName);
@@ -74,7 +72,15 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     RF_BEGIN(1);
     updateCount++;
 
-    bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
+    if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
+        refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
+    {
+        bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
+    }
+    else
+    {
+        bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
+    }
 
     snprintf(
         bulletsRemainingTextBuffer,
