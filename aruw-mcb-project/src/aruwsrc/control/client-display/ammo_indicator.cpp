@@ -65,40 +65,33 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
     RF_END();
 }
 
-int newBulletsPurchased = 0;
 int updateCount = 0;
 int updateOuter = 0;
 modm::ResumableResult<bool> AmmoIndicator::update()
 {
     updateOuter++;
 
-    int ammoCount = refSerial.getRobotData().turret.bulletsRemaining42;
-    if (ammoCount == lastBullets)
-    {
-        return false;
-    }
-
-    newBulletsPurchased++;
-
-
-    lastBullets = ammoCount;
-
-    const char *bulletsRemainingText = "AMMO: ";
-    char bulletsRemainingTextBuffer[29];
-    snprintf(bulletsRemainingTextBuffer, 29, "%s%d", bulletsRemainingText, ammoCount);
-
     RF_BEGIN(1);
-
     updateCount++;
 
-        // Set the graphic state and update data
+    bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
+
+    snprintf(
+        bulletsRemainingTextBuffer,
+        TEXT_BUFFER_SIZE,
+        "%s%hu",
+        bulletsRemainingText,
+        bulletCount);
+
+    // Set the graphic state and update data
     bulletsRemainingGraphics.graphicData.operation =
         bulletsRemainingGraphics.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
                                                                              : Tx::GRAPHIC_MODIFY;
 
-    strncpy(bulletsRemainingGraphics.msg, bulletsRemainingTextBuffer, strlen(bulletsRemainingTextBuffer) + 1);
+    strncpy(bulletsRemainingGraphics.msg, bulletsRemainingTextBuffer, TEXT_BUFFER_SIZE);
 
-    bulletsRemainingGraphics.graphicData.endAngle = strlen(bulletsRemainingTextBuffer) + 1;  // Sets the length of the string
+    // Sets the length of the string
+    bulletsRemainingGraphics.graphicData.endAngle = TEXT_BUFFER_SIZE;
 
     RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
 

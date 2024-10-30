@@ -64,9 +64,13 @@ private:
 
     Tx::GraphicCharacterMessage bulletsRemainingGraphics;
 
-    int lastBullets = -1;
+    int bulletCount = -1;
 
     const tap::communication::serial::RefSerial &refSerial;
+
+    static constexpr int TEXT_BUFFER_SIZE = 9;
+    const char *bulletsRemainingText = "AMMO: ";
+    char bulletsRemainingTextBuffer[TEXT_BUFFER_SIZE];
 };
 
 }  // namespace aruwsrc::control::client_display
