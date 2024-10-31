@@ -485,7 +485,8 @@ CycleStateCommandMapping<
         RemoteMapState({Remote::Key::V}),
         MultiShotCvCommandMapping::SINGLE,
         &leftMousePressedBNotPressed,
-        &MultiShotCvCommandMapping::setShooterState);
+        &MultiShotCvCommandMapping::setShooterState,
+        RemoteMapState({Remote::Key::E}));
 
 // cap bank
 PressCommandMapping cShiftPressed(
