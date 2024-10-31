@@ -408,7 +408,7 @@ HoldCommandMapping rightSwitchMiddle(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
