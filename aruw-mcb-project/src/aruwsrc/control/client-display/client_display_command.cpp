@@ -70,7 +70,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           multiShotHandler,
           cvOnTargetManager),
       reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
+      ammoIndicator(refSerialTransmitter, drivers.refSerial)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -92,6 +93,7 @@ void ClientDisplayCommand::restartHud()
     positionHudIndicators.initialize();
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
+    ammoIndicator.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -120,6 +122,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
+    PT_CALL(ammoIndicator.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -130,6 +133,8 @@ bool ClientDisplayCommand::run()
         PT_CALL(positionHudIndicators.update());
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
+        PT_CALL(ammoIndicator.update());
+
         PT_YIELD();
     }
     // Breaking out of the loop successfully calls this method,
