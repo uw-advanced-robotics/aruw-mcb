@@ -393,7 +393,6 @@ ClientDisplayCommand clientDisplayCommand(
     drivers()->commandScheduler,
     drivers()->visionCoprocessor,
     clientDisplay,
-    nullptr,
     frictionWheels,
     waterwheelAgitator,
     turret,
@@ -401,9 +400,6 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
-    &beybladeCommand,
-    &chassisAutorotateCommand,
-    nullptr,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -420,10 +416,10 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping rightSwitchMiddle(
     drivers(),
-    {&stopFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&spinFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&kicker::launchKickerHeatAndCVLimited},
@@ -483,10 +479,6 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
-PressCommandMapping xPressed(
-    drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
     RemoteMapState({Remote::Key::R}),
@@ -546,7 +538,7 @@ void registerHeroSubsystems(Drivers *drivers)
 void setDefaultHeroCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    frictionWheels.setDefaultCommand(&spinFrictionWheels);
+    frictionWheels.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
@@ -558,12 +550,13 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->plateHitTracker.attachTransformer(&transformAdapter);
 }
 
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
     drivers->commandMapper.addMap(&leftMousePressedBPressed);
@@ -575,7 +568,6 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&zPressed);
     drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
     drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
