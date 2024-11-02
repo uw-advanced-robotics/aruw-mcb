@@ -42,7 +42,7 @@ namespace aruwsrc::algorithms::odometry
  * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
  */
-class DeadwheelChassisLPOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class DeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -63,7 +63,7 @@ public:
      * chassis. When moving in the direction of the parallel deadwheel, the perpendicular deadwheel
      * should not move, and vice versa
      */
-    DeadwheelChassisLPOdometry(
+    DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
@@ -188,9 +188,6 @@ private:
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
 
-    float Vx = 0;
-    float Vy = 0;
-
     /// Chassis measured change in velocity since the last time `update` was called, in the chassis
     /// frame
     modm::Vector2f chassisMeasuredDeltaVelocity;
@@ -208,11 +205,6 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(float Vx, float Vy);
-    void updateChassisStateWithLowPassFilter(float Vx, float Vy);
-
-    float CHASSIS_VELOCITY_LOW_PASS_ALPHA = 0.09f;
-    modm::Vector2f filteredVelocity;
-    modm::Location2D<float> filteredLocation;
 };
 }  // namespace aruwsrc::algorithms::odometry
 
