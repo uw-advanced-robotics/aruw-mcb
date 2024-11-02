@@ -42,7 +42,7 @@ public:
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
-        float rotationMultiplier = 1.0f);
+        const float rotationMultiplier = 1.0f);
 
     /**
      * Sets rotational input target on Ramp
@@ -62,6 +62,7 @@ public:
     const char* getName() const override { return "chassis beyblade"; }
 
 private:
+    float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
 
     tap::Drivers* drivers;
@@ -69,9 +70,7 @@ private:
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
-    float rotationDirection;
-    float rotationMultiplier;
-    float lastHitTime;
+    const float rotationMultiplier;
 
 };  // class BeybladeCommand
 

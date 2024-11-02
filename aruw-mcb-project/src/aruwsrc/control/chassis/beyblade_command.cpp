@@ -32,7 +32,6 @@
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
-using namespace tap::arch::clock;
 
 namespace aruwsrc
 {
@@ -43,13 +42,12 @@ BeybladeCommand::BeybladeCommand(
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::ControlOperatorInterface& operatorInterface,
-    float rotationMultiplier)
+    const float rotationMultiplier)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       operatorInterface(operatorInterface),
-      rotationMultiplier(rotationMultiplier),
-      lastHitTime(getTimeMilliseconds())
+      rotationMultiplier(rotationMultiplier)
 {
     addSubsystemRequirement(chassis);
 }
@@ -84,48 +82,28 @@ void BeybladeCommand::execute()
             0,
             &x,
             &y);
-
-        const auto &robotData = this->drivers->refSerial.getRobotData();
-        const auto currentTime = getTimeMilliseconds();
-
-        if (robotData.receivedDps > 0) {
-            lastHitTime = currentTime;
-        }
-
-        const bool inCombat = currentTime - lastHitTime < 10000;
+        x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
+        y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
             HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
-        
+
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
         const float translationalSpeedThreshold =
             BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
-            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed * rotationMultiplier;
 
         float rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
-
-        if (inCombat) {
-            x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-            y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-        } else {
-            x *= 0.9f;
-            y *= 0.9f;
-        }
+            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed * rotationMultiplier;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
         // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-        if (inCombat && (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold))
+        if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
         {
             rampTarget *= BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
-        } else if (!inCombat) {
-            const float f1 = rotationMultiplier * (1.0f - fabsf(x) / maxWheelSpeed);
-            const float f2 = rotationMultiplier * (1.0f - fabsf(y) / maxWheelSpeed);
-
-            rampTarget *= std::min(f1, f2);
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
@@ -137,7 +115,7 @@ void BeybladeCommand::execute()
         tap::algorithms::rotateVector(&x, &y, turretYawAngle);
 
         // set outputs
-        chassis->setDesiredOutput(x, y, r);
+        chassis->setDesiredOutput(x * rotationMultiplier, y * rotationMultiplier, r);
     }
     else
     {
@@ -149,3 +127,4 @@ void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
 }  // namespace chassis
 
 }  // namespace aruwsrc
+

@@ -66,6 +66,8 @@
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
+#include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -220,6 +222,12 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
+    (drivers()->controlOperatorInterface));
+
+aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
     (drivers()->controlOperatorInterface),
     0.5f);
 
@@ -298,6 +306,39 @@ cv::TurretCVCommand turretCVCommand(
     USER_PITCH_INPUT_SCALAR);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
+
+// beyblade governors
+PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
+PlateHitGovernor plateHitInvertedGovernor(&(drivers()->plateHitTracker), 5000, true);
+
+MovedFastRecentlyGovernor movedRecentlyGovernor(drivers(),
+    &chassis,
+    (drivers()->controlOperatorInterface),
+    0.5f,
+    5000);
+
+MovedFastRecentlyGovernor movedRecentlyInvertedGovernor(drivers(),
+    &chassis,
+    (drivers()->controlOperatorInterface),
+    0.5f,
+    5000,
+    true);
+
+GovernorLimitedCommand<2> beybladeSlowWithPlateHitCommand(
+    {&chassis},
+    slowBeybladeCommand,
+    {&plateHitGovernor, &movedRecentlyGovernor});
+
+GovernorLimitedCommand<2> beybladeWithPlateHitInvertedCommand(
+    {&chassis},
+    beybladeCommand,
+    {&plateHitInvertedGovernor, &movedRecentlyInvertedGovernor});
+
+GovernorWithFallbackCommand<2> beybladeAlternatingWithPlateHitCommand(
+    {&chassis},
+    slowBeybladeCommand,
+    beybladeCommand,
+    {&plateHitGovernor, &movedRecentlyGovernor});
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -413,10 +454,11 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
-HoldCommandMapping leftSwitchDown(
+HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    {&beybladeAlternatingWithPlateHitCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
