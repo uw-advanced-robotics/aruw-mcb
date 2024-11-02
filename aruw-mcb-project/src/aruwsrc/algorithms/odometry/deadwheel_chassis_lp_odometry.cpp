@@ -74,7 +74,7 @@ void DeadwheelChassisLPOdometry::update()
     float ay = imu.getAy();
 
     // Rotate acceleration to the world frame
-    float accelXWorld, accelYWorld;
+    static float accelXWorld, accelYWorld;
     tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
     accelXWorld = ax;
     accelYWorld = ay;
@@ -84,6 +84,17 @@ void DeadwheelChassisLPOdometry::update()
 
     // Perform the low pass filter update
     updateChassisStateWithLowPassFilter(Vx, Vy);
+}
+
+void DeadwheelChassisLPOdometry::overrideOdometryPosition(modm::Vector2f& newPos)
+{
+    filteredLocation.setPosition(newPos.x, newPos.y);
+}
+
+void DeadwheelChassisLPOdometry::overrideOdometryOrientation(float deltaYaw)
+{
+    chassisYaw += deltaYaw;
+    tap::algorithms::rotateVector(&filteredVelocity.x, &filteredVelocity.y, chassisYaw);
 }
 
 void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, float Vy)

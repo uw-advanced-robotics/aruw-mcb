@@ -87,6 +87,10 @@ public:
 
     void update();
 
+    void overrideOdometryPosition(modm::Vector2f& newPos);
+
+    void overrideOdometryOrientation(float deltaYaw);
+
 protected:
     enum class OdomState
     {

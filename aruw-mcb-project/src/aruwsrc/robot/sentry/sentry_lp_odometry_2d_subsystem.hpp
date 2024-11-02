@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef SENTRY_LP_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define SENTRY_LP_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include <aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp>
 
@@ -27,8 +27,7 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
-#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/deadwheel_chassis_lp_odometry.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
 
@@ -49,8 +48,8 @@ class ChassisSubsystemInterface;
 
 namespace aruwsrc::sentry
 {
-class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
+class SentryLPOdometry2DSubsystem : public tap::control::Subsystem,
+                                    public aruwsrc::algorithms::odometry::DeadwheelChassisLPOdometry
 {
 public:
     /**
@@ -69,7 +68,7 @@ public:
      * @param[in] initialXPos initial world-frame x position of the chassis
      * @param[in] initialYPos initial world-frame y position of the chassis
      */
-    SentryKFOdometry2DSubsystem(
+    SentryLPOdometry2DSubsystem(
         tap::Drivers &drivers,
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
