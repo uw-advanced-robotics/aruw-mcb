@@ -21,7 +21,7 @@
 
 namespace aruwsrc::algorithms::odometry
 {
-DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
+DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
@@ -44,13 +44,13 @@ DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
     reset();
 }
 
-void DeadwheelChassisLPOdometry::reset()
+void DeadwheelChassisKFOdometry::reset()
 {
     float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
     kf.init(initialX);
 }
 
-void DeadwheelChassisLPOdometry::update()
+void DeadwheelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
@@ -66,7 +66,7 @@ void DeadwheelChassisLPOdometry::update()
     float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
 
     // Calculate velocities in the robot's frame of reference
-    // Correct for rotation of the robot
+    // Correct for roation of the robot
     V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
     float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
@@ -93,12 +93,9 @@ void DeadwheelChassisLPOdometry::update()
     // Perform the Kalman filter update
     kf.performUpdate(y);
     updateChassisStateFromKF(chassisYaw);
-
-    // Perform the low pass filter update
-    updateChassisStateWithLowPassFilter(Vx, Vy);
 }
 
-void DeadwheelChassisLPOdometry::updateChassisStateFromKF(float chassisYaw)
+void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 {
     const auto& x = kf.getStateVectorAsMatrix();
 
@@ -110,32 +107,7 @@ void DeadwheelChassisLPOdometry::updateChassisStateFromKF(float chassisYaw)
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
 }
 
-void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, float Vy)
-{
-    // Apply low pass filter to velocities
-    static float filteredVx = 0.0f;
-    static float filteredVy = 0.0f;
-
-    filteredVx = tap::algorithms::lowPassFilter(filteredVx, Vx, CHASSIS_VELOCITY_LOW_PASS_ALPHA);
-    filteredVy = tap::algorithms::lowPassFilter(filteredVy, Vy, CHASSIS_VELOCITY_LOW_PASS_ALPHA);
-
-    // Update the filtered velocity and position
-    filteredVelocity.x = filteredVx;
-    filteredVelocity.y = filteredVy;
-
-    // Assuming a simple integration for position update
-    static float prevTime = tap::arch::clock::getTimeMicroseconds();
-    float curTime = tap::arch::clock::getTimeMicroseconds();
-    float dt = (curTime - prevTime) * 1E-6; // Convert microseconds to seconds
-    prevTime = curTime;
-
-    filteredLocation.setPosition(
-        filteredLocation.getX() + filteredVx * dt,
-        filteredLocation.getY() + filteredVy * dt);
-    filteredLocation.setOrientation(chassisYaw);
-}
-
-void DeadwheelChassisLPOdometry::updateMeasurementCovariance(float Vx, float Vy)
+void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
 {
     const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
     const uint32_t dt = curTime - prevTime;
