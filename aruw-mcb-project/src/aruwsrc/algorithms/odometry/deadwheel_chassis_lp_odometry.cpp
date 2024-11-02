@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "deadwheel_chassis_kf_odometry.hpp"
+#include "deadwheel_chassis_lp_odometry.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -29,14 +29,10 @@ DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
     const float parallelCenterToWheelDistance,
     const float parallelWheelChassisRelativeAngleRadians,
     const float perpendicularWheelChassisRelativeAngleRadians)
-    : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
-      deadwheelOdometry(deadwheelOdometry),
+    : deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
-      chassisAccelerationToMeasurementCovarianceInterpolator(
-          CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
       parallelWheelChassisRelativeAngleRadians(parallelWheelChassisRelativeAngleRadians),
       perpendicularWheelChassisRelativeAngleRadians(perpendicularWheelChassisRelativeAngleRadians)
@@ -47,7 +43,6 @@ DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
 void DeadwheelChassisLPOdometry::reset()
 {
     float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
-    kf.init(initialX);
 }
 
 void DeadwheelChassisLPOdometry::update()
@@ -84,30 +79,11 @@ void DeadwheelChassisLPOdometry::update()
     accelXWorld = ax;
     accelYWorld = ay;
 
-    // The measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(Vx, Vy);
-
     // Create the measurement vector
     float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
 
-    // Perform the Kalman filter update
-    kf.performUpdate(y);
-    updateChassisStateFromKF(chassisYaw);
-
     // Perform the low pass filter update
     updateChassisStateWithLowPassFilter(Vx, Vy);
-}
-
-void DeadwheelChassisLPOdometry::updateChassisStateFromKF(float chassisYaw)
-{
-    const auto& x = kf.getStateVectorAsMatrix();
-
-    // update odometry velocity and orientation
-    velocity.x = x[int(OdomState::VEL_X)];
-    velocity.y = x[int(OdomState::VEL_Y)];
-
-    location.setOrientation(chassisYaw);
-    location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
 }
 
 void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, float Vy)
@@ -135,44 +111,4 @@ void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, f
     filteredLocation.setOrientation(chassisYaw);
 }
 
-void DeadwheelChassisLPOdometry::updateMeasurementCovariance(float Vx, float Vy)
-{
-    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
-
-    // Return to avoid weird acceleration spike on startup
-    if (prevTime == 0)
-    {
-        return;
-    }
-
-    // Compute acceleration
-    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.x,
-        Vx - prevChassisVelocity[0][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.y,
-        Vy - prevChassisVelocity[1][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    prevChassisVelocity[0][0] = Vx;
-    prevChassisVelocity[1][0] = Vy;
-
-    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
-    // convert dt in microseconds to seconds
-    const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
-
-    const float velocityCovariance =
-        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
-
-    // Set measurement covariance of chassis velocity as measured by the wheels
-    kf.getMeasurementCovariance()[0] = velocityCovariance;
-    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-        velocityCovariance;
 }
-
-}  // namespace aruwsrc::algorithms::odometry

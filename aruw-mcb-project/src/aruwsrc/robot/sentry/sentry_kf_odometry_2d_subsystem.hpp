@@ -50,7 +50,7 @@ class ChassisSubsystemInterface;
 namespace aruwsrc::sentry
 {
 class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
+                                    public aruwsrc::algorithms::odometry::DeadwheelChassisLPOdometry
 {
 public:
     /**

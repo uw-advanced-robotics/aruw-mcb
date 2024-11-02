@@ -34,7 +34,7 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     float initialYPos,
     const float centerToWheelDistance)
     : Subsystem(&drivers),
-      DeadwheelChassisKFOdometry(
+      DeadwheelChassisLPOdometry(
           deadwheels,
           yawObserver,
           imu,
@@ -51,40 +51,40 @@ void SentryKFOdometry2DSubsystem::overrideOdometryPosition(const modm::Vector2f 
 {
     auto currKFState = this->kf.getStateVectorAsMatrix();
 
-    float newState[int(DeadwheelChassisKFOdometry::OdomState::NUM_STATES)] = {
+    float newState[int(DeadwheelChassisLPOdometry::OdomState::NUM_STATES)] = {
         newPos.x,
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_X)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_X)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::VEL_X)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::ACC_X)],
         newPos.y,
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_Y)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_Y)]};
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::VEL_Y)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::ACC_Y)]};
 
-    DeadwheelChassisKFOdometry::kf.init(newState);
+    DeadwheelChassisLPOdometry::kf.init(newState);
 }
 
 void SentryKFOdometry2DSubsystem::overrideOdometryOrientation(float deltaYaw)
 {
     auto currKFState = this->kf.getStateVectorAsMatrix();
 
-    float newState[int(DeadwheelChassisKFOdometry::OdomState::NUM_STATES)] = {
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::POS_X)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_X)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_X)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::POS_Y)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_Y)],
-        currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_Y)]};
+    float newState[int(DeadwheelChassisLPOdometry::OdomState::NUM_STATES)] = {
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::POS_X)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::VEL_X)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::ACC_X)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::POS_Y)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::VEL_Y)],
+        currKFState[int(DeadwheelChassisLPOdometry::OdomState::ACC_Y)]};
 
     tap::algorithms::rotateVector(
-        &newState[int(DeadwheelChassisKFOdometry::OdomState::VEL_X)],
-        &newState[int(DeadwheelChassisKFOdometry::OdomState::VEL_Y)],
+        &newState[int(DeadwheelChassisLPOdometry::OdomState::VEL_X)],
+        &newState[int(DeadwheelChassisLPOdometry::OdomState::VEL_Y)],
         deltaYaw);
 
     tap::algorithms::rotateVector(
-        &newState[int(DeadwheelChassisKFOdometry::OdomState::ACC_X)],
-        &newState[int(DeadwheelChassisKFOdometry::OdomState::ACC_Y)],
+        &newState[int(DeadwheelChassisLPOdometry::OdomState::ACC_X)],
+        &newState[int(DeadwheelChassisLPOdometry::OdomState::ACC_Y)],
         deltaYaw);
 
-    DeadwheelChassisKFOdometry::kf.init(newState);
+    DeadwheelChassisLPOdometry::kf.init(newState);
 }
 
 }  // namespace aruwsrc::sentry

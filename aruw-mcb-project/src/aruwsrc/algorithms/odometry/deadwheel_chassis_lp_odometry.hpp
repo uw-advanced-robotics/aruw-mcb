@@ -108,71 +108,7 @@ protected:
         NUM_INPUTS,
     };
 
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
-
 private:
-    static constexpr int STATES_SQUARED =
-        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
-    static constexpr int INPUTS_SQUARED =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
-    static constexpr int INPUTS_MULT_STATES =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
-
-    /// Assumed time difference between calls to `update`, in seconds
-    static constexpr float DT = 0.002f;
-
-    // clang-format off
-    static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
-        0, 1 , DT           , 0, 0 , 0            ,
-        0, 0 , 1            , 0, 0 , 0            ,
-        0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-        0, 0 , 0            , 0, 1 , DT           ,
-        0, 0 , 0            , 0, 0 , 1            ,
-    };
-    static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 1,
-    };
-    static constexpr float KF_Q[STATES_SQUARED] = {
-        1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-1, 0  , 0  , 0  , 0  ,
-        0  , 0  , 5E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-1, 0  ,
-        0  , 0  , 0  , 0  , 0  , 5E0,
-    };
-    static constexpr float KF_R[INPUTS_SQUARED] = {
-        7.49565672e-05, 0, 0, 0,
-        0, 7.35872941e-04, 0, 0,
-        0, 0, 7.81982345e-05, 0,
-        0, 0, 0, 5.69132363e-04
-    };
-
-    static constexpr float KF_P0[STATES_SQUARED] = {
-        1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-2, 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-2, 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E3,
-    };
-    // clang-format on
-
-    /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
-    /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
-    static constexpr float MAX_ACCELERATION = 8.0f;
-
-    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 1E0},
-            {MAX_ACCELERATION, 1E2},
-        };
-
-    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
-
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
@@ -195,9 +131,6 @@ private:
     /// frame
     modm::Vector2f chassisMeasuredDeltaVelocity;
 
-    modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovarianceInterpolator;
-
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
     modm::Matrix<float, 3, 1> prevChassisVelocity;
@@ -205,9 +138,7 @@ private:
     const float parallelCenterToWheelDistance;
     const float parallelWheelChassisRelativeAngleRadians;
     const float perpendicularWheelChassisRelativeAngleRadians;
-    void updateChassisStateFromKF(float chassisYaw);
 
-    void updateMeasurementCovariance(float Vx, float Vy);
     void updateChassisStateWithLowPassFilter(float Vx, float Vy);
 
     float CHASSIS_VELOCITY_LOW_PASS_ALPHA = 0.09f;
