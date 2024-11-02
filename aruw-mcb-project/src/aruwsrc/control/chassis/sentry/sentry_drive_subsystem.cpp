@@ -162,11 +162,4 @@ float SentryDriveSubsystem::distanceFromEncoder(const tap::motor::DjiMotor* moto
     float numberOfRotations = unwrappedAngle / (tap::motor::DjiMotor::ENC_RESOLUTION);
     return numberOfRotations * 2.0f * M_PI * WHEEL_RADIUS / GEAR_RATIO;
 }
-
-void SentryDriveSubsystem::runHardwareTests() {}
-
-void SentryDriveSubsystem::onHardwareTestStart() {}
-
-void SentryDriveSubsystem::onHardwareTestComplete() {}
-
 }  // namespace aruwsrc::control::sentry::drive

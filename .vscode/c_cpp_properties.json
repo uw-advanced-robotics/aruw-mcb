@@ -42,7 +42,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_SENTRY_HYDRA"]
+            "defines": [
+                "TARGET_SENTRY_HYDRA"
+            ]
         },
         {
             "name": "MCB Standard Spider",
@@ -55,7 +57,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_STANDARD_SPIDER"]
+            "defines": [
+                "TARGET_STANDARD_SPIDER"
+            ]
         },
         {
             "name": "MCB Standard Orion",
@@ -68,7 +72,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_STANDARD_ORION"]
+            "defines": [
+                "TARGET_STANDARD_ORION"
+            ]
         },
         {
             "name": "MCB Standard Cygnus",
@@ -81,7 +87,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_STANDARD_CYGNUS"]
+            "defines": [
+                "TARGET_STANDARD_CYGNUS"
+            ]
         },
         {
             "name": "MCB Dart",
@@ -94,7 +102,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_DART"]
+            "defines": [
+                "TARGET_DART"
+            ]
         },
         {
             "name": "MCB Engineer",
@@ -107,7 +117,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_ENGINEER"]
+            "defines": [
+                "TARGET_ENGINEER"
+            ]
         },
         {
             "name": "MCB Drone",
@@ -120,7 +132,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_DRONE"]
+            "defines": [
+                "TARGET_DRONE"
+            ]
         },
         {
             "name": "MCB Testbed",
@@ -133,7 +147,24 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_TESTBED"]
+            "defines": [
+                "TARGET_TESTBED"
+            ]
+        },
+        {
+            "name": "MCB Motor Tester",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_MOTOR_TESTER"
+            ]
         },
         {
             "name": "MCB Hero Perseus",
@@ -146,7 +177,9 @@
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
-            "defines": ["TARGET_HERO_PERSEUS"]
+            "defines": [
+                "TARGET_HERO_PERSEUS"
+            ]
         }
     ],
     "version": 4

@@ -69,9 +69,11 @@ void DeadwheelChassisKFOdometry::update()
     // Correct for rotation of the robot
     V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
-    Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
-    Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
+    float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
+    float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
+
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
+
     // Get acceleration from IMU
     float ax = imu.getAx();
     float ay = imu.getAy();

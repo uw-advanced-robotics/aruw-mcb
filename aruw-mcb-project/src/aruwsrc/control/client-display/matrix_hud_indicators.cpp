@@ -23,6 +23,7 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/util_macros.hpp"
 
@@ -57,39 +58,24 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::Drivers &drivers,
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
-    const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-    const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand)
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
-      hopperSubsystem(hopperSubsystem),
       frictionWheelSubsystem(frictionWheelSubsystem),
       turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
       cvOnTargetGovernor(cvOnTargetGovernor),
-      driveCommands{
-          chassisBeybladeCmd,
-          chassisAutorotateCmd,
-          chassisImuDriveCommand,
-      },
       matrixHudIndicatorDrawers
 {
     StateHUDIndicator<uint16_t>(
         refSerialTransmitter,
-        &matrixHudIndicatorGraphics[CHASSIS_STATE],
+        &matrixHudIndicatorGraphics[SHOOTER_STATE],
         updateGraphicYLocation,
         0),
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[SHOOTER_STATE],
-            updateGraphicYLocation,
-            0),
 #if defined(DISPLAY_FIRING_MODE)
         StateHUDIndicator<uint16_t>(
             refSerialTransmitter,
@@ -144,21 +130,6 @@ modm::ResumableResult<bool> MatrixHudIndicators::update()
 
 void MatrixHudIndicators::updateIndicatorState()
 {
-    // update chassis state
-    for (size_t i = 0; i < driveCommands.size(); i++)
-    {
-        if (drivers.commandScheduler.isCommandScheduled(driveCommands[i]))
-        {
-            currDriveCommandIndex = i;
-        }
-    }
-
-    if (currDriveCommandIndex != -1)
-    {
-        matrixHudIndicatorDrawers[CHASSIS_STATE].setIndicatorState(
-            getIndicatorYCoordinate(currDriveCommandIndex));
-    }
-
     // update flywheel and hopper state
     bool flywheelsOff =
         compareFloatClose(0.0f, frictionWheelSubsystem.getDesiredLaunchSpeed(), 1E-5);
@@ -168,12 +139,7 @@ void MatrixHudIndicators::updateIndicatorState()
 
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
-#if defined(ALL_STANDARDS)
-        if (hopperSubsystem != nullptr && hopperSubsystem->getIsHopperOpen())
-        {
-            shooterState = ShooterState::LOADING;
-        }
-#elif defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HERO_PERSEUS)
         auto turretMCB = turretSubsystem.getTurretMCB();
         assert(turretMCB != nullptr);
         if (!turretMCB->getLimitSwitchDepressed())

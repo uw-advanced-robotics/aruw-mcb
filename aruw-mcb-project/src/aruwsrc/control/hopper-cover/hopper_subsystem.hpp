@@ -34,6 +34,8 @@
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
+#include "hopper_test_command.hpp"
+
 namespace aruwsrc
 {
 namespace control
@@ -58,7 +60,7 @@ public:
      *                 a PWM value (between 0 and 1)
      */
     HopperSubsystem(
-        tap::Drivers *drivers,
+        tap::Drivers* drivers,
         tap::gpio::Pwm::Pin pwmPin,
         float open,
         float close,
@@ -76,16 +78,12 @@ public:
 
     void refresh() override;
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
-    void onHardwareTestComplete() override;
-
-    const char *getName() const override { return "Hopper"; }
+    const char* getName() const override { return "Hopper"; }
 
 private:
     tap::motor::Servo hopper;
+
+    HopperTestCommand hopperTestCommand;
 
     /*
      * return the angle defined as open as a PWM value
@@ -96,8 +94,6 @@ private:
      * return the angle defined as close as a PWM value
      */
     float getClosePWM();
-
-    uint64_t testTime;
 };
 
 }  // namespace control
