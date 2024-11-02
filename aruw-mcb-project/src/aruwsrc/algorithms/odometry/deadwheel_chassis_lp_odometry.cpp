@@ -42,7 +42,7 @@ DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
 
 void DeadwheelChassisLPOdometry::reset()
 {
-    float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
+    overrideOdometryPosition(initPos);
 }
 
 void DeadwheelChassisLPOdometry::update()
@@ -69,24 +69,11 @@ void DeadwheelChassisLPOdometry::update()
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 
-    // Get acceleration from IMU
-    float ax = imu.getAx();
-    float ay = imu.getAy();
-
-    // Rotate acceleration to the world frame
-    static float accelXWorld, accelYWorld;
-    tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
-    accelXWorld = ax;
-    accelYWorld = ay;
-
-    // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
-
     // Perform the low pass filter update
     updateChassisStateWithLowPassFilter(Vx, Vy);
 }
 
-void DeadwheelChassisLPOdometry::overrideOdometryPosition(modm::Vector2f& newPos)
+void DeadwheelChassisLPOdometry::overrideOdometryPosition(const modm::Vector2f& newPos)
 {
     filteredLocation.setPosition(newPos.x, newPos.y);
 }

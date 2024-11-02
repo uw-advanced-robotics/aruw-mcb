@@ -87,7 +87,7 @@ public:
 
     void update();
 
-    void overrideOdometryPosition(modm::Vector2f& newPos);
+    void overrideOdometryPosition(const modm::Vector2f& newPos);
 
     void overrideOdometryOrientation(float deltaYaw);
 

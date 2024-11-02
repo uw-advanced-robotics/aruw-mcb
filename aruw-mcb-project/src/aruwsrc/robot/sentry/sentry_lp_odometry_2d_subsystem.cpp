@@ -47,7 +47,7 @@ SentryLPOdometry2DSubsystem::SentryLPOdometry2DSubsystem(
 
 void SentryLPOdometry2DSubsystem::refresh() { update(); }
 
-void SentryLPOdometry2DSubsystem::overrideOdometryPosition(modm::Vector2f &newPos)
+void SentryLPOdometry2DSubsystem::overrideOdometryPosition(const modm::Vector2f &newPos)
 {
     DeadwheelChassisLPOdometry::overrideOdometryPosition(newPos);
 }
