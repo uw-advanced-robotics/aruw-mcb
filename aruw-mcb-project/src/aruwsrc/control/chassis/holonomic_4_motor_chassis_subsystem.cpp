@@ -106,6 +106,8 @@ void Holonomic4MotorChassisSubsystem::refresh()
 
     limitChassisPower();
 }
+float modifiedPowerLimitFrac = 0;
+float powerLimitFrac = 0;
 
 void Holonomic4MotorChassisSubsystem::limitChassisPower()
 {
@@ -113,7 +115,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
 
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
-    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
     // total velocity error for all wheels
     float totalError = 0.0f;
@@ -140,7 +142,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
         // compensation, a total of NUM_MOTORS * powerLimitFrac fractional limiting is divided
         // evenly among NUM_MOTORS motors. Instead, divide this limiting based on the
         // velocityErrorFrac for each motor.
-        float modifiedPowerLimitFrac =
+        modifiedPowerLimitFrac =
             limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
         motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
     }

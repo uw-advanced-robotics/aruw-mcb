@@ -324,6 +324,20 @@ before_script:
   variables:
     ROBOT: DART
 
+# Chassis Build
+
+"Chassis: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: CHASSIS
+  
+"Chassis: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: CHASSIS
+
 # Testbed Build
 
 "Testbed: MCB Build":

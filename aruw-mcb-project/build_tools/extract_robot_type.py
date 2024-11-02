@@ -28,6 +28,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
                         "SENTRY_HYDRA",
                         "HERO_PERSEUS",
                         "DART",
+                        "CHASSIS",
                         "TESTBED",
                         "MOTOR_TESTER" ]
 
@@ -40,6 +41,7 @@ ROBOT_CLASS = {
     "SENTRY_HYDRA": "sentry",
     "HERO_PERSEUS": "hero",
     "DART": "dart",
+    "CHASSIS": "chassis",
     "TESTBED": "testbed",
     "MOTOR_TESTER": "motor_tester"
 }
