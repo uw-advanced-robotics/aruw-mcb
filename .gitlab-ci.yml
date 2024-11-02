@@ -75,6 +75,7 @@ before_script:
             aruwsrc/robot/drone/drone_control.cpp
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
+            aruwsrc/robot/chassis/chassis_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
             main.cpp

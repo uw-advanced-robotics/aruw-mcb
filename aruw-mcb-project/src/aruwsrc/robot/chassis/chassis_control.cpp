@@ -22,15 +22,15 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/robot_control.hpp"
-#include "aruwsrc/robot/chassis/chassis_drivers.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/chassis/chassis_drivers.hpp"
+#include "aruwsrc/robot/robot_control.hpp"
 
 using namespace aruwsrc::chassis;
 using namespace tap::control;
@@ -52,10 +52,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(
-    drivers(),
-    &currentSensor
-);
+XDriveChassisSubsystem chassis(drivers(), &currentSensor);
 
 // aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
@@ -80,7 +77,6 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 //     &turret.yawMotor,
 //     (drivers()->controlOperatorInterface));
 
-
 // HoldCommandMapping leftSwitchDown(
 //     drivers(),
 //     {&beybladeCommand},
@@ -92,18 +88,11 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 
 // ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
+void initializeSubsystems() { chassis.registerAndInitialize(); }
 
-void initializeSubsystems()
-{
-    chassis.registerAndInitialize();
-}
+void setDefaultCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
 
-void setDefaultCommands(Drivers *)
-{
-    chassis.setDefaultCommand(&chassisDriveCommand);
-}
-
-void registerIoMappings(Drivers* drivers)
+void registerIoMappings(Drivers *)
 {
     // drivers->commandMapper.addMap(&leftSwitchDown);
     // drivers->commandMapper.addMap(&leftSwitchUp);
