@@ -26,6 +26,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
@@ -65,12 +66,23 @@ tap::motor::DjiMotor leftChannelMotor(
 VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
 // 3508
-tap::motor::DjiMotor rightChannelMotor(
+// tap::motor::DjiMotor rightChannelMotor(
+//     drivers(),
+//     tap::motor::MOTOR1,          // id 1
+//     tap::can::CanBus::CAN_BUS1,  // bus 1
+//     false,
+//     "RMotor");
+
+tap::motor::DoubleDjiMotor rightChannelDoubleMotor(
     drivers(),
-    tap::motor::MOTOR1,          // id 1
-    tap::can::CanBus::CAN_BUS1,  // bus 1
+    tap::motor::MOTOR1,
+    tap::motor::MOTOR2,
+    tap::can::CanBus::CAN_BUS2,
+    tap::can::CanBus::CAN_BUS2,
     false,
-    "RMotor");
+    false,
+    "double 1",
+    "double 2");
 
 // 6020
 tap::motor::DjiMotor wheelChannelMotor(
@@ -88,7 +100,7 @@ MotorSubsystem leftMotorSubsystem(
 
 MotorSubsystem rightMotorSubsystem(
     drivers(),
-    rightChannelMotor,
+    rightChannelDoubleMotor,
     rm3508VelocityPidConfig,
     (187.0f / 3591.0f));  // internal gearbox ratio
 
@@ -112,7 +124,7 @@ StickRpmCommand rightManual(
     &rightMotorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
-    482.0f);
+    tap::motor::DjiMotor::MAX_OUTPUT_C620 / tap::motor::DjiMotor::GEAR_RATIO_M3508);
 
 StickRpmCommand wheelManual(
     &wheelMotorSubsystem,
