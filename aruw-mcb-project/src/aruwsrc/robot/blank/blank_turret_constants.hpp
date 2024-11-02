@@ -34,4 +34,4 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 }  // namespace aruwsrc::control::turret
 
-#endif  // DART_TURRET_CONSTANTS_HPP_
+#endif  // BLANK_TURRET_CONSTANTS_HPP_

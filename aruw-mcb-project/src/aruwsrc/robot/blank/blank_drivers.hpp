@@ -34,7 +34,7 @@ public:
     Drivers() : tap::Drivers() {}
 
 public:
-};  // class aruwsrc::TestbedDrivers
+};  // class aruwsrc::BlankDrivers
 }  // namespace aruwsrc::blank
 
-#endif  // STANDARD_DRIVERS_HPP_
+#endif  // BLANK_DRIVERS_HPP_

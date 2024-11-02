@@ -48,7 +48,7 @@ namespace aruwsrc::testbed
 #elif defined(TARGET_BLANK)
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
 namespace aruwsrc::blank
-#elif defined(TARGET_MOTOR_BLANKER)
+#elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
 #endif
