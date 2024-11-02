@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
-#define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#ifndef DEADWHEEL_CHASSIS_LP_ODOMETRY_HPP_
+#define DEADWHEEL_CHASSIS_LP_ODOMETRY_HPP_
 
 #include <aruwsrc/control/turret/yaw_turret_subsystem.hpp>
 

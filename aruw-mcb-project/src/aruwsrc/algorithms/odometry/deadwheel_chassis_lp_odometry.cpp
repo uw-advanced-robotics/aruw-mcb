@@ -40,10 +40,7 @@ DeadwheelChassisLPOdometry::DeadwheelChassisLPOdometry(
     reset();
 }
 
-void DeadwheelChassisLPOdometry::reset()
-{
-    overrideOdometryPosition(initPos);
-}
+void DeadwheelChassisLPOdometry::reset() { overrideOdometryPosition(initPos); }
 
 void DeadwheelChassisLPOdometry::update()
 {
@@ -100,7 +97,7 @@ void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, f
     // Assuming a simple integration for position update
     static float prevTime = tap::arch::clock::getTimeMicroseconds();
     float curTime = tap::arch::clock::getTimeMicroseconds();
-    float dt = (curTime - prevTime) * 1E-6; // Convert microseconds to seconds
+    float dt = (curTime - prevTime) * 1E-6;  // Convert microseconds to seconds
     prevTime = curTime;
 
     filteredLocation.setPosition(
@@ -109,4 +106,4 @@ void DeadwheelChassisLPOdometry::updateChassisStateWithLowPassFilter(float Vx, f
     filteredLocation.setOrientation(chassisYaw);
 }
 
-}
+}  // namespace aruwsrc::algorithms::odometry
