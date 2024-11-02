@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,18 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_DRIVERS_HPP_
-#define CHASSIS_DRIVERS_HPP_
+#ifndef BLANK_DRIVERS_HPP_
+#define BLANK_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#else
-#include "aruwsrc/robot/control_operator_interface.hpp"
-#endif
-
-namespace aruwsrc::chassis
+namespace aruwsrc::blank
 {
 class Drivers : public tap::Drivers
 {
@@ -37,17 +31,10 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
-
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
-#else
-public:
-    control::ControlOperatorInterface controlOperatorInterface;
-#endif
+    Drivers() : tap::Drivers() {}
 
 public:
-};  // class aruwsrc::ChassisDrivers
-}  // namespace aruwsrc::chassis
+};  // class aruwsrc::TestbedDrivers
+}  // namespace aruwsrc::blank
 
-#endif  // CHASSIS_DRIVERS_HPP_
+#endif  // STANDARD_DRIVERS_HPP_

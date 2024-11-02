@@ -62,10 +62,10 @@ using namespace aruwsrc::drone;
 using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
-#elif defined(TARGET_CHASSIS)
-using namespace aruwsrc::chassis;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
+#elif defined(TARGET_BLANK)
+using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
 #endif

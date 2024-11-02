@@ -20,13 +20,13 @@
 #ifndef ROBOT_CONTROL_HPP_
 #define ROBOT_CONTROL_HPP_
 
+#include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
-#include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
@@ -40,10 +40,10 @@ namespace aruwsrc::drone
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart
-#elif defined(TARGET_CHASSIS)
-namespace aruwsrc::chassis
 #elif defined(TARGET_TESTBED)
 namespace aruwsrc::testbed
+#elif defined(TARGET_BLANK)
+namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
 #endif

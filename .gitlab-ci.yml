@@ -75,8 +75,8 @@ before_script:
             aruwsrc/robot/drone/drone_control.cpp
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
-            aruwsrc/robot/chassis/chassis_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
+            aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
             main.cpp
 
@@ -325,20 +325,6 @@ before_script:
   variables:
     ROBOT: DART
 
-# Chassis Build
-
-"Chassis: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: CHASSIS
-  
-"Chassis: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: CHASSIS
-
 # Testbed Build
 
 "Testbed: MCB Build":
@@ -352,6 +338,20 @@ before_script:
     - .test_build
   variables:
     ROBOT: TESTBED
+
+# Blank Build
+
+"Blank: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: BLANK
+  
+"Blank: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: BLANK
 
 # Motor Tester Build
 

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CHASSIS_CHASSIS_CONSTANTS_HPP_
-#define CHASSIS_CHASSIS_CONSTANTS_HPP_
+#ifndef TESTBED_CHASSIS_CONSTANTS_HPP_
+#define TESTBED_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -142,4 +142,4 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 }  // namespace aruwsrc::chassis
 
-#endif  // CHASSIS_CHASSIS_CONSTANTS_HPP_
+#endif  // TESTBED_CHASSIS_CONSTANTS_HPP_

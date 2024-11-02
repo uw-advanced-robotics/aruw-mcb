@@ -42,13 +42,13 @@ namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 namespace aruwsrc::dart
-#elif defined(TARGET_CHASSIS)
-#include "aruwsrc/robot/chassis/chassis_drivers.hpp"
-namespace aruwsrc::chassis
 #elif defined(TARGET_TESTBED)
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 namespace aruwsrc::testbed
-#elif defined(TARGET_MOTOR_TESTER)
+#elif defined(TARGET_BLANK)
+#include "aruwsrc/robot/blank/blank_drivers.hpp"
+namespace aruwsrc::blank
+#elif defined(TARGET_MOTOR_BLANKER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
 #endif
