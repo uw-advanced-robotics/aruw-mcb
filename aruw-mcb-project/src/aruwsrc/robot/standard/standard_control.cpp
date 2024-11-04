@@ -63,6 +63,7 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -309,7 +310,8 @@ user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // beyblade governors
 PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
-PlateHitGovernor plateHitInvertedGovernor(&(drivers()->plateHitTracker), 5000, true);
+
+FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
 
 MovedFastRecentlyGovernor movedRecentlyGovernor(drivers(),
     &chassis,
@@ -317,28 +319,16 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(drivers(),
     0.5f,
     5000);
 
-MovedFastRecentlyGovernor movedRecentlyInvertedGovernor(drivers(),
-    &chassis,
-    (drivers()->controlOperatorInterface),
-    0.5f,
-    5000,
-    true);
-
-GovernorLimitedCommand<2> beybladeSlowWithPlateHitCommand(
+GovernorLimitedCommand<1> beybladeSlowWithPlateHitCommand(
     {&chassis},
     slowBeybladeCommand,
-    {&plateHitGovernor, &movedRecentlyGovernor});
+    {&plateHitGovernor});
 
-GovernorLimitedCommand<2> beybladeWithPlateHitInvertedCommand(
+GovernorWithFallbackCommand<1> beybladeAlternatingWithPlateHitCommand(
     {&chassis},
+    beybladeSlowWithPlateHitCommand,
     beybladeCommand,
-    {&plateHitInvertedGovernor, &movedRecentlyInvertedGovernor});
-
-GovernorWithFallbackCommand<2> beybladeAlternatingWithPlateHitCommand(
-    {&chassis},
-    slowBeybladeCommand,
-    beybladeCommand,
-    {&plateHitGovernor, &movedRecentlyGovernor});
+    {&plateHitGovernor});
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);

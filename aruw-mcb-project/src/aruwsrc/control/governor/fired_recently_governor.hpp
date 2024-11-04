@@ -24,43 +24,47 @@
 
 #include "tap/architecture/clock.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/ref_system_constants.hpp"
 
 namespace aruwsrc::control::governor
 {
 /**
- * Governor that blocks commands from running if a plate has been hit recently.
+ * Governor that blocks commands from running if a shot has been fired recently.
  */
 class FiredRecentlyGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
     /**
-     * @param durationBuffer Time since last hit in milliseconds to run the command blocked.
+     * @param durationBuffer Time since last shot in milliseconds to run the command blocked.
      */
     FiredRecentlyGovernor(
+        tap::Drivers* drivers,
         const uint32_t durationBuffer,
         const bool inverted = false)
-        : durationBuffer(durationBuffer),
+        : drivers(drivers),
+          durationBuffer(durationBuffer),
           inverted(inverted)
     {
     }
 
-    bool isReady() final { return inverted != enoughTimeSinceLastHit(); }
+    bool isReady() final { return inverted != enoughTimeSinceLastShot(); }
 
-    bool isFinished() final { return inverted != !enoughTimeSinceLastHit(); }
+    bool isFinished() final { return inverted != !enoughTimeSinceLastShot(); }
 
 private:
+    tap::Drivers* drivers;
 
     const uint32_t durationBuffer;
     const bool inverted;
 
-    bool enoughTimeSinceLastHit() const
+    bool enoughTimeSinceLastShot() const
     {
         const auto currentTime = tap::arch::clock::getTimeMilliseconds();
-        const auto lastHit = this->FiredRecentlyTracker->getLastHitData();
+        const auto lastShot = this->drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
 
-        return currentTime - lastHit.timestamp > durationBuffer;
+        return currentTime - lastShot > durationBuffer;
     }
 };
 }  // namespace aruwsrc::control::governor
