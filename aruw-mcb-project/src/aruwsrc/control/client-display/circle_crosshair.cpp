@@ -24,12 +24,12 @@ using namespace tap::communication::serial;
 namespace aruwsrc::control::client_display
 {
 
-CicleCrosshair::CicleCrosshair(RefSerialTransmitter &refSerialTransmitter)
+CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter)
 {
 }
 
-void CicleCrosshair::initialize()
+void CircleCrosshair::initialize()
 {
     uint8_t crosshairName[3];
 
@@ -37,7 +37,7 @@ void CicleCrosshair::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &crosshairGraphics.graphicData,
         crosshairName,
-        Tx::GRAPHIC_DELETE,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::GREEN);
 
@@ -49,7 +49,7 @@ void CicleCrosshair::initialize()
         &crosshairGraphics.graphicData);
 }
 
-modm::ResumableResult<bool> CicleCrosshair::sendInitialGraphics()
+modm::ResumableResult<bool> CircleCrosshair::sendInitialGraphics()
 {
     RF_BEGIN(0)
 
@@ -58,7 +58,7 @@ modm::ResumableResult<bool> CicleCrosshair::sendInitialGraphics()
     RF_END();
 }
 
-modm::ResumableResult<bool> CicleCrosshair::update()
+modm::ResumableResult<bool> CircleCrosshair::update()
 {
     RF_BEGIN(1)
     RF_END();

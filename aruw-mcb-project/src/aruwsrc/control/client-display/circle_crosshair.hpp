@@ -29,15 +29,15 @@
 
 namespace aruwsrc::control::client_display
 {
-class CicleCrosshair : public HudIndicator, protected modm::Resumable<2>
+class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**
-     * Construct a CicleCrosshair object.
+     * Makes a dot circle crosshair on the screen.
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    CicleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    CircleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
 
@@ -51,9 +51,9 @@ private:
     // Y position of the circle
     static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2;
     // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 4;
+    static constexpr uint16_t CRICLE_SIZE = 2;
     // Thickness of the line
-    static constexpr uint16_t LINE_THICKNESS = 10;
+    static constexpr uint16_t LINE_THICKNESS = 5;
 
     Tx::Graphic1Message crosshairGraphics;
 };

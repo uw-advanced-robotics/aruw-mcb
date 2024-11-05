@@ -41,6 +41,8 @@
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
 
+#include "circle_crosshair.hpp"
+
 namespace tap::control
 {
 class Subsystem;
@@ -129,6 +131,7 @@ private:
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
+    CircleCrosshair circleCrosshair;
 
     bool restarting = true;
 
