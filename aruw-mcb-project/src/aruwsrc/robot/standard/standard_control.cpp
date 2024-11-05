@@ -319,16 +319,11 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(drivers(),
     0.5f,
     5000);
 
-GovernorLimitedCommand<1> beybladeSlowWithPlateHitCommand(
-    {&chassis},
-    slowBeybladeCommand,
-    {&plateHitGovernor});
-
 GovernorWithFallbackCommand<1> beybladeAlternatingWithPlateHitCommand(
     {&chassis},
-    beybladeSlowWithPlateHitCommand,
+    slowBeybladeCommand,
     beybladeCommand,
-    {&plateHitGovernor});
+    {&firedRecentlyGovernor});
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -434,10 +429,11 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-HoldCommandMapping rightSwitchMiddle(
+HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
-    {&spinFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+    {&spinFrictionWheels, &rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
+    true);
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&rotateAndUnjamAgitatorWithHeatAndCVLimiting},
