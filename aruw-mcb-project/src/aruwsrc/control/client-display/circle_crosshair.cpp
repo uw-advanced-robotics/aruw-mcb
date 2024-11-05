@@ -23,7 +23,6 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-
 CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter)
 {
