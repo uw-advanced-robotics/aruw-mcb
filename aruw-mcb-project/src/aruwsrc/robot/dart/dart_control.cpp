@@ -47,30 +47,17 @@ namespace dart_control
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
 
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-
-/* only being used for the encoder motor */
-tap::motor::DjiMotor deadMotor1(
-    drivers(),
-    DEAD_MOTOR1,
-    CAN_BUS_MOTORS,
-    false,
-    "Pitch Turret Encoder Motor 1");
-tap::motor::DjiMotor deadMotor2(
-    drivers(),
-    DEAD_MOTOR2,
-    CAN_BUS_MOTORS,
-    false,
-    "Pitch Turret Encoder Motor 2");
-
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() { buzzer.initialize(); }
+void initializeSubsystems() {}
 
-void registerDartSubsystems(Drivers* drivers)
-{
-    drivers->commandScheduler.registerSubsystem(&buzzer);
-}
+void registerDartSubsystems(Drivers* drivers) {}
+
+void setDefaultDartCommands(Drivers*) {}
+
+void startDartCommands(Drivers* drivers) {}
+
+void registerDartIoMappings(Drivers* drivers) {}
 
 }  // namespace dart_control
 
@@ -80,6 +67,9 @@ void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &dart_control::remoteSafeDisconnectFunction);
+    dart_control::setDefaultDartCommands(drivers);
+    dart_control::startDartCommands(drivers);
+    dart_control::registerDartIoMappings(drivers);
     dart_control::initializeSubsystems();
     dart_control::registerDartSubsystems(drivers);
 }
