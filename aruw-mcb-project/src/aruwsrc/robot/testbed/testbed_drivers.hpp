@@ -22,6 +22,9 @@
 
 #include "tap/drivers.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330dlc/ism330dlc.hpp"
+#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
+
+#include "tap/board/board.hpp"
 
 namespace aruwsrc::testbed
 {
@@ -32,10 +35,15 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), imu(this) {}
+    Drivers() : tap::Drivers(),
+                ism330dlc(),
+                ism330dlcTerminalSerialHandler(this, &this->ism330dlc)
+    {}
 
 public:
-    aruwsrc::communication::sensors::imu::Ism330dlc imu;
+    aruwsrc::communication::sensors::imu::Ism330dlc<I2cMaster> ism330dlc;
+    tap::communication::sensors::imu::ImuTerminalSerialHandler ism330dlcTerminalSerialHandler;
+
 
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed

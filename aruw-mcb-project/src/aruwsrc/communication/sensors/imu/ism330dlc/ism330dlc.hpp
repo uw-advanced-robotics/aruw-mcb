@@ -36,7 +36,7 @@ namespace aruwsrc::communication::sensors::imu
 template<class I2cMaster>
 class Ism330dlc : public tap::communication::sensors::imu::ImuInterface, public ism330dlcData, public modm::I2cDevice<I2cMaster> {
 public:
-    Ism330dlc(I2cMaster &i2c, uint8_t address) : modm::I2cDevice<I2cMaster>(i2c, address) {}
+    Ism330dlc(uint8_t address) : modm::I2cDevice<I2cMaster>(address) {}
 
     struct ImuData {
         enum Axis
@@ -55,7 +55,7 @@ public:
 
     mockable void periodicIMUUpdate();
 
-    inline void setAccSensitivity(int index) {AccSensitivityScalar = AccCountToAccTable[i];}
+    inline void setAccSensitivity(int index) {accFsSetting = static_cast<accFs>(1 << index);}
     void computeOffsets();
 
     inline const char *getName() const override { return "ism330dlc"; };
@@ -74,12 +74,16 @@ public:
 private:
     ImuState imuState = ImuState::IMU_NOT_CONNECTED;
 
-    float AccSensitivityScalar_;
+    accFs accFsSetting = accFs::FS_2G;
+    gyroFs gyroFsSetting = gyroFs::FS_125DPS;
 
     uint8_t rxBuff[14] = {};
     
 	modm::ResumableResult<bool>
     read(ism330dlcData::Register reg, uint8_t* data, int size);
+
+    modm::ResumableResult<bool>
+    write(ism330dlcData::Register reg, uint8_t* data, int size);
 
 };
 }

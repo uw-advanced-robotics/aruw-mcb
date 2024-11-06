@@ -3,6 +3,7 @@
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc::communication::sensors::imu {
 /**
@@ -55,8 +56,7 @@ public:
         FS_2000DPS = 16
     };
 
-    accFs accFsSetting = accFs::FS_2G;
-    gyroFs gyroFsSetting = gyroFs::FS_125DPS;
+    
 
 };
 
