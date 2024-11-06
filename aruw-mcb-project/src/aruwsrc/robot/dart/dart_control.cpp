@@ -25,10 +25,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/dart/dart_command.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
-#include "aruwsrc/robot/dart/dart_subsystem.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -48,16 +46,6 @@ namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
-
-DartSubsystem dart(drivers(), &pullMotor);
-
-DartCommand dartCommand(dart, drivers());
-
-HoldRepeatCommandMapping rightSwitchDown(
-    drivers(),
-    {&dartCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN),
-    true);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
@@ -79,21 +67,13 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 void initializeSubsystems()
 {
-    dart.initialize();
     buzzer.initialize();
 }
 
 void registerDartSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&dart);
     drivers->commandScheduler.registerSubsystem(&buzzer);
 }
-
-void setDefaultDartCommands(Drivers*) { dart.setDefaultCommand(&dartCommand); }
-
-void startDartCommands(Drivers* drivers) { drivers->commandScheduler.addCommand(&dartCommand); }
-
-void registerDartIoMappings(Drivers* drivers) { drivers->commandMapper.addMap(&rightSwitchDown); }
 
 }  // namespace dart_control
 
@@ -105,9 +85,7 @@ void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
         &dart_control::remoteSafeDisconnectFunction);
     dart_control::initializeSubsystems();
     dart_control::registerDartSubsystems(drivers);
-    dart_control::setDefaultDartCommands(drivers);
-    dart_control::startDartCommands(drivers);
-    dart_control::registerDartIoMappings(drivers);
+
 }
 }  // namespace aruwsrc::dart
 
