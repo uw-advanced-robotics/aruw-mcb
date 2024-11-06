@@ -71,7 +71,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           cvOnTargetManager),
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
-      ammoIndicator(refSerialTransmitter, drivers.refSerial)
+      ammoIndicator(refSerialTransmitter, drivers.refSerial),
+      circleCrosshair(refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -94,6 +95,7 @@ void ClientDisplayCommand::restartHud()
     reticleIndicator.initialize();
     visionHudIndicators.initialize();
     ammoIndicator.initialize();
+    circleCrosshair.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -123,6 +125,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
+    PT_CALL(circleCrosshair.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -134,6 +137,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
+        PT_CALL(circleCrosshair.update());
 
         PT_YIELD();
     }
