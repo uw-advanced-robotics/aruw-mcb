@@ -37,6 +37,7 @@
 #include "boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
+#include "circle_crosshair.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
@@ -129,6 +130,7 @@ private:
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
+    CircleCrosshair circleCrosshair;
 
     bool restarting = true;
 
