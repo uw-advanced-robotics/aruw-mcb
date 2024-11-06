@@ -34,22 +34,56 @@ DamageIndicator::DamageIndicator(
 {
 }
 
+int updates;
+int validDatas;
+
 modm::ResumableResult<bool> DamageIndicator::update()
 {
     RF_BEGIN(1);
 
-    // Get current damage angle
-    auto hitData = plateHitTracker.getLastHitData();
+    updates++;
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
-    bool hasNewHitData = hitData.timestamp
+    // hasValidAngle = peakAngleBin.magnitude > DAMAGE_THRESHOLD;
+    hasValidAngle = true;
 
-        RF_END();
+
+    // Figure out X, Y cordinates for the line, add 90 deg cuz 0 to the right
+    degreeRadian = peakAngleBin.radians.getWrappedValue();
+
+    degree = modm::toDegree(degreeRadian + INDICATOR_OFFSET_RADIANS);
+    x = cos(degreeRadian) * DISTANCE_FROM_CENTER;
+    y = sin(degreeRadian) * DISTANCE_FROM_CENTER;
+
+    RefSerialTransmitter::configLine(
+        DAMAGE_INDICATOR_THICKNESS,
+        X_POS + x,
+        Y_POS + y,
+        X_POS + x,
+        Y_POS + LINE_LENGTH + y,
+        &damageGraphic.graphicData);
+
+    if (hasValidAngle){
+        auto prevOperation = damageGraphic.graphicData.operation;
+        damageGraphic.graphicData.operation = prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+        validDatas++;
+    } else
+    {
+        damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
+    }
+
+    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));    
+
+    RF_END();
 }
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
-    // Don't need to send anything since we add/delete the graphic when updating
+
+    // We do this so that the graphic gets drawn to begin with
+    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
+
     RF_END();
 }
 
@@ -59,51 +93,19 @@ void DamageIndicator::initialize()
 
     getUnusedGraphicName(indicatorName);
     RefSerialTransmitter::configGraphicGenerics(
-        &leftGraphic.graphicData,
+        &damageGraphic.graphicData,
         indicatorName,
-        Tx::GRAPHIC_ADD,
+        Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::RED_AND_BLUE);
+        Tx::GraphicColor::PURPLISH_RED);
 
     RefSerialTransmitter::configLine(
         DAMAGE_INDICATOR_THICKNESS,
-        DAMAGE_INDICATOR_LEFT_X,
-        DAMAGE_INDICATOR_LR_Y_BOTTOM,
-        DAMAGE_INDICATOR_LEFT_X,
-        DAMAGE_INDICATOR_LR_Y_TOP,
-        &leftGraphic.graphicData);
-
-    getUnusedGraphicName(indicatorName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &rightGraphic.graphicData,
-        indicatorName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::RED_AND_BLUE);
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        DAMAGE_INDICATOR_RIGHT_X,
-        DAMAGE_INDICATOR_LR_Y_BOTTOM,
-        DAMAGE_INDICATOR_RIGHT_X,
-        DAMAGE_INDICATOR_LR_Y_TOP,
-        &rightGraphic.graphicData);
-
-    getUnusedGraphicName(indicatorName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &bottomGraphic.graphicData,
-        indicatorName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::RED_AND_BLUE);
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        DAMAGE_INDICATOR_BOTTOM_X,
-        DAMAGE_INDICATOR_BOTTOM_Y_BOTTOM,
-        DAMAGE_INDICATOR_BOTTOM_X,
-        DAMAGE_INDICATOR_BOTTOM_Y_TOP,
-        &bottomGraphic.graphicData);
+        SCREEN_WIDTH / 2,
+        SCREEN_HEIGHT + DISTANCE_FROM_CENTER,
+        SCREEN_WIDTH / 2,
+        SCREEN_HEIGHT + DISTANCE_FROM_CENTER + DAMAGE_INDICATOR_LENGTH,
+        &damageGraphic.graphicData);
 }
 
 }  // namespace aruwsrc::control::client_display

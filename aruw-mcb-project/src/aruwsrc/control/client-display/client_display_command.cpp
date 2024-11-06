@@ -44,6 +44,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
+    algorithms::PlateHitTracker &plateHitTracker,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
@@ -72,7 +73,8 @@ ClientDisplayCommand::ClientDisplayCommand(
       reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
-      circleCrosshair(refSerialTransmitter)
+      circleCrosshair(refSerialTransmitter),
+      damageIndicator(plateHitTracker, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -88,6 +90,9 @@ void ClientDisplayCommand::initialize()
 void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
+
+    damageIndicator.initialize();
+
     booleanHudIndicators.initialize();
     capBankIndicator.initialize();
     chassisOrientationIndicator.initialize();
@@ -118,6 +123,8 @@ bool ClientDisplayCommand::run()
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
+    PT_CALL(damageIndicator.update());
+
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
     PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
@@ -130,6 +137,8 @@ bool ClientDisplayCommand::run()
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
+        PT_CALL(damageIndicator.update());
+
         PT_CALL(booleanHudIndicators.update());
         PT_CALL(capBankIndicator.update());
         PT_CALL(chassisOrientationIndicator.update());

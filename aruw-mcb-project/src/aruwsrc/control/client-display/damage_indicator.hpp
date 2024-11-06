@@ -32,8 +32,7 @@ namespace aruwsrc::control::client_display
 {
 
 /**
- * Draws 3 lines on the screen to indicate where damage is coming from.
- * Either left, right, or bottom of center circle.
+ * Draws 1 line on the screen around the center circle to indicate where damage has come from.
  */
 class DamageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
@@ -58,22 +57,29 @@ private:
     static constexpr uint16_t DAMAGE_INDICATOR_THICKNESS = 20;
     static constexpr uint16_t DAMAGE_INDICATOR_LENGTH = 20;
 
-    static constexpr uint16_t DAMAGE_INDICATOR_LR_Y_BOTTOM =
-        SCREEN_HEIGHT / 2 - DAMAGE_INDICATOR_LENGTH / 2;
-    static constexpr uint16_t DAMAGE_INDICATOR_LR_Y_TOP =
-        DAMAGE_INDICATOR_LR_Y_BOTTOM + DAMAGE_INDICATOR_LENGTH;
-    static constexpr uint16_t DAMAGE_INDICATOR_LEFT_X = 900;
-    static constexpr uint16_t DAMAGE_INDICATOR_RIGHT_X = 1000;
+    static constexpr uint16_t DISTANCE_FROM_CENTER = 60;
+
+    static constexpr uint16_t LINE_LENGTH = 20;
+
+    static constexpr uint16_t X_POS = SCREEN_WIDTH / 2;
+    static constexpr uint16_t Y_POS = SCREEN_HEIGHT / 2;
 
 
-    static constexpr uint16_t DAMAGE_INDICATOR_BOTTOM_X = SCREEN_WIDTH / 2;
-    static constexpr uint16_t DAMAGE_INDICATOR_BOTTOM_Y_BOTTOM = 480;
-    static constexpr uint16_t DAMAGE_INDICATOR_BOTTOM_Y_TOP =
-        DAMAGE_INDICATOR_BOTTOM_Y_BOTTOM + DAMAGE_INDICATOR_LENGTH;
-
-    Tx::Graphic1Message leftGraphic, rightGraphic, bottomGraphic;
+    Tx::Graphic1Message damageGraphic;
 
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
+
+    static constexpr float DAMAGE_THRESHOLD = 0.1;
+
+    static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
+
+    // DEBUG
+    float x,y;
+    float degree;
+    float degreeRadian;
+    bool hasValidAngle;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
+
 };
 
 }  // namespace aruwsrc::control::client_display
