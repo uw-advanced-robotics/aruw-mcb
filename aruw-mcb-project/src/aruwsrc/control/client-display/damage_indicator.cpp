@@ -50,10 +50,12 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
     // Figure out X, Y cordinates for the line, add 90 deg cuz 0 to the right
     degreeRadian = peakAngleBin.radians.getWrappedValue();
+    degree = modm::toDegree(degreeRadian);
 
-    degree = modm::toDegree(degreeRadian + INDICATOR_OFFSET_RADIANS);
-    x = cos(degreeRadian) * DISTANCE_FROM_CENTER;
-    y = sin(degreeRadian) * DISTANCE_FROM_CENTER;
+
+    float offsetDegreeRadian = degreeRadian + INDICATOR_OFFSET_RADIANS;
+    x = cos(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
+    y = sin(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
 
     RefSerialTransmitter::configLine(
         DAMAGE_INDICATOR_THICKNESS,
