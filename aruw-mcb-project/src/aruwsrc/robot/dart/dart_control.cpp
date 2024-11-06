@@ -51,16 +51,15 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 void initializeSubsystems() {}
 
-void registerDartSubsystems(Drivers* drivers) {}
+void registerDartSubsystems(Drivers*) {}
 
 void setDefaultDartCommands(Drivers*) {}
 
-void startDartCommands(Drivers* drivers) {}
+void startDartCommands(Drivers*) {}
 
-void registerDartIoMappings(Drivers* drivers) {}
+void registerDartIoMappings(Drivers*) {}
 
 }  // namespace dart_control
-
 namespace aruwsrc::dart
 {
 void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
