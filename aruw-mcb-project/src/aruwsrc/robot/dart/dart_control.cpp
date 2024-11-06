@@ -65,10 +65,7 @@ tap::motor::DjiMotor deadMotor2(
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems()
-{
-    buzzer.initialize();
-}
+void initializeSubsystems() { buzzer.initialize(); }
 
 void registerDartSubsystems(Drivers* drivers)
 {
@@ -85,7 +82,6 @@ void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
         &dart_control::remoteSafeDisconnectFunction);
     dart_control::initializeSubsystems();
     dart_control::registerDartSubsystems(drivers);
-
 }
 }  // namespace aruwsrc::dart
 
