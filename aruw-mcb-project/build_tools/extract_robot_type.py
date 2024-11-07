@@ -29,6 +29,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
                         "HERO_PERSEUS",
                         "DART",
                         "TESTBED",
+                        "BLANK",
                         "MOTOR_TESTER" ]
 
 ROBOT_CLASS = {
@@ -41,6 +42,7 @@ ROBOT_CLASS = {
     "HERO_PERSEUS": "hero",
     "DART": "dart",
     "TESTBED": "testbed",
+    "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester"
 }
 
