@@ -20,6 +20,7 @@
 #ifndef ROBOT_CONTROL_HPP_
 #define ROBOT_CONTROL_HPP_
 
+#include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
@@ -42,6 +43,8 @@ namespace aruwsrc::engineer
 namespace aruwsrc::dart
 #elif defined(TARGET_TESTBED)
 namespace aruwsrc::testbed
+#elif defined(TARGET_BLANK)
+namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
 #endif

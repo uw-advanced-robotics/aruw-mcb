@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TESTBED_TURRET_CONSTANTS_HPP_
-#define TESTBED_TURRET_CONSTANTS_HPP_
+#ifndef BLANK_TURRET_CONSTANTS_HPP_
+#define BLANK_TURRET_CONSTANTS_HPP_
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -34,4 +34,4 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 }  // namespace aruwsrc::control::turret
 
-#endif  // TESTBED_TURRET_CONSTANTS_HPP_
+#endif  // BLANK_TURRET_CONSTANTS_HPP_

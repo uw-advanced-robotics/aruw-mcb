@@ -152,6 +152,21 @@
             ]
         },
         {
+            "name": "MCB Blank",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_BLANK"
+            ]
+        },
+        {
             "name": "MCB Motor Tester",
             "includePath": [
                 "${default}",
