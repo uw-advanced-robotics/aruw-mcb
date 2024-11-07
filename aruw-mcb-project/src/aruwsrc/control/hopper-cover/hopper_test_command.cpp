@@ -17,20 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_subsystem.hpp"
+#include "hopper_test_command.hpp"
 
-#include "tap/control/subsystem.hpp"
+#include "tap/architecture/clock.hpp"
 
-namespace aruwsrc::dart
+#include "hopper_subsystem.hpp"
+
+namespace aruwsrc
 {
-DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
-    : Subsystem(drivers),
-      motor(motor)
+namespace control
 {
+HopperTestCommand::HopperTestCommand(HopperSubsystem* subsystem) : subsystem(subsystem)
+{
+    this->addSubsystemRequirement(subsystem);
 }
 
-void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
+void HopperTestCommand::initialize()
+{
+    this->subsystem->setOpen();
+    this->startTime = tap::arch::clock::getTimeMilliseconds();
+}
 
-void DartSubsystem::stop() { motor->setDesiredOutput(0); }
+void HopperTestCommand::end(bool) { this->subsystem->setClose(); }
 
-}  // namespace aruwsrc::dart
+bool HopperTestCommand::isFinished() const
+{
+    return tap::arch::clock::getTimeMilliseconds() - this->startTime > 1000;
+}
+}  // namespace control
+
+}  // namespace aruwsrc

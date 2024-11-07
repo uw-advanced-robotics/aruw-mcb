@@ -46,7 +46,7 @@ void ChassisAutoNavController::runController(
 
     float desiredSpeed = visionCoprocessor.getAutonavSpeed();
 
-    if (posError.magnitude() > POS_ERROR_THRESHOLD)
+    if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
         moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
     }
@@ -86,14 +86,9 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    if (!visionCoprocessor.isCvOnline() || !movementEnabled || path.empty())
     {
         return lastSetPoint;
-    }
-
-    if (path.empty())
-    {
-        return current;
     }
 
     if (path.hasChanged())

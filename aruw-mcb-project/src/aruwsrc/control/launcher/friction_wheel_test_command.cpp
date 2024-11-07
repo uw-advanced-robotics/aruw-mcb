@@ -16,37 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "friction_wheel_test_command.hpp"
 
-#ifndef DART_COMMAND_HPP_
-#define DART_COMMAND_HPP_
+#include "friction_wheel_subsystem.hpp"
 
-#include "tap/control/command.hpp"
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/robot/dart/dart_subsystem.hpp"
-
-namespace aruwsrc::dart
+namespace aruwsrc::control::launcher
 {
-class DartCommand : public tap::control::Command
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
+    : subsystem(subsystem)
 {
-public:
-    DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers);
+    this->addSubsystemRequirement(subsystem);
+}
 
-    void initialize() override {}
+void FrictionWheelTestCommand::initialize() { this->subsystem->setDesiredLaunchSpeed(15); }
 
-    void execute() override;
+void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpeed(0); }
 
-    bool isFinished() const override { return true; }
+bool FrictionWheelTestCommand::isFinished() const
+{
+    return abs(this->subsystem->rightWheel.getShaftRPM()) > 4000.0f;
+}
 
-    void end(bool interrupt) override;
-
-    const char* getName() const override { return "Dart command"; }
-
-private:
-    aruwsrc::dart::DartSubsystem& dartSubsystem;
-    tap::Drivers* drivers;
-};
-
-}  // namespace aruwsrc::dart
-
-#endif
+}  // namespace aruwsrc::control::launcher

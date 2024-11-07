@@ -16,36 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "cap_bank_test_command.hpp"
 
-#ifndef DART_SUBSYSTEM_HPP_
-#define DART_SUBSYSTEM_HPP_
+#include "cap_bank_subsystem.hpp"
 
-#include "limits.h"
-
-#include "tap/control/subsystem.hpp"
-#include "tap/motor/dji_motor.hpp"
-
-#define WINDUP_SPEED = SHRT_MAX / 2
-
-namespace aruwsrc::dart
+namespace aruwsrc::control::capbank
 {
-class DartSubsystem : public tap::control::Subsystem
+CapBankTestCommand::CapBankTestCommand(CapBankSubsystem *subsystem) : subsystem(subsystem)
 {
-public:
-    DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor);
+    this->addSubsystemRequirement(subsystem);
+}
 
-    const char* getName() const override { return "Dart"; }
+void CapBankTestCommand::initialize() { this->subsystem->enableCapacitors(); }
 
-    void windUp();
+void CapBankTestCommand::end(bool) { this->subsystem->disableCapacitors(); }
 
-    void refreshSafeDisconnect() override { stop(); }
+bool CapBankTestCommand::isFinished() const
+{
+    return this->subsystem->capacitorBank.getVoltage() > 12.0f;
+}
 
-    void stop();
-
-private:
-    tap::motor::DjiMotor* motor;
-};
-
-}  // namespace aruwsrc::dart
-
-#endif  // DART_SUBSYSTEM_HPP_
+}  // namespace aruwsrc::control::capbank

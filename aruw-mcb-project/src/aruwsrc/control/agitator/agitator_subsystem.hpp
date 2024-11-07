@@ -36,6 +36,8 @@
 
 #include "aruwsrc/util_macros.hpp"
 
+#include "agitator_test_command.hpp"
+
 namespace aruwsrc
 {
 namespace agitator
@@ -163,10 +165,6 @@ public:
         return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
     }
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
     mockable const char* getName() const override { return "Agitator"; }
 
 protected:
@@ -230,6 +228,8 @@ private:
 #else
     tap::motor::DjiMotor agitatorMotor;
 #endif
+
+    AgitatorTestCommand agitatorTestCommand;
 };  // class AgitatorSubsystem
 
 }  // namespace agitator
