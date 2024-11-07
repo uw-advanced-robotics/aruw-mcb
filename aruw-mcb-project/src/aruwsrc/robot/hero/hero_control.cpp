@@ -422,7 +422,7 @@ HoldCommandMapping rightSwitchMiddle(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerHeatAndCVLimited},
+    {&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
