@@ -319,11 +319,11 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(drivers(),
     0.5f,
     5000);
 
-GovernorWithFallbackCommand<1> beybladeAlternatingWithPlateHitCommand(
+GovernorWithFallbackCommand<3> beybladeAlternatingWithPlateHitCommand(
     {&chassis},
     slowBeybladeCommand,
     beybladeCommand,
-    {&firedRecentlyGovernor});
+    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor});
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
