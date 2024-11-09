@@ -39,6 +39,8 @@ int validDatas;
 
 modm::ResumableResult<bool> DamageIndicator::update()
 {
+    float offsetDegreeRadian;
+    
     RF_BEGIN(1);
 
     updates++;
@@ -53,7 +55,7 @@ modm::ResumableResult<bool> DamageIndicator::update()
     degree = modm::toDegree(degreeRadian);
 
 
-    float offsetDegreeRadian = degreeRadian + INDICATOR_OFFSET_RADIANS;
+    offsetDegreeRadian = degreeRadian + INDICATOR_OFFSET_RADIANS;
     x = cos(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
     y = sin(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
 
