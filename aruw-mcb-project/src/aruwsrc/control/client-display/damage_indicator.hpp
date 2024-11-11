@@ -69,7 +69,7 @@ private:
 
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
 
-    float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
+    static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
 
     float x, y;
     float hitAngleRadian;
