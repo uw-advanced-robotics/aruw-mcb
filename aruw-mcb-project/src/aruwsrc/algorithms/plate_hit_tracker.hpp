@@ -125,7 +125,7 @@ private:
         B , 0 , 0 , 0 , 0 , 0 , B , A
     };
     // clang-format on
-    const float DECAY_FACTOR = 0.9995;
+    const float DECAY_FACTOR = 0.99995;
 
     // Variables
     tap::Drivers *drivers;
