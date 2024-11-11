@@ -74,7 +74,7 @@ ClientDisplayCommand::ClientDisplayCommand(
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
       circleCrosshair(refSerialTransmitter),
-      damageIndicator(plateHitTracker, refSerialTransmitter)
+      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();

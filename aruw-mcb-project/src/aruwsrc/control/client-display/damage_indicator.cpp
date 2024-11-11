@@ -28,34 +28,30 @@ namespace aruwsrc::control::client_display
 
 DamageIndicator::DamageIndicator(
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
-      plateHitTracker(plateHitTracker)
+      plateHitTracker(plateHitTracker),
+      turretSubsystem(turretSubsystem)
 {
 }
 
-int updates;
-int validDatas;
-
 modm::ResumableResult<bool> DamageIndicator::update()
 {
-    float offsetDegreeRadian;
-    
     RF_BEGIN(1);
 
-    updates++;
-    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
-
-    // hasValidAngle = peakAngleBin.magnitude > DAMAGE_THRESHOLD;
-    hasValidAngle = true;
-
+    peakAngleBin = plateHitTracker.getLastHitData();
 
     // Figure out X, Y cordinates for the line, add 90 deg cuz 0 to the right
-    degreeRadian = peakAngleBin.radians.getWrappedValue();
-    degree = modm::toDegree(degreeRadian);
+    degreeRadian = peakAngleBin.hitAngle_worldRelative_radians.getWrappedValue();
+
+    turretYaw = -turretSubsystem.getWorldYaw();
+
+    offsetDegreeRadian = degreeRadian;
+    offsetDegreeRadian += -turretSubsystem.getWorldYaw(); // Negated for some reason
+    offsetDegreeRadian += INDICATOR_OFFSET_RADIANS;
 
 
-    offsetDegreeRadian = degreeRadian + INDICATOR_OFFSET_RADIANS;
     x = cos(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
     y = sin(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
 
@@ -67,16 +63,11 @@ modm::ResumableResult<bool> DamageIndicator::update()
         Y_POS + LINE_LENGTH + y,
         &damageGraphic.graphicData);
 
-    if (hasValidAngle){
-        auto prevOperation = damageGraphic.graphicData.operation;
-        damageGraphic.graphicData.operation = prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
-        validDatas++;
-    } else
-    {
-        damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
-    }
+    prevOperation = damageGraphic.graphicData.operation;
+    damageGraphic.graphicData.operation =
+        prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));    
+    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
     RF_END();
 }

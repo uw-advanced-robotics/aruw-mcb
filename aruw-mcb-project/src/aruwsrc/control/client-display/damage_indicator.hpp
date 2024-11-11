@@ -24,6 +24,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -45,6 +46,7 @@ public:
      */
     DamageIndicator(
         aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
@@ -64,22 +66,23 @@ private:
     static constexpr uint16_t X_POS = SCREEN_WIDTH / 2;
     static constexpr uint16_t Y_POS = SCREEN_HEIGHT / 2;
 
-
     Tx::Graphic1Message damageGraphic;
 
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
 
-    static constexpr float DAMAGE_THRESHOLD = 0.1;
-
-    static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
+    float INDICATOR_OFFSET_RADIANS = modm::toRadian(180);
 
     // DEBUG
-    float x,y;
+    float x, y;
     float degree;
     float degreeRadian;
-    bool hasValidAngle;
-    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitData peakAngleBin;
+    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
 
+    uint32_t prevOperation;
+    float offsetDegreeRadian;
+
+    float turretYaw = 0;
 };
 
 }  // namespace aruwsrc::control::client_display
