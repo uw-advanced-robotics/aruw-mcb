@@ -25,7 +25,6 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-
 DamageIndicator::DamageIndicator(
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
@@ -42,18 +41,14 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
     peakAngleBin = plateHitTracker.getLastHitData();
 
-    // Figure out X, Y cordinates for the line, add 90 deg cuz 0 to the right
-    degreeRadian = peakAngleBin.hitAngle_worldRelative_radians.getWrappedValue();
+    // Get position of hit in turret frame + offset
+    hitAngleRadian = peakAngleBin.hitAngle_worldRelative_radians.getWrappedValue();
+    hitAngleRadian += -turretSubsystem.getWorldYaw();
+    hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
-    turretYaw = -turretSubsystem.getWorldYaw();
-
-    offsetDegreeRadian = degreeRadian;
-    offsetDegreeRadian += -turretSubsystem.getWorldYaw(); // Negated for some reason
-    offsetDegreeRadian += INDICATOR_OFFSET_RADIANS;
-
-
-    x = cos(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
-    y = sin(offsetDegreeRadian) * DISTANCE_FROM_CENTER;
+    // Calculate x and y position of hit
+    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
+    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
 
     RefSerialTransmitter::configLine(
         DAMAGE_INDICATOR_THICKNESS,
@@ -93,14 +88,6 @@ void DamageIndicator::initialize()
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::PURPLISH_RED);
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        SCREEN_WIDTH / 2,
-        SCREEN_HEIGHT + DISTANCE_FROM_CENTER,
-        SCREEN_WIDTH / 2,
-        SCREEN_HEIGHT + DISTANCE_FROM_CENTER + DAMAGE_INDICATOR_LENGTH,
-        &damageGraphic.graphicData);
 }
 
 }  // namespace aruwsrc::control::client_display

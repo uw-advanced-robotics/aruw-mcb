@@ -31,7 +31,6 @@
 
 namespace aruwsrc::control::client_display
 {
-
 /**
  * Draws 1 line on the screen around the center circle to indicate where damage has come from.
  */
@@ -59,7 +58,7 @@ private:
     static constexpr uint16_t DAMAGE_INDICATOR_THICKNESS = 20;
     static constexpr uint16_t DAMAGE_INDICATOR_LENGTH = 20;
 
-    static constexpr uint16_t DISTANCE_FROM_CENTER = 60;
+    static constexpr uint16_t DISTANCE_FROM_CENTER = 65;
 
     static constexpr uint16_t LINE_LENGTH = 20;
 
@@ -70,19 +69,14 @@ private:
 
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
 
-    float INDICATOR_OFFSET_RADIANS = modm::toRadian(180);
+    float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
 
-    // DEBUG
     float x, y;
-    float degree;
-    float degreeRadian;
+    float hitAngleRadian;
     aruwsrc::algorithms::PlateHitTracker::PlateHitData peakAngleBin;
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
 
     uint32_t prevOperation;
-    float offsetDegreeRadian;
-
-    float turretYaw = 0;
 };
 
 }  // namespace aruwsrc::control::client_display

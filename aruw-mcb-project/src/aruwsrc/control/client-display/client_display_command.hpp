@@ -39,12 +39,10 @@
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
 #include "circle_crosshair.hpp"
+#include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
-
-
-#include "damage_indicator.hpp" 
 
 namespace tap::control
 {
@@ -137,7 +135,6 @@ private:
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
-    
 
     bool restarting = true;
 
