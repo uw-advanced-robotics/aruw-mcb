@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TEXT_HUD_INIDACTORS_HPP_
-#define TEXT_HUD_INIDACTORS_HPP_
+#ifndef TEXT_HUD_INDIACTORS_HPP_
+#define TEXT_HUD_INDIACTORS_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -105,4 +105,4 @@ private:
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  //  TEXT_HUD_INIDACTORS_HPP_
+#endif  // TEXT_HUD_INDIACTORS_HPP_
