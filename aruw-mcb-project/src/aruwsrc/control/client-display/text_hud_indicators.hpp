@@ -101,6 +101,9 @@ private:
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
     const std::vector<tap::control::Command *> validChassisCommands;
 
+    static constexpr uint16_t JAM_TIMEOUT_MS = 1000;
+    tap::arch::MilliTimeout jamTimeout;
+
     // Resumeable function thing
     int index = 0;
 };

@@ -39,8 +39,15 @@ TextHudIndicators::TextHudIndicators(
 
 modm::ResumableResult<bool> TextHudIndicators::update()
 {
+    // Either the agitator is online and not jammed, or the shooter has no power
+    if ((agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed()) ||
+         !(drivers.refSerial.getRobotData().robotPower & Rx::RobotPower::SHOOTER_HAS_POWER))
+    {
+        jamTimeout.restart(JAM_TIMEOUT_MS);
+    }
+
     // Defined outside due to RF
-    states[AGITATOR_JAMMED] = agitatorSubsystem.isJammed() || !agitatorSubsystem.isOnline();
+    states[AGITATOR_JAMMED] = jamTimeout.isExpired();
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
     states[NOT_SPINNING] = true;
 
