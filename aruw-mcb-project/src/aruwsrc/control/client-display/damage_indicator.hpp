@@ -93,7 +93,6 @@ private:
     {
         return std::abs(angle1 - angle2) < modm::toRadian(DEGREES_MINIMUM_BIN);
     }
-
 };
 
 }  // namespace aruwsrc::control::client_display
