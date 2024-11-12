@@ -74,7 +74,6 @@ void PlateHitTracker::update()
         calculatedPeakAngles = false;
     }
     lastHitData.lastDps = newHitData.receivedDps;
-    getPeakAnglesRadians();
 }
 
 CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)

@@ -39,13 +39,14 @@ modm::ResumableResult<bool> DamageIndicator::update()
 {
     RF_BEGIN(1);
 
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
+
     currentTime = tap::arch::clock::getTimeMilliseconds();
-    if (plateHitTracker.getPeakAnglesRadians()[0].radians.getWrappedValue() 
-        != peakAngleBin.radians.getWrappedValue()){
+    if (plateHitTracker.getPeakAnglesRadians()[0].radians.getWrappedValue() !=
+        peakAngleBin.radians.getWrappedValue())
+    {
         prevTimestamp = currentTime;
     }
-
-    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     // Get position of hit in turret frame + offset
     hitAngleRadian = peakAngleBin.radians.getWrappedValue();
@@ -65,11 +66,14 @@ modm::ResumableResult<bool> DamageIndicator::update()
         &damageGraphic.graphicData);
 
     prevOperation = damageGraphic.graphicData.operation;
-    
-    if (currentTime - prevTimestamp < DECAY_TIMEOUT_MILLIS ) {
+
+    if (currentTime - prevTimestamp < DECAY_TIMEOUT_MILLIS)
+    {
         damageGraphic.graphicData.operation =
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
-    } else {
+    }
+    else
+    {
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
 
