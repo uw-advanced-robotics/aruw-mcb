@@ -39,10 +39,16 @@ modm::ResumableResult<bool> DamageIndicator::update()
 {
     RF_BEGIN(1);
 
-    peakAngleBin = plateHitTracker.getLastHitData();
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
+
+    currentTime = tap::arch::clock::getTimeMilliseconds();
+    if (peakAngleBin.radians.getWrappedValue() != peakAngleBin.radians.getWrappedValue())
+    {
+        prevTimestamp = currentTime;
+    }
 
     // Get position of hit in turret frame + offset
-    hitAngleRadian = peakAngleBin.hitAngle_worldRelative_radians.getWrappedValue();
+    hitAngleRadian = peakAngleBin.radians.getWrappedValue();
     hitAngleRadian += -turretSubsystem.getWorldYaw();
     hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
@@ -59,8 +65,16 @@ modm::ResumableResult<bool> DamageIndicator::update()
         &damageGraphic.graphicData);
 
     prevOperation = damageGraphic.graphicData.operation;
-    damageGraphic.graphicData.operation =
-        prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
+    if (currentTime - prevTimestamp < DECAY_TIMEOUT_MILLIS)
+    {
+        damageGraphic.graphicData.operation =
+            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+    }
+    else
+    {
+        damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
+    }
 
     RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
