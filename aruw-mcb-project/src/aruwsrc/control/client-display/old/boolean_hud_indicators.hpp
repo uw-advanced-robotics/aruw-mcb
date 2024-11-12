@@ -29,7 +29,7 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "modm/processing/resumable.hpp"
 
-#include "hud_indicator.hpp"
+#include "../hud_indicator.hpp"
 
 namespace aruwsrc::control::client_display
 {

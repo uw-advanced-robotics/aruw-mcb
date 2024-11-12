@@ -29,7 +29,7 @@
 #include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/resumable.hpp"
 
-#include "hud_indicator.hpp"
+#include "../hud_indicator.hpp"
 
 namespace tap
 {

@@ -27,7 +27,7 @@
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/utils/misc.hpp"
 
-#include "hud_indicator.hpp"
+#include "../hud_indicator.hpp"
 
 namespace tap
 {

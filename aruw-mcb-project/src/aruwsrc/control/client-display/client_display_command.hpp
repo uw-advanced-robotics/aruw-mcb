@@ -35,13 +35,13 @@
 #include "modm/processing/protothread.hpp"
 
 #include "ammo_indicator.hpp"
-#include "boolean_hud_indicators.hpp"
+#include "old/boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
-#include "chassis_orientation_indicator.hpp"
+#include "old/chassis_orientation_indicator.hpp"
 #include "circle_crosshair.hpp"
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
-#include "reticle_indicator.hpp"
+#include "old/reticle_indicator.hpp"
 #include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 
@@ -135,10 +135,10 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
 
-    // Deprecated, not found useful in current HUD
-    // ReticleIndicator reticleIndicator;
-    // BooleanHudIndicators booleanHudIndicators;
-    // ChassisOrientationIndicator chassisOrientationIndicator;
+    int startTime, totalTime, capBankTime, positionTime, visionTime, ammoTime, circleTime, damageTime, textTime;
+
+    int fpsTime;
+    float fps;
 
     bool restarting = true;
 
