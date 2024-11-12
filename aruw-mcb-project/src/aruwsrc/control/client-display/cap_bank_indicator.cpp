@@ -63,6 +63,8 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             capBankGraphics.graphicData[1].operation =
                 capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
                                                                                : Tx::GRAPHIC_MODIFY;
+
+            prevTextOperation = capBankTextGraphic.graphicData.operation;
             capBankTextGraphic.graphicData.operation =
                 capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
                                                                                : Tx::GRAPHIC_MODIFY;
@@ -90,10 +92,9 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 &capBankGraphics.graphicData[1]);
 
             capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
-                voltage_squared < VOLTAGE_SQUARED_ORANGE
-                    ? Tx::GraphicColor::ORANGE
-                    : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
-                                                               : Tx::GraphicColor::GREEN);
+                voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
+                : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
+                                                           : Tx::GraphicColor::GREEN);
 
             // Update the background status
             switch (capBank->getState())
@@ -144,7 +145,12 @@ modm::ResumableResult<bool> CapBankIndicator::update()
 
             // Send data
             RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
-            RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
+            if (capBank->getState() != prevState ||
+                prevTextOperation != capBankTextGraphic.graphicData.operation)
+            {
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
+            }
+            prevState = capBank->getState();
         }
     }
 
