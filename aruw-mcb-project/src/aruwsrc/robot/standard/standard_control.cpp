@@ -392,6 +392,7 @@ ClientDisplayCommand clientDisplayCommand(
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
+    drivers()->plateHitTracker,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
