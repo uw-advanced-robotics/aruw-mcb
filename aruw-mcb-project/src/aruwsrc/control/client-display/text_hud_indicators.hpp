@@ -80,11 +80,11 @@ private:
     };
 
     static constexpr TextIndicatorData agitatorJammed =
-        {"Jammed", Tx::GraphicColor::CYAN, 1035, 880, 20};
+        {"Jammed", Tx::GraphicColor::CYAN, 1030, 840, 20};
     static constexpr TextIndicatorData imuCalibrating =
-        {"Calibrating", Tx::GraphicColor::CYAN, 730, 880, 20};
+        {"Calibrating", Tx::GraphicColor::CYAN, 730, 840, 20};
     static constexpr TextIndicatorData notSpinning =
-        {"SPIN!", Tx::GraphicColor::CYAN, 730, 830, 100};
+        {"SPIN!", Tx::GraphicColor::CYAN, 730, 800, 100};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         agitatorJammed,
@@ -101,6 +101,9 @@ private:
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
     const std::vector<tap::control::Command *> validChassisCommands;
+
+    // Resumeable function thing
+    int index = 0;
 };
 
 }  // namespace aruwsrc::control::client_display

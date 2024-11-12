@@ -97,6 +97,8 @@ void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
 
+    textHudIndicators.initialize();
+
     booleanHudIndicators.initialize();
     capBankIndicator.initialize();
     chassisOrientationIndicator.initialize();
@@ -105,7 +107,6 @@ void ClientDisplayCommand::restartHud()
     ammoIndicator.initialize();
     circleCrosshair.initialize();
     damageIndicator.initialize();
-    textHudIndicators.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -128,6 +129,9 @@ bool ClientDisplayCommand::run()
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
+
+    PT_CALL(textHudIndicators.sendInitialGraphics());
+
     PT_CALL(booleanHudIndicators.sendInitialGraphics());
     PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
@@ -137,11 +141,12 @@ bool ClientDisplayCommand::run()
     PT_CALL(circleCrosshair.sendInitialGraphics());
     PT_CALL(damageIndicator.sendInitialGraphics());
 
-    PT_CALL(textHudIndicators.sendInitialGraphics());
-
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
+        PT_CALL(textHudIndicators.update());
+
+
         PT_CALL(booleanHudIndicators.update());
         PT_CALL(capBankIndicator.update());
         PT_CALL(chassisOrientationIndicator.update());
@@ -150,8 +155,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
-
-        PT_CALL(textHudIndicators.update());
 
         PT_YIELD();
     }

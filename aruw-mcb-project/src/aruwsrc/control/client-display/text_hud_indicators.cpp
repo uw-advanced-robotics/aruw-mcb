@@ -40,8 +40,6 @@ TextHudIndicators::TextHudIndicators(
 modm::ResumableResult<bool> TextHudIndicators::update()
 {
     // Defined outside due to RF
-    int i = 0;
-
     states[AGITATOR_JAMMED] = agitatorSubsystem.isJammed() || !agitatorSubsystem.isOnline();
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
     states[NOT_SPINNING] = true;
@@ -51,13 +49,13 @@ modm::ResumableResult<bool> TextHudIndicators::update()
         states[NOT_SPINNING] &= !drivers.commandScheduler.isCommandScheduled(command);
     }
 
-    RF_BEGIN(1);
+    RF_BEGIN(0);
 
-    for (i = 0; i < NUM_TEXT_HUD_INDICATORS; i++)
+    for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
-        textHudIndicatorGraphics[i].graphicData.operation =
-            states[i] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
-        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[i]));
+        textHudIndicatorGraphics[index].graphicData.operation =
+            states[index] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
+        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
     }
 
     RF_END();
@@ -65,15 +63,12 @@ modm::ResumableResult<bool> TextHudIndicators::update()
 
 modm::ResumableResult<bool> TextHudIndicators::sendInitialGraphics()
 {
-    // Defined outside due to RF
-    int i = 0;
-
-    RF_BEGIN(0);
+    RF_BEGIN(1);
 
     // send all text indicators
-    for (i = 0; i < NUM_TEXT_HUD_INDICATORS; i++)
+    for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
-        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[i]));
+        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
     }
 
     RF_END();
