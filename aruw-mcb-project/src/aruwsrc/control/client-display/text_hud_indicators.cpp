@@ -41,7 +41,7 @@ modm::ResumableResult<bool> TextHudIndicators::update()
 {
     // Either the agitator is online and not jammed, or the shooter has no power
     if ((agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed()) ||
-         !(drivers.refSerial.getRobotData().robotPower & Rx::RobotPower::SHOOTER_HAS_POWER))
+        !(drivers.refSerial.getRobotData().robotPower & Rx::RobotPower::SHOOTER_HAS_POWER))
     {
         jamTimeout.restart(JAM_TIMEOUT_MS);
     }
