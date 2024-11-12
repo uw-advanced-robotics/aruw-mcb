@@ -79,6 +79,7 @@ private:
     uint32_t prevOperation;
     uint32_t prevTimestamp;
     uint32_t currentTime;
+    float prevAngle;
     static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
 };
 

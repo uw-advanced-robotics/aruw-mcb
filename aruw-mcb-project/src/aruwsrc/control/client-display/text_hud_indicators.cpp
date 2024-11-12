@@ -96,7 +96,7 @@ void TextHudIndicators::initialize()
 
         RefSerialTransmitter::configCharacterMsg(
             textIndicator.size,
-            TEXT_WIDTH,
+            textIndicator.textWidth,
             textIndicator.x,
             textIndicator.y,
             textIndicator.text,

@@ -41,7 +41,7 @@ void AmmoIndicator::initialize()
         bulletsRemainingName,
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::YELLOW);
+        Tx::GraphicColor::ORANGE);
 
     RefSerialTransmitter::configCharacterMsg(
         TEXT_SIZE,

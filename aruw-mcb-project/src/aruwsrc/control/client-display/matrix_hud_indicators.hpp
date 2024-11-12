@@ -110,7 +110,7 @@ private:
         MATRIX_HUD_INDICATOR_CHAR_SIZE;
 
     /** The starting X point where the matrix HUD indicator will be situated, in pixels. */
-    static constexpr uint16_t MATRIX_HUD_INDICATOR_START_X = 350;
+    static constexpr uint16_t MATRIX_HUD_INDICATOR_START_X = 35;
     /** The starting Y point for the title row of the matrix indicator, in pixels. */
     static constexpr uint16_t MATRIX_HUD_INDICATOR_TITLE_START_Y = 775;
     /** The starting Y point for the labels situated below the row of titles, in pixels. */

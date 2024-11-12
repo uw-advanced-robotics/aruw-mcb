@@ -39,10 +39,11 @@ modm::ResumableResult<bool> DamageIndicator::update()
 {
     RF_BEGIN(1);
 
+    prevAngle = peakAngleBin.radians.getWrappedValue();
     peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     currentTime = tap::arch::clock::getTimeMilliseconds();
-    if (peakAngleBin.radians.getWrappedValue() != peakAngleBin.radians.getWrappedValue())
+    if (peakAngleBin.radians.getWrappedValue() != prevAngle)
     {
         prevTimestamp = currentTime;
     }

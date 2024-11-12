@@ -69,6 +69,7 @@ private:
         uint16_t x;
         uint16_t y;
         uint16_t size;
+        uint16_t textWidth;
     };
 
     enum TextIndicators
@@ -80,11 +81,11 @@ private:
     };
 
     static constexpr TextIndicatorData agitatorJammed =
-        {"Jammed", Tx::GraphicColor::CYAN, 1030, 840, 20};
+        {"Jammed", Tx::GraphicColor::ORANGE, 1030, 840, 20, 3};
     static constexpr TextIndicatorData imuCalibrating =
-        {"Calibrating", Tx::GraphicColor::CYAN, 730, 840, 20};
+        {"Calibrating", Tx::GraphicColor::ORANGE, 730, 840, 20, 3};
     static constexpr TextIndicatorData notSpinning =
-        {"SPIN!", Tx::GraphicColor::CYAN, 730, 800, 100};
+        {"SPIN!", Tx::GraphicColor::PURPLISH_RED, 730, 800, 100, 10};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         agitatorJammed,
@@ -94,8 +95,6 @@ private:
     Tx::GraphicCharacterMessage textHudIndicatorGraphics[NUM_TEXT_HUD_INDICATORS];
 
     bool states[NUM_TEXT_HUD_INDICATORS];
-
-    static constexpr uint16_t TEXT_WIDTH = 3;
 
     tap::Drivers &drivers;
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;

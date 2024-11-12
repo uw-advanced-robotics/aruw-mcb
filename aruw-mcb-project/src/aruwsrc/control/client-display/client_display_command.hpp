@@ -140,7 +140,6 @@ private:
     // BooleanHudIndicators booleanHudIndicators;
     // ChassisOrientationIndicator chassisOrientationIndicator;
 
-
     bool restarting = true;
 
     bool run();
