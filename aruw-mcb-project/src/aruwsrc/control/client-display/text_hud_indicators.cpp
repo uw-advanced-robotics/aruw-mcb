@@ -44,10 +44,14 @@ modm::ResumableResult<bool> TextHudIndicators::update()
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
     states[NOT_SPINNING] = true;
 
+    // Check if either of the commands are running
     for (auto command : validChassisCommands)
     {
         states[NOT_SPINNING] &= !drivers.commandScheduler.isCommandScheduled(command);
     }
+
+    // Check if we are actually in a match
+    states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage != Rx::GameStage::PREMATCH;
 
     RF_BEGIN(0);
 

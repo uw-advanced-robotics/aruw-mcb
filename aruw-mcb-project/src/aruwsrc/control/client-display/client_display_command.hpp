@@ -127,17 +127,19 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-    BooleanHudIndicators booleanHudIndicators;
     CapBankIndicator capBankIndicator;
-    ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
-    // Deprecated, not found useful in current HUD
-    ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
+
+    // Deprecated, not found useful in current HUD
+    // ReticleIndicator reticleIndicator;
+    // BooleanHudIndicators booleanHudIndicators;
+    // ChassisOrientationIndicator chassisOrientationIndicator;
+
 
     bool restarting = true;
 
