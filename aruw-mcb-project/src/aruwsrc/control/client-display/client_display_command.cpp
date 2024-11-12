@@ -95,7 +95,6 @@ void ClientDisplayCommand::restartHud()
     capBankIndicator.initialize();
     chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
-    reticleIndicator.initialize();
     visionHudIndicators.initialize();
     ammoIndicator.initialize();
     circleCrosshair.initialize();
@@ -126,7 +125,6 @@ bool ClientDisplayCommand::run()
     PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(reticleIndicator.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
     PT_CALL(circleCrosshair.sendInitialGraphics());
@@ -139,7 +137,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(capBankIndicator.update());
         PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
-        PT_CALL(reticleIndicator.update());
         PT_CALL(visionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());

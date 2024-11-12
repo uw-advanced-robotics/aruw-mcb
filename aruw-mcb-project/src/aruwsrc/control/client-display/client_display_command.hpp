@@ -130,6 +130,7 @@ private:
     CapBankIndicator capBankIndicator;
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
+    // Deprecated, not found useful in current HUD
     ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
