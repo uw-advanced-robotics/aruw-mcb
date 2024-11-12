@@ -71,16 +71,29 @@ private:
 
     static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
 
+    // Gets rounded to nearest bin to reduce calls
+    static constexpr uint16_t DEGREES_MINIMUM_BIN = 3;
+
+    static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
+
     float x, y;
     float hitAngleRadian;
     aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
+    float prevPeakAngle;
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
 
     uint32_t prevOperation;
     uint32_t prevTimestamp;
     uint32_t currentTime;
-    float prevAngle;
-    static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
+
+    float prevComputedAngle = -1.0;
+    bool currentAngleSameAsPrev = false;
+
+    static inline bool anglesAreClose(float angle1, float angle2)
+    {
+        return std::abs(angle1 - angle2) < modm::toRadian(DEGREES_MINIMUM_BIN);
+    }
+
 };
 
 }  // namespace aruwsrc::control::client_display

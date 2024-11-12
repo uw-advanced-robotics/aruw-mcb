@@ -39,11 +39,11 @@ modm::ResumableResult<bool> DamageIndicator::update()
 {
     RF_BEGIN(1);
 
-    prevAngle = peakAngleBin.radians.getWrappedValue();
+    prevPeakAngle = peakAngleBin.radians.getWrappedValue();
     peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     currentTime = tap::arch::clock::getTimeMilliseconds();
-    if (peakAngleBin.radians.getWrappedValue() != prevAngle)
+    if (peakAngleBin.radians.getWrappedValue() != prevPeakAngle)
     {
         prevTimestamp = currentTime;
     }
@@ -53,17 +53,8 @@ modm::ResumableResult<bool> DamageIndicator::update()
     hitAngleRadian += -turretSubsystem.getWorldYaw();
     hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
-    // Calculate x and y position of hit
-    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
-    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        X_POS + x,
-        Y_POS + y,
-        X_POS + x,
-        Y_POS + LINE_LENGTH + y,
-        &damageGraphic.graphicData);
+    currentAngleSameAsPrev = anglesAreClose(hitAngleRadian, prevComputedAngle);
+    prevComputedAngle = hitAngleRadian;
 
     prevOperation = damageGraphic.graphicData.operation;
 
@@ -76,6 +67,23 @@ modm::ResumableResult<bool> DamageIndicator::update()
     {
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
+
+    // Calculate x and y position of hit
+    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
+    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
+
+    if (currentAngleSameAsPrev && prevOperation == damageGraphic.graphicData.operation)
+    {
+        RF_RETURN(true);
+    }
+
+    RefSerialTransmitter::configLine(
+        DAMAGE_INDICATOR_THICKNESS,
+        X_POS + x,
+        Y_POS + y,
+        X_POS + x,
+        Y_POS + LINE_LENGTH + y,
+        &damageGraphic.graphicData);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
