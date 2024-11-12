@@ -39,7 +39,7 @@ void AmmoIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &bulletsRemainingGraphics.graphicData,
         bulletsRemainingName,
-        Tx::GRAPHIC_DELETE,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::ORANGE);
 
@@ -80,6 +80,7 @@ modm::ResumableResult<bool> AmmoIndicator::update()
 
     if (prevBulletCount == bulletCount)
     {
+        // If the count hasn't changed, don't update the graphic
         RF_RETURN(false);
     }
 

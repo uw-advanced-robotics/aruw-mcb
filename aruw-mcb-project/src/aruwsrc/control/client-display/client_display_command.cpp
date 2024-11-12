@@ -153,7 +153,6 @@ bool ClientDisplayCommand::run()
         totalTime = tap::arch::clock::getTimeMicroseconds() - fpsTime;
         fps = 1000000.0f / totalTime;
 
-
         PT_YIELD();
     }
     // Breaking out of the loop successfully calls this method,

@@ -33,15 +33,15 @@
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
+#include "old/boolean_hud_indicators.hpp"
+#include "old/chassis_orientation_indicator.hpp"
+#include "old/reticle_indicator.hpp"
 
 #include "ammo_indicator.hpp"
-#include "old/boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
-#include "old/chassis_orientation_indicator.hpp"
 #include "circle_crosshair.hpp"
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
-#include "old/reticle_indicator.hpp"
 #include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 
@@ -135,7 +135,8 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
 
-    int startTime, totalTime, capBankTime, positionTime, visionTime, ammoTime, circleTime, damageTime, textTime;
+    int startTime, totalTime, capBankTime, positionTime, visionTime, ammoTime, circleTime,
+        damageTime, textTime;
 
     int fpsTime;
     float fps;
