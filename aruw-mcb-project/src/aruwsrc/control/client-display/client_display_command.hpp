@@ -42,6 +42,7 @@
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
+#include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 
 namespace tap::control
@@ -136,6 +137,7 @@ private:
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
+    TextHudIndicators textHudIndicators;
 
     bool restarting = true;
 

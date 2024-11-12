@@ -74,7 +74,13 @@ ClientDisplayCommand::ClientDisplayCommand(
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
       circleCrosshair(refSerialTransmitter),
-      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter)
+      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter),
+      textHudIndicators(
+          drivers,
+          agitatorSubsystem,
+          imuCalibrateCommand,
+          avoidanceCommands,
+          refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -99,6 +105,7 @@ void ClientDisplayCommand::restartHud()
     ammoIndicator.initialize();
     circleCrosshair.initialize();
     damageIndicator.initialize();
+    textHudIndicators.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -128,7 +135,9 @@ bool ClientDisplayCommand::run()
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
     PT_CALL(circleCrosshair.sendInitialGraphics());
-    PT_CALL(damageIndicator.update());
+    PT_CALL(damageIndicator.sendInitialGraphics());
+
+    PT_CALL(textHudIndicators.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -141,6 +150,8 @@ bool ClientDisplayCommand::run()
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
+
+        PT_CALL(textHudIndicators.update());
 
         PT_YIELD();
     }
