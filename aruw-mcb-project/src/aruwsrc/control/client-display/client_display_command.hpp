@@ -126,8 +126,10 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
+    // Deprecated, not found useful in current HUD
     BooleanHudIndicators booleanHudIndicators;
     CapBankIndicator capBankIndicator;
+    // Deprecated, not found useful in current HUD
     ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
     // Deprecated, not found useful in current HUD
