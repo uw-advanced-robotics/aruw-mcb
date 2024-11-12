@@ -87,7 +87,8 @@ private:
      * Two graphics that represent the Capacitor Bank charge. The first graphic is the background
      * for the bar, while the second is the charge of the Capacitor Bank.
      */
-    Tx::Graphic2Message capBankGraphics;
+    Tx::Graphic1Message capBankBackgroundGraphic;
+    Tx::Graphic1Message capBankForegroundGraphic;
 
     /**
      * A graphic that represents the current status of the Capacitor Bank.
@@ -95,7 +96,9 @@ private:
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
     aruwsrc::can::capbank::State prevState = aruwsrc::can::capbank::State::UNKNOWN;
+    // This is here or it doesn't compile right
     uint32_t prevTextOperation = -1;
+
 };
 }  // namespace aruwsrc::control::client_display
 
