@@ -40,8 +40,7 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
     RF_BEGIN(0)
 
     // remove initial graphics
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundGraphic));
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankForegroundGraphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
 
     RF_END();
@@ -52,27 +51,23 @@ modm::ResumableResult<bool> CapBankIndicator::update()
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
 
-    uint32_t prevRectBackgroundOperation = -1;
-
     RF_BEGIN(1);
 
     if (capBank != nullptr)
     {
         if (capBank->isOnline())
         {
-            prevRectBackgroundOperation = capBankBackgroundGraphic.graphicData.operation;
-            capBankBackgroundGraphic.graphicData.operation =
-                prevRectBackgroundOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
-                                                                  : Tx::GRAPHIC_MODIFY;
-
-            capBankForegroundGraphic.graphicData.operation =
-                capBankForegroundGraphic.graphicData.operation == Tx::GRAPHIC_DELETE
-                    ? Tx::GRAPHIC_ADD
-                    : Tx::GRAPHIC_MODIFY;
+            capBankGraphics.graphicData[0].operation =
+                capBankGraphics.graphicData[0].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
+            capBankGraphics.graphicData[1].operation =
+                capBankGraphics.graphicData[1].operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
 
             prevTextOperation = capBankTextGraphic.graphicData.operation;
             capBankTextGraphic.graphicData.operation =
-                prevTextOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+                capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                               : Tx::GRAPHIC_MODIFY;
 
             // Update the voltage bar
 
@@ -94,9 +89,9 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                     BOTTOM + 10,
                 CAP_CENTER_X,
                 BOTTOM + 10,
-                &capBankForegroundGraphic.graphicData);
+                &capBankGraphics.graphicData[1]);
 
-            capBankForegroundGraphic.graphicData.color = static_cast<uint8_t>(
+            capBankGraphics.graphicData[1].color = static_cast<uint8_t>(
                 voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
                 : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
                                                            : Tx::GraphicColor::GREEN);
@@ -106,60 +101,52 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             {
                 case can::capbank::State::RESET:
                     strncpy(capBankTextGraphic.msg, "RST ", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
                 case can::capbank::State::SAFE:
                     strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
                 case can::capbank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "CHDS", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "DSCH", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case can::capbank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
                 case can::capbank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg, "OFF", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
                 default:
                     strncpy(capBankTextGraphic.msg, "UNK ", 5);
-                    capBankBackgroundGraphic.graphicData.color =
+                    capBankGraphics.graphicData[0].color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
             }
             // Update the text
             capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
 
-            // Send data if the background color has changed or the op has changed
-            if (capBank->getState() != prevState ||
-                prevRectBackgroundOperation != capBankBackgroundGraphic.graphicData.operation)
-            {
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundGraphic));
-            }
-
             // Send data
-            RF_CALL(refSerialTransmitter.sendGraphic(&capBankForegroundGraphic));
+            RF_CALL(refSerialTransmitter.sendGraphic(&capBankGraphics));
 
-            // Send data if text state has changed or the op has changed
-            if (capBank->getState() != prevState ||
+            if (prevState != capBank->getState() ||
                 prevTextOperation != capBankTextGraphic.graphicData.operation)
             {
                 RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
@@ -177,7 +164,7 @@ void CapBankIndicator::initialize()
 
     getUnusedGraphicName(capBankName);
     RefSerialTransmitter::configGraphicGenerics(
-        &capBankBackgroundGraphic.graphicData,
+        &capBankGraphics.graphicData[0],
         capBankName,
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
@@ -185,7 +172,7 @@ void CapBankIndicator::initialize()
 
     getUnusedGraphicName(capBankName);
     RefSerialTransmitter::configGraphicGenerics(
-        &capBankForegroundGraphic.graphicData,
+        &capBankGraphics.graphicData[1],
         capBankName,
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER + 1,
@@ -207,7 +194,7 @@ void CapBankIndicator::initialize()
             CAP_CENTER_Y + BOX_HEIGHT / 2,
             CAP_CENTER_X,
             CAP_CENTER_Y - BOX_HEIGHT / 2,
-            &capBankBackgroundGraphic.graphicData);
+            &capBankGraphics.graphicData[0]);
 
         RefSerialTransmitter::configLine(
             BOX_WIDTH - 20,
@@ -215,7 +202,7 @@ void CapBankIndicator::initialize()
             CAP_CENTER_Y + BOX_HEIGHT / 2 - 10,
             CAP_CENTER_X,
             CAP_CENTER_Y - BOX_HEIGHT / 2 + 10,
-            &capBankForegroundGraphic.graphicData);
+            &capBankGraphics.graphicData[1]);
 
         RefSerialTransmitter::configCharacterMsg(
             15,
