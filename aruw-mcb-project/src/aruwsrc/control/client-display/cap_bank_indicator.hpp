@@ -93,9 +93,6 @@ private:
      * A graphic that represents the current status of the Capacitor Bank.
      */
     Tx::GraphicCharacterMessage capBankTextGraphic;
-
-    aruwsrc::can::capbank::State prevState = aruwsrc::can::capbank::State::UNKNOWN;
-    uint32_t prevTextOperation = -1;
 };
 }  // namespace aruwsrc::control::client_display
 
