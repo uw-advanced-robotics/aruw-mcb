@@ -29,6 +29,7 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
@@ -38,6 +39,7 @@
 #include "cap_bank_indicator.hpp"
 #include "chassis_orientation_indicator.hpp"
 #include "circle_crosshair.hpp"
+#include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "reticle_indicator.hpp"
 #include "vision_hud_indicators.hpp"
@@ -106,6 +108,7 @@ public:
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
+        aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
         const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
@@ -131,6 +134,7 @@ private:
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
+    DamageIndicator damageIndicator;
 
     bool restarting = true;
 
