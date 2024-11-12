@@ -73,10 +73,13 @@ private:
 
     float x, y;
     float hitAngleRadian;
-    aruwsrc::algorithms::PlateHitTracker::PlateHitData peakAngleBin;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
     const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
 
     uint32_t prevOperation;
+    uint32_t prevTimestamp;
+    uint32_t currentTime;
+    static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
 };
 
 }  // namespace aruwsrc::control::client_display
