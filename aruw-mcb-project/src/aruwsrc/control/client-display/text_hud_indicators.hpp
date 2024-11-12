@@ -95,6 +95,8 @@ private:
     Tx::GraphicCharacterMessage textHudIndicatorGraphics[NUM_TEXT_HUD_INDICATORS];
 
     bool states[NUM_TEXT_HUD_INDICATORS];
+    bool prevStates[NUM_TEXT_HUD_INDICATORS];
+
 
     tap::Drivers &drivers;
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;

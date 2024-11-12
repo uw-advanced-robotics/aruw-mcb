@@ -148,7 +148,6 @@ bool ClientDisplayCommand::run()
         startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(textHudIndicators.update());
         textTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-
         // Calculate the FPS
         totalTime = tap::arch::clock::getTimeMicroseconds() - fpsTime;
         fps = 1000000.0f / totalTime;

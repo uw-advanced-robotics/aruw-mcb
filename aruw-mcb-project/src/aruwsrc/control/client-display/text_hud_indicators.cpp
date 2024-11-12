@@ -46,6 +46,8 @@ modm::ResumableResult<bool> TextHudIndicators::update()
         jamTimeout.restart(JAM_TIMEOUT_MS);
     }
 
+    memcpy(prevStates, states, sizeof(states));
+
     // Defined outside due to RF
     states[AGITATOR_JAMMED] = jamTimeout.isExpired();
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
@@ -64,9 +66,12 @@ modm::ResumableResult<bool> TextHudIndicators::update()
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
-        textHudIndicatorGraphics[index].graphicData.operation =
-            states[index] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
-        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
+        if (prevStates[index] != states[index])
+        {
+            textHudIndicatorGraphics[index].graphicData.operation =
+                states[index] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
+            RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
+        }
     }
 
     RF_END();
@@ -75,13 +80,6 @@ modm::ResumableResult<bool> TextHudIndicators::update()
 modm::ResumableResult<bool> TextHudIndicators::sendInitialGraphics()
 {
     RF_BEGIN(1);
-
-    // send all text indicators
-    for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
-    {
-        RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
-    }
-
     RF_END();
 }
 
