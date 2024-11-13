@@ -81,7 +81,7 @@ private:
     float x, y;
     aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
 
-    uint32_t prevTimestamp; 
+    uint32_t prevTimestamp;
     float prevComputedAngle = -1.0;
 
     static inline bool anglesAreClose(float angle1, float angle2)
