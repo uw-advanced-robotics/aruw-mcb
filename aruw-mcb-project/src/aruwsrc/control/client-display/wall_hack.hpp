@@ -34,10 +34,8 @@
 using namespace aruwsrc::algorithms::transforms;
 using tap::algorithms::CMSISMat;
 
-
 namespace aruwsrc::control::client_display
 {
-
 /**
  * Draws a square where the enemy robot is.
  */
@@ -67,14 +65,14 @@ private:
     TransformerInterface *transformer;
 
     modm::Vector3f enemyPositionVector, robotPositionVector, enemyPositionTransformed;
-    CMSISMat<3,1> enemyPosition, robotPosition;
+    CMSISMat<3, 1> enemyPosition, robotPosition;
 
     Tx::Graphic1Message visionTargetGraphic;
 
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
     static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
 
-    CMSISMat<4,4> projectionMatrix;
+    CMSISMat<4, 4> projectionMatrix;
 
     int SQUARE_SIZE = 30;
 
@@ -93,14 +91,9 @@ private:
      *  z -> y
      * -x -> z
      */
-    CMSISMat<3,3> swapAxesMatrix = {{
-         0, -1, 0,
-         0,  0, 1,
-        -1,  0, 0
-    }};
+    CMSISMat<3, 3> swapAxesMatrix = {{0, -1, 0, 0, 0, 1, -1, 0, 0}};
 
     uint32_t computedScreenX, computedScreenY;
-
 };
 
 }  // namespace aruwsrc::control::client_display

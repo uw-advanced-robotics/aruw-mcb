@@ -41,7 +41,6 @@
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
-
 #include "wall_hack.hpp"
 
 namespace tap::control
