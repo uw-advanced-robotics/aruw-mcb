@@ -35,13 +35,11 @@
 #include "modm/processing/protothread.hpp"
 
 #include "ammo_indicator.hpp"
-#include "boolean_hud_indicators.hpp"
 #include "cap_bank_indicator.hpp"
-#include "chassis_orientation_indicator.hpp"
 #include "circle_crosshair.hpp"
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
-#include "reticle_indicator.hpp"
+#include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 
 namespace tap::control
@@ -126,16 +124,13 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-    BooleanHudIndicators booleanHudIndicators;
     CapBankIndicator capBankIndicator;
-    ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
-    // Deprecated, not found useful in current HUD
-    ReticleIndicator reticleIndicator;
     VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
+    TextHudIndicators textHudIndicators;
 
     bool restarting = true;
 

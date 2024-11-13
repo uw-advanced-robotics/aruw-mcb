@@ -51,17 +51,7 @@ ClientDisplayCommand::ClientDisplayCommand(
       visionCoprocessor(visionCoprocessor),
       commandScheduler(commandScheduler),
       refSerialTransmitter(&drivers),
-      booleanHudIndicators(
-          commandScheduler,
-          refSerialTransmitter,
-          agitatorSubsystem,
-          imuCalibrateCommand),
       capBankIndicator(refSerialTransmitter, capBank),
-      chassisOrientationIndicator(
-          drivers,
-          refSerialTransmitter,
-          robotTurretSubsystem,
-          avoidanceCommands),
       positionHudIndicators(
           drivers,
           visionCoprocessor,
@@ -70,11 +60,16 @@ ClientDisplayCommand::ClientDisplayCommand(
           robotTurretSubsystem,
           multiShotHandler,
           cvOnTargetManager),
-      reticleIndicator(drivers, refSerialTransmitter),
       visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
       circleCrosshair(refSerialTransmitter),
-      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter)
+      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter),
+      textHudIndicators(
+          drivers,
+          agitatorSubsystem,
+          imuCalibrateCommand,
+          avoidanceCommands,
+          refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -91,14 +86,13 @@ void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
 
-    booleanHudIndicators.initialize();
     capBankIndicator.initialize();
-    chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
     visionHudIndicators.initialize();
     ammoIndicator.initialize();
     circleCrosshair.initialize();
     damageIndicator.initialize();
+    textHudIndicators.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -121,26 +115,24 @@ bool ClientDisplayCommand::run()
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
-    PT_CALL(booleanHudIndicators.sendInitialGraphics());
     PT_CALL(capBankIndicator.sendInitialGraphics());
-    PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
     PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
     PT_CALL(circleCrosshair.sendInitialGraphics());
-    PT_CALL(damageIndicator.update());
+    PT_CALL(damageIndicator.sendInitialGraphics());
+    PT_CALL(textHudIndicators.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
-        PT_CALL(booleanHudIndicators.update());
         PT_CALL(capBankIndicator.update());
-        PT_CALL(chassisOrientationIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(visionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
+        PT_CALL(textHudIndicators.update());
 
         PT_YIELD();
     }

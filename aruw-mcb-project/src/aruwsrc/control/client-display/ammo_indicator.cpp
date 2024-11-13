@@ -39,9 +39,9 @@ void AmmoIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &bulletsRemainingGraphics.graphicData,
         bulletsRemainingName,
-        Tx::GRAPHIC_DELETE,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::YELLOW);
+        Tx::GraphicColor::ORANGE);
 
     RefSerialTransmitter::configCharacterMsg(
         TEXT_SIZE,
@@ -63,6 +63,9 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 
 modm::ResumableResult<bool> AmmoIndicator::update()
 {
+    int prevBulletCount = bulletCount;
+    uint32_t prevOp = bulletsRemainingGraphics.graphicData.operation;
+
     RF_BEGIN(1);
 
     // Access the correct field depending on the robot type
@@ -96,8 +99,11 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     // Updates the length of the string, needed as on initialization it is 0 length string
     bulletsRemainingGraphics.graphicData.endAngle = TEXT_BUFFER_SIZE;
 
-    // Actually send the graphic
-    RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
+    // If the bullet count has changed, or the operation has changed, send the graphic
+    if (prevBulletCount != bulletCount || prevOp != bulletsRemainingGraphics.graphicData.operation)
+    {
+        RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
+    }
 
     RF_END();
 }

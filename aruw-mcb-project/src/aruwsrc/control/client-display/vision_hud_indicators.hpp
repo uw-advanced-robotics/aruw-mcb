@@ -28,9 +28,9 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
+#include "old/reticle_indicator.hpp"
 
 #include "hud_indicator.hpp"
-#include "reticle_indicator.hpp"
 
 namespace aruwsrc::control::client_display
 {

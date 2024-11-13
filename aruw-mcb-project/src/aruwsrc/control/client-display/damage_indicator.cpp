@@ -37,36 +37,32 @@ DamageIndicator::DamageIndicator(
 
 modm::ResumableResult<bool> DamageIndicator::update()
 {
+    float hitAngleRadian = 0;
+    uint32_t prevOperation = -1;
+    bool angleIsClose = false;
+
     RF_BEGIN(1);
 
-    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
-
-    currentTime = tap::arch::clock::getTimeMilliseconds();
-    if (peakAngleBin.radians.getWrappedValue() != peakAngleBin.radians.getWrappedValue())
+    // Check if current angle is different from previous angle
+    if (plateHitTracker.getPeakAnglesRadians()[0].radians.getWrappedValue() !=
+        peakAngleBin.radians.getWrappedValue())
     {
-        prevTimestamp = currentTime;
+        decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     }
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     // Get position of hit in turret frame + offset
     hitAngleRadian = peakAngleBin.radians.getWrappedValue();
     hitAngleRadian += -turretSubsystem.getWorldYaw();
     hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
-    // Calculate x and y position of hit
-    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
-    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        X_POS + x,
-        Y_POS + y,
-        X_POS + x,
-        Y_POS + LINE_LENGTH + y,
-        &damageGraphic.graphicData);
+    // Check if the angle is close to the previous angle
+    angleIsClose = anglesAreClose(hitAngleRadian, prevComputedAngle);
+    prevComputedAngle = hitAngleRadian;
 
     prevOperation = damageGraphic.graphicData.operation;
 
-    if (currentTime - prevTimestamp < DECAY_TIMEOUT_MILLIS)
+    if (!decayTimeout.isExpired())
     {
         damageGraphic.graphicData.operation =
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
@@ -76,6 +72,24 @@ modm::ResumableResult<bool> DamageIndicator::update()
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
 
+    // Calculate x and y position of hit
+    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
+    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
+
+    // If the angles aren't different and the operation is the same, don't send the graphic
+    if (angleIsClose && prevOperation == damageGraphic.graphicData.operation)
+    {
+        RF_RETURN(true);
+    }
+
+    RefSerialTransmitter::configLine(
+        DAMAGE_INDICATOR_THICKNESS,
+        X_POS + x,
+        Y_POS + y,
+        X_POS + x,
+        Y_POS + LINE_LENGTH + y,
+        &damageGraphic.graphicData);
+
     RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
     RF_END();
@@ -83,11 +97,8 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
+    decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     RF_BEGIN(0);
-
-    // We do this so that the graphic gets drawn to begin with
-    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
-
     RF_END();
 }
 
