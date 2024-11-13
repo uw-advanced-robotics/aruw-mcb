@@ -69,21 +69,21 @@ public:
 
     const char *getName() const override
     {
-        return defaultCommandSelected ? commandWhenGovernorsReady.getName()
-                                        : fallbackCommand.getName();
+        return governedCommandSelected ? commandWhenGovernorsReady.getName()
+                                       : fallbackCommand.getName();
     }
 
     bool isReady() override
     {
-        defaultCommandSelected = checkGovernorReadiness();
+        governedCommandSelected = checkGovernorReadiness();
 
-        return (defaultCommandSelected && commandWhenGovernorsReady.isReady()) ||
-               (!defaultCommandSelected && fallbackCommand.isReady());
+        return (governedCommandSelected && commandWhenGovernorsReady.isReady()) ||
+               (!governedCommandSelected && fallbackCommand.isReady());
     }
 
     void initialize() override
     {
-        if (defaultCommandSelected)
+        if (governedCommandSelected)
         {
             commandWhenGovernorsReady.initialize();
         }
@@ -95,7 +95,7 @@ public:
 
     void execute() override
     {
-        if (defaultCommandSelected)
+        if (governedCommandSelected)
         {
             commandWhenGovernorsReady.execute();
         }
@@ -107,7 +107,7 @@ public:
 
     void end(bool interrupted) override
     {
-        if (defaultCommandSelected)
+        if (governedCommandSelected)
         {
             commandWhenGovernorsReady.end(interrupted);
         }
@@ -119,13 +119,16 @@ public:
 
     bool isFinished() const override
     {
-        return defaultCommandSelected
-                   ? (commandWhenGovernorsReady.isFinished() || checkAnyGovernorFinished())
-                   : (fallbackCommand.isFinished() || (stopFallbackCommandIfGovernorsReady && checkGovernorReadiness()));
+        if (governedCommandSelected)
+        {
+            return commandWhenGovernorsReady.isFinished() || checkAnyGovernorFinished();
+        }
+        return fallbackCommand.isFinished() ||
+               (stopFallbackCommandIfGovernorsReady && checkGovernorReadiness());
     }
 
 private:
-    bool defaultCommandSelected = false;
+    bool governedCommandSelected = false;
     Command &commandWhenGovernorsReady;
     Command &fallbackCommand;
 

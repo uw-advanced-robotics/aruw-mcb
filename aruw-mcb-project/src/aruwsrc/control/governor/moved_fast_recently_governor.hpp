@@ -44,14 +44,11 @@ public:
      * @param durationBuffer Time since last moved too fast in milliseconds to run the command blocked.
      */
     MovedFastRecentlyGovernor(
-        tap::Drivers* drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
         const float speedBuffer,
         const uint32_t durationBuffer,
         const bool inverted=false)
-        : drivers(drivers),
-          chassis(chassis),
+        : 
           operatorInterface(operatorInterface),
           speedBuffer(speedBuffer),
           durationBuffer(durationBuffer),
@@ -64,8 +61,6 @@ public:
     bool isFinished() final { return inverted != !timeSinceLastFastMovement(); }
 
 private:
-    tap::Drivers* drivers;
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
     const float speedBuffer;
@@ -78,16 +73,8 @@ private:
     {
         const auto currentTime = tap::arch::clock::getTimeMilliseconds();
 
-        float x = 0.0f;
-        float y = 0.0f;
-
-        aruwsrc::chassis::ChassisRelDrive::computeDesiredUserTranslation(
-            &operatorInterface,
-            drivers,
-            chassis,
-            0,
-            &x,
-            &y);
+        float x = operatorInterface.getChassisXInput();
+        float y = operatorInterface.getChassisYInput();
 
         if (fabsf(x) > speedBuffer || fabsf(y) > speedBuffer) {
             lastTimeTooFast = currentTime;
