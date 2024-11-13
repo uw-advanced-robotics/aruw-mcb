@@ -64,17 +64,15 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     TransformerInterface *transformer;
 
-    modm::Vector3f enemyPositionVector, robotPositionVector, enemyPositionTransformed;
-    CMSISMat<3, 1> enemyPosition, robotPosition;
-
     Tx::Graphic1Message visionTargetGraphic;
-
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
     static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
+    static constexpr int SQUARE_SIZE = 30;
+
+    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionCameraAxes;
+    modm::Vector3f enemyPositionScreenFrame;
 
     CMSISMat<4, 4> projectionMatrix;
-
-    int SQUARE_SIZE = 30;
 
     float horizontalFOV = 135;
     float verticalFOV = 90;
@@ -83,15 +81,21 @@ private:
 
     void setProjectionMatrix();
 
-    modm::Vector3f convertVectorByProjectionMatrix(modm::Vector3f &vector);
+    modm::Vector3f convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector);
 
+    // clang-format off
     /**
      * Swaps:
      * -y -> x
      *  z -> y
      * -x -> z
      */
-    CMSISMat<3, 3> swapAxesMatrix = {{0, -1, 0, 0, 0, 1, -1, 0, 0}};
+    CMSISMat<3, 3> swapAxesMatrix = {
+        {0, -1, 0,
+         0, 0, 1,
+        -1, 0, 0}
+    };
+    // clang-format on
 
     uint32_t computedScreenX, computedScreenY;
 };

@@ -36,30 +36,25 @@ WallHack::WallHack(
 
 modm::ResumableResult<bool> WallHack::update()
 {
-    auto robotPos = transformer->getWorldToTurret(0);
-    robotPositionVector.x = robotPos.getX();
-    robotPositionVector.y = robotPos.getY();
-    robotPositionVector.z = robotPos.getZ();
-
     auto aimData = visionCoprocessor.getLastAimData(0);
 
-    Position enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
-    enemyPosition = transformer->getWorldToTurret(0).apply(enemyPosition);
+    // Get pos
+    enemyPositionWorldFrame = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+    // Convert to turret frame
+    enemyPositionTurretFrame = transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame);
+    // Swap axes to match camera math
+    enemyPositionCameraAxes = swapAxesMatrix * enemyPositionTurretFrame.coordinates();
 
-    // Swap axes
-    enemyPosition = swapAxesMatrix * enemyPosition.coordinates();
-    enemyPositionVector.x = enemyPosition.x();
-    enemyPositionVector.y = enemyPosition.y();
-    enemyPositionVector.z = enemyPosition.z();
+    CMSISMat<3, 1> enemyPositionVector = enemyPositionCameraAxes.coordinates();
 
-    enemyPositionTransformed = convertVectorByProjectionMatrix(enemyPositionVector);
+    enemyPositionScreenFrame = convertVectorByProjectionMatrix(enemyPositionVector);
 
     computedScreenX = std::clamp(
-        (int)((enemyPositionTransformed.x + 1) * 0.5f * SCREEN_WIDTH),
+        (int)((enemyPositionScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH),
         0,
         (SCREEN_WIDTH - 1));
     computedScreenY = std::clamp(
-        (int)((1 - enemyPositionTransformed.y) * 0.5f * SCREEN_HEIGHT),
+        (int)((1 - enemyPositionScreenFrame.y) * 0.5f * SCREEN_HEIGHT),
         0,
         SCREEN_HEIGHT - 1);
 
@@ -121,12 +116,12 @@ void WallHack::setProjectionMatrix()
     projectionMatrix.data[4 * 3 + 3] = 0;
 }
 
-modm::Vector3f WallHack::convertVectorByProjectionMatrix(modm::Vector3f &vector)
+modm::Vector3f WallHack::convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector)
 {
     CMSISMat<4, 1> vec;
-    vec.data[0] = vector.x;
-    vec.data[1] = vector.y;
-    vec.data[2] = vector.z;
+    vec.data[0] = vector.data[0];
+    vec.data[1] = vector.data[1];
+    vec.data[2] = vector.data[2];
     vec.data[3] = 1.0f;
 
     CMSISMat<4, 1> result = projectionMatrix * vec;
