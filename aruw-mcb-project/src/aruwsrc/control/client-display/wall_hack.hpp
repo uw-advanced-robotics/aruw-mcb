@@ -121,7 +121,6 @@ private:
         vec.y = pos.y;
         vec.z = pos.z;
     }
-
 };
 
 }  // namespace aruwsrc::control::client_display
