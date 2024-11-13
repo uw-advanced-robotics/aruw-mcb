@@ -64,7 +64,7 @@ modm::ResumableResult<bool> WallHack::update()
         0,
         (SCREEN_WIDTH - 1));
     computedScreenY = std::clamp(
-        (int)((1 - enemyPositionScreenFrame.y) * 0.5f * SCREEN_HEIGHT),
+        (int)((enemyPositionScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
         0,
         SCREEN_HEIGHT - 1);
 
