@@ -45,6 +45,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     algorithms::PlateHitTracker &plateHitTracker,
+    TransformerInterface *transformer,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
@@ -69,7 +70,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           agitatorSubsystem,
           imuCalibrateCommand,
           avoidanceCommands,
-          refSerialTransmitter)
+          refSerialTransmitter),
+      wallHack(visionCoprocessor, refSerialTransmitter, transformer)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -93,6 +95,8 @@ void ClientDisplayCommand::restartHud()
     circleCrosshair.initialize();
     damageIndicator.initialize();
     textHudIndicators.initialize();
+
+    wallHack.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -123,6 +127,8 @@ bool ClientDisplayCommand::run()
     PT_CALL(damageIndicator.sendInitialGraphics());
     PT_CALL(textHudIndicators.sendInitialGraphics());
 
+    PT_CALL(wallHack.sendInitialGraphics());
+
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
@@ -133,6 +139,8 @@ bool ClientDisplayCommand::run()
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
         PT_CALL(textHudIndicators.update());
+
+        PT_CALL(wallHack.update());
 
         PT_YIELD();
     }

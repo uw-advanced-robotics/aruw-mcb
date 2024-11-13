@@ -42,6 +42,8 @@
 #include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 
+#include "wall_hack.hpp"
+
 namespace tap::control
 {
 class Subsystem;
@@ -107,6 +109,7 @@ public:
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+        TransformerInterface *transformer,
         const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
@@ -131,6 +134,7 @@ private:
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
+    WallHack wallHack;
 
     bool restarting = true;
 
