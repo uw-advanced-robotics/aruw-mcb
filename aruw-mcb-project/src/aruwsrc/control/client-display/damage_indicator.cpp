@@ -97,6 +97,7 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
+    decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     RF_BEGIN(0);
     RF_END();
 }
