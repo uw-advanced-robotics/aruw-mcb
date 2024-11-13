@@ -126,31 +126,13 @@ bool ClientDisplayCommand::run()
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
-        fpsTime = tap::arch::clock::getTimeMicroseconds();
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(capBankIndicator.update());
-        capBankTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(positionHudIndicators.update());
-        positionTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(visionHudIndicators.update());
-        visionTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(ammoIndicator.update());
-        ammoTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(circleCrosshair.update());
-        circleTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(damageIndicator.update());
-        damageTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(textHudIndicators.update());
-        textTime = tap::arch::clock::getTimeMicroseconds() - startTime;
-        // Calculate the FPS
-        totalTime = tap::arch::clock::getTimeMicroseconds() - fpsTime;
-        fps = 1000000.0f / totalTime;
 
         PT_YIELD();
     }

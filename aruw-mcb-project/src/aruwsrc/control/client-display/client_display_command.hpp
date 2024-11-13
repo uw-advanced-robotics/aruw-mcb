@@ -135,12 +135,6 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
 
-    int startTime, totalTime, capBankTime, positionTime, visionTime, ammoTime, circleTime,
-        damageTime, textTime;
-
-    int fpsTime;
-    float fps;
-
     bool restarting = true;
 
     bool run();
