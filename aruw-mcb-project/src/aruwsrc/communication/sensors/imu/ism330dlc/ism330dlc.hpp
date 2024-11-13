@@ -29,6 +29,9 @@
 #include "tap/util_macros.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 
+#define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
+    (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
+
 using namespace modm;
 
 namespace aruwsrc::communication::sensors::imu
@@ -77,6 +80,8 @@ private:
     accFs accFsSetting = accFs::FS_2G;
     gyroFs gyroFsSetting = gyroFs::FS_125DPS;
 
+    uint32_t prevIMUDataReceivedTime;
+
     uint8_t rxBuff[14] = {};
     
 	modm::ResumableResult<bool>
@@ -85,7 +90,77 @@ private:
     modm::ResumableResult<bool>
     write(ism330dlcData::Register reg, uint8_t* data, int size);
 
+    
+    uint8_t allData[30] = {};
+    bool worked = false;
+
 };
+
+template<class I2cMaster>
+void Ism330dlc<I2cMaster>::periodicIMUUpdate()
+{
+    // uint8_t rxBuff[6] = {};
+
+    prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+
+    worked = RF_CALL_BLOCKING(read(OUT_TEMP_L, allData, 30));
+
+    // We read starting from the lowest accelerometer register address since
+    // all of our registers are contiguous
+    RF_CALL_BLOCKING(read(OUTX_L_XL, rxBuff, 6 * sizeof(uint8_t)));
+    data.accRaw[ImuData::X] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+    data.accRaw[ImuData::Y] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 2);
+    data.accRaw[ImuData::Z] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 4);
+
+    // RF_CALL_BLOCKING(read(OUTX_L_XL, rxBuff, 2 * sizeof(uint8_t)));
+    // data.accRaw[ImuData::X] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+    // RF_CALL_BLOCKING(read(OUTY_L_XL, rxBuff, 2 * sizeof(uint8_t)));
+    // data.accRaw[ImuData::Y] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+    // RF_CALL_BLOCKING(read(OUTZ_L_XL, rxBuff, 2 * sizeof(uint8_t)));
+    // data.accRaw[ImuData::Z] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+
+    // RF_CALL_BLOCKING(read(OUTX_L_G, rxBuff, 6 * sizeof(uint8_t)));
+    // data.gyroRaw[ImuData::X] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+    // data.gyroRaw[ImuData::Y] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 2);
+    // data.gyroRaw[ImuData::Z] = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 4);
+
+    // RF_CALL_BLOCKING(read(OUT_TEMP_L, rxBuff, 2 * sizeof(uint8_t)));
+    // float temperatureRaw = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
+    // data.temperature = temperatureRaw * CELSIUS_PER_COUNT;
+    
+    data.gyro[ImuData::X] = static_cast<float>(gyroFsSetting) * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::X];
+    data.gyro[ImuData::Y] = static_cast<float>(gyroFsSetting) * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::Y];
+    data.gyro[ImuData::Z] = static_cast<float>(gyroFsSetting) * GYRO_DPS_PER_COUNT * data.gyroRaw[ImuData::Z];
+
+    data.acc[ImuData::X] = static_cast<float>(accFsSetting) * ACC_MPS_PER_COUNT * data.accRaw[ImuData::X];
+    data.acc[ImuData::Y] = static_cast<float>(accFsSetting) * ACC_MPS_PER_COUNT * data.accRaw[ImuData::Y];
+    data.acc[ImuData::Z] = static_cast<float>(accFsSetting) * ACC_MPS_PER_COUNT * data.accRaw[ImuData::Z];
 }
+
+template<class I2cMaster>
+modm::ResumableResult<bool> Ism330dlc<I2cMaster>::read(ism330dlcData::Register reg, uint8_t* data, int size) {
+    RF_BEGIN();
+
+    data[0] = static_cast<uint8_t>(reg);
+    RF_WAIT_WHILE(!this->transaction.configureWriteRead(data, 1, data, 6 * sizeof(uint8_t)));
+
+    RF_END_RETURN_CALL(this->runTransaction());
+}
+
+
+// Data to write should start at data[1], as data[0] will be overwritten with register address
+// template<std::unsigned_integral T>
+template<class I2cMaster>
+modm::ResumableResult<bool> Ism330dlc<I2cMaster>::write(ism330dlcData::Register reg, uint8_t* data, int size)
+{
+    RF_BEGIN();
+    data[0] = static_cast<uint8_t>(reg);
+
+    this->transaction.configureWrite(data, size);
+
+    RF_END_RETURN_CALL(this->runTransaction());
+}
+
+} // namespace aruwsrc::communication::sensors::imu
 
 #endif //ISM330DLC_HPP_

@@ -80,6 +80,8 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
+bool gotPinged = false;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -108,6 +110,11 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
+#if defined(TARGET_TESTBED)
+            PROFILE(drivers->profiler, drivers->ism330dlc.periodicIMUUpdate, ());
+            gotPinged = drivers->ism330dlc.ping().getResult();
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
@@ -129,6 +136,7 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
+
         }
         modm::delay_us(10);
     }
@@ -146,6 +154,12 @@ static void initializeIo(Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
+
+#if defined(TARGET_TESTBED)
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 100'000>();
+#endif
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();

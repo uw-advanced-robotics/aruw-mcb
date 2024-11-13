@@ -36,13 +36,11 @@ class Drivers : public tap::Drivers
 public:
 #endif
     Drivers() : tap::Drivers(),
-                ism330dlc(),
-                ism330dlcTerminalSerialHandler(this, &this->ism330dlc)
+                ism330dlc(0x6A)
     {}
 
 public:
-    aruwsrc::communication::sensors::imu::Ism330dlc<I2cMaster> ism330dlc;
-    tap::communication::sensors::imu::ImuTerminalSerialHandler ism330dlcTerminalSerialHandler;
+    aruwsrc::communication::sensors::imu::Ism330dlc<Board::I2CMaster> ism330dlc;
 
 
 };  // class aruwsrc::TestbedDrivers
