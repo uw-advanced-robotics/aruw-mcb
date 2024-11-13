@@ -37,28 +37,32 @@ DamageIndicator::DamageIndicator(
 
 modm::ResumableResult<bool> DamageIndicator::update()
 {
+    float hitAngleRadian = 0;
+    uint32_t prevOperation = -1;
+    bool angleIsClose = false;
+
     RF_BEGIN(1);
 
-    prevPeakAngle = peakAngleBin.radians.getWrappedValue();
-    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
-
-    currentTime = tap::arch::clock::getTimeMilliseconds();
-    if (peakAngleBin.radians.getWrappedValue() != prevPeakAngle)
+    // Check if current angle is different from previous angle
+    if (plateHitTracker.getPeakAnglesRadians()[0].radians.getWrappedValue() !=
+        peakAngleBin.radians.getWrappedValue())
     {
-        prevTimestamp = currentTime;
+        decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     }
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     // Get position of hit in turret frame + offset
     hitAngleRadian = peakAngleBin.radians.getWrappedValue();
     hitAngleRadian += -turretSubsystem.getWorldYaw();
     hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
-    currentAngleSameAsPrev = anglesAreClose(hitAngleRadian, prevComputedAngle);
+    // Check if the angle is close to the previous angle
+    angleIsClose = anglesAreClose(hitAngleRadian, prevComputedAngle);
     prevComputedAngle = hitAngleRadian;
 
     prevOperation = damageGraphic.graphicData.operation;
 
-    if (currentTime - prevTimestamp < DECAY_TIMEOUT_MILLIS)
+    if (!decayTimeout.isExpired())
     {
         damageGraphic.graphicData.operation =
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
@@ -72,7 +76,8 @@ modm::ResumableResult<bool> DamageIndicator::update()
     x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
     y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
 
-    if (currentAngleSameAsPrev && prevOperation == damageGraphic.graphicData.operation)
+    // If the angles aren't different and the operation is the same, don't send the graphic
+    if (angleIsClose && prevOperation == damageGraphic.graphicData.operation)
     {
         RF_RETURN(true);
     }
@@ -93,10 +98,6 @@ modm::ResumableResult<bool> DamageIndicator::update()
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
-
-    // We do this so that the graphic gets drawn to begin with
-    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
-
     RF_END();
 }
 
