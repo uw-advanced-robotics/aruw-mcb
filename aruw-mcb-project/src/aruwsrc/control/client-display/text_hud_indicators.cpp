@@ -48,7 +48,7 @@ modm::ResumableResult<bool> TextHudIndicators::update()
 
     memcpy(prevStates, states, sizeof(states));
 
-    // Defined outside due to RF
+    // Update states
     states[AGITATOR_JAMMED] = jamTimeout.isExpired();
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
     states[NOT_SPINNING] = true;
@@ -60,12 +60,13 @@ modm::ResumableResult<bool> TextHudIndicators::update()
     }
 
     // Check if we are actually in a match
-    states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage != Rx::GameStage::PREMATCH;
+    states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage == Rx::GameStage::IN_GAME;
 
     RF_BEGIN(0);
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
+        // If the state has changed, update the graphic
         if (prevStates[index] != states[index])
         {
             textHudIndicatorGraphics[index].graphicData.operation =
