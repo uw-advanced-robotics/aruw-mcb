@@ -63,9 +63,10 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 
 modm::ResumableResult<bool> AmmoIndicator::update()
 {
-    RF_BEGIN(1);
+    int prevBulletCount = bulletCount;
+    uint32_t prevOp = bulletsRemainingGraphics.graphicData.operation;
 
-    prevBulletCount = bulletCount;
+    RF_BEGIN(1);
 
     // Access the correct field depending on the robot type
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
@@ -76,12 +77,6 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     else
     {
         bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
-    }
-
-    if (prevBulletCount == bulletCount)
-    {
-        // If the count hasn't changed, don't update the graphic
-        RF_RETURN(false);
     }
 
     // Appends the current bullet count to the "AMMO: " text
@@ -104,8 +99,11 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     // Updates the length of the string, needed as on initialization it is 0 length string
     bulletsRemainingGraphics.graphicData.endAngle = TEXT_BUFFER_SIZE;
 
-    // Actually send the graphic
-    RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
+    // If the bullet count has changed, or the operation has changed, send the graphic
+    if (prevBulletCount != bulletCount || prevOp != bulletsRemainingGraphics.graphicData.operation)
+    {
+        RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
+    }
 
     RF_END();
 }

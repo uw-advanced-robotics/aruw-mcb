@@ -65,7 +65,6 @@ private:
     Tx::GraphicCharacterMessage bulletsRemainingGraphics;
 
     int bulletCount = -1;
-    int prevBulletCount = -1;
 
     const tap::communication::serial::RefSerial &refSerial;
 
