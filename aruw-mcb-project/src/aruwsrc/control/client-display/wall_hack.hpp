@@ -98,6 +98,30 @@ private:
     // clang-format on
 
     uint32_t computedScreenX, computedScreenY;
+
+    // SCREW OZONE DEBUGGING WITH VARIABLES
+    struct Vector3
+    {
+        float x;
+        float y;
+        float z;
+    };
+    Vector3 worldFrame, turretFrame, cameraAxes, screenFrame;
+
+    inline void copyToVector3(Vector3 &vec, Position &pos)
+    {
+        vec.x = pos.x();
+        vec.y = pos.y();
+        vec.z = pos.z();
+    }
+
+    inline void copyToVector3(Vector3 &vec, modm::Vector3f &pos)
+    {
+        vec.x = pos.x;
+        vec.y = pos.y;
+        vec.z = pos.z;
+    }
+
 };
 
 }  // namespace aruwsrc::control::client_display

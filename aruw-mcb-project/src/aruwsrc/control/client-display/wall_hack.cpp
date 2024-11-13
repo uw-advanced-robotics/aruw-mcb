@@ -29,7 +29,11 @@ WallHack::WallHack(
     TransformerInterface *transformer)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
-      transformer(transformer)
+      transformer(transformer),
+      enemyPositionWorldFrame(0, 0, 0),
+      enemyPositionTurretFrame(0, 0, 0),
+      enemyPositionCameraAxes(0, 0, 0),
+      enemyPositionScreenFrame(0, 0, 0)
 {
     setProjectionMatrix();
 }
@@ -40,14 +44,20 @@ modm::ResumableResult<bool> WallHack::update()
 
     // Get pos
     enemyPositionWorldFrame = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+    copyToVector3(worldFrame, enemyPositionWorldFrame);
+
     // Convert to turret frame
     enemyPositionTurretFrame = transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame);
+    copyToVector3(turretFrame, enemyPositionTurretFrame);
+
     // Swap axes to match camera math
     enemyPositionCameraAxes = swapAxesMatrix * enemyPositionTurretFrame.coordinates();
+    copyToVector3(cameraAxes, enemyPositionCameraAxes);
 
     CMSISMat<3, 1> enemyPositionVector = enemyPositionCameraAxes.coordinates();
 
     enemyPositionScreenFrame = convertVectorByProjectionMatrix(enemyPositionVector);
+    copyToVector3(screenFrame, enemyPositionScreenFrame);
 
     computedScreenX = std::clamp(
         (int)((enemyPositionScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH),
