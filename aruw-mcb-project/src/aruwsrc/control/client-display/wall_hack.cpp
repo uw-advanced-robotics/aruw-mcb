@@ -31,6 +31,7 @@ WallHack::WallHack(
       visionCoprocessor(visionCoprocessor),
       transformer(transformer)
 {
+    setProjectionMatrix();
 }
 
 modm::ResumableResult<bool> WallHack::update()
@@ -62,14 +63,14 @@ modm::ResumableResult<bool> WallHack::update()
 
     RF_BEGIN(0);
 
-    if (abs(enemyPositionTransformed.x) > 1 || abs(enemyPositionTransformed.y) > 1)
-    {
-        RF_RETURN(false);
-    }
+    // if (abs(enemyPositionTransformed.x) > 1 || abs(enemyPositionTransformed.y) > 1)
+    // {
+    //     RF_RETURN(false);
+    // }
 
     visionTargetGraphic.graphicData.operation =
-        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_MODIFY
-                                                                        : Tx::GRAPHIC_ADD;
+        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                        : Tx::GRAPHIC_MODIFY;
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
