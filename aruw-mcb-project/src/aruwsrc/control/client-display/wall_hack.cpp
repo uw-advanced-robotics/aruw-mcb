@@ -54,12 +54,14 @@ modm::ResumableResult<bool> WallHack::update()
 
     enemyPositionTransformed = convertVectorByProjectionMatrix(enemyPositionVector);
 
-    computedScreenX = std::min(
-        (uint32_t)(SCREEN_WIDTH - 1),
-        (uint32_t)((enemyPositionTransformed.x + 1) * 0.5 * SCREEN_WIDTH));
-    computedScreenY = std::min(
-        (uint32_t)(SCREEN_HEIGHT - 1),
-        (uint32_t)((1 - enemyPositionTransformed.y) * 0.5 * SCREEN_HEIGHT));
+    computedScreenX = std::clamp(
+        (int)((enemyPositionTransformed.x + 1) * 0.5f * SCREEN_WIDTH),
+        0,
+        (SCREEN_WIDTH - 1));
+    computedScreenY = std::clamp(
+        (int)((1 - enemyPositionTransformed.y) * 0.5f * SCREEN_HEIGHT),
+        0,
+        SCREEN_HEIGHT - 1);
 
     RF_BEGIN(0);
 
@@ -106,14 +108,14 @@ void WallHack::initialize()
 
 void WallHack::setProjectionMatrix()
 {
-    float horizontalScale = 1 / tanf(horizontalFOV * 0.5 * M_PI / 180);
-    float verticalScale = 1 / tanf(verticalFOV * 0.5 * M_PI / 180);
+    float horizontalScale = 1.0f / tanf(horizontalFOV * 0.5 * M_PI / 180);
+    float verticalScale = 1.0f / tanf(verticalFOV * 0.5 * M_PI / 180);
 
     projectionMatrix.data[0] = horizontalScale;
     projectionMatrix.data[4 * 1 + 1] = verticalScale;
 
     projectionMatrix.data[4 * 2 + 2] = -far / (far - near);
-    projectionMatrix.data[4 * 2 + 3] = -1;
+    projectionMatrix.data[4 * 2 + 3] = -1.0f;
 
     projectionMatrix.data[4 * 3 + 2] = -far * near / (far - near);
     projectionMatrix.data[4 * 3 + 3] = 0;
@@ -125,7 +127,7 @@ modm::Vector3f WallHack::convertVectorByProjectionMatrix(modm::Vector3f &vector)
     vec.data[0] = vector.x;
     vec.data[1] = vector.y;
     vec.data[2] = vector.z;
-    vec.data[3] = 1;
+    vec.data[3] = 1.0f;
 
     CMSISMat<4, 1> result = projectionMatrix * vec;
 
