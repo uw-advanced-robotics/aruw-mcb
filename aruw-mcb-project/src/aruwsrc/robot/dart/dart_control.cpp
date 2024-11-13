@@ -20,6 +20,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -27,13 +28,15 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
-
+using namespace dart::subsystem;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -49,20 +52,30 @@ tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, 
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+DartLauncherSubsystem dartLauncher(
+    *drivers(),
+    pullMotor);
 
-void registerDartSubsystems(Drivers*) {}
+void initializeSubsystems() {
+    dartLauncher.initialize();
+}
 
-void setDefaultDartCommands(Drivers*) {}
+void registerDartSubsystems(aruwsrc::dart::Drivers *drivers) {
+    drivers->commandScheduler.registerSubsystem(&dartLauncher);
+}
 
-void startDartCommands(Drivers*) {}
+void setDefaultDartCommands(aruwsrc::dart::Drivers*) {
+    //dartLauncher.setDefaultCommand(&)
+}
 
-void registerDartIoMappings(Drivers*) {}
+void startDartCommands(aruwsrc::dart::Drivers*) {}
+
+void registerDartIoMappings(aruwsrc::dart::Drivers*) {}
 
 }  // namespace dart_control
 namespace aruwsrc::dart
 {
-void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
+void initSubsystemCommands(Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &dart_control::remoteSafeDisconnectFunction);
