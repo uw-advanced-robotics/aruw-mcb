@@ -55,6 +55,9 @@ public:
     modm::ResumableResult<bool> update() override final;
 
 private:
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
+    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
+
     static constexpr uint16_t DAMAGE_INDICATOR_THICKNESS = 20;
     static constexpr uint16_t DAMAGE_INDICATOR_LENGTH = 20;
 
@@ -65,21 +68,26 @@ private:
     static constexpr uint16_t X_POS = SCREEN_WIDTH / 2;
     static constexpr uint16_t Y_POS = SCREEN_HEIGHT / 2;
 
-    Tx::Graphic1Message damageGraphic;
-
-    aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
-
     static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
 
-    float x, y;
-    float hitAngleRadian;
-    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
+    Tx::Graphic1Message damageGraphic;
 
-    uint32_t prevOperation;
-    uint32_t prevTimestamp;
-    uint32_t currentTime;
+    // Gets rounded to nearest bin to reduce calls
+    static constexpr uint16_t DEGREES_MINIMUM_BIN = 3;
+
+    tap::arch::MilliTimeout decayTimeout;
     static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
+
+    float x, y;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
+
+    uint32_t prevTimestamp;
+    float prevComputedAngle = -1.0;
+
+    static inline bool anglesAreClose(float angle1, float angle2)
+    {
+        return std::abs(angle1 - angle2) < modm::toRadian(DEGREES_MINIMUM_BIN);
+    }
 };
 
 }  // namespace aruwsrc::control::client_display

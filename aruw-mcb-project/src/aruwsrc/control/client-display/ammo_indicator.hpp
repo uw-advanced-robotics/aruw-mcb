@@ -54,13 +54,13 @@ public:
 
 private:
     // X position of the text
-    static constexpr uint16_t TEXT_X = 1300;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
     // Y position of the text
-    static constexpr uint16_t TEXT_Y = 800;
+    static constexpr uint16_t TEXT_Y = 200;
     // WIDTH of the text
-    static constexpr uint16_t TEXT_WIDTH = 3;
+    static constexpr uint16_t TEXT_WIDTH = 4;
     // SIZE of the text
-    static constexpr uint16_t TEXT_SIZE = 20;
+    static constexpr uint16_t TEXT_SIZE = 40;
 
     Tx::GraphicCharacterMessage bulletsRemainingGraphics;
 
