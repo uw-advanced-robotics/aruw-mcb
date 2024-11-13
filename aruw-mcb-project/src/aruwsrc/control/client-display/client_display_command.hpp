@@ -33,9 +33,6 @@
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
-#include "old/boolean_hud_indicators.hpp"
-#include "old/chassis_orientation_indicator.hpp"
-#include "old/reticle_indicator.hpp"
 
 #include "ammo_indicator.hpp"
 #include "cap_bank_indicator.hpp"
