@@ -62,7 +62,6 @@ private:
     static constexpr uint16_t TEXT_SIZE = 40;
 
     Tx::GraphicCharacterMessage bulletsRemainingGraphics;
-    tap::arch::PeriodicMilliTimer updateTimer;
 
     int bulletCount = -1;
 
