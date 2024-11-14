@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WALL_HACK_HPP_
-#define WALL_HACK_HPP_
+#ifndef VISION_TARGET_INDICATOR_HPP_
+#define VISION_TARGET_INDICATOR_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/architecture/timeout.hpp"
@@ -40,17 +40,10 @@ namespace aruwsrc::control::client_display
 /**
  * Draws a square where the enemy robot is.
  */
-class WallHack : public HudIndicator, protected modm::Resumable<2>
+class VisionTargetIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
-    /**
-     * Construct a WallHack object.
-     *
-     * @param[in] visionCoprocessor VisionCoprocessor instance.
-     * @param[in] refSerialTransmitter RefSerialTransmitter instance.
-     * @param[in] transformer TransformerInterface instance.
-     */
-    WallHack(
+    VisionTargetIndicator(
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         TransformerInterface *transformer);
@@ -84,4 +77,4 @@ private:
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // WALL_HACK_HPP_
+#endif  // VISION_TARGET_INDICATOR_HPP_

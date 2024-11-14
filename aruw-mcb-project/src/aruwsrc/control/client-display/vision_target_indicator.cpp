@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wall_hack.hpp"
+#include "vision_target_indicator.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-WallHack::WallHack(
+VisionTargetIndicator::VisionTargetIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     RefSerialTransmitter &refSerialTransmitter,
     TransformerInterface *transformer)
@@ -37,7 +37,7 @@ WallHack::WallHack(
 
 float Y_OFFSET = 0.0f;
 float Z_OFFSET = -1.0f;
-modm::ResumableResult<bool> WallHack::update()
+modm::ResumableResult<bool> VisionTargetIndicator::update()
 {
     VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
 
@@ -84,13 +84,13 @@ modm::ResumableResult<bool> WallHack::update()
     RF_END();
 }
 
-modm::ResumableResult<bool> WallHack::sendInitialGraphics()
+modm::ResumableResult<bool> VisionTargetIndicator::sendInitialGraphics()
 {
     RF_BEGIN(1);
     RF_END();
 }
 
-void WallHack::initialize()
+void VisionTargetIndicator::initialize()
 {
     uint8_t indicatorName[3];
 

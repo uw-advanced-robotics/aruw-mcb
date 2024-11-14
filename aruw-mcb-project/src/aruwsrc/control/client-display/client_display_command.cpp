@@ -70,7 +70,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           imuCalibrateCommand,
           avoidanceCommands,
           refSerialTransmitter),
-      wallHack(visionCoprocessor, refSerialTransmitter, transformer),
+      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer),
       fpsIndicator(refSerialTransmitter)
 {
     addSubsystemRequirement(&clientDisplay);
@@ -95,7 +95,7 @@ void ClientDisplayCommand::restartHud()
     damageIndicator.initialize();
     textHudIndicators.initialize();
 
-    wallHack.initialize();
+    visionTargetIndicator.initialize();
 
     fpsIndicator.initialize();
 
@@ -127,7 +127,7 @@ bool ClientDisplayCommand::run()
     PT_CALL(damageIndicator.sendInitialGraphics());
     PT_CALL(textHudIndicators.sendInitialGraphics());
 
-    PT_CALL(wallHack.sendInitialGraphics());
+    PT_CALL(visionTargetIndicator.sendInitialGraphics());
     PT_CALL(fpsIndicator.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop

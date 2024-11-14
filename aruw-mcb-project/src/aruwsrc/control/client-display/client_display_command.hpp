@@ -41,7 +41,7 @@
 #include "fps_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
-#include "wall_hack.hpp"
+#include "vision_target_indicator.hpp"
 
 namespace tap::control
 {
@@ -132,7 +132,7 @@ private:
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
-    WallHack wallHack;
+    VisionTargetIndicator visionTargetIndicator;
     FPSIndicator fpsIndicator;
 
     bool restarting = true;
