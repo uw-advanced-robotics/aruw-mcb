@@ -133,7 +133,7 @@ bool ClientDisplayCommand::run()
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
-        startTime = tap::arch::clock::getTimeMilliseconds();
+        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(capBankIndicator.update());
         PT_CALL(positionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
@@ -145,9 +145,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(fpsIndicator.update());
 
         // Calculate the time it took to update the HUD
-        this->fps = 1000.0f / (tap::arch::clock::getTimeMilliseconds() - startTime) > 1000
-                        ? 1000
-                        : 1000.0f / (tap::arch::clock::getTimeMilliseconds() - startTime);
+        this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
 
         PT_YIELD();
     }
