@@ -24,9 +24,8 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
-#include "modm/processing/resumable.hpp"
-
 #include "../hud_indicator.hpp"
+#include "modm/processing/resumable.hpp"
 
 namespace aruwsrc::control::client_display
 {

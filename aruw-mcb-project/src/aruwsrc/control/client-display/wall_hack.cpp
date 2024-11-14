@@ -32,6 +32,8 @@ WallHack::WallHack(
       transformer(transformer),
       enemyPosition(0, 0, 0)
 {
+    // This is here otherwise the compiler compains that this is unused
+    convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
 }
 
 float Y_OFFSET = 0.0f;
@@ -46,13 +48,13 @@ modm::ResumableResult<bool> WallHack::update()
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
-    ProjectedResult enemyPosScreenFrame =
+    enemyPosScreenFrame =
         convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
 
-    ProjectedResult bottomLeftScreenFrame = convertWorldFrameToScreenFrame(
+    bottomLeftScreenFrame = convertWorldFrameToScreenFrame(
         enemyPosition - plateCornerOffset,
         transformer->getWorldToTurret(0));
-    ProjectedResult topRightScreenFrame = convertWorldFrameToScreenFrame(
+    topRightScreenFrame = convertWorldFrameToScreenFrame(
         enemyPosition - (plateCornerOffset * -1),
         transformer->getWorldToTurret(0));
 
@@ -60,11 +62,8 @@ modm::ResumableResult<bool> WallHack::update()
 
     if (!enemyPosScreenFrame.inFrame)
     {
-        enemyInFrame = false;
         // RF_RETURN(false);
     }
-
-    enemyInFrame = true;
 
     visionTargetGraphic.graphicData.operation =
         visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD

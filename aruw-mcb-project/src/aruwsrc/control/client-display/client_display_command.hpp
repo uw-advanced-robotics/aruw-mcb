@@ -38,10 +38,10 @@
 #include "cap_bank_indicator.hpp"
 #include "circle_crosshair.hpp"
 #include "damage_indicator.hpp"
+#include "fps_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
 #include "wall_hack.hpp"
-#include "fps_indicator.hpp"
 
 namespace tap::control
 {

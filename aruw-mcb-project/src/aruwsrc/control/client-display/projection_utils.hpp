@@ -17,7 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef PROJECTION_UTILS_HPP_
+#define PROJECTION_UTILS_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -30,7 +31,6 @@ using aruwsrc::control::client_display::HudIndicator;
 
 namespace aruwsrc::control::client_display
 {
-
 static constexpr int HORIZONTAL_FOV = 169;
 static constexpr int VERTICAL_FOV = 160;
 
@@ -73,7 +73,8 @@ static CMSISMat<4, 4> getProjectionMatrix()
     projectionMatrix.data[4 * 2 + 2] = -FAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
     projectionMatrix.data[4 * 2 + 3] = -1.0f;
 
-    projectionMatrix.data[4 * 3 + 2] = -FAR_CUTOFF_M * NEAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
+    projectionMatrix.data[4 * 3 + 2] =
+        -FAR_CUTOFF_M * NEAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
     projectionMatrix.data[4 * 3 + 3] = 0;
 
     return projectionMatrix;
@@ -143,3 +144,5 @@ static ProjectedResult convertWorldFrameToScreenFrame(
 }
 
 }  // namespace aruwsrc::control::client_display
+
+#endif  // PROJECTION_UTILS_HPP_

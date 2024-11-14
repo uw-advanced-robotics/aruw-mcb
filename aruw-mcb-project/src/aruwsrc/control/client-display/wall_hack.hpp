@@ -70,12 +70,10 @@ private:
 
     // In world frame
     Position enemyPosition;
-
-    bool enemyInFrame = false;
+    ProjectedResult enemyPosScreenFrame, bottomLeftScreenFrame, topRightScreenFrame;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
     Vector plateCornerOffset = Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
-
 };
 
 }  // namespace aruwsrc::control::client_display

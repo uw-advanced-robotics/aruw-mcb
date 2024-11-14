@@ -57,7 +57,6 @@ private:
     float FPSwithGraphic = 0;
     float FPSwithoutGraphic = 0;
     uint32_t lastTime = 0;
-
 };
 
 }  // namespace aruwsrc::control::client_display
