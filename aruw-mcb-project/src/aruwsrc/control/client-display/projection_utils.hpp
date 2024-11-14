@@ -37,6 +37,29 @@ static constexpr int VERTICAL_FOV = 160;
 static constexpr float NEAR_CUTOFF = 0.1;
 static constexpr float FAR_CUTOFF = 100;
 
+static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
+
+// clang-format off
+static const CMSISMat<3, 3> worldAxesToCameraAxes = {
+    {0, -1, 0,
+     0, 0, 1,
+    -1, 0, 0}
+};
+// clang-format on
+
+struct ProjectedResult
+{
+    bool inFrame;
+    uint32_t screenX;
+    uint32_t screenY;
+};
+
+#if defined(TARGET_STANDARD_CYGNUS)
+static const Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
+#else
+static const Position VTM_OFFSET_FRAME = Position(0, 0, 0);
+#endif
+
 /**
  * Creates a projection matrix.
  */
@@ -58,22 +81,21 @@ static CMSISMat<4, 4> getProjectionMatrix()
     return projectionMatrix;
 };
 
-static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
-
-// clang-format off
-static const CMSISMat<3, 3> worldAxesToCameraAxes = {
-    {0, -1, 0,
-     0, 0, 1,
-    -1, 0, 0}
-};
-// clang-format on
-
-struct ProjectedResult
+static Position convertWorldFrameToCameraFrame(
+    const Position &worldFrame,
+    const Transform &worldToTurret)
 {
-    bool inFrame;
-    uint32_t screenX;
-    uint32_t screenY;
-};
+    Position turretFrame = worldToTurret.apply(worldFrame);
+    return turretFrame + VTM_OFFSET_FRAME;
+}
+
+static ProjectedResult convertWorldFrameToScreenFrame(
+    const Position &worldFrame,
+    const Transform &worldToTurret)
+{
+    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret);
+    return convertCameraFrameToScreenFrame(cameraFrame);
+}
 
 /**
  * Converts a vector from world frame to screen frame.
@@ -118,28 +140,6 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     output.screenY = (result.data[1] + 1) * 0.5f * HudIndicator::SCREEN_HEIGHT;
 
     return output;
-}
-
-#if defined(TARGET_STANDARD_CYGNUS)
-static const Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
-#else
-static const Position VTM_OFFSET_FRAME = Position(0, 0, 0);
-#endif
-
-static Position convertWorldFrameToCameraFrame(
-    const Position &worldFrame,
-    const Transform &worldToTurret)
-{
-    Position turretFrame = worldToTurret.apply(worldFrame);
-    return turretFrame + VTM_OFFSET_FRAME;
-}
-
-static ProjectedResult convertWorldFrameToScreenFrame(
-    const Position &worldFrame,
-    const Transform &worldToTurret)
-{
-    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret);
-    return convertCameraFrameToScreenFrame(cameraFrame);
 }
 
 }  // namespace aruwsrc::control::client_display
