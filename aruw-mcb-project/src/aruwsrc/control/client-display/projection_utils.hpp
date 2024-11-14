@@ -53,9 +53,9 @@ struct ProjectedResult
 };
 
 #if defined(TARGET_STANDARD_CYGNUS)
-static const Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
+static Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
 #else
-static const Position VTM_OFFSET_FRAME = Position(0, 0, 0);
+static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 #endif
 
 /**
