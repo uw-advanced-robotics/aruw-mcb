@@ -41,6 +41,7 @@ modm::ResumableResult<bool> WallHack::update()
     VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
 
     auto aimData = visionCoprocessor.getLastAimData(0);
+    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
@@ -54,8 +55,6 @@ modm::ResumableResult<bool> WallHack::update()
     ProjectedResult topRightScreenFrame = convertWorldFrameToScreenFrame(
         enemyPosition - (plateCornerOffset * -1),
         transformer->getWorldToTurret(0));
-
-    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     RF_BEGIN(0);
 
@@ -104,41 +103,6 @@ void WallHack::initialize()
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::PURPLISH_RED);
-}
-
-void WallHack::setProjectionMatrix()
-{
-    float horizontalScale = 1.0f / tanf(horizontalFOV * 0.5 * M_PI / 180);
-    float verticalScale = 1.0f / tanf(verticalFOV * 0.5 * M_PI / 180);
-
-    projectionMatrix.data[0] = horizontalScale;
-    projectionMatrix.data[4 * 1 + 1] = verticalScale;
-
-    projectionMatrix.data[4 * 2 + 2] = -far / (far - near);
-    projectionMatrix.data[4 * 2 + 3] = -1.0f;
-
-    projectionMatrix.data[4 * 3 + 2] = -far * near / (far - near);
-    projectionMatrix.data[4 * 3 + 3] = 0;
-}
-
-modm::Vector3f WallHack::convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector)
-{
-    vector = swapAxesMatrix * vector;
-
-    CMSISMat<4, 1> vec;
-    vec.data[0] = vector.data[0];
-    vec.data[1] = vector.data[1];
-    vec.data[2] = vector.data[2];
-    vec.data[3] = 1.0f;
-
-    CMSISMat<4, 1> result = projectionMatrix * vec;
-
-    modm::Vector3f resultVec;
-    resultVec.x = result.data[0] / result.data[3];
-    resultVec.y = result.data[1] / result.data[3];
-    resultVec.z = result.data[2] / result.data[3];
-
-    return resultVec;
 }
 
 }  // namespace aruwsrc::control::client_display

@@ -41,6 +41,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
 #include "wall_hack.hpp"
+#include "fps_indicator.hpp"
 
 namespace tap::control
 {
@@ -132,6 +133,7 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
     WallHack wallHack;
+    FPSIndicator fpsIndicator;
 
     bool restarting = true;
 
