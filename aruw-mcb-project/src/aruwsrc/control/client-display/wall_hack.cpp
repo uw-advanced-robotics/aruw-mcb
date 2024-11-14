@@ -34,9 +34,8 @@ WallHack::WallHack(
 {
 }
 
-float Z_OFFSET = 0.0f;
 float Y_OFFSET = 0.0f;
-
+float Z_OFFSET = -1.0f;
 modm::ResumableResult<bool> WallHack::update()
 {
     VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
