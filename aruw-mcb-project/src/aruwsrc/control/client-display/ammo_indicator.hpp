@@ -20,7 +20,6 @@
 #ifndef AMMO_INDICATOR_HPP_
 #define AMMO_INDICATOR_HPP_
 
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
