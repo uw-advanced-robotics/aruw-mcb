@@ -37,47 +37,51 @@ DamageIndicator::DamageIndicator(
 
 modm::ResumableResult<bool> DamageIndicator::update()
 {
-    float hitAngleRadian = 0;
+    float prevPeakAngle = peakAngleBin.radians.getWrappedValue();
     uint32_t prevOperation = -1;
-    bool angleIsClose = false;
 
     RF_BEGIN(1);
 
+    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
+
     // Check if current angle is different from previous angle
-    if (plateHitTracker.getPeakAnglesRadians()[0].radians.getWrappedValue() !=
-        peakAngleBin.radians.getWrappedValue())
+    if (peakAngleBin.radians.getWrappedValue() != prevPeakAngle)
     {
         decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     }
-    peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     // Get position of hit in turret frame + offset
-    hitAngleRadian = peakAngleBin.radians.getWrappedValue();
-    hitAngleRadian += -turretSubsystem.getWorldYaw();
-    hitAngleRadian += INDICATOR_OFFSET_RADIANS;
+    hitAngleRadian = peakAngleBin.radians.getWrappedValue() - turretSubsystem.getWorldYaw() +
+                     INDICATOR_OFFSET_RADIANS;
 
-    // Check if the angle is close to the previous angle
-    angleIsClose = anglesAreClose(hitAngleRadian, prevComputedAngle);
-    prevComputedAngle = hitAngleRadian;
+    // Normalize angle to be between 0 and 2pi
+    hitAngleRadian = fmod(hitAngleRadian, 2 * M_PI);
+    if (hitAngleRadian < 0)
+    {
+        hitAngleRadian += 2 * M_PI;
+    }
 
     prevOperation = damageGraphic.graphicData.operation;
 
-    if (!decayTimeout.isExpired())
+    // If the damage is old or the angle is within +-45 deg
+    if (decayTimeout.isExpired() ||
+        (fmod(hitAngleRadian + CENTER_THRESHOLD, 2 * M_PI) < CENTER_THRESHOLD * 2))
     {
-        damageGraphic.graphicData.operation =
-            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+        damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
     else
     {
-        damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
+        damageGraphic.graphicData.operation =
+            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
     }
 
     // Calculate x and y position of hit
     x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
     y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
 
-    // If the angles aren't different and the operation is the same, don't send the graphic
-    if (angleIsClose && prevOperation == damageGraphic.graphicData.operation)
+    // Don't update the message if you're deleting it and it's already deleted
+    if (prevOperation == Tx::GRAPHIC_DELETE &&
+        damageGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
         RF_RETURN(true);
     }
