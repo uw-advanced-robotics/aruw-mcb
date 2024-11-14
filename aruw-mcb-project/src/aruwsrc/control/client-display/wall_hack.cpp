@@ -172,9 +172,7 @@ modm::Vector3f WallHack::convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector)
     vec.data[2] = vector.data[2];
     vec.data[3] = 1.0f;
 
-    CMSISMat<4,4> temp = cameraDistortionMatrix * projectionMatrix.inverse();
-
-    CMSISMat<4, 1> result = projectionMatrix * temp * vec;
+    CMSISMat<4, 1> result = projectionMatrix * vec;
 
     modm::Vector3f resultVec;
     resultVec.x = result.data[0] / result.data[3];

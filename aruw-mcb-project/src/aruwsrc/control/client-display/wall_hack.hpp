@@ -69,7 +69,8 @@ private:
     static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
     static constexpr int SQUARE_SIZE = 30;
 
-    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionVTMFrame, enemyPositionCameraAxes;
+    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionVTMFrame,
+        enemyPositionCameraAxes;
     modm::Vector3f enemyPositionScreenFrame;
 
     CMSISMat<4, 4> projectionMatrix;
@@ -129,23 +130,6 @@ private:
 
     static constexpr float PLATE_SIZE_M = 0.14;
     int PIXEL_OFFSET_X = 20;
-
-    // clang-format off
-    /**
-     * Camera Matrix:
-        [[8.01013095e+02 0.00000000e+00 1.29972990e+03]
-        [0.00000000e+00 7.94603506e+02 5.50866137e+02]
-        [0.00000000e+00 0.00000000e+00 1.00000000e+00]]
-     */
-    CMSISMat<4, 4> cameraDistortionMatrix = {
-        {801.013095, 0, 1299.72990, 0,
-         0, 794.603506, 550.866137, 0,
-         0, 0, 1, 0,
-         0, 0, 0, 1}
-    };
-    // clang-format on
-
-
 };
 
 }  // namespace aruwsrc::control::client_display
