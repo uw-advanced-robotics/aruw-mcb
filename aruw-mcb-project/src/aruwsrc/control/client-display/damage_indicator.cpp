@@ -51,8 +51,7 @@ modm::ResumableResult<bool> DamageIndicator::update()
     }
 
     // Get position of hit in turret frame + offset
-    hitAngleRadian = peakAngleBin.radians.getWrappedValue() - turretSubsystem.getWorldYaw() +
-                     INDICATOR_OFFSET_RADIANS;
+    hitAngleRadian = peakAngleBin.radians.getWrappedValue() - turretSubsystem.getWorldYaw();
 
     // Normalize angle to be between 0 and 2pi
     hitAngleRadian = fmod(hitAngleRadian, 2 * M_PI);
@@ -74,6 +73,9 @@ modm::ResumableResult<bool> DamageIndicator::update()
         damageGraphic.graphicData.operation =
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
     }
+
+    // Add in offset, because 0 should be top
+    hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
     // Calculate x and y position of hit
     x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
@@ -101,7 +103,6 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
-    decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     RF_BEGIN(0);
     RF_END();
 }
