@@ -32,6 +32,7 @@ WallHack::WallHack(
       transformer(transformer),
       enemyPositionWorldFrame(0, 0, 0),
       enemyPositionTurretFrame(0, 0, 0),
+      enemyPositionVTMFrame(0, 0, 0),
       enemyPositionCameraAxes(0, 0, 0),
       enemyPositionScreenFrame(0, 0, 0)
 {
@@ -40,6 +41,14 @@ WallHack::WallHack(
 
 modm::ResumableResult<bool> WallHack::update()
 {
+    if (redoMatrix)
+    {
+        setProjectionMatrix();
+        redoMatrix = false;
+    }
+
+    VTM_OFFSET_FRAME = Position(0, 0, Z_OFFSET);
+
     auto aimData = visionCoprocessor.getLastAimData(0);
 
     // Get pos
@@ -49,15 +58,24 @@ modm::ResumableResult<bool> WallHack::update()
     // Convert to turret frame
     enemyPositionTurretFrame = transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame);
     copyToVector3(turretFrame, enemyPositionTurretFrame);
+    enemyPositionVTMFrame = enemyPositionTurretFrame + VTM_OFFSET_FRAME;
 
-    // Swap axes to match camera math
-    enemyPositionCameraAxes = swapAxesMatrix * enemyPositionTurretFrame.coordinates();
-    copyToVector3(cameraAxes, enemyPositionCameraAxes);
+    // Define plate points
+    CMSISMat<3, 1> enemyPositionVector = enemyPositionVTMFrame.coordinates();
 
-    CMSISMat<3, 1> enemyPositionVector = enemyPositionCameraAxes.coordinates();
+    CMSISMat<3, 1> topRight = enemyPositionVector;
+    topRight.data[1] += PLATE_SIZE_M / 2;
+    topRight.data[2] += PLATE_SIZE_M / 2;
+
+    CMSISMat<3, 1> bottomLeft = enemyPositionVector;
+    bottomLeft.data[1] -= PLATE_SIZE_M / 2;
+    bottomLeft.data[2] -= PLATE_SIZE_M / 2;
 
     enemyPositionScreenFrame = convertVectorByProjectionMatrix(enemyPositionVector);
     copyToVector3(screenFrame, enemyPositionScreenFrame);
+
+    modm::Vector3f topRightScreenFrame = convertVectorByProjectionMatrix(topRight);
+    modm::Vector3f bottomLeftScreenFrame = convertVectorByProjectionMatrix(bottomLeft);
 
     computedScreenX = std::clamp(
         (int)((enemyPositionScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH),
@@ -65,6 +83,24 @@ modm::ResumableResult<bool> WallHack::update()
         (SCREEN_WIDTH - 1));
     computedScreenY = std::clamp(
         (int)((enemyPositionScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
+        0,
+        SCREEN_HEIGHT - 1);
+
+    uint32_t bottomLeftX = std::clamp(
+        (int)((bottomLeftScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH) + PIXEL_OFFSET_X,
+        0,
+        SCREEN_WIDTH - 1);
+    uint32_t bottomLeftY = std::clamp(
+        (int)((bottomLeftScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
+        0,
+        SCREEN_HEIGHT - 1);
+    
+    uint32_t topRightX = std::clamp(
+        (int)((topRightScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH) + PIXEL_OFFSET_X,
+        0,
+        SCREEN_WIDTH - 1);
+    uint32_t topRightY = std::clamp(
+        (int)((topRightScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
         0,
         SCREEN_HEIGHT - 1);
 
@@ -81,10 +117,10 @@ modm::ResumableResult<bool> WallHack::update()
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
-        computedScreenX,
-        computedScreenY,
-        computedScreenX + SQUARE_SIZE,
-        computedScreenY + SQUARE_SIZE,
+        bottomLeftX,
+        bottomLeftY,
+        topRightX,
+        topRightY,
         &visionTargetGraphic.graphicData);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
@@ -128,6 +164,8 @@ void WallHack::setProjectionMatrix()
 
 modm::Vector3f WallHack::convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector)
 {
+    vector = swapAxesMatrix * vector;
+
     CMSISMat<4, 1> vec;
     vec.data[0] = vector.data[0];
     vec.data[1] = vector.data[1];

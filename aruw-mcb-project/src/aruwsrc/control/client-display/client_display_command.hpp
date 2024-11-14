@@ -43,6 +43,8 @@
 #include "vision_hud_indicators.hpp"
 #include "wall_hack.hpp"
 
+#include "number_spam.hpp"
+
 namespace tap::control
 {
 class Subsystem;
@@ -134,8 +136,15 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
     WallHack wallHack;
+    NumberSpam spam;
 
     bool restarting = true;
+
+    float fps = 0.0f;
+
+    uint32_t startTime = 0;
+
+
 
     bool run();
     void restartHud();

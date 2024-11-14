@@ -69,15 +69,20 @@ private:
     static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
     static constexpr int SQUARE_SIZE = 30;
 
-    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionCameraAxes;
+    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionVTMFrame, enemyPositionCameraAxes;
     modm::Vector3f enemyPositionScreenFrame;
 
     CMSISMat<4, 4> projectionMatrix;
 
-    float horizontalFOV = 135;
-    float verticalFOV = 90;
+    float horizontalFOV = 169;
+    float verticalFOV = 160;
 
     float near = 0.1, far = 100;
+
+    bool redoMatrix = false;
+
+    float Z_OFFSET = -0.1;
+    Position VTM_OFFSET_FRAME = Position(0, 0, Z_OFFSET);
 
     void setProjectionMatrix();
 
@@ -121,6 +126,10 @@ private:
         vec.y = pos.y;
         vec.z = pos.z;
     }
+
+    static constexpr float PLATE_SIZE_M = 0.14;
+    int PIXEL_OFFSET_X = 70;
+
 };
 
 }  // namespace aruwsrc::control::client_display
