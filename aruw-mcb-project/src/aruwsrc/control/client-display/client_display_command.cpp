@@ -132,8 +132,6 @@ bool ClientDisplayCommand::run()
 
     PT_CALL(wallHack.sendInitialGraphics());
 
-    PT_CALL(spam.sendInitialGraphics());
-
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {

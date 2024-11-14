@@ -128,7 +128,7 @@ private:
     }
 
     static constexpr float PLATE_SIZE_M = 0.14;
-    int PIXEL_OFFSET_X = 70;
+    int PIXEL_OFFSET_X = 20;
 
 };
 
