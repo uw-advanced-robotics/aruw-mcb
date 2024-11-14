@@ -32,8 +32,7 @@ WallHack::WallHack(
       transformer(transformer),
       enemyPosition(0, 0, 0)
 {
-    // This is here otherwise the compiler compains that this is unused
-    convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
+    filler();
 }
 
 float Y_OFFSET = 0.0f;
