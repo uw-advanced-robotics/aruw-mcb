@@ -29,9 +29,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
 
-#include "projection_utils.hpp"
-
 #include "hud_indicator.hpp"
+#include "projection_utils.hpp"
 
 using namespace aruwsrc::algorithms::transforms;
 using tap::algorithms::CMSISMat;
@@ -68,13 +67,15 @@ private:
 
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
-    static constexpr int SQUARE_SIZE = 30;
 
-    Position enemyPositionWorldFrame;
+    // In world frame
+    Position enemyPosition;
 
-    uint32_t computedScreenX, computedScreenY;
+    bool enemyInFrame = false;
 
-    static constexpr float PLATE_SIZE_M = 0.14;
+    static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
+    Vector plateCornerOffset = Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
+
 };
 
 }  // namespace aruwsrc::control::client_display

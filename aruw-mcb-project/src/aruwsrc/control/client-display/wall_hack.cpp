@@ -30,84 +30,43 @@ WallHack::WallHack(
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
       transformer(transformer),
-      enemyPositionWorldFrame(0, 0, 0),
-      enemyPositionTurretFrame(0, 0, 0),
-      enemyPositionVTMFrame(0, 0, 0),
-      enemyPositionCameraAxes(0, 0, 0),
-      enemyPositionScreenFrame(0, 0, 0)
+      enemyPosition(0, 0, 0)
 {
-    setProjectionMatrix();
 }
+
+float Z_OFFSET = 0.0f;
+float Y_OFFSET = 0.0f;
 
 modm::ResumableResult<bool> WallHack::update()
 {
-    if (redoMatrix)
-    {
-        setProjectionMatrix();
-        redoMatrix = false;
-    }
-
-    VTM_OFFSET_FRAME = Position(0, 0, Z_OFFSET);
+    VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
 
     auto aimData = visionCoprocessor.getLastAimData(0);
 
-    // Get pos
-    enemyPositionWorldFrame = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
-    copyToVector3(worldFrame, enemyPositionWorldFrame);
+    // Get position
+    enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
-    // Convert to turret frame
-    enemyPositionTurretFrame = transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame);
-    copyToVector3(turretFrame, enemyPositionTurretFrame);
-    enemyPositionVTMFrame = enemyPositionTurretFrame + VTM_OFFSET_FRAME;
+    ProjectedResult enemyPosScreenFrame =
+        convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
 
-    // Define plate points
-    CMSISMat<3, 1> enemyPositionVector = enemyPositionVTMFrame.coordinates();
+    ProjectedResult bottomLeftScreenFrame = convertWorldFrameToScreenFrame(
+        enemyPosition - plateCornerOffset,
+        transformer->getWorldToTurret(0));
+    ProjectedResult topRightScreenFrame = convertWorldFrameToScreenFrame(
+        enemyPosition - (plateCornerOffset * -1),
+        transformer->getWorldToTurret(0));
 
-    CMSISMat<3, 1> topRight = enemyPositionVector;
-    topRight.data[1] += PLATE_SIZE_M / 2;
-    topRight.data[2] += PLATE_SIZE_M / 2;
-
-    CMSISMat<3, 1> bottomLeft = enemyPositionVector;
-    bottomLeft.data[1] -= PLATE_SIZE_M / 2;
-    bottomLeft.data[2] -= PLATE_SIZE_M / 2;
-
-    enemyPositionScreenFrame = convertVectorByProjectionMatrix(enemyPositionVector);
-    copyToVector3(screenFrame, enemyPositionScreenFrame);
-
-    modm::Vector3f topRightScreenFrame = convertVectorByProjectionMatrix(topRight);
-    modm::Vector3f bottomLeftScreenFrame = convertVectorByProjectionMatrix(bottomLeft);
-
-    computedScreenX = std::clamp(
-        (int)((enemyPositionScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH),
-        0,
-        (SCREEN_WIDTH - 1));
-    computedScreenY = std::clamp(
-        (int)((enemyPositionScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
-        0,
-        SCREEN_HEIGHT - 1);
-
-    uint32_t bottomLeftX = std::clamp(
-        (int)((bottomLeftScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH) + PIXEL_OFFSET_X,
-        0,
-        SCREEN_WIDTH - 1);
-    uint32_t bottomLeftY = std::clamp(
-        (int)((bottomLeftScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
-        0,
-        SCREEN_HEIGHT - 1);
-
-    uint32_t topRightX = std::clamp(
-        (int)((topRightScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH) + PIXEL_OFFSET_X,
-        0,
-        SCREEN_WIDTH - 1);
-    uint32_t topRightY =
-        std::clamp((int)((topRightScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT), 0, SCREEN_HEIGHT - 1);
+    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     RF_BEGIN(0);
 
-    // if (abs(enemyPositionTransformed.x) > 1 || abs(enemyPositionTransformed.y) > 1)
-    // {
-    //     RF_RETURN(false);
-    // }
+    if (!enemyPosScreenFrame.inFrame)
+    {
+        enemyInFrame = false;
+        RF_RETURN(false);
+    }
+
+    enemyInFrame = true;
 
     visionTargetGraphic.graphicData.operation =
         visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
@@ -115,15 +74,14 @@ modm::ResumableResult<bool> WallHack::update()
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
-        bottomLeftX,
-        bottomLeftY,
-        topRightX,
-        topRightY,
+        bottomLeftScreenFrame.screenX,
+        bottomLeftScreenFrame.screenY,
+        topRightScreenFrame.screenX,
+        topRightScreenFrame.screenY,
         &visionTargetGraphic.graphicData);
 
-    visionTargetGraphic.graphicData.color = static_cast<uint32_t>(
-        visionCoprocessor.getSomeTurretHasTarget() ? Tx::GraphicColor::GREEN
-                                                   : Tx::GraphicColor::ORANGE);
+    visionTargetGraphic.graphicData.color =
+        static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 
