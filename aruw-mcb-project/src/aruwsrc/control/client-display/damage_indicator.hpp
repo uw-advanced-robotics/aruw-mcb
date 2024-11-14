@@ -73,8 +73,7 @@ private:
 
     Tx::Graphic1Message damageGraphic;
 
-    // Gets rounded to nearest bin to reduce calls
-    static constexpr uint16_t DEGREES_MINIMUM_BIN = 3;
+    static constexpr float CENTER_THRESHOLD = modm::toRadian(35);
 
     tap::arch::MilliTimeout decayTimeout;
     static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
@@ -85,11 +84,6 @@ private:
     aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
 
     uint32_t prevTimestamp;
-
-    static inline bool anglesAreClose(float angle1, float angle2)
-    {
-        return std::abs(angle1 - angle2) < modm::toRadian(DEGREES_MINIMUM_BIN);
-    }
 };
 
 }  // namespace aruwsrc::control::client_display

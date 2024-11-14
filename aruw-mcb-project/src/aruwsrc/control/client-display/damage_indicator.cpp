@@ -64,7 +64,8 @@ modm::ResumableResult<bool> DamageIndicator::update()
     prevOperation = damageGraphic.graphicData.operation;
 
     // If the damage is old or the angle is within +-45 deg
-    if (decayTimeout.isExpired() || (fmod(hitAngleRadian + M_PI_4, 2 * M_PI) < M_PI_2))
+    if (decayTimeout.isExpired() ||
+        (fmod(hitAngleRadian + CENTER_THRESHOLD, 2 * M_PI) < CENTER_THRESHOLD * 2))
     {
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
