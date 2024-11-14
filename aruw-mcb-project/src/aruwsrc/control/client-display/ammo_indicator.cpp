@@ -57,7 +57,7 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
     RF_BEGIN(0)
 
     RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
-    updateTimer.restart(500);
+    updateTimer.restart(1000);
 
     RF_END();
 }
