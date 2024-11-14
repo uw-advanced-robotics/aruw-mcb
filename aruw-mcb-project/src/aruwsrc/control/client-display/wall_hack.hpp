@@ -70,67 +70,11 @@ private:
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
     static constexpr int SQUARE_SIZE = 30;
 
-    Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionVTMFrame,
-        enemyPositionCameraAxes;
-    modm::Vector3f enemyPositionScreenFrame;
-
-    CMSISMat<4, 4> projectionMatrix;
-
-    float horizontalFOV = 169;
-    float verticalFOV = 160;
-
-    float near = 0.1, far = 100;
-
-    bool redoMatrix = false;
-
-    float Z_OFFSET = -0.1;
-    Position VTM_OFFSET_FRAME = Position(0, 0, Z_OFFSET);
-
-    void setProjectionMatrix();
-
-    modm::Vector3f convertVectorByProjectionMatrix(CMSISMat<3, 1> &vector);
-
-    // clang-format off
-    /**
-     * Swaps:
-     * -y -> x
-     *  z -> y
-     * -x -> z
-     */
-    CMSISMat<3, 3> swapAxesMatrix = {
-        {0, -1, 0,
-         0, 0, 1,
-        -1, 0, 0}
-    };
-    // clang-format on
+    Position enemyPositionWorldFrame;
 
     uint32_t computedScreenX, computedScreenY;
 
-    // SCREW OZONE DEBUGGING WITH VARIABLES
-    struct Vector3
-    {
-        float x;
-        float y;
-        float z;
-    };
-    Vector3 worldFrame, turretFrame, cameraAxes, screenFrame;
-
-    inline void copyToVector3(Vector3 &vec, Position &pos)
-    {
-        vec.x = pos.x();
-        vec.y = pos.y();
-        vec.z = pos.z();
-    }
-
-    inline void copyToVector3(Vector3 &vec, modm::Vector3f &pos)
-    {
-        vec.x = pos.x;
-        vec.y = pos.y;
-        vec.z = pos.z;
-    }
-
     static constexpr float PLATE_SIZE_M = 0.14;
-    int PIXEL_OFFSET_X = 20;
 };
 
 }  // namespace aruwsrc::control::client_display
