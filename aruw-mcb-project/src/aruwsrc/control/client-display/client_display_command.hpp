@@ -39,11 +39,10 @@
 #include "circle_crosshair.hpp"
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
+#include "number_spam.hpp"
 #include "text_hud_indicators.hpp"
 #include "vision_hud_indicators.hpp"
 #include "wall_hack.hpp"
-
-#include "number_spam.hpp"
 
 namespace tap::control
 {

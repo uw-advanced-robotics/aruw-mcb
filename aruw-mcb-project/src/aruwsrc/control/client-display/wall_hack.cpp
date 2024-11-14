@@ -94,15 +94,13 @@ modm::ResumableResult<bool> WallHack::update()
         (int)((bottomLeftScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
         0,
         SCREEN_HEIGHT - 1);
-    
+
     uint32_t topRightX = std::clamp(
         (int)((topRightScreenFrame.x + 1) * 0.5f * SCREEN_WIDTH) + PIXEL_OFFSET_X,
         0,
         SCREEN_WIDTH - 1);
-    uint32_t topRightY = std::clamp(
-        (int)((topRightScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT),
-        0,
-        SCREEN_HEIGHT - 1);
+    uint32_t topRightY =
+        std::clamp((int)((topRightScreenFrame.y + 1) * 0.5f * SCREEN_HEIGHT), 0, SCREEN_HEIGHT - 1);
 
     RF_BEGIN(0);
 
@@ -122,6 +120,10 @@ modm::ResumableResult<bool> WallHack::update()
         topRightX,
         topRightY,
         &visionTargetGraphic.graphicData);
+
+    visionTargetGraphic.graphicData.color = static_cast<uint32_t>(
+        visionCoprocessor.getSomeTurretHasTarget() ? Tx::GraphicColor::GREEN
+                                                   : Tx::GraphicColor::ORANGE);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 

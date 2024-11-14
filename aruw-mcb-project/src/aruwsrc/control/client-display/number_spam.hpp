@@ -21,7 +21,6 @@
 #define NUMBER_SPAM_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
@@ -42,8 +41,7 @@ public:
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    NumberSpam(
-        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    NumberSpam(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
 
@@ -63,7 +61,6 @@ private:
 
     tap::arch::PeriodicMilliTimer delayTimeout;
     uint32_t timeout = 500;
-
 };
 
 }  // namespace aruwsrc::control::client_display
