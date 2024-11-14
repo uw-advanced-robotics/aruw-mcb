@@ -66,7 +66,6 @@ private:
 
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
-    static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
     static constexpr int SQUARE_SIZE = 30;
 
     Position enemyPositionWorldFrame, enemyPositionTurretFrame, enemyPositionVTMFrame,
