@@ -62,7 +62,7 @@ modm::ResumableResult<bool> WallHack::update()
     if (!enemyPosScreenFrame.inFrame)
     {
         enemyInFrame = false;
-        RF_RETURN(false);
+        // RF_RETURN(false);
     }
 
     enemyInFrame = true;
