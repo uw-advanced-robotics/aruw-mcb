@@ -34,14 +34,13 @@ namespace aruwsrc::control::client_display
 static constexpr int HORIZONTAL_FOV = 169;
 static constexpr int VERTICAL_FOV = 160;
 
+static constexpr float NEAR_CUTOFF = 0.1;
+static constexpr float FAR_CUTOFF = 100;
+
 /**
  * Creates a projection matrix.
- *
- * @param nearCutoff Cutoff at which it no longer is considered in front of camera. Units: meters
- * @param farCutoff Cutoff distance at which no longer considered in frame. Units: meters
- *
  */
-static CMSISMat<4, 4> getProjectionMatrix(float nearCutoff, float farCutoff)
+static CMSISMat<4, 4> getProjectionMatrix()
 {
     float horizontalScale = 1.0f / tanf(HORIZONTAL_FOV * 0.5 * M_PI / 180);
     float verticalScale = 1.0f / tanf(VERTICAL_FOV * 0.5 * M_PI / 180);
@@ -50,24 +49,24 @@ static CMSISMat<4, 4> getProjectionMatrix(float nearCutoff, float farCutoff)
     projectionMatrix.data[0] = horizontalScale;
     projectionMatrix.data[4 * 1 + 1] = verticalScale;
 
-    projectionMatrix.data[4 * 2 + 2] = -farCutoff / (farCutoff - nearCutoff);
+    projectionMatrix.data[4 * 2 + 2] = -FAR_CUTOFF / (FAR_CUTOFF - NEAR_CUTOFF);
     projectionMatrix.data[4 * 2 + 3] = -1.0f;
 
-    projectionMatrix.data[4 * 3 + 2] = -farCutoff * nearCutoff / (farCutoff - nearCutoff);
+    projectionMatrix.data[4 * 3 + 2] = -FAR_CUTOFF * NEAR_CUTOFF / (FAR_CUTOFF - NEAR_CUTOFF);
     projectionMatrix.data[4 * 3 + 3] = 0;
 
     return projectionMatrix;
 };
 
+static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
+
 // clang-format off
-static const CMSISMat<3, 3> worldFrameToCameraFrame = {
+static const CMSISMat<3, 3> worldAxesToCameraAxes = {
     {0, -1, 0,
      0, 0, 1,
     -1, 0, 0}
 };
 // clang-format on
-
-static constexpr int PIXEL_OFFSET_X = 20;
 
 struct ProjectedResult
 {
@@ -83,13 +82,11 @@ struct ProjectedResult
  *
  * @return Result in screen frame.
  */
-static ProjectedResult convertWorldFrameToScreenFrame(
-    const Position &vector,
-    const CMSISMat<4, 4> &projectionMatrix)
+static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
 {
     CMSISMat<3, 1> posWorld = vector.coordinates();
     // Convert to camera axes
-    CMSISMat<3, 1> posCamera = worldFrameToCameraFrame * posWorld;
+    CMSISMat<3, 1> posCamera = worldAxesToCameraAxes * posWorld;
 
     // Temporary vector since we don't have w
     CMSISMat<4, 1> vec;
@@ -121,6 +118,28 @@ static ProjectedResult convertWorldFrameToScreenFrame(
     output.screenY = (result.data[1] + 1) * 0.5f * HudIndicator::SCREEN_HEIGHT;
 
     return output;
+}
+
+#if defined(TARGET_STANDARD_CYGNUS)
+static const Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
+#else
+static const Position VTM_OFFSET_FRAME = Position(0, 0, 0);
+#endif
+
+static Position convertWorldFrameToCameraFrame(
+    const Position &worldFrame,
+    const Transform &worldToTurret)
+{
+    Position turretFrame = worldToTurret.apply(worldFrame);
+    return turretFrame + VTM_OFFSET_FRAME;
+}
+
+static ProjectedResult convertWorldFrameToScreenFrame(
+    const Position &worldFrame,
+    const Transform &worldToTurret)
+{
+    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret);
+    return convertCameraFrameToScreenFrame(cameraFrame);
 }
 
 }  // namespace aruwsrc::control::client_display

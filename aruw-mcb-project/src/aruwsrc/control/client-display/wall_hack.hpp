@@ -29,6 +29,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
 
+#include "projection_utils.hpp"
+
 #include "hud_indicator.hpp"
 
 using namespace aruwsrc::algorithms::transforms;
