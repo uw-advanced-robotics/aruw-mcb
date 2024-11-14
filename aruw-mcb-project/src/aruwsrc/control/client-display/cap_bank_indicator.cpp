@@ -39,6 +39,8 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
 {
     this->previousState = can::capbank::State::UNKNOWN;
     this->previousColor = Tx::GraphicColor::BLACK;
+    voltageUpdateTimer.restart(500);
+
     RF_BEGIN(0)
 
     // remove initial graphics
@@ -96,10 +98,9 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                 &capBankVoltageLevel.graphicData);
 
             capBankVoltageLevel.graphicData.color = static_cast<uint8_t>(
-                voltage_squared < VOLTAGE_SQUARED_ORANGE
-                    ? Tx::GraphicColor::ORANGE
-                    : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
-                                                               : Tx::GraphicColor::GREEN);
+                voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
+                : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
+                                                           : Tx::GraphicColor::GREEN);
 
             // Update the background status
             state = capBank->getState();
@@ -162,7 +163,10 @@ modm::ResumableResult<bool> CapBankIndicator::update()
                     static_cast<Tx::GraphicColor>(capBankBackgroundLine.graphicData.color);
                 RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
             }
-            RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
+            if (voltageUpdateTimer.execute())
+            {
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
+            }
         }
     }
 

@@ -20,6 +20,7 @@
 #ifndef CAP_BANK_INDICATOR_HPP_
 #define CAP_BANK_INDICATOR_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -94,6 +95,7 @@ private:
      * A line that shows the charge of the Capacitor Bank.
      */
     Tx::Graphic1Message capBankVoltageLevel;
+    tap::arch::PeriodicMilliTimer voltageUpdateTimer;
 
     /**
      * A graphic that represents the current status of the Capacitor Bank.
