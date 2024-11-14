@@ -73,7 +73,7 @@ private:
 
     Tx::Graphic1Message damageGraphic;
 
-    static constexpr float CENTER_THRESHOLD = modm::toRadian(35);
+    static constexpr float CENTER_THRESHOLD = modm::toRadian(40);
 
     tap::arch::MilliTimeout decayTimeout;
     static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
