@@ -130,21 +130,17 @@ private:
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
     CapBankIndicator capBankIndicator;
     MatrixHudIndicators positionHudIndicators;
-    VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
     WallHack wallHack;
-    NumberSpam spam;
 
     bool restarting = true;
 
     float fps = 0.0f;
 
     uint32_t startTime = 0;
-
-
 
     bool run();
     void restartHud();

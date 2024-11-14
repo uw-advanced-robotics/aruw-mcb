@@ -61,7 +61,6 @@ ClientDisplayCommand::ClientDisplayCommand(
           robotTurretSubsystem,
           multiShotHandler,
           cvOnTargetManager),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
       circleCrosshair(refSerialTransmitter),
       damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter),
@@ -71,8 +70,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           imuCalibrateCommand,
           avoidanceCommands,
           refSerialTransmitter),
-      wallHack(visionCoprocessor, refSerialTransmitter, transformer),
-      spam(refSerialTransmitter)
+      wallHack(visionCoprocessor, refSerialTransmitter, transformer)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -91,15 +89,12 @@ void ClientDisplayCommand::restartHud()
 
     capBankIndicator.initialize();
     positionHudIndicators.initialize();
-    visionHudIndicators.initialize();
     ammoIndicator.initialize();
     circleCrosshair.initialize();
     damageIndicator.initialize();
     textHudIndicators.initialize();
 
     wallHack.initialize();
-
-    spam.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -124,7 +119,6 @@ bool ClientDisplayCommand::run()
 
     PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
     PT_CALL(circleCrosshair.sendInitialGraphics());
     PT_CALL(damageIndicator.sendInitialGraphics());
@@ -138,12 +132,10 @@ bool ClientDisplayCommand::run()
         startTime = tap::arch::clock::getTimeMilliseconds();
         PT_CALL(capBankIndicator.update());
         PT_CALL(positionHudIndicators.update());
-        PT_CALL(visionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
         PT_CALL(textHudIndicators.update());
-
 
         PT_CALL(wallHack.update());
         // Calculate the time it took to update the HUD
