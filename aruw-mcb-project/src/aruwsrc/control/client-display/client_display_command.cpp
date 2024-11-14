@@ -141,7 +141,7 @@ bool ClientDisplayCommand::run()
         PT_CALL(damageIndicator.update());
         PT_CALL(textHudIndicators.update());
 
-        PT_CALL(wallHack.update());
+        PT_CALL(visionTargetIndicator.update());
         PT_CALL(fpsIndicator.update());
 
         // Calculate the time it took to update the HUD
