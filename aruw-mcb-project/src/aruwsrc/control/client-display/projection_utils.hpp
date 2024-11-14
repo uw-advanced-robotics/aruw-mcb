@@ -50,6 +50,7 @@ struct ProjectedResult
     bool inFrame;
     uint32_t screenX;
     uint32_t screenY;
+    CMSISMat<3, 1> positionScreenFrame;
 };
 
 #if defined(TARGET_STANDARD_CYGNUS)
@@ -131,6 +132,9 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     // Convert to screen space
     output.screenX = (result.data[0] + 1) * 0.5f * HudIndicator::SCREEN_WIDTH;
     output.screenY = (result.data[1] + 1) * 0.5f * HudIndicator::SCREEN_HEIGHT;
+    output.positionScreenFrame.data[0] = result.data[0];
+    output.positionScreenFrame.data[1] = result.data[1];
+    output.positionScreenFrame.data[2] = result.data[2];
 
     return output;
 }
