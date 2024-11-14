@@ -84,15 +84,23 @@ private:
     const can::capbank::CapacitorBank *capBank;
 
     /**
-     * Two graphics that represent the Capacitor Bank charge. The first graphic is the background
-     * for the bar, while the second is the charge of the Capacitor Bank.
+     * Background line for the status that highlights a few states.
      */
-    Tx::Graphic2Message capBankGraphics;
+    Tx::Graphic1Message capBankBackgroundLine;
+
+    Tx::GraphicColor previousColor;
+
+    /**
+     * A line that shows the charge of the Capacitor Bank.
+     */
+    Tx::Graphic1Message capBankVoltageLevel;
 
     /**
      * A graphic that represents the current status of the Capacitor Bank.
      */
     Tx::GraphicCharacterMessage capBankTextGraphic;
+
+    can::capbank::State previousState;
 };
 }  // namespace aruwsrc::control::client_display
 
