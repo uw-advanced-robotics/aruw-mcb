@@ -70,8 +70,7 @@ ClientDisplayCommand::ClientDisplayCommand(
           imuCalibrateCommand,
           avoidanceCommands,
           refSerialTransmitter),
-      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer),
-      fpsIndicator(refSerialTransmitter)
+      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -96,8 +95,6 @@ void ClientDisplayCommand::restartHud()
     textHudIndicators.initialize();
 
     visionTargetIndicator.initialize();
-
-    fpsIndicator.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -128,7 +125,6 @@ bool ClientDisplayCommand::run()
     PT_CALL(textHudIndicators.sendInitialGraphics());
 
     PT_CALL(visionTargetIndicator.sendInitialGraphics());
-    PT_CALL(fpsIndicator.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
@@ -142,7 +138,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(textHudIndicators.update());
 
         PT_CALL(visionTargetIndicator.update());
-        PT_CALL(fpsIndicator.update());
 
         // Calculate the time it took to update the HUD
         this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
