@@ -34,8 +34,8 @@ namespace aruwsrc::control::client_display
 static constexpr int HORIZONTAL_FOV = 169;
 static constexpr int VERTICAL_FOV = 160;
 
-static constexpr float NEAR_CUTOFF = 0.1;
-static constexpr float FAR_CUTOFF = 100;
+static constexpr float NEAR_CUTOFF_M = 0.1;
+static constexpr float FAR_CUTOFF_M = 100;
 
 // clang-format off
 static const CMSISMat<3, 3> worldAxesToCameraAxes = {
@@ -70,10 +70,10 @@ static CMSISMat<4, 4> getProjectionMatrix()
     projectionMatrix.data[0] = horizontalScale;
     projectionMatrix.data[4 * 1 + 1] = verticalScale;
 
-    projectionMatrix.data[4 * 2 + 2] = -FAR_CUTOFF / (FAR_CUTOFF - NEAR_CUTOFF);
+    projectionMatrix.data[4 * 2 + 2] = -FAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
     projectionMatrix.data[4 * 2 + 3] = -1.0f;
 
-    projectionMatrix.data[4 * 3 + 2] = -FAR_CUTOFF * NEAR_CUTOFF / (FAR_CUTOFF - NEAR_CUTOFF);
+    projectionMatrix.data[4 * 3 + 2] = -FAR_CUTOFF_M * NEAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
     projectionMatrix.data[4 * 3 + 3] = 0;
 
     return projectionMatrix;
