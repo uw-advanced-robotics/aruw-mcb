@@ -62,7 +62,8 @@ private:
     bool enoughTimeSinceLastShot() const
     {
         const auto currentTime = tap::arch::clock::getTimeMilliseconds();
-        const auto lastShot = this->drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+        const auto lastShot =
+            this->drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
 
         return currentTime - lastShot > durationBuffer;
     }

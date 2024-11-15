@@ -63,8 +63,8 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
@@ -85,6 +85,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -230,7 +231,7 @@ aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
-    0.5f);
+    0.5f);  // Multiplier for slow beyblade speed
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -313,10 +314,7 @@ PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
 
 FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
 
-MovedFastRecentlyGovernor movedRecentlyGovernor(
-    (drivers()->controlOperatorInterface),
-    0.9f,
-    5000);
+MovedFastRecentlyGovernor movedRecentlyGovernor((drivers()->controlOperatorInterface), 0.9f, 5000);
 
 GovernorWithFallbackCommand<3> beybladeAlternatingWithPlateHitCommand(
     {&chassis},
@@ -407,7 +405,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     agitator,
     turret,
-    {&wiggleCommand, &beybladeCommand},
+    {&wiggleCommand, &beybladeAlternatingWithPlateHitCommand},
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
@@ -431,7 +429,7 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
 // Remote related mappings
 HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
 HoldRepeatCommandMapping rightSwitchUp(
@@ -457,7 +455,7 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeAlternatingWithPlateHitCommand}, RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),

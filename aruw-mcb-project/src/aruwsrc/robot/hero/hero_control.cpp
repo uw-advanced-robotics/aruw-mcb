@@ -61,9 +61,12 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
+#include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
+#include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -78,6 +81,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -203,8 +207,14 @@ BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
+    (drivers()->controlOperatorInterface));
+
+BeybladeCommand slowBeybladeCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
     (drivers()->controlOperatorInterface),
-    1.0f);
+    0.5f);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -313,6 +323,21 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis);
 
+// beyblade governors
+
+PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
+
+FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
+
+MovedFastRecentlyGovernor movedRecentlyGovernor((drivers()->controlOperatorInterface), 0.9f, 5000);
+
+GovernorWithFallbackCommand<3> beybladeAlternatingWithPlateHitCommand(
+    {&chassis},
+    slowBeybladeCommand,
+    beybladeCommand,
+    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
+    true);
+
 // hero agitator commands
 
 LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
@@ -389,7 +414,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     waterwheelAgitator,
     turret,
-    {&beybladeCommand},
+    {&beybladeAlternatingWithPlateHitCommand},
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
@@ -420,7 +445,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&beybladeAlternatingWithPlateHitCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -448,7 +473,7 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeAlternatingWithPlateHitCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(

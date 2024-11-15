@@ -95,8 +95,8 @@ void BeybladeCommand::execute()
             BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
             BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed * rotationMultiplier;
 
-        float rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed * rotationMultiplier;
+        float rampTarget = rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX *
+                           maxWheelSpeed * rotationMultiplier;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
@@ -127,4 +127,3 @@ void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
 }  // namespace chassis
 
 }  // namespace aruwsrc
-
