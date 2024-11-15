@@ -86,7 +86,6 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
-
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
@@ -455,7 +454,10 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-ToggleCommandMapping fToggled(drivers(), {&beybladeAlternatingWithPlateHitCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(
+    drivers(),
+    {&beybladeAlternatingWithPlateHitCommand},
+    RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),

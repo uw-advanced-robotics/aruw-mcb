@@ -82,7 +82,6 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::chassis;
@@ -473,7 +472,10 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(drivers(), {&beybladeAlternatingWithPlateHitCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(
+    drivers(),
+    {&beybladeAlternatingWithPlateHitCommand},
+    RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
