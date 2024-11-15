@@ -54,7 +54,7 @@ struct ProjectedResult
 };
 
 #if defined(TARGET_STANDARD_CYGNUS)
-static Position VTM_OFFSET_FRAME = Position(0, -0.05, -0.1);
+static Position VTM_OFFSET_FRAME = Position(0, -0.02, -0.085);
 #else
 static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 #endif
@@ -85,10 +85,11 @@ static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
 
 static Position convertWorldFrameToCameraFrame(
     const Position &worldFrame,
-    const Transform &worldToTurret)
+    const Transform &worldToTurret,
+    const Position &offset = Position(0, 0, 0))
 {
     Position turretFrame = worldToTurret.apply(worldFrame);
-    return turretFrame + VTM_OFFSET_FRAME;
+    return turretFrame + VTM_OFFSET_FRAME + offset;
 }
 
 /**
@@ -115,12 +116,12 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     CMSISMat<4, 1> result = projectionMatrix * vec;
     result.data[0] /= result.data[3];
     result.data[1] /= result.data[3];
-    result.data[2] /= result.data[3];
+    // result.data[2] /= result.data[3];
 
     ProjectedResult output;
 
     // Culling if out of frame
-    if (abs(result.data[0]) > 1 || abs(result.data[1]) > 1 || abs(result.data[2]) > 1)
+    if (abs(result.data[0]) > 1 || abs(result.data[1]) > 1 || result.data[2] < 0)
     {
         output.inFrame = false;
     }
@@ -141,9 +142,10 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
 
 static ProjectedResult convertWorldFrameToScreenFrame(
     const Position &worldFrame,
-    const Transform &worldToTurret)
+    const Transform &worldToTurret,
+    const Position &offset = Position(0, 0, 0))
 {
-    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret);
+    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret, offset);
     return convertCameraFrameToScreenFrame(cameraFrame);
 }
 

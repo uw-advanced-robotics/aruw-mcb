@@ -66,7 +66,7 @@ private:
     ProjectedResult enemyPosScreenFrame, bottomLeftScreenFrame, topRightScreenFrame;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
-    Vector plateCornerOffset = Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
+    Position plateCornerOffset = Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
 
     inline void filler()
     {

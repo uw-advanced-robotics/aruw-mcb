@@ -36,7 +36,8 @@ VisionTargetIndicator::VisionTargetIndicator(
 }
 
 float Y_OFFSET = 0.0f;
-float Z_OFFSET = -1.0f;
+float Z_OFFSET = -0.5f;
+// Position cameraFrame = Position(0, 0, 0);
 modm::ResumableResult<bool> VisionTargetIndicator::update()
 {
     VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
@@ -46,27 +47,32 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+    // cameraFrame = convertWorldFrameToCameraFrame(enemyPosition,
+    // transformer->getWorldToTurret(0));
 
     enemyPosScreenFrame =
         convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
 
     bottomLeftScreenFrame = convertWorldFrameToScreenFrame(
-        enemyPosition - plateCornerOffset,
-        transformer->getWorldToTurret(0));
+        enemyPosition,
+        transformer->getWorldToTurret(0),
+        plateCornerOffset);
     topRightScreenFrame = convertWorldFrameToScreenFrame(
-        enemyPosition - (plateCornerOffset * -1),
-        transformer->getWorldToTurret(0));
+        enemyPosition,
+        transformer->getWorldToTurret(0),
+        plateCornerOffset * -1);
+
+    uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 
     RF_BEGIN(0);
 
+    visionTargetGraphic.graphicData.operation =
+        prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
     if (!enemyPosScreenFrame.inFrame)
     {
-        // RF_RETURN(false);
+        visionTargetGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
-
-    visionTargetGraphic.graphicData.operation =
-        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
-                                                                        : Tx::GRAPHIC_MODIFY;
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
@@ -79,7 +85,11 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     visionTargetGraphic.graphicData.color =
         static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
+    if (!(prevOperation == Tx::GRAPHIC_DELETE &&
+          visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE))
+    {
+        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
+    }
 
     RF_END();
 }
