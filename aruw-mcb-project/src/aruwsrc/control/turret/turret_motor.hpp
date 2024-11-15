@@ -115,13 +115,9 @@ public:
      * and the turret motors' specified "start angle" (specified upon construction in the
      * TurretMotorConfig struct).
      */
-    mockable inline float getAngleFromCenter() const
+    mockable inline WrappedFloat getAngleFromCenter() const
     {
-        return tap::algorithms::WrappedFloat(
-                   chassisFrameMeasuredAngle.getWrappedValue() - config.startAngle,
-                   -M_PI,
-                   M_PI)
-            .getWrappedValue();
+        return chassisFrameMeasuredAngle - config.startAngle;
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
