@@ -35,20 +35,23 @@ VisionTargetIndicator::VisionTargetIndicator(
     filler();
 }
 
-float Y_OFFSET = 0.0f;
-float Z_OFFSET = -0.5f;
-// Position cameraFrame = Position(0, 0, 0);
+float Y_OFFSET = VTM_OFFSET_FRAME.y();
+float Z_OFFSET = VTM_OFFSET_FRAME.z();
 modm::ResumableResult<bool> VisionTargetIndicator::update()
 {
+    // Here for debugging purposes. Should be removed in the future
     VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
 
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
+    if (visionHasTarget)
+    {
+        targetTimeout.restart(TIMEOUT_MS);
+    }
+
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
-    // cameraFrame = convertWorldFrameToCameraFrame(enemyPosition,
-    // transformer->getWorldToTurret(0));
 
     enemyPosScreenFrame =
         convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
@@ -66,13 +69,19 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     RF_BEGIN(0);
 
-    visionTargetGraphic.graphicData.operation =
-        prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
-
-    if (!enemyPosScreenFrame.inFrame)
+    // If the target is not in frame or the target has timed out, delete the graphic
+    if (!enemyPosScreenFrame.inFrame || targetTimeout.isExpired())
     {
         visionTargetGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
+    else
+    {
+        visionTargetGraphic.graphicData.operation =
+            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+    }
+
+    visionTargetGraphic.graphicData.color =
+        static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
@@ -82,9 +91,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         topRightScreenFrame.screenY,
         &visionTargetGraphic.graphicData);
 
-    visionTargetGraphic.graphicData.color =
-        static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
-
+    // Checking that if it's already deleted, don't send it again
     if (!(prevOperation == Tx::GRAPHIC_DELETE &&
           visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE))
     {

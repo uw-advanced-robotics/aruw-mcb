@@ -53,6 +53,7 @@ struct ProjectedResult
     CMSISMat<3, 1> positionScreenFrame;
 };
 
+// This in theory is the offset between the realsense and the VTM
 #if defined(TARGET_STANDARD_CYGNUS)
 static Position VTM_OFFSET_FRAME = Position(0, -0.02, -0.085);
 #else
@@ -60,7 +61,7 @@ static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 #endif
 
 /**
- * Creates a projection matrix.
+ * Creates a projection matrix. Made from expirementally found values of the VT02 (VTM) camera.
  */
 static CMSISMat<4, 4> getProjectionMatrix()
 {
@@ -83,6 +84,17 @@ static CMSISMat<4, 4> getProjectionMatrix()
 
 static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
 
+/**
+ * Converts a position from world frame to camera frame. This function first applies transform to
+ * convert to turret frame, then accounts for transform to VTM. Can optionally take in a offset
+ * position that translates the position in camera frame.
+ *
+ * @param worldFrame Position in world frame.
+ * @param worldToTurret Transform from world to turret frame.
+ * @param offset Offset to apply to the position in camera frame.
+ *
+ * @return Result in camera frame.
+ */
 static Position convertWorldFrameToCameraFrame(
     const Position &worldFrame,
     const Transform &worldToTurret,
@@ -93,7 +105,8 @@ static Position convertWorldFrameToCameraFrame(
 }
 
 /**
- * Converts a vector from world frame to screen frame.
+ * Converts a vector from world frame to screen frame. This function applies the projection matrix
+ * to convert from x,y,z to screen space of x,y in pixels.
  *
  * @param vector Vector in world frame.
  *
@@ -116,7 +129,6 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     CMSISMat<4, 1> result = projectionMatrix * vec;
     result.data[0] /= result.data[3];
     result.data[1] /= result.data[3];
-    // result.data[2] /= result.data[3];
 
     ProjectedResult output;
 
@@ -140,6 +152,18 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     return output;
 }
 
+/***
+ * @brief Takes a given position in world frame (x,y,z in meters) and outputs the position of the
+ * object in screen frame (x,y in pixels)
+ *
+ * @param worldFrame Position in world frame
+ * @param worldToTurret Transform from world to turret frame (Interally computes from realsense to
+ * VTM)
+ * @param offset Offset to apply to the position in camera frame (For example, to get position of
+ * corner of plate instead of center)
+ *
+ * @return ProjectedResult Position in screen frame, including whether it is in frame
+ */
 static ProjectedResult convertWorldFrameToScreenFrame(
     const Position &worldFrame,
     const Transform &worldToTurret,

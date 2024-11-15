@@ -61,6 +61,10 @@ private:
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t WALL_HACK_THICKNESS = 3;
 
+    // Duration of which to show target after losing it
+    static constexpr uint16_t TIMEOUT_MS = 5000;
+    tap::arch::MilliTimeout targetTimeout;
+
     // In world frame
     Position enemyPosition;
     ProjectedResult enemyPosScreenFrame, bottomLeftScreenFrame, topRightScreenFrame;
