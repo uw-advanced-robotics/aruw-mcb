@@ -115,7 +115,7 @@ void BeybladeCommand::execute()
         tap::algorithms::rotateVector(&x, &y, turretYawAngle);
 
         // set outputs
-        chassis->setDesiredOutput(x * rotationMultiplier, y * rotationMultiplier, r);
+        chassis->setDesiredOutput(x, y, r);
     }
     else
     {

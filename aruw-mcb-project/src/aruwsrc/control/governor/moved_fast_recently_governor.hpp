@@ -47,25 +47,22 @@ public:
     MovedFastRecentlyGovernor(
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
         const float speedBuffer,
-        const uint32_t durationBuffer,
-        const bool inverted = false)
+        const uint32_t durationBuffer)
         : operatorInterface(operatorInterface),
           speedBuffer(speedBuffer),
-          durationBuffer(durationBuffer),
-          inverted(inverted)
+          durationBuffer(durationBuffer)
     {
     }
 
-    bool isReady() final { return inverted != timeSinceLastFastMovement(); }
+    bool isReady() final { return timeSinceLastFastMovement(); }
 
-    bool isFinished() final { return inverted != !timeSinceLastFastMovement(); }
+    bool isFinished() final { return !timeSinceLastFastMovement(); }
 
 private:
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
     const float speedBuffer;
     const uint32_t durationBuffer;
-    const bool inverted;
 
     uint32_t lastTimeTooFast = -1;
 
