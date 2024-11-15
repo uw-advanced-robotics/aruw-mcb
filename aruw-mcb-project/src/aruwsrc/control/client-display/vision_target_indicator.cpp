@@ -83,6 +83,13 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     visionTargetGraphic.graphicData.color =
         static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
 
+    // If the graphic is already deleted, don't delete it again
+    if (prevOperation == Tx::GRAPHIC_DELETE &&
+        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
+    {
+        RF_RETURN(true);
+    }
+
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
         bottomLeftScreenFrame.screenX,
@@ -91,12 +98,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         topRightScreenFrame.screenY,
         &visionTargetGraphic.graphicData);
 
-    // Checking that if it's already deleted, don't send it again
-    if (!(prevOperation == Tx::GRAPHIC_DELETE &&
-          visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE))
-    {
-        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
-    }
+    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 
     RF_END();
 }
