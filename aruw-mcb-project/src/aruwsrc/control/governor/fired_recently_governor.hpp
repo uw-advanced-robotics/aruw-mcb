@@ -41,23 +41,20 @@ public:
      */
     FiredRecentlyGovernor(
         tap::Drivers* drivers,
-        const uint32_t durationBuffer,
-        const bool inverted = false)
+        const uint32_t durationBuffer)
         : drivers(drivers),
-          durationBuffer(durationBuffer),
-          inverted(inverted)
+          durationBuffer(durationBuffer)
     {
     }
 
-    bool isReady() final { return inverted != enoughTimeSinceLastShot(); }
+    bool isReady() final { return enoughTimeSinceLastShot(); }
 
-    bool isFinished() final { return inverted != !enoughTimeSinceLastShot(); }
+    bool isFinished() final { return !enoughTimeSinceLastShot(); }
 
 private:
     tap::Drivers* drivers;
 
     const uint32_t durationBuffer;
-    const bool inverted;
 
     bool enoughTimeSinceLastShot() const
     {

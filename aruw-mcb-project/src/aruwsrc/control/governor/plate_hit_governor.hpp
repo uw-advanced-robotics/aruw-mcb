@@ -42,23 +42,20 @@ public:
      */
     PlateHitGovernor(
         aruwsrc::algorithms::PlateHitTracker* plateHitTracker,
-        const uint32_t durationBuffer,
-        const bool inverted = false)
+        const uint32_t durationBuffer)
         : plateHitTracker(plateHitTracker),
-          durationBuffer(durationBuffer),
-          inverted(inverted)
+          durationBuffer(durationBuffer)
     {
     }
 
-    bool isReady() final { return inverted != enoughTimeSinceLastHit(); }
+    bool isReady() final { return enoughTimeSinceLastHit(); }
 
-    bool isFinished() final { return inverted != !enoughTimeSinceLastHit(); }
+    bool isFinished() final { return !enoughTimeSinceLastHit(); }
 
 private:
     aruwsrc::algorithms::PlateHitTracker* plateHitTracker;
 
     const uint32_t durationBuffer;
-    const bool inverted;
 
     bool enoughTimeSinceLastHit() const
     {
