@@ -19,6 +19,7 @@
 #ifndef LAUNCHER_SUBSYSTEM_HPP_
 #define LAUNCHER_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 #include <tap/motor/dji_motor.hpp>
 class Drivers;
@@ -36,10 +37,18 @@ public:
     void refresh() override;
 
     void refreshSafeDisconnect() override;
+    
+    void setSetpoint(float setpoint);
 
     const char* getName() const override { return "Dart_Launcher_Subsystem"; }
 protected:
     tap::motor::MotorInterface &motor;
+
+private: 
+    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::control::turret::pullMotorPidConfig);
+    float setpoint;
+    float zeroOffset = 0;
+    float lastTime;
 
 };  // class DartLauncherSubsystem
 

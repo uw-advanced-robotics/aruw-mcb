@@ -23,6 +23,7 @@
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
+#include "tap/algorithms/smooth_pid.hpp"
 #endif
 
 namespace aruwsrc::control::turret
@@ -32,6 +33,15 @@ static constexpr uint8_t NUM_TURRETS = 1;
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
+
+static constexpr tap::algorithms::SmoothPidConfig pullMotorPidConfig = { //TODO: put actual pid constants
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 }  // namespace aruwsrc::control::turret
 
 #endif  // DART_TURRET_CONSTANTS_HPP_
