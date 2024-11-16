@@ -20,7 +20,6 @@
 #include "turret_motor.hpp"
 
 #include <cassert>
-#include <iomanip>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
