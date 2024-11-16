@@ -313,7 +313,10 @@ PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
 
 FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
 
-MovedFastRecentlyGovernor movedRecentlyGovernor((drivers()->controlOperatorInterface), 5000.0f, 5000);
+MovedFastRecentlyGovernor movedRecentlyGovernor(
+    (drivers()->controlOperatorInterface),
+    5000.0f,
+    5000);
 
 GovernorWithFallbackCommand<3> beybladeAlternatingWithPlateHitCommand(
     {&chassis},
