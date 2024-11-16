@@ -58,7 +58,7 @@ protected:
           t(&d),
           cs(&d, &currentSensor),
           bc(&d, &cs, &t.yawMotor, operatorInterface),
-          yawAngle(std::get<2>(GetParam())),
+          yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
     {
@@ -82,7 +82,7 @@ protected:
     {
         float rotatedX = x;
         float rotatedY = y;
-        rotateVector(&rotatedX, &rotatedY, yawAngle);
+        rotateVector(&rotatedX, &rotatedY, yawAngle.getWrappedValue());
         EXPECT_CALL(
             cs,
             setDesiredOutput(
@@ -98,7 +98,7 @@ protected:
     NiceMock<MecanumChassisSubsystemMock> cs;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};
-    float yawAngle = 0;
+    WrappedFloat yawAngle = Angle(0);
     float x = 0, y = 0;
 };
 

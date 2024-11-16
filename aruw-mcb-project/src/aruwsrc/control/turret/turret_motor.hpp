@@ -90,7 +90,7 @@ public:
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
 
     /**
-     * @return turret motor angle setpoint relative to the chassis, in radians, not normalized
+     * @return turret motor angle setpoint relative to the chassis, in radians
      */
     mockable inline WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
@@ -111,7 +111,7 @@ public:
     }
 
     /**
-     * @return A normalized angle between [-PI, PI] that is the angle difference between the turret
+     * @return A wrapped angle that is the angle difference between the turret
      * and the turret motors' specified "start angle" (specified upon construction in the
      * TurretMotorConfig struct).
      */

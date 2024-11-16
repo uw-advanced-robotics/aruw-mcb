@@ -53,8 +53,8 @@ protected:
             .WillByDefault(ReturnRef(currentAngle));
         ON_CALL(turretSubsystem.yawMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentAngle));
-        ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(0));
-        ON_CALL(turretSubsystem.yawMotor, getAngleFromCenter).WillByDefault(Return(0));
+        ON_CALL(turretSubsystem.pitchMotor, getAngleFromCenter).WillByDefault(Return(Angle(0)));
+        ON_CALL(turretSubsystem.yawMotor, getAngleFromCenter).WillByDefault(Return(Angle(0)));
         ON_CALL(turretSubsystem.pitchMotor, getChassisFrameVelocity).WillByDefault(Return(0));
         ON_CALL(turretSubsystem.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
     }

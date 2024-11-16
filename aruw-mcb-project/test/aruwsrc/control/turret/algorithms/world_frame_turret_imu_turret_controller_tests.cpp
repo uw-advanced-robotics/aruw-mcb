@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
 #include "tap/mock/dji_motor_mock.hpp"
 
@@ -50,16 +51,18 @@ protected:
     void SetUp() override
     {
         ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
-        ON_CALL(djiMotor, getEncoderUnwrapped).WillByDefault([&]() {
-            return chassisFrameMeasurement.getUnwrappedValue() *
-                   tap::motor::DjiMotor::ENC_RESOLUTION / M_TWOPI;
-        });
-        ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
-            return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
-        });
-        ON_CALL(djiMotor, getOutputDesired).WillByDefault([&]() {
-            return djiMotor.DjiMotor::getOutputDesired();
-        });
+        ON_CALL(djiMotor, getEncoderUnwrapped)
+            .WillByDefault(
+                [&]()
+                {
+                    return chassisFrameMeasurement.getUnwrappedValue() *
+                           tap::motor::DjiMotor::ENC_RESOLUTION / M_TWOPI;
+                });
+        ON_CALL(djiMotor, setDesiredOutput)
+            .WillByDefault([&](int32_t desiredOutput)
+                           { return djiMotor.DjiMotor::setDesiredOutput(desiredOutput); });
+        ON_CALL(djiMotor, getOutputDesired)
+            .WillByDefault([&]() { return djiMotor.DjiMotor::getOutputDesired(); });
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
@@ -79,13 +82,12 @@ protected:
 
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
 
-        ON_CALL(turretMotor, setChassisFrameSetpoint).WillByDefault([&](WrappedFloat setpoint) {
-            turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint);
-        });
+        ON_CALL(turretMotor, setChassisFrameSetpoint)
+            .WillByDefault([&](WrappedFloat setpoint)
+                           { turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint); });
 
-        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() {
-            return turretMotor.TurretMotor::getChassisFrameSetpoint();
-        });
+        ON_CALL(turretMotor, getChassisFrameSetpoint)
+            .WillByDefault([&]() { return turretMotor.TurretMotor::getChassisFrameSetpoint(); });
     }
 
     tap::Drivers drivers;
@@ -298,12 +300,12 @@ TEST_F(
 
 // Pitch controller tests
 
-static int16_t computeCGOffset(float pitchAngleFromCenter)
+static int16_t computeCGOffset(WrappedFloat pitchAngleFromCenter)
 {
     return computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
-        -pitchAngleFromCenter,
+        -pitchAngleFromCenter.getWrappedValue(),
         GRAVITY_COMPENSATION_SCALAR);
 }
 

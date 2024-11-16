@@ -171,7 +171,7 @@ TEST_F(TurretMotorTest, getAngleFromCenter__return_0_when_motors_offline)
 
     turretMotor.updateMotorAngle();
 
-    EXPECT_NEAR(0, turretMotor.getAngleFromCenter(), 1E-3);
+    EXPECT_NEAR(0, turretMotor.getAngleFromCenter().minDifference(0), 1E-3);
 }
 
 TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
@@ -192,7 +192,7 @@ TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
     {
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
-        EXPECT_NEAR(angle, turretMotor.getAngleFromCenter(), 1E-3);
+        EXPECT_NEAR(0, turretMotor.getAngleFromCenter().minDifference(angle), 1E-3);
     }
 }
 
