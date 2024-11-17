@@ -52,7 +52,14 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
-    enemyPositionScreenFrame = geEnemyPositionPlate(enemyPosition);
+    if (square)
+    {
+        enemyPositionScreenFrame = getEnemyPositionPlateSquare(enemyPosition);
+    }
+    else
+    {
+        enemyPositionScreenFrame = getEnemyPositionPlateCircle(enemyPosition);
+    }
 
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 
@@ -79,13 +86,25 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         RF_RETURN(true);
     }
 
-    RefSerialTransmitter::configRectangle(
-        WALL_HACK_THICKNESS,
-        enemyPositionScreenFrame.bottomLeftX,
-        enemyPositionScreenFrame.bottomLeftY,
-        enemyPositionScreenFrame.topRightX,
-        enemyPositionScreenFrame.topRightY,
-        &visionTargetGraphic.graphicData);
+    if (square)
+    {
+        RefSerialTransmitter::configRectangle(
+            WALL_HACK_THICKNESS,
+            enemyPositionScreenFrame.bottomLeftX,
+            enemyPositionScreenFrame.bottomLeftY,
+            enemyPositionScreenFrame.topRightX,
+            enemyPositionScreenFrame.topRightY,
+            &visionTargetGraphic.graphicData);
+    }
+    else
+    {
+        RefSerialTransmitter::configCircle(
+            WALL_HACK_THICKNESS,
+            enemyPositionScreenFrame.bottomLeftX,
+            enemyPositionScreenFrame.bottomLeftY,
+            enemyPositionScreenFrame.topRightX,
+            &visionTargetGraphic.graphicData);
+    }
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 
