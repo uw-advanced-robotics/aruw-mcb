@@ -65,17 +65,59 @@ private:
     static constexpr uint16_t TIMEOUT_MS = 5000;
     tap::arch::MilliTimeout targetTimeout;
 
-    // In world frame
-    Position enemyPosition;
-    ProjectedResult enemyPosScreenFrame, bottomLeftScreenFrame, topRightScreenFrame;
-
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
     Position plateCornerOffset = Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
 
-    inline void filler()
+    // In world frame
+    Position enemyPosition;
+
+    struct ProjectedPlateResult
     {
-        // This is here otherwise the compiler compains that this is unused
-        convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
+        bool inFrame;
+        uint32_t bottomLeftX;
+        uint32_t bottomLeftY;
+        uint32_t topRightX;
+        uint32_t topRightY;
+        Position enemyCenterCameraFrame;
+
+        ProjectedPlateResult()
+            : inFrame(false),
+              bottomLeftX(0),
+              bottomLeftY(0),
+              topRightX(0),
+              topRightY(0),
+              enemyCenterCameraFrame(0, 0, 0)
+        {
+        }
+    };
+
+    ProjectedPlateResult enemyPositionScreenFrame;
+
+    ProjectedPlateResult geEnemyPositionPlate(Position enemyPosition)
+    {
+        ProjectedPlateResult output;
+
+        ProjectedResult enemyPositionScreenFrame =
+            convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
+
+        output.inFrame = enemyPositionScreenFrame.inFrame;
+
+        ProjectedResult topRight = convertWorldFrameToScreenFrame(
+            enemyPosition,
+            transformer->getWorldToTurret(0),
+            plateCornerOffset);
+
+        ProjectedResult bottomLeft = convertWorldFrameToScreenFrame(
+            enemyPosition,
+            transformer->getWorldToTurret(0),
+            plateCornerOffset * -1);
+
+        output.bottomLeftX = bottomLeft.screenX;
+        output.bottomLeftY = bottomLeft.screenY;
+        output.topRightX = topRight.screenX;
+        output.topRightY = topRight.screenY;
+
+        return output;
     }
 };
 

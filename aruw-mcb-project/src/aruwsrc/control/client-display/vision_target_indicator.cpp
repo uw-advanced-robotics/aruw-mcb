@@ -32,7 +32,6 @@ VisionTargetIndicator::VisionTargetIndicator(
       transformer(transformer),
       enemyPosition(0, 0, 0)
 {
-    filler();
 }
 
 float Y_OFFSET = VTM_OFFSET_FRAME.y();
@@ -53,24 +52,14 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
-    enemyPosScreenFrame =
-        convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
-
-    bottomLeftScreenFrame = convertWorldFrameToScreenFrame(
-        enemyPosition,
-        transformer->getWorldToTurret(0),
-        plateCornerOffset);
-    topRightScreenFrame = convertWorldFrameToScreenFrame(
-        enemyPosition,
-        transformer->getWorldToTurret(0),
-        plateCornerOffset * -1);
+    enemyPositionScreenFrame = geEnemyPositionPlate(enemyPosition);
 
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 
     RF_BEGIN(0);
 
     // If the target is not in frame or the target has timed out, delete the graphic
-    if (!enemyPosScreenFrame.inFrame || targetTimeout.isExpired())
+    if (!enemyPositionScreenFrame.inFrame || targetTimeout.isExpired())
     {
         visionTargetGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
@@ -92,10 +81,10 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     RefSerialTransmitter::configRectangle(
         WALL_HACK_THICKNESS,
-        bottomLeftScreenFrame.screenX,
-        bottomLeftScreenFrame.screenY,
-        topRightScreenFrame.screenX,
-        topRightScreenFrame.screenY,
+        enemyPositionScreenFrame.bottomLeftX,
+        enemyPositionScreenFrame.bottomLeftY,
+        enemyPositionScreenFrame.topRightX,
+        enemyPositionScreenFrame.topRightY,
         &visionTargetGraphic.graphicData);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
