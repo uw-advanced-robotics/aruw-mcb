@@ -59,7 +59,7 @@ private:
     TransformerInterface *transformer;
 
     Tx::Graphic1Message visionTargetGraphic;
-    static constexpr uint16_t WALL_HACK_THICKNESS = 3;
+    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
 
     // Duration of which to show target after losing it
     static constexpr uint16_t TIMEOUT_MS = 5000;
