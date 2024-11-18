@@ -89,7 +89,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     if (square)
     {
         RefSerialTransmitter::configRectangle(
-            WALL_HACK_THICKNESS,
+            INDICATOR_LINE_THICKNESS,
             enemyPositionScreenFrame.bottomLeftX,
             enemyPositionScreenFrame.bottomLeftY,
             enemyPositionScreenFrame.topRightX,
@@ -99,7 +99,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     else
     {
         RefSerialTransmitter::configCircle(
-            WALL_HACK_THICKNESS,
+            INDICATOR_LINE_THICKNESS,
             enemyPositionScreenFrame.bottomLeftX,
             enemyPositionScreenFrame.bottomLeftY,
             enemyPositionScreenFrame.topRightX,
