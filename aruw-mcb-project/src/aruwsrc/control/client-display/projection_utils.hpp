@@ -61,7 +61,7 @@ static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 #endif
 
 /**
- * Creates a projection matrix. Made from expirementally found values of the VT02 (VTM) camera.
+ * Creates a projection matrix. Made from experimentally found values of the VT02 (VTM) camera.
  */
 static CMSISMat<4, 4> getProjectionMatrix()
 {
