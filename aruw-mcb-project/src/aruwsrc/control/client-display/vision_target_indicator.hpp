@@ -67,7 +67,7 @@ private:
         RefSerialData::Tx::GraphicColor::ORANGE;
 
     // Duration of which to show target after losing it
-    static constexpr uint16_t TIMEOUT_MS = 5000;
+    static constexpr uint16_t TIMEOUT_MS = 1000;
     tap::arch::MilliTimeout targetTimeout;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
