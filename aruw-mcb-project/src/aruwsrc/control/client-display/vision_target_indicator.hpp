@@ -61,6 +61,11 @@ private:
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
 
+    RefSerialData::Tx::GraphicColor INDICATOR_HAS_TARGET_COLOR =
+        RefSerialData::Tx::GraphicColor::GREEN;
+    RefSerialData::Tx::GraphicColor INDICATOR_NO_TARGET_COLOR =
+        RefSerialData::Tx::GraphicColor::ORANGE;
+
     // Duration of which to show target after losing it
     static constexpr uint16_t TIMEOUT_MS = 5000;
     tap::arch::MilliTimeout targetTimeout;
@@ -76,10 +81,8 @@ private:
     struct ProjectedPlateResult
     {
         bool inFrame;
-        // For circle this is center
         uint32_t bottomLeftX;
         uint32_t bottomLeftY;
-        // For circle this is radius
         uint32_t topRightX;
         uint32_t topRightY;
         Position enemyCenterCameraFrame;

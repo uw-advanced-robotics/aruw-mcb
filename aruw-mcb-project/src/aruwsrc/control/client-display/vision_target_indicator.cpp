@@ -76,8 +76,8 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
     }
 
-    visionTargetGraphic.graphicData.color =
-        static_cast<uint32_t>(visionHasTarget ? Tx::GraphicColor::GREEN : Tx::GraphicColor::ORANGE);
+    visionTargetGraphic.graphicData.color = static_cast<uint32_t>(
+        visionHasTarget ? INDICATOR_HAS_TARGET_COLOR : INDICATOR_NO_TARGET_COLOR);
 
     // If the graphic is already deleted, don't delete it again
     if (prevOperation == Tx::GRAPHIC_DELETE &&
@@ -86,25 +86,13 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         RF_RETURN(true);
     }
 
-    if (square)
-    {
-        RefSerialTransmitter::configRectangle(
-            INDICATOR_LINE_THICKNESS,
-            enemyPositionScreenFrame.bottomLeftX,
-            enemyPositionScreenFrame.bottomLeftY,
-            enemyPositionScreenFrame.topRightX,
-            enemyPositionScreenFrame.topRightY,
-            &visionTargetGraphic.graphicData);
-    }
-    else
-    {
-        RefSerialTransmitter::configCircle(
-            INDICATOR_LINE_THICKNESS,
-            enemyPositionScreenFrame.bottomLeftX,
-            enemyPositionScreenFrame.bottomLeftY,
-            enemyPositionScreenFrame.topRightX,
-            &visionTargetGraphic.graphicData);
-    }
+    RefSerialTransmitter::configRectangle(
+        INDICATOR_LINE_THICKNESS,
+        enemyPositionScreenFrame.bottomLeftX,
+        enemyPositionScreenFrame.bottomLeftY,
+        enemyPositionScreenFrame.topRightX,
+        enemyPositionScreenFrame.topRightY,
+        &visionTargetGraphic.graphicData);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 

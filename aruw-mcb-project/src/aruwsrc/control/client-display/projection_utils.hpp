@@ -63,46 +63,29 @@ static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 /**
  * Creates a projection matrix. Made from experimentally found values of the VT02 (VTM) camera.
  */
-static CMSISMat<4, 4> getProjectionMatrix()
+static CMSISMat<4, 4> getProjectionMatrix(
+    float fx = HORIZONTAL_FOV,
+    float fy = VERTICAL_FOV,
+    float near = NEAR_CUTOFF_M,
+    float far = FAR_CUTOFF_M)
 {
-    float horizontalScale = 1.0f / tanf(HORIZONTAL_FOV * 0.5 * M_PI / 180);
-    float verticalScale = 1.0f / tanf(VERTICAL_FOV * 0.5 * M_PI / 180);
+    float horizontalScale = 1.0f / tanf(fx * 0.5 * M_PI / 180);
+    float verticalScale = 1.0f / tanf(fy * 0.5 * M_PI / 180);
 
     CMSISMat<4, 4> projectionMatrix;
     projectionMatrix.data[0] = horizontalScale;
     projectionMatrix.data[4 * 1 + 1] = verticalScale;
 
-    projectionMatrix.data[4 * 2 + 2] = -FAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
+    projectionMatrix.data[4 * 2 + 2] = -far / (far - near);
     projectionMatrix.data[4 * 2 + 3] = -1.0f;
 
-    projectionMatrix.data[4 * 3 + 2] =
-        -FAR_CUTOFF_M * NEAR_CUTOFF_M / (FAR_CUTOFF_M - NEAR_CUTOFF_M);
+    projectionMatrix.data[4 * 3 + 2] = -far * near / (far - near);
     projectionMatrix.data[4 * 3 + 3] = 0;
 
     return projectionMatrix;
 };
 
 static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
-
-/**
- * Converts a position from world frame to camera frame. This function first applies transform to
- * convert to turret frame, then accounts for transform to VTM. Can optionally take in a offset
- * position that translates the position in camera frame.
- *
- * @param worldFrame Position in world frame.
- * @param worldToTurret Transform from world to turret frame.
- * @param offset Offset to apply to the position in camera frame.
- *
- * @return Result in camera frame.
- */
-static Position convertWorldFrameToCameraFrame(
-    const Position &worldFrame,
-    const Transform &worldToTurret,
-    const Position &offset = Position(0, 0, 0))
-{
-    Position turretFrame = worldToTurret.apply(worldFrame);
-    return turretFrame + VTM_OFFSET_FRAME + offset;
-}
 
 /**
  * Converts a vector from world frame to screen frame. This function applies the projection matrix
@@ -129,6 +112,9 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     CMSISMat<4, 1> result = projectionMatrix * vec;
     result.data[0] /= result.data[3];
     result.data[1] /= result.data[3];
+    // Preserve the z value for depth
+    result.data[2] /= abs(result.data[3]);
+
 
     ProjectedResult output;
 
@@ -150,27 +136,6 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     output.positionScreenFrame.data[2] = result.data[2];
 
     return output;
-}
-
-/***
- * @brief Takes a given position in world frame (x,y,z in meters) and outputs the position of the
- * object in screen frame (x,y in pixels)
- *
- * @param worldFrame Position in world frame
- * @param worldToTurret Transform from world to turret frame (Interally computes from realsense to
- * VTM)
- * @param offset Offset to apply to the position in camera frame (For example, to get position of
- * corner of plate instead of center)
- *
- * @return ProjectedResult Position in screen frame, including whether it is in frame
- */
-static ProjectedResult convertWorldFrameToScreenFrame(
-    const Position &worldFrame,
-    const Transform &worldToTurret,
-    const Position &offset = Position(0, 0, 0))
-{
-    Position cameraFrame = convertWorldFrameToCameraFrame(worldFrame, worldToTurret, offset);
-    return convertCameraFrameToScreenFrame(cameraFrame);
 }
 
 }  // namespace aruwsrc::control::client_display
