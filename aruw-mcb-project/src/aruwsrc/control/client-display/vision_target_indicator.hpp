@@ -103,7 +103,7 @@ private:
         ProjectedPlateResult output;
 
         Position cameraFrame =
-            transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET_FRAME;
+            transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET;
 
         ProjectedResult screenFrame = convertCameraFrameToScreenFrame(cameraFrame);
 
