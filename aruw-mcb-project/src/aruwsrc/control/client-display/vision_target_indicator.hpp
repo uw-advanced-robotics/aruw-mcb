@@ -76,8 +76,6 @@ private:
     // In world frame
     Position enemyPosition;
 
-    bool square;
-
     struct ProjectedPlateResult
     {
         bool inFrame;
@@ -104,19 +102,17 @@ private:
     {
         ProjectedPlateResult output;
 
-        Position enemyPositionCameraFrame =
-            transformer->getWorldToTurret(0).apply(enemyPosition) + VTM_OFFSET_FRAME;
+        Position cameraFrame =
+            transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET_FRAME;
 
-        ProjectedResult enemyPositionScreenFrame =
-            convertCameraFrameToScreenFrame(enemyPositionCameraFrame);
+        ProjectedResult screenFrame = convertCameraFrameToScreenFrame(cameraFrame);
 
-        output.inFrame = enemyPositionScreenFrame.inFrame;
+        output.inFrame = screenFrame.inFrame;
 
-        ProjectedResult topRight =
-            convertCameraFrameToScreenFrame(enemyPositionCameraFrame + plateCornerOffset);
+        ProjectedResult topRight = convertCameraFrameToScreenFrame(cameraFrame + plateCornerOffset);
 
         ProjectedResult bottomLeft =
-            convertCameraFrameToScreenFrame(enemyPositionCameraFrame + (plateCornerOffset * -1));
+            convertCameraFrameToScreenFrame(cameraFrame + (plateCornerOffset * -1));
 
         output.bottomLeftX = bottomLeft.screenX;
         output.bottomLeftY = bottomLeft.screenY;
