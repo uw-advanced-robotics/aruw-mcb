@@ -56,7 +56,8 @@ struct ProjectedResult
 // This in theory is the offset between the realsense and the VTM
 #if defined(TARGET_STANDARD_CYGNUS)
 static Position VTM_OFFSET_FRAME = Position(0, -0.02, -0.085);
-#else if defined(TARGET_STANDARD_ORION)
+#elif defined(TARGET_STANDARD_ORION)
+static Position VTM_OFFSET_FRAME = Position(0, -0.02, -0.085);
 #else
 static Position VTM_OFFSET_FRAME = Position(0, 0, 0);
 #endif
