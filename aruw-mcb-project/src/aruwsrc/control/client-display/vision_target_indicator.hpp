@@ -89,7 +89,7 @@ private:
 
     ProjectedPlateResult enemyPositionScreenFrame;
 
-    ProjectedPlateResult getEnemyPositionPlateSquare(Position enemyPositionWorldFrame)
+    ProjectedPlateResult getEnemyPlatePosition(Position enemyPositionWorldFrame)
     {
         ProjectedPlateResult output;
 
