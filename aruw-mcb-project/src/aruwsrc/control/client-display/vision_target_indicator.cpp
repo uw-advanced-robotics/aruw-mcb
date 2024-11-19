@@ -34,13 +34,8 @@ VisionTargetIndicator::VisionTargetIndicator(
 {
 }
 
-float Y_OFFSET = VTM_OFFSET_FRAME.y();
-float Z_OFFSET = VTM_OFFSET_FRAME.z();
 modm::ResumableResult<bool> VisionTargetIndicator::update()
 {
-    // Here for debugging purposes. Should be removed in the future
-    VTM_OFFSET_FRAME = Position(0, Y_OFFSET, Z_OFFSET);
-
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
