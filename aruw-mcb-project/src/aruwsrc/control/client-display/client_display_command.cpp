@@ -123,7 +123,6 @@ bool ClientDisplayCommand::run()
     PT_CALL(circleCrosshair.sendInitialGraphics());
     PT_CALL(damageIndicator.sendInitialGraphics());
     PT_CALL(textHudIndicators.sendInitialGraphics());
-
     PT_CALL(visionTargetIndicator.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
@@ -136,7 +135,6 @@ bool ClientDisplayCommand::run()
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
         PT_CALL(textHudIndicators.update());
-
         PT_CALL(visionTargetIndicator.update());
 
         // Calculate the time it took to update the HUD
