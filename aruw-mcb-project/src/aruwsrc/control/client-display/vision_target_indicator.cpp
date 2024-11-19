@@ -52,14 +52,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
-    if (square)
-    {
-        enemyPositionScreenFrame = getEnemyPositionPlateSquare(enemyPosition);
-    }
-    else
-    {
-        enemyPositionScreenFrame = getEnemyPositionPlateCircle(enemyPosition);
-    }
+    enemyPositionScreenFrame = getEnemyPositionPlateSquare(enemyPosition);
 
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 

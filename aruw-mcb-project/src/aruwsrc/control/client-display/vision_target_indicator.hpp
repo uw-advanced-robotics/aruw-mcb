@@ -100,55 +100,28 @@ private:
 
     ProjectedPlateResult enemyPositionScreenFrame;
 
-    ProjectedPlateResult getEnemyPositionPlateSquare(Position enemyPosition)
+    ProjectedPlateResult getEnemyPositionPlateSquare(Position enemyPositionWorldFrame)
     {
         ProjectedPlateResult output;
 
+        Position enemyPositionCameraFrame =
+            transformer->getWorldToTurret(0).apply(enemyPosition) + VTM_OFFSET_FRAME;
+
         ProjectedResult enemyPositionScreenFrame =
-            convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
+            convertCameraFrameToScreenFrame(enemyPositionCameraFrame);
 
         output.inFrame = enemyPositionScreenFrame.inFrame;
 
-        ProjectedResult topRight = convertWorldFrameToScreenFrame(
-            enemyPosition,
-            transformer->getWorldToTurret(0),
-            plateCornerOffset);
+        ProjectedResult topRight =
+            convertCameraFrameToScreenFrame(enemyPositionCameraFrame + plateCornerOffset);
 
-        ProjectedResult bottomLeft = convertWorldFrameToScreenFrame(
-            enemyPosition,
-            transformer->getWorldToTurret(0),
-            plateCornerOffset * -1);
+        ProjectedResult bottomLeft =
+            convertCameraFrameToScreenFrame(enemyPositionCameraFrame + (plateCornerOffset * -1));
 
         output.bottomLeftX = bottomLeft.screenX;
         output.bottomLeftY = bottomLeft.screenY;
         output.topRightX = topRight.screenX;
         output.topRightY = topRight.screenY;
-
-        return output;
-    }
-
-    ProjectedPlateResult getEnemyPositionPlateCircle(Position enemyPosition)
-    {
-        ProjectedPlateResult output;
-
-        ProjectedResult enemyPositionScreenFrame =
-            convertWorldFrameToScreenFrame(enemyPosition, transformer->getWorldToTurret(0));
-
-        output.inFrame = enemyPositionScreenFrame.inFrame;
-
-        ProjectedResult topRight = convertWorldFrameToScreenFrame(
-            enemyPosition,
-            transformer->getWorldToTurret(0),
-            plateCornerOffset);
-
-        // Get magnitude of the vector from the center to the top right corner
-        uint32_t difference_x = topRight.screenX - enemyPositionScreenFrame.screenX;
-        uint32_t difference_y = topRight.screenY - enemyPositionScreenFrame.screenY;
-        float radius = sqrt(difference_x * difference_x + difference_y * difference_y);
-
-        output.bottomLeftX = enemyPositionScreenFrame.screenX;
-        output.bottomLeftY = enemyPositionScreenFrame.screenY;
-        output.topRightX = (uint32_t)radius;
 
         return output;
     }

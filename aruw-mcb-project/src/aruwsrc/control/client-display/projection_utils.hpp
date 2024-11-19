@@ -85,7 +85,7 @@ static CMSISMat<4, 4> getProjectionMatrix(
     return projectionMatrix;
 };
 
-static const CMSISMat<4, 4> projectionMatrix = getProjectionMatrix();
+static const CMSISMat<4, 4> vtmProjectionMatrix = getProjectionMatrix();
 
 /**
  * Converts a vector from world frame to screen frame. This function applies the projection matrix
@@ -109,7 +109,7 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     vec.data[3] = 1.0f;
 
     // Conversion to screen space
-    CMSISMat<4, 1> result = projectionMatrix * vec;
+    CMSISMat<4, 1> result = vtmProjectionMatrix * vec;
     result.data[0] /= result.data[3];
     result.data[1] /= result.data[3];
     // Preserve the z value for depth
@@ -131,9 +131,7 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     // Convert to screen space
     output.screenX = (result.data[0] + 1) * 0.5f * HudIndicator::SCREEN_WIDTH;
     output.screenY = (result.data[1] + 1) * 0.5f * HudIndicator::SCREEN_HEIGHT;
-    output.positionScreenFrame.data[0] = result.data[0];
-    output.positionScreenFrame.data[1] = result.data[1];
-    output.positionScreenFrame.data[2] = result.data[2];
+    output.positionScreenFrame.data = {result.data[0], result.data[1], result.data[2]};
 
     return output;
 }
