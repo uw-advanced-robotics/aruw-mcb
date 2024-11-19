@@ -57,9 +57,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
     }
 
-    visionTargetGraphic.graphicData.color = static_cast<uint32_t>(
-        visionHasTarget ? INDICATOR_HAS_TARGET_COLOR : INDICATOR_NO_TARGET_COLOR);
-
     RF_BEGIN(0);
 
     // If the graphic is already deleted, don't delete it again
@@ -98,7 +95,7 @@ void VisionTargetIndicator::initialize()
         indicatorName,
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::PURPLISH_RED);
+        INDICATOR_COLOR);
 }
 
 }  // namespace aruwsrc::control::client_display

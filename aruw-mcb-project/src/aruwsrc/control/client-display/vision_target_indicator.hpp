@@ -58,10 +58,8 @@ private:
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
 
-    RefSerialData::Tx::GraphicColor INDICATOR_HAS_TARGET_COLOR =
+    RefSerialData::Tx::GraphicColor INDICATOR_COLOR =
         RefSerialData::Tx::GraphicColor::GREEN;
-    RefSerialData::Tx::GraphicColor INDICATOR_NO_TARGET_COLOR =
-        RefSerialData::Tx::GraphicColor::ORANGE;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
     Position plateCornerOffset = Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
