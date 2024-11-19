@@ -117,7 +117,6 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     // Preserve the z value for depth
     result.data[2] /= abs(result.data[3]);
 
-
     ProjectedResult output;
 
     // Culling if out of frame
