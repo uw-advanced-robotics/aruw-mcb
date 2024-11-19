@@ -98,4 +98,29 @@ void VisionTargetIndicator::initialize()
         INDICATOR_COLOR);
 }
 
+VisionTargetIndicator::ProjectedPlateResult VisionTargetIndicator::getEnemyPlatePosition(
+    Position &enemyPositionWorldFrame)
+{
+    VisionTargetIndicator::ProjectedPlateResult output;
+
+    Position cameraFrame =
+        transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET;
+
+    ProjectedResult screenFrame = convertCameraFrameToScreenFrame(cameraFrame);
+
+    output.inFrame = screenFrame.inFrame;
+
+    ProjectedResult topRight = convertCameraFrameToScreenFrame(cameraFrame + plateCornerOffset);
+
+    ProjectedResult bottomLeft =
+        convertCameraFrameToScreenFrame(cameraFrame + (plateCornerOffset * -1));
+
+    output.bottomLeftX = bottomLeft.screenX;
+    output.bottomLeftY = bottomLeft.screenY;
+    output.topRightX = topRight.screenX;
+    output.topRightY = topRight.screenY;
+
+    return output;
+}
+
 }  // namespace aruwsrc::control::client_display

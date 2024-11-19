@@ -97,7 +97,7 @@ static const CMSISMat<4, 4> vtmProjectionMatrix = getProjectionMatrix();
  *
  * @return Result in screen frame.
  */
-static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
+static inline ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
 {
     CMSISMat<3, 1> posWorld = vector.coordinates();
     // Convert to camera axes

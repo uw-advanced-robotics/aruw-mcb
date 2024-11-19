@@ -51,22 +51,6 @@ public:
 
     modm::ResumableResult<bool> update() override final;
 
-private:
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    TransformerInterface *transformer;
-
-    Tx::Graphic1Message visionTargetGraphic;
-    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
-
-    RefSerialData::Tx::GraphicColor INDICATOR_COLOR =
-        RefSerialData::Tx::GraphicColor::GREEN;
-
-    static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
-    const Position plateCornerOffset = Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
-
-    // In world frame
-    Position enemyPosition;
-
     struct ProjectedPlateResult
     {
         bool inFrame;
@@ -87,31 +71,24 @@ private:
         }
     };
 
+private:
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    TransformerInterface *transformer;
+
+    Tx::Graphic1Message visionTargetGraphic;
+    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
+
+    RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::GREEN;
+
+    static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
+    const Position plateCornerOffset =
+        Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
+
+    // In world frame
+    Position enemyPosition;
     ProjectedPlateResult enemyPositionScreenFrame;
 
-    ProjectedPlateResult getEnemyPlatePosition(Position enemyPositionWorldFrame)
-    {
-        ProjectedPlateResult output;
-
-        Position cameraFrame =
-            transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET;
-
-        ProjectedResult screenFrame = convertCameraFrameToScreenFrame(cameraFrame);
-
-        output.inFrame = screenFrame.inFrame;
-
-        ProjectedResult topRight = convertCameraFrameToScreenFrame(cameraFrame + plateCornerOffset);
-
-        ProjectedResult bottomLeft =
-            convertCameraFrameToScreenFrame(cameraFrame + (plateCornerOffset * -1));
-
-        output.bottomLeftX = bottomLeft.screenX;
-        output.bottomLeftY = bottomLeft.screenY;
-        output.topRightX = topRight.screenX;
-        output.topRightY = topRight.screenY;
-
-        return output;
-    }
+    ProjectedPlateResult getEnemyPlatePosition(Position &enemyPosition);
 };
 
 }  // namespace aruwsrc::control::client_display
