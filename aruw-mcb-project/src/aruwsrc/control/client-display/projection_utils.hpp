@@ -114,7 +114,7 @@ static ProjectedResult convertCameraFrameToScreenFrame(const Position &vector)
     CMSISMat<4, 1> result = vtmProjectionMatrix * vec;
     result.data[0] /= result.data[3];
     result.data[1] /= result.data[3];
-    // Preserve the z value for depth
+    // Preserve the z sign for depth
     result.data[2] /= abs(result.data[3]);
 
     ProjectedResult output;
