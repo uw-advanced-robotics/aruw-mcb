@@ -20,8 +20,6 @@
 #ifndef VISION_TARGET_INDICATOR_HPP_
 #define VISION_TARGET_INDICATOR_HPP_
 
-#include "tap/algorithms/cmsis_mat.hpp"
-#include "tap/architecture/timeout.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
@@ -33,7 +31,6 @@
 #include "projection_utils.hpp"
 
 using namespace aruwsrc::algorithms::transforms;
-using tap::algorithms::CMSISMat;
 
 namespace aruwsrc::control::client_display
 {
@@ -65,10 +62,6 @@ private:
         RefSerialData::Tx::GraphicColor::GREEN;
     RefSerialData::Tx::GraphicColor INDICATOR_NO_TARGET_COLOR =
         RefSerialData::Tx::GraphicColor::ORANGE;
-
-    // Duration of which to show target after losing it
-    static constexpr uint16_t TIMEOUT_MS = 1000;
-    tap::arch::MilliTimeout targetTimeout;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
     Position plateCornerOffset = Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);

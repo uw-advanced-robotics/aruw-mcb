@@ -39,11 +39,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
-    if (visionHasTarget)
-    {
-        targetTimeout.restart(TIMEOUT_MS);
-    }
-
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
@@ -51,10 +46,8 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 
-    RF_BEGIN(0);
-
-    // If the target is not in frame or the target has timed out, delete the graphic
-    if (!enemyPositionScreenFrame.inFrame || targetTimeout.isExpired())
+    // If the target is not in frame, delete the graphic
+    if (!enemyPositionScreenFrame.inFrame)
     {
         visionTargetGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
@@ -66,6 +59,8 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     visionTargetGraphic.graphicData.color = static_cast<uint32_t>(
         visionHasTarget ? INDICATOR_HAS_TARGET_COLOR : INDICATOR_NO_TARGET_COLOR);
+
+    RF_BEGIN(0);
 
     // If the graphic is already deleted, don't delete it again
     if (prevOperation == Tx::GRAPHIC_DELETE &&
