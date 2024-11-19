@@ -47,7 +47,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
 
     // If the target is not in frame, delete the graphic
-    if (!enemyPositionScreenFrame.inFrame)
+    if (!enemyPositionScreenFrame.inFrame || !visionHasTarget)
     {
         visionTargetGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
