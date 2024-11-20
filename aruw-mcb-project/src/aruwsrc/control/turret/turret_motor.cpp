@@ -165,42 +165,11 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         {
             return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
-        else
-        {
-            return measurement.minDifference(setpoint);
-        }
-    }
-    else
-    {
-        // the error can be wrapped around the unit circle
-        // equivalent to this - other
-        return measurement.minDifference(setpoint);
-    }
-}
-
-float TurretMotor::getSetpointWithinTurretRange(float setpoint) const
-{
-    if (setpoint < config.minAngle)
-    {
-        float newSetpoint = setpoint;
-        while (newSetpoint < config.minAngle)
-        {
-            newSetpoint += M_TWOPI;
-        }
-        return newSetpoint <= config.maxAngle ? newSetpoint : setpoint;
     }
 
-    if (setpoint > config.maxAngle)
-    {
-        float newSetpoint = setpoint;
-        while (newSetpoint > config.maxAngle)
-        {
-            newSetpoint -= M_TWOPI;
-        }
-        return newSetpoint >= config.minAngle ? newSetpoint : setpoint;
-    }
-
-    return setpoint;
+    // the error can be wrapped around the unit circle
+    // equivalent to this - other
+    return measurement.minDifference(setpoint);
 }
 
 }  // namespace aruwsrc::control::turret

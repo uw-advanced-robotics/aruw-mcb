@@ -172,21 +172,6 @@ public:
     mockable float getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
         const;
 
-    /**
-     * Translates the setpoint that may or may not be within the range of the turret to an angle
-     * that is within the min/max bounds of the turret motor if possible. If there is no valid
-     * setpoint within the min/max bounds, this function will return the original setpoint.
-     *
-     * For example, if the minimum angle is -PI and the max angle is PI, if the setpoint is -2*PI
-     * then the value returned is -2*PI + 2*PI = 0. This angle is within the acceptable bounds and
-     * rotationally equivalent to the specified setpoint.
-     *
-     * @param[in] setpoint Some non-normalized turret setpoint, in radians.
-     *
-     * @return The translated value.
-     */
-    float getSetpointWithinTurretRange(float setpoint) const;
-
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
 
 private:
