@@ -32,8 +32,8 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
     : config(motorConfig),
       motor(motor),
-      chassisFrameSetpoint(config.startAngle, 0, M_TWOPI),
-      chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
+      chassisFrameSetpoint(Angle(config.startAngle)),
+      chassisFrameMeasuredAngle(Angle(config.startAngle)),
       chassisFrameUnwrappedMeasurement(config.startAngle),
       lastUpdatedEncoderValue(config.startEncoderValue)
 {
