@@ -483,7 +483,10 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(
+    drivers(),
+    {&beybladeAlternatingWithPlateHitCommand},
+    RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(
     drivers(),
     {&turretUTurnCommandLimited},
