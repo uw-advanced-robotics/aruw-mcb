@@ -26,10 +26,10 @@ namespace aruwsrc::control::client_display
 VisionTargetIndicator::VisionTargetIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     RefSerialTransmitter &refSerialTransmitter,
-    TransformerInterface *transformer)
+    const Transform &worldToTurretTransform)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
-      transformer(transformer),
+      worldToTurretTransform(worldToTurretTransform),
       enemyPosition(0, 0, 0)
 {
 }
@@ -103,8 +103,7 @@ VisionTargetIndicator::ProjectedPlateResult VisionTargetIndicator::getEnemyPlate
 {
     VisionTargetIndicator::ProjectedPlateResult output;
 
-    Position cameraFrame =
-        transformer->getWorldToTurret(0).apply(enemyPositionWorldFrame) + VTM_OFFSET;
+    Position cameraFrame = worldToTurretTransform.apply(enemyPositionWorldFrame) + VTM_OFFSET;
 
     ProjectedResult screenFrame = convertCameraFrameToScreenFrame(cameraFrame);
 
