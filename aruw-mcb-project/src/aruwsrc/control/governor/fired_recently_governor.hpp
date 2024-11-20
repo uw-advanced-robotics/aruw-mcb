@@ -39,9 +39,7 @@ public:
     /**
      * @param durationBuffer Time since last shot in milliseconds to run the command blocked.
      */
-    FiredRecentlyGovernor(
-        tap::Drivers* drivers,
-        const uint32_t durationBuffer)
+    FiredRecentlyGovernor(tap::Drivers* drivers, const uint32_t durationBuffer)
         : drivers(drivers),
           durationBuffer(durationBuffer)
     {

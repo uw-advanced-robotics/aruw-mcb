@@ -73,7 +73,7 @@ private:
         float x = operatorInterface.getChassisXInput();
         float y = operatorInterface.getChassisYInput();
 
-        if (fabsf(x) > speedBuffer || fabsf(y) > speedBuffer)
+        if (pow(x, 2) + pow(y, 2) >= pow(speedBuffer, 2))
         {
             lastTimeTooFast = currentTime;
         }
