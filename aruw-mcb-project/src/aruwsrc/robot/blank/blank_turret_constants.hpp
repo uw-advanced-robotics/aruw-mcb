@@ -17,20 +17,21 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_subsystem.hpp"
+#ifndef BLANK_TURRET_CONSTANTS_HPP_
+#define BLANK_TURRET_CONSTANTS_HPP_
 
-#include "tap/control/subsystem.hpp"
+// Do not include this file directly: use turret_constants.hpp instead.
+#ifndef TURRET_CONSTANTS_HPP_
+#error "Do not include this file directly! Use turret_controller_constants.hpp instead."
+#endif
 
-namespace aruwsrc::dart
+namespace aruwsrc::control::turret
 {
-DartSubsystem::DartSubsystem(tap::Drivers* drivers, tap::motor::DjiMotor* motor)
-    : Subsystem(drivers),
-      motor(motor)
-{
-}
+// These are needed to not break vision coprocessor ¯\_(ツ)_/¯, temp fix to issue
+static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr float TURRET_CG_X = 0;
+static constexpr float TURRET_CG_Z = 0;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
+}  // namespace aruwsrc::control::turret
 
-void DartSubsystem::windUp() { motor->setDesiredOutput(SHRT_MAX / 2); }
-
-void DartSubsystem::stop() { motor->setDesiredOutput(0); }
-
-}  // namespace aruwsrc::dart
+#endif  // BLANK_TURRET_CONSTANTS_HPP_
