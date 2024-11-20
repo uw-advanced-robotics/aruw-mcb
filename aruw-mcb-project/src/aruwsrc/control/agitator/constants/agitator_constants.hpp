@@ -24,8 +24,8 @@
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
 #elif defined(TARGET_SENTRY_HYDRA)
 #include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
-#include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
+#elif defined(TARGET_HIMO_PERSEUS)
+#include "aruwsrc/robot/himo/himo_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_

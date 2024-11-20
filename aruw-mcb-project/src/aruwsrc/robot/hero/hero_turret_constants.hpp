@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HERO_TURRET_CONSTANTS_HPP_
-#define HERO_TURRET_CONSTANTS_HPP_
+#ifndef HIMO_TURRET_CONSTANTS_HPP_
+#define HIMO_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -202,4 +202,4 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 }  // namespace aruwsrc::control::turret
 
-#endif  // HERO_TURRET_CONSTANTS_HPP_
+#endif  // HIMO_TURRET_CONSTANTS_HPP_

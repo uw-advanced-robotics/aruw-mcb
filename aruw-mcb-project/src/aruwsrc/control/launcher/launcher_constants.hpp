@@ -29,13 +29,13 @@
 
 namespace aruwsrc::control::launcher
 {
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
 
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_SENTRIES)
+#if defined(TARGET_HIMO_PERSEUS) || defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
@@ -74,7 +74,7 @@ static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {4.0f, 1900.0f},
@@ -128,13 +128,13 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HIMO_PERSEUS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
 #else

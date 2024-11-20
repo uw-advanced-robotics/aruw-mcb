@@ -69,8 +69,8 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     RF_BEGIN(1);
 
     // Access the correct field depending on the robot type
-    if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
-        refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
+    if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HIMO ||
+        refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HIMO)
     {
         bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
     }

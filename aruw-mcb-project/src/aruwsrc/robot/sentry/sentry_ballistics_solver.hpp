@@ -121,7 +121,7 @@ public:
      * @param[in] turretBaseMotor motor that rotates the base on which the turret is mounted (ex:
      * motor of turret major for the sentry)
      * @param[in] turretDistFromBase the absolute distance of the turret from the point it spins
-     * around. Should be 0 for standard and hero and nonzero for the dual-turret sentry.
+     * around. Should be 0 for standard and himo and nonzero for the dual-turret sentry.
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
      */

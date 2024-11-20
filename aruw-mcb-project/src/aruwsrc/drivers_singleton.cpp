@@ -25,8 +25,8 @@
 namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
-namespace aruwsrc::hero
+#elif defined(TARGET_HIMO_PERSEUS)
+namespace aruwsrc::himo
 #elif defined(TARGET_DRONE)
 namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)

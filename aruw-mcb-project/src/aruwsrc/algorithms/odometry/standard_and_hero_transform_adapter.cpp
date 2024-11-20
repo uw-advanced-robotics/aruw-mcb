@@ -17,37 +17,37 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "standard_and_hero_transform_adapter.hpp"
+#include "standard_and_himo_transform_adapter.hpp"
 
 #include "tap/algorithms/cmsis_mat.hpp"
 
-#include "standard_and_hero_transformer.hpp"
+#include "standard_and_himo_transformer.hpp"
 #include "transformer_interface.hpp"
 
 using namespace tap::algorithms::transforms;
 namespace aruwsrc::algorithms::transforms
 {
-StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
-    const StandardAndHeroTransformer& transforms)
+StandardAndHimoTransformAdapter::StandardAndHimoTransformAdapter(
+    const StandardAndHimoTransformer& transforms)
     : transforms(transforms)
 {
 }
 
-modm::Vector2f StandardAndHeroTransformAdapter::getChassisVelocity2d() const
+modm::Vector2f StandardAndHimoTransformAdapter::getChassisVelocity2d() const
 {
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
-uint32_t StandardAndHeroTransformAdapter::getLastComputedOdometryTime() const
+uint32_t StandardAndHimoTransformAdapter::getLastComputedOdometryTime() const
 {
     return transforms.getChassisOdometry().getLastComputedOdometryTime();
 }
 
-const Transform& StandardAndHeroTransformAdapter::getWorldToChassis() const
+const Transform& StandardAndHimoTransformAdapter::getWorldToChassis() const
 {
     return transforms.getWorldToChassis();
 }
-const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t) const
+const Transform& StandardAndHimoTransformAdapter::getWorldToTurret(uint8_t) const
 {
     return transforms.getWorldToTurret();
 };

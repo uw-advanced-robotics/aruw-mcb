@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HERO_AGITATOR_CONSTANTS_HPP_
-#define HERO_AGITATOR_CONSTANTS_HPP_
+#ifndef HIMO_AGITATOR_CONSTANTS_HPP_
+#define HIMO_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
@@ -35,7 +35,7 @@
 
 namespace aruwsrc::control::agitator::constants
 {
-// Hero's waterwheel constants
+// Himo's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
     .kp = 7'000.0f,
     .ki = 0.0f,
@@ -87,7 +87,7 @@ static constexpr tap::control::setpoint::UnjamIntegralCommand::Config
         .targetCycleCount = 1,
 };
 
-// PID terms for the hero kicker
+// PID terms for the himo kicker
 static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
     .kp = 5'000.0f,
     .ki = 0.0f,
@@ -134,4 +134,4 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
 }  // namespace aruwsrc::control::agitator::constants
 
-#endif  // HERO_AGITATOR_CONSTANTS_HPP_
+#endif  // HIMO_AGITATOR_CONSTANTS_HPP_

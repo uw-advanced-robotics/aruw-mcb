@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HERO_CHASSIS_CONSTANTS_HPP_
-#define HERO_CHASSIS_CONSTANTS_HPP_
+#ifndef HIMO_CHASSIS_CONSTANTS_HPP_
+#define HIMO_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
 
@@ -133,7 +133,7 @@ static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.70f;
  * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
  * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
  */
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
 static constexpr float
     BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.7f;
 #else
@@ -152,4 +152,4 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 }  // namespace aruwsrc::chassis
 
-#endif  // HERO_CHASSIS_CONSTANTS_HPP_
+#endif  // HIMO_CHASSIS_CONSTANTS_HPP_

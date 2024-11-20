@@ -139,7 +139,7 @@ void MatrixHudIndicators::updateIndicatorState()
 
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
         auto turretMCB = turretSubsystem.getTurretMCB();
         assert(turretMCB != nullptr);
         if (!turretMCB->getLimitSwitchDepressed())

@@ -34,9 +34,9 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -156,10 +156,10 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 // transforms
-StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAndHimoTransformer transformer(odometrySubsystem, turret);
+StandardAnderHimoTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
-StandardAndHeroTransformAdapter transformAdapter(transformer);
+StandardAndHimoTransformAdapter transformAdapter(transformer);
 
 VelocityAgitatorSubsystem agitator(
     drivers(),

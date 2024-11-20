@@ -17,20 +17,20 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
-#define STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
+#ifndef STANDARD_AND_HIMO_TRANSFORM_ADAPTER_HPP_
+#define STANDARD_AND_HIMO_TRANSFORM_ADAPTER_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
 
-#include "standard_and_hero_transformer.hpp"
+#include "standard_and_himo_transformer.hpp"
 #include "transformer_interface.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
-class StandardAndHeroTransformAdapter : public TransformerInterface
+class StandardAndHimoTransformAdapter : public TransformerInterface
 {
 public:
-    StandardAndHeroTransformAdapter(const StandardAndHeroTransformer& transforms);
+    StandardAndHimoTransformAdapter(const StandardAndHimoTransformer& transforms);
 
     modm::Vector2f getChassisVelocity2d() const;
 
@@ -40,9 +40,9 @@ public:
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t) const;
 
 private:
-    const aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transforms;
+    const aruwsrc::algorithms::transforms::StandardAndHimoTransformer& transforms;
 };
 
 }  // namespace aruwsrc::algorithms::transforms
 
-#endif  // STANDARD_AND_HERO_TRANSFORM_ADAPTER_HPP_
+#endif  // STANDARD_AND_HIMO_TRANSFORM_ADAPTER_HPP_

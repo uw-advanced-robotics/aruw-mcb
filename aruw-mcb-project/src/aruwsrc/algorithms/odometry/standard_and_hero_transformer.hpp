@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_AND_HERO_TRANSFORMER_HPP_
-#define STANDARD_AND_HERO_TRANSFORMER_HPP_
+#ifndef STANDARD_AND_HIMO_TRANSFORMER_HPP_
+#define STANDARD_AND_HIMO_TRANSFORMER_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -30,16 +30,16 @@
 namespace aruwsrc::algorithms::transforms
 {
 /**
- * @brief transform provider for both the standard and hero
- * Use the StandardAndHeroTransformerSubsystem as a convenience class to
+ * @brief transform provider for both the standard and himo
+ * Use the StandardAndHimoTransformerSubsystem as a convenience class to
  * update the transformer each loop
  */
-class StandardAndHeroTransformer
+class StandardAndHimoTransformer
 {
-    friend class StandardAndHeroTransformAdapter;
+    friend class StandardAndHimoTransformAdapter;
 
 public:
-    StandardAndHeroTransformer(
+    StandardAndHimoTransformer(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::RobotTurretSubsystem& turret);
 
@@ -84,4 +84,4 @@ private:
 
 }  // namespace aruwsrc::algorithms::transforms
 
-#endif  // STANDARD_AND_HERO_TRANSFORMER_HPP_
+#endif  // STANDARD_AND_HIMO_TRANSFORMER_HPP_

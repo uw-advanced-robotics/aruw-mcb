@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HERO_DRIVERS_HPP_
-#define HERO_DRIVERS_HPP_
+#ifndef HIMO_DRIVERS_HPP_
+#define HIMO_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
@@ -39,7 +39,7 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
-namespace aruwsrc::hero
+namespace aruwsrc::himo
 {
 class Drivers : public tap::Drivers
 {
@@ -86,7 +86,7 @@ public:
     can::capbank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
 #endif
-};  // class aruwsrc::HeroDrivers
-}  // namespace aruwsrc::hero
+};  // class aruwsrc::HimoDrivers
+}  // namespace aruwsrc::himo
 
-#endif  // HERO_DRIVERS_HPP_
+#endif  // HIMO_DRIVERS_HPP_

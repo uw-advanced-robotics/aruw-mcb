@@ -30,9 +30,9 @@ namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
-namespace aruwsrc::hero
+#elif defined(TARGET_HIMO_PERSEUS)
+#include "aruwsrc/robot/himo/himo_drivers.hpp"
+namespace aruwsrc::himo
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 namespace aruwsrc::drone

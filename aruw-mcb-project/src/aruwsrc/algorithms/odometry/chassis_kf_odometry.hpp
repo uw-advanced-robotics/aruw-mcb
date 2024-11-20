@@ -145,7 +145,7 @@ private:
     // clang-format on
 
     /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
-    /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
+    /// m/s^2. Also works for himo since it has an acceleration on the same order of magnitude.
     static constexpr float MAX_ACCELERATION = 8.0f;
 
     static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =

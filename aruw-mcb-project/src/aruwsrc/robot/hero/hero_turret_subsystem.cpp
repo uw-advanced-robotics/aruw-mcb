@@ -17,17 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hero_turret_subsystem.hpp"
+#include "himo_turret_subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 namespace aruwsrc::control::turret
 {
-float HeroTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float HimoTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
 
-float HeroTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
+float HimoTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
 
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
+uint32_t HimoTurretSubsystem::getLastMeasurementTimeMicros() const
 {
     return getTurretMCB()->getIMUDataTimestamp();
 }

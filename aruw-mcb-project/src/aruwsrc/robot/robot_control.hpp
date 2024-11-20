@@ -23,7 +23,7 @@
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/hero/hero_drivers.hpp"
+#include "aruwsrc/robot/himo/himo_drivers.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
@@ -33,8 +33,8 @@
 namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
-namespace aruwsrc::hero
+#elif defined(TARGET_HIMO_PERSEUS)
+namespace aruwsrc::himo
 #elif defined(TARGET_DRONE)
 namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)

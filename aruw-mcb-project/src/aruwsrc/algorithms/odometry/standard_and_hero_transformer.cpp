@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "standard_and_hero_transformer.hpp"
+#include "standard_and_himo_transformer.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
@@ -27,7 +27,7 @@ using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms::transforms
 {
-StandardAndHeroTransformer::StandardAndHeroTransformer(
+StandardAndHimoTransformer::StandardAndHimoTransformer(
     const Odometry2DInterface& chassisOdometry,
     const RobotTurretSubsystem& turret)
     : chassisOdometry(chassisOdometry),
@@ -38,7 +38,7 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
 {
 }
 
-void StandardAndHeroTransformer::updateTransforms()
+void StandardAndHimoTransformer::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);

@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HIMO_PERSEUS)
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -34,9 +34,9 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/standard_and_himo_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -78,7 +78,7 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "aruwsrc/robot/himo/himo_turret_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
@@ -97,7 +97,7 @@ using namespace tap::communication::serial;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
 using namespace aruwsrc::algorithms::transforms;
-using namespace aruwsrc::hero;
+using namespace aruwsrc::himo;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -107,7 +107,7 @@ using namespace aruwsrc::hero;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace hero_control
+namespace himo_control
 {
 inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
@@ -152,7 +152,7 @@ tap::motor::DjiMotor pitchMotor(
     true,
     "Pitch Turret");
 tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
-HeroTurretSubsystem turret(
+HimoTurretSubsystem turret(
     drivers(),
     &pitchMotor,
     &yawMotor,
@@ -163,10 +163,10 @@ HeroTurretSubsystem turret(
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
 
 // transforms
-StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAndHimoTransformer transformer(odometrySubsystem, turret);
+StandardAnderHimoTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
-StandardAndHeroTransformAdapter transformAdapter(transformer);
+StandardAndHimoTransformAdapter transformAdapter(transformer);
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
@@ -320,7 +320,7 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
     turretUTurnCommand,
     {&imuCalibrateDoneGovernor});
 
-// hero agitator commands
+// himo agitator commands
 
 LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
     getTurretMCBCanComm(),
@@ -521,7 +521,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(Drivers *drivers)
+void registerHimoSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
@@ -536,7 +536,7 @@ void registerHeroSubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands()
+void setDefaultHimoCommands()
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
@@ -547,7 +547,7 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *drivers)
+void startHimoCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -556,7 +556,7 @@ void startHeroCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers *drivers)
+void registerHimoIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -575,24 +575,24 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&shiftPressed);
     drivers->commandMapper.addMap(&ctrlPressed);
 }
-}  // namespace hero_control
+}  // namespace himo_control
 
-namespace aruwsrc::hero
+namespace aruwsrc::himo
 {
-void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::himo::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &hero_control::remoteSafeDisconnectFunction);
-    hero_control::initializeSubsystems();
-    hero_control::registerHeroSubsystems(drivers);
-    hero_control::setDefaultHeroCommands();
-    hero_control::startHeroCommands(drivers);
-    hero_control::registerHeroIoMappings(drivers);
+        &himo_control::remoteSafeDisconnectFunction);
+    himo_control::initializeSubsystems();
+    himo_control::registerHimoSubsystems(drivers);
+    himo_control::setDefaultHimoCommands();
+    himo_control::startHimoCommands(drivers);
+    himo_control::registerHimoIoMappings(drivers);
 }
-}  // namespace aruwsrc::hero
+}  // namespace aruwsrc::himo
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &himo_control::imuCalibrateCommand; }
 #endif
 
 #endif

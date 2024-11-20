@@ -26,8 +26,8 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
-#include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
+#elif defined(TARGET_HIMO_PERSEUS)
+#include "aruwsrc/robot/himo/himo_chassis_constants.hpp"
 #elif defined(TARGET_TESTBED)
 #include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)

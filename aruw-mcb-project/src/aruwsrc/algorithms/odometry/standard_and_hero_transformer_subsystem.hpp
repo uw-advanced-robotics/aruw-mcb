@@ -17,24 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_AND_HERO_TRANSFORMER_SUBSYSTEM_HPP_
-#define STANDARD_AND_HERO_TRANSFORMER_SUBSYSTEM_HPP_
+#ifndef STANDARD_AND_HIMO_TRANSFORMER_SUBSYSTEM_HPP_
+#define STANDARD_AND_HIMO_TRANSFORMER_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 
-#include "standard_and_hero_transformer.hpp"
+#include "standard_and_himo_transformer.hpp"
 
 namespace aruwsrc::algorithms::transforms
 {
 /**
- * @brief a convenience subsystem for updating a StandardAndHeroTransformer each control loop
+ * @brief a convenience subsystem for updating a StandardAndHimoTransformer each control loop
  */
-class StandardAnderHeroTransformerSubsystem : public tap::control::Subsystem
+class StandardAnderHimoTransformerSubsystem : public tap::control::Subsystem
 {
 public:
-    StandardAnderHeroTransformerSubsystem(
+    StandardAnderHimoTransformerSubsystem(
         tap::Drivers& drivers,
-        StandardAndHeroTransformer& transformer)
+        StandardAndHimoTransformer& transformer)
         : tap::control::Subsystem(&drivers),
           transformer(transformer)
     {
@@ -42,12 +42,12 @@ public:
 
     inline void initialize() override{};
     inline void refresh() override { transformer.updateTransforms(); };
-    const char* getName() const { return "Standard and hero transformer subsystem"; }
+    const char* getName() const { return "Standard and himo transformer subsystem"; }
 
 private:
-    StandardAndHeroTransformer& transformer;
+    StandardAndHimoTransformer& transformer;
 };
 
 }  // namespace aruwsrc::algorithms::transforms
 
-#endif  // STANDARD_AND_HERO_TRANSFORMER_SUBSYSTEM_HPP_
+#endif  // STANDARD_AND_HIMO_TRANSFORMER_SUBSYSTEM_HPP_
