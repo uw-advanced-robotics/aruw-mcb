@@ -70,7 +70,10 @@ ClientDisplayCommand::ClientDisplayCommand(
           imuCalibrateCommand,
           avoidanceCommands,
           refSerialTransmitter),
-      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer->getWorldToTurret(0))
+      visionTargetIndicator(
+          visionCoprocessor,
+          refSerialTransmitter,
+          transformer->getWorldToTurret(0))
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();

@@ -43,7 +43,7 @@ public:
     VisionTargetIndicator(
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const Transform& worldToTurretTransform);
+        const Transform &worldToTurretTransform);
 
     void initialize() override final;
 
@@ -73,7 +73,7 @@ public:
 
 private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const Transform& worldToTurretTransform;
+    const Transform &worldToTurretTransform;
 
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
