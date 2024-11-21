@@ -117,7 +117,7 @@ public:
      */
     mockable inline WrappedFloat getAngleFromCenter() const
     {
-        return chassisFrameMeasuredAngle - config.startAngle;
+        return getChassisFrameMeasuredAngle() - config.startAngle;
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
