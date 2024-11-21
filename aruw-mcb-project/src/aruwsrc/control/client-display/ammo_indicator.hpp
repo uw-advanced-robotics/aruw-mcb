@@ -57,20 +57,32 @@ private:
     // Y position of the text
     static constexpr uint16_t TEXT_Y = 200;
     // WIDTH of the text
-    static constexpr uint16_t TEXT_WIDTH = 4;
+    static constexpr uint16_t WIDTH = 4;
     // SIZE of the text
-    static constexpr uint16_t TEXT_SIZE = 40;
+    static constexpr uint16_t SIZE = 40;
 
-    Tx::GraphicCharacterMessage bulletsRemainingGraphics;
+    Tx::GraphicCharacterMessage textGraphic;
+    const char *bulletsRemainingText = "AMMO: ";
+
+    Tx::Graphic1Message numberGraphic;
+    tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
+
+    static constexpr uint16_t NUMBER_X = TEXT_X + 100;
 
     int bulletCount = -1;
 
     const tap::communication::serial::RefSerial &refSerial;
 
-    // Size of "AMMO: " is 7, plus 3 more digits for the number of bullets
-    static constexpr int TEXT_BUFFER_SIZE = 10;
-    const char *bulletsRemainingText = "AMMO: ";
-    char bulletsRemainingTextBuffer[TEXT_BUFFER_SIZE];
+    static inline void updateAmmoCount(int32_t value, RefSerialData::Tx::Graphic1Message *graphic)
+    {
+        RefSerialTransmitter::configInteger(
+            SIZE,
+            WIDTH,
+            NUMBER_X,
+            TEXT_Y,
+            value,
+            &graphic->graphicData);
+    }
 };
 
 }  // namespace aruwsrc::control::client_display
