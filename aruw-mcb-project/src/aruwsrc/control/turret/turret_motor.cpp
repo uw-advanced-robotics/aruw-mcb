@@ -134,13 +134,6 @@ float TurretMotor::getValidChassisMeasurementError() const
     return getValidMinError(chassisFrameSetpoint, chassisFrameMeasuredAngle);
 }
 
-// unused?
-float TurretMotor::getValidChassisMeasurementErrorWrapped() const
-{
-    // equivalent to this - other
-    return chassisFrameMeasuredAngle.minDifference(chassisFrameSetpoint);
-}
-
 float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
     const
 {
