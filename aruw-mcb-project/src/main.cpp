@@ -142,6 +142,12 @@ int main()
 
 static void initializeIo(Drivers *drivers)
 {
+#if defined(TARGET_BLANK)
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+#endif
+
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
@@ -175,9 +181,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(TARGET_BLANK)
-    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+    drivers->imu.init();
 #endif
 }
 
