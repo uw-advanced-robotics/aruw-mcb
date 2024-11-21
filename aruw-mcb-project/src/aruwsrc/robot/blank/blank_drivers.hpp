@@ -22,6 +22,9 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/sensors/imu/ism330.hpp"
+#include "tap/board/board.hpp"
+
 namespace aruwsrc::blank
 {
 class Drivers : public tap::Drivers
@@ -34,6 +37,10 @@ public:
     Drivers() : tap::Drivers() {}
 
 public:
+    aruwsrc::communication::sensors::imu::ISM330<Board::I2CMaster> imu;
+
+
+
 };  // class aruwsrc::BlankDrivers
 }  // namespace aruwsrc::blank
 
