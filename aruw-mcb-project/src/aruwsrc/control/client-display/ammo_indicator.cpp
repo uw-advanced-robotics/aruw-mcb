@@ -27,8 +27,8 @@ namespace aruwsrc::control::client_display
 {
 AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const RefSerial &refSerial)
     : HudIndicator(refSerialTransmitter),
-      refSerial(refSerial),
-      numberIndicator(refSerialTransmitter, &numberGraphic, updateAmmoCount, (int32_t)0)
+      numberIndicator(refSerialTransmitter, &numberGraphic, updateAmmoCount, (int32_t)0),
+      refSerial(refSerial)
 {
 }
 
@@ -87,13 +87,7 @@ void AmmoIndicator::initialize()
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::ORANGE);
 
-    RefSerialTransmitter::configInteger(
-        SIZE,
-        WIDTH,
-        NUMBER_X,
-        TEXT_Y,
-        -1,
-        &numberGraphic.graphicData);
+    updateAmmoCount(0, &numberGraphic);
 }
 
 }  // namespace aruwsrc::control::client_display

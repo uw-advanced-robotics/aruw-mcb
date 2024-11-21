@@ -27,6 +27,8 @@
 
 #include "hud_indicator.hpp"
 
+using namespace tap::communication::serial;
+
 namespace aruwsrc::control::client_display
 {
 /**
@@ -67,9 +69,9 @@ private:
     Tx::Graphic1Message numberGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
 
-    static constexpr uint16_t NUMBER_X = TEXT_X + 100;
+    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
 
-    int bulletCount = -1;
+    int bulletCount = 0;
 
     const tap::communication::serial::RefSerial &refSerial;
 
