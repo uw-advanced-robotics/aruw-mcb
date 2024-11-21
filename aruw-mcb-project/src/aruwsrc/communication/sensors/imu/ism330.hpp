@@ -41,7 +41,7 @@ public:
             return;
         }
 
-        pinged = RF_CALL_BLOCKING(ping());
+        pinged = RF_CALL_BLOCKING(this->ping());
 
         RF_CALL_BLOCKING(readRegister(0x20, 14));
     }
