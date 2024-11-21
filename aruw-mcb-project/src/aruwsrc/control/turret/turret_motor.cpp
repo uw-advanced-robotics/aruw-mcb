@@ -34,7 +34,6 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
       chassisFrameMeasuredAngle(Angle(config.startAngle)),
-      chassisFrameUnwrappedMeasurement(config.startAngle),
       lastUpdatedEncoderValue(config.startEncoderValue)
 {
     assert(config.minAngle <= config.maxAngle);
@@ -77,7 +76,7 @@ void TurretMotor::updateMotorAngle()
 
         lastUpdatedEncoderValue = encoderUnwrapped;
 
-        chassisFrameUnwrappedMeasurement =
+        float chassisFrameUnwrappedMeasurement =
             static_cast<float>(
                 encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
                 startEncoderOffset) *

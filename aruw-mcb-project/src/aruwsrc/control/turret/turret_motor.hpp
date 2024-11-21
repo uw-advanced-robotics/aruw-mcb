@@ -191,9 +191,6 @@ private:
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     WrappedFloat chassisFrameMeasuredAngle;
 
-    /// Unwrapped chassis frame measured angle. Units radians.
-    float chassisFrameUnwrappedMeasurement;
-
     int64_t lastUpdatedEncoderValue;
 };
 }  // namespace aruwsrc::control::turret
