@@ -44,7 +44,7 @@ SentryTransforms::SentryTransforms(
       worldToVTM(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
-      turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.),
+      turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.)
 {
 }
 
