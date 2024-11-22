@@ -50,6 +50,11 @@ const Transform& StandardAndHeroTransformAdapter::getWorldToChassis() const
 const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t) const
 {
     return transforms.getWorldToTurret();
-};
+}
+
+const Transform& StandardAndHeroTransformAdapter::getWorldToVTM() const
+{
+    return transforms.getWorldToVTM();
+}
 
 };  // namespace aruwsrc::algorithms::transforms

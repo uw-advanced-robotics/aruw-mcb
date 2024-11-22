@@ -39,6 +39,7 @@ public:
         getWorldToTurret,
         (uint8_t),
         (const override));
+    MOCK_METHOD(tap::algorithms::transforms::Transform&, getWorldToVTM, (), (const override));
 };
 }  // namespace aruwsrc::mock
 

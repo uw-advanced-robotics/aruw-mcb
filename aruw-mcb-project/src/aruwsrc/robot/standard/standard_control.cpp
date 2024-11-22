@@ -393,6 +393,7 @@ ClientDisplayCommand clientDisplayCommand(
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
     drivers()->plateHitTracker,
+    &transformAdapter,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
