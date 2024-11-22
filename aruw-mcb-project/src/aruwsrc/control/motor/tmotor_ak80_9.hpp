@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TMOTOR_AK809_HPP_
-#define TMOTOR_AK809_HPP_
+#ifndef TMOTOR_AK80_9_HPP_
+#define TMOTOR_AK80_9_HPP_
 
 #include <string>
 
@@ -253,4 +253,4 @@ private:
 
 }  // namespace aruwsrc::control::motor
 
-#endif  // TMOTOR_AK809_HPP_
+#endif  // TMOTOR_AK80_9_HPP_

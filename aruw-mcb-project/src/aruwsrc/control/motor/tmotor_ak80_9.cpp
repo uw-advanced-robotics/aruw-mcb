@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tmotor_ak80-9.hpp"
+#include "tmotor_ak80_9.hpp"
 
 #include "tap/drivers.hpp"
 
