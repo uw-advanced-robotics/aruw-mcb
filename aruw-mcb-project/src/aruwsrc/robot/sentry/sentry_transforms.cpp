@@ -71,6 +71,7 @@ void SentryTransforms::updateTransforms()
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
     worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
     worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+    worldToVTM = worldToTurretMajor;
 }
 
 }  // namespace aruwsrc::sentry

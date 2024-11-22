@@ -73,7 +73,7 @@ ClientDisplayCommand::ClientDisplayCommand(
       visionTargetIndicator(
           visionCoprocessor,
           refSerialTransmitter,
-          transformer->getWorldToTurret(0))
+          transformer->getWorldToVTM())
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();

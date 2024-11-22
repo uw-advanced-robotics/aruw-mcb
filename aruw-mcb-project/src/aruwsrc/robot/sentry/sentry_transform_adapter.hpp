@@ -39,6 +39,8 @@ public:
 
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
+    const tap::algorithms::transforms::Transform& getWorldToVTM() const;
+
 private:
     const SentryTransforms& transforms;
 };

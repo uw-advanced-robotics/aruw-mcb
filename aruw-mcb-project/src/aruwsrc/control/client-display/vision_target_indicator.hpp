@@ -73,7 +73,7 @@ public:
 
 private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const Transform &worldToTurretTransform;
+    const Transform &worldToCameraTransform;
 
     Tx::Graphic1Message visionTargetGraphic;
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
