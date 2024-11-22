@@ -143,6 +143,19 @@ bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& mess
     return true;
 }
 
+bool VisionCoprocessor::decodeToRobotOrbitData(const ReceivedSerialMessage& message)
+{
+    int dataLength = message.header.dataLength;
+    if (dataLength > sizeof(RobotOrbitData))
+    {
+        return false;
+    }
+
+    memset(&lastRobotOrbitData, 0, sizeof(RobotOrbitData));
+    memcpy(&lastRobotOrbitData, &message.data, dataLength);
+    return true;
+}
+
 bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& message)
 {
     int currIndex = 0;

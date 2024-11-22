@@ -222,6 +222,22 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
+    static constexpr uint8_t MAX_NUM_ROBOT_ORBITS = 3;
+
+    struct RobotOrbitData
+    {
+        struct RobotOrbit
+        {
+            float x;
+            float y;
+            float z;
+            float radius;
+        } modm_packed;
+
+        RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct
+
+    } modm_packed;
+
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
@@ -288,6 +304,11 @@ public:
         return hasTarget;
     }
 
+    mockable inline const RobotOrbitData& getLastRobotOrbitData() const
+    {
+        return lastRobotOrbitData;
+    }
+
     mockable inline void attachTransformer(
         aruwsrc::algorithms::transforms::TransformerInterface* transformer)
     {
@@ -340,9 +361,11 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_ROBOT_ORBIT = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
+        // Deprecated at moment, will be used later for april tags
+        CV_MESSAGE_TYPE_ARUCO_RESET = 99,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -411,6 +434,8 @@ private:
         .updated = false,
     };
 
+    RobotOrbitData lastRobotOrbitData;
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -446,6 +471,8 @@ private:
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
     bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+
+    bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
