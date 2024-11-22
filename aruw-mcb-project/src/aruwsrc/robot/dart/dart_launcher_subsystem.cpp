@@ -9,9 +9,9 @@ namespace dart::subsystem
 {
 DartLauncherSubsystem::DartLauncherSubsystem(
     tap::Drivers& drivers,
-    tap::motor::MotorInterface& pullMotor)
+    tap::motor::MotorInterface& pullMotor, tap::motor::Servo& servo)
     : Subsystem(&drivers),
-      motor(pullMotor){};
+      motor(pullMotor), servo(servo){};
 
   void DartLauncherSubsystem::initialize() {
     motor.initialize();
@@ -22,12 +22,22 @@ DartLauncherSubsystem::DartLauncherSubsystem(
     setpoint = newSetpoint;
   }
 
+  void DartLauncherSubsystem::setServoOpen() {
+    servo.setTargetPwm(servo.getMaxPWM());
+  }
+
+  void DartLauncherSubsystem::setServoClosed() {
+    servo.setTargetPwm(servo.getMinPWM());
+  }
+
   void DartLauncherSubsystem::refresh() {
-    float error = setpoint - motor.getPositionUnwrapped() - zeroOffset; //how do we convert encoder ticks
+    float error = setpoint - motor.getPositionUnwrapped();
     float errorDerivative = motor.getShaftRPM() / 1000 / 60; //rotations per millisecond
     float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime; //time in milliseconds
     lastTime = tap::arch::clock::getTimeMilliseconds();
     pid.runController(error, errorDerivative, timeDifference); 
     motor.setDesiredOutput(pid.getOutput());
+
+    servo.updateSendPwmRamp();
   }
 }

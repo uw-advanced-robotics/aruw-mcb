@@ -22,6 +22,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 #include <tap/motor/dji_motor.hpp>
+#include "tap/motor/servo.hpp"
+
 class Drivers;
 namespace dart::subsystem
 {
@@ -30,7 +32,7 @@ class DartLauncherSubsystem : public tap::control::Subsystem
 {
 public: 
     DartLauncherSubsystem(
-        tap::Drivers &drivers, tap::motor::MotorInterface &pullMotor);
+        tap::Drivers &drivers, tap::motor::MotorInterface &pullMotor, tap::motor::Servo &servo);
 
     void initialize() override;
 
@@ -39,13 +41,16 @@ public:
     void refreshSafeDisconnect() override;
     
     void setSetpoint(float setpoint);
+    void setServoOpen();
+    void setServoClosed();
 
     const char* getName() const override { return "Dart_Launcher_Subsystem"; }
 protected:
     tap::motor::MotorInterface &motor;
+    tap::motor::Servo &servo;
 
 private: 
-    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::control::turret::pullMotorPidConfig);
+    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::control::turret::PULL_MOTOR_PID_CONFIG);
     float setpoint;
     float zeroOffset = 0;
     float lastTime;

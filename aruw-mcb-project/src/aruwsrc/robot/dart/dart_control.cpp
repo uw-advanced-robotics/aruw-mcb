@@ -30,6 +30,7 @@
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "tap/motor/servo.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
@@ -49,15 +50,17 @@ namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::Servo servo(drivers(), SERVO_PORT, SERVO_MAX, SERVO_MIN, 1);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(
     *drivers(),
-    pullMotor);
+    pullMotor, servo);
 
 void initializeSubsystems() {
     dartLauncher.initialize();
+    dartLauncher.setServoOpen(); //may need to change to close depending on the starting protocal 
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers *drivers) {

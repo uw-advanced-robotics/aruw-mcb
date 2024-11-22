@@ -33,15 +33,6 @@ static constexpr uint8_t NUM_TURRETS = 1;
 static constexpr float TURRET_CG_X = 0;
 static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
-
-static constexpr tap::algorithms::SmoothPidConfig pullMotorPidConfig = { //TODO: put actual pid constants
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
-    .errorDerivativeFloor = 0.0f,
-};
 }  // namespace aruwsrc::control::turret
 
 #endif  // DART_TURRET_CONSTANTS_HPP_

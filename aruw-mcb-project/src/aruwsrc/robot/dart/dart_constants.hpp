@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/communication/gpio/pwm.hpp"
 
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -33,6 +34,19 @@ static constexpr tap::motor::MotorId PULL_MOTOR_ID =
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+static constexpr tap::algorithms::SmoothPidConfig PULL_MOTOR_PID_CONFIG = { //TODO: put actual pid constants
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr float SERVO_MIN = 0.0f;
+static constexpr float SERVO_MAX = 1.0f; //TODO: figure out real values
+static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X; //TODO: figure out real port value
 
 }  // namespace aruwsrc::control::turret
 #endif
