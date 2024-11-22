@@ -40,7 +40,7 @@
 #include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
-#include "vision_hud_indicators.hpp"
+#include "vision_target_indicator.hpp"
 
 namespace tap::control
 {
@@ -107,6 +107,7 @@ public:
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
         aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+        TransformerInterface *transformer,
         const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
@@ -126,13 +127,17 @@ private:
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
     CapBankIndicator capBankIndicator;
     MatrixHudIndicators positionHudIndicators;
-    VisionHudIndicators visionHudIndicators;
     AmmoIndicator ammoIndicator;
     CircleCrosshair circleCrosshair;
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
+    VisionTargetIndicator visionTargetIndicator;
 
     bool restarting = true;
+
+    float fps = 0.0f;
+
+    uint32_t startTime = 0;
 
     bool run();
     void restartHud();
