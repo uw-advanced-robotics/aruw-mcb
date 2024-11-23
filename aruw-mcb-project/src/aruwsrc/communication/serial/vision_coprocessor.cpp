@@ -104,6 +104,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToArucoResetData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_ROBOT_ORBIT:
+        {
+            decodeToRobotOrbitData(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -145,7 +150,7 @@ bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& mess
 
 bool VisionCoprocessor::decodeToRobotOrbitData(const ReceivedSerialMessage& message)
 {
-    int dataLength = message.header.dataLength;
+    uint16_t dataLength = message.header.dataLength;
     if (dataLength > sizeof(RobotOrbitData))
     {
         return false;
