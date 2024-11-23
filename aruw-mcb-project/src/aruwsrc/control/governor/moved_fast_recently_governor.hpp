@@ -40,16 +40,16 @@ class MovedFastRecentlyGovernor : public tap::control::governor::CommandGovernor
 {
 public:
     /**
-     * @param speedBuffer Speed limit for the robot to move fast
+     * @param speedThreshold Speed limit for the robot to move fast
      * @param durationBuffer Time since last moved too fast in milliseconds to run the command
      * blocked.
      */
     MovedFastRecentlyGovernor(
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
-        const float speedBuffer,
+        const float speedThreshold,
         const uint32_t durationBuffer)
         : operatorInterface(operatorInterface),
-          speedBuffer(speedBuffer),
+          speedThreshold(speedThreshold),
           durationBuffer(durationBuffer)
     {
     }
@@ -61,7 +61,7 @@ public:
 private:
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
 
-    const float speedBuffer;
+    const float speedThreshold;
     const uint32_t durationBuffer;
 
     uint32_t lastTimeTooFast = -1;
@@ -73,7 +73,7 @@ private:
         float x = operatorInterface.getChassisXInput();
         float y = operatorInterface.getChassisYInput();
 
-        if (pow(x, 2) + pow(y, 2) >= pow(speedBuffer, 2))
+        if (pow(x, 2) + pow(y, 2) >= pow(speedThreshold, 2))
         {
             lastTimeTooFast = currentTime;
         }
