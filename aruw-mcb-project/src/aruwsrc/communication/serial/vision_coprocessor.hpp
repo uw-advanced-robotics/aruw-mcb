@@ -361,11 +361,10 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ROBOT_ORBIT = 10,
+        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
-        // Deprecated at moment, will be used later for april tags
-        CV_MESSAGE_TYPE_ARUCO_RESET = 99,
+        CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
