@@ -81,12 +81,8 @@ namespace algorithms
 
 
     std::complex<float> Butterworth::s2z(std::complex<float> s, float Ts){
-        float theta;
-        float magnitude;
-        theta = std::atan(((Ts/2)*s.imag()) / (1+(Ts/2)*s.real())) - std::atan(((-Ts/2)*s.imag())/(1-(Ts/2)*s.real()));
-        magnitude = std::sqrt(std::pow((1+Ts/2 * s.real()),2) + std::pow(Ts/2 * s.imag(),2)) / std::sqrt(std::pow((1-Ts/2 * s.real()),2) + std::pow(Ts/2 * s.imag(),2));
-
-        std::complex<float> z = std::polar(magnitude,theta);
+        std::complex<float> one = 1;
+        auto z =  (one + ((Ts/2) * s))  / (one - (Ts/2) * s );
         return z;
     }
 
