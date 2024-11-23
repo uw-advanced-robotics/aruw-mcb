@@ -53,7 +53,7 @@ private:
     std::vector<float> sum;
     /**
      * used to transform poles from the laplauce domain to the 
-     * Z domain for descrete time using the Tustin transform
+     * Z domain for descrete time using the bilinear transform
      * 
      * @param [in] s a pole or zero from the laplauce domain
      * @param [in] Ts the sample time

@@ -18,6 +18,9 @@ namespace algorithms
     forcedResponseResult(n, 0.0f),
     sum(n, 0.0f)
     {
+        //Warp frequency for bilinear transform
+        wc = (2/Ts)*std::atan(wc*(Ts/2));
+
         //generate poles for butterworth filter
         std::vector<std::complex<float>> poles;
         for (int k = 0; k < n; ++k) {
