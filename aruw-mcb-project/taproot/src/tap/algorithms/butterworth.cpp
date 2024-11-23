@@ -79,13 +79,9 @@ namespace algorithms
         return;
     }
 
-
-    std::complex<float> Butterworth::s2z(std::complex<float> s, float Ts){
-        std::complex<float> one = 1;
-        auto z =  (one + ((Ts/2) * s))  / (one - (Ts/2) * s );
-        return z;
+    std::complex<float> s2z(std::complex<float> s, float Ts){
+        return (1.0f + (Ts / 2) * s) / (1.0f - (Ts / 2) * s);
     }
-
 
     std::vector<float> Butterworth::expandPolynomial(std::vector<std::complex<float>> zeros){
 
