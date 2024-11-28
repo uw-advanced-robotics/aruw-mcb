@@ -30,12 +30,10 @@ using namespace aruwsrc::sentry;
 SentryArucoResetSubsystem::SentryArucoResetSubsystem(
     tap::Drivers& drivers,
     aruwsrc::serial::VisionCoprocessor& vision,
-    aruwsrc::sentry::SentryChassisWorldYawObserver& yawObserver,
     aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometrySubsystem,
     SentryTransforms& transforms)
     : tap::control::Subsystem(&drivers),
       vision(vision),
-      yawObserver(yawObserver),
       odometrySubsystem(odometrySubsystem),
       transforms(transforms)
 {
@@ -49,36 +47,25 @@ void SentryArucoResetSubsystem::refresh()
     if (!resetData.updated) return;
     vision.invalidateArucoResetData();
 
-    modm::Quaternion<float> q(
-        resetData.data.quatW,
-        resetData.data.quatX,
-        resetData.data.quatY,
-        resetData.data.quatZ);
+    float prevComputedX = odometrySubsystem.getCurrentLocation2D().getX();
+    float prevComputedY = odometrySubsystem.getCurrentLocation2D().getY();
 
     const Transform& majorToMinor = transforms.getMajorToMinor(resetData.data.turretId);
     const Transform& chassisToMajor = transforms.getChassisToMajor();
 
-    float newYaw = tap::algorithms::eulerAnglesFromQuaternion(q).z - majorToMinor.getYaw() -
-                   chassisToMajor.getYaw();
-
-    float oldYaw;
-    yawObserver.getChassisWorldYaw(&oldYaw);
-
-    float chassisX = resetData.data.x -
+    float arucoChassisXEstimate = resetData.data.x -
                      transforms.getWorldToTurret(resetData.data.turretId).getX() +
                      transforms.getWorldToChassis().getX();
-    float chassisY = resetData.data.y -
+    float arucoChassisYEstimate = resetData.data.y -
                      transforms.getWorldToTurret(resetData.data.turretId).getY() +
                      transforms.getWorldToChassis().getY();
 
-    setOrientation(newYaw, oldYaw);
-    setPosition(chassisX, chassisY);
-}
 
-void SentryArucoResetSubsystem::setOrientation(float newYaw, float oldYaw)
-{
-    odometrySubsystem.overrideOdometryOrientation(newYaw - oldYaw);
-    yawObserver.overrideChassisYaw(newYaw);
+    // Apply a low-pass between the aruco measurement and our current odometry position
+    arucoChassisXEstimate = tap::algorithms::lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
+    arucoChassisYEstimate = tap::algorithms::lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+
+    setPosition(arucoChassisXEstimate, arucoChassisYEstimate);
 }
 
 void SentryArucoResetSubsystem::setPosition(const float x, const float y)
