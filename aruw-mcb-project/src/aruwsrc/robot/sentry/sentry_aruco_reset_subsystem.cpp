@@ -60,7 +60,6 @@ void SentryArucoResetSubsystem::refresh()
                      transforms.getWorldToTurret(resetData.data.turretId).getY() +
                      transforms.getWorldToChassis().getY();
 
-
     // Apply a low-pass between the aruco measurement and our current odometry position
     arucoChassisXEstimate = tap::algorithms::lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
     arucoChassisYEstimate = tap::algorithms::lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);

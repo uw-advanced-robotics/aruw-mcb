@@ -53,6 +53,7 @@ private:
 
     void setPosition(float x, float y);
 
+    // Higher value here means we trust AruCo measurements more
     static constexpr float VISION_TRUST = 0.5f;
 };
 
