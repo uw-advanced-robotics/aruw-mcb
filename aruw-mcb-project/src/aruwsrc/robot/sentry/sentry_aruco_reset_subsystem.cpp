@@ -54,15 +54,17 @@ void SentryArucoResetSubsystem::refresh()
     const Transform& chassisToMajor = transforms.getChassisToMajor();
 
     float arucoChassisXEstimate = resetData.data.x -
-                     transforms.getWorldToTurret(resetData.data.turretId).getX() +
-                     transforms.getWorldToChassis().getX();
+                                  transforms.getWorldToTurret(resetData.data.turretId).getX() +
+                                  transforms.getWorldToChassis().getX();
     float arucoChassisYEstimate = resetData.data.y -
-                     transforms.getWorldToTurret(resetData.data.turretId).getY() +
-                     transforms.getWorldToChassis().getY();
+                                  transforms.getWorldToTurret(resetData.data.turretId).getY() +
+                                  transforms.getWorldToChassis().getY();
 
     // Apply a low-pass between the aruco measurement and our current odometry position
-    arucoChassisXEstimate = tap::algorithms::lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
-    arucoChassisYEstimate = tap::algorithms::lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+    arucoChassisXEstimate =
+        tap::algorithms::lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
+    arucoChassisYEstimate =
+        tap::algorithms::lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
 
     setPosition(arucoChassisXEstimate, arucoChassisYEstimate);
 }

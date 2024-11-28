@@ -38,7 +38,7 @@ public:
         aruwsrc::sentry::SentryKFOdometry2DSubsystem& odometrySubsystem,
         SentryTransforms& transforms);
 
-    void initialize() override {};
+    void initialize() override{};
 
     void refresh() override;
 
