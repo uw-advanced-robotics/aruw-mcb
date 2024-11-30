@@ -32,8 +32,11 @@ namespace aruwsrc::communication::sensors::current
  * Calibrated current sensor's mv to ma ratio used to convert analog value to an actual
  * current. The current sensor we are using is linear, so only the slope and y-intercept
  * are needed.
+ *
+ * We use the 30A version of the ACS712 current sensor, which has a sensitivity of 66mV/A.
  */
-static constexpr float ACS712_CURRENT_SENSOR_MV_PER_MA = 11.47f;
+static constexpr float ACS712_CURRENT_SENSOR_MA_PER_MV = 1000.0f / 66.0f;
+
 /**
  * Voltage (in mV) that the current sensor reads 0 mA.
  */

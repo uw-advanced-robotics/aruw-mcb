@@ -60,7 +60,7 @@ protected:
         : currentSensor(
               {&drivers.analog,
                aruwsrc::chassis::CURRENT_SENSOR_PIN,
-               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+               aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MA_PER_MV,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
           LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
