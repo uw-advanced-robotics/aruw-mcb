@@ -332,7 +332,7 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(
     5000.0f,
     5000);
 
-GovernorWithFallbackCommand<3> beybladeAlternatingWithPlateHitCommand(
+GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
     {&chassis},
     slowBeybladeCommand,
     beybladeCommand,
@@ -414,7 +414,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     agitator,
     turret,
-    {&wiggleCommand, &beybladeAlternatingWithPlateHitCommand},
+    {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
@@ -450,7 +450,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeAlternatingWithPlateHitCommand},
+    {&beybladeSlowWhenOutOfCombatCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
@@ -467,7 +467,7 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 
 ToggleCommandMapping fToggled(
     drivers(),
-    {&beybladeAlternatingWithPlateHitCommand},
+    {&beybladeSlowWhenOutOfCombatCommand},
     RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
