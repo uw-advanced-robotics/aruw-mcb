@@ -46,29 +46,6 @@ void TurretMotor::updateMotorAngle()
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
 
-        if (startEncoderOffset ==
-            INT16_MIN)  // startEncoderOffset itself can prolly just be removed
-        {
-            int encoderDiff =
-                static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
-
-            if (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
-            {
-                // encoder offset by 1 rev in negative direction
-                startEncoderOffset = -DjiMotor::ENC_RESOLUTION;
-            }
-            else if (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
-            {
-                // offset by 1 rev in positive direction
-                startEncoderOffset = DjiMotor::ENC_RESOLUTION;
-            }
-            else
-            {
-                // no offset necessary
-                startEncoderOffset = 0;
-            }
-        }
-
         if (lastUpdatedEncoderValue == encoderUnwrapped)
         {
             return;
@@ -77,11 +54,9 @@ void TurretMotor::updateMotorAngle()
         lastUpdatedEncoderValue = encoderUnwrapped;
 
         float chassisFrameUnwrappedMeasurement =
-            static_cast<float>(
-                encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
-                startEncoderOffset) *
-                M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;  // todo: can probably not do all this bc it's wrapped again anyway
+            static_cast<float>(encoderUnwrapped - config.startEncoderValue) * M_TWOPI /
+                static_cast<float>(DjiMotor::ENC_RESOLUTION) +
+            config.startAngle;
 
         chassisFrameMeasuredAngle.setUnwrappedValue(chassisFrameUnwrappedMeasurement);
     }
@@ -93,7 +68,6 @@ void TurretMotor::updateMotorAngle()
         }
 
         lastUpdatedEncoderValue = config.startEncoderValue;
-        startEncoderOffset = INT16_MIN;
 
         chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
