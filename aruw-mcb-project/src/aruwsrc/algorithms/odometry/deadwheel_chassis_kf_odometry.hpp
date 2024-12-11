@@ -178,6 +178,8 @@ private:
     const float parallelWheelChassisRelativeAngleRadians;
     const float perpendicularWheelChassisRelativeAngleRadians;
 
+    uint32_t prevTime = 0;
+
     void updateChassisStateFromKF(float chassisYaw);
 };
 }  // namespace aruwsrc::algorithms::odometry

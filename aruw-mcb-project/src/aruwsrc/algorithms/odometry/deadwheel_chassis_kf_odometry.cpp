@@ -87,6 +87,8 @@ void DeadwheelChassisKFOdometry::update()
     // Perform the Kalman filter update
     kf.performUpdate(y);
     updateChassisStateFromKF(chassisYaw);
+
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
