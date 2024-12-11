@@ -34,9 +34,6 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
-      chassisAccelerationToMeasurementCovarianceInterpolator(
-          CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
       parallelWheelChassisRelativeAngleRadians(parallelWheelChassisRelativeAngleRadians),
       perpendicularWheelChassisRelativeAngleRadians(perpendicularWheelChassisRelativeAngleRadians)
@@ -84,9 +81,6 @@ void DeadwheelChassisKFOdometry::update()
     accelXWorld = ax;
     accelYWorld = ay;
 
-    // The measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(Vx, Vy);
-
     // Create the measurement vector
     float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
 
@@ -105,46 +99,6 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 
     location.setOrientation(chassisYaw);
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
-}
-
-void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
-{
-    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
-
-    // Return to avoid weird acceleration spike on startup
-    if (prevTime == 0)
-    {
-        return;
-    }
-
-    // Compute acceleration
-    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.x,
-        Vx - prevChassisVelocity[0][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.y,
-        Vy - prevChassisVelocity[1][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    prevChassisVelocity[0][0] = Vx;
-    prevChassisVelocity[1][0] = Vy;
-
-    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
-    // convert dt in microseconds to seconds
-    const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
-
-    const float velocityCovariance =
-        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
-
-    // Set measurement covariance of chassis velocity as measured by the wheels
-    kf.getMeasurementCovariance()[0] = velocityCovariance;
-    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-        velocityCovariance;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
