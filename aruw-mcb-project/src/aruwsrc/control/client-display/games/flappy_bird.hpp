@@ -20,7 +20,6 @@
 #ifndef FLAPPY_BIRD_HPP_
 #define FLAPPY_BIRD_HPP_
 
-#include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/control/client-display/hud_indicator.hpp"
@@ -40,9 +39,31 @@ class FlappyBird : public HudIndicator, protected modm::Resumable<3>{
 
 
 private:
-
+// SCREEN SPACE --------------------------------
 static constexpr uint16_t MIN_Y = 180;
 static constexpr uint16_t MAX_Y = 825;
+static constexpr uint16_t MIN_X = 550;
+static constexpr uint16_t MAX_X = 1800;
+
+// BIRD ---------------------------------------
+static constexpr uint16_t BIRD_X = MIN_X + 50;
+static constexpr uint16_t BIRD_WIDTH_HEIGHT = 16;
+static constexpr uint16_t BIRD_LINE_THICKNESS = 15;
+static constexpr Tx::GraphicColor BIRD_COLOR = Tx::GraphicColor::WHITE;
+
+// BOUDING LINES -------------------------------
+static constexpr uint16_t BOUNDING_LINE_THICKNESS = 10;
+static constexpr Tx::GraphicColor TOP_BOUNDING_LINE_COLOR = Tx::GraphicColor::CYAN;
+static constexpr Tx::GraphicColor BOTTOM_BOUNDING_LINE_COLOR = Tx::GraphicColor::GREEN;
+
+// PIPES --------------------------------------
+static constexpr uint16_t PIPE_WIDTH = 35;
+static constexpr uint16_t PIPE_THICKNESS = 100;
+
+// SCORE --------------------------------------
+static constexpr uint16_t SCORE_X = MIN_X - 100;
+static constexpr uint16_t SCORE_Y = MAX_Y - 50;
+static constexpr uint16_t SCORE_SIZE = 100;
 
 
 }; 
