@@ -64,9 +64,12 @@
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
+#include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
+#include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -223,6 +226,13 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
+aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
+    (drivers()->controlOperatorInterface),
+    0.5f);  // Multiplier for slow beyblade speed
+
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     turret.pitchMotor,
@@ -312,6 +322,22 @@ IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
+// beyblade governors
+PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
+
+FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
+
+MovedFastRecentlyGovernor movedRecentlyGovernor(
+    (drivers()->controlOperatorInterface),
+    5000.0f,
+    5000);
+
+GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
+    {&chassis},
+    slowBeybladeCommand,
+    beybladeCommand,
+    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
+    true);
 GovernorLimitedCommand<1> turretUTurnCommandLimited(
     {&turret},
     turretUTurnCommand,
@@ -388,7 +414,7 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     agitator,
     turret,
-    {&wiggleCommand, &beybladeCommand},
+    {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
     imuCalibrateCommand,
     &leftMousePressedBNotPressed,
     &cvOnTargetGovernor,
@@ -412,20 +438,22 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-HoldCommandMapping rightSwitchMiddle(
+HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
+    true);
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
-HoldCommandMapping leftSwitchDown(
+HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    {&beybladeSlowWhenOutOfCombatCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
@@ -438,7 +466,10 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(
+    drivers(),
+    {&beybladeSlowWhenOutOfCombatCommand},
+    RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
