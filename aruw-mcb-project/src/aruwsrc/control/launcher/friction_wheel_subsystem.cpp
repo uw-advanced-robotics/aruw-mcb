@@ -33,8 +33,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     tap::Drivers *drivers,
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
-    tap::can::CanBus canBus,
-    aruwsrc::can::TurretMCBCanComm *turretMCB)
+    tap::can::CanBus canBus)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
       launchSpeedLinearInterpolator(
@@ -55,7 +54,6 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       desiredRpmRamp(0),
       leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
       rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
-      turretMCB(turretMCB),
       frictionTestCommand(this)
 {
     this->setTestCommand(&frictionTestCommand);
@@ -72,10 +70,6 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    if (turretMCB != nullptr)
-    {
-        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
-    }
 }
 
 float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const

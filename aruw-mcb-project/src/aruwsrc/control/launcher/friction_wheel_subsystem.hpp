@@ -63,8 +63,7 @@ public:
         tap::Drivers *drivers,
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus,
-        aruwsrc::can::TurretMCBCanComm *turretMCB);
+        tap::can::CanBus canBus);
 
     void initialize() override;
 
@@ -143,8 +142,6 @@ private:
     tap::motor::DjiMotor leftWheel;
     tap::motor::DjiMotor rightWheel;
 #endif
-
-    aruwsrc::can::TurretMCBCanComm *turretMCB;
 
     FrictionWheelTestCommand frictionTestCommand;
 
