@@ -40,13 +40,13 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
-      velocityPidLeftWheel(
+      pidLeftWheel(
           LAUNCHER_PID_KP,
           LAUNCHER_PID_KI,
           LAUNCHER_PID_KD,
           LAUNCHER_PID_MAX_ERROR_SUM,
           LAUNCHER_PID_MAX_OUTPUT),
-      velocityPidRightWheel(
+      pidRightWheel(
           LAUNCHER_PID_KP,
           LAUNCHER_PID_KI,
           LAUNCHER_PID_KD,
@@ -95,10 +95,16 @@ void FrictionWheelSubsystem::refresh()
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
-    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    float setpoint = desiredRpmRamp.getValue();
+    float feedforward = setpoint * LAUNCHER_PID_KF;
+
+    pidLeftWheel.update(setpoint - leftWheel.getShaftRPM());
+    int32_t leftOutput = static_cast<int32_t>(pidLeftWheel.getValue() + feedforward);
+    leftWheel.setDesiredOutput(leftOutput);
+
+    pidRightWheel.update(setpoint - rightWheel.getShaftRPM());
+    int32_t rightOutput = static_cast<int32_t>(pidRightWheel.getValue() + feedforward);
+    rightWheel.setDesiredOutput(rightOutput);
 }
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const

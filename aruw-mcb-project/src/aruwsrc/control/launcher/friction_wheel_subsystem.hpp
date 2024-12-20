@@ -121,9 +121,9 @@ protected:
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
-    modm::Pid<float> velocityPidLeftWheel;
+    modm::Pid<float> pidLeftWheel;
 
-    modm::Pid<float> velocityPidRightWheel;
+    modm::Pid<float> pidRightWheel;
 
     float desiredLaunchSpeed;
 

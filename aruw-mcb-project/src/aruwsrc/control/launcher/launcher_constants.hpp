@@ -54,18 +54,21 @@ static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.3f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_KF = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_KF = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_KF = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
