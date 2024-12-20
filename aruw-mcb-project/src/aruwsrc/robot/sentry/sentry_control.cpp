@@ -409,7 +409,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm2(),
         turretLeft::barrelID);
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -419,8 +418,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         aruwsrc::control::launcher::LEFT_MOTOR_ID,
         aruwsrc::control::launcher::RIGHT_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
-        &getTurretMCBCanComm1(),
-        turretRight::barrelID);  // @todo idk what they actually are
+        turretRight::barrelID);
 
 // Agitators
 VelocityAgitatorSubsystem turretLeftAgitator(
