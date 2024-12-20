@@ -141,8 +141,7 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers)
           drivers,
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
-          tap::can::CanBus::CAN_BUS1,
-          nullptr)
+          tap::can::CanBus::CAN_BUS1)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -154,7 +153,6 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           tap::motor::MOTOR1,
           tap::motor::MOTOR2,
           tap::can::CanBus::CAN_BUS1,
-          nullptr,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
