@@ -534,28 +534,6 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
-// Left
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    leftFrictionWheels(
-        drivers(),
-        tap::motor::MOTOR2,
-        tap::motor::MOTOR1,
-        tap::can::CanBus::CAN_BUS2,
-        &drivers()->turretMCBCanCommBus2,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-
-// Right
-aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    rightFrictionWheels(
-        drivers(),
-        tap::motor::MOTOR2,
-        tap::motor::MOTOR1,
-        tap::can::CanBus::CAN_BUS1,
-        &drivers()->turretMCBCanCommBus1,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
