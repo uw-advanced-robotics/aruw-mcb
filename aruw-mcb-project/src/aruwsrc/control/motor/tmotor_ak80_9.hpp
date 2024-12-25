@@ -108,6 +108,8 @@ public:
      */
     uint16_t getEncoderWrapped() const override;
 
+    void resetEncoderValue();
+
     /***
      * @returns Angular position of motor, unwrapped, in radians.
      */

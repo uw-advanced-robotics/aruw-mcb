@@ -36,6 +36,7 @@
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
+#include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
@@ -55,12 +56,12 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motor_tester_control
 {
 // m2006
-tap::motor::DjiMotor leftChannelMotor(
-    drivers(),
-    tap::motor::MOTOR3,          // id 3
-    tap::can::CanBus::CAN_BUS1,  // bus 1
-    false,
-    "LMotor");
+// tap::motor::DjiMotor leftChannelMotor(
+//     drivers(),
+//     tap::motor::MOTOR3,          // id 3
+//     tap::can::CanBus::CAN_BUS1,  // bus 1
+//     false,
+//     "LMotor");
 
 VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
@@ -80,11 +81,27 @@ tap::motor::DjiMotor wheelChannelMotor(
     false,
     "WMotor");
 
+aruwsrc::control::motor::Tmotor_AK809 leftChannelMotor(
+    drivers(),
+    aruwsrc::control::motor::TMotorId::MOTOR4,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "LMotor");  
+
+
 MotorSubsystem leftMotorSubsystem(
     drivers(),
     leftChannelMotor,
-    m2006VelocityPidConfig,
-    (1.0f / 36.0f));
+    Ak809VelocityPidConfig,
+    (1.0f),
+    true
+);
+
+// MotorSubsystem leftMotorSubsystem(
+    // drivers(),
+    // leftChannelMotor,
+    // m2006VelocityPidConfig,
+    // (1.0f / 36.0f));
 
 MotorSubsystem rightMotorSubsystem(
     drivers(),
@@ -151,6 +168,7 @@ void initializeSubsystems()
     leftMotorSubsystem.initialize();
     rightMotorSubsystem.initialize();
     wheelMotorSubsystem.initialize();
+    // legMotorSubsystem.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
@@ -159,6 +177,7 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&legMotorSubsystem);
 }
 
 void registerIoMappings(Drivers* drivers)

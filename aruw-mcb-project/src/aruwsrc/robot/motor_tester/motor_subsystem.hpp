@@ -25,6 +25,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 
 namespace aruwsrc::motor_tester
 {
@@ -35,11 +36,13 @@ public:
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motor,
         tap::algorithms::SmoothPidConfig pidConfig,
-        float gearRatio)
+        float gearRatio,
+        bool akMotor = false)
         : Subsystem(drivers),
           motor(motor),
           velocityPid(pidConfig),
-          gearRatio(gearRatio)
+          gearRatio(gearRatio),
+          akMotor(akMotor)
     {
     }
 
@@ -58,6 +61,10 @@ public:
         velocityPid.runControllerDerivateError(velocityError, dt);
 
         motor.setDesiredOutput(velocityPid.getOutput());
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     };
 
     // in output shaft rpm
@@ -80,6 +87,7 @@ private:
 
     float desiredRPM{0};
     uint32_t prevTime = 0;
+    bool akMotor = false;
 };
 
 }  // namespace aruwsrc::motor_tester
