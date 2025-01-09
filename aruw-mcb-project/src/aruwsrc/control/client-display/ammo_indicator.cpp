@@ -27,44 +27,13 @@ namespace aruwsrc::control::client_display
 {
 AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const RefSerial &refSerial)
     : HudIndicator(refSerialTransmitter),
+      numberIndicator(refSerialTransmitter, &numberGraphic, updateAmmoCount, (int32_t)0),
       refSerial(refSerial)
 {
 }
 
-void AmmoIndicator::initialize()
-{
-    uint8_t bulletsRemainingName[3];
-
-    getUnusedGraphicName(bulletsRemainingName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &bulletsRemainingGraphics.graphicData,
-        bulletsRemainingName,
-        Tx::GRAPHIC_DELETE,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::YELLOW);
-
-    RefSerialTransmitter::configCharacterMsg(
-        TEXT_SIZE,
-        TEXT_WIDTH,
-        TEXT_X,
-        TEXT_Y,
-        "",
-        &bulletsRemainingGraphics);
-}
-
-modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
-{
-    RF_BEGIN(0)
-
-    RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
-
-    RF_END();
-}
-
 modm::ResumableResult<bool> AmmoIndicator::update()
 {
-    RF_BEGIN(1);
-
     // Access the correct field depending on the robot type
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
         refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
@@ -76,30 +45,49 @@ modm::ResumableResult<bool> AmmoIndicator::update()
         bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
     }
 
-    // Appends the current bullet count to the "AMMO: " text
-    snprintf(
-        bulletsRemainingTextBuffer,
-        TEXT_BUFFER_SIZE,
-        "%s%hd",
-        bulletsRemainingText,
-        bulletCount);
+    numberIndicator.setIndicatorState(bulletCount);
 
-    // If we previously deleted the graphic, we need to add it back
-    // If not, we are trying to update the ammo count
-    bulletsRemainingGraphics.graphicData.operation =
-        bulletsRemainingGraphics.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
-                                                                             : Tx::GRAPHIC_MODIFY;
+    RF_BEGIN(1);
 
-    // Copy over the text into the graphics message
-    strncpy(bulletsRemainingGraphics.msg, bulletsRemainingTextBuffer, TEXT_BUFFER_SIZE);
-
-    // Updates the length of the string, needed as on initialization it is 0 length string
-    bulletsRemainingGraphics.graphicData.endAngle = TEXT_BUFFER_SIZE;
-
-    // Actually send the graphic
-    RF_CALL(refSerialTransmitter.sendGraphic(&bulletsRemainingGraphics));
+    RF_CALL(numberIndicator.draw());
 
     RF_END();
+}
+
+modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
+{
+    RF_BEGIN(0)
+
+    RF_CALL(refSerialTransmitter.sendGraphic(&textGraphic));
+
+    RF_CALL(numberIndicator.initialize());
+
+    RF_END();
+}
+
+void AmmoIndicator::initialize()
+{
+    uint8_t graphicName[3];
+
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &textGraphic.graphicData,
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::ORANGE);
+
+    RefSerialTransmitter::configCharacterMsg(SIZE, WIDTH, TEXT_X, TEXT_Y, "AMMO: ", &textGraphic);
+
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &numberGraphic.graphicData,
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::ORANGE);
+
+    updateAmmoCount(0, &numberGraphic);
 }
 
 }  // namespace aruwsrc::control::client_display

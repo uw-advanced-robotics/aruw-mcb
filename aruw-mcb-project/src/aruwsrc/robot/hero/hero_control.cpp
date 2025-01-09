@@ -61,9 +61,13 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+#include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
+#include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
+#include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -205,6 +209,13 @@ BeybladeCommand beybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
+BeybladeCommand slowBeybladeCommand(
+    drivers(),
+    &chassis,
+    &turret.yawMotor,
+    (drivers()->controlOperatorInterface),
+    0.5f);
+
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -299,8 +310,6 @@ cv::TurretCVCommand turretCVCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
-
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
@@ -311,6 +320,32 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassis);
+
+// beyblade governors
+
+PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
+
+FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
+
+MovedFastRecentlyGovernor movedRecentlyGovernor(
+    (drivers()->controlOperatorInterface),
+    5000.0f,
+    5000);
+
+GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
+    {&chassis},
+    slowBeybladeCommand,
+    beybladeCommand,
+    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
+    true);
+IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
+
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
+
+GovernorLimitedCommand<1> turretUTurnCommandLimited(
+    {&turret},
+    turretUTurnCommand,
+    {&imuCalibrateDoneGovernor});
 
 // hero agitator commands
 
@@ -388,10 +423,12 @@ ClientDisplayCommand clientDisplayCommand(
     frictionWheels,
     waterwheelAgitator,
     turret,
-    {&beybladeCommand},
+    {&beybladeSlowWhenOutOfCombatCommand},
     imuCalibrateCommand,
     nullptr,
     &kicker::cvOnTargetGovernor,
+    drivers()->plateHitTracker,
+    &transformAdapter,
     &drivers()->capacitorBank);
 
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -414,12 +451,12 @@ HoldCommandMapping rightSwitchMiddle(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&kicker::launchKickerHeatAndCVLimited},
+    {&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&beybladeSlowWhenOutOfCombatCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -447,8 +484,14 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-PressCommandMapping zPressed(drivers(), {&turretUTurnCommand}, RemoteMapState({Remote::Key::Z}));
+ToggleCommandMapping fToggled(
+    drivers(),
+    {&beybladeSlowWhenOutOfCombatCommand},
+    RemoteMapState({Remote::Key::F}));
+PressCommandMapping zPressed(
+    drivers(),
+    {&turretUTurnCommandLimited},
+    RemoteMapState({Remote::Key::Z}));
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
@@ -531,6 +574,7 @@ void setDefaultHeroCommands()
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

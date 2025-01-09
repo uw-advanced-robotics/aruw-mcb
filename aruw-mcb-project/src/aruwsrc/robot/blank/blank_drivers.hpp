@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,21 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_command.hpp"
+#ifndef BLANK_DRIVERS_HPP_
+#define BLANK_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::dart
+namespace aruwsrc::blank
 {
-DartCommand::DartCommand(aruwsrc::dart::DartSubsystem& dartSubsystem, tap::Drivers* drivers)
-    : dartSubsystem(dartSubsystem),
-      drivers(drivers)
+class Drivers : public tap::Drivers
 {
-    addSubsystemRequirement(&dartSubsystem);
-}
+    friend class DriversSingleton;
 
-void DartCommand::execute() { dartSubsystem.windUp(); }
+#ifdef ENV_UNIT_TESTS
+public:
+#endif
+    Drivers() : tap::Drivers() {}
 
-void DartCommand::end(bool) { dartSubsystem.stop(); }
+public:
+};  // class aruwsrc::BlankDrivers
+}  // namespace aruwsrc::blank
 
-}  // namespace aruwsrc::dart
+#endif  // BLANK_DRIVERS_HPP_

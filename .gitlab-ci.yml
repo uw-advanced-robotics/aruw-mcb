@@ -76,6 +76,7 @@ before_script:
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
+            aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
             main.cpp
 
@@ -337,6 +338,20 @@ before_script:
     - .test_build
   variables:
     ROBOT: TESTBED
+
+# Blank Build
+
+"Blank: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: BLANK
+  
+"Blank: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: BLANK
 
 # Motor Tester Build
 

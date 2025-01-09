@@ -20,13 +20,14 @@
 #ifndef AMMO_INDICATOR_HPP_
 #define AMMO_INDICATOR_HPP_
 
-#include "tap/architecture/timeout.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
+
+using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
@@ -54,24 +55,36 @@ public:
 
 private:
     // X position of the text
-    static constexpr uint16_t TEXT_X = 1300;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
     // Y position of the text
-    static constexpr uint16_t TEXT_Y = 800;
+    static constexpr uint16_t TEXT_Y = 200;
     // WIDTH of the text
-    static constexpr uint16_t TEXT_WIDTH = 3;
+    static constexpr uint16_t WIDTH = 4;
     // SIZE of the text
-    static constexpr uint16_t TEXT_SIZE = 20;
+    static constexpr uint16_t SIZE = 40;
 
-    Tx::GraphicCharacterMessage bulletsRemainingGraphics;
+    Tx::GraphicCharacterMessage textGraphic;
+    const char *bulletsRemainingText = "AMMO: ";
 
-    int bulletCount = -1;
+    Tx::Graphic1Message numberGraphic;
+    tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
+
+    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
+
+    int bulletCount = 0;
 
     const tap::communication::serial::RefSerial &refSerial;
 
-    // Size of "AMMO: " is 7, plus 3 more digits for the number of bullets
-    static constexpr int TEXT_BUFFER_SIZE = 10;
-    const char *bulletsRemainingText = "AMMO: ";
-    char bulletsRemainingTextBuffer[TEXT_BUFFER_SIZE];
+    static inline void updateAmmoCount(int32_t value, RefSerialData::Tx::Graphic1Message *graphic)
+    {
+        RefSerialTransmitter::configInteger(
+            SIZE,
+            WIDTH,
+            NUMBER_X,
+            TEXT_Y,
+            value,
+            &graphic->graphicData);
+    }
 };
 
 }  // namespace aruwsrc::control::client_display

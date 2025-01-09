@@ -23,6 +23,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/control/client-display/projection_utils.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -67,6 +68,11 @@ public:
         return chassisToTurret;
     }
 
+    inline const tap::algorithms::transforms::Transform& getWorldToVTM() const
+    {
+        return worldToVTM;
+    }
+
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
     {
@@ -80,6 +86,7 @@ private:
     tap::algorithms::transforms::Transform worldToChassis;
     tap::algorithms::transforms::Transform worldToTurret;
     tap::algorithms::transforms::Transform chassisToTurret;
+    tap::algorithms::transforms::Transform worldToVTM;
 };
 
 }  // namespace aruwsrc::algorithms::transforms
