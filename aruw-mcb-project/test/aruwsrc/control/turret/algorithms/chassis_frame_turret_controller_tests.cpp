@@ -98,33 +98,37 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
         setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, modm::toRadian(150))));
 
     // should set motor output to 0 + gravity compensation for each setpoint
-    EXPECT_CALL(
-        turretSubsystem.pitchMotor,
-        setMotorOutput(FloatNear(
-            computeGravitationalForceOffset(
-                TURRET_CG_X,
-                TURRET_CG_Z,
-                0,
-                GRAVITY_COMPENSATION_SCALAR),
-            1e-2)));
-    EXPECT_CALL(
-        turretSubsystem.pitchMotor,
-        setMotorOutput(FloatNear(
-            computeGravitationalForceOffset(
-                TURRET_CG_X,
-                TURRET_CG_Z,
-                M_TWOPI - M_PI_2,
-                GRAVITY_COMPENSATION_SCALAR),
-            1e-2)));
-    EXPECT_CALL(
-        turretSubsystem.pitchMotor,
-        setMotorOutput(FloatNear(
-            computeGravitationalForceOffset(
-                TURRET_CG_X,
-                TURRET_CG_Z,
-                M_TWOPI - modm::toRadian(150),
-                GRAVITY_COMPENSATION_SCALAR),
-            1e-2)));
+    {
+        InSequence s;
+
+        EXPECT_CALL(
+            turretSubsystem.pitchMotor,
+            setMotorOutput(FloatNear(
+                computeGravitationalForceOffset(
+                    TURRET_CG_X,
+                    TURRET_CG_Z,
+                    0,
+                    GRAVITY_COMPENSATION_SCALAR),
+                1e-2)));
+        EXPECT_CALL(
+            turretSubsystem.pitchMotor,
+            setMotorOutput(FloatNear(
+                computeGravitationalForceOffset(
+                    TURRET_CG_X,
+                    TURRET_CG_Z,
+                    M_TWOPI - M_PI_2,
+                    GRAVITY_COMPENSATION_SCALAR),
+                1e-2)));
+        EXPECT_CALL(
+            turretSubsystem.pitchMotor,
+            setMotorOutput(FloatNear(
+                computeGravitationalForceOffset(
+                    TURRET_CG_X,
+                    TURRET_CG_Z,
+                    M_TWOPI - modm::toRadian(150),
+                    GRAVITY_COMPENSATION_SCALAR),
+                1e-2)));
+    }
 
     setpoint = Angle(0);
     currentAngle.setWrappedValue(0);
