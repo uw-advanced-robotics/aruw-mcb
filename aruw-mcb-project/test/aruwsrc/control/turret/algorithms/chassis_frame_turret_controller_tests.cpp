@@ -116,7 +116,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
                 computeGravitationalForceOffset(
                     TURRET_CG_X,
                     TURRET_CG_Z,
-                    M_TWOPI - M_PI_2,
+                    -M_PI_2,
                     GRAVITY_COMPENSATION_SCALAR),
                 1e-2)));
         EXPECT_CALL(
@@ -125,7 +125,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
                 computeGravitationalForceOffset(
                     TURRET_CG_X,
                     TURRET_CG_Z,
-                    M_TWOPI - modm::toRadian(150),
+                    -modm::toRadian(150),
                     GRAVITY_COMPENSATION_SCALAR),
                 1e-2)));
     }
@@ -154,7 +154,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint
         setMotorOutput(Gt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
-            M_TWOPI - currentAngle.getWrappedValue(),
+            -currentAngle.getWrappedValue(),
             GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
@@ -171,7 +171,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
         setMotorOutput(Lt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
-            M_TWOPI - currentAngle.getWrappedValue(),
+            -currentAngle.getWrappedValue(),
             GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
