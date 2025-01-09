@@ -51,7 +51,6 @@ public:
         (),
         (const override));
     MOCK_METHOD(float, getChassisFrameVelocity, (), (const override));
-    MOCK_METHOD(WrappedFloat, getAngleFromCenter, (), (const override));
     MOCK_METHOD(
         const control::turret::algorithms::TurretControllerInterface *,
         getTurretController,

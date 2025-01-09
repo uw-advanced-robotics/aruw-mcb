@@ -59,7 +59,8 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
         // do that here. This doesn't specify which direction positive yaw sweeps.
         WrappedFloat turretWorldYawRadians = Angle(turretMCB->getYaw());
         // Normalized angle in range (-pi, pi)
-        WrappedFloat turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
+        WrappedFloat turretChassisYawRadians =
+            turretSubsystem.yawMotor.getChassisFrameMeasuredAngle();
 
         *output = (turretWorldYawRadians - turretChassisYawRadians).getWrappedValue();
         return true;

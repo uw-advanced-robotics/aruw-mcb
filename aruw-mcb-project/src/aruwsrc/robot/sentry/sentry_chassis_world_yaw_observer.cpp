@@ -35,7 +35,8 @@ SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
 bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
-    WrappedFloat turretMajorChassisYawRadians = turretMajor.getReadOnlyMotor().getAngleFromCenter();
+    WrappedFloat turretMajorChassisYawRadians =
+        turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle();
     *output = (Angle::fromDegrees(imu.getYaw()) + offset - turretMajorChassisYawRadians)
                   .getWrappedValue();
     return true;

@@ -90,7 +90,7 @@ void ChassisAutorotateCommand::execute()
     {
         updateAutorotateState();
 
-        float turretAngleFromCenter = yawMotor->getAngleFromCenter().getWrappedValue();
+        float turretAngleFromCenter = yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
 
         if (chassisAutorotating)
         {

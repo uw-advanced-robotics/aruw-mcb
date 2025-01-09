@@ -148,13 +148,19 @@ TEST_F(
     // Default expectations so turret assumes motors are good to go and within valid angle range
     const int encStep = DjiMotor::ENC_RESOLUTION / 8;
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {M_PI_2, TURRET_MOTOR_CONFIG.startEncoderValue},
-        {M_PI_2 + M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
-        {M_PI_2 + 2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
-        {M_PI_2 + 3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
-        {M_PI_2 + 4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
-        {M_PI_2 + 5 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
-        {M_PI_2 + 6 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle, TURRET_MOTOR_CONFIG.startEncoderValue},
+        {TURRET_MOTOR_CONFIG.startAngle + M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 2 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 3 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 4 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 5 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 6 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
     };
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
@@ -162,37 +168,6 @@ TEST_F(
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle), 1E-3);
-    }
-}
-
-TEST_F(TurretMotorTest, getAngleFromCenter__return_0_when_motors_offline)
-{
-    motorOnline = false;
-
-    turretMotor.updateMotorAngle();
-
-    EXPECT_NEAR(0, turretMotor.getAngleFromCenter().minDifference(0), 1E-3);
-}
-
-TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
-{
-    const int encStep = DjiMotor::ENC_RESOLUTION / 8;
-
-    std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {0, TURRET_MOTOR_CONFIG.startEncoderValue},
-        {M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
-        {2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
-        {3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
-        {4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
-        {-3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
-        {-2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
-    };
-
-    for (auto [angle, encoder] : angleAndEncoderPairs)
-    {
-        setEncoder(encoder);
-        turretMotor.updateMotorAngle();
-        EXPECT_NEAR(0, turretMotor.getAngleFromCenter().minDifference(angle), 1E-3);
     }
 }
 

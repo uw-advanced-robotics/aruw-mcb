@@ -366,7 +366,9 @@ TEST_F(
 
     turretController.runController(1, Angle(0));
 
-    EXPECT_EQ(computeCGOffset(turretMotor.getAngleFromCenter()), turretMotor.getMotorOutput());
+    EXPECT_EQ(
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()),
+        turretMotor.getMotorOutput());
 }
 
 TEST_F(
@@ -389,7 +391,9 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_GT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_GT(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }
 
 TEST_F(
@@ -412,7 +416,9 @@ TEST_F(
 
     turretController.runController(1, Angle::fromDegrees(100));
 
-    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_LT(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }
 
 TEST_F(
@@ -436,7 +442,9 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_EQ(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }
 
 TEST_F(
@@ -459,7 +467,9 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_EQ(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }
 
 TEST_F(
@@ -481,7 +491,9 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_LT(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }
 
 TEST_F(
@@ -503,5 +515,7 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_GT(turretMotor.getMotorOutput(), computeCGOffset(turretMotor.getAngleFromCenter()));
+    EXPECT_GT(
+        turretMotor.getMotorOutput(),
+        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
 }

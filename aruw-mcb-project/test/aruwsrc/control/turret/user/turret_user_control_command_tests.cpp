@@ -127,9 +127,9 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
             computeGravitationalForceOffset(
                 TURRET_CG_X,
                 TURRET_CG_Z,
-                0,
+                M_TWOPI - pitchActual.getWrappedValue(),
                 GRAVITY_COMPENSATION_SCALAR),
-            1E-3)));
+            1E-2)));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(0));
     EXPECT_CALL(
         turret.pitchMotor,

@@ -60,12 +60,12 @@ void SentryTransforms::updateTransforms()
     // Turret Major to Minors
     turretMajorToTurretLeft.updateRotation(
         0.,
-        turretLeft.pitchMotor.getAngleFromCenter().getWrappedValue(),
-        turretLeft.yawMotor.getAngleFromCenter().getWrappedValue());
+        turretLeft.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        turretLeft.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
     turretMajorToTurretRight.updateRotation(
         0.,
-        turretRight.pitchMotor.getAngleFromCenter().getWrappedValue(),
-        turretRight.yawMotor.getAngleFromCenter().getWrappedValue());
+        turretRight.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        turretRight.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
 
     // World transforms
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);

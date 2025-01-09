@@ -113,7 +113,7 @@ void ChassisFramePitchTurretController::runController(
     pidOutput += computeGravitationalForceOffset(
         TURRET_CG_X,
         TURRET_CG_Z,
-        -turretMotor.getAngleFromCenter().getWrappedValue(),
+        -turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
         GRAVITY_COMPENSATION_SCALAR);
 
     turretMotor.setMotorOutput(pidOutput);

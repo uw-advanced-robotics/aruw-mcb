@@ -176,8 +176,6 @@ public:
         turretConfig.limitMotorAngles = GetParam().yawLimited;
 
         ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
-        ON_CALL(turret.yawMotor, getAngleFromCenter)
-            .WillByDefault(Return(Angle(yawAngleFromCenter)));
         ON_CALL(turret.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
         ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(turretAngleActual));

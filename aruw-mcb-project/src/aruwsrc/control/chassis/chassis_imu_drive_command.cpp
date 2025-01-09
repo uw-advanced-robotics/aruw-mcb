@@ -142,7 +142,7 @@ void ChassisImuDriveCommand::execute()
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            yawMotor->getAngleFromCenter().getWrappedValue());
+            yawMotor->getChassisFrameMeasuredAngle().getWrappedValue());
     }
     else
     {

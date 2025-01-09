@@ -67,7 +67,7 @@ void BeybladeCommand::execute()
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        WrappedFloat turretYawAngle = yawMotor->getAngleFromCenter();
+        WrappedFloat turretYawAngle = yawMotor->getChassisFrameMeasuredAngle();
 
         float x = 0.0f;
         float y = 0.0f;

@@ -110,16 +110,6 @@ public:
         return (M_TWOPI / 60) * motor->getShaftRPM();
     }
 
-    /**
-     * @return A wrapped angle that is the angle difference between the turret
-     * and the turret motors' specified "start angle" (specified upon construction in the
-     * TurretMotorConfig struct).
-     */
-    mockable inline WrappedFloat getAngleFromCenter() const
-    {
-        return getChassisFrameMeasuredAngle() - config.startAngle;
-    }
-
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
     mockable const algorithms::TurretControllerInterface *getTurretController() const
     {

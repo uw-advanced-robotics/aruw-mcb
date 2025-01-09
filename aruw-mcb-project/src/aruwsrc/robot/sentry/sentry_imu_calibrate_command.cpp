@@ -91,7 +91,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           (turret.getReadOnlyMotor().getAngleFromCenter().minDifference(0) <
+           (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
             SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
