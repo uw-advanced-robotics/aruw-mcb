@@ -27,12 +27,14 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
+#include "aruwsrc/robot/dart/dart_yaw_subsystem.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
+using namespace dart::dart_yaw_subsystem;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -46,12 +48,23 @@ namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
-
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_MOTORS, false, "Yaw Motor");
+tap::motor::DjiMotor yawDeadMotor(drivers(), YAW_DEAD_MOTOR_ID, CAN_BUS_MOTORS, false, "Yaw Dead Motor");
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+DartYawSubsystem dartYaw{
+    *drivers(),
+    yawDeadMotor,
+    yawMotor
+};
 
-void registerDartSubsystems(Drivers*) {}
+void initializeSubsystems() {
+    dartYaw.initialize();
+}
+
+void registerDartSubsystems(Drivers* drivers) {
+    drivers->commandScheduler.registerSubsystem(&dartYaw);
+}
 
 void setDefaultDartCommands(Drivers*) {}
 

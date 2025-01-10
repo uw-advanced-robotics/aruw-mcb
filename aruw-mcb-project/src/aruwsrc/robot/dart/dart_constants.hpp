@@ -30,9 +30,23 @@ namespace aruwsrc::control::turret
 {
 static constexpr tap::motor::MotorId PULL_MOTOR_ID =
     tap::motor::MOTOR6;  // TODO: update correct motor
-static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
-static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID =
+    tap::motor::MOTOR1;  // TODO: update correct motor
+static constexpr tap::motor::MotorId YAW_DEAD_MOTOR_ID =
+    tap::motor::MOTOR2;  // TODO: update correct motor
+
+static constexpr tap::gpio::Digital::InputPin limitSwitchPin = 
+tap::gpio::Digital::InputPin::B; //TODO: put actual pin
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_MOTOR_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 }  // namespace aruwsrc::control::turret
 #endif
