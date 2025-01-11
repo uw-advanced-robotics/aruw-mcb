@@ -50,17 +50,21 @@ public:
 
     inline void setDesiredRPM(float rpm) { desiredRPM = rpm; }
 
+
+
     inline void refresh() override
     {
-        const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-        const uint32_t dt = curTime - prevTime;
-        prevTime = curTime;
 
-        const float velocityError = desiredRPM - getCurrentRPM();
+        // const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+        // const uint32_t dt = curTime - prevTime;
+        // prevTime = curTime;
 
-        velocityPid.runControllerDerivateError(velocityError, dt);
+        // const float velocityError = desiredRPM - getCurrentRPM();
 
-        motor.setDesiredOutput(velocityPid.getOutput());
+        // velocityPid.runControllerDerivateError(velocityError, dt);
+
+        // motor.setDesiredOutput(velocityPid.getOutput());
+        motor.setDesiredOutput(desiredRPM);
         if (akMotor)
         {
             static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
@@ -76,6 +80,10 @@ public:
     {
         desiredRPM = 0;
         this->motor.setDesiredOutput(0);
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     }
 
     const char* getName() const override { return "Motor"; }
