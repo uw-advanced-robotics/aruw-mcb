@@ -89,6 +89,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
 
     switch (completeMessage.messageType)
     {
+        case CV_MESSAGE_HUSKY_BOT:
+        {
+            decodeToHuskyBotData(completeMessage);
+            return;
+        }
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
             decodeToTurretAimData(completeMessage);

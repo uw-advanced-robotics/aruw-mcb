@@ -72,7 +72,7 @@ public:
         tap::communication::serial::Uart::UartPort::Uart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
+        tap::communication::serial::Uart::UartPort::Uart8;
 
 #if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
     defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
@@ -238,6 +238,12 @@ public:
 
     } modm_packed;
 
+    struct HuskyBotData{
+        float x;
+        float y;
+        float z;
+    } modm_packed;
+
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
@@ -360,6 +366,7 @@ private:
 
     enum RxMessageTypes
     {
+        CV_MESSAGE_HUSKY_BOT = 1,
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
         CV_MESSAGE_TYPE_ARUCO_RESET = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
@@ -476,6 +483,16 @@ private:
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
         aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {0, 1, 0};
+
+
+    HuskyBotData hbData;
+    bool gotData = false;
+    int count = 0;
+    void decodeToHuskyBotData(const ReceivedSerialMessage& message){
+        memcpy(&hbData, &message.data, sizeof(HuskyBotData));
+        gotData = true;
+        count++;
+    }
 
 #ifdef ENV_UNIT_TESTS
 public:

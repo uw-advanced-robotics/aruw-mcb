@@ -202,7 +202,9 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
     if (!turretMcbConnected)
     {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
+        // tap::buzzer::playNote(&drivers->pwm, 1000);
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
+
     }
     else
     {
