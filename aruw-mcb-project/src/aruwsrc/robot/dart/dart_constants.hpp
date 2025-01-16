@@ -44,9 +44,10 @@ static constexpr tap::algorithms::SmoothPidConfig PULL_MOTOR_PID_CONFIG = { //TO
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float SERVO_MIN = 0.0f;
-static constexpr float SERVO_MAX = 1.0f; //TODO: figure out real values
-static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X; //TODO: figure out real port value
+// static constexpr float SERVO_MIN = 0.0f;
+// static constexpr float SERVO_MAX = 1.0f; //TODO: figure out real values
+// static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X; //TODO: figure out real port value
+    static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digital::InputPin::B;
 
 }  // namespace aruwsrc::control::turret
 #endif

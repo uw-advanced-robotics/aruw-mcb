@@ -25,32 +25,33 @@
 #include "tap/motor/servo.hpp"
 
 class Drivers;
-namespace dart::subsystem
+namespace aruwsrc::robot::dart
 {
 
 class DartLauncherSubsystem : public tap::control::Subsystem
 {
 public: 
     DartLauncherSubsystem(
-        tap::Drivers &drivers, tap::motor::MotorInterface &pullMotor, tap::motor::Servo &servo);
+        tap::Drivers *drivers, tap::motor::MotorInterface &pullMotor);
 
     void initialize() override;
-
+    void moveMotor(int32_t power);
     void refresh() override;
 
     void refreshSafeDisconnect() override;
     
     void setSetpoint(float setpoint);
-    void setServoOpen();
-    void setServoClosed();
+    // void setServoOpen();
+    // void setServoClosed();
+    bool isBeamBroken();
 
     const char* getName() const override { return "Dart_Launcher_Subsystem"; }
 protected:
     tap::motor::MotorInterface &motor;
-    tap::motor::Servo &servo;
+    
 
 private: 
-    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::control::turret::PULL_MOTOR_PID_CONFIG);
+    // tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::control::turret::PULL_MOTOR_PID_CONFIG);
     float setpoint;
     float zeroOffset = 0;
     float lastTime;

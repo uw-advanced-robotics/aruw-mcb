@@ -31,13 +31,15 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
 #include "tap/motor/servo.hpp"
+#include "dart_release_command.hpp"
+#include "dart_pullback_command.hpp"
 
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
-using namespace dart::subsystem;
+using namespace aruwsrc::robot::dart;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -50,17 +52,32 @@ namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
 tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
-tap::motor::Servo servo(drivers(), SERVO_PORT, SERVO_MAX, SERVO_MIN, 1);
+
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(
-    *drivers(),
-    pullMotor, servo);
+    drivers(),
+    pullMotor);
+DartReleaseCommand dartRelease(dartLauncher);
+DartPullbackCommand dartPullback(dartLauncher);
+
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&dartPullback},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    false);
+
+HoldRepeatCommandMapping rightSwitchMiddle(
+    drivers(),
+    {&dartRelease},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
+    false);
+
 
 void initializeSubsystems() {
     dartLauncher.initialize();
-    dartLauncher.setServoOpen(); //may need to change to close depending on the starting protocal 
+    // dartLauncher.setServoOpen(); //may need to change to close depending on the starting protocal 
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers *drivers) {
@@ -71,9 +88,14 @@ void setDefaultDartCommands(aruwsrc::dart::Drivers*) {
     //dartLauncher.setDefaultCommand(&)
 }
 
-void startDartCommands(aruwsrc::dart::Drivers*) {}
+void startDartCommands(aruwsrc::dart::Drivers* ) {
+    
+}
 
-void registerDartIoMappings(aruwsrc::dart::Drivers*) {}
+void registerDartIoMappings(aruwsrc::dart::Drivers* drivers) {
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
+}
 
 }  // namespace dart_control
 namespace aruwsrc::dart
