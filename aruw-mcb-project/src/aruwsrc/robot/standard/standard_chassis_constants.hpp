@@ -67,10 +67,13 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float VELOCITY_PID_KP = 10.0f;
+static constexpr float VELOCITY_PID_KI = 0.0f;
+static constexpr float VELOCITY_PID_KD = 1.25f;
+static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float VELOCITY_PID_KV = 0.057f;
+static constexpr float VELOCITY_PID_KS = 350.0f;
+
 /**
  * This max output is measured in the c620 robomaster translated current.
  * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
