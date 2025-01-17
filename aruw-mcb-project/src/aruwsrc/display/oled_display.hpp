@@ -22,12 +22,13 @@
 
 #include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
-#include "tap/display/sh1106.hpp"
+#include "tap/display/Sh1107.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "modm/processing/fiber.hpp"
 #include "modm/ui/menu/view_stack.hpp"
+#include "modm/platform.hpp"
 
 #include "splash_screen.hpp"
 
@@ -58,7 +59,7 @@ public:
 
     /**
      * Updates the display in a nonblocking fashion. This function uses protothreads
-     * to call the sh1106's updateNonblocking function at a rate of 2 hz.
+     * to call the Sh1107's updateNonblocking function at a rate of 2 hz.
      *
      * @note This function uses protothreads (http://dunkels.com/adam/pt/).
      *      Local variables *do not* necessarily behave correctly and this
@@ -75,14 +76,14 @@ public:
 private:
     tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
 
-    tap::display::Sh1106<
+    tap::display::Sh1107<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
         Board::DisplayReset,
 #endif
         128,
-        64,
+        128,
         false>
         display;
 
