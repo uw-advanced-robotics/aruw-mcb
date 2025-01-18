@@ -45,6 +45,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
     algorithms::PlateHitTracker &plateHitTracker,
+    TransformerInterface *transformer,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
       drivers(drivers),
@@ -60,7 +61,6 @@ ClientDisplayCommand::ClientDisplayCommand(
           robotTurretSubsystem,
           multiShotHandler,
           cvOnTargetManager),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter),
       ammoIndicator(refSerialTransmitter, drivers.refSerial),
       circleCrosshair(refSerialTransmitter),
       damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter),
@@ -69,7 +69,8 @@ ClientDisplayCommand::ClientDisplayCommand(
           agitatorSubsystem,
           imuCalibrateCommand,
           avoidanceCommands,
-          refSerialTransmitter)
+          refSerialTransmitter),
+      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer->getWorldToVTM())
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -88,11 +89,12 @@ void ClientDisplayCommand::restartHud()
 
     capBankIndicator.initialize();
     positionHudIndicators.initialize();
-    visionHudIndicators.initialize();
     ammoIndicator.initialize();
     circleCrosshair.initialize();
     damageIndicator.initialize();
     textHudIndicators.initialize();
+
+    visionTargetIndicator.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -117,22 +119,26 @@ bool ClientDisplayCommand::run()
 
     PT_CALL(capBankIndicator.sendInitialGraphics());
     PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(visionHudIndicators.sendInitialGraphics());
     PT_CALL(ammoIndicator.sendInitialGraphics());
     PT_CALL(circleCrosshair.sendInitialGraphics());
     PT_CALL(damageIndicator.sendInitialGraphics());
     PT_CALL(textHudIndicators.sendInitialGraphics());
+    PT_CALL(visionTargetIndicator.sendInitialGraphics());
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
+        startTime = tap::arch::clock::getTimeMicroseconds();
         PT_CALL(capBankIndicator.update());
         PT_CALL(positionHudIndicators.update());
-        PT_CALL(visionHudIndicators.update());
         PT_CALL(ammoIndicator.update());
         PT_CALL(circleCrosshair.update());
         PT_CALL(damageIndicator.update());
         PT_CALL(textHudIndicators.update());
+        PT_CALL(visionTargetIndicator.update());
+
+        // Calculate the time it took to update the HUD
+        this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
 
         PT_YIELD();
     }

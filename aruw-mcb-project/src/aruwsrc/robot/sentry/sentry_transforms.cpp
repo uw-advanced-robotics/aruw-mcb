@@ -41,6 +41,7 @@ SentryTransforms::SentryTransforms(
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
       worldToTurretRight(Transform::identity()),
+      worldToVTM(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
       turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.)
@@ -71,6 +72,7 @@ void SentryTransforms::updateTransforms()
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
     worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
     worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+    worldToVTM = worldToTurretMajor;
 }
 
 }  // namespace aruwsrc::sentry

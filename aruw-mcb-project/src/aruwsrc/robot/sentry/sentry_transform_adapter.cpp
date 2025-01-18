@@ -60,4 +60,9 @@ const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) cons
     }
 }
 
+const Transform& SentryTransformAdapter::getWorldToVTM() const
+{
+    return this->transforms.getWorldToVTM();
+}
+
 };  // namespace aruwsrc::sentry

@@ -88,7 +88,7 @@ for source in rawSrcs:
     # Only compile robot-specific sources
     if source.startswith(robot_directory):
         directory = dirname(source)
-        if not(directory == robot_directory or directory == class_directory):
+        if not(directory == robot_directory or directory.startswith(class_directory)):
             continue
     if source.startswith(sim_directory):
         if not source.endswith(f"{robot_class}_sim.cpp"):
