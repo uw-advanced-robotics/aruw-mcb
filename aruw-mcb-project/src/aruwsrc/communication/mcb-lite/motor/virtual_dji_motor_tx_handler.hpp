@@ -43,9 +43,13 @@ public:
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can1MessageHighSend;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
+        can1Message6020CurrentSend;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can2MessageLowSend;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can2MessageHighSend;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
+        can2Message6020CurrentSend;
 };
 
 }  // namespace aruwsrc::virtualMCB
