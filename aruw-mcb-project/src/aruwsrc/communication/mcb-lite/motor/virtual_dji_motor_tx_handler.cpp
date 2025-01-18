@@ -111,7 +111,10 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
     }
     if (can1ValidMotorMessage6020Current)
     {
-        memcpy(can1Message6020CurrentSend.data, &can1Message6020Current, sizeof(modm::can::Message));
+        memcpy(
+            can1Message6020CurrentSend.data,
+            &can1Message6020Current,
+            sizeof(modm::can::Message));
         can1Message6020CurrentSend.messageType = 0;
         can1Message6020CurrentSend.setCRC16();
     }
@@ -129,7 +132,10 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
     }
     if (can2ValidMotorMessage6020Current)
     {
-        memcpy(can2Message6020CurrentSend.data, &can2Message6020Current, sizeof(modm::can::Message));
+        memcpy(
+            can2Message6020CurrentSend.data,
+            &can2Message6020Current,
+            sizeof(modm::can::Message));
         can2Message6020CurrentSend.messageType = 1;
         can2Message6020CurrentSend.setCRC16();
     }
