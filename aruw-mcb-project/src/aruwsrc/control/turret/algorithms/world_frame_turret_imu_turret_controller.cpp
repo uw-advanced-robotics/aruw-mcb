@@ -165,16 +165,17 @@ static inline void updateWorldFrameSetpoint(
  * @return desired PID output from running the position -> velocity cascade controller
  */
 static inline float runWorldFrameTurretImuController(
-    const WrappedFloat worldFrameAngleSetpoint,
-    const WrappedFloat worldFrameAngleMeasurement,
+    const WrappedFloat worldFrameAngleError,
+    const WrappedFloat chassisFrameAngleMeasurement,
     const float worldFrameVelocityMeasured,
     const uint32_t dt,
     const TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)
 {
-    const float positionControllerError =
-        turretMotor.getValidMinError(worldFrameAngleSetpoint, worldFrameAngleMeasurement);
+    const float positionControllerError = turretMotor.getValidMinError(
+        chassisFrameAngleMeasurement + worldFrameAngleError,
+        chassisFrameAngleMeasurement);
     const float positionPidOutput =
         positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
 
@@ -225,16 +226,8 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
         turretMotor);
 
     const float pidOut = runWorldFrameTurretImuController(
-        transformWorldFrameValueToChassisFrame(
-            chassisFrameYaw,
-            worldFrameYawAngle,
-            worldFrameSetpoint),
-        transformWorldFrameValueToChassisFrame(
-            chassisFrameYaw,
-            worldFrameYawAngle,
-            worldFrameYawAngle),
-        // worldFrameSetpoint,
-        // worldFrameYawAngle,
+        worldFrameSetpoint - worldFrameYawAngle,
+        chassisFrameYaw,
         worldFrameYawVelocity,
         dt,
         turretMotor,
@@ -335,8 +328,8 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         turretMotor);
 
     float pidOut = runWorldFrameTurretImuController(
-        worldFrameSetpoint,
-        worldFramePitchAngle,
+        worldFrameSetpoint - worldFramePitchAngle,
+        chassisFramePitch,
         worldFramePitchVelocity,
         dt,
         turretMotor,
