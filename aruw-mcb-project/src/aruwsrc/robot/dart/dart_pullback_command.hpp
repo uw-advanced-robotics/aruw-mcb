@@ -34,7 +34,7 @@ public:
 
     int32_t power = 1;
 
-    void execute() override{}
+    void execute() override;
 
     void end(bool interrupted) override;
 

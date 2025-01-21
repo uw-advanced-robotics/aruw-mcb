@@ -44,6 +44,7 @@ public:
     // void setServoOpen();
     // void setServoClosed();
     bool isBeamBroken();
+    bool isLimitSwitched();
 
     const char* getName() const override { return "Dart_Launcher_Subsystem"; }
 protected:

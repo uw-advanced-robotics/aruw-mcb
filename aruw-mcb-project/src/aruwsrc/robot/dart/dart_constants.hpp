@@ -21,21 +21,22 @@
 #define DART_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "tap/communication/gpio/pwm.hpp"
 
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "modm/math/geometry/angle.hpp"
-
-namespace aruwsrc::control::turret
+namespace aruwsrc::robot::dart
 {
 static constexpr tap::motor::MotorId PULL_MOTOR_ID =
-    tap::motor::MOTOR6;  // TODO: update correct motor
+    tap::motor::MOTOR1;  // TODO: update correct motor
+static constexpr tap::motor::MotorId PULL_MOTOR_TWO_ID =
+    tap::motor::MOTOR2;  // todo: update to correct
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;      // todo: update
+static constexpr tap::can::CanBus CAN_BUS_TWO_MOTORS = tap::can::CanBus::CAN_BUS2;  // todo: update
 
-static constexpr tap::algorithms::SmoothPidConfig PULL_MOTOR_PID_CONFIG = { //TODO: put actual pid constants
+static constexpr tap::algorithms::SmoothPidConfig PULL_MOTOR_PID_CONFIG = {
+    // TODO: put actual pid constants
     .kp = 0.0f,
     .ki = 0.0f,
     .kd = 0.0f,
@@ -46,8 +47,10 @@ static constexpr tap::algorithms::SmoothPidConfig PULL_MOTOR_PID_CONFIG = { //TO
 
 // static constexpr float SERVO_MIN = 0.0f;
 // static constexpr float SERVO_MAX = 1.0f; //TODO: figure out real values
-// static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X; //TODO: figure out real port value
-    static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digital::InputPin::B;
+// static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X; //TODO: figure out real
+// port value
+static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digital::InputPin::B;
+static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D;
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::robot::dart
 #endif

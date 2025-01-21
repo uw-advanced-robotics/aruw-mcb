@@ -5,7 +5,9 @@ namespace aruwsrc::robot::dart
 {
     DartReleaseCommand::DartReleaseCommand (
         DartLauncherSubsystem &dartLauncher
-    ): dartLauncher(dartLauncher){}
+    ): dartLauncher(dartLauncher){
+        addSubsystemRequirement(&dartLauncher);
+    }
 
     void DartReleaseCommand::initialize() {
         dartLauncher.moveMotor(power);
@@ -17,7 +19,8 @@ namespace aruwsrc::robot::dart
     }
 
     bool DartReleaseCommand::isFinished() const {
-        return dartLauncher.isBeamBroken();
+       // return dartLauncher.isLimitSwitched();
+       return false;
     }
 
     
