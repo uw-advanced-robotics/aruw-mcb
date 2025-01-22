@@ -20,12 +20,9 @@
 #ifndef TURRET_QUICK_TURN_COMMAND_HPP_
 #define TURRET_QUICK_TURN_COMMAND_HPP_
 
-#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/command.hpp"
 
 #include "../turret_subsystem.hpp"
-
-using namespace tap::algorithms;
 
 namespace tap
 {

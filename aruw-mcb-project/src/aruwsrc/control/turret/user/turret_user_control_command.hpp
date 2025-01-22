@@ -20,13 +20,10 @@
 #ifndef TURRET_USER_CONTROL_COMMAND_HPP_
 #define TURRET_USER_CONTROL_COMMAND_HPP_
 
-#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "../turret_subsystem.hpp"
-
-using namespace tap::algorithms;
 
 namespace aruwsrc
 {

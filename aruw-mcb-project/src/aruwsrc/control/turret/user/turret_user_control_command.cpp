@@ -19,10 +19,13 @@
 
 #include "turret_user_control_command.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::user
 {

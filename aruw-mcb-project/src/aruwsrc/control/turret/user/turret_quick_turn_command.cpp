@@ -19,7 +19,10 @@
 
 #include "turret_quick_turn_command.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
+
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::user
 {

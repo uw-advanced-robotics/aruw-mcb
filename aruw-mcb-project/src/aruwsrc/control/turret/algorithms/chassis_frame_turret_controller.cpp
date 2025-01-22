@@ -19,6 +19,7 @@
 
 #include "chassis_frame_turret_controller.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
 
 #include "../constants/turret_constants.hpp"
@@ -27,6 +28,7 @@
 #include "turret_gravity_compensation.hpp"
 
 using namespace tap::control::turret;
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::algorithms
 {

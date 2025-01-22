@@ -23,11 +23,8 @@
 #include <cstdint>
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/algorithms/wrapped_float.hpp"
 
 #include "turret_controller_interface.hpp"
-
-using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
