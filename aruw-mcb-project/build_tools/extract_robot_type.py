@@ -50,7 +50,7 @@ ROBOT_CLASS = {
 assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
 
 def search_for_robot_type(query):
-    return [robot for robot in VALID_ROBOT_TYPES if query in robot] if query else []
+    return [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()] if query else []
 
 def get_robot_type():
     robot_query = ARGUMENTS.get("robot")
