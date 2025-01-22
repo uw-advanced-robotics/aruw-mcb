@@ -94,6 +94,14 @@ private:
 
     SplashScreen splashScreen;
 
+    const tap::display::AnalogConfig analogConfig{
+        .ok = 50,
+        .left = 1000,
+        .right = 2000,
+        .up = 3050,
+        .down = 3700,
+    };
+
     tap::Drivers *drivers;
 
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
