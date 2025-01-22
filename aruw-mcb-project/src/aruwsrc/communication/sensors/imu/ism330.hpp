@@ -47,7 +47,7 @@ public:
         RF_CALL_BLOCKING(readRegister(0x0F, 3, rxConfig));
     }
 
-    void read()
+    void readAndProcessData()
     {
         if (!updateTimeout.execute())
         {
@@ -58,7 +58,18 @@ public:
 
         pinged = RF_CALL_BLOCKING(this->ping());
 
-        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
+        // Read temp
+        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_H, READ_LENGTH, rxBuff[0]));
+        if (!readWorking)
+        {
+            return;
+        }
+        RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff[1]));
+        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / 256.0f) + 25.0f;
+
+        // Read gyro
+
+        // Read accel
         processData();
     }
 
