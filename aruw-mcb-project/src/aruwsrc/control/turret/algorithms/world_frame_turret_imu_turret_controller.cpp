@@ -250,11 +250,6 @@ void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(WrappedFloat 
         turretMotor);
 }
 
-WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::getSetpoint() const
-{
-    return worldFrameSetpoint;
-}
-
 WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::getMeasurement() const
 {
     return Angle(turretMCBCanComm.getYawUnwrapped());
@@ -356,11 +351,6 @@ void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(WrappedFloa
         worldFramePitchAngle,
         worldFrameSetpoint,
         turretMotor);
-}
-
-WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::getSetpoint() const
-{
-    return worldFrameSetpoint;
 }
 
 WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::getMeasurement() const

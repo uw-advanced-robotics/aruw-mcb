@@ -173,11 +173,6 @@ void WorldFrameYawChassisImuTurretController::setSetpoint(WrappedFloat desiredSe
         turretMotor);
 }
 
-WrappedFloat WorldFrameYawChassisImuTurretController::getSetpoint() const
-{
-    return worldFrameSetpoint;
-}
-
 WrappedFloat WorldFrameYawChassisImuTurretController::getMeasurement() const
 {
     const WrappedFloat chassisFrameImuYawAngle =

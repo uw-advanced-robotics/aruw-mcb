@@ -81,7 +81,7 @@ public:
     /**
      * @return The yaw setpoint, in the world frame.
      */
-    WrappedFloat getSetpoint() const final;
+    inline WrappedFloat getSetpoint() const final { return worldFrameSetpoint; }
 
     bool isOnline() const final;
 

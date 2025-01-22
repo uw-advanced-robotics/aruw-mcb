@@ -78,7 +78,7 @@ public:
     void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
-    WrappedFloat getSetpoint() const final;
+    inline WrappedFloat getSetpoint() const final { return worldFrameSetpoint; }
 
     /// @return World frame yaw angle measurement, refer to top level documentation for more
     /// details.
@@ -141,7 +141,7 @@ public:
     void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
-    WrappedFloat getSetpoint() const final;
+    inline WrappedFloat getSetpoint() const final { return worldFrameSetpoint; }
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
     WrappedFloat getMeasurement() const final;
