@@ -41,7 +41,7 @@ OledDisplay::OledDisplay(
     : Fiber([this] { run(); }),
       display(),
       viewStack(&display),
-      buttonHandler(drivers),
+      buttonHandler(drivers, &analogConfig),
       splashScreen(
           &viewStack,
           drivers,
