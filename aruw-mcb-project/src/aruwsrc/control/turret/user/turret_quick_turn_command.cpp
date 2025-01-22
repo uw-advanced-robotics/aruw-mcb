@@ -42,8 +42,6 @@ void TurretQuickTurnCommand::initialize()
     WrappedFloat newSetpoint =
         turretSubsystem->yawMotor.getChassisFrameMeasuredAngle() + targetOffsetToTurn;
 
-    // newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
-
     turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
 
     turretSubsystem->yawMotor.attachTurretController(nullptr);
