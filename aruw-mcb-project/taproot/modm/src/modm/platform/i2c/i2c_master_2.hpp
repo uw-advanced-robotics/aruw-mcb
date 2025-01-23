@@ -40,9 +40,9 @@ public:
 	static constexpr size_t TransactionBufferSize = 8;
 
 public:
-	template< template<Peripheral _> class... Signals, ResetDevices reset = ResetDevices::Standard>
+	template<class... Signals>
 	static void
-	connect(PullUps pullups = PullUps::External)
+	connect(PullUps pullups = PullUps::External, ResetDevices reset = ResetDevices::Standard)
 	{
 		using Connector = GpioConnector<Peripheral::I2c2, Signals...>;
 		using Scl = typename Connector::template GetSignal<Gpio::Signal::Scl>;
@@ -58,7 +58,7 @@ public:
 		Sda::configure(input);
 		Scl::setOutput(Gpio::OutputType::OpenDrain);
 		Sda::setOutput(Gpio::OutputType::OpenDrain);
-		if (reset != ResetDevices::NoReset) resetDevices<Scl, uint32_t(reset)>();
+		if (reset != ResetDevices::NoReset) resetDevices<Scl>(uint32_t(reset));
 		Connector::connect();
 	}
 
@@ -69,14 +69,14 @@ public:
 	 *		`Standard` or `Fast`, `High` datarate is not supported
 	 */
 	template<class SystemClock, baudrate_t baudrate=kBd(100), percent_t tolerance=pct(5)>
-	static modm_always_inline void
-	initialize()
+	static void
+	initialize(uint8_t isrPriority = 10u)
 	{
 		// calculate the expected clock ratio
 		constexpr uint8_t scalar = (baudrate <= 100'000) ? 2 : ((baudrate <= 300'000) ? 3 : 25);
 		constexpr uint16_t range_begin = (scalar == 2) ? 4 : 1;
 
-		constexpr auto result = Prescaler::from_range(
+		constexpr auto result = Prescaler::from_linear(
 				SystemClock::I2c2 / scalar, baudrate, range_begin, 4095);
 		assertBaudrateInTolerance< result.frequency, baudrate, tolerance >();
 
@@ -96,10 +96,9 @@ public:
 		constexpr float trise_raw = max_rise_time < 0 ? 0 : std::floor(max_rise_time / (1'000.f / freq));
 		constexpr uint8_t trise = trise_raw > 62 ? 63 : (trise_raw + 1);
 
-		initializeWithPrescaler(freq, trise, prescaler);
+		initializeWithPrescaler(freq, trise, prescaler, isrPriority);
 	}
 
-	// start documentation inherited
 	static bool
 	start(I2cTransaction *transaction, ConfigurationHandler handler = nullptr);
 
@@ -108,11 +107,10 @@ public:
 
 	static void
 	reset();
-	// end documentation inherited
 
 private:
 	static void
-	initializeWithPrescaler(uint8_t peripheralFrequency, uint8_t riseTime, uint16_t prescaler);
+	initializeWithPrescaler(uint8_t peripheralFrequency, uint8_t riseTime, uint16_t prescaler, uint8_t isrPriority);
 };
 
 } // namespace platform
