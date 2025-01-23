@@ -262,7 +262,9 @@ TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_null
 
     chassisImuDriveCommand.initialize();
 
-    ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(M_PI_4));
+    WrappedFloat chassisFrameMeasuredAngle = Angle(M_PI_4);
+    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+        .WillByDefault(ReturnRef(chassisFrameMeasuredAngle));
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
 
     float xExpected = MAX_SPEED;

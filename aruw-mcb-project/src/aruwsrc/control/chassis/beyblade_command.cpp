@@ -20,6 +20,7 @@
 #include "beyblade_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -68,7 +69,7 @@ void BeybladeCommand::execute()
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        float turretYawAngle = yawMotor->getAngleFromCenter();
+        WrappedFloat turretYawAngle = yawMotor->getChassisFrameMeasuredAngle();
 
         float x = 0.0f;
         float y = 0.0f;
@@ -112,7 +113,7 @@ void BeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, turretYawAngle);
+        tap::algorithms::rotateVector(&x, &y, turretYawAngle.getWrappedValue());
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);
