@@ -105,7 +105,8 @@ public:
      */
     mockable inline float getRollUnwrapped() const
     {
-        return lastCompleteImuData.roll + static_cast<float>(M_TWOPI) * static_cast<float>(rollRevolutions);
+        return lastCompleteImuData.roll +
+               static_cast<float>(M_TWOPI) * static_cast<float>(rollRevolutions);
     }
 
     /**
@@ -130,7 +131,8 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
-        return lastCompleteImuData.pitch + static_cast<float>(M_TWOPI) * static_cast<float>(pitchRevolutions);
+        return lastCompleteImuData.pitch +
+               static_cast<float>(M_TWOPI) * static_cast<float>(pitchRevolutions);
     }
 
     /**
@@ -157,9 +159,12 @@ public:
     {
         // @todo this is dumb
 #ifdef TARGET_SENTRY_HYDRA
-        return lastCompleteImuData.yaw + static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions) - static_cast<float>(M_PI);
+        return lastCompleteImuData.yaw +
+               static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions) -
+               static_cast<float>(M_PI);
 #else
-        return lastCompleteImuData.yaw + static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions);
+        return lastCompleteImuData.yaw +
+               static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions);
 #endif
     }
 

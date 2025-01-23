@@ -73,12 +73,14 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange = static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
+    .targetIntegralChange =
+        static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
     .desiredSetpoint = AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-constexpr float UNJAM_VELOCITY = 0.35f * AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_VELOCITY =
+    0.35f * AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS);
 constexpr float UNJAM_DISTANCE = 0.6f * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS);
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
@@ -122,8 +124,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    .targetIntegralChange =
-        1.1f * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),  // @todo remove multiplier if possible
+    .targetIntegralChange = 1.1f * (static_cast<float>(M_TWOPI) /
+                                    AGITATOR_NUM_POCKETS),  // @todo remove multiplier if possible
     .desiredSetpoint = AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS) * 0.25f,
 };
@@ -131,13 +133,15 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
-        .unjamSetpoint = 0.25f * AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
+        .unjamSetpoint =
+            0.25f * AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds.Convert to ms, Add 100 ms extra tolerance.
-        .maxWaitTime = static_cast<uint32_t>(
-                           1000.0f * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS) / 0.25f * AGITATOR_MAX_ROF *
-                           (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS)) +
-                       100,
+        .maxWaitTime =
+            static_cast<uint32_t>(
+                1000.0f * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS) / 0.25f *
+                AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS)) +
+            100,
         .targetCycleCount = 3,
 };
 

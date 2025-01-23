@@ -47,7 +47,8 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
 
 static constexpr float DESIRED_LOAD_TIME_S = 1.0f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
-static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = static_cast<float>(M_TWOPI) / WATERWHEEL_NUM_BALL_POCKETS;
+static constexpr float WATERWHEEL_TARGET_DISPLACEMENT =
+    static_cast<float>(M_TWOPI) / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 

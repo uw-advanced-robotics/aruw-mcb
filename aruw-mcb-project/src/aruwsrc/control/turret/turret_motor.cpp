@@ -54,8 +54,8 @@ void TurretMotor::updateMotorAngle()
         lastUpdatedEncoderValue = encoderUnwrapped;
 
         float chassisFrameUnwrappedMeasurement =
-            static_cast<float>(encoderUnwrapped - config.startEncoderValue) * static_cast<float>(M_TWOPI) /
-                static_cast<float>(DjiMotor::ENC_RESOLUTION) +
+            static_cast<float>(encoderUnwrapped - config.startEncoderValue) *
+                static_cast<float>(M_TWOPI) / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
             config.startAngle;
 
         chassisFrameMeasuredAngle.setUnwrappedValue(chassisFrameUnwrappedMeasurement);

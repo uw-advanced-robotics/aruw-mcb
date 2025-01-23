@@ -60,7 +60,8 @@ void ChassisAutorotateCommand::updateAutorotateState()
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !yawMotor->getConfig().limitMotorAngles &&
-        turretYawActualSetpointDiff > (static_cast<float>(M_PI) - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+        turretYawActualSetpointDiff >
+            (static_cast<float>(M_PI) - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;

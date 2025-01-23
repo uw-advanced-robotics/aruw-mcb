@@ -176,7 +176,8 @@ public:
      */
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
-        static constexpr float ratio = 2.0f * static_cast<float>(M_PI) * CHASSIS_GEARBOX_RATIO / 60.0f;
+        static constexpr float ratio =
+            2.0f * static_cast<float>(M_PI) * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
 

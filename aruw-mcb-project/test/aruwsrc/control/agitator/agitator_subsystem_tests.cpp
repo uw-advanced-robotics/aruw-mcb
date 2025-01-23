@@ -92,10 +92,14 @@ TEST_P(AgitatorSubsystemTest, refresh_runs_pid_controller)
 {
     static constexpr float UPDATE_INCR = M_PI / 100;
 
-    ON_CALL(agitator.agitatorMotor, setDesiredOutput).WillByDefault([&](int32_t out) {
-        encUnwrapped += out < 0 ? -UPDATE_INCR / ENC_TO_ANGLE_RATIO
-                                : out > 0 ? UPDATE_INCR / ENC_TO_ANGLE_RATIO : 0;
-    });
+    ON_CALL(agitator.agitatorMotor, setDesiredOutput)
+        .WillByDefault(
+            [&](int32_t out)
+            {
+                encUnwrapped += out < 0   ? -UPDATE_INCR / ENC_TO_ANGLE_RATIO
+                                : out > 0 ? UPDATE_INCR / ENC_TO_ANGLE_RATIO
+                                          : 0;
+            });
 
     agitator.calibrateHere();
 

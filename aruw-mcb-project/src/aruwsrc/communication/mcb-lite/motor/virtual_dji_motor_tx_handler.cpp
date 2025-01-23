@@ -41,21 +41,13 @@ VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers)
 void VirtualDJIMotorTxHandler::encodeAndSendCanData()
 {
     // set up new can messages to be sent via CAN bus 1 and 2
-    modm::can::Message can1MessageLow(
-        CAN_DJI_LOW_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH);
-    modm::can::Message can1MessageHigh(
-        CAN_DJI_HIGH_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH);
+    modm::can::Message can1MessageLow(CAN_DJI_LOW_IDENTIFIER, CAN_DJI_MESSAGE_SEND_LENGTH);
+    modm::can::Message can1MessageHigh(CAN_DJI_HIGH_IDENTIFIER, CAN_DJI_MESSAGE_SEND_LENGTH);
     modm::can::Message can1Message6020Current(
         CAN_DJI_6020_CURRENT_IDENTIFIER,
         CAN_DJI_MESSAGE_SEND_LENGTH);
-    modm::can::Message can2MessageLow(
-        CAN_DJI_LOW_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH);
-    modm::can::Message can2MessageHigh(
-        CAN_DJI_HIGH_IDENTIFIER,
-        CAN_DJI_MESSAGE_SEND_LENGTH);
+    modm::can::Message can2MessageLow(CAN_DJI_LOW_IDENTIFIER, CAN_DJI_MESSAGE_SEND_LENGTH);
+    modm::can::Message can2MessageHigh(CAN_DJI_HIGH_IDENTIFIER, CAN_DJI_MESSAGE_SEND_LENGTH);
     modm::can::Message can2Message6020Current(
         CAN_DJI_6020_CURRENT_IDENTIFIER,
         CAN_DJI_MESSAGE_SEND_LENGTH);
