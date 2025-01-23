@@ -67,6 +67,8 @@ public:
      */
     mockable bool updateDisplay();
 
+    mockable bool run() override { return this->updateDisplay(); };
+
     /**
      * Checks button state and updates the view stack responsible for determining what
      * should be displayed on the OLED.

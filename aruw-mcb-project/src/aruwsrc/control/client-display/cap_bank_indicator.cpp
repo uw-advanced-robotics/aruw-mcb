@@ -48,7 +48,7 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> CapBankIndicator::update()
@@ -171,7 +171,7 @@ modm::ResumableResult<bool> CapBankIndicator::update()
         }
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void CapBankIndicator::initialize()

@@ -51,7 +51,7 @@ modm::ResumableResult<bool> AmmoIndicator::update()
 
     RF_CALL(numberIndicator.draw());
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
@@ -62,7 +62,7 @@ modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 
     RF_CALL(numberIndicator.initialize());
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void AmmoIndicator::initialize()

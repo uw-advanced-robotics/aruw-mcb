@@ -109,7 +109,7 @@ modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
     RF_CALL(refSerialTransmitter.sendGraphic(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> MatrixHudIndicators::update()
@@ -125,7 +125,7 @@ modm::ResumableResult<bool> MatrixHudIndicators::update()
         RF_CALL(matrixHudIndicatorDrawers[matrixHudIndicatorIndex].draw());
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void MatrixHudIndicators::updateIndicatorState()

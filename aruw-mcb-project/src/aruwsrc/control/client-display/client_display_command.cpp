@@ -100,7 +100,7 @@ void ClientDisplayCommand::restartHud()
     this->restarting = false;
 }
 
-void ClientDisplayCommand::execute() { run(); }
+void ClientDisplayCommand::execute() { }
 
 bool ClientDisplayCommand::run()
 {

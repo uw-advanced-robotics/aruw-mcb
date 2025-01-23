@@ -70,6 +70,8 @@ using namespace aruwsrc::blank;
 using namespace aruwsrc::motor_tester;
 #endif
 
+using namespace std::chrono_literals;
+
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 static void initializeIo(Drivers *drivers);
@@ -101,42 +103,47 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    while (1)
+    modm::Fiber<> ioFiber([&]
     {
-        // do this as fast as you can
-        PROFILE(drivers->profiler, updateIo, (drivers));
-
-        if (sendMotorTimeout.execute())
+        while (1)
         {
-            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+            // do this as fast as you can
+            PROFILE(drivers->profiler, updateIo, (drivers));
+
+            if (sendMotorTimeout.execute())
+            {
+                PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+                PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+                PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-            ((Drivers *)drivers)->plateHitTracker.update();
+                PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+                ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+                PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+                PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-            checkTurretMcbDisconnection(drivers);
+                checkTurretMcbDisconnection(drivers);
 #endif
+            }
+            modm::this_fiber::sleep_for(10us);
         }
-        modm::delay_us(10);
-    }
+    });
+
+    modm::fiber::Scheduler::run();
     return 0;
 }
 
@@ -150,6 +157,7 @@ static void initializeIo(Drivers *drivers)
     drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->mpu6500.start();
     drivers->refSerial.initialize();
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
@@ -158,6 +166,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
+    ((Drivers *)drivers)->oledDisplay.start();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
@@ -180,11 +189,6 @@ static void updateIo(Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
-    drivers->mpu6500.read();
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->oledDisplay.updateDisplay();
-#endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();

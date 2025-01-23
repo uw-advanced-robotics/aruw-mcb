@@ -98,13 +98,13 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
     RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void DamageIndicator::initialize()

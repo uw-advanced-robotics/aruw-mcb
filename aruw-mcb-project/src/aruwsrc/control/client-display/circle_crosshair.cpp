@@ -54,13 +54,13 @@ modm::ResumableResult<bool> CircleCrosshair::sendInitialGraphics()
 
     RF_CALL(refSerialTransmitter.sendGraphic(&crosshairGraphics));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> CircleCrosshair::update()
 {
     RF_BEGIN(1)
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 }  // namespace aruwsrc::control::client_display
