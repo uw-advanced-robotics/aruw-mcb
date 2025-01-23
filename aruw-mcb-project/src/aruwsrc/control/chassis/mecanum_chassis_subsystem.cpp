@@ -54,10 +54,10 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     wheelVelToChassisVelMat[Y][RF] = -1;
     wheelVelToChassisVelMat[Y][LB] = 1;
     wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][LF] = -1.0f / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][RF] = -1.0f / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][LB] = -1.0f / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[R][RB] = -1.0f / WHEELBASE_HYPOTENUSE;
     wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 }
 

@@ -59,10 +59,10 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
         // normal angle wrapping
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI)
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > static_cast<float>(M_PI))
         {
             rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_TWOPI;
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * static_cast<float>(M_TWOPI);
         }
         newRotationSetpointRadians = newRawRotationSetpointRadians + rotationOffset;
 
@@ -70,10 +70,10 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
         // TODO 2: Test again on this year's bot (2024)
-        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > static_cast<float>(M_PI_2))
         {
             rotationOffset -=
-                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * static_cast<float>(M_PI);
         }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
@@ -83,7 +83,7 @@ void SwerveWheel::executeWheelVelocity(float vx, float vy)
         // if offset isn't an integer multiple of 2pi, it means module is currently reversed so
         // speed must be negative
         //  compareFloatClose may or may not be necessary
-        if (compareFloatClose(wrapAngle(rotationOffset, M_TWOPI), M_PI, 0.1))
+        if (compareFloatClose(wrapAngle(rotationOffset, static_cast<float>(M_TWOPI)), static_cast<float>(M_PI), 0.1))
             preScaledSpeedSetpoint *= -1;
     }
     speedSetpointRPM = preScaledSpeedSetpoint;

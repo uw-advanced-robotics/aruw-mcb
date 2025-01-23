@@ -105,7 +105,7 @@ float VelocityAgitatorSubsystem::getCurrentValueIntegral() const
 
 float VelocityAgitatorSubsystem::getUncalibratedAgitatorAngle() const
 {
-    return (2.0f * M_PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
+    return (2.0f * static_cast<float>(M_PI) / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
            agitatorMotor.getEncoderUnwrapped() / config.gearRatio;
 }
 

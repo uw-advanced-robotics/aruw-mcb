@@ -48,7 +48,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 1643,
     .minAngle = 0,     ///< Doesn't matter since yaw not limited
-    .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
+    .maxAngle = static_cast<float>(M_PI),  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
 };
 

@@ -46,7 +46,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       turretRight(turretRight),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
+      worldFrameSetpoint(0, 0.0, static_cast<float>(M_TWOPI)),
       maxVelErrorInput(maxVelErrorInput),
       minorMajorTorqueRatio(minorMajorTorqueRatio),
       feedforwardGain(feedforwardGain)

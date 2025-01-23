@@ -71,8 +71,8 @@ static CMSISMat<4, 4> getProjectionMatrix(
     float near = NEAR_CUTOFF_M,
     float far = FAR_CUTOFF_M)
 {
-    float horizontalScale = 1.0f / tanf(fx * 0.5 * M_PI / 180);
-    float verticalScale = 1.0f / tanf(fy * 0.5 * M_PI / 180);
+    float horizontalScale = 1.0f / tanf(fx * 0.5f * static_cast<float>(M_PI) / 180);
+    float verticalScale = 1.0f / tanf(fy * 0.5f * static_cast<float>(M_PI) / 180);
 
     CMSISMat<4, 4> projectionMatrix;
     projectionMatrix.data[0] = horizontalScale;
