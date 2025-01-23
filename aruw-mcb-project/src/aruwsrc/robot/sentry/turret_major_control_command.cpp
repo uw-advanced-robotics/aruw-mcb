@@ -34,6 +34,7 @@ TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
       turretMajorSubsystem(turretMajorSubsystem),
+      lastYawSetPoint(Angle(0)),
       yawController(yawController),
       userYawInputScalar(userYawInputScalar)
 {
@@ -54,7 +55,7 @@ void TurretMajorSentryControlCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    const float yawSetpoint =
+    const WrappedFloat yawSetpoint =
         yawController.getSetpoint() +
         userYawInputScalar *
             controlOperatorInterface

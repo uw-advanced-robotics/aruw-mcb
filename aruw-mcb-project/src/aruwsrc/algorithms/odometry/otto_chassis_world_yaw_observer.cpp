@@ -19,10 +19,14 @@
 
 #include "otto_chassis_world_yaw_observer.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
+
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
+
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -53,11 +57,12 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 
         // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
         // do that here. This doesn't specify which direction positive yaw sweeps.
-        float turretWorldYawRadians = modm::Angle::normalize(turretMCB->getYaw());
+        WrappedFloat turretWorldYawRadians = Angle(turretMCB->getYaw());
         // Normalized angle in range (-pi, pi)
-        float turretChassisYawRadians = turretSubsystem.yawMotor.getAngleFromCenter();
+        WrappedFloat turretChassisYawRadians =
+            turretSubsystem.yawMotor.getChassisFrameMeasuredAngle();
 
-        *output = modm::Angle::normalize(turretWorldYawRadians - turretChassisYawRadians);
+        *output = (turretWorldYawRadians - turretChassisYawRadians).getWrappedValue();
         return true;
     }
 }

@@ -18,7 +18,9 @@
  */
 #include "sentry_chassis_world_yaw_observer.hpp"
 
-#include "modm/math/geometry/angle.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::sentry
 {
@@ -33,9 +35,10 @@ SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
 bool SentryChassisWorldYawObserver::getChassisWorldYaw(float* output) const
 {
     // TODO: Make this false while the IMU is uncalibrated. Not possible via Interface
-    float turretMajorChassisYawRadians = turretMajor.getReadOnlyMotor().getAngleFromCenter();
-    *output = modm::Angle::normalize(
-        modm::toRadian(imu.getYaw()) + offset - turretMajorChassisYawRadians);
+    WrappedFloat turretMajorChassisYawRadians =
+        turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle();
+    *output = (Angle::fromDegrees(imu.getYaw()) + offset - turretMajorChassisYawRadians)
+                  .getWrappedValue();
     return true;
 }
 
