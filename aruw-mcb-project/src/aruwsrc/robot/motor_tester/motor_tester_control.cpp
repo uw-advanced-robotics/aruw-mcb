@@ -123,7 +123,7 @@ StickRpmCommand leftManual(
     &leftMotorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-    4096.0f);
+    60000.0f);
 
 // StickRpmCommand rightManual(
 //     &rightMotorSubsystem,
