@@ -17,10 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "grabber_subsystem_mock.hpp"
-#include "tow_subsystem_mock.hpp"
-#include "x_axis_subsystem_mock.hpp"
-
 // A file for listing all mock constructors and destructors since doing
 // so in a source file allows for faster compilation than defining constructors
 // in the headers
