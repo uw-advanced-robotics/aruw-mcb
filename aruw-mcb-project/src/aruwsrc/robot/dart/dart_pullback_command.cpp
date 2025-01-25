@@ -23,22 +23,15 @@
 
 namespace aruwsrc::robot::dart
 {
-
 DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher)
     : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartPullbackCommand::initialize()
-{   
-    dartLauncher.moveMotor(power);
-}
+void DartPullbackCommand::initialize() { dartLauncher.moveMotor(power); }
 
-void DartPullbackCommand::execute()
-{
-    dartLauncher.moveMotor(power);
-}
+void DartPullbackCommand::execute() { dartLauncher.moveMotor(power); }
 
 void DartPullbackCommand::end(bool) { dartLauncher.moveMotor(0); }
 

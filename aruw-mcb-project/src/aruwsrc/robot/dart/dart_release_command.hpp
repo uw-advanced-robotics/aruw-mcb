@@ -32,7 +32,7 @@ public:
     DartReleaseCommand(DartLauncherSubsystem &dartLauncher);
 
     void initialize() override;
-    int32_t power = 1; //TODO: place holder value
+    int32_t power = 1;  // TODO: place holder value
 
     void execute() override {}
 

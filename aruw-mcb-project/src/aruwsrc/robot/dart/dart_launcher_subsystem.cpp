@@ -53,10 +53,7 @@ bool DartLauncherSubsystem::isBeamBroken()
 
 bool DartLauncherSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
 
-void DartLauncherSubsystem::refresh()
-{
-    beam = !drivers->digital.read(BEAMBREAK_PORT);
-}
+void DartLauncherSubsystem::refresh() { beam = !drivers->digital.read(BEAMBREAK_PORT); }
 
 void DartLauncherSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 }  // namespace aruwsrc::robot::dart
