@@ -40,11 +40,11 @@ public:
 
     void init()
     {
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ACCELEROMETER_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, GYRO_CONFIG));
+        setAccelRange(2);
+        setGyroRange(250);
 
         // Check Who Am I
-        RF_CALL_BLOCKING(readRegister(0x0F, 3, rxConfig));
+        RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
     }
 
     void readAndProcessData()
@@ -65,30 +65,83 @@ public:
             return;
         }
         RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff[1]));
-        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / 256.0f) + 25.0f;
+        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / 256.0f) + 25.0f; //where tf
 
         // Read gyro
+        RF_CALL_BLOCKING(readRegister(OUTX_L_G, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTX_H_G, READ_LENGTH, rxBuff[1]));
+        imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff);
+
+        RF_CALL_BLOCKING(readRegister(OUTY_L_G, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTY_H_G, READ_LENGTH, rxBuff[1]));
+        imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff);
+
+        RF_CALL_BLOCKING(readRegister(OUTZ_L_G, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTZ_H_G, READ_LENGTH, rxBuff[1]));
+        imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff);
 
         // Read accel
-        processData();
+        RF_CALL_BLOCKING(readRegister(OUTX_L_XL, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTX_H_XL, READ_LENGTH, rxBuff[1]));
+        imuData.accRaw[ImuData::X] = accelValueToG(rxBuff);
+
+        RF_CALL_BLOCKING(readRegister(OUTY_L_XL, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTY_H_XL, READ_LENGTH, rxBuff[1]));
+        imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff);
+
+        RF_CALL_BLOCKING(readRegister(OUTZ_L_XL, READ_LENGTH, rxBuff[0]));
+        RF_CALL_BLOCKING(readRegister(OUTZ_H_XL, READ_LENGTH, rxBuff[1]));
+        imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff);
     }
 
-    void processData()
-    {
-        if (!readWorking)
-        {
-            return;
+    void setAccelRange(int num) {
+        uint8_t current_reg;
+        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg));
+        switch(num) {
+            case 2:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G2_CONFIG));
+                accelScale = 0.061;
+                break;
+            case 4:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G4_CONFIG));
+                accelScale = 0.122;
+                break;
+            case 8:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G8_CONFIG));
+                accelScale = 0.244;
+                break;
+            case 16:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G16_CONFIG));
+                accelScale = 0.488;
+                break;
+            default:
+                break;
         }
+    }
 
-        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / 256.0f) + 25.0f;
-
-        imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
-        imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff + 4);
-        imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff + 6);
-
-        imuData.accRaw[ImuData::X] = accelValueToG(rxBuff + 8);
-        imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff + 10);
-        imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff + 12);
+    void setGyroRange(int num) {
+        uint8_t current_reg;
+        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg));
+        switch(num) {
+            case 250:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS250_CONFIG));
+                gyroScale = 8.75f;
+                break;
+            case 500:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS500_CONFIG));
+                gyroScale = 17.50f;
+                break;
+            case 1000:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS1000_CONFIG));
+                gyroScale = 35f;
+                break;
+            case 2000:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS2000_CONFIG));
+                gyroScale = 70f;
+                break;
+            default:
+                break;
+        }
     }
 
 private:
@@ -140,22 +193,20 @@ private:
         return static_cast<float>(static_cast<int16_t>((*(buff)) | (*(buff + 1) << 8)));
     }
 
-    // We at 250DPS
-    float gryoScale = 8.75f;
-    float gyroValueToDegPerSec(const uint8_t *buff)
-    {
-        float raw = bigEndianInt16ToFloat(buff);
-        return raw * gryoScale / 1000.0f;
-    }
-
-    float accelScale = 0.061f;
+    float accelScale;
     float accelValueToG(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return raw * accelScale / 1000.0f;
     }
-};
 
-}  // namespace aruwsrc::communication::sensors::imu
+    float gyroScale;
+    float gyroValueToDegPerSec(const uint8_t *buff)
+    {
+        float raw = bigEndianInt16ToFloat(buff);
+        return raw * gyroScale / 1000.0f;
+    }
+};
+} // namespace aruwsrc::communication::sensors::imu
 
 #endif  // ISM330_HPP_
