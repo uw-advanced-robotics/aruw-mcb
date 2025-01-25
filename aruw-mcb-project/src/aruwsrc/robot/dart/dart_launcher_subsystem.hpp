@@ -51,8 +51,6 @@ protected:
     tap::motor::MotorInterface &motor;
 
 private:
-    // tap::algorithms::SmoothPid pid =
-    // tap::algorithms::SmoothPid(aruwsrc::control::turret::PULL_MOTOR_PID_CONFIG);
     float setpoint;
     float zeroOffset = 0;
     float lastTime;

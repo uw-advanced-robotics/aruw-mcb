@@ -53,24 +53,9 @@ bool DartLauncherSubsystem::isBeamBroken()
 
 bool DartLauncherSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
 
-// void DartLauncherSubsystem::setServoOpen() {
-//   servo.setTargetPwm(servo.getMaxPWM());
-// }
-
-// void DartLauncherSubsystem::setServoClosed() {
-//   servo.setTargetPwm(servo.getMinPWM());
-// }
-
 void DartLauncherSubsystem::refresh()
 {
     beam = !drivers->digital.read(BEAMBREAK_PORT);
-    // float error = setpoint - motor.getPositionUnwrapped();
-    // float errorDerivative = motor.getShaftRPM() / 1000 / 60; //rotations per millisecond
-    // float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime; //time in
-    // milliseconds lastTime = tap::arch::clock::getTimeMilliseconds(); pid.runController(error,
-    // errorDerivative, timeDifference); motor.setDesiredOutput(pid.getOutput());
-
-    // servo.updateSendPwmRamp();
 }
 
 void DartLauncherSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
