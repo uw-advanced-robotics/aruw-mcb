@@ -26,7 +26,6 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/servo.hpp"
 
-class Drivers;
 namespace aruwsrc::robot::dart
 {
 class DartLauncherSubsystem : public tap::control::Subsystem

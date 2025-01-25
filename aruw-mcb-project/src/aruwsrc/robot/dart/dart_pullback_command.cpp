@@ -23,7 +23,7 @@
 
 namespace aruwsrc::robot::dart
 {
-int ct = 0;
+
 DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher)
     : dartLauncher(dartLauncher)
 {
@@ -31,18 +31,16 @@ DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher)
 }
 
 void DartPullbackCommand::initialize()
-{
-    ct = -1;
+{   
     dartLauncher.moveMotor(power);
 }
 
 void DartPullbackCommand::execute()
 {
     dartLauncher.moveMotor(power);
-    ct += 2;
 }
 
-void DartPullbackCommand::end(bool isInterrupted) { dartLauncher.moveMotor(0); }
+void DartPullbackCommand::end(bool) { dartLauncher.moveMotor(0); }
 
 bool DartPullbackCommand::isFinished() const { return dartLauncher.isBeamBroken(); }
 

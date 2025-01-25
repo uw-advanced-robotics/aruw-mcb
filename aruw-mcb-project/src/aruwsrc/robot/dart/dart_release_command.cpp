@@ -31,7 +31,7 @@ DartReleaseCommand::DartReleaseCommand(DartLauncherSubsystem &dartLauncher)
 
 void DartReleaseCommand::initialize() { dartLauncher.moveMotor(power); }
 
-void DartReleaseCommand::end(bool isInterrupted) { dartLauncher.moveMotor(0); }
+void DartReleaseCommand::end(bool) { dartLauncher.moveMotor(0); }
 
 bool DartReleaseCommand::isFinished() const
 {
