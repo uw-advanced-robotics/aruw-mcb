@@ -90,6 +90,9 @@ enum ODR : uint8_t { // Only includes high power
 
 #define READ_LENGTH 13 //why 13?
 
+static constexpr float TEMPERATURE_OFFSET = 25.0f;
+static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;
+
 }  // namespace aruwsrc::communication::sensors::ism330
 
 #endif //ISM330_DATA_HPP_

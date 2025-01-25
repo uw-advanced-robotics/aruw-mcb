@@ -65,7 +65,7 @@ public:
             return;
         }
         RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff[1]));
-        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / 256.0f) + 25.0f; //where tf
+        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
 
         // Read gyro
         RF_CALL_BLOCKING(readRegister(OUTX_L_G, READ_LENGTH, rxBuff[0]));
@@ -94,7 +94,7 @@ public:
         imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff);
     }
 
-    void setAccelRange(int num) {
+    void setAccelRange(int num) { // Takes in num in g
         uint8_t current_reg;
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg));
         switch(num) {
@@ -119,7 +119,7 @@ public:
         }
     }
 
-    void setGyroRange(int num) {
+    void setGyroRange(int num) { // Takes in num in dps
         uint8_t current_reg;
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg));
         switch(num) {
@@ -138,6 +138,42 @@ public:
             case 2000:
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS2000_CONFIG));
                 gyroScale = 70f;
+                break;
+            default:
+                break;
+        }
+    }
+
+    void updateODR(int num) { // Takes in ODR in Hz
+        uint8_t current_reg_G;
+        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg_G));
+        uint8_t current_reg_XL;
+        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL));
+        switch(num) {
+            case 416:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_416HZ));
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_416HZ));
+                timeout = 3;
+                break;
+            case 833:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_833HZ));
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_833HZ));
+                timeout = 2;
+                break;
+            case 1660:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_1660HZ));
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_1660HZ));
+                timeout = 1;
+                break;
+            case 3330:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_3330HZ));
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_3330HZ));
+                timeout = 1;
+                break;
+            case 6660:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_6660HZ));
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_6660HZ));
+                timeout = 1;
                 break;
             default:
                 break;
@@ -176,7 +212,7 @@ private:
 
     uint8_t rxConfig[10];
 
-    int timeout = 2;
+    int timeout;
 
     tap::arch::PeriodicMilliTimer updateTimeout;
 
