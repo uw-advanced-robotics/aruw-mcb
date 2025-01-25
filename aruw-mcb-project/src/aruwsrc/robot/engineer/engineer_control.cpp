@@ -60,9 +60,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems() {}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *)
-{
-}
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *) {}
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
