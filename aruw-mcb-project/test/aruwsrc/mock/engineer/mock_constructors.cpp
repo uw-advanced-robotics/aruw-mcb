@@ -25,4 +25,5 @@
 // so in a source file allows for faster compilation than defining constructors
 // in the headers
 namespace aruwsrc::mock
-{}  // namespace aruwsrc::mock
+{
+}  // namespace aruwsrc::mock
