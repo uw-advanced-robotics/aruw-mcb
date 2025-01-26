@@ -88,7 +88,7 @@ enum ODR : uint8_t { // Only includes high power
     ODR_6660HZ = 0b10101111  
 };
 
-#define READ_LENGTH 13 //why 13?
+#define READ_LENGTH 14 
 
 static constexpr float TEMPERATURE_OFFSET = 25.0f;
 static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;
