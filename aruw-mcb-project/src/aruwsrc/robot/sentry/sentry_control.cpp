@@ -221,52 +221,6 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-struct TurretMinorWorldControllers
-{
-    WorldFramePitchTurretImuCascadePidTurretController pitchController;
-    WorldFrameYawTurretImuCascadePidTurretController yawController;
-};
-
-// @todo surely there's a better way to construct this
-SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
-
-TurretMinorWorldControllers turretRightWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.pitchMotor,
-        turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid),
-
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.yawMotor,
-        turretRightWorldYawPosPid,
-        turretRightWorldYawVelPid)
-
-};
-
-TurretMinorWorldControllers turretLeftWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
-        turretLeft.pitchMotor,
-        turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid),
-
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
-        turretLeft.yawMotor,
-        turretLeftWorldYawPosPid,
-        turretLeftWorldYawVelPid)
-
-};
-
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
@@ -383,6 +337,52 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+
+struct TurretMinorWorldControllers
+{
+    WorldFramePitchTurretImuCascadePidTurretController pitchController;
+    WorldFrameYawTurretImuCascadePidTurretController yawController;
+};
+
+// @todo surely there's a better way to construct this
+SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+
+TurretMinorWorldControllers turretRightWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.pitchMotor,
+        turretRightWorldPitchPosPid,
+        turretRightWorldPitchVelPid),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.yawMotor,
+        turretRightWorldYawPosPid,
+        turretRightWorldYawVelPid)
+
+};
+
+TurretMinorWorldControllers turretLeftWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.pitchMotor,
+        turretLeftWorldPitchPosPid,
+        turretLeftWorldPitchVelPid),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.yawMotor,
+        turretLeftWorldYawPosPid,
+        turretLeftWorldYawVelPid)
+
+};
 
 TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),

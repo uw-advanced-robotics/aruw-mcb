@@ -46,7 +46,7 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 #if defined(TARGET_STANDARD_SPIDER)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 656,
     .minAngle = 0,
     .maxAngle = M_PI,
@@ -54,15 +54,15 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 7500,
-    .minAngle = modm::toRadian(50),
-    .maxAngle = modm::toRadian(108),
+    .minAngle = modm::toRadian(-40),
+    .maxAngle = modm::toRadian(18),
     .limitMotorAngles = true,
 };
 #elif defined(TARGET_STANDARD_ORION)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 1365,
     .minAngle = 0,
     .maxAngle = M_PI,
@@ -70,15 +70,15 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 4705,
-    .minAngle = modm::toRadian(48),
-    .maxAngle = modm::toRadian(115),
+    .minAngle = modm::toRadian(-42),
+    .maxAngle = modm::toRadian(25),
     .limitMotorAngles = true,
 };
 #elif defined(TARGET_STANDARD_CYGNUS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 2693,
     .minAngle = 0,
     .maxAngle = M_PI,
@@ -86,10 +86,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = 0,
     .startEncoderValue = 3393,
-    .minAngle = modm::toRadian(48),
-    .maxAngle = modm::toRadian(115),
+    .minAngle = modm::toRadian(-42),
+    .maxAngle = modm::toRadian(25),
     .limitMotorAngles = true,
 };
 #else

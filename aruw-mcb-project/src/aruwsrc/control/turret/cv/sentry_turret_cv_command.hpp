@@ -148,8 +148,8 @@ private:
     void computeAimSetpoints(
         TurretConfig &config,
         aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
-        float *desiredYawSetpoint,
-        float *desiredPitchSetpoint,
+        WrappedFloat *desiredYawSetpoint,
+        WrappedFloat *desiredPitchSetpoint,
         bool *withinAimingTolerance);
 
     serial::VisionCoprocessor &visionCoprocessor;
@@ -178,8 +178,7 @@ private:
     static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(45.0f);
     static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
 
-    tap::algorithms::WrappedFloat majorScanValue =
-        tap::algorithms::WrappedFloat(0.0f, 0.0f, M_TWOPI);
+    tap::algorithms::WrappedFloat majorScanValue = Angle(0);
 
     bool withinAimingToleranceLeft = false;
     bool withinAimingToleranceRight = false;
@@ -197,11 +196,11 @@ private:
      *
      * Sets the yaw scanner to the current setpoint of the turret major.
      */
-    inline void enterScanMode(float majorYawSetpoint)
+    inline void enterScanMode(WrappedFloat majorYawSetpoint)
     {
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
-        majorScanValue = tap::algorithms::WrappedFloat(majorYawSetpoint, 0.0f, M_TWOPI);
+        majorScanValue = majorYawSetpoint;
     }
 
     inline void exitScanMode()

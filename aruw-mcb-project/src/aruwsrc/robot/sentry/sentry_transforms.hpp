@@ -50,6 +50,8 @@ public:
 
     void updateTransforms();
 
+    inline void initialize() {}
+
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
         return worldToChassis;
