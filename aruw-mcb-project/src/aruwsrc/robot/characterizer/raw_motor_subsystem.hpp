@@ -45,7 +45,7 @@ public:
 
     inline void initialize() override { this->motor.initialize(); };
 
-    inline void setDesiredOutput(float rpm) { desiredOutput = rpm; }
+    inline void setDesiredOutput(int32_t rpm) { desiredOutput = rpm; }
 
     inline void refresh() override
     {
@@ -73,7 +73,7 @@ public:
 private:
     tap::motor::MotorInterface& motor;
 
-    float desiredOutput{0};
+    int32_t desiredOutput{0};
     bool akMotor;
 };
 

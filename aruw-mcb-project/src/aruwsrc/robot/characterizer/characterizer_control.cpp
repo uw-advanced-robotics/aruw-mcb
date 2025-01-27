@@ -26,6 +26,7 @@
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
+#include "aruwsrc/robot/characterizer/output_sweep_command.hpp"
 #include "aruwsrc/robot/characterizer/raw_motor_subsystem.hpp"
 #include "aruwsrc/robot/characterizer/stick_output_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
@@ -56,11 +57,13 @@ RawMotorSubsystem motorSubsystem(drivers(), motor, true);
 // Commands
 // ----------
 
-StickOutputCommand leftManual(
+StickOutputCommand manual(
     &motorSubsystem,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     60000.0f);
+
+OutputSweepCommand sweep(&motorSubsystem, 0, 60000, 500, 1000);
 
 // ------------------
 // command mappings
@@ -79,7 +82,7 @@ void registerIoMappings(Drivers* drivers)
 {
     // drivers->commandMapper.addMap(&leftSwitchUp);
 
-    motorSubsystem.setDefaultCommand(&leftManual);
+    motorSubsystem.setDefaultCommand(&manual);
 }
 
 }  // namespace characterizer_control

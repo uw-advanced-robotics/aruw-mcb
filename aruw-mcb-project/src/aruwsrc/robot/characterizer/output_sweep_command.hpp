@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STICK_OUTPUT_COMMAND_HPP_
-#define STICK_OUTPUT_COMMAND_HPP_
+#ifndef OUTPUT_SWEEP_COMMAND_HPP_
+#define OUTPUT_SWEEP_COMMAND_HPP_
 
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
@@ -27,31 +27,36 @@
 
 using namespace aruwsrc::characterizer;
 
-class StickOutputCommand : public tap::control::Command
+class OutputSweepCommand : public tap::control::Command
 {
 public:
-    explicit StickOutputCommand(
+    explicit OutputSweepCommand(
         RawMotorSubsystem* subsystem,
-        tap::communication::serial::Remote* remote,
-        tap::communication::serial::Remote::Channel channel,
-        int32_t maxOutput);
+        int32_t minOutput,
+        int32_t maxOutput,
+        uint32_t levelLengthMillis,
+        int32_t levelIncrement);
 
-    void initialize() override {}
+    void initialize() override { started = false; }
 
     void execute() override;
 
     void end(bool) override;
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override { return currentOutput > maxOutput; }
 
-    const char* getName() const override { return "stick output"; }
+    const char* getName() const override { return "output sweep"; }
 
 private:
     RawMotorSubsystem* motorSubsystem;
-    tap::communication::serial::Remote* remote;
-    tap::communication::serial::Remote::Channel channel;
-    int32_t maxOutput;
+    int32_t minOutput, maxOutput;
+    uint32_t levelLengthMillis;
+    int32_t levelIncrement;
 
-};  // class StickOutputCommand
+    bool started{false};
+    uint32_t startTime{0}, endTime;
+    int32_t currentOutput{0};
 
-#endif  // STICK_OUTPUT_COMMAND_HPP_
+};  // class OutputSweepCommand
+
+#endif  // OUTPUT_SWEEP_COMMAND_HPP_

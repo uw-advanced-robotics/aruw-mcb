@@ -17,25 +17,38 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "stick_output_command.hpp"
+#include "output_sweep_command.hpp"
 
-StickOutputCommand::StickOutputCommand(
+OutputSweepCommand::OutputSweepCommand(
     RawMotorSubsystem* subsystem,
-    tap::communication::serial::Remote* remote,
-    tap::communication::serial::Remote::Channel channel,
-    int32_t maxOutput)
+    int32_t minOutput,
+    int32_t maxOutput,
+    uint32_t levelLengthMillis,
+    int32_t levelIncrement)
     : motorSubsystem(subsystem),
-      remote(remote),
-      channel(channel),
-      maxOutput(maxOutput)
+      minOutput(minOutput),
+      maxOutput(maxOutput),
+      levelLengthMillis(levelLengthMillis),
+      levelIncrement(levelIncrement)
 {
     this->addSubsystemRequirement(subsystem);
 }
 
-void StickOutputCommand::execute()
+void OutputSweepCommand::execute()
 {
-    float stick = remote->getChannel(this->channel);
-    motorSubsystem->setDesiredOutput(static_cast<int32_t>(maxOutput * stick));
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    if (!started)
+    {
+        started = true;
+        startTime = currTime;
+        endTime = (maxOutput - minOutput) / levelIncrement * levelLengthMillis + startTime;
+    }
+
+    currentOutput = ((currTime - startTime) / levelLengthMillis) * levelIncrement + minOutput;
+
+    if (currentOutput > maxOutput) return;
+
+    motorSubsystem->setDesiredOutput(currentOutput);
 }
 
-void StickOutputCommand::end(bool) { motorSubsystem->stop(); }
+void OutputSweepCommand::end(bool) { motorSubsystem->stop(); }
