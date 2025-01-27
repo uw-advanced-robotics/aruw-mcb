@@ -78,6 +78,7 @@ before_script:
             aruwsrc/robot/testbed/testbed_control.cpp
             aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
+            aruwsrc/robot/characterizer/characterizer_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
