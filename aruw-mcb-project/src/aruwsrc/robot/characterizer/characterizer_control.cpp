@@ -69,6 +69,13 @@ OutputSweepCommand sweep(&motorSubsystem, 0, 60000, 500, 1000);
 // command mappings
 // ------------------
 
+tap::control::HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&sweep},
+    tap::control::RemoteMapState(
+        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
+        tap::communication::serial::Remote::SwitchState::UP));
+
 // inits
 
 void initializeSubsystems() { motorSubsystem.initialize(); }
@@ -80,7 +87,7 @@ void registerSubsystems(Drivers* drivers)
 
 void registerIoMappings(Drivers* drivers)
 {
-    // drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchUp);
 
     motorSubsystem.setDefaultCommand(&manual);
 }
