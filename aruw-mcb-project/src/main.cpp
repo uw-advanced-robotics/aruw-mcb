@@ -68,6 +68,8 @@ using namespace aruwsrc::testbed;
 using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
+#elif defined(TARGET_CHARACTERIZER)
+using namespace aruwsrc::characterizer;
 #endif
 
 // Place any sort of input/output initialization here. For example, place

@@ -62,9 +62,7 @@ void Tmotor_AK809::initialize()
     sendPositionHomeGetMessage();
 }
 
-void Tmotor_AK809::resetEncoderValue(){
-    return;
-}
+void Tmotor_AK809::resetEncoderValue() { return; }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
