@@ -50,6 +50,8 @@ public:
 
     void updateTransforms();
 
+    inline void initialize() {}
+
     inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
     {
         return worldToChassis;
@@ -71,6 +73,11 @@ public:
     {
         return chassisToTurretMajor;
     };
+
+    inline const tap::algorithms::transforms::Transform& getWorldToVTM() const
+    {
+        return worldToVTM;
+    }
 
     // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
@@ -136,6 +143,7 @@ private:
     tap::algorithms::transforms::Transform worldToTurretMajor;
     tap::algorithms::transforms::Transform worldToTurretLeft;
     tap::algorithms::transforms::Transform worldToTurretRight;
+    tap::algorithms::transforms::Transform worldToVTM;
 
     // Intermediary transforms
     tap::algorithms::transforms::Transform chassisToTurretMajor;

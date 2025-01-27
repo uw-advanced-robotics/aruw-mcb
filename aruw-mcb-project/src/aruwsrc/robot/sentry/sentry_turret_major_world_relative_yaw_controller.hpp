@@ -91,31 +91,31 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const final;
 
     /// @return World frame yaw angle measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
     // @todo see todo in interface class
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    WrappedFloat convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const final
     {
         controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
-        return 0.0;
+        return Angle(0.0);
     };
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final
     {
         chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
-        return 0.0;
+        return Angle(0.0);
     };
 
 private:
