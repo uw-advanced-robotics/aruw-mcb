@@ -25,6 +25,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
+
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 
 namespace aruwsrc::motor_tester
@@ -50,21 +51,18 @@ public:
 
     inline void setDesiredRPM(float rpm) { desiredRPM = rpm; }
 
-
-
     inline void refresh() override
     {
+        const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+        const uint32_t dt = curTime - prevTime;
+        prevTime = curTime;
 
-        // const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-        // const uint32_t dt = curTime - prevTime;
-        // prevTime = curTime;
+        const float velocityError = desiredRPM - getCurrentRPM();
 
-        // const float velocityError = desiredRPM - getCurrentRPM();
+        velocityPid.runControllerDerivateError(velocityError, dt);
 
-        // velocityPid.runControllerDerivateError(velocityError, dt);
+        motor.setDesiredOutput(velocityPid.getOutput());
 
-        // motor.setDesiredOutput(velocityPid.getOutput());
-        motor.setDesiredOutput(desiredRPM);
         if (akMotor)
         {
             static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
