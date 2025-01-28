@@ -62,6 +62,8 @@ private:
     can::capbank::State state;
 
     bool changed;
+
+    tap::arch::PeriodicMilliTimer updateTimer{100};
 };
 }  // namespace aruwsrc::display
 
