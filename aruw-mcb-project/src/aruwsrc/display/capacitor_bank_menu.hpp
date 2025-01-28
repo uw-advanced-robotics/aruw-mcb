@@ -40,6 +40,9 @@ class CapacitorBankMenu
     : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
+    /** Time between calls to `draw`, which will redraw the cap bank menu. */
+    static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
+
     CapacitorBankMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
         can::capbank::CapacitorBank* capacitorBank);
@@ -63,7 +66,7 @@ private:
 
     bool changed;
 
-    tap::arch::PeriodicMilliTimer updateTimer{100};
+    tap::arch::PeriodicMilliTimer updateTimer{DISPLAY_DRAW_PERIOD};
 };
 }  // namespace aruwsrc::display
 
