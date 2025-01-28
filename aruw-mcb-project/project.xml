@@ -16,6 +16,18 @@
     <option name="taproot:board:digital_out_pins">E,F,G,H,Laser</option>
     <option name="taproot:board:analog_in_pins">S,T,U,V,OledJoystick</option>
     <option name="taproot:board:pwm_pins">W,X,Y,Z,Buzzer,ImuHeater</option>
+    <option name="taproot:communication:serial:uart_port_1.rx_buffer_size">256</option>
+    <option name="taproot:communication:serial:uart_port_1.tx_buffer_size">256</option>
+    <option name="taproot:communication:serial:uart_port_2.rx_buffer_size">512</option>
+    <option name="taproot:communication:serial:uart_port_2.tx_buffer_size">512</option>
+    <option name="taproot:communication:serial:uart_port_3.tx_buffer_size">2048</option>
+    <option name="taproot:communication:serial:uart_port_3.rx_buffer_size">2048</option>
+    <option name="taproot:communication:serial:uart_port_6.rx_buffer_size">256</option>
+    <option name="taproot:communication:serial:uart_port_6.tx_buffer_size">256</option>
+    <option name="taproot:communication:serial:uart_port_7.tx_buffer_size">512</option>
+    <option name="taproot:communication:serial:uart_port_7.rx_buffer_size">512</option>
+    <option name="taproot:communication:serial:uart_port_8.tx_buffer_size">256</option>
+    <option name="taproot:communication:serial:uart_port_8.rx_buffer_size">256</option>
   </options>
   <modules>
     <module>taproot:core</module>

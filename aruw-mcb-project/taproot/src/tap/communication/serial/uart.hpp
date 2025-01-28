@@ -48,10 +48,10 @@ class Uart
 #ifndef PLATFORM_HOSTED
 private:
     using Port1 = BufferedUart<UsartHal1, UartTxBuffer<256>, UartRxBuffer<256>>;
-    using Port2 = BufferedUart<UsartHal2, UartTxBuffer<256>, UartRxBuffer<256>>;
-    using Port3 = BufferedUart<UsartHal3, UartTxBuffer<256>, UartRxBuffer<256>>;
+    using Port2 = BufferedUart<UsartHal2, UartTxBuffer<512>, UartRxBuffer<512>>;
+    using Port3 = BufferedUart<UsartHal3, UartTxBuffer<2048>, UartRxBuffer<2048>>;
     using Port6 = BufferedUart<UsartHal6, UartTxBuffer<256>, UartRxBuffer<256>>;
-    using Port7 = BufferedUart<UartHal7, UartTxBuffer<256>, UartRxBuffer<256>>;
+    using Port7 = BufferedUart<UartHal7, UartTxBuffer<512>, UartRxBuffer<512>>;
     using Port8 = BufferedUart<UartHal8, UartTxBuffer<256>, UartRxBuffer<256>>;
 #endif
 
