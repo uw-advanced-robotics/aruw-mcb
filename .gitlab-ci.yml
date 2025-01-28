@@ -132,7 +132,7 @@ before_script:
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
+    - scons run-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
     # - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
   cache:
     - key: mcb-test-libs-$CI_COMMIT_REF_SLUG
