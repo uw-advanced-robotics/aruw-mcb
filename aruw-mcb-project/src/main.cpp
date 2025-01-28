@@ -103,7 +103,7 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    modm::Fiber<> ioFiber(
+    modm::Fiber<2048> ioFiber(
         [&]
         {
             while (1)
@@ -158,7 +158,6 @@ static void initializeIo(Drivers *drivers)
     drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->mpu6500.start();
     drivers->refSerial.initialize();
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
@@ -167,7 +166,6 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
-    ((Drivers *)drivers)->oledDisplay.start();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
