@@ -52,6 +52,14 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
         CAN_DJI_6020_CURRENT_IDENTIFIER,
         CAN_DJI_MESSAGE_SEND_LENGTH);
 
+
+    can1MessageLow.setExtended(false);
+    can1MessageHigh.setExtended(false);
+    can1Message6020Current.setExtended(false);
+    can2MessageLow.setExtended(false);
+    can2MessageHigh.setExtended(false);
+    can2Message6020Current.setExtended(false);
+
     bool can1ValidMotorMessageLow = false;
     bool can1ValidMotorMessageHigh = false;
     bool can1ValidMotorMessage6020Current = false;
