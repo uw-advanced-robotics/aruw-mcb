@@ -52,7 +52,6 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
         CAN_DJI_6020_CURRENT_IDENTIFIER,
         CAN_DJI_MESSAGE_SEND_LENGTH);
 
-
     can1MessageLow.setExtended(false);
     can1MessageHigh.setExtended(false);
     can1Message6020Current.setExtended(false);
