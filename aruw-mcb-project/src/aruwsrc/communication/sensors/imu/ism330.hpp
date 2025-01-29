@@ -40,8 +40,11 @@ public:
 
     void init()
     {
-        setAccelRange(2);
-        setGyroRange(250);
+        // setAccelRange(2);
+        // setGyroRange(250);
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, G8_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, DPS2000_CONFIG));
+
 
         // Check Who Am I
         RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
@@ -59,44 +62,44 @@ public:
         pinged = RF_CALL_BLOCKING(this->ping());
 
         // Read temp
-        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_H, READ_LENGTH, rxBuff[0]));
+        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
         if (!readWorking)
         {
             return;
         }
-        RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff[1]));
+        // RF_CALL_BLOCKING(readRegister(OUT_TEMP_H, READ_LENGTH, rxBuff + 1));
         imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
 
-        // Read gyro
-        RF_CALL_BLOCKING(readRegister(OUTX_L_G, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTX_H_G, READ_LENGTH, rxBuff[1]));
-        imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff);
+        // // Read gyro
+        // RF_CALL_BLOCKING(readRegister(OUTX_L_G, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTX_H_G, READ_LENGTH, rxBuff + 1));
+        imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
 
-        RF_CALL_BLOCKING(readRegister(OUTY_L_G, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTY_H_G, READ_LENGTH, rxBuff[1]));
-        imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff);
+        // RF_CALL_BLOCKING(readRegister(OUTY_L_G, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTY_H_G, READ_LENGTH, rxBuff + 1));
+        imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff + 4);
 
-        RF_CALL_BLOCKING(readRegister(OUTZ_L_G, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTZ_H_G, READ_LENGTH, rxBuff[1]));
-        imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff);
+        // RF_CALL_BLOCKING(readRegister(OUTZ_L_G, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTZ_H_G, READ_LENGTH, rxBuff + 1));
+        imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff + 6);
 
-        // Read accel
-        RF_CALL_BLOCKING(readRegister(OUTX_L_XL, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTX_H_XL, READ_LENGTH, rxBuff[1]));
-        imuData.accRaw[ImuData::X] = accelValueToG(rxBuff);
+        // // Read accel
+        // RF_CALL_BLOCKING(readRegister(OUTX_L_XL, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTX_H_XL, READ_LENGTH, rxBuff + 1));
+        imuData.accRaw[ImuData::X] = accelValueToG(rxBuff + 8);
 
-        RF_CALL_BLOCKING(readRegister(OUTY_L_XL, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTY_H_XL, READ_LENGTH, rxBuff[1]));
-        imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff);
+        // RF_CALL_BLOCKING(readRegister(OUTY_L_XL, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTY_H_XL, READ_LENGTH, rxBuff + 1));
+        imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff + 10);
 
-        RF_CALL_BLOCKING(readRegister(OUTZ_L_XL, READ_LENGTH, rxBuff[0]));
-        RF_CALL_BLOCKING(readRegister(OUTZ_H_XL, READ_LENGTH, rxBuff[1]));
-        imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff);
+        // RF_CALL_BLOCKING(readRegister(OUTZ_L_XL, READ_LENGTH, rxBuff));
+        // RF_CALL_BLOCKING(readRegister(OUTZ_H_XL, READ_LENGTH, rxBuff + 1));
+        imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff + 12);
     }
 
     void setAccelRange(int num) { // Takes in num in g
         uint8_t current_reg;
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg));
+        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg));
         switch(num) {
             case 2:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G2_CONFIG));
@@ -121,23 +124,23 @@ public:
 
     void setGyroRange(int num) { // Takes in num in dps
         uint8_t current_reg;
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg));
+        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg));
         switch(num) {
             case 250:
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS250_CONFIG));
-                gyroScale = 8.75f;
+                gyroScale = 8.75;
                 break;
             case 500:
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS500_CONFIG));
-                gyroScale = 17.50f;
+                gyroScale = 17.50;
                 break;
             case 1000:
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS1000_CONFIG));
-                gyroScale = 35f;
+                gyroScale = 35;
                 break;
             case 2000:
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS2000_CONFIG));
-                gyroScale = 70f;
+                gyroScale = 70;
                 break;
             default:
                 break;
@@ -180,6 +183,8 @@ public:
         }
     }
 
+    ImuData imuData; // TODO: remove
+
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
@@ -212,11 +217,11 @@ private:
 
     uint8_t rxConfig[10];
 
-    int timeout;
+    int timeout = 2;
 
     tap::arch::PeriodicMilliTimer updateTimeout;
 
-    ImuData imuData;
+    // ImuData imuData;
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
@@ -229,14 +234,14 @@ private:
         return static_cast<float>(static_cast<int16_t>((*(buff)) | (*(buff + 1) << 8)));
     }
 
-    float accelScale;
+    float accelScale = 0.488;
     float accelValueToG(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return raw * accelScale / 1000.0f;
     }
 
-    float gyroScale;
+    float gyroScale = 70;
     float gyroValueToDegPerSec(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);

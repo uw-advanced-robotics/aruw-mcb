@@ -23,7 +23,7 @@
 
 #ifndef ISM330_DATA_HPP_
 #define ISM330_DATA_HPP_
-namespace aruwsrc::communication::sensors::ism330
+namespace aruwsrc::communication::sensors::imu
 {
     enum Register : uint8_t {
     DEVICE_ADDRESS = 0x6B,
@@ -33,15 +33,6 @@ namespace aruwsrc::communication::sensors::ism330
     OUT_TEMP_L = 0x20,
     OUT_TEMP_H = 0x21,
 
-    // accelerometer
-    CTRL1_XL = 0x10,
-    OUTX_L_XL = 0x28,
-    OUTX_H_XL = 0x29,
-    OUTY_L_XL = 0x2A,
-    OUTY_H_XL = 0x2B,
-    OUTZ_L_XL = 0x2C,
-    OUTZ_H_XL = 0x2D,
-    
     // gyroscope
     CTRL2_G = 0x11,
     OUTX_L_G = 0x22,
@@ -49,7 +40,16 @@ namespace aruwsrc::communication::sensors::ism330
     OUTY_L_G = 0x24,
     OUTY_H_G = 0x25,
     OUTZ_L_G = 0x26,
-    OUTZ_H_G = 0x27
+    OUTZ_H_G = 0x27,
+
+    // accelerometer
+    CTRL1_XL = 0x10,
+    OUTX_L_XL = 0x28,
+    OUTX_H_XL = 0x29,
+    OUTY_L_XL = 0x2A,
+    OUTY_H_XL = 0x2B,
+    OUTZ_L_XL = 0x2C,
+    OUTZ_H_XL = 0x2D
 };
 
 struct ImuData
@@ -70,14 +70,14 @@ enum XL_Config : uint8_t {
     G2_CONFIG = 0b11110000,
     G16_CONFIG = 0b11110100,
     G4_CONFIG = 0b11111000,
-    G8_CONFIG = 0b11111100,
+    G8_CONFIG = 0b11111100
 };
 
 enum Gyro_Config : uint8_t { // Also capable of 125 and 4000 dps
     DPS250_CONFIG = 0b11110000,
     DPS500_CONFIG = 0b11110100,
     DPS1000_CONFIG = 0b11111000,
-    DPS2000_CONFIG = 0b11111100,
+    DPS2000_CONFIG = 0b11111100
 };
 
 enum ODR : uint8_t { // Only includes high power
@@ -85,7 +85,7 @@ enum ODR : uint8_t { // Only includes high power
     ODR_833HZ = 0b01111111,
     ODR_1660HZ = 0b10001111,
     ODR_3330HZ = 0b10011111,
-    ODR_6660HZ = 0b10101111  
+    ODR_6660HZ = 0b10101111
 };
 
 #define READ_LENGTH 14 

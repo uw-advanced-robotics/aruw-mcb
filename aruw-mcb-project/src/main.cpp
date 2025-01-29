@@ -142,6 +142,18 @@ int main()
 
 static void initializeIo(Drivers *drivers)
 {
+
+#if defined(TARGET_BLANK)
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+
+    Board::I2CMaster::reset();
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+                Board::I2CMaster::PullUps::External);
+
+#endif
+
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
@@ -173,6 +185,11 @@ static void initializeIo(Drivers *drivers)
     drivers->chassisMcbLite.initialize();
     drivers->turretMajorMcbLite.initialize();
 #endif
+
+#if defined(TARGET_BLANK)
+    drivers->imu.init();
+#endif
+
 }
 
 static void updateIo(Drivers *drivers)
@@ -194,6 +211,11 @@ static void updateIo(Drivers *drivers)
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
 #endif
+
+#if defined(TARGET_BLANK)
+    drivers->imu.readAndProcessData();
+#endif
+
 }
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
