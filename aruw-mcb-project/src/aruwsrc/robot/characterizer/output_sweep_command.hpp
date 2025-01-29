@@ -35,7 +35,8 @@ public:
         int32_t minOutput,
         int32_t maxOutput,
         uint32_t levelLengthMillis,
-        int32_t levelIncrement);
+        int32_t levelIncrement,
+        int32_t dir = 1);
 
     void initialize() override { started = false; }
 
@@ -52,6 +53,7 @@ private:
     int32_t minOutput, maxOutput;
     uint32_t levelLengthMillis;
     int32_t levelIncrement;
+    int32_t dir{1};
 
     bool started{false};
     uint32_t startTime{0}, endTime;

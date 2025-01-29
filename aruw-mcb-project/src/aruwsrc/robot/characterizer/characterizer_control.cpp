@@ -63,7 +63,19 @@ StickOutputCommand manual(
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     60000.0f);
 
-OutputSweepCommand sweep(&motorSubsystem, 0, 60000, 500, 1000);
+StickOutputCommand manualFine(
+    &motorSubsystem,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
+    1000.0f);
+
+OutputSweepCommand sweep(
+    &motorSubsystem,
+    0,      // min output
+    30000,  // max output
+    1000,   // step length (ms)
+    500,    // step size
+    -1);
 
 // ------------------
 // command mappings
@@ -75,6 +87,13 @@ tap::control::HoldCommandMapping leftSwitchUp(
     tap::control::RemoteMapState(
         tap::communication::serial::Remote::Switch::LEFT_SWITCH,
         tap::communication::serial::Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&manual},
+    tap::control::RemoteMapState(
+        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
+        tap::communication::serial::Remote::SwitchState::DOWN));
 
 // inits
 
@@ -88,8 +107,9 @@ void registerSubsystems(Drivers* drivers)
 void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
 
-    motorSubsystem.setDefaultCommand(&manual);
+    motorSubsystem.setDefaultCommand(&manualFine);
 }
 
 }  // namespace characterizer_control

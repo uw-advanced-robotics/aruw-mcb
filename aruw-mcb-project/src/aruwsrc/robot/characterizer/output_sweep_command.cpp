@@ -24,12 +24,14 @@ OutputSweepCommand::OutputSweepCommand(
     int32_t minOutput,
     int32_t maxOutput,
     uint32_t levelLengthMillis,
-    int32_t levelIncrement)
+    int32_t levelIncrement,
+    int32_t dir)
     : motorSubsystem(subsystem),
       minOutput(minOutput),
       maxOutput(maxOutput),
       levelLengthMillis(levelLengthMillis),
-      levelIncrement(levelIncrement)
+      levelIncrement(levelIncrement),
+      dir(dir)
 {
     this->addSubsystemRequirement(subsystem);
 }
@@ -48,7 +50,7 @@ void OutputSweepCommand::execute()
 
     if (currentOutput > maxOutput) return;
 
-    motorSubsystem->setDesiredOutput(currentOutput);
+    motorSubsystem->setDesiredOutput(currentOutput * dir);
 }
 
 void OutputSweepCommand::end(bool) { motorSubsystem->stop(); }
