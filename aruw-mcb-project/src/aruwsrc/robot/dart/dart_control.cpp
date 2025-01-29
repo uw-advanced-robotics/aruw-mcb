@@ -33,7 +33,6 @@
 
 #include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
-// using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
@@ -52,14 +51,14 @@ namespace dart_control
 /* define subsystems ----------------------------------------------*/
 tap::motor::DoubleDjiMotor pullMotor(
     drivers(),
-    PULL_MOTOR_ID,
-    PULL_MOTOR_TWO_ID,
+    UPPER_PULL_MOTOR_ID,
+    LOWER_PULL_MOTOR_ID,
     LAUNCHER_CAN_BUS,
-    CAN_BUS_TWO_MOTORS,
+    LAUNCHER_CAN_BUS, 
     false,
     false,
-    "First Motor",
-    "Second Motor");
+    "Upper Motor",
+    "Lower Motor");
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
