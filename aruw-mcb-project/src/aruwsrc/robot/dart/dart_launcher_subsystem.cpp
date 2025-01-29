@@ -37,12 +37,9 @@ DartLauncherSubsystem::DartLauncherSubsystem(
 void DartLauncherSubsystem::initialize()
 {
     motor.initialize();
-    lastTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 void DartLauncherSubsystem::moveMotor(int32_t power) { motor.setDesiredOutput(power); }
-
-void DartLauncherSubsystem::setSetpoint(float newSetpoint) { setpoint = newSetpoint; }
 
 bool beam = false;
 bool DartLauncherSubsystem::isBeamBroken()

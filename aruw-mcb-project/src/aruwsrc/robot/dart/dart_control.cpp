@@ -22,7 +22,6 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
-#include "tap/motor/servo.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -55,7 +54,7 @@ tap::motor::DoubleDjiMotor pullMotor(
     drivers(),
     PULL_MOTOR_ID,
     PULL_MOTOR_TWO_ID,
-    CAN_BUS_MOTORS,
+    LAUNCHER_CAN_BUS,
     CAN_BUS_TWO_MOTORS,
     false,
     false,
@@ -82,7 +81,6 @@ HoldCommandMapping rightSwitchDown(
 void initializeSubsystems()
 {
     dartLauncher.initialize();
-    // dartLauncher.setServoOpen(); //may need to change to close depending on the starting protocal
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
@@ -90,10 +88,7 @@ void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&dartLauncher);
 }
 
-void setDefaultDartCommands(aruwsrc::dart::Drivers*)
-{
-    // dartLauncher.setDefaultCommand(&)
-}
+void setDefaultDartCommands(aruwsrc::dart::Drivers*) {}
 
 void startDartCommands(aruwsrc::dart::Drivers*) {}
 

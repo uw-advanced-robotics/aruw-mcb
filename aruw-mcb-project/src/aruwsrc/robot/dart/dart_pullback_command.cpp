@@ -19,8 +19,6 @@
 
 #include "dart_pullback_command.hpp"
 
-#include "dart_launcher_subsystem.hpp"
-
 namespace aruwsrc::robot::dart
 {
 DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher)
@@ -29,7 +27,7 @@ DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher)
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartPullbackCommand::initialize() { dartLauncher.moveMotor(power); }
+void DartPullbackCommand::initialize() {}
 
 void DartPullbackCommand::execute() { dartLauncher.moveMotor(power); }
 

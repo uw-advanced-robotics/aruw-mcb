@@ -40,21 +40,13 @@ public:
     void refreshSafeDisconnect() override;
 
     void setSetpoint(float setpoint);
-    // void setServoOpen();
-    // void setServoClosed();
     bool isBeamBroken();
     bool isLimitSwitched();
 
-    const char *getName() const override { return "Dart_Launcher_Subsystem"; }
+    const char *getName() const override { return "Dart Launcher Subsystem"; }
 
 protected:
     tap::motor::MotorInterface &motor;
-
-private:
-    float setpoint;
-    float zeroOffset = 0;
-    float lastTime;
-
 };  // class DartLauncherSubsystem
 
 }  // namespace aruwsrc::robot::dart

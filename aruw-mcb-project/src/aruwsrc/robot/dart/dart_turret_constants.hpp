@@ -23,7 +23,6 @@
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
-#include "tap/algorithms/smooth_pid.hpp"
 #endif
 
 namespace aruwsrc::control::turret
