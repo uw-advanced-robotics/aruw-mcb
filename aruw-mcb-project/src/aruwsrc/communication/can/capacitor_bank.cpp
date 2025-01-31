@@ -45,10 +45,10 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[4])) / 1000.0;
             this->powerLimit = message.data[6];
             this->availableEnergy = tap::algorithms::limitVal(
-                1.0 / 2.0 * this->capacitance *
+                0.5f * this->capacitance *
                     (powf(this->voltage, 2) - powf(CAPACITOR_BANK_MIN_VOLTAGE, 2)),
-                0.0,
-                2000.0);
+                0.0f,
+                2000.0f);
 
             this->heartbeat.restart(80);
             break;

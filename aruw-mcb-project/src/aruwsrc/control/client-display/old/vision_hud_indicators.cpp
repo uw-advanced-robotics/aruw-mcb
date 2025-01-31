@@ -39,7 +39,7 @@ modm::ResumableResult<bool> VisionHudIndicators::sendInitialGraphics()
 {
     RF_BEGIN(0);
     // Don't need to send anything since we add/delete the graphic when updating
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> VisionHudIndicators::update()
@@ -49,7 +49,7 @@ modm::ResumableResult<bool> VisionHudIndicators::update()
     // update vision target status
     RF_CALL(updateVisionTargetStatus());
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
@@ -100,7 +100,7 @@ modm::ResumableResult<bool> VisionHudIndicators::updateVisionTargetStatus()
         prevVisionIndicatorColor = newVisionIndicatorColor;
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void VisionHudIndicators::initialize()

@@ -40,7 +40,7 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { sentryRequestTransmitter.stop(); }
+    void refreshSafeDisconnect() override { sentryRequestTransmitter.request_stop(); }
 
     inline mockable void queueRequest(SentryRequestMessageType type)
     {

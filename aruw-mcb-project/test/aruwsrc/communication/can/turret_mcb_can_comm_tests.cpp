@@ -37,8 +37,16 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {1}, false);
+    modm::can::Message blankMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(0)},
+        false);
+    modm::can::Message filledMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(1)},
+        false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
@@ -59,8 +67,16 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b10}, false);
+    modm::can::Message blankMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(0)},
+        false);
+    modm::can::Message filledMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(0b10)},
+        false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, blankMsg));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
@@ -80,8 +96,16 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b100}, false);
+    modm::can::Message blankMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(0)},
+        false);
+    modm::can::Message filledMsg(
+        TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID,
+        1,
+        {static_cast<uint8_t>(0b100)},
+        false);
 
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
@@ -103,9 +127,8 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener) {
-            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
-        });
+        .WillByDefault([&](tap::can::CanRxListener* const listener)
+                       { drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener); });
 
     modm::can::Message limitSwitchMsg(
         TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID,
@@ -113,10 +136,12 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
         {1},
         false);
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
-            *message = limitSwitchMsg;
-            return true;
-        });
+        .WillByDefault(
+            [&](tap::can::CanBus, modm::can::Message* message)
+            {
+                *message = limitSwitchMsg;
+                return true;
+            });
 
     dut.init();
 
@@ -133,13 +158,12 @@ TEST(TurretMCBCanComm, receive_turret_data)
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener) {
-            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
-        });
+        .WillByDefault([&](tap::can::CanRxListener* const listener)
+                       { drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener); });
 
-    modm::can::Message xAxisMessage(TurretMCBCanComm::CanIDs::X_AXIS_RX_CAN_ID, 8, 0, false);
-    modm::can::Message yAxisMessage(TurretMCBCanComm::CanIDs::Y_AXIS_RX_CAN_ID, 8, 0, false);
-    modm::can::Message zAxisMessage(TurretMCBCanComm::CanIDs::Z_AXIS_RX_CAN_ID, 8, 0, false);
+    modm::can::Message xAxisMessage(TurretMCBCanComm::CanIDs::X_AXIS_RX_CAN_ID, 8);
+    modm::can::Message yAxisMessage(TurretMCBCanComm::CanIDs::Y_AXIS_RX_CAN_ID, 8);
+    modm::can::Message zAxisMessage(TurretMCBCanComm::CanIDs::Z_AXIS_RX_CAN_ID, 8);
 
     modm::can::Message* messageToSend = &xAxisMessage;
 
@@ -159,10 +183,12 @@ TEST(TurretMCBCanComm, receive_turret_data)
     tap::arch::convertToLittleEndian<uint8_t>(0x12, zAxisMessage.data + 6);
 
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
-            *message = *messageToSend;
-            return true;
-        });
+        .WillByDefault(
+            [&](tap::can::CanBus, modm::can::Message* message)
+            {
+                *message = *messageToSend;
+                return true;
+            });
 
     dut.init();
 
@@ -218,19 +244,22 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
     ON_CALL(drivers.canRxHandler, attachReceiveHandler)
-        .WillByDefault([&](tap::can::CanRxListener* const listener) {
-            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
-        });
+        .WillByDefault([&](tap::can::CanRxListener* const listener)
+                       { drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener); });
 
-    modm::can::Message syncReqMessage(TurretMCBCanComm::CanIDs::SYNC_RX_CAN_ID, 0, 0, false);
+    modm::can::Message syncReqMessage(TurretMCBCanComm::CanIDs::SYNC_RX_CAN_ID, 4);
+    syncReqMessage.setExtended(false);
 
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
-        .WillByDefault([syncReqMessage](tap::can::CanBus, modm::can::Message* message) {
-            *message = syncReqMessage;
-            return true;
-        });
+        .WillByDefault(
+            [syncReqMessage](tap::can::CanBus, modm::can::Message* message)
+            {
+                *message = syncReqMessage;
+                return true;
+            });
 
-    modm::can::Message syncMessage(TurretMCBCanComm::CanIDs::SYNC_TX_CAN_ID, 4, 0, false);
+    modm::can::Message syncMessage(TurretMCBCanComm::CanIDs::SYNC_TX_CAN_ID, 4);
+    syncMessage.setExtended(false);
     tap::arch::convertToLittleEndian(getTimeMicroseconds(), syncMessage.data);
     EXPECT_CALL(drivers.can, sendMessage(_, Eq(syncMessage)));
 

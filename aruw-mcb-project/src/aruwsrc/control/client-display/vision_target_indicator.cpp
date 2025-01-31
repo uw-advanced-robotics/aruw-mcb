@@ -76,13 +76,13 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
 
     RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> VisionTargetIndicator::sendInitialGraphics()
 {
     RF_BEGIN(1);
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void VisionTargetIndicator::initialize()

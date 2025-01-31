@@ -87,13 +87,12 @@ def run_lbuild():
 
     def override_windows():
         # Note: The LF/CRLF change should be undone by git automatically when the change is staged but we do it manually to reduce confusion
-        LF_TO_CRLF = ["aruw-mcb-project/taproot/modm/ext/gcc/cabi.c"]
+        LF_TO_CRLF = ["aruw-mcb-project/taproot/modm/ext/gcc/cabi.c", "aruw-mcb-project/taproot/modm/ext/gcc/atomic"]
         DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES = ["aruw-mcb-project/taproot/modm/openocd.cfg"]
         BACKSLASHES_TO_FORWARD_SLASHES = [
             os.path.join(PROJECT_DIR, "taproot", dir, file) for file in [
                 pathlib.Path("project.xml"),
-                pathlib.Path("modm/SConscript"),
-                pathlib.Path("modm/ext/printf/printf.h"),
+                pathlib.Path("modm/SConscript")
             ] for dir in [
                 pathlib.Path("."),
                 pathlib.Path("sim-modm/hosted-darwin"),
@@ -105,11 +104,11 @@ def run_lbuild():
         for file_path in LF_TO_CRLF:
             with open(file_path, "rb+") as f:
                 content = f.read()
-                content = content.replace(b"\r\n", b"\n")
+                content = content.replace(b"\n", b"\r\n")
                 f.seek(0)
                 f.write(content)
                 f.truncate()
-        
+
         for file_path in DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES:
             with open(file_path, "r+", encoding="utf8") as f:
                 content = f.read()
@@ -121,6 +120,7 @@ def run_lbuild():
         for file_path in BACKSLASHES_TO_FORWARD_SLASHES:
             with open(file_path, "r+", encoding="utf8") as f:
                 content = f.read()
+                content = content.replace("\\\\", "/")
                 content = content.replace("\\", "/")
                 f.seek(0)
                 f.write(content)
