@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+*
+* This file is part of aruw-mcb.
+*
+* aruw-mcb is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* aruw-mcb is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+*/
+#ifndef CUBE_STORAGE_SUBSYSTEM_HPP_
+#define CUBE_STORAGE_SUBSYSTEM_HPP_
+
+#include "tap/control/subsystem.hpp"
+#include <tap/motor/motor_interface.hpp>
+#include "engineer_drivers.hpp"
+#include "engineer_lift_constants.hpp"
+
+namespace aruwsrc::robot::engineer
+{
+
+class CubeStorageSubsystem : public tap::control::Subsystem
+{
+public: 
+    CubeStorageSubsystem(
+        tap::Drivers* drivers, tap::motor::MotorInterface &liftMotor);
+
+    void initialize() override;
+    
+    void moveMotor(int32_t power);
+
+
+
+    bool isLimitSwitched();
+
+    void refresh() override;
+
+    void refreshSafeDisconnect() override;
+
+    const char* getName() const override { return "Cube Storage"; }
+
+protected:
+    tap::motor::MotorInterface &motor;
+
+};  // class CUBE_STORAGE
+
+}  // NAMESPACE
+#endif  // CUBE_STORAGE_SUBSYSTEM_HPP_
