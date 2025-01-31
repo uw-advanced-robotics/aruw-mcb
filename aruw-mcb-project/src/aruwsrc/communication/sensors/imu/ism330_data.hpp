@@ -17,15 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
-#include "tap/algorithms/math_user_utils.hpp"
 
 #ifndef ISM330_DATA_HPP_
 #define ISM330_DATA_HPP_
 namespace aruwsrc::communication::sensors::imu
 {
-    enum Register : uint8_t {
+enum Register : uint8_t
+{
     DEVICE_ADDRESS = 0x6B,
     WHO_AM_I = 0x0F,
 
@@ -66,21 +68,24 @@ struct ImuData
     float temperature;
 };
 
-enum XL_Config : uint8_t {
+enum XL_Config : uint8_t
+{
     G2_CONFIG = 0b11110000,
     G16_CONFIG = 0b11110100,
     G4_CONFIG = 0b11111000,
     G8_CONFIG = 0b11111100
 };
 
-enum Gyro_Config : uint8_t { // Also capable of 125 and 4000 dps
+enum Gyro_Config : uint8_t
+{  // Also capable of 125 and 4000 dps
     DPS250_CONFIG = 0b11110000,
     DPS500_CONFIG = 0b11110100,
     DPS1000_CONFIG = 0b11111000,
     DPS2000_CONFIG = 0b11111100
 };
 
-enum ODR : uint8_t { // Only includes high power
+enum ODR : uint8_t
+{  // Only includes high power
     ODR_416HZ = 0b01101111,
     ODR_833HZ = 0b01111111,
     ODR_1660HZ = 0b10001111,
@@ -88,11 +93,11 @@ enum ODR : uint8_t { // Only includes high power
     ODR_6660HZ = 0b10101111
 };
 
-#define READ_LENGTH 14 
+#define READ_LENGTH 14
 
 static constexpr float TEMPERATURE_OFFSET = 25.0f;
 static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;
 
-}  // namespace aruwsrc::communication::sensors::ism330
+}  // namespace aruwsrc::communication::sensors::imu
 
-#endif //ISM330_DATA_HPP_
+#endif  // ISM330_DATA_HPP_

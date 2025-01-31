@@ -20,18 +20,18 @@
 #ifndef ISM330_HPP_
 #define ISM330_HPP_
 
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
-#include "modm/processing/resumable.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+
 #include "modm/architecture/interface/i2c_device.hpp"
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
+#include "modm/processing/resumable.hpp"
 
 #include "ism330_data.hpp"
 
 namespace aruwsrc::communication::sensors::imu
 {
-
 template <class I2cMaster>
 class ISM330 : public modm::I2cDevice<I2cMaster>
 {
@@ -40,11 +40,8 @@ public:
 
     void init()
     {
-        // setAccelRange(2);
-        // setGyroRange(250);
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, G8_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, DPS2000_CONFIG));
-
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ODR_6660HZ & G8_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, ODR_6660HZ & DPS2000_CONFIG));
 
         // Check Who Am I
         RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
@@ -67,54 +64,36 @@ public:
         {
             return;
         }
-        // RF_CALL_BLOCKING(readRegister(OUT_TEMP_H, READ_LENGTH, rxBuff + 1));
-        imuData.temperature = (bigEndianInt16ToFloat(rxBuff) / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
+        imuData.temperature = tempValueToCelsius(rxBuff);
 
-        // // Read gyro
-        // RF_CALL_BLOCKING(readRegister(OUTX_L_G, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTX_H_G, READ_LENGTH, rxBuff + 1));
         imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
-
-        // RF_CALL_BLOCKING(readRegister(OUTY_L_G, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTY_H_G, READ_LENGTH, rxBuff + 1));
         imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff + 4);
-
-        // RF_CALL_BLOCKING(readRegister(OUTZ_L_G, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTZ_H_G, READ_LENGTH, rxBuff + 1));
         imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff + 6);
 
-        // // Read accel
-        // RF_CALL_BLOCKING(readRegister(OUTX_L_XL, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTX_H_XL, READ_LENGTH, rxBuff + 1));
         imuData.accRaw[ImuData::X] = accelValueToG(rxBuff + 8);
-
-        // RF_CALL_BLOCKING(readRegister(OUTY_L_XL, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTY_H_XL, READ_LENGTH, rxBuff + 1));
         imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff + 10);
-
-        // RF_CALL_BLOCKING(readRegister(OUTZ_L_XL, READ_LENGTH, rxBuff));
-        // RF_CALL_BLOCKING(readRegister(OUTZ_H_XL, READ_LENGTH, rxBuff + 1));
         imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff + 12);
     }
 
-    void setAccelRange(int num) { // Takes in num in g
-        uint8_t current_reg;
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg));
-        switch(num) {
-            case 2:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G2_CONFIG));
+    void setAccelRange(XL_Config xl_config)
+    {
+        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
+        switch (xl_config)
+        {
+            case G2_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G2_CONFIG));
                 accelScale = 0.061;
                 break;
-            case 4:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G4_CONFIG));
+            case G4_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G4_CONFIG));
                 accelScale = 0.122;
                 break;
-            case 8:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G8_CONFIG));
+            case G8_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G8_CONFIG));
                 accelScale = 0.244;
                 break;
-            case 16:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg & G16_CONFIG));
+            case G16_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G16_CONFIG));
                 accelScale = 0.488;
                 break;
             default:
@@ -122,24 +101,25 @@ public:
         }
     }
 
-    void setGyroRange(int num) { // Takes in num in dps
-        uint8_t current_reg;
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg));
-        switch(num) {
-            case 250:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS250_CONFIG));
+    void setGyroRange(Gyro_Config g_config)
+    {
+        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
+        switch (g_config)
+        {
+            case DPS250_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS250_CONFIG));
                 gyroScale = 8.75;
                 break;
-            case 500:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS500_CONFIG));
+            case DPS500_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS500_CONFIG));
                 gyroScale = 17.50;
                 break;
-            case 1000:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS1000_CONFIG));
+            case DPS1000_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS1000_CONFIG));
                 gyroScale = 35;
                 break;
-            case 2000:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg & DPS2000_CONFIG));
+            case DPS2000_CONFIG:
+                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS2000_CONFIG));
                 gyroScale = 70;
                 break;
             default:
@@ -147,33 +127,33 @@ public:
         }
     }
 
-    void updateODR(int num) { // Takes in ODR in Hz
-        uint8_t current_reg_G;
+    void updateODR(ODR odr)
+    {  // Takes in ODR in Hz
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg_G));
-        uint8_t current_reg_XL;
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL));
-        switch(num) {
-            case 416:
+        switch (odr)
+        {
+            case ODR_416HZ:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_416HZ));
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_416HZ));
                 timeout = 3;
                 break;
-            case 833:
+            case ODR_833HZ:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_833HZ));
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_833HZ));
                 timeout = 2;
                 break;
-            case 1660:
+            case ODR_1660HZ:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_1660HZ));
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_1660HZ));
                 timeout = 1;
                 break;
-            case 3330:
+            case ODR_3330HZ:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_3330HZ));
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_3330HZ));
                 timeout = 1;
                 break;
-            case 6660:
+            case ODR_6660HZ:
                 RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_6660HZ));
                 RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_6660HZ));
                 timeout = 1;
@@ -183,7 +163,7 @@ public:
         }
     }
 
-    ImuData imuData; // TODO: remove
+    ImuData imuData;  // TODO: remove
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -219,6 +199,9 @@ private:
 
     int timeout = 2;
 
+    uint8_t current_reg_G;
+    uint8_t current_reg_XL;
+
     tap::arch::PeriodicMilliTimer updateTimeout;
 
     // ImuData imuData;
@@ -247,7 +230,13 @@ private:
         float raw = bigEndianInt16ToFloat(buff);
         return raw * gyroScale / 1000.0f;
     }
+
+    float tempValueToCelsius(const uint8_t *buff)
+    {
+        float raw = bigEndianInt16ToFloat(buff);
+        return (raw / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
+    }
 };
-} // namespace aruwsrc::communication::sensors::imu
+}  // namespace aruwsrc::communication::sensors::imu
 
 #endif  // ISM330_HPP_
