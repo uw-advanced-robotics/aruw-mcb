@@ -29,7 +29,7 @@ namespace aruwsrc
 namespace algorithms
 {
 Wheel::Wheel(float diameter, float gearRatio, float motorGearRatio)
-    : circumference(diameter * M_PI),
+    : circumference(diameter * static_cast<float>(M_PI)),
       gearRatio(gearRatio),
       motorGearRatio(motorGearRatio)
 {

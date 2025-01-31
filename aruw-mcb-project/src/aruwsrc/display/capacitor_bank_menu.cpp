@@ -97,6 +97,6 @@ void CapacitorBankMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 
-bool CapacitorBankMenu::hasChanged() { return changed; }
+bool CapacitorBankMenu::hasChanged() { return changed && updateTimer.execute(); }
 
 }  // namespace aruwsrc::display

@@ -75,13 +75,13 @@ modm::ResumableResult<bool> TextHudIndicators::update()
         }
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> TextHudIndicators::sendInitialGraphics()
 {
     RF_BEGIN(1);
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void TextHudIndicators::initialize()

@@ -104,7 +104,8 @@ void CommandSchedulerMenu::draw()
     std::for_each(
         drivers->commandScheduler.subMapBegin(),
         drivers->commandScheduler.subMapEnd(),
-        [&](control::Subsystem *sub) {
+        [&](control::Subsystem *sub)
+        {
             if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
                 index <= vertScrollHandler.getLargestIndexDisplayed())
             {
@@ -121,7 +122,8 @@ void CommandSchedulerMenu::draw()
     std::for_each(
         drivers->commandScheduler.cmdMapBegin(),
         drivers->commandScheduler.cmdMapEnd(),
-        [&](control::Command *cmd) {
+        [&](control::Command *cmd)
+        {
             // Only display stuff within bounds of the scroll handler.
             if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
                 index <= vertScrollHandler.getLargestIndexDisplayed())

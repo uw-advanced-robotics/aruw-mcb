@@ -43,18 +43,18 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = static_cast<float>(M_PI_2),
     .startEncoderValue = 0,
     .minAngle = 0,
-    .maxAngle = M_PI,
+    .maxAngle = static_cast<float>(M_PI),
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
+    .startAngle = static_cast<float>(M_PI_2),
     .startEncoderValue = 0,
     .minAngle = 0,
-    .maxAngle = M_PI,
+    .maxAngle = static_cast<float>(M_PI),
     .limitMotorAngles = true,
 };
 

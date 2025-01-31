@@ -47,7 +47,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::sendInitialGraphics()
     turretAnglesGraphic.graphicData.operation = Tx::GRAPHIC_MODIFY;
     RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesLabelGraphics));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> TurretAnglesIndicator::update()
@@ -69,7 +69,7 @@ modm::ResumableResult<bool> TurretAnglesIndicator::update()
         prevPitch = pitch;
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void TurretAnglesIndicator::initialize()

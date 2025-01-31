@@ -44,13 +44,13 @@ modm::ResumableResult<bool> ReticleIndicator::sendInitialGraphics()
         RF_CALL(refSerialTransmitter.sendGraphic(&reticleMsg[reticleIndex]));
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> ReticleIndicator::update()
 {
     RF_BEGIN(1);
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void ReticleIndicator::initialize()

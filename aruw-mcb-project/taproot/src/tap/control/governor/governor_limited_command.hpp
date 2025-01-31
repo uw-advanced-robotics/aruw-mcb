@@ -52,9 +52,10 @@ public:
         : command(command),
           commandGovernorList(commandGovernorList)
     {
-        std::for_each(subRequirements.begin(), subRequirements.end(), [&](auto sub) {
-            addSubsystemRequirement(sub);
-        });
+        std::for_each(
+            subRequirements.begin(),
+            subRequirements.end(),
+            [&](auto sub) { addSubsystemRequirement(sub); });
         assert(command.getRequirementsBitwise() == this->getRequirementsBitwise());
     }
 
