@@ -7,7 +7,7 @@ namespace aruwsrc::robot::engineer
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR1;  //TODO: UPDATE W CORRECT VALUE
  
 
-static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2; // update
+static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2; // TODO: UPDATE W CORRECT VALUE
 
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D; //TODO: UPDATE W CORRECT VALUE
 
