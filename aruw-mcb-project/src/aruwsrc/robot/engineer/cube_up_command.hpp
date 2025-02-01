@@ -16,8 +16,8 @@
 * You should have received a copy of the GNU General Public License
 * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef CUBE_MOVE_COMMAND_HPP_
-#define CUBE_MOVE_COMMAND_HPP_
+#ifndef CUBE_UP_COMMAND_HPP_
+#define CUBE_UP_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 #include "cube_storage_subsystem.hpp"
@@ -26,10 +26,12 @@ namespace aruwsrc::robot::engineer
 
 {
 
-class CubeMoveCommand : public tap::control::Command
+class CubeUpCommand : public tap::control::Command
 {
 public: 
-    CubeMoveCommand(CubeStorageSubsystem &cubeLift);
+    CubeUpCommand(CubeStorageSubsystem &cubeLift);
+    int32_t power = 1;
+
 
     void initialize() override;
 
@@ -39,8 +41,12 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "Cube Move Command"; }
-};  // class CubeMoveCommand
+    const char* getName() const override { return "Cube Up Command"; }
+
+private:
+    CubeStorageSubsystem &cubeLift;
+ 
+};  // class CubeUpCommand
 
 }  // NAMESPACE
-#endif  // CUBE_MOVE_COMMAND_HPP_
+#endif  // CUBE_UP_COMMAND_HPP_
