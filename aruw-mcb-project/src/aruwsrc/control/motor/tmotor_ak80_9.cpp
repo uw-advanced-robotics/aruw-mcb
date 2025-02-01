@@ -125,9 +125,8 @@ bool Tmotor_AK809::sendCanMessage()
     modm::can::Message message(
         (uint32_t)(motorIdentifier) |
             ((uint32_t)0x01 << 8),  // the 01 in LSByte 2 sets motor to current mode
-        CAN_TMOTOR_MESSAGE_SEND_LENGTH,
-        0,
-        true);
+        CAN_TMOTOR_MESSAGE_SEND_LENGTH);
+    message.setExtended();
     message.setRemoteTransmitRequest(false);
 
     message.data[0] = desiredOutput >> 24;
@@ -156,9 +155,8 @@ bool Tmotor_AK809::sendPositionHomeResetMessage() const
     modm::can::Message homingMessage(
         (uint32_t)(motorIdentifier) |
             ((uint32_t)0x05 << 8),  // the 05 in LSByte 2 sets motor to pos home mode
-        8,                          // data length is 8 as per the protocol
-        0,
-        true);
+        8);
+    homingMessage.setExtended();
     homingMessage.data[0] = 0x1;  // sets the permanent origin
     return drivers->can.sendMessage(motorCanBus, homingMessage);
 }
@@ -168,9 +166,8 @@ bool Tmotor_AK809::sendPositionHomeGetMessage() const
     modm::can::Message homingMessage(
         (uint32_t)(motorIdentifier) |
             ((uint32_t)0x05 << 8),  // the 05 in LSByte 2 sets motor to pos home mode
-        8,                          // data length is 8 as per the protocol
-        0,
-        true);
+        8);                         // data length is 8 as per the protocol
+    homingMessage.setExtended();
     homingMessage.data[0] = 0x2;  // gets the permanent origin
     return drivers->can.sendMessage(motorCanBus, homingMessage);
 }

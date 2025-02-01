@@ -115,7 +115,7 @@ public:
      */
     float getPositionUnwrapped() const
     {
-        return ((getEncoderUnwrapped()) / ((float)ENC_RESOLUTION)) * M_TWOPI;
+        return ((getEncoderUnwrapped()) / ((float)ENC_RESOLUTION)) * static_cast<float>(M_TWOPI);
     };
 
     /***
@@ -123,7 +123,7 @@ public:
      */
     float getPositionWrapped() const
     {
-        return (getEncoderWrapped()) / ((float)ENC_RESOLUTION) * M_TWOPI;
+        return (getEncoderWrapped()) / ((float)ENC_RESOLUTION) * static_cast<float>(M_TWOPI);
     };
 
     DISALLOW_COPY_AND_ASSIGN(Tmotor_AK809)
