@@ -107,7 +107,7 @@ public:
 
     float mpsToRpm(float mps) const override
     {
-        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
+        return mps / (static_cast<float>(M_TWOPI) * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
     }
 
 protected:

@@ -42,7 +42,7 @@ ChassisImuDriveCommand::ChassisImuDriveCommand(
       operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
-      rotationSetpoint(0, 0, M_TWOPI)
+      rotationSetpoint(0, 0, static_cast<float>(M_TWOPI))
 {
     addSubsystemRequirement(chassis);
 }

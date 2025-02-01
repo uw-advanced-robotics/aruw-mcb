@@ -48,6 +48,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     TransformerInterface *transformer,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
+      Fiber([this] { run(); }),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
       commandScheduler(commandScheduler),
@@ -100,50 +101,44 @@ void ClientDisplayCommand::restartHud()
     this->restarting = false;
 }
 
-void ClientDisplayCommand::execute() { run(); }
+void ClientDisplayCommand::execute() {}
 
 bool ClientDisplayCommand::run()
 {
-    // The thread has exited the loop, meaning that there are no locked resources
-    if (!this->isRunning())
-    {
-        // Restart the thread
-        restart();
-        // Reset the HUD elements
-        this->restartHud();
-    }
-
     PT_BEGIN();
-
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
-    PT_CALL(capBankIndicator.sendInitialGraphics());
-    PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(ammoIndicator.sendInitialGraphics());
-    PT_CALL(circleCrosshair.sendInitialGraphics());
-    PT_CALL(damageIndicator.sendInitialGraphics());
-    PT_CALL(textHudIndicators.sendInitialGraphics());
-    PT_CALL(visionTargetIndicator.sendInitialGraphics());
-
-    // If we try to restart the hud, break out of the loop
-    while (!this->restarting)
+    while (true)
     {
-        startTime = tap::arch::clock::getTimeMicroseconds();
-        PT_CALL(capBankIndicator.update());
-        PT_CALL(positionHudIndicators.update());
-        PT_CALL(ammoIndicator.update());
-        PT_CALL(circleCrosshair.update());
-        PT_CALL(damageIndicator.update());
-        PT_CALL(textHudIndicators.update());
-        PT_CALL(visionTargetIndicator.update());
+        // Reset the HUD elements
+        this->restartHud();
 
-        // Calculate the time it took to update the HUD
-        this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
+        PT_CALL(capBankIndicator.sendInitialGraphics());
+        PT_CALL(positionHudIndicators.sendInitialGraphics());
+        PT_CALL(ammoIndicator.sendInitialGraphics());
+        PT_CALL(circleCrosshair.sendInitialGraphics());
+        PT_CALL(damageIndicator.sendInitialGraphics());
+        PT_CALL(textHudIndicators.sendInitialGraphics());
+        PT_CALL(visionTargetIndicator.sendInitialGraphics());
 
-        PT_YIELD();
+        // If we try to restart the hud, break out of the loop
+        while (!this->restarting)
+        {
+            startTime = tap::arch::clock::getTimeMicroseconds();
+            PT_CALL(capBankIndicator.update());
+            PT_CALL(positionHudIndicators.update());
+            PT_CALL(ammoIndicator.update());
+            PT_CALL(circleCrosshair.update());
+            PT_CALL(damageIndicator.update());
+            PT_CALL(textHudIndicators.update());
+            PT_CALL(visionTargetIndicator.update());
+
+            // Calculate the time it took to update the HUD
+            this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
+
+            PT_YIELD();
+        }
     }
-    // Breaking out of the loop successfully calls this method,
-    // allowing us to know that all execution is over.
     PT_END();
 }
 

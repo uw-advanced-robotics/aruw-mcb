@@ -81,14 +81,14 @@ public:
      *  0 Rotation corresponds with a 0 rotation of the chassis
      */
     // MCB has power inlet facing forward
-    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+    static constexpr float MCB_ROTATION_OFFSET = -static_cast<float>(M_PI_2);
 #elif defined(TARGET_SENTRY_HYDRA)
     // MCB is on a diagonal
     // @todo: ensure this is correct
     static constexpr float MCB_ROTATION_OFFSET = 0;
 #else
     // MCB has power inlet facing backwards
-    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
+    static constexpr float MCB_ROTATION_OFFSET = static_cast<float>(M_PI_2);
 #endif
 
     enum class FireRate : uint8_t

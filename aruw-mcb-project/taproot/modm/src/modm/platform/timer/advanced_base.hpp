@@ -39,9 +39,6 @@ public:
 	//configureOutputChannel(uint32_t channel, OutputCompareMode mode,
 	//		uint16_t compareValue);
 
-	// TODO Repetition Counter (TIM1_RCR)
-
-
 	enum class MasterMode : uint32_t
 	{
 		Reset 			= 0,							// 0b000
@@ -102,18 +99,6 @@ public:
 	{
 		Reset = 0,
 		Set   = TIM_CR2_OIS1,
-	};
-
-	enum class Event : uint32_t
-	{
-		Break 						= TIM_EGR_BG,
-		Trigger 					= TIM_EGR_TG,
-		CaptureCompareControlUpdate = TIM_EGR_COMG,
-		CaptureCompare4 			= TIM_EGR_CC4G,
-		CaptureCompare3 			= TIM_EGR_CC3G,
-		CaptureCompare2 			= TIM_EGR_CC2G,
-		CaptureCompare1 			= TIM_EGR_CC1G,
-		Update 						= TIM_EGR_UG,
 	};
 };
 
