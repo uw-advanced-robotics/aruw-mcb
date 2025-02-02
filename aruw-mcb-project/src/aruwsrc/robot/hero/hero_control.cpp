@@ -340,7 +340,7 @@ GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
     true);
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, static_cast<float>(M_PI));
 
 GovernorLimitedCommand<1> turretUTurnCommandLimited(
     {&turret},

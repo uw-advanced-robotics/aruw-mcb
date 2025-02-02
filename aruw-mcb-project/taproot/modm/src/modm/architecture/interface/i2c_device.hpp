@@ -80,6 +80,46 @@ public:
 		RF_END_RETURN( wasTransactionSuccessful() );
 	}
 
+	/// Starts a write-read transaction and waits until finished.
+	modm::ResumableResult<bool>
+	writeRead(const uint8_t *writeBuffer, std::size_t writeSize,
+			  uint8_t *readBuffer, std::size_t readSize)
+	{
+		RF_BEGIN();
+
+		RF_WAIT_UNTIL( startWriteRead(writeBuffer, writeSize, readBuffer, readSize) );
+
+		RF_WAIT_WHILE( isTransactionRunning() );
+
+		RF_END_RETURN( wasTransactionSuccessful() );
+	}
+
+	/// Starts a write transaction and waits until finished.
+	modm::ResumableResult<bool>
+	write(const uint8_t *buffer, std::size_t size)
+	{
+		RF_BEGIN();
+
+		RF_WAIT_UNTIL( startWrite(buffer, size) );
+
+		RF_WAIT_WHILE( isTransactionRunning() );
+
+		RF_END_RETURN( wasTransactionSuccessful() );
+	}
+
+	/// Starts a write transaction and waits until finished.
+	modm::ResumableResult<bool>
+	read(uint8_t *buffer, std::size_t size)
+	{
+		RF_BEGIN();
+
+		RF_WAIT_UNTIL( startRead(buffer, size) );
+
+		RF_WAIT_WHILE( isTransactionRunning() );
+
+		RF_END_RETURN( wasTransactionSuccessful() );
+	}
+
 protected:
 	/// Configures the transaction with a write/read operation and starts it.
 	bool inline
@@ -114,7 +154,7 @@ protected:
 		return startTransaction(&this->transaction);
 	}
 
-	/// Starts the transaction with a seperate transaction object.
+	/// Starts the transaction with a separate transaction object.
 	bool inline
 	startTransaction(modm::I2cTransaction *transaction)
 	{

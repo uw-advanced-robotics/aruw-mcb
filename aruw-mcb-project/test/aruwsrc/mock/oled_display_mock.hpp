@@ -42,7 +42,6 @@ public:
         aruwsrc::virtualMCB::MCBLite *mcbLite2);
     virtual ~OledDisplayMock();
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(bool, updateDisplay, (), (override));
     MOCK_METHOD(void, updateMenu, (), (override));
 };  // class OledDisplayMock
 }  // namespace mock

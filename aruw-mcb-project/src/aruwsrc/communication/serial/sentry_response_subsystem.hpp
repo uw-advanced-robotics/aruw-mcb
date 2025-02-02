@@ -52,7 +52,7 @@ public:
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override { stop(); }
+    void refreshSafeDisconnect() override { request_stop(); }
 
 private:
     tap::Drivers &drivers;

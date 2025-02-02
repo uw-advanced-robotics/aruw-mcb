@@ -54,17 +54,18 @@ modm::ResumableResult<bool> DamageIndicator::update()
     hitAngleRadian = peakAngleBin.radians.getWrappedValue() - turretSubsystem.getWorldYaw();
 
     // Normalize angle to be between 0 and 2pi
-    hitAngleRadian = fmod(hitAngleRadian, 2 * M_PI);
+    hitAngleRadian = fmod(hitAngleRadian, 2 * static_cast<float>(M_PI));
     if (hitAngleRadian < 0)
     {
-        hitAngleRadian += 2 * M_PI;
+        hitAngleRadian += 2 * static_cast<float>(M_PI);
     }
 
     prevOperation = damageGraphic.graphicData.operation;
 
     // If the damage is old or the angle is within +-45 deg
     if (decayTimeout.isExpired() || decayTimeout.isStopped() ||
-        (fmod(hitAngleRadian + CENTER_THRESHOLD, 2 * M_PI) < CENTER_THRESHOLD * 2))
+        (fmod(hitAngleRadian + CENTER_THRESHOLD, 2 * static_cast<float>(M_PI)) <
+         CENTER_THRESHOLD * 2))
     {
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
@@ -98,13 +99,13 @@ modm::ResumableResult<bool> DamageIndicator::update()
 
     RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void DamageIndicator::initialize()

@@ -69,7 +69,7 @@ class ClientDisplaySubsystem;
  * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
  * instantiated, this will lead to undefined behavior.
  */
-class ClientDisplayCommand : public tap::control::Command, ::modm::pt::Protothread
+class ClientDisplayCommand : public tap::control::Command, ::modm::Fiber<2048>
 {
 public:
     /**

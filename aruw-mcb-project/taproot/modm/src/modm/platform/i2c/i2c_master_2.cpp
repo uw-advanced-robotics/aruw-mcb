@@ -588,7 +588,7 @@ MODM_ISR(I2C2_ER)
 // ----------------------------------------------------------------------------
 
 void
-modm::platform::I2cMaster2::initializeWithPrescaler(uint8_t peripheralFrequency, uint8_t riseTime, uint16_t prescaler)
+modm::platform::I2cMaster2::initializeWithPrescaler(uint8_t peripheralFrequency, uint8_t riseTime, uint16_t prescaler, uint8_t isrPriority)
 {
 	// no reset, since we want to keep the transaction attached!
 
@@ -597,9 +597,9 @@ modm::platform::I2cMaster2::initializeWithPrescaler(uint8_t peripheralFrequency,
 	I2C2->CR1 = I2C_CR1_SWRST; 		// reset module
 	I2C2->CR1 = 0;
 
-	NVIC_SetPriority(I2C2_ER_IRQn, 10);
+	NVIC_SetPriority(I2C2_ER_IRQn, isrPriority);
 	NVIC_EnableIRQ(I2C2_ER_IRQn);
-	NVIC_SetPriority(I2C2_EV_IRQn, 10);
+	NVIC_SetPriority(I2C2_EV_IRQn, isrPriority);
 	NVIC_EnableIRQ(I2C2_EV_IRQn);
 
 	I2C2->CR2 = peripheralFrequency;
