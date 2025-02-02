@@ -20,6 +20,7 @@
 #ifndef OUTPUT_SWEEP_COMMAND_HPP_
 #define OUTPUT_SWEEP_COMMAND_HPP_
 
+#include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
 
@@ -32,6 +33,8 @@ class OutputSweepCommand : public tap::control::Command
 public:
     explicit OutputSweepCommand(
         RawMotorSubsystem* subsystem,
+        tap::gpio::Digital& digital,
+        tap::gpio::Digital::OutputPin outputPin,
         int32_t minOutput,
         int32_t maxOutput,
         uint32_t levelLengthMillis,
@@ -50,6 +53,8 @@ public:
 
 private:
     RawMotorSubsystem* motorSubsystem;
+    tap::gpio::Digital& digital;
+    tap::gpio::Digital::OutputPin outputPin;
     int32_t minOutput, maxOutput;
     uint32_t levelLengthMillis;
     int32_t levelIncrement;

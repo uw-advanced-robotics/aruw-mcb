@@ -21,12 +21,16 @@
 
 OutputSweepCommand::OutputSweepCommand(
     RawMotorSubsystem* subsystem,
+    tap::gpio::Digital& digital,
+    tap::gpio::Digital::OutputPin outputPin,
     int32_t minOutput,
     int32_t maxOutput,
     uint32_t levelLengthMillis,
     int32_t levelIncrement,
     int32_t dir)
     : motorSubsystem(subsystem),
+      digital(digital),
+      outputPin(outputPin),
       minOutput(minOutput),
       maxOutput(maxOutput),
       levelLengthMillis(levelLengthMillis),
@@ -46,11 +50,14 @@ void OutputSweepCommand::execute()
         endTime = (maxOutput - minOutput) / levelIncrement * levelLengthMillis + startTime;
     }
 
-    currentOutput = ((currTime - startTime) / levelLengthMillis) * levelIncrement + minOutput;
+    uint8_t levelIndex = ((currTime - startTime) / levelLengthMillis);
+
+    currentOutput = levelIndex * levelIncrement + minOutput;
 
     if (currentOutput > maxOutput) return;
 
     motorSubsystem->setDesiredOutput(currentOutput * dir);
+    digital.set(outputPin, levelIndex % 2 == 0);
 }
 
 void OutputSweepCommand::end(bool) { motorSubsystem->stop(); }
