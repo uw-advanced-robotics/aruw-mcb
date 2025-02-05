@@ -40,8 +40,8 @@ public:
 
     void init()
     {
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ODR_6660HZ | G8_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, ODR_6660HZ | DPS2000_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (uint8_t) ODR_6660HZ | (uint8_t) G8_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (uint8_t) ODR_6660HZ | (uint8_t) DPS2000_CONFIG));
 
         // Check Who Am I
         RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
@@ -79,7 +79,7 @@ public:
     {
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
 
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & G_CONFIG_BITMASK) | xl_config));
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL &  (uint8_t) G_CONFIG_BITMASK) | (uint8_t) xl_config));
         switch (xl_config)
         {
             case G2_CONFIG:
@@ -103,7 +103,7 @@ public:
     {
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
 
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & DPS_CONFIG_BITMASK) | g_config));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & (uint8_t) DPS_CONFIG_BITMASK) | (uint8_t) g_config));
         switch (g_config)
         {
             case DPS250_CONFIG:
@@ -128,8 +128,8 @@ public:
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg_G));
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL));
 
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & ODR_BITMASK) | odr));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & ODR_BITMASK) | odr));
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t) ODR_BITMASK) | (uint8_t) odr));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & (uint8_t) ODR_BITMASK) | (uint8_t) odr));
         switch (odr)
         {
             case ODR_416HZ:
