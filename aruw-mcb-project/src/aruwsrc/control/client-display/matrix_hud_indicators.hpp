@@ -145,7 +145,8 @@ private:
 #if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\nCONST\n10Hz\n20Hz\nMAX\n"},
 #endif
-            {"CV  ", "GATE\nNOGT\nOFFL"}};
+            {"CV  ", "GATE\nNOGT\nOFFL"}
+        };
 
     /** Enum representing different states that the shooting mechanism can be in. Corresponds to
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[FIRING_MODE]. */

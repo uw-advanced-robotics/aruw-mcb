@@ -45,5 +45,5 @@ SentryStrategyMenu::SentryStrategyMenu(
         false);
 }
 
-void SentryStrategyMenu::openNextScreen() {};
+void SentryStrategyMenu::openNextScreen(){};
 }  // namespace aruwsrc::display

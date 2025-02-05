@@ -103,46 +103,44 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    modm::Fiber<2048> ioFiber(
-        [&]
+    modm::Fiber<2048> ioFiber([&] {
+        while (1)
         {
-            while (1)
-            {
-                // do this as fast as you can
-                PROFILE(drivers->profiler, updateIo, (drivers));
+            // do this as fast as you can
+            PROFILE(drivers->profiler, updateIo, (drivers));
 
-                if (sendMotorTimeout.execute())
-                {
-                    PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-                    PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-                    PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+            if (sendMotorTimeout.execute())
+            {
+                PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+                PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+                PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-                    ((Drivers *)drivers)->plateHitTracker.update();
+                PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+                ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-                    PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-                    PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+                PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+                PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+                PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-                    checkTurretMcbDisconnection(drivers);
+                checkTurretMcbDisconnection(drivers);
 #endif
-                }
-                modm::this_fiber::sleep_for(10us);
             }
-        });
+            modm::this_fiber::sleep_for(10us);
+        }
+    });
 
     modm::fiber::Scheduler::run();
     return 0;
