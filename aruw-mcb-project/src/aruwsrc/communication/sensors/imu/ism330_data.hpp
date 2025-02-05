@@ -74,7 +74,7 @@ enum XL_Config : uint8_t
     G16_CONFIG = (0x01 << 2) | 0x0,
     G4_CONFIG = (0x10 << 2) | 0x0,
     G8_CONFIG = (0x11 << 2) | 0x0,
-    G_BITMASK = 0b11110011
+    G_CONFIG_BITMASK = 0b11110011
 };
 
 enum Gyro_Config : uint8_t
@@ -83,7 +83,7 @@ enum Gyro_Config : uint8_t
     DPS500_CONFIG = (0x01 << 2) | 0x0,
     DPS1000_CONFIG = (0x10 << 2) | 0x0,
     DPS2000_CONFIG = (0x11 << 2) | 0x0,
-    DPS_BITMASK = 0b11110011
+    DPS_CONFIG_BITMASK = 0b11110011
 };
 
 enum ODR : uint8_t

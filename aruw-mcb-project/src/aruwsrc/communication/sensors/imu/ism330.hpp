@@ -40,8 +40,8 @@ public:
 
     void init()
     {
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ODR_6660HZ & G8_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, ODR_6660HZ & DPS2000_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ODR_6660HZ | G8_CONFIG));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, ODR_6660HZ | DPS2000_CONFIG));
 
         // Check Who Am I
         RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
@@ -78,22 +78,20 @@ public:
     void setAccelRange(XL_Config xl_config)
     {
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
+
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & G_CONFIG_BITMASK) | xl_config));
         switch (xl_config)
         {
             case G2_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G2_CONFIG));
                 accelScale = 0.061;
                 break;
             case G4_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G4_CONFIG));
                 accelScale = 0.122;
                 break;
             case G8_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G8_CONFIG));
                 accelScale = 0.244;
                 break;
             case G16_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & G16_CONFIG));
                 accelScale = 0.488;
                 break;
             default:
@@ -104,22 +102,20 @@ public:
     void setGyroRange(Gyro_Config g_config)
     {
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
+
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & DPS_CONFIG_BITMASK) | g_config));
         switch (g_config)
         {
             case DPS250_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS250_CONFIG));
                 gyroScale = 8.75;
                 break;
             case DPS500_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS500_CONFIG));
                 gyroScale = 17.50;
                 break;
             case DPS1000_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS1000_CONFIG));
                 gyroScale = 35;
                 break;
             case DPS2000_CONFIG:
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & DPS2000_CONFIG));
                 gyroScale = 70;
                 break;
             default:
@@ -131,31 +127,24 @@ public:
     {  // Takes in ODR in Hz
         RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg_G));
         RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL));
+
+        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & ODR_BITMASK) | odr));
+        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & ODR_BITMASK) | odr));
         switch (odr)
         {
             case ODR_416HZ:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_416HZ));
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_416HZ));
                 timeout = 3;
                 break;
             case ODR_833HZ:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_833HZ));
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_833HZ));
                 timeout = 2;
                 break;
             case ODR_1660HZ:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_1660HZ));
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_1660HZ));
                 timeout = 1;
                 break;
             case ODR_3330HZ:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_3330HZ));
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_3330HZ));
                 timeout = 1;
                 break;
             case ODR_6660HZ:
-                RF_CALL_BLOCKING(writeRegister(CTRL1_XL, current_reg_XL & ODR_6660HZ));
-                RF_CALL_BLOCKING(writeRegister(CTRL2_G, current_reg_G & ODR_6660HZ));
                 timeout = 1;
                 break;
             default:
