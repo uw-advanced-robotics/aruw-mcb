@@ -70,27 +70,30 @@ struct ImuData
 
 enum XL_Config : uint8_t
 {
-    G2_CONFIG = 0b11110000,
-    G16_CONFIG = 0b11110100,
-    G4_CONFIG = 0b11111000,
-    G8_CONFIG = 0b11111100
+    G2_CONFIG = (0x00 << 2) | 0x0,
+    G16_CONFIG = (0x01 << 2) | 0x0,
+    G4_CONFIG = (0x10 << 2) | 0x0,
+    G8_CONFIG = (0x11 << 2) | 0x0,
+    G_BITMASK = 0b11110011
 };
 
 enum Gyro_Config : uint8_t
 {  // Also capable of 125 and 4000 dps
-    DPS250_CONFIG = 0b11110000,
-    DPS500_CONFIG = 0b11110100,
-    DPS1000_CONFIG = 0b11111000,
-    DPS2000_CONFIG = 0b11111100
+    DPS250_CONFIG = (0x00 << 2) | 0x0,
+    DPS500_CONFIG = (0x01 << 2) | 0x0,
+    DPS1000_CONFIG = (0x10 << 2) | 0x0,
+    DPS2000_CONFIG = (0x11 << 2) | 0x0,
+    DPS_BITMASK = 0b11110011
 };
 
 enum ODR : uint8_t
 {  // Only includes high power
-    ODR_416HZ = 0b01101111,
-    ODR_833HZ = 0b01111111,
-    ODR_1660HZ = 0b10001111,
-    ODR_3330HZ = 0b10011111,
-    ODR_6660HZ = 0b10101111
+    ODR_416HZ = (0b0110 << 4) | 0x0,
+    ODR_833HZ = (0b0111 << 4) | 0x0,
+    ODR_1660HZ = (0b1000 << 4) | 0x0,
+    ODR_3330HZ = (0b1001 << 4) | 0x0,
+    ODR_6660HZ = (0b1010 << 4) | 0x0,
+    ODR_BITMASK = 0b00001111
 };
 
 #define READ_LENGTH 14
