@@ -22,13 +22,22 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command_scheduler.hpp"
 
+#include "tap/control/command_mapper.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+
+
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
+#include "aruwsrc/robot/engineer/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_up_command.hpp"
+#include "aruwsrc/robot/engineer/cube_down_command.hpp"
 using namespace tap::gpio;
 using tap::control::CommandMapper;
+using tap::communication::serial::Remote;
 using namespace aruwsrc::engineer;
+using namespace aruwsrc::robot::engineer;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -49,18 +58,47 @@ static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
 static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
 static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
+tap::motor::DjiMotor liftMotor(
+    drivers(),
+    CUBE_LIFT_MOTOR_ID,
+    LIFT_MOTOR_CAN_BUS,
+    false,
+    "Lifting Motor");
+
+
+
 /* define subsystems --------------------------------------------------------*/
 
-/* define commands ----------------------------------------------------------*/
 
+CubeStorageSubsystem cubeLift(drivers(), liftMotor);
+/* define commands ----------------------------------------------------------*/
+CubeUpCommand cubeUp(cubeLift);
+CubeDownCommand cubeDown(cubeLift);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::control::HoldCommandMapping rightSwitchUp(
+    drivers(),
+    {&cubeUp},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&cubeDown},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {}
+void initializeSubsystems() {
+    cubeLift.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *) {}
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
+{
+
+    drivers->commandScheduler.registerSubsystem(&cubeLift);
+}
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
@@ -69,7 +107,11 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers) {
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchDown);
+
+}
 }  // namespace control
 
 }  // namespace aruwsrc
