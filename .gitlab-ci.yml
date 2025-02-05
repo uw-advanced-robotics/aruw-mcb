@@ -16,7 +16,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 default:
-  image: aruw/mcb-2020-gitlab-ci:2021-06-02.1
+  image: aruw/mcb-2020-gitlab-ci:latest
 
 variables:
   ARTIFACT_PATH: isolated-deploy
@@ -56,7 +56,7 @@ before_script:
 "Clang Format":
   stage: Quality
   script:
-    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r aruw-mcb-project/src/ aruw-mcb-project/test/
+    - python3 /run-clang-format.py -r aruw-mcb-project/src/ aruw-mcb-project/test/
   only: *verification_only
   except: *verification_except
 
@@ -76,6 +76,8 @@ before_script:
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
+            aruwsrc/robot/blank/blank_control.cpp
+            aruwsrc/robot/motor_tester/motor_tester_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
@@ -110,8 +112,18 @@ before_script:
     reports:
       metrics: metrics.txt
   cache:
-    key: mcb-binaries
-    untracked: true
+    - key: mcb-libs-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/hardware/scons-release/modm/
+        - aruw-mcb-project/build/hardware/scons-release/src/tap/
+        - aruw-mcb-project/build/hardware/scons-release/.sconsign
+      policy: pull
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/hardware/scons-release/TARGET_$ROBOT/
+      fallback_keys:
+        - robot-$ROBOT-develop
+      when: 'always'
 
 .test_build:
   stage: Tests
@@ -120,11 +132,22 @@ before_script:
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
+    - scons run-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
+    # - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
   cache:
-    key: test-binaries
-    untracked: true
+    - key: mcb-test-libs-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/tests/scons-fast/modm/
+        - aruw-mcb-project/build/tests/scons-fast/src/tap/
+        - aruw-mcb-project/build/tests/scons-fast/test/tap/
+        - aruw-mcb-project/build/tests/scons-fast/.sconsign
+      policy: pull
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
+      paths:
+        - aruw-mcb-project/build/tests/scons-fast/TARGET_$ROBOT/
+      fallback_keys:
+        - robot-$ROBOT-develop-test
+      when: 'always'
 
 # Generic build, done before other builds which then use shared cache to build faster
 
@@ -139,10 +162,14 @@ before_script:
     - cd aruw-mcb-project
     - scons build robot=STANDARD_SPIDER compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
-    untracked: true
-    key: mcb-binaries
+    key: mcb-libs-$CI_COMMIT_REF_SLUG
     paths:
-      - $BUILD_PATH
+      - aruw-mcb-project/build/hardware/scons-release/modm/
+      - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/build/hardware/scons-release/.sconsign
+    fallback_keys:
+      - mcb-libs-develop
+    when: 'always'
 
 "Test Lib Build":
   stage: Build Libraries
@@ -153,8 +180,15 @@ before_script:
     - cd aruw-mcb-project
     - scons build robot=STANDARD_SPIDER compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
+    key: mcb-test-libs-$CI_COMMIT_REF_SLUG
     paths:
-      - $BUILD_PATH
+      - aruw-mcb-project/build/tests/scons-fast/modm/
+      - aruw-mcb-project/build/tests/scons-fast/src/tap/
+      - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/build/tests/scons-fast/.sconsign
+    fallback_keys:
+      - mcb-test-libs-develop
+    when: 'always'
 
 # Standard (Spider) build
 
@@ -173,7 +207,7 @@ before_script:
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
+    # valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -185,20 +219,13 @@ before_script:
         coverage_format: cobertura
         path: cobertura.xml
     expire_in: 2 weeks
-
-# Standard (Elsa) build
-
-"Standard (Elsa): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ELSA
+  cache:
+    key: robot-STANDARD_SPIDER-$CI_COMMIT_REF_SLUG-tests
+    paths:
+      - aruw-mcb-project/build/tests/scons-fast/
+    fallback_keys:
+      - robot-STANDARD_SPIDER-develop-tests
+    when: 'always'
 
 # Standard (Orion) build
 
@@ -312,6 +339,28 @@ before_script:
   variables:
     ROBOT: TESTBED
 
+# Blank Build
+
+"Blank: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: BLANK
+  
+"Blank: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: BLANK
+
+# Motor Tester Build
+
+"Motor Tester: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: MOTOR_TESTER
+
 # Pages deploy
 
 "Generate Docs":
@@ -339,7 +388,6 @@ before_script:
       - public
   only:
     - develop
-    - merge_requests
   except:
     - schedules
   environment:

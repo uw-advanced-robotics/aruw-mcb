@@ -189,18 +189,14 @@ protected:
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               compareFloatClose(
-                   0.0f,
-                   turret->yawMotor.getAngleFromCenter(),
-                   positionZeroThreshold) &&
+               (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+                positionZeroThreshold) &&
                (ignorePitch || (compareFloatClose(
                                     0.0f,
                                     turret->pitchMotor.getChassisFrameVelocity(),
                                     velocityZeroThreshold) &&
-                                compareFloatClose(
-                                    0.0f,
-                                    turret->pitchMotor.getAngleFromCenter(),
-                                    positionZeroThreshold)));
+                                (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(
+                                     0) < positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu

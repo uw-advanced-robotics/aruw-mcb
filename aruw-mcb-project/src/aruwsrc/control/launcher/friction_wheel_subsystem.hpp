@@ -32,6 +32,7 @@
 
 #include "modm/math/filter/pid.hpp"
 
+#include "friction_wheel_test_command.hpp"
 #include "launcher_constants.hpp"
 
 namespace aruwsrc
@@ -52,6 +53,8 @@ namespace aruwsrc::control::launcher
  */
 class FrictionWheelSubsystem : public tap::control::Subsystem
 {
+    friend class FrictionWheelTestCommand;
+
 public:
     /**
      * Creates a new friction wheel subsystem
@@ -98,12 +101,6 @@ public:
         rightWheel.setDesiredOutput(0);
     }
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
-    void onHardwareTestComplete() override;
-
     const char *getName() const override { return "Friction wheels"; }
 
 protected:
@@ -148,6 +145,8 @@ private:
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
+
+    FrictionWheelTestCommand frictionTestCommand;
 
     /**
      * @param[in] launchSpeed Some launch speed in m/s. The speed will be

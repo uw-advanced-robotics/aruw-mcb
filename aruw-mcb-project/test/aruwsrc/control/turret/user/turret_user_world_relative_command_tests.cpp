@@ -69,8 +69,8 @@ protected:
               1),
           currentYawValue(0, 0, M_TWOPI),
           currentPitchValue(0, 0, M_TWOPI),
-          yawSetpoint(0),
-          pitchSetpoint(0)
+          yawSetpoint(Angle(0)),
+          pitchSetpoint(Angle(0))
     {
     }
 
@@ -105,8 +105,8 @@ protected:
     TurretUserWorldRelativeCommand turretCmd;
     WrappedFloat currentYawValue;
     WrappedFloat currentPitchValue;
-    float yawSetpoint;
-    float pitchSetpoint;
+    WrappedFloat yawSetpoint;
+    WrappedFloat pitchSetpoint;
     bool turretOnline = false;
     bool turretMcbCanCommConnected = false;
     TurretMotorConfig config = {};

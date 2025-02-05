@@ -60,7 +60,8 @@ void ChassisAutorotateCommand::updateAutorotateState()
 
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !yawMotor->getConfig().limitMotorAngles &&
-        turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
+        turretYawActualSetpointDiff >
+            (static_cast<float>(M_PI) - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
     {
         // If turret setpoint all of a sudden turns around, don't autorotate
         chassisAutorotating = false;
@@ -90,21 +91,21 @@ void ChassisAutorotateCommand::execute()
     {
         updateAutorotateState();
 
-        float turretAngleFromCenter = yawMotor->getAngleFromCenter();
+        float turretAngleFromCenter = yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
 
         if (chassisAutorotating)
         {
-            float maxAngleFromCenter = M_PI;
+            float maxAngleFromCenter = static_cast<float>(M_PI);
 
             if (!yawMotor->getConfig().limitMotorAngles)
             {
                 switch (chassisSymmetry)
                 {
                     case ChassisSymmetry::SYMMETRICAL_180:
-                        maxAngleFromCenter = M_PI_2;
+                        maxAngleFromCenter = static_cast<float>(M_PI_2);
                         break;
                     case ChassisSymmetry::SYMMETRICAL_90:
-                        maxAngleFromCenter = M_PI_4;
+                        maxAngleFromCenter = static_cast<float>(M_PI_4);
                         break;
                     case ChassisSymmetry::SYMMETRICAL_NONE:
                     default:

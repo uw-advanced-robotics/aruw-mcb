@@ -87,13 +87,12 @@ def run_lbuild():
 
     def override_windows():
         # Note: The LF/CRLF change should be undone by git automatically when the change is staged but we do it manually to reduce confusion
-        LF_TO_CRLF = ["aruw-mcb-project/taproot/modm/ext/gcc/cabi.c"]
+        LF_TO_CRLF = ["aruw-mcb-project/taproot/modm/ext/gcc/cabi.c", "aruw-mcb-project/taproot/modm/ext/gcc/atomic"]
         DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES = ["aruw-mcb-project/taproot/modm/openocd.cfg"]
         BACKSLASHES_TO_FORWARD_SLASHES = [
             os.path.join(PROJECT_DIR, "taproot", dir, file) for file in [
                 pathlib.Path("project.xml"),
-                pathlib.Path("modm/SConscript"),
-                pathlib.Path("modm/ext/printf/printf.h"),
+                pathlib.Path("modm/SConscript")
             ] for dir in [
                 pathlib.Path("."),
                 pathlib.Path("sim-modm/hosted-darwin"),
@@ -105,11 +104,11 @@ def run_lbuild():
         for file_path in LF_TO_CRLF:
             with open(file_path, "rb+") as f:
                 content = f.read()
-                content = content.replace(b"\r\n", b"\n")
+                content = content.replace(b"\n", b"\r\n")
                 f.seek(0)
                 f.write(content)
                 f.truncate()
-        
+
         for file_path in DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES:
             with open(file_path, "r+", encoding="utf8") as f:
                 content = f.read()
@@ -121,6 +120,7 @@ def run_lbuild():
         for file_path in BACKSLASHES_TO_FORWARD_SLASHES:
             with open(file_path, "r+", encoding="utf8") as f:
                 content = f.read()
+                content = content.replace("\\\\", "/")
                 content = content.replace("\\", "/")
                 f.seek(0)
                 f.write(content)
@@ -135,40 +135,35 @@ class BuildTarget(Enum):
     STANDARD_ORION = "STANDARD_ORION"
     STANDARD_CYGNUS = "STANDARD_CYGNUS"
     STANDARD_SPIDER = "STANDARD_SPIDER"
-    STANDARD_ELSA = "STANDARD_ELSA"
     HERO_CYCLONE = "HERO_PERSEUS"
     SENTRY_HYDRA = "SENTRY_HYDRA"
     DART = "DART"
     ENGINEER = "ENGINEER"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
+    BLANK = "BLANK"
+    MOTOR_TESTER = "MOTOR_TESTER"
+    all = "all"
 
 
 def build_mcb(target : Optional[BuildTarget] = None):
     print(f"Checking MCB build for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_mcb(t)
     else:
         run(["pipenv", "run", "scons", "build", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
 
 
 def build_and_run_tests(target : Optional[BuildTarget] = None):
     print(f"Checking tests for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_and_run_tests(t)
     else:
-        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
-
-
-def build_sim(target : Optional[BuildTarget] = None):
-    print(f"Checking sim build for {target.value if target else 'all'}...")
-    if not target:
-        for t in BuildTarget:
-            build_mcb(t)
-    else:
-        run(["pipenv", "run", "scons", "build-sim", "profile=fast", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
+        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}"], cwd=PROJECT_DIR)
 
 
 action_to_method : Dict[str, Callable] = {
@@ -179,8 +174,7 @@ action_to_method : Dict[str, Callable] = {
     # "taproot" : check_taproot_submodule,
     "lbuild" : run_lbuild,
     "build" : build_mcb,
-    "test" : build_and_run_tests,
-    "sim" : build_sim,
+    "test" : build_and_run_tests
 }
 
 
@@ -213,7 +207,6 @@ def main():
         run_lbuild()
         build_mcb()
         build_and_run_tests()
-        build_sim()
 
     # TODO: idk how docs work
 

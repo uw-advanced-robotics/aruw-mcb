@@ -83,10 +83,6 @@ public:
         agitatorMotor.setDesiredOutput(0);
     }
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
     const char* getName() const override { return "velocity agitator"; }
 
     /// @return The velocity setpoint that some command has requested, in radians / second
@@ -102,7 +98,8 @@ public:
     /// @return The agitator velocity in radians / second.
     inline float getCurrentValue() const override
     {
-        return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
+        return (agitatorMotor.getShaftRPM() / config.gearRatio) *
+               (static_cast<float>(M_TWOPI) / 60.0f);
     }
 
     /**

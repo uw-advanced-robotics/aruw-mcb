@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,12 @@
 
 #include "tap/drivers.hpp"
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#else
+#include "aruwsrc/robot/control_operator_interface.hpp"
+#endif
+
 namespace aruwsrc::testbed
 {
 class Drivers : public tap::Drivers
@@ -31,10 +37,17 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+#else
+public:
+    control::ControlOperatorInterface controlOperatorInterface;
+#endif
 
 public:
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
-#endif  // STANDARD_DRIVERS_HPP_
+#endif  // TESTBED_DRIVERS_HPP_

@@ -162,7 +162,7 @@ float ControlOperatorInterface::getChassisRInput()
         chassisRInputRamp,
         MAX_ACCELERATION_R,
         MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
+        static_cast<float>(dt) / 1E3f);
 
     return chassisRInputRamp.getValue();
 }
@@ -177,14 +177,15 @@ float ControlOperatorInterface::getTurretYawInput(uint8_t turretID)
                        -drivers->remote.getMouseX(),
                        -USER_MOUSE_YAW_MAX,
                        USER_MOUSE_YAW_MAX)) *
-                       USER_MOUSE_YAW_SCALAR;
+                       getUserMouseYawScalar();
         case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
                    static_cast<float>(limitVal<int16_t>(
                        -drivers->remote.getMouseX(),
                        -USER_MOUSE_YAW_MAX,
                        USER_MOUSE_YAW_MAX)) *
-                       USER_MOUSE_YAW_SCALAR;
+                       getUserMouseYawScalar();
+            ;
         default:
             return 0;
     }
@@ -200,16 +201,40 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
                        drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
-                       USER_MOUSE_PITCH_SCALAR;
+                       getUserMousePitchScalar();
         case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
                        drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
-                       USER_MOUSE_PITCH_SCALAR;
+                       getUserMousePitchScalar();
         default:
             return 0;
+    }
+}
+
+float ControlOperatorInterface::getUserMouseYawScalar()
+{
+    if (drivers->remote.keyPressed(LOW_DPI_MODE_KEY))
+    {
+        return USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI * USER_MOUSE_YAW_SCALAR;
+    }
+    else
+    {
+        return USER_MOUSE_SENSITIVITY_SCALAR_NORMAL * USER_MOUSE_YAW_SCALAR;
+    }
+}
+
+float ControlOperatorInterface::getUserMousePitchScalar()
+{
+    if (drivers->remote.keyPressed(LOW_DPI_MODE_KEY))
+    {
+        return USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI * USER_MOUSE_PITCH_SCALAR;
+    }
+    else
+    {
+        return USER_MOUSE_SENSITIVITY_SCALAR_NORMAL * USER_MOUSE_PITCH_SCALAR;
     }
 }
 

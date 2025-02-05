@@ -37,7 +37,6 @@ ClientDisplayCommand::ClientDisplayCommand(
     tap::control::CommandScheduler &commandScheduler,
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
-    const TurretMCBHopperSubsystem *hopperSubsystem,
     const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
@@ -45,43 +44,34 @@ ClientDisplayCommand::ClientDisplayCommand(
     const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-    const chassis::BeybladeCommand *chassisBeybladeCmd,
-    const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+    algorithms::PlateHitTracker &plateHitTracker,
+    TransformerInterface *transformer,
     const can::capbank::CapacitorBank *capBank)
     : Command(),
+      Fiber([this] { run(); }),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
       commandScheduler(commandScheduler),
       refSerialTransmitter(&drivers),
-      booleanHudIndicators(
-          commandScheduler,
-          refSerialTransmitter,
-          hopperSubsystem,
-          frictionWheelSubsystem,
-          agitatorSubsystem,
-          imuCalibrateCommand,
-          &drivers.refSerial),
       capBankIndicator(refSerialTransmitter, capBank),
-      chassisOrientationIndicator(
-          drivers,
-          refSerialTransmitter,
-          robotTurretSubsystem,
-          avoidanceCommands),
       positionHudIndicators(
           drivers,
           visionCoprocessor,
           refSerialTransmitter,
-          hopperSubsystem,
           frictionWheelSubsystem,
           robotTurretSubsystem,
           multiShotHandler,
-          cvOnTargetManager,
-          chassisBeybladeCmd,
-          chassisAutorotateCmd,
-          chassisImuDriveCommand),
-      reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+          cvOnTargetManager),
+      ammoIndicator(refSerialTransmitter, drivers.refSerial),
+      circleCrosshair(refSerialTransmitter),
+      damageIndicator(plateHitTracker, robotTurretSubsystem, refSerialTransmitter),
+      textHudIndicators(
+          drivers,
+          agitatorSubsystem,
+          imuCalibrateCommand,
+          avoidanceCommands,
+          refSerialTransmitter),
+      visionTargetIndicator(visionCoprocessor, refSerialTransmitter, transformer->getWorldToVTM())
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -97,54 +87,58 @@ void ClientDisplayCommand::initialize()
 void ClientDisplayCommand::restartHud()
 {
     HudIndicator::resetGraphicNameGenerator();
-    booleanHudIndicators.initialize();
+
     capBankIndicator.initialize();
-    chassisOrientationIndicator.initialize();
     positionHudIndicators.initialize();
-    reticleIndicator.initialize();
-    visionHudIndicators.initialize();
+    ammoIndicator.initialize();
+    circleCrosshair.initialize();
+    damageIndicator.initialize();
+    textHudIndicators.initialize();
+
+    visionTargetIndicator.initialize();
 
     // We can successfully restart the thread
     this->restarting = false;
 }
 
-void ClientDisplayCommand::execute() { run(); }
+void ClientDisplayCommand::execute() {}
 
 bool ClientDisplayCommand::run()
 {
-    // The thread has exited the loop, meaning that there are no locked resources
-    if (!this->isRunning())
-    {
-        // Restart the thread
-        restart();
-        // Reset the HUD elements
-        this->restartHud();
-    }
-
     PT_BEGIN();
-
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
-    PT_CALL(booleanHudIndicators.sendInitialGraphics());
-    PT_CALL(capBankIndicator.sendInitialGraphics());
-    PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
-    PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(reticleIndicator.sendInitialGraphics());
-    PT_CALL(visionHudIndicators.sendInitialGraphics());
-
-    // If we try to restart the hud, break out of the loop
-    while (!this->restarting)
+    while (true)
     {
-        PT_CALL(booleanHudIndicators.update());
-        PT_CALL(capBankIndicator.update());
-        PT_CALL(chassisOrientationIndicator.update());
-        PT_CALL(positionHudIndicators.update());
-        PT_CALL(reticleIndicator.update());
-        PT_CALL(visionHudIndicators.update());
-        PT_YIELD();
+        // Reset the HUD elements
+        this->restartHud();
+
+        PT_CALL(capBankIndicator.sendInitialGraphics());
+        PT_CALL(positionHudIndicators.sendInitialGraphics());
+        PT_CALL(ammoIndicator.sendInitialGraphics());
+        PT_CALL(circleCrosshair.sendInitialGraphics());
+        PT_CALL(damageIndicator.sendInitialGraphics());
+        PT_CALL(textHudIndicators.sendInitialGraphics());
+        PT_CALL(visionTargetIndicator.sendInitialGraphics());
+
+        // If we try to restart the hud, break out of the loop
+        while (!this->restarting)
+        {
+            startTime = tap::arch::clock::getTimeMicroseconds();
+            PT_CALL(capBankIndicator.update());
+            PT_CALL(positionHudIndicators.update());
+            PT_CALL(ammoIndicator.update());
+            PT_CALL(circleCrosshair.update());
+            PT_CALL(damageIndicator.update());
+            PT_CALL(textHudIndicators.update());
+            PT_CALL(visionTargetIndicator.update());
+
+            // Calculate the time it took to update the HUD
+            this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
+
+            PT_YIELD();
+        }
     }
-    // Breaking out of the loop successfully calls this method,
-    // allowing us to know that all execution is over.
     PT_END();
 }
 

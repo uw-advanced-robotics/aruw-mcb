@@ -45,6 +45,8 @@ public:
 
     virtual const tap::algorithms::transforms::Transform& getWorldToTurret(
         uint8_t turretID) const = 0;
+
+    virtual const tap::algorithms::transforms::Transform& getWorldToVTM() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

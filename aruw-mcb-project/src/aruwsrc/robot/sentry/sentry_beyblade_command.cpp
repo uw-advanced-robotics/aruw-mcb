@@ -68,8 +68,6 @@ void SentryBeybladeCommand::execute()
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        // float turretYawAngle = yawMotor->getAngleFromCenter();
-
         float worldYawAngle = -worldToChassis.getYaw();
 
         float x = 0.0f;

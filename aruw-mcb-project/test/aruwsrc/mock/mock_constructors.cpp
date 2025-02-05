@@ -19,6 +19,7 @@
 
 #include "agitator_subsystem_mock.hpp"
 #include "beyblade_command_mock.hpp"
+#include "capacitor_bank_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
 #include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
@@ -79,6 +80,15 @@ BeybladeCommandMock::BeybladeCommandMock(
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
+
+CapacitorBankMock::CapacitorBankMock(
+    tap::Drivers *drivers,
+    tap::can::CanBus canBus,
+    const float capacitance)
+    : CapacitorBank(drivers, canBus, capacitance)
+{
+}
+CapacitorBankMock::~CapacitorBankMock() {}
 
 ChassisDriveCommandMock::ChassisDriveCommandMock(
     tap::Drivers *d,
@@ -224,14 +234,13 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(
-            getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getWrappedValue());
-    });
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement)
+                       { return measurement.minDifference(setpoint); });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]() {
+                return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}

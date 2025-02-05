@@ -158,8 +158,6 @@ public:
 
     const char* getName() const override { return "Chassis"; }
 
-    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
-
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
@@ -178,7 +176,8 @@ public:
      */
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+        static constexpr float ratio =
+            2.0f * static_cast<float>(M_PI) * CHASSIS_GEARBOX_RATIO / 60.0f;
         return mat * ratio;
     }
 

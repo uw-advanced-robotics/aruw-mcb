@@ -20,6 +20,7 @@
 #ifndef CAP_BANK_INDICATOR_HPP_
 #define CAP_BANK_INDICATOR_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -84,15 +85,24 @@ private:
     const can::capbank::CapacitorBank *capBank;
 
     /**
-     * Two graphics that represent the Capacitor Bank charge. The first graphic is the background
-     * for the bar, while the second is the charge of the Capacitor Bank.
+     * Background line for the status that highlights a few states.
      */
-    Tx::Graphic2Message capBankGraphics;
+    Tx::Graphic1Message capBankBackgroundLine;
+
+    Tx::GraphicColor previousColor;
+
+    /**
+     * A line that shows the charge of the Capacitor Bank.
+     */
+    Tx::Graphic1Message capBankVoltageLevel;
+    tap::arch::PeriodicMilliTimer voltageUpdateTimer;
 
     /**
      * A graphic that represents the current status of the Capacitor Bank.
      */
     Tx::GraphicCharacterMessage capBankTextGraphic;
+
+    can::capbank::State previousState;
 };
 }  // namespace aruwsrc::control::client_display
 

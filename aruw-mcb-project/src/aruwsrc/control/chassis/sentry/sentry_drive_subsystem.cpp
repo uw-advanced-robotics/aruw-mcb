@@ -89,7 +89,7 @@ float SentryDriveSubsystem::getDesiredRpm() { return desiredRpm; }
 
 modm::Matrix<float, 3, 1> SentryDriveSubsystem::getActualVelocityChassisRelative() const
 {
-    static constexpr float C = 2 * M_PI * WHEEL_RADIUS / 1000.0f;
+    static constexpr float C = 2 * static_cast<float>(M_PI) * WHEEL_RADIUS / 1000.0f;
     static constexpr float RPM_TO_MPS = C / (60.0f * GEAR_RATIO);
     float wheelVelRPM = leftWheel.getShaftRPM();
 
@@ -160,13 +160,6 @@ float SentryDriveSubsystem::distanceFromEncoder(const tap::motor::DjiMotor* moto
 {
     float unwrappedAngle = motor->getEncoderUnwrapped();
     float numberOfRotations = unwrappedAngle / (tap::motor::DjiMotor::ENC_RESOLUTION);
-    return numberOfRotations * 2.0f * M_PI * WHEEL_RADIUS / GEAR_RATIO;
+    return numberOfRotations * 2.0f * static_cast<float>(M_PI) * WHEEL_RADIUS / GEAR_RATIO;
 }
-
-void SentryDriveSubsystem::runHardwareTests() {}
-
-void SentryDriveSubsystem::onHardwareTestStart() {}
-
-void SentryDriveSubsystem::onHardwareTestComplete() {}
-
 }  // namespace aruwsrc::control::sentry::drive

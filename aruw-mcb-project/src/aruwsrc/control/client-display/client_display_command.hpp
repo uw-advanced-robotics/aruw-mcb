@@ -29,16 +29,18 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "modm/math/geometry/polygon_2d.hpp"
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
 
-#include "boolean_hud_indicators.hpp"
+#include "ammo_indicator.hpp"
 #include "cap_bank_indicator.hpp"
-#include "chassis_orientation_indicator.hpp"
+#include "circle_crosshair.hpp"
+#include "damage_indicator.hpp"
 #include "matrix_hud_indicators.hpp"
-#include "reticle_indicator.hpp"
-#include "vision_hud_indicators.hpp"
+#include "text_hud_indicators.hpp"
+#include "vision_target_indicator.hpp"
 
 namespace tap::control
 {
@@ -67,7 +69,7 @@ class ClientDisplaySubsystem;
  * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
  * instantiated, this will lead to undefined behavior.
  */
-class ClientDisplayCommand : public tap::control::Command, ::modm::pt::Protothread
+class ClientDisplayCommand : public tap::control::Command, ::modm::Fiber<2048>
 {
 public:
     /**
@@ -76,8 +78,6 @@ public:
      * @param[in] drivers Global drivers instance.
      * @param[in] commandScheduler CommandScheduler instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
-     * @param[in] hopperSubsystem Hopper used when checking if the hopper is open/closed. A pointer
-     * that may be nullptr if no hopper exists.
      * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
      * are on or off.
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
@@ -92,12 +92,6 @@ public:
      * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
      * HUD).
      * @param[in] cvOnTargetManager @see MatrixHudIndicators
-     * @param[in] chassisBeybladeCmd May be nullptr. If nullptr the chassis beyblade command will
-     * never be selected as the current chassis command.
-     * @param[in] chassisAutorotateCmd May be nullptr. If nullptr the chassis autorotate command
-     * will never be selected as the current chassis command.
-     * @param[in] chassisImuDriveCommand May be nullptr. If nullptr the chassis IMU drive command
-     * will never be selected as the current chassis command.
      * @param[in] capBank A pointer to the capacitor bank for the robot.
      */
     ClientDisplayCommand(
@@ -105,7 +99,6 @@ public:
         tap::control::CommandScheduler &commandScheduler,
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
-        const aruwsrc::control::TurretMCBHopperSubsystem *hopperSubsystem,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
@@ -113,9 +106,8 @@ public:
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-        const aruwsrc::chassis::BeybladeCommand *chassisBeybladeCmd,
-        const aruwsrc::chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-        const aruwsrc::chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
+        aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+        TransformerInterface *transformer,
         const can::capbank::CapacitorBank *capBank = nullptr);
 
     const char *getName() const override { return "client display"; }
@@ -133,14 +125,19 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-    BooleanHudIndicators booleanHudIndicators;
     CapBankIndicator capBankIndicator;
-    ChassisOrientationIndicator chassisOrientationIndicator;
     MatrixHudIndicators positionHudIndicators;
-    ReticleIndicator reticleIndicator;
-    VisionHudIndicators visionHudIndicators;
+    AmmoIndicator ammoIndicator;
+    CircleCrosshair circleCrosshair;
+    DamageIndicator damageIndicator;
+    TextHudIndicators textHudIndicators;
+    VisionTargetIndicator visionTargetIndicator;
 
     bool restarting = true;
+
+    float fps = 0.0f;
+
+    uint32_t startTime = 0;
 
     bool run();
     void restartHud();

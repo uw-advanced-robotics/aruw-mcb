@@ -21,6 +21,8 @@
 
 #include <cassert>
 
+// #include "modm/platform/exti/exti.hpp"
+
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -34,14 +36,15 @@ using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
 
-#ifndef PLATFORM_HOSTED
-MODM_ISR(EXTI0)
-{
-    // Currently the EXTI0 interrupt handler is only used by the time sync pin
-    VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
-    VisionCoprocessor::handleTimeSyncRequest();
-}
-#endif
+// #ifndef PLATFORM_HOSTED
+// MODM_ISR(EXTI0)
+// {
+//     // Currently the EXTI0 interrupt handler is only used by the time sync pin
+//     // VisionCoprocessor::TimeSyncTriggerPin::acknowledgeExternalInterruptFlag();
+//     Exti::acknowledgeFlags<VisionCoprocessor::TimeSyncTriggerPin>();
+//     VisionCoprocessor::handleTimeSyncRequest();
+// }
+// #endif
 
 VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     : DJISerial(drivers, VISION_COPROCESSOR_RX_UART_PORT),
@@ -71,7 +74,7 @@ void VisionCoprocessor::initializeCV()
 #define DISABLE_TIME_SYNC_INTERRUPT
 #if !defined(PLATFORM_HOSTED) && !defined(DISABLE_TIME_SYNC_INTERRUPT)
     // Set up the interrupt for the vision coprocessor sync handler
-    VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
+    // VisionCoprocessor::TimeSyncTriggerPin::setInput(modm::platform::Gpio::InputType::PullDown);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterruptVector(0);
     VisionCoprocessor::TimeSyncTriggerPin::enableExternalInterrupt
         VisionCoprocessor::TimeSyncTriggerPin::setInputTrigger(
@@ -102,6 +105,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
         case CV_MESSAGE_TYPE_ARUCO_RESET:
         {
             decodeToArucoResetData(completeMessage);
+            return;
+        }
+        case CV_MESSAGE_TYPE_ROBOT_ORBIT:
+        {
+            decodeToRobotOrbitData(completeMessage);
             return;
         }
         default:
@@ -140,6 +148,19 @@ bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& mess
     // copy packet into data field
     memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
     lastArucoData.updated = true;
+    return true;
+}
+
+bool VisionCoprocessor::decodeToRobotOrbitData(const ReceivedSerialMessage& message)
+{
+    uint16_t dataLength = message.header.dataLength;
+    if (dataLength > sizeof(RobotOrbitData))
+    {
+        return false;
+    }
+
+    memset(&lastRobotOrbitData, 0, sizeof(RobotOrbitData));
+    memcpy(&lastRobotOrbitData, &message.data, dataLength);
     return true;
 }
 

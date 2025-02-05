@@ -33,7 +33,7 @@
 #include "tap/util_macros.hpp"
 
 #include "modm/math/geometry.hpp"
-#include "modm/processing/protothread.hpp"
+#include "modm/processing/fiber.hpp"
 
 #define LITTLE_ENDIAN_INT16_TO_FLOAT(buff) \
     (static_cast<float>(static_cast<int16_t>((*(buff) << 8) | *(buff + 1))))
@@ -55,7 +55,13 @@ namespace tap::communication::sensors::imu::mpu6500
  * @note if you are shaking the imu while it is initializing, the offsets will likely
  *      be calibrated poorly and unexpectedly bad results may occur.
  */
-class Mpu6500 final_mockable : public ::modm::pt::Protothread, public ImuInterface
+#ifdef ENV_UNIT_TESTS
+#define MPU_FIBER_STACK_SIZE 4096
+#else
+#define MPU_FIBER_STACK_SIZE 512
+#endif
+
+class Mpu6500 final_mockable : public ::modm::Fiber<MPU_FIBER_STACK_SIZE>, public ImuInterface
 {
 public:
     /**
@@ -124,6 +130,8 @@ public:
      * @return `true` if the function is not done, `false` otherwise
      */
     mockable bool read();
+
+    bool run() { return this->read(); }
 
     /**
      * Returns the state of the IMU. Can be not connected, connected but not calibrated, calibrating
@@ -278,6 +286,11 @@ public:
     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
 
     inline void setCalibrationSamples(float samples) { MPU6500_OFFSET_SAMPLES = samples; }
+
+    inline void setTargetTemperature(float temperatureC)
+    {
+        imuHeater.setDesiredTemperature(temperatureC);
+    }
 
 private:
     static constexpr float ACCELERATION_GRAVITY = 9.80665f;

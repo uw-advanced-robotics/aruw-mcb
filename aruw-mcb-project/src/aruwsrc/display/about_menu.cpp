@@ -26,9 +26,7 @@
 
 namespace aruwsrc::display
 {
-#if defined(TARGET_STANDARD_ELSA)
-static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ELSA";
-#elif defined(TARGET_DRONE)
+#if defined(TARGET_DRONE)
 static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
 static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";

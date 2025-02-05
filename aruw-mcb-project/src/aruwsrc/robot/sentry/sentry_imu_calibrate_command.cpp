@@ -56,23 +56,28 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       majorMCBLite(majorMCBLite),
       chassisMCBLite(chassisMCBLite)
 {
+    for (auto &config : turretsAndControllers)
+    {
+        addSubsystemRequirement(config.turret);
+    }
+
     addSubsystemRequirement(&turretMajor);
 }
 
 void SentryImuCalibrateCommand::initialize()
 {
-    yawObserver.overrideChassisYaw(0);
     // reset odometry
+    yawObserver.overrideChassisYaw(0);
     odometryInterface.reset();
 
     ImuCalibrateCommand::initialize();
 
     // initialize major
     turretMajor.getMutableMotor().setChassisFrameSetpoint(
-        turretMajor.getReadOnlyMotor()
-            .getConfig()
-            .startAngle);  // @todo really sus interdependency with imu
-                           // drift because assumes world controller
+        Angle(turretMajor.getReadOnlyMotor()
+                  .getConfig()
+                  .startAngle));  // @todo really sus interdependency with imu
+                                  // drift because assumes world controller
     turretMajorController.initialize();
 
     calibrationLongTimeout.stop();
@@ -86,10 +91,8 @@ static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsyst
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           compareFloatClose(
-               0.0f,
-               turret.getReadOnlyMotor().getAngleFromCenter(),
-               SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
+           (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
+            SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
 void SentryImuCalibrateCommand::execute()

@@ -24,6 +24,7 @@
 using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
+using namespace aruwsrc::control::client_display;
 
 namespace aruwsrc::algorithms::transforms
 {
@@ -34,7 +35,8 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
       turret(turret),
       worldToChassis(Transform::identity()),
       worldToTurret(Transform::identity()),
-      chassisToTurret(Transform::identity())  // do we care about z offset?
+      chassisToTurret(Transform::identity()),  // do we care about z offset?
+      worldToVTM(Transform::identity())
 {
 }
 
@@ -57,6 +59,8 @@ void StandardAndHeroTransformer::updateTransforms()
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
     chassisToTurret = worldToChassis.getInverse().compose(worldToTurret);
+
+    worldToVTM = worldToTurret.compose(VTM_OFFSET);
 }
 
 }  // namespace aruwsrc::algorithms::transforms

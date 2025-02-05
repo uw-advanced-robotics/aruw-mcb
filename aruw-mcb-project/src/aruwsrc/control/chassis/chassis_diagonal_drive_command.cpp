@@ -49,8 +49,12 @@ float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
     if (const auto chassisVelocity = chassis->getActualVelocityChassisRelative();
         hypot(chassisVelocity[0][0], chassisVelocity[1][0]) > AUTOROTATION_DIAGONAL_SPEED)
     {
-        angleFromCenterForChassisAutorotate =
-            WrappedFloat(turretAngleFromCenter, -M_PI_2, M_PI_2).getWrappedValue() + M_PI_4;
+        angleFromCenterForChassisAutorotate = WrappedFloat(
+                                                  turretAngleFromCenter,
+                                                  -static_cast<float>(M_PI_2),
+                                                  static_cast<float>(M_PI_2))
+                                                  .getWrappedValue() +
+                                              static_cast<float>(M_PI_4);
     }
     else
     {

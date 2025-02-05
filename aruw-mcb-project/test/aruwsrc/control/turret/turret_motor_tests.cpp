@@ -99,8 +99,8 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__limited_to_min_max_when_limit_a
 
     for (auto [expectedAngle, inputAngle] : limitedAndInputAnglePairs)
     {
-        turretMotor.setChassisFrameSetpoint(inputAngle);
-        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint(), 1E-3);
+        turretMotor.setChassisFrameSetpoint(Angle(inputAngle));
+        EXPECT_NEAR(0, turretMotor.getChassisFrameSetpoint().minDifference(expectedAngle), 1E-3);
     }
 }
 
@@ -123,8 +123,8 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint__not_limited_when_limit_angles_f
 
     for (auto expectedAngle : limitedAndInputAnglePairs)
     {
-        turretMotor.setChassisFrameSetpoint(expectedAngle);
-        EXPECT_NEAR(expectedAngle, turretMotor.getChassisFrameSetpoint(), 1E-3);
+        turretMotor.setChassisFrameSetpoint(Angle(expectedAngle));
+        EXPECT_NEAR(0, turretMotor.getChassisFrameSetpoint().minDifference(expectedAngle), 1E-3);
     }
 }
 
@@ -148,13 +148,19 @@ TEST_F(
     // Default expectations so turret assumes motors are good to go and within valid angle range
     const int encStep = DjiMotor::ENC_RESOLUTION / 8;
     std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {M_PI_2, TURRET_MOTOR_CONFIG.startEncoderValue},
-        {M_PI_2 + M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
-        {M_PI_2 + 2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
-        {M_PI_2 + 3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
-        {M_PI_2 + 4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
-        {M_PI_2 + 5 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
-        {M_PI_2 + 6 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle, TURRET_MOTOR_CONFIG.startEncoderValue},
+        {TURRET_MOTOR_CONFIG.startAngle + M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 2 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 3 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 4 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 5 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
+        {TURRET_MOTOR_CONFIG.startAngle + 6 * M_TWOPI / 8,
+         TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
     };
 
     for (auto [angle, encoder] : angleAndEncoderPairs)
@@ -162,37 +168,6 @@ TEST_F(
         setEncoder(encoder);
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle), 1E-3);
-    }
-}
-
-TEST_F(TurretMotorTest, getAngleFromCenter__return_0_when_motors_offline)
-{
-    motorOnline = false;
-
-    turretMotor.updateMotorAngle();
-
-    EXPECT_NEAR(0, turretMotor.getAngleFromCenter(), 1E-3);
-}
-
-TEST_F(TurretMotorTest, getAngleFromCenter__valid_encoder_angles)
-{
-    const int encStep = DjiMotor::ENC_RESOLUTION / 8;
-
-    std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {0, TURRET_MOTOR_CONFIG.startEncoderValue},
-        {M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
-        {2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
-        {3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
-        {4 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
-        {-3 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
-        {-2 * M_TWOPI / 8, TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
-    };
-
-    for (auto [angle, encoder] : angleAndEncoderPairs)
-    {
-        setEncoder(encoder);
-        turretMotor.updateMotorAngle();
-        EXPECT_NEAR(angle, turretMotor.getAngleFromCenter(), 1E-3);
     }
 }
 
@@ -304,7 +279,7 @@ TEST_F(TurretMotorTest, getValidMinError_small_min_max_values)
 
     for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
     {
-        EXPECT_NEAR(error, tm.getValidMinError(setpoint, measurement), 1E-3);
+        EXPECT_NEAR(error, tm.getValidMinError(Angle(setpoint), Angle(measurement)), 1E-3);
     }
 }
 
@@ -329,14 +304,14 @@ TEST_F(TurretMotorTest, getValidMinError_large_min_max_values)
         {0, M_PI_4, -M_PI_4},
         {0.1, M_PI - 0.1, -M_PI + 0.2},
         {M_PI_2 + M_PI_4, 1.5 * M_PI + 0.1, -M_PI_2 - M_PI_4 - 0.1},
-        {M_PI_2 + M_PI_4, M_TWOPI - 0.1, -M_PI - M_PI_4 + 0.1},
+        {M_PI_2 + M_PI_4, M_TWOPI - 0.1, M_PI_2 + M_PI_4 + 0.1},
         {0, 1.5 * M_PI, -1.5 * M_PI},
         {1.5 * M_PI, 0, 1.5 * M_PI},
     };
 
     for (auto [setpoint, measurement, error] : setpointMeasurementErrorPairs)
     {
-        EXPECT_NEAR(error, tm.getValidMinError(setpoint, measurement), 1E-3);
+        EXPECT_NEAR(error, tm.getValidMinError(Angle(setpoint), Angle(measurement)), 1E-3);
     }
 }
 
@@ -351,11 +326,11 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint_large_min_max_difference_limited
     };
     TurretMotor tm(&motor, mc);
 
-    tm.setChassisFrameSetpoint(-M_PI_2 - M_PI_4 / 2.0f);
-    EXPECT_NEAR(-M_PI_2, tm.getChassisFrameSetpoint(), 1E-3);
+    tm.setChassisFrameSetpoint(Angle(-M_PI_2 - M_PI_4 / 2.0f));
+    EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(-M_PI_2), 1E-3);
 
-    tm.setChassisFrameSetpoint(M_PI + M_PI_4 / 2.0f);
-    EXPECT_NEAR(M_PI, tm.getChassisFrameSetpoint(), 1E-3);
+    tm.setChassisFrameSetpoint(Angle(M_PI + M_PI_4 / 2.0f));
+    EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(M_PI), 1E-3);
 }
 
 static int64_t getEncoderUnwrapped(const TurretMotorConfig &motorConfig, float angle)
@@ -370,8 +345,8 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
     TurretMotorConfig mc = {
         .startAngle = 0,
         .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
+        .minAngle = -M_PI_2,
+        .maxAngle = M_PI_2,
         .limitMotorAngles = true,
     };
     TurretMotor tm(&motor, mc);
@@ -380,9 +355,9 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
 
     std::vector<std::tuple<float, float, float>> errorMeasurementsToTest = {
         {-M_TWOPI, -M_TWOPI, 0},
-        {-M_TWOPI, 0, M_TWOPI},
-        {-M_TWOPI, M_TWOPI, 2 * M_TWOPI},
-        {M_TWOPI, -M_TWOPI, -2 * M_TWOPI},
+        {-M_TWOPI, 0, 0},
+        {-M_TWOPI, M_TWOPI, 0},
+        {M_TWOPI, -M_TWOPI, 0},
     };
 
     setEncoder(getEncoderUnwrapped(mc, mc.startAngle));
@@ -393,233 +368,13 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
         setEncoder(getEncoderUnwrapped(mc, measured));
         tm.updateMotorAngle();
 
-        EXPECT_NEAR(measured, tm.getChassisFrameUnwrappedMeasuredAngle(), 1E-3);
+        EXPECT_NEAR(0, tm.getChassisFrameMeasuredAngle().minDifference(measured), 1E-3);
 
-        tm.setChassisFrameSetpoint(setpoint);
+        tm.setChassisFrameSetpoint(Angle(setpoint));
 
-        EXPECT_NEAR(setpoint, tm.getChassisFrameSetpoint(), 1E-3);
+        EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(setpoint), 1E-3);
 
+        EXPECT_NEAR(expectedErr, tm.getValidMinError(Angle(setpoint), Angle(measured)), 1E-3);
         EXPECT_NEAR(expectedErr, tm.getValidChassisMeasurementError(), 1E-3);
     }
 }
-
-TEST(TurretMotor, getClosestNonNormalizedSetpointToMeasurement)
-{
-    std::vector<std::tuple<float, float, float>> valuesToTest = {
-        {0, 0, 0},
-        {-M_TWOPI, 0, -M_TWOPI},
-        {M_TWOPI, 0, M_TWOPI},
-        {-M_TWOPI, 0.1, -M_TWOPI + 0.1},
-        {-M_PI, M_PI, -M_PI},
-        {M_PI_2, 0, 0},
-        {M_PI, 0, 0},
-        {M_TWOPI + M_PI_2, -M_TWOPI, M_TWOPI},
-        {M_TWOPI + M_PI_2, -M_TWOPI - M_PI, M_TWOPI + M_PI},
-    };
-
-    for (auto &[measurement, setpoint, nonNormalizedSetpoint] : valuesToTest)
-    {
-        EXPECT_NEAR(
-            nonNormalizedSetpoint,
-            TurretMotor::getClosestNonNormalizedSetpointToMeasurement(measurement, setpoint),
-            1E-3);
-    }
-}
-
-TEST_F(TurretMotorTest, getSetpointWithinTurretRange)
-{
-    TurretMotorConfig mc = {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
-        .limitMotorAngles = true,
-    };
-    TurretMotor tm(&motor, mc);
-
-    std::vector<std::tuple<float, float>> valuesToTest = {
-        {0, 0},
-        {-M_TWOPI, -M_TWOPI},
-        {M_TWOPI, M_TWOPI},
-        {M_PI, M_PI},
-        {-M_PI, -M_PI},
-        {-M_TWOPI - 0.1, -0.1},
-        {M_TWOPI + 0.1, 0.1},
-        {4 * M_TWOPI + 0.1, 0.1},
-    };
-
-    for (auto [setpoint, expected] : valuesToTest)
-    {
-        EXPECT_NEAR(expected, tm.getSetpointWithinTurretRange(setpoint), 1E-3);
-    }
-}
-
-struct UnwrapTargetAngleTestValues
-{
-    float targetFrameMeasurement;
-    float targetAngle;
-    float expectedUnwrappedTargetAngle;  // If unwrapping happens, this is the unwrapped value. If
-                                         // unwrapping doesn't happen in a particular test,
-                                         // targetAngle should not change.
-};
-
-class UnwrapTargetAngleTest
-    : public TurretMotorTest,
-      public WithParamInterface<std::tuple<UnwrapTargetAngleTestValues, TurretMotorConfig>>
-{
-protected:
-    UnwrapTargetAngleTest() : tm(&motor, std::get<1>(GetParam())), turretController(tm) {}
-
-    void SetUp() override
-    {
-        TurretMotorTest::SetUp();
-
-        ON_CALL(turretController, getMeasurement)
-            .WillByDefault(Return(std::get<0>(GetParam()).targetFrameMeasurement));
-    }
-
-    void runUnwrapTargetAngleTest()
-    {
-        float unwrappedTargetAngle = std::get<0>(GetParam()).targetAngle;
-        unwrappedTargetAngle = tm.unwrapTargetAngle(unwrappedTargetAngle);
-
-        if (std::get<1>(GetParam()).limitMotorAngles && tm.getTurretController() != nullptr)
-        {
-            float controllerFrameExpectedTarget =
-                std::get<0>(GetParam()).expectedUnwrappedTargetAngle;
-
-            // using getSetpointWithinTurretRange since that has been validated to work by another
-            // test
-            float chassisFrameExpectedTarget =
-                turretController.convertControllerAngleToChassisFrame(
-                    controllerFrameExpectedTarget);
-
-            controllerFrameExpectedTarget = turretController.convertChassisAngleToControllerFrame(
-                tm.getSetpointWithinTurretRange(chassisFrameExpectedTarget));
-
-            EXPECT_NEAR(
-                0.0f,
-                WrappedFloat(unwrappedTargetAngle, 0, M_TWOPI)
-                    .minDifference(controllerFrameExpectedTarget),
-                1e-5f);
-        }
-        else
-        {
-            // targetAngle should not change
-            EXPECT_EQ(std::get<0>(GetParam()).targetAngle, unwrappedTargetAngle);
-        }
-    }
-
-    TurretMotor tm;
-    NiceMock<aruwsrc::mock::TurretControllerInterfaceMock> turretController;
-};
-
-TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_no_turret_controller)
-{
-    runUnwrapTargetAngleTest();
-}
-
-TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_chassis_frame_controller)
-{
-    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
-        return value;
-    });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
-        return value;
-    });
-
-    tm.attachTurretController(&turretController);
-
-    runUnwrapTargetAngleTest();
-}
-
-TEST_P(UnwrapTargetAngleTest, unwrapped_angle_correct_rotated_frame_controller)
-{
-    ON_CALL(turretController, convertChassisAngleToControllerFrame).WillByDefault([](float value) {
-        return value + M_PI;
-    });
-    ON_CALL(turretController, convertControllerAngleToChassisFrame).WillByDefault([](float value) {
-        return value - M_PI;
-    });
-
-    tm.attachTurretController(&turretController);
-
-    float chassisFrameExpectedTarget = turretController.convertControllerAngleToChassisFrame(
-        std::get<0>(GetParam()).expectedUnwrappedTargetAngle);
-    chassisFrameExpectedTarget = turretController.convertChassisAngleToControllerFrame(
-        turretMotor.getSetpointWithinTurretRange(chassisFrameExpectedTarget));
-
-    runUnwrapTargetAngleTest();
-}
-
-std::vector<UnwrapTargetAngleTestValues> unwrapTargetAnglesValuesToTest = {
-    {
-        .targetFrameMeasurement = 0,
-        .targetAngle = 0,
-        .expectedUnwrappedTargetAngle = 0,
-    },
-    {
-        .targetFrameMeasurement = 0,
-        .targetAngle = M_PI_2,
-        .expectedUnwrappedTargetAngle = M_PI_2,
-    },
-    {
-        .targetFrameMeasurement = 0,
-        .targetAngle = -M_PI_2,
-        .expectedUnwrappedTargetAngle = -M_PI_2,
-    },
-    {
-        .targetFrameMeasurement = 0,
-        .targetAngle = -M_TWOPI,
-        .expectedUnwrappedTargetAngle = 0,
-    },
-    {
-        .targetFrameMeasurement = 0,
-        .targetAngle = M_TWOPI,
-        .expectedUnwrappedTargetAngle = 0,
-    },
-    {
-        .targetFrameMeasurement = M_PI,
-        .targetAngle = -M_PI,
-        .expectedUnwrappedTargetAngle = M_PI,
-    },
-    {
-        .targetFrameMeasurement = M_PI,
-        .targetAngle = -M_PI - M_PI_4,
-        .expectedUnwrappedTargetAngle = M_PI - M_PI_4,
-    },
-    {
-        .targetFrameMeasurement = -M_PI,
-        .targetAngle = M_PI + M_PI_4,
-        .expectedUnwrappedTargetAngle = -M_PI + M_PI_4,
-    },
-};
-
-std::vector<TurretMotorConfig> motorConfigValuesToTest = {
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = 0,
-        .maxAngle = 0,
-        .limitMotorAngles = false,
-    },
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = -M_PI,
-        .maxAngle = M_PI,
-        .limitMotorAngles = true,
-    },
-    {
-        .startAngle = 0,
-        .startEncoderValue = 0,
-        .minAngle = -M_TWOPI,
-        .maxAngle = M_TWOPI,
-        .limitMotorAngles = true,
-    },
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    TurretMotorTest,
-    UnwrapTargetAngleTest,
-    Combine(ValuesIn(unwrapTargetAnglesValuesToTest), ValuesIn(motorConfigValuesToTest)));

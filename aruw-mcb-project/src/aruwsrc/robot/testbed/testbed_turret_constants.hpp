@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -34,4 +34,4 @@ static constexpr float TURRET_CG_Z = 0;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0;
 }  // namespace aruwsrc::control::turret
 
-#endif  // DART_TURRET_CONSTANTS_HPP_
+#endif  // TESTBED_TURRET_CONSTANTS_HPP_

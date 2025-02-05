@@ -24,8 +24,8 @@
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
  */
-#if defined(TARGET_STANDARD_ELSA) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
+    defined(TARGET_STANDARD_CYGNUS)
 #define ALL_STANDARDS
 #endif
 

@@ -21,7 +21,7 @@ void inline
 modm::platform::SpiHal1::enable()
 {
 	Rcc::enable<Peripheral::Spi1>();
-	SPI1->CR1 |= SPI_CR1_SPE;		// SPI Enable
+	enableTransfer();
 }
 
 void inline
@@ -155,4 +155,17 @@ modm::platform::SpiHal1::acknowledgeInterruptFlag(InterruptFlag_t /*flags*/)
 {
 	// TODO: implement; see STM32F3 reference manual p. 736
 	// SPI1->SR = flags.value;
+}
+
+void inline
+modm::platform::SpiHal1::enableTransfer()
+{
+	SPI1->CR1 |= SPI_CR1_SPE;
+}
+
+void inline
+modm::platform::SpiHal1::disableTransfer()
+{
+	SPI1->CR1 &= ~SPI_CR1_SPE;
+	__DSB();
 }

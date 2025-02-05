@@ -63,8 +63,8 @@ public:
 	enum class
 	MasterSelection : uint32_t
 	{
-		Slave 	= 0,			///< Configure SPI as Slave
-		Master 	= SPI_CR1_MSTR,	///< Configure SPI as Master
+		Slave 	= 0,
+		Master 	= SPI_CR1_MSTR,
 		All 	= Master,
 	};
 
@@ -73,9 +73,9 @@ public:
 	{
 		Mode0 = 0b00,			///< clock normal,   sample on rising  edge
 		Mode1 = SPI_CR1_CPHA,	///< clock normal,   sample on falling edge
-		Mode2 = SPI_CR1_CPOL,	///< clock inverted, sample on falling  edge
+		Mode2 = SPI_CR1_CPOL,	///< clock inverted, sample on falling edge
+								///  clock inverted, sample on rising  edge
 		Mode3 = SPI_CR1_CPOL | SPI_CR1_CPHA,
-		///< clock inverted, sample on rising edge
 		All = Mode3
 	};
 

@@ -46,7 +46,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       turretRight(turretRight),
       positionPid(positionPid),
       velocityPid(velocityPid),
-      worldFrameSetpoint(0, 0.0, M_TWOPI),
+      worldFrameSetpoint(0, 0.0, static_cast<float>(M_TWOPI)),
       maxVelErrorInput(maxVelErrorInput),
       minorMajorTorqueRatio(minorMajorTorqueRatio),
       feedforwardGain(feedforwardGain)
@@ -61,9 +61,8 @@ void TurretMajorWorldFrameController::initialize()
         positionPid.reset();
         velocityPid.reset();
 
-        worldFrameSetpoint.setWrappedValue(
-            yawMotor.getChassisFrameSetpoint() - yawMotor.getChassisFrameUnwrappedMeasuredAngle() +
-            worldToMajor.getYaw());
+        worldFrameSetpoint = yawMotor.getChassisFrameSetpoint() -
+                             yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 
         yawMotor.attachTurretController(this);
     }
@@ -72,12 +71,14 @@ void TurretMajorWorldFrameController::initialize()
 // @todo implement separate controller with limiting or refactor elsewhere
 //       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
 //       code difficult to trace, follow, and maintain
-void TurretMajorWorldFrameController::runController(const uint32_t dt, const float desiredSetpoint)
+void TurretMajorWorldFrameController::runController(
+    const uint32_t dt,
+    const WrappedFloat desiredSetpoint)
 {
-    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 
     const float positionControllerError =
-        turretMotor.getValidMinError(worldFrameSetpoint.getWrappedValue(), worldToMajor.getYaw());
+        turretMotor.getValidMinError(worldFrameSetpoint, Angle(worldToMajor.getYaw()));
 
     positionPidOutput = positionPid.runController(
         positionControllerError,
@@ -107,19 +108,16 @@ void TurretMajorWorldFrameController::runController(const uint32_t dt, const flo
 }
 
 // @todo what's the point of this; overridden by runController anyways?
-void TurretMajorWorldFrameController::setSetpoint(float desiredSetpoint)
+void TurretMajorWorldFrameController::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    worldFrameSetpoint.setWrappedValue(desiredSetpoint);
+    worldFrameSetpoint = desiredSetpoint;
 }
 
-float TurretMajorWorldFrameController::getSetpoint() const
-{
-    return worldFrameSetpoint.getWrappedValue();
-}
+WrappedFloat TurretMajorWorldFrameController::getSetpoint() const { return worldFrameSetpoint; }
 
-float TurretMajorWorldFrameController::getMeasurement() const
+WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
 {
-    return yawMotor.getChassisFrameMeasuredAngle().getWrappedValue() + worldToMajor.getYaw();
+    return yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }

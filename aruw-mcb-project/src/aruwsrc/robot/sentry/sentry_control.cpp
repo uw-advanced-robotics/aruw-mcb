@@ -221,52 +221,6 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-struct TurretMinorWorldControllers
-{
-    WorldFramePitchTurretImuCascadePidTurretController pitchController;
-    WorldFrameYawTurretImuCascadePidTurretController yawController;
-};
-
-// @todo surely there's a better way to construct this
-SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
-SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
-
-TurretMinorWorldControllers turretRightWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.pitchMotor,
-        turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid),
-
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
-        turretRight.yawMotor,
-        turretRightWorldYawPosPid,
-        turretRightWorldYawVelPid)
-
-};
-
-TurretMinorWorldControllers turretLeftWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
-        turretLeft.pitchMotor,
-        turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid),
-
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
-        turretLeft.yawMotor,
-        turretLeftWorldYawPosPid,
-        turretLeftWorldYawVelPid)
-
-};
-
 VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
@@ -348,7 +302,7 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &rightOmni,
     DEADWHEEL_RADIUS);
 
-SentryKFOdometry2DSubsystem chassisOdometry(
+SentryKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     chassisYawObserver,
@@ -358,7 +312,7 @@ SentryKFOdometry2DSubsystem chassisOdometry(
     CENTER_TO_WHEELBASE_RADIUS);
 
 SentryTransforms transformer(
-    chassisOdometry,
+    odometrySubsystem,
     turretMajor,
     turretLeft,
     turretRight,
@@ -370,7 +324,7 @@ SentryArucoResetSubsystem arucoResetSubsystem(
     *drivers(),
     drivers()->visionCoprocessor,
     chassisYawObserver,
-    chassisOdometry,
+    odometrySubsystem,
     transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
@@ -383,6 +337,52 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
+
+struct TurretMinorWorldControllers
+{
+    WorldFramePitchTurretImuCascadePidTurretController pitchController;
+    WorldFrameYawTurretImuCascadePidTurretController yawController;
+};
+
+// @todo surely there's a better way to construct this
+SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
+
+TurretMinorWorldControllers turretRightWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.pitchMotor,
+        turretRightWorldPitchPosPid,
+        turretRightWorldPitchVelPid),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus1,
+        turretRight.yawMotor,
+        turretRightWorldYawPosPid,
+        turretRightWorldYawVelPid)
+
+};
+
+TurretMinorWorldControllers turretLeftWorldControllers{
+    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.pitchMotor,
+        turretLeftWorldPitchPosPid,
+        turretLeftWorldPitchVelPid),
+
+    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+        drivers()->turretMCBCanCommBus2,
+        turretLeft.yawMotor,
+        turretLeftWorldYawPosPid,
+        turretLeftWorldYawVelPid)
+
+};
 
 TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),
@@ -532,7 +532,7 @@ imu::SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
-    chassisOdometry,
+    odometrySubsystem,
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
@@ -832,7 +832,7 @@ void initializeSubsystems()
     turretLeft.initialize();
     turretRight.initialize();
     turretMajor.initialize();
-    chassisOdometry.initialize();
+    odometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
 
@@ -853,7 +853,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
     drivers->commandScheduler.registerSubsystem(&turretRight);
-    drivers->commandScheduler.registerSubsystem(&chassisOdometry);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 
@@ -881,6 +881,7 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->plateHitTracker.attachTransformer(&transformAdapter);
 }
 
 /* register io mappings here ------------------------------------------------*/

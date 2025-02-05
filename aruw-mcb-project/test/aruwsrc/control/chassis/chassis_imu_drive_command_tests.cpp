@@ -59,12 +59,15 @@ protected:
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-            return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
-        });
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d);
-        });
+        ON_CALL(chassis, calculateRotationTranslationalGain)
+            .WillByDefault(
+                [&](float r) {
+                    return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
+                });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float r, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d); });
 
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
         ON_CALL(drivers.mpu6500, getImuState).WillByDefault(ReturnPointee(&imuState));
@@ -262,7 +265,9 @@ TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_null
 
     chassisImuDriveCommand.initialize();
 
-    ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(M_PI_4));
+    WrappedFloat chassisFrameMeasuredAngle = Angle(M_PI_4);
+    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+        .WillByDefault(ReturnRef(chassisFrameMeasuredAngle));
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
 
     float xExpected = MAX_SPEED;

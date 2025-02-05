@@ -1,12 +1,12 @@
 {
-    "image": "aruw/mcb-dev:2021-06-02.3",
-    // TODO: consider supporting/promoting using WSL2 file system for perf?
-    //       Might make it harder to deploy to an MCB.
-    "extensions": [
-        "marus25.cortex-debug",
-        "ms-vscode.cpptools",
-        "aruwrobotchooser.robot-chooser"
-    ],
+    "image": "docker.io/aruw/mcb-dev:2025-01-19.1",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools"
+            ]
+        }
+    },
     "mounts": [
         // Persist installed extensions across container rebuilds
         "source=aruw-mcb-extensions,target=/root/.vscode-server/extensions,type=volume",

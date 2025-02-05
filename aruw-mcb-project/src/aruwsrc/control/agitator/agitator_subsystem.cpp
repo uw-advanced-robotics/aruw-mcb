@@ -60,9 +60,11 @@ AgitatorSubsystem::AgitatorSubsystem(
           agitatorMotorId,
           agitatorCanBusId,
           isAgitatorInverted,
-          "agitator motor")
+          "agitator motor"),
+      agitatorTestCommand(this)
 {
     assert(jammingDistance >= 0);
+    this->setTestCommand(&agitatorTestCommand);
 }
 
 void AgitatorSubsystem::initialize() { agitatorMotor.initialize(); }
@@ -135,21 +137,8 @@ float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
 {
     // position is equal to the following equation:
     // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-    return (2.0f * M_PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
+    return (2.0f * static_cast<float>(M_PI) / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
            agitatorMotor.getEncoderUnwrapped() / gearRatio;
-}
-
-void AgitatorSubsystem::runHardwareTests()
-{
-    if (tap::algorithms::compareFloatClose(this->getSetpoint(), this->getCurrentValue(), M_PI / 16))
-    {
-        this->setHardwareTestsComplete();
-    }
-}
-
-void AgitatorSubsystem::onHardwareTestStart()
-{
-    this->setSetpoint(this->getCurrentValue() + M_PI / 2);
 }
 
 }  // namespace agitator

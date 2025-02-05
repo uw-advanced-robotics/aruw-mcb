@@ -95,11 +95,8 @@ void __modm_startup(void)
 	table_copy(__table_copy_intern_start, __table_copy_intern_end);
 	table_zero(__table_zero_intern_start, __table_zero_intern_end);
 
-	// Enable FPU in privileged and user mode
-	SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
 	// Set the vector table location
 	SCB->VTOR = (uint32_t)__vector_table_rom_start;
-
 	// Enable trapping of divide by zero for UDIV/SDIV instructions.
 	SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
 	// Call all hardware initialize hooks

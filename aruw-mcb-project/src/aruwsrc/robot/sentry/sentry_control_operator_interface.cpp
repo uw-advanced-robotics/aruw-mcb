@@ -174,7 +174,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
         chassisYawInputRamp,
         MAX_ACCELERATION_R,
         MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3);
+        static_cast<float>(dt) / 1E3F);
 
     return chassisYawInputRamp.getValue() * 20;
 }

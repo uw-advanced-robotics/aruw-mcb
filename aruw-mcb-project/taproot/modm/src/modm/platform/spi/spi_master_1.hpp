@@ -5,6 +5,7 @@
  * Copyright (c) 2012, Georgi Grinshpun
  * Copyright (c) 2013, Kevin Läufer
  * Copyright (c) 2014, Sascha Schade
+ * Copyright (c) 2022, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -17,6 +18,7 @@
 #ifndef MODM_STM32_SPI_MASTER1_HPP
 #define MODM_STM32_SPI_MASTER1_HPP
 
+#include <modm/architecture/interface/spi_lock.hpp>
 #include <modm/architecture/interface/spi_master.hpp>
 #include <modm/platform/gpio/connector.hpp>
 #include <modm/math/algorithm/prescaler.hpp>
@@ -36,12 +38,13 @@ namespace platform
  * @author	Niklas Hauser
  * @ingroup	modm_platform_spi modm_platform_spi_1
  */
-class SpiMaster1 : public modm::SpiMaster
+class SpiMaster1 : public modm::SpiMaster, public SpiLock<SpiMaster1>
 {
-	static uint8_t state;
-	static uint8_t count;
-	static void *context;
-	static ConfigurationHandler configuration;
+protected:
+	// `state` must be protected to allow access from SpiMasterDma subclass
+	// Bit0: single transfer state
+	// Bit1: block transfer state
+	static inline uint8_t state{0};
 public:
 	using Hal = SpiHal1;
 
@@ -67,7 +70,7 @@ public:
 	using DataSize = Hal::DataSize;
 
 public:
-	template< template<Peripheral _> class... Signals >
+	template< class... Signals >
 	static void
 	connect()
 	{
@@ -83,7 +86,6 @@ public:
 		Connector::connect();
 	}
 
-	// start documentation inherited
 	template< class SystemClock, baudrate_t baudrate, percent_t tolerance=pct(5) >
 	static void
 	initialize()
@@ -99,30 +101,28 @@ public:
 		state = 0;
 	}
 
-	static modm_always_inline void
+	static void
 	setDataMode(DataMode mode)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataMode(static_cast<SpiHal1::DataMode>(mode));
+		SpiHal1::enableTransfer();
 	}
 
-	static modm_always_inline void
+	static void
 	setDataOrder(DataOrder order)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataOrder(static_cast<SpiHal1::DataOrder>(order));
+		SpiHal1::enableTransfer();
 	}
-	static modm_always_inline void
+	static void
 	setDataSize(DataSize size)
 	{
+		SpiHal1::disableTransfer();
 		SpiHal1::setDataSize(static_cast<SpiHal1::DataSize>(size));
+		SpiHal1::enableTransfer();
 	}
-
-
-	static uint8_t
-	acquire(void *ctx, ConfigurationHandler handler = nullptr);
-
-	static uint8_t
-	release(void *ctx);
-
 
 	static uint8_t
 	transferBlocking(uint8_t data)
@@ -142,7 +142,6 @@ public:
 
 	static modm::ResumableResult<void>
 	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
-	// end documentation inherited
 };
 
 } // namespace platform
