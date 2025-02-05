@@ -86,7 +86,7 @@ modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
             &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> BooleanHudIndicators::update()
@@ -108,7 +108,7 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
         RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw());
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void BooleanHudIndicators::initialize()

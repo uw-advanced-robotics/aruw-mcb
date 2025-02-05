@@ -45,14 +45,16 @@ void PlateHitTracker::update()
     {
         lastHitData.timestamp = newHitData.robotDataReceivedTimestamp;
 
-        lastHitData.hitAngle_chassisRelative_radians = Angle(lastHitData.plateID * M_PI / 2);
+        lastHitData.hitAngle_chassisRelative_radians =
+            Angle(lastHitData.plateID * static_cast<float>(M_PI) / 2);
 
         lastHitData.hitAngle_worldRelative_radians = lastHitData.hitAngle_chassisRelative_radians +
                                                      transformer->getWorldToChassis().getYaw();
 
         // Update bins
         int binIndex = static_cast<int>(
-            lastHitData.hitAngle_worldRelative_radians.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
+            lastHitData.hitAngle_worldRelative_radians.getWrappedValue() /
+            (2 * static_cast<float>(M_PI) / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
         float damage = newHitData.receivedDps - lastHitData.lastDps;
@@ -125,9 +127,8 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
     std::sort(
         prevPeakBinData.begin(),
         prevPeakBinData.end(),
-        [](const PlateHitBinData& a, const PlateHitBinData& b) {
-            return a.magnitude > b.magnitude;
-        });
+        [](const PlateHitBinData& a, const PlateHitBinData& b)
+        { return a.magnitude > b.magnitude; });
     calculatedPeakAngles = true;
     return prevPeakBinData;
 }

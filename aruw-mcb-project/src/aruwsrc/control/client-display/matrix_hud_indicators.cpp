@@ -69,26 +69,25 @@ MatrixHudIndicators::MatrixHudIndicators(
       turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
       cvOnTargetGovernor(cvOnTargetGovernor),
-      matrixHudIndicatorDrawers
-{
-    StateHUDIndicator<uint16_t>(
-        refSerialTransmitter,
-        &matrixHudIndicatorGraphics[SHOOTER_STATE],
-        updateGraphicYLocation,
-        0),
+      matrixHudIndicatorDrawers{
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[SHOOTER_STATE],
+              updateGraphicYLocation,
+              0),
 #if defined(DISPLAY_FIRING_MODE)
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[FIRING_MODE],
-            updateGraphicYLocation,
-            0),
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[FIRING_MODE],
+              updateGraphicYLocation,
+              0),
 #endif
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[CV_STATUS],
-            updateGraphicYLocation,
-            0),
-}
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[CV_STATUS],
+              updateGraphicYLocation,
+              0),
+      }
 {
 }
 
@@ -109,7 +108,7 @@ modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
     RF_CALL(refSerialTransmitter.sendGraphic(
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]));
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 modm::ResumableResult<bool> MatrixHudIndicators::update()
@@ -125,7 +124,7 @@ modm::ResumableResult<bool> MatrixHudIndicators::update()
         RF_CALL(matrixHudIndicatorDrawers[matrixHudIndicatorIndex].draw());
     }
 
-    RF_END();
+    RF_END_RETURN(true);
 }
 
 void MatrixHudIndicators::updateIndicatorState()

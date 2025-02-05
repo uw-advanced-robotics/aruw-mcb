@@ -47,7 +47,7 @@ public:
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
-        float turretPlateOffset = M_PI_4);
+        float turretPlateOffset = static_cast<float>(M_PI_4));
 
     void initialize() override;
 

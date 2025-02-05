@@ -39,9 +39,10 @@ CommandMapping::CommandMapping(
       mappedCommands(cmds),
       drivers(drivers)
 {
-    std::remove_if(mappedCommands.begin(), mappedCommands.end(), [](Command *c) {
-        return c == nullptr;
-    });
+    std::remove_if(
+        mappedCommands.begin(),
+        mappedCommands.end(),
+        [](Command *c) { return c == nullptr; });
 }
 
 bool operator==(const CommandMapping &cm1, const CommandMapping &cm2)
@@ -61,16 +62,18 @@ bool CommandMapping::mappingSubset(const RemoteMapState &mapState)
 
 void CommandMapping::addCommands()
 {
-    std::for_each(mappedCommands.begin(), mappedCommands.end(), [this](auto cmd) {
-        drivers->commandScheduler.addCommand(cmd);
-    });
+    std::for_each(
+        mappedCommands.begin(),
+        mappedCommands.end(),
+        [this](auto cmd) { drivers->commandScheduler.addCommand(cmd); });
 }
 
 void CommandMapping::removeCommands()
 {
-    std::for_each(mappedCommands.begin(), mappedCommands.end(), [this](auto cmd) {
-        drivers->commandScheduler.removeCommand(cmd, false);
-    });
+    std::for_each(
+        mappedCommands.begin(),
+        mappedCommands.end(),
+        [this](auto cmd) { drivers->commandScheduler.removeCommand(cmd, false); });
 }
 
 bool CommandMapping::noCommandsScheduled() const

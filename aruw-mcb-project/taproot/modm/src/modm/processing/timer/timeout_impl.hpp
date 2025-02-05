@@ -126,6 +126,13 @@ modm::GenericTimeout<Clock, Duration>::isExpired() const
 	return state() == TimerState::Expired;
 }
 
+template< class Clock, class Duration >
+void
+modm::GenericTimeout<Clock, Duration>::wait()
+{
+	modm::this_fiber::poll([this]{ return not execute(); });
+}
+
 // ----------------------------------------------------------------------------
 template< class Clock, class Duration >
 bool
