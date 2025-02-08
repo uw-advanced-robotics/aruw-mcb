@@ -1,29 +1,47 @@
+/*
+* Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+*
+* This file is part of aruw-mcb.
+*
+* aruw-mcb is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* aruw-mcb is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "cube_storage_subsystem.hpp"
 namespace aruwsrc::robot::engineer
 {
     CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& liftMotor)
+    tap::motor::MotorInterface& storageLiftMotor)
     : Subsystem(drivers),
-      motor(liftMotor){};
+      motor(storageLiftMotor){};
 void CubeStorageSubsystem::initialize() {
     motor.initialize();
 }
 
-void CubeStorageSubsystem::moveMotor(int32_t power) { 
+void CubeStorageSubsystem::moveMotor(int16_t power) { 
     motor.setDesiredOutput(power); 
 }
 void CubeStorageSubsystem::refreshSafeDisconnect() {
     motor.setDesiredOutput(0);
 }
-bool limit = false;
 
 bool CubeStorageSubsystem::isLimitSwitched() { 
     return drivers->digital.read(LIMITSWITCH_PORT); 
 }
 
 void CubeStorageSubsystem::refresh() { 
-    limit = !drivers->digital.read(LIMITSWITCH_PORT); 
+    limit = isLimitSwitched(); 
 }
 
 

@@ -30,7 +30,7 @@ class CubeDownCommand : public tap::control::Command
 {
 public: 
     CubeDownCommand(CubeStorageSubsystem &cubeLift);
-    int32_t power = 1;
+    int16_t power = 1;
 
 
     void initialize() override;

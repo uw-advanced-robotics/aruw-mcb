@@ -31,11 +31,11 @@ class CubeStorageSubsystem : public tap::control::Subsystem
 {
 public: 
     CubeStorageSubsystem(
-        tap::Drivers* drivers, tap::motor::MotorInterface &liftMotor);
+        tap::Drivers* drivers, tap::motor::MotorInterface &storageLiftMotor);
 
     void initialize() override;
     
-    void moveMotor(int32_t power);
+    void moveMotor(int16_t power);
 
 
 
@@ -50,6 +50,8 @@ public:
 protected:
     tap::motor::MotorInterface &motor;
 
+private: 
+    bool limit = false;
 };  // class CUBE_STORAGE
 
 }  // NAMESPACE

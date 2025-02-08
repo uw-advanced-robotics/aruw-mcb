@@ -58,7 +58,7 @@ static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
 static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
 static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
-tap::motor::DjiMotor liftMotor(
+tap::motor::DjiMotor storageLiftMotor(
     drivers(),
     CUBE_LIFT_MOTOR_ID,
     LIFT_MOTOR_CAN_BUS,
@@ -70,7 +70,7 @@ tap::motor::DjiMotor liftMotor(
 /* define subsystems --------------------------------------------------------*/
 
 
-CubeStorageSubsystem cubeLift(drivers(), liftMotor);
+CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor);
 /* define commands ----------------------------------------------------------*/
 CubeUpCommand cubeUp(cubeLift);
 CubeDownCommand cubeDown(cubeLift);
