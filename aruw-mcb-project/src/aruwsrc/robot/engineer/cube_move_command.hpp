@@ -29,8 +29,8 @@ namespace aruwsrc::robot::engineer
 class CubeMoveCommand : public tap::control::Command
 {
 public: 
-    CubeMoveCommand(CubeStorageSubsystem &cubeLift);
-    int32_t power = 1;
+    CubeMoveCommand(CubeStorageSubsystem &cubeLift, int32_t power);
+    int32_t power;
 
 
     void initialize() override;

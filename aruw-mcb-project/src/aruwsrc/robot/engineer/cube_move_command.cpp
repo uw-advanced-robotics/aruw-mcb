@@ -19,8 +19,8 @@
 
 #include "cube_move_command.hpp"
 namespace aruwsrc::robot::engineer {
-    CubeMoveCommand::CubeMoveCommand(CubeStorageSubsystem &cubeLift) 
-    : cubeLift(cubeLift)
+    CubeMoveCommand::CubeMoveCommand(CubeStorageSubsystem &cubeLift, int32_t power)
+    : cubeLift(cubeLift), power(power)
     {
         addSubsystemRequirement(&cubeLift);
     }
