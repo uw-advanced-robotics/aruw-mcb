@@ -193,11 +193,6 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMajorMcbLite.initialize();
 #endif
 
-#if defined(TARGET_BLANK)
-    drivers->imu.init();
-#endif
-}
-
 static void updateIo(Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();

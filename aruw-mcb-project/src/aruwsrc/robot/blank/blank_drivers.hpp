@@ -20,10 +20,7 @@
 #ifndef BLANK_DRIVERS_HPP_
 #define BLANK_DRIVERS_HPP_
 
-#include "tap/board/board.hpp"
 #include "tap/drivers.hpp"
-
-#include "aruwsrc/communication/sensors/imu/ism330.hpp"
 
 namespace aruwsrc::blank
 {
