@@ -150,7 +150,6 @@ int main()
 
 static void initializeIo(Drivers *drivers)
 {
-
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
