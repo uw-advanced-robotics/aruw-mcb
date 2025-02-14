@@ -17,13 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ISM330_DATA_HPP_
+#define ISM330_DATA_HPP_
+
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
 
-#ifndef ISM330_DATA_HPP_
-#define ISM330_DATA_HPP_
 namespace aruwsrc::communication::sensors::imu
 {
 enum Register : uint8_t

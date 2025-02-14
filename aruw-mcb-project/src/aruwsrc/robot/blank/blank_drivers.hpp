@@ -37,7 +37,6 @@ public:
     Drivers() : tap::Drivers() {}
 
 public:
-    aruwsrc::communication::sensors::imu::ISM330<Board::I2CMaster> imu;
 };  // class aruwsrc::BlankDrivers
 }  // namespace aruwsrc::blank
 
