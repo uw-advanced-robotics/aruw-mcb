@@ -127,9 +127,8 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
     std::sort(
         prevPeakBinData.begin(),
         prevPeakBinData.end(),
-        [](const PlateHitBinData& a, const PlateHitBinData& b) {
-            return a.magnitude > b.magnitude;
-        });
+        [](const PlateHitBinData& a, const PlateHitBinData& b)
+        { return a.magnitude > b.magnitude; });
     calculatedPeakAngles = true;
     return prevPeakBinData;
 }

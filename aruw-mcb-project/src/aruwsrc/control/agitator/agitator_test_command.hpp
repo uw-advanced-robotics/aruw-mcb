@@ -43,9 +43,9 @@ public:
         subsystem->setSetpoint(subsystem->getCurrentValue() + static_cast<float>(M_PI) / 2);
     };
 
-    void execute() override{};
+    void execute() override {};
 
-    void end(bool) override{};
+    void end(bool) override {};
 
     bool isFinished() const override
     {
