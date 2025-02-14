@@ -70,19 +70,19 @@ struct ImuData
 
 enum XL_Config : uint8_t
 {
-    G2_CONFIG = (0x00 << 2) | 0x0,
-    G16_CONFIG = (0x01 << 2) | 0x0,
-    G4_CONFIG = (0x10 << 2) | 0x0,
-    G8_CONFIG = (0x11 << 2) | 0x0,
+    G2_CONFIG = (0b00 << 2) | 0x0,
+    G16_CONFIG = (0b01 << 2) | 0x0,
+    G4_CONFIG = (0b10 << 2) | 0x0,
+    G8_CONFIG = (0b11 << 2) | 0x0,
     G_CONFIG_BITMASK = 0b11110011
 };
 
 enum Gyro_Config : uint8_t
 {  // Also capable of 125 and 4000 dps
-    DPS250_CONFIG = (0x00 << 2) | 0x0,
-    DPS500_CONFIG = (0x01 << 2) | 0x0,
-    DPS1000_CONFIG = (0x10 << 2) | 0x0,
-    DPS2000_CONFIG = (0x11 << 2) | 0x0,
+    DPS250_CONFIG = (0b00 << 2) | 0x0,
+    DPS500_CONFIG = (0b01 << 2) | 0x0,
+    DPS1000_CONFIG = (0b10 << 2) | 0x0,
+    DPS2000_CONFIG = (0b11 << 2) | 0x0,
     DPS_CONFIG_BITMASK = 0b11110011
 };
 

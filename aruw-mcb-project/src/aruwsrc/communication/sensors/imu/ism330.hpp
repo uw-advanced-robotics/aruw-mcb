@@ -40,11 +40,11 @@ public:
 
     void init()
     {
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (uint8_t)ODR_6660HZ | (uint8_t)G8_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, (uint8_t)ODR_6660HZ | (uint8_t)DPS2000_CONFIG));
+        writeRegister(CTRL1_XL, (uint8_t)ODR_6660HZ | (uint8_t)G8_CONFIG);
+        writeRegister(CTRL2_G, (uint8_t)ODR_6660HZ | (uint8_t)DPS2000_CONFIG);
 
         // Check Who Am I
-        RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
+        readRegister(WHO_AM_I, 3, rxConfig);
     }
 
     void readAndProcessData()
@@ -56,14 +56,15 @@ public:
 
         updateTimeout.restart(timeout);
 
-        pinged = RF_CALL_BLOCKING(this->ping());
+        pinged = this->ping();
 
         // Read temp
-        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
-        if (!readWorking)
-        {
-            return;
-        }
+        uint8_t rxBuff[15];
+        readWorking = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff);
+        // if (!readWorking)
+        // {
+        //     return;
+        // }
         imuData.temperature = tempValueToCelsius(rxBuff);
 
         imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
@@ -77,11 +78,9 @@ public:
 
     void setAccelRange(XL_Config xl_config)
     {
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
+        readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL);
 
-        RF_CALL_BLOCKING(writeRegister(
-            CTRL1_XL,
-            (current_reg_XL & (uint8_t)G_CONFIG_BITMASK) | (uint8_t)xl_config));
+        writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t)G_CONFIG_BITMASK) | (uint8_t)xl_config);
         switch (xl_config)
         {
             case G2_CONFIG:
@@ -103,11 +102,9 @@ public:
 
     void setGyroRange(Gyro_Config g_config)
     {
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
+        readRegister(CTRL2_G, READ_LENGTH, &current_reg_G);
 
-        RF_CALL_BLOCKING(writeRegister(
-            CTRL2_G,
-            (current_reg_G & (uint8_t)DPS_CONFIG_BITMASK) | (uint8_t)g_config));
+        writeRegister(CTRL2_G, (current_reg_G & (uint8_t)DPS_CONFIG_BITMASK) | (uint8_t)g_config);
         switch (g_config)
         {
             case DPS250_CONFIG:
@@ -129,13 +126,12 @@ public:
 
     void updateODR(ODR odr)
     {  // Takes in ODR in Hz
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, current_reg_G));
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL));
+        readRegister(CTRL2_G, READ_LENGTH, current_reg_G);
+        readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL);
 
-        RF_CALL_BLOCKING(
-            writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t)ODR_BITMASK) | (uint8_t)odr));
-        RF_CALL_BLOCKING(
-            writeRegister(CTRL2_G, (current_reg_G & (uint8_t)ODR_BITMASK) | (uint8_t)odr));
+        writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t)ODR_BITMASK) | (uint8_t)odr);
+
+        writeRegister(CTRL2_G, (current_reg_G & (uint8_t)ODR_BITMASK) | (uint8_t)odr);
         switch (odr)
         {
             case ODR_416HZ:
@@ -161,34 +157,32 @@ public:
     ImuData imuData;  // TODO: remove
 
 private:
-    modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
+    bool readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
-        RF_BEGIN();
+        uint8_t txBuff = reg;
 
-        txBuff[0] = reg;
+        while (!this->transaction.configureWriteRead(&txBuff, 1, rxBuffer, length))
+        {
+            modm::this_fiber::yield();
+        }
 
-        RF_WAIT_WHILE(!this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length));
-
-        RF_END_RETURN_CALL(this->runTransaction());
+        return this->runTransaction();
     };
 
-    modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
+    bool writeRegister(uint8_t reg, uint8_t data)
     {
-        RF_BEGIN();
+        uint8_t txBuff[2] = {reg, data};
 
-        txBuff[0] = reg;
-        txBuff[1] = data;
+        while (!this->transaction.configureWrite(txBuff, 2))
+        {
+            modm::this_fiber::yield();
+        }
 
-        RF_WAIT_WHILE(!this->transaction.configureWrite(txBuff, 2));
-
-        RF_END_RETURN_CALL(this->runTransaction());
+        return this->runTransaction();
     };
 
     bool pinged;
     bool readWorking;
-
-    uint8_t txBuff[2];
-    uint8_t rxBuff[30];
 
     uint8_t rxConfig[10];
 
