@@ -3,6 +3,7 @@
 
 #include "tap/control/subsystem.hpp"
 #include "robot_orbit_transmitter.hpp"
+#include "tap/architecture/timeout.hpp"
 
 namespace aruwsrc::communication::serial {
 

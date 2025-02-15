@@ -10,7 +10,12 @@ RobotOrbitSubsystem::RobotOrbitSubsystem(
       transmitter(drivers, stateProvider, chassisOdometry, refSerial) {}
 
 void RobotOrbitSubsystem::refresh() {
-    (void)transmitter.sendRobotStates();
+    static tap::arch::MilliTimeout timeout(100); 
+
+    if (timeout.execute()) {
+        transmitter.sendRobotStates();
+        timeout.restart(100); 
+    }
 }
 
 } // namespace aruwsrc::communication::serial
