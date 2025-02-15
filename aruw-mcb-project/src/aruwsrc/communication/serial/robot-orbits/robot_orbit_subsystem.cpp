@@ -2,14 +2,15 @@
 
 namespace aruwsrc::communication::serial {
 
-RobotOrbitSubsystem::RobotOrbitSubsystem(tap::Drivers* drivers,
-    tap::communication::serial::RefSerialTransmitter::RobotId allyRobot)
+RobotOrbitSubsystem::RobotOrbitSubsystem(
+    tap::Drivers* drivers,
+    aruwsrc::algorithms::odometry::ChassisKFOdometry* chassisOdometry,
+    tap::communication::serial::RefSerial* refSerial)
     : tap::control::Subsystem(drivers),
-      transmitter(drivers, stateProvider),
-      allyRobot(allyRobot) {}
+      transmitter(drivers, stateProvider, chassisOdometry, refSerial) {}
 
 void RobotOrbitSubsystem::refresh() {
-    (void)transmitter.sendRobotStates(allyRobot);
+    (void)transmitter.sendRobotStates();
 }
 
 } // namespace aruwsrc::communication::serial

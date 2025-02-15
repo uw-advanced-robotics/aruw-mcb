@@ -2,7 +2,7 @@
 #define ROBOT_ORBIT_SUBSYSTEM_HPP
 
 #include "tap/control/subsystem.hpp"
-#include "robot_orbit_transgender.hpp"
+#include "robot_orbit_transmitter.hpp"
 
 namespace aruwsrc::communication::serial {
 
@@ -10,13 +10,21 @@ class RobotOrbitSubsystem : public tap::control::Subsystem {
 public:
     explicit RobotOrbitSubsystem(
         tap::Drivers* drivers,
-        tap::communication::serial::RefSerialTransmitter::RobotId allyRobot);
+        aruwsrc::algorithms::odometry::ChassisKFOdometry* chassisOdometry,
+        tap::communication::serial::RefSerial* refSerial);
     void refresh() override;
+
+    inline void updateFromVision(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state) {
+        stateProvider.updateFromVision(robotID, state);
+    }
+
+    inline void updateFromAlly(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state) {
+        stateProvider.updateFromAlly(robotID, state);
+    }
 
 private:
     RobotOrbitStateProvider stateProvider;
     RobotOrbitTransmitter transmitter;
-    tap::communication::serial::RefSerialTransmitter::RobotId allyRobot;
 };
 
 } // namespace aruwsrc::communication::serial

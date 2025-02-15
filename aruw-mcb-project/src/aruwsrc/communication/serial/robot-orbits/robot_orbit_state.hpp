@@ -2,22 +2,14 @@
 #define ROBOT_ORBIT_STATE_HPP
 
 #include <cstdint>
-#include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::communication::serial {
 
 constexpr uint8_t MAX_TRACKED_ROBOTS = 4;
 
-enum class RobotId : uint8_t {
-    SELF = 0,
-    ENEMY_STANDARD = 1,
-    ENEMY_HERO = 2,
-    ENEMY_SENTRY = 3,
-    INVALID = 255
-};
-
 struct RobotState {
-    uint8_t plateID;
+    tap::communication::serial::RefSerialData::RobotId robotId; 
     uint8_t xPos;
     uint8_t yPos;
     uint8_t zPos;
@@ -25,10 +17,10 @@ struct RobotState {
 
 class RobotOrbitStateProvider {
 public:
-    void updateFromVision(RobotId robotID, const RobotState& state);
-    void updateFromAlly(RobotId robotID, const RobotState& state);
-    bool getRobotState(RobotId robotID, RobotState& outState) const;
-    uint8_t getKnownStates(RobotState states[MAX_TRACKED_ROBOTS]) const;
+    void updateFromVision(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state);
+    void updateFromAlly(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state);
+    bool getRobotState(tap::communication::serial::RefSerialData::RobotId robotID, RobotState& outState) const;
+    uint8_t getNumKnownVisionStates(RobotState states[MAX_TRACKED_ROBOTS]) const;
 
 private:
     RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
