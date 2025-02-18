@@ -44,8 +44,8 @@ public:
 private:
     int index = 0;
 
-    static constexpr uint16_t IMAGE_X_OFFSET = 0;
-    static constexpr uint16_t IMAGE_Y_OFFSET = 0;
+    static constexpr uint16_t IMAGE_X_OFFSET = 600;
+    static constexpr int16_t IMAGE_Y_OFFSET = -400;
 
     static constexpr uint16_t LINE_THICKNESS = 1;
 

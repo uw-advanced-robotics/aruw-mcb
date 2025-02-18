@@ -32,20 +32,7 @@ ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
 {
 }
 
-void ImageIndicator::initialize()
-{
-    uint8_t graphicName[3];
-
-    getUnusedGraphicName(graphicName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &imageGraphic.graphicData,
-        graphicName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::GREEN);
-
-    index = 0;
-}
+void ImageIndicator::initialize() { index = 0; }
 
 modm::ResumableResult<bool> ImageIndicator::sendInitialGraphics()
 {
@@ -58,23 +45,37 @@ modm::ResumableResult<bool> ImageIndicator::update()
 {
     RF_BEGIN(0)
 
+    if (index > NUM_LINES_MARCUS)
+    {
+        RF_RETURN(true);
+    }
+
     auto currentTuple = MARCUS_LINES[index];
-    int startX = std::get<0>(currentTuple);
-    int startY = std::get<1>(currentTuple);
-    int endX = std::get<2>(currentTuple);
-    int endY = std::get<3>(currentTuple);
+    int startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
+    int startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
+    int endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;
+    int endY = std::get<3>(currentTuple) + IMAGE_Y_OFFSET;
+
+    uint8_t graphicName[3];
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &imageGraphic.graphicData,
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::GREEN);
 
     RefSerialTransmitter::configLine(
         LINE_THICKNESS,
-        startX + IMAGE_X_OFFSET,
-        startY + IMAGE_Y_OFFSET,
-        endX + IMAGE_X_OFFSET,
-        endY + IMAGE_Y_OFFSET,
+        startX,
+        startY,
+        endX,
+        endY,
         &imageGraphic.graphicData);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&imageGraphic));
 
-    index = (index + 1) % NUM_LINES_MARCUS;
+    index++;
 
     RF_END_RETURN(true);
 }

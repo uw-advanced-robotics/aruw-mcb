@@ -115,26 +115,26 @@ bool ClientDisplayCommand::run()
         // Reset the HUD elements
         this->restartHud();
 
-        // PT_CALL(capBankIndicator.sendInitialGraphics());
-        // PT_CALL(positionHudIndicators.sendInitialGraphics());
-        // PT_CALL(ammoIndicator.sendInitialGraphics());
-        // PT_CALL(circleCrosshair.sendInitialGraphics());
-        // PT_CALL(damageIndicator.sendInitialGraphics());
-        // PT_CALL(textHudIndicators.sendInitialGraphics());
-        // PT_CALL(visionTargetIndicator.sendInitialGraphics());
+        PT_CALL(capBankIndicator.sendInitialGraphics());
+        PT_CALL(positionHudIndicators.sendInitialGraphics());
+        PT_CALL(ammoIndicator.sendInitialGraphics());
+        PT_CALL(circleCrosshair.sendInitialGraphics());
+        PT_CALL(damageIndicator.sendInitialGraphics());
+        PT_CALL(textHudIndicators.sendInitialGraphics());
+        PT_CALL(visionTargetIndicator.sendInitialGraphics());
         PT_CALL(imageIndicator.sendInitialGraphics());
 
         // If we try to restart the hud, break out of the loop
         while (!this->restarting)
         {
             startTime = tap::arch::clock::getTimeMicroseconds();
-            // PT_CALL(capBankIndicator.update());
-            // PT_CALL(positionHudIndicators.update());
-            // PT_CALL(ammoIndicator.update());
-            // PT_CALL(circleCrosshair.update());
-            // PT_CALL(damageIndicator.update());
-            // PT_CALL(textHudIndicators.update());
-            // PT_CALL(visionTargetIndicator.update());
+            PT_CALL(capBankIndicator.update());
+            PT_CALL(positionHudIndicators.update());
+            PT_CALL(ammoIndicator.update());
+            PT_CALL(circleCrosshair.update());
+            PT_CALL(damageIndicator.update());
+            PT_CALL(textHudIndicators.update());
+            PT_CALL(visionTargetIndicator.update());
             PT_CALL(imageIndicator.update());
 
             // Calculate the time it took to update the HUD
