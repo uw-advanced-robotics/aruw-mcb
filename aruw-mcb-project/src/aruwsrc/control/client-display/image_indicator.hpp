@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MARCUS_INDICATOR_HPP_
-#define MARCUS_INDICATOR_HPP_
+#ifndef IMAGE_INDICATOR_HPP_
+#define IMAGE_INDICATOR_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
@@ -32,7 +32,7 @@
 namespace aruwsrc::control::client_display
 {
 
-class MarcusIndicator : public HudIndicator, protected modm::Resumable<2>
+class ImageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 };
 
