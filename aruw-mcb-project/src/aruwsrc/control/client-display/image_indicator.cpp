@@ -71,15 +71,12 @@ modm::ResumableResult<bool> ImageIndicator::update()
         endX + IMAGE_X_OFFSET,
         endY + IMAGE_Y_OFFSET,
         &imageGraphic.graphicData);
-    
+
     RF_CALL(refSerialTransmitter.sendGraphic(&imageGraphic));
 
     index = (index + 1) % NUM_LINES_MARCUS;
 
     RF_END_RETURN(true);
 }
-
-
-
 
 }  // namespace aruwsrc::control::client_display
