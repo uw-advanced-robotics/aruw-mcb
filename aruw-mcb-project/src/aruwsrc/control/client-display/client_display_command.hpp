@@ -41,6 +41,7 @@
 #include "matrix_hud_indicators.hpp"
 #include "text_hud_indicators.hpp"
 #include "vision_target_indicator.hpp"
+#include "image_indicator.hpp"
 
 namespace tap::control
 {
@@ -132,6 +133,7 @@ private:
     DamageIndicator damageIndicator;
     TextHudIndicators textHudIndicators;
     VisionTargetIndicator visionTargetIndicator;
+    ImageIndicator imageIndicator;
 
     bool restarting = true;
 

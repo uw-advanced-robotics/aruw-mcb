@@ -20,11 +20,9 @@
 #ifndef IMAGE_INDICATOR_HPP_
 #define IMAGE_INDICATOR_HPP_
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
-#include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
 
-#include "images/marcus.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -34,6 +32,24 @@ namespace aruwsrc::control::client_display
 
 class ImageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
+public:
+    ImageIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+
+    void initialize() override final;
+
+    modm::ResumableResult<bool> sendInitialGraphics() override final;
+
+    modm::ResumableResult<bool> update() override final;
+
+private:
+    int index = 0;
+
+    static constexpr uint16_t IMAGE_X_OFFSET = 0;
+    static constexpr uint16_t IMAGE_Y_OFFSET = 0;
+
+    static constexpr uint16_t LINE_THICKNESS = 1;
+
+    Tx::Graphic1Message imageGraphic;
 };
 
 }  // namespace aruwsrc::control::client_display

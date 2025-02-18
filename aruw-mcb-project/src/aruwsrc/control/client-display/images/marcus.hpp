@@ -1507,6 +1507,8 @@ static constexpr LineTuple MARCUS_LINES[]{
     LineTuple(537, 42, 489, 72),
     LineTuple(489, 72, 546, 27)};
 
-}  // namespace aruwsrc::control::client_display::images
+    static constexpr size_t NUM_LINES_MARCUS = sizeof(MARCUS_LINES) / sizeof(LineTuple);
+
+};  // namespace aruwsrc::control::client_display::images
 
 #endif // MARCUS_HPP_
