@@ -20,28 +20,18 @@
 #include "cube_storage_subsystem.hpp"
 namespace aruwsrc::robot::engineer
 {
-    CubeStorageSubsystem::CubeStorageSubsystem(
+CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& storageLiftMotor)
     : Subsystem(drivers),
       motor(storageLiftMotor){};
 
-    void CubeStorageSubsystem::initialize() {
-        motor.initialize();
-    }
+void CubeStorageSubsystem::initialize() { motor.initialize(); }
 
-    void CubeStorageSubsystem::moveMotor(int16_t power) { 
-        motor.setDesiredOutput(power); 
-    }
-    void CubeStorageSubsystem::refreshSafeDisconnect() {
-        motor.setDesiredOutput(0);
-    }
+void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(power); }
+void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-    bool CubeStorageSubsystem::isLimitSwitched() { 
-        return drivers->digital.read(LIMITSWITCH_PORT); 
-    }
+bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
 
-    void CubeStorageSubsystem::refresh() { 
-        limit = isLimitSwitched(); 
-    }
-}
+void CubeStorageSubsystem::refresh() { limit = isLimitSwitched(); }
+}  // namespace aruwsrc::robot::engineer

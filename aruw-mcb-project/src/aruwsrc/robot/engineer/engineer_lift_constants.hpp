@@ -17,21 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #ifndef ENGINEER_LIFT_CONSTANTS_HPP_
- #define ENGINEER_LIFT_CONSTANTS_HPP_
-
-#include "tap/motor/dji_motor.hpp"
+#ifndef ENGINEER_LIFT_CONSTANTS_HPP_
+#define ENGINEER_LIFT_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 namespace aruwsrc::robot::engineer
 {
-static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR1;  //TODO: UPDATE W CORRECT VALUE
- 
+static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
+    tap::motor::MOTOR1;  // TODO: UPDATE W CORRECT VALUE
 
-static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2; // TODO: UPDATE W CORRECT VALUE
+static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
+    tap::can::CanBus::CAN_BUS2;  // TODO: UPDATE W CORRECT VALUE
 
-static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D; //TODO: UPDATE W CORRECT VALUE
+static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
+    tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
 
-}
+}  // namespace aruwsrc::robot::engineer
 #endif

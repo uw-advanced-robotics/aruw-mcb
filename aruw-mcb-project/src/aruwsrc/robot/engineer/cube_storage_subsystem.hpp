@@ -19,8 +19,10 @@
 #ifndef CUBE_STORAGE_SUBSYSTEM_HPP_
 #define CUBE_STORAGE_SUBSYSTEM_HPP_
 
-#include "tap/control/subsystem.hpp"
 #include <tap/motor/motor_interface.hpp>
+
+#include "tap/control/subsystem.hpp"
+
 #include "engineer_drivers.hpp"
 #include "engineer_lift_constants.hpp"
 
@@ -29,15 +31,12 @@ namespace aruwsrc::robot::engineer
 
 class CubeStorageSubsystem : public tap::control::Subsystem
 {
-public: 
-    CubeStorageSubsystem(
-        tap::Drivers* drivers, tap::motor::MotorInterface &storageLiftMotor);
+public:
+    CubeStorageSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface& storageLiftMotor);
 
     void initialize() override;
-    
+
     void moveMotor(int16_t power);
-
-
 
     bool isLimitSwitched();
 
@@ -48,12 +47,11 @@ public:
     const char* getName() const override { return "Cube Storage"; }
 
 protected:
-    tap::motor::MotorInterface &motor;
+    tap::motor::MotorInterface& motor;
 
-private: 
+private:
     bool limit = false;
 };  // class CUBE_STORAGE
 
-}  // NAMESPACE
+}  // namespace aruwsrc::robot::engineer
 #endif  // CUBE_STORAGE_SUBSYSTEM_HPP_
-

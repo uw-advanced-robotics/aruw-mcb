@@ -20,6 +20,7 @@
 #define CUBE_MOVE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+
 #include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::robot::engineer
@@ -28,7 +29,7 @@ namespace aruwsrc::robot::engineer
 
 class CubeMoveCommand : public tap::control::Command
 {
-public: 
+public:
     CubeMoveCommand(CubeStorageSubsystem &cubeLift, int32_t power);
 
     void initialize() override;
@@ -39,14 +40,13 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "Cube Move Command"; }
+    const char *getName() const override { return "Cube Move Command"; }
 
 private:
     CubeStorageSubsystem &cubeLift;
     int32_t power;
- 
+
 };  // class CubeMoveCommand
 
-}  // NAMESPACE
+}  // namespace aruwsrc::robot::engineer
 #endif  // CUBE_MOVE_COMMAND_HPP_
-
