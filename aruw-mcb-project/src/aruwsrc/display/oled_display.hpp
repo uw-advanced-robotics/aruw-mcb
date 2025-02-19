@@ -21,9 +21,9 @@
 #define OLED_DISPLAY_HPP_
 
 #include "tap/board/board.hpp"
-#include "tap/display/Sh1107.hpp"
 #include "tap/display/oled_button_handler.hpp"
 #include "tap/display/sh1106.hpp"
+#include "tap/display/sh1107.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
@@ -32,6 +32,7 @@
 #include "modm/ui/menu/view_stack.hpp"
 
 #include "splash_screen.hpp"
+
 
 namespace aruwsrc
 {
