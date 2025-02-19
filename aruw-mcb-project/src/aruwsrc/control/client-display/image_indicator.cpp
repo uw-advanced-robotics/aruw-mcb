@@ -28,7 +28,8 @@ namespace aruwsrc::control::client_display
 {
 
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
-    : HudIndicator(refSerialTransmitter)
+    : HudIndicator(refSerialTransmitter),
+      image({NUM_LINES_MARCUS, MARCUS_LINES})
 {
 }
 
@@ -45,12 +46,12 @@ modm::ResumableResult<bool> ImageIndicator::update()
 {
     RF_BEGIN(0)
 
-    if (index > NUM_LINES_MARCUS)
+    if (index > image.size - 1)
     {
         RF_RETURN(true);
     }
 
-    auto currentTuple = MARCUS_LINES[index];
+    auto currentTuple = image.lines[index];
     int startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
     int startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
     int endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;

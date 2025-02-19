@@ -50,6 +50,14 @@ private:
     static constexpr uint16_t LINE_THICKNESS = 1;
 
     Tx::Graphic1Message imageGraphic;
+
+    struct Image
+    {
+        int size;
+        const LineTuple *lines;
+    };
+
+    Image image;
 };
 
 }  // namespace aruwsrc::control::client_display
