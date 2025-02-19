@@ -33,7 +33,6 @@
 
 #include "splash_screen.hpp"
 
-
 namespace aruwsrc
 {
 class Drivers;
