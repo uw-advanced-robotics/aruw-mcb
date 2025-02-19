@@ -30,8 +30,6 @@ class CubeMoveCommand : public tap::control::Command
 {
 public: 
     CubeMoveCommand(CubeStorageSubsystem &cubeLift, int32_t power);
-    int32_t power;
-
 
     void initialize() override;
 
@@ -45,6 +43,7 @@ public:
 
 private:
     CubeStorageSubsystem &cubeLift;
+    int32_t power;
  
 };  // class CubeMoveCommand
 
