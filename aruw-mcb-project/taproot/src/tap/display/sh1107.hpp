@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -26,7 +26,6 @@
 
 #include "modm/architecture/driver/atomic/flag.hpp"
 #include "modm/architecture/interface/delay.hpp"
-#include "modm/processing/resumable.hpp"
 #include "modm/ui/display/monochrome_graphic_display_vertical.hpp"
 
 namespace tap
@@ -44,8 +43,9 @@ template <
 #endif
     unsigned int Width,
     unsigned int Height,
-    bool Flipped>
-class Sh1107 : public modm::MonochromeGraphicDisplayVertical<Width, Height>, modm::Resumable<1>
+    bool Flipped,
+    bool Rotate>
+class Sh1107 : public modm::MonochromeGraphicDisplayVertical<Width, Height>
 {
 public:
     virtual ~Sh1107() {}
@@ -59,12 +59,8 @@ public:
 
     /**
      * Update the display with the content of the RAM buffer.
-     *
-     * @note This function uses protothreads (http://dunkels.com/adam/pt/).
-     *      Local variables *do not* necessarily behave correctly and this
-     *      function should be edited with care.
      */
-    modm::ResumableResult<bool> updateNonblocking();
+    bool updateNonblocking();
 
     /**
      * Invert the display content.
@@ -80,6 +76,7 @@ protected:
 
 private:
     static constexpr uint8_t SH1107_COL_OFFSET = 2;
+    uint8_t rotatedMatrix[Height / 8][Width] = {0};
 
     /**
      * Variables used in `updateNonblocking`. Since it is generally not a good idea

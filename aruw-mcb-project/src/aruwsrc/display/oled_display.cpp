@@ -41,7 +41,15 @@ OledDisplay::OledDisplay(
     : Fiber([this] { run(); }),
       display(),
       viewStack(&display),
-      buttonHandler(drivers, &analogConfig),
+      buttonHandler(
+          drivers,
+          (tap::display::AnalogConfig){
+              .ok = 50,
+              .left = 1000,
+              .right = 2000,
+              .up = 3050,
+              .down = 3700,
+          }),
       splashScreen(
           &viewStack,
           drivers,

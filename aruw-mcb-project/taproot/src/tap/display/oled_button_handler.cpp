@@ -29,39 +29,26 @@ namespace tap
 {
 namespace display
 {
-OledButtonHandler::OledButtonHandler(tap::Drivers *drivers)
+OledButtonHandler::OledButtonHandler(tap::Drivers *drivers, const AnalogConfig analogConfig)
     : drivers(drivers),
       downButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       upButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       leftButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       rightButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
       okButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      ADC_CONFIG(&DEFAULT_ADC_CONFIG)
-{
-}
-
-OledButtonHandler::OledButtonHandler(tap::Drivers *drivers, const AnalogConfig *analogConfig)
-    : drivers(drivers),
-      downButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      upButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      leftButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      rightButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      okButtonPressed(BUTTON_DEBOUNCE_SAMPLES),
-      ADC_CONFIG(analogConfig)
+      adcConfig(analogConfig)
 {
 }
 
 OledButtonHandler::Button OledButtonHandler::getCurrentButtonState()
 {
     int buttonADC = drivers->analog.read(gpio::Analog::Pin::OledJoystick);
-    bals = drivers->analog.read(gpio::Analog::Pin::OledJoystick);
 
-
-    downButtonPressed.update(abs(buttonADC - ADC_CONFIG->down) < ADC_PRESSED_RANGE);
-    upButtonPressed.update(abs(buttonADC - ADC_CONFIG->up) < ADC_PRESSED_RANGE);
-    leftButtonPressed.update(abs(buttonADC - ADC_CONFIG->left) < ADC_PRESSED_RANGE);
-    rightButtonPressed.update(abs(buttonADC - ADC_CONFIG->right) < ADC_PRESSED_RANGE);
-    okButtonPressed.update(abs(buttonADC - ADC_CONFIG->ok) < ADC_PRESSED_RANGE);
+    downButtonPressed.update(abs(buttonADC - adcConfig.down) < ADC_PRESSED_RANGE);
+    upButtonPressed.update(abs(buttonADC - adcConfig.up) < ADC_PRESSED_RANGE);
+    leftButtonPressed.update(abs(buttonADC - adcConfig.left) < ADC_PRESSED_RANGE);
+    rightButtonPressed.update(abs(buttonADC - adcConfig.right) < ADC_PRESSED_RANGE);
+    okButtonPressed.update(abs(buttonADC - adcConfig.ok) < ADC_PRESSED_RANGE);
 
     if (downButtonPressed.getValue())
     {

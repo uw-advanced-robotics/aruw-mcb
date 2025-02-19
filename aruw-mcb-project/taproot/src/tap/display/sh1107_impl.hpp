@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -27,46 +27,102 @@
 
 #include "sh1107_defines.hpp"
 
+namespace details
+{
+inline void rotateBox(uint8_t *box)
+{
+    uint8_t temp[8] = {0};
+
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            temp[i] |= ((box[j] >> i) & 1) << (8 - j - 1);
+        }
+    }
+
+    for (int i = 0; i < 8; i++) box[i] = temp[i];
+}
+
+inline void rotateMatrix(
+    int Height,
+    int Width,
+    uint8_t (&matrix)[16][128],
+    uint8_t (&rotatedMatrix)[16][128])
+{
+    for (int i = 0; i < Height / 8; i++)
+    {
+        for (int j = 0; j < Width / 8; j++)
+        {
+            uint8_t targetBytes[8];
+            for (int k = 0; k < 8; k++)
+            {
+                targetBytes[k] = matrix[j][i * 8 + 7 - k];
+            }
+
+            rotateBox(targetBytes);
+
+            for (int k = 0; k < 8; k++)
+            {
+                rotatedMatrix[i][j * 8 + k] = targetBytes[k];
+            }
+        }
+    }
+
+    for (int i = 0; i < Height / 8; i++)
+    {
+        for (int j = 0; j < Width / 2; j++)
+        {
+            uint8_t tmp = rotatedMatrix[i][j];
+            rotatedMatrix[i][j] = rotatedMatrix[i][Width - 1 - j];
+            rotatedMatrix[i][Width - 1 - j] = tmp;
+        }
+    }
+}
+}  // namespace details
+
 template <
     typename SPI,
     typename A0,
     typename Reset,
     unsigned int Width,
     unsigned int Height,
-    bool Flipped>
-modm::ResumableResult<bool> tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped>::
-    updateNonblocking()
+    bool Flipped,
+    bool Rotate>
+bool tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped, Rotate>::updateNonblocking()
 {
-    RF_BEGIN(0);
+    if (!writeToDisplay.testAndSet(false)) return false;
 
-    if (!writeToDisplay.testAndSet(false)) RF_RETURN(false);
+    if (Rotate)
+    {
+        details::rotateMatrix(Height, Width, this->buffer, rotatedMatrix);
+    }
 
     for (y = 0; y < (Height / 8); ++y)
     {
         // command mode
         a0.reset();
-        RF_CALL(spi.transfer(SH1107_PAGE_ADDRESS | y));  // Row select
-        RF_CALL(spi.transfer(SH1107_COL_ADDRESS_MSB));   // Column select high
-
-        if (Flipped)
-        {
-            RF_CALL(spi.transfer(SH1107_COL_ADDRESS_LSB | 4));  // Column select low
-        }
-        else
-        {
-            RF_CALL(spi.transfer(SH1107_COL_ADDRESS_LSB | SH1107_COL_OFFSET));  // Column select low
-        }
+        spi.transfer(SH1107_PAGE_ADDRESS | y);  // Row select
+        spi.transfer(SH1107_COL_ADDRESS_MSB);   // Column select high
+        spi.transfer(SH1107_COL_ADDRESS_LSB);   // Column select low
 
         // switch to data mode
         a0.set();
         for (x = 0; x < Width; ++x)
         {
-            RF_CALL(spi.transfer(this->buffer[y][x]));
+            if (Rotate)
+            {
+                spi.transfer(rotatedMatrix[y][x]);
+            }
+            else
+            {
+                spi.transfer(this->buffer[y][x]);
+            }
         }
     }
     a0.reset();
 
-    RF_END_RETURN(true);
+    return true;
 }
 
 template <
@@ -75,8 +131,9 @@ template <
     typename Reset,
     unsigned int Width,
     unsigned int Height,
-    bool Flipped>
-void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped>::update()
+    bool Flipped,
+    bool Rotate>
+void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped, Rotate>::update()
 {
     writeToDisplay.testAndSet(true);
 }
@@ -87,8 +144,9 @@ template <
     typename Reset,
     unsigned int Width,
     unsigned int Height,
-    bool Flipped>
-void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped>::setInvert(bool invert)
+    bool Flipped,
+    bool Rotate>
+void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped, Rotate>::setInvert(bool invert)
 {
     a0.reset();
 
@@ -109,8 +167,9 @@ template <
     typename Reset,
     unsigned int Width,
     unsigned int Height,
-    bool Flipped>
-void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped>::initializeBlocking()
+    bool Flipped,
+    bool Rotate>
+void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped, Rotate>::initializeBlocking()
 {
     a0.setOutput();
     reset.setOutput();
@@ -136,7 +195,6 @@ void tap::display::Sh1107<SPI, A0, Reset, Width, Height, Flipped>::initializeBlo
         spi.transferBlocking(SH1107_ADC_REVERSE);
         spi.transferBlocking(SH1107_SCAN_DIR_REVERSE);
     }
-
 
     spi.transferBlocking(SH1107_ON);
 
