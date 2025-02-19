@@ -18,7 +18,7 @@
  */
 
  #ifndef ENGINEER_LIFT_CONSTANTS_HPP_
- #define ENGINEER_LIST_CONSTANTS_HPP_
+ #define ENGINEER_LIFT_CONSTANTS_HPP_
 
 #include "tap/motor/dji_motor.hpp"
 
