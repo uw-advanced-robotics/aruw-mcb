@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #ifndef ENGINEER_LIFT_CONSTANTS_HPP_
+ #define ENGINEER_LIST_CONSTANTS_HPP_
+
 #include "tap/motor/dji_motor.hpp"
 
 #include "tap/communication/gpio/digital.hpp"
@@ -31,3 +34,4 @@ static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D; //TODO: UPDATE W CORRECT VALUE
 
 }
+#endif
