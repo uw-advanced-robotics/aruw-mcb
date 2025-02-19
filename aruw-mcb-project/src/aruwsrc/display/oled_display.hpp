@@ -29,6 +29,7 @@
 #include "modm/platform.hpp"
 #include "modm/processing/fiber.hpp"
 #include "modm/ui/menu/view_stack.hpp"
+#include "modm/platform.hpp"
 
 #include "splash_screen.hpp"
 
@@ -93,6 +94,14 @@ private:
     tap::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
+
+    const tap::display::AnalogConfig analogConfig{
+        .ok = 50,
+        .left = 1000,
+        .right = 2000,
+        .up = 3050,
+        .down = 3700,
+    };
 
     tap::Drivers *drivers;
 };  // class OledDisplay
