@@ -135,19 +135,19 @@ public:
         switch (odr)
         {
             case ODR_416HZ:
-                timeout = 3000;
+                timeout = 1000000/416;
                 break;
             case ODR_833HZ:
-                timeout = 2000;
+                timeout = 1000000/833;
                 break;
             case ODR_1660HZ:
-                timeout = 1000;
+                timeout = 1000000/1660;
                 break;
             case ODR_3330HZ:
-                timeout = 500;
+                timeout = 1000000/3330;
                 break;
             case ODR_6660HZ:
-                timeout = 300;
+                timeout = 1000000/6660;
                 break;
             default:
                 break;
