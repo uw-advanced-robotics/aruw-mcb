@@ -31,13 +31,13 @@
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
 #include "aruwsrc/robot/engineer/cube_storage_subsystem.hpp"
-#include "aruwsrc/robot/engineer/cube_up_command.hpp"
-#include "aruwsrc/robot/engineer/cube_down_command.hpp"
+#include "aruwsrc/robot/engineer/cube_move_command.hpp"
 using namespace tap::gpio;
 using tap::control::CommandMapper;
 using tap::communication::serial::Remote;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::robot::engineer;
+using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -72,8 +72,8 @@ tap::motor::DjiMotor storageLiftMotor(
 
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor);
 /* define commands ----------------------------------------------------------*/
-CubeUpCommand cubeUp(cubeLift);
-CubeDownCommand cubeDown(cubeLift);
+CubeMoveCommand cubeUp(cubeLift, 100);
+CubeMoveCommand cubeDown(cubeLift, -100);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
