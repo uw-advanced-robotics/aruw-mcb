@@ -61,10 +61,10 @@ public:
         // Read temp
         uint8_t rxBuff[15];
         readWorking = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff);
-        // if (!readWorking)
-        // {
-        //     return;
-        // }
+        if (!readWorking)
+        {
+            return;
+        }
         imuData.temperature = tempValueToCelsius(rxBuff);
 
         imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
@@ -135,26 +135,24 @@ public:
         switch (odr)
         {
             case ODR_416HZ:
-                timeout = 3;
+                timeout = 3000;
                 break;
             case ODR_833HZ:
-                timeout = 2;
+                timeout = 2000;
                 break;
             case ODR_1660HZ:
-                timeout = 1;
+                timeout = 1000;
                 break;
             case ODR_3330HZ:
-                timeout = 1;
+                timeout = 500;
                 break;
             case ODR_6660HZ:
-                timeout = 1;
+                timeout = 300;
                 break;
             default:
                 break;
         }
     }
-
-    ImuData imuData;  // TODO: remove
 
 private:
     bool readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -186,14 +184,14 @@ private:
 
     uint8_t rxConfig[10];
 
-    int timeout = 2;
+    int timeout = 300;
 
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
 
-    tap::arch::PeriodicMilliTimer updateTimeout;
+    tap::arch::PeriodicMicroTimer updateTimeout;
 
-    // ImuData imuData;
+    ImuData imuData;
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
