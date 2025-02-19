@@ -1,5 +1,4 @@
 /*
-/*
  * Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
@@ -26,24 +25,23 @@ namespace aruwsrc::robot::engineer
     tap::motor::MotorInterface& storageLiftMotor)
     : Subsystem(drivers),
       motor(storageLiftMotor){};
-void CubeStorageSubsystem::initialize() {
-    motor.initialize();
-}
 
-void CubeStorageSubsystem::moveMotor(int16_t power) { 
-    motor.setDesiredOutput(power); 
-}
-void CubeStorageSubsystem::refreshSafeDisconnect() {
-    motor.setDesiredOutput(0);
-}
+    void CubeStorageSubsystem::initialize() {
+        motor.initialize();
+    }
 
-bool CubeStorageSubsystem::isLimitSwitched() { 
-    return drivers->digital.read(LIMITSWITCH_PORT); 
-}
+    void CubeStorageSubsystem::moveMotor(int16_t power) { 
+        motor.setDesiredOutput(power); 
+    }
+    void CubeStorageSubsystem::refreshSafeDisconnect() {
+        motor.setDesiredOutput(0);
+    }
 
-void CubeStorageSubsystem::refresh() { 
-    limit = isLimitSwitched(); 
-}
+    bool CubeStorageSubsystem::isLimitSwitched() { 
+        return drivers->digital.read(LIMITSWITCH_PORT); 
+    }
 
-
+    void CubeStorageSubsystem::refresh() { 
+        limit = isLimitSwitched(); 
+    }
 }
