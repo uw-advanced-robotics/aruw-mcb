@@ -37,4 +37,8 @@
 #define ALL_SENTRIES
 #endif
 
+#if defined(ALL_STANDARDS) || defined(ALL_SENTRIES)
+#define OLD_ROBOTS
+#endif
+
 #endif  // UTIL_MACROS_HPP_

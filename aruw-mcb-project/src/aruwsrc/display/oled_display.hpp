@@ -23,16 +23,15 @@
 #include "tap/board/board.hpp"
 #include "tap/display/Sh1107.hpp"
 #include "tap/display/oled_button_handler.hpp"
+#include "tap/display/sh1106.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "modm/platform.hpp"
 #include "modm/processing/fiber.hpp"
 #include "modm/ui/menu/view_stack.hpp"
-#include "modm/platform.hpp"
 
 #include "splash_screen.hpp"
-
 
 namespace aruwsrc
 {
@@ -76,6 +75,19 @@ public:
     mockable void updateMenu();
 
 private:
+#if defined(OLD_ROBOTS)
+    tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
+    tap::display::Sh1106<
+#ifndef PLATFORM_HOSTED
+        Board::DisplaySpiMaster,
+        Board::DisplayCommand,
+        Board::DisplayReset,
+#endif
+        128,
+        64,
+        false>
+        display;
+#else
     tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
     tap::display::Sh1107<
 #ifndef PLATFORM_HOSTED
@@ -88,20 +100,13 @@ private:
         true,
         true>
         display;
+#endif
 
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
 
     tap::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
-
-    const tap::display::AnalogConfig analogConfig{
-        .ok = 50,
-        .left = 1000,
-        .right = 2000,
-        .up = 3050,
-        .down = 3700,
-    };
 
     tap::Drivers *drivers;
 };  // class OledDisplay
