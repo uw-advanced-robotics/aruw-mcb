@@ -2,44 +2,61 @@
 
 namespace aruwsrc::communication::serial {
 
-void RobotOrbitStateProvider::updateFromVision(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state) {
-    uint8_t index = static_cast<uint8_t>(robotID);
-    if (index < MAX_TRACKED_ROBOTS) {
-        visionStates[index] = state;
-        visionStates[index].robotId = robotID; 
-        hasVisionState[index] = true;
+int RobotOrbitStateProvider::findRobotIndex(RefSerialData::RobotId robotID) const {
+    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
+        if (hasState[i] && storedIDs[i] == robotID) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void RobotOrbitStateProvider::updateFromVision(RefSerialData::RobotId robotID, const RobotState& state) {
+    int index = findRobotIndex(robotID);
+    if (index != -1) {
+        storedStates[index] = state;
+    } else {
+        for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
+            if (!hasState[i]) {
+                storedStates[i] = state;
+                storedIDs[i] = robotID;
+                hasState[i] = true;
+                return;
+            }
+        }
     }
 }
 
-void RobotOrbitStateProvider::updateFromAlly(tap::communication::serial::RefSerialData::RobotId robotID, const RobotState& state) {
-    uint8_t index = static_cast<uint8_t>(robotID);
-    if (index < MAX_TRACKED_ROBOTS && !hasVisionState[index]) {
-        allyStates[index] = state;
-        allyStates[index].robotId = robotID; 
-        hasAllyState[index] = true;
+void RobotOrbitStateProvider::updateFromAlly(RefSerialData::RobotId robotID, const RobotState& state) {
+    int index = findRobotIndex(robotID);
+    if (index != -1) {
+        storedStates[index] = state;
+    } else {
+        for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
+            if (!hasState[i]) {
+                storedStates[i] = state;
+                storedIDs[i] = robotID;
+                hasState[i] = true;
+                return;
+            }
+        }
     }
 }
 
-bool RobotOrbitStateProvider::getRobotState(tap::communication::serial::RefSerialData::RobotId robotID, RobotState& outState) const {
-    uint8_t index = static_cast<uint8_t>(robotID);
-    if (index >= MAX_TRACKED_ROBOTS) return false;
-
-    if (hasVisionState[index]) {
-        outState = visionStates[index];
-        return true;
-    } else if (hasAllyState[index]) {
-        outState = allyStates[index];
+bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, RobotState& outState) const {
+    int index = findRobotIndex(robotID);
+    if (index != -1) {
+        outState = storedStates[index];
         return true;
     }
-
     return false;
 }
 
 uint8_t RobotOrbitStateProvider::getNumKnownVisionStates(RobotState states[MAX_TRACKED_ROBOTS]) const {
     uint8_t count = 0;
     for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
-        if (hasVisionState[i]) {
-            states[count++] = visionStates[i];
+        if (hasState[i]) {
+            states[count++] = storedStates[i];
         }
     }
     return count;

@@ -8,27 +8,36 @@
 #include "tap/control/subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
 
+using namespace aruwsrc::algorithms::odometry;
+using namespace tap::communication::serial;
+
 namespace aruwsrc::communication::serial {
 
-class RobotOrbitTransmitter {
+class RobotOrbitTransmitter : public RefSerial::RobotToRobotMessageHandler {
 public:
     RobotOrbitTransmitter(
         tap::Drivers* drivers, 
         RobotOrbitStateProvider& stateProvider, 
-        aruwsrc::algorithms::odometry::ChassisKFOdometry* chassisOdometry, 
-        tap::communication::serial::RefSerial* refSerial
+        ChassisKFOdometry* chassisOdometry, 
+        RefSerial* refSerial
     );
 
     void sendRobotStates();
+    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
+    void operator()(
+        const DJISerial::ReceivedSerialMessage &message) override final;
 
 private:
     tap::Drivers* drivers;
-    tap::communication::serial::RefSerialTransmitter serialTransmitter;
+    RefSerialTransmitter serialTransmitter;
     RobotOrbitStateProvider& stateProvider;
-    aruwsrc::algorithms::odometry::ChassisKFOdometry* odometry;
-    tap::communication::serial::RefSerial* refSerial;
+    ChassisKFOdometry* odometry;
+    RefSerial* refSerial;
 
-    tap::communication::serial::RefSerialTransmitter::RobotId getAllyRobotId() const;
+    RefSerialTransmitter::RobotId getAllyRobotId() const;
+
+    constexpr static uint8_t STATIC_CAST_SCALE_FACTOR = 100;
+
 };
 
 } // namespace aruwsrc::communication::serial

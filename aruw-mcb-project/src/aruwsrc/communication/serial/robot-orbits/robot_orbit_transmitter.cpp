@@ -5,8 +5,8 @@ namespace aruwsrc::communication::serial {
 RobotOrbitTransmitter::RobotOrbitTransmitter(
     tap::Drivers* drivers, 
     RobotOrbitStateProvider& stateProvider,
-    aruwsrc::algorithms::odometry::ChassisKFOdometry* chassisOdometry,
-    tap::communication::serial::RefSerial* refSerial)
+    ChassisKFOdometry* chassisOdometry,
+    RefSerial* refSerial)
     : 
       drivers(drivers),
       serialTransmitter(drivers),
@@ -14,9 +14,7 @@ RobotOrbitTransmitter::RobotOrbitTransmitter(
       odometry(chassisOdometry),
       refSerial(refSerial) {}
 
-tap::communication::serial::RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const {
-    using namespace tap::communication::serial;
-
+RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const {
     const auto& robotData = refSerial->getRobotData();
     if (robotData.robotId == RefSerialData::RobotId::INVALID) {
         return RefSerialData::RobotId::INVALID;
@@ -35,31 +33,28 @@ tap::communication::serial::RefSerialTransmitter::RobotId RobotOrbitTransmitter:
 }
 
 void RobotOrbitTransmitter::sendRobotStates() {
-    tap::communication::serial::RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
-    if (allyRobot == tap::communication::serial::RefSerialData::RobotId::INVALID) {
+    RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
+    if (allyRobot == RefSerialData::RobotId::INVALID) {
         return;
     }
 
     auto robotPosition = odometry->getCurrentLocation2D();
-    auto robotVelocity = odometry->getCurrentVelocity2D();
 
-    tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage message{};
+    RefSerialData::Tx::RobotToRobotMessage message{};
     message.dataAndCRC16[0] = 0;
     uint8_t baseIndex = 1;
 
-    message.dataAndCRC16[baseIndex] = static_cast<uint8_t>(robotPosition.getX() );
-    message.dataAndCRC16[baseIndex + 1] = static_cast<uint8_t>(robotPosition.getY() );
-    message.dataAndCRC16[baseIndex + 2] = static_cast<uint8_t>(robotVelocity.getX() );
-    message.dataAndCRC16[baseIndex + 3] = static_cast<uint8_t>(robotVelocity.getY() );
+    message.dataAndCRC16[baseIndex] = static_cast<uint8_t>(robotPosition.getX() * STATIC_CAST_SCALE_FACTOR);
+    message.dataAndCRC16[baseIndex + 1] = static_cast<uint8_t>(robotPosition.getY() * STATIC_CAST_SCALE_FACTOR);
 
-    baseIndex += 4;
+    baseIndex += 2;
 
     RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
     uint8_t numVisionStates = stateProvider.getNumKnownVisionStates(visionStates);
 
     for (uint8_t i = 0; i < numVisionStates; i++) {
         if (baseIndex + 4 >= static_cast<uint8_t>(sizeof(message.dataAndCRC16))) {
-            break; 
+            break;
         }
 
         message.dataAndCRC16[0] |= (1 << (i + 1));
@@ -72,8 +67,52 @@ void RobotOrbitTransmitter::sendRobotStates() {
         baseIndex += 4;
     }
 
-    serialTransmitter.sendRobotToRobotMsg(
-        &message, 0x200, allyRobot, baseIndex);
+    serialTransmitter.sendRobotToRobotMsg(&message, 0x200, allyRobot, baseIndex);
+}
+
+void RobotOrbitTransmitter::operator()(
+    const DJISerial::ReceivedSerialMessage &message)
+{
+    parseIncomingMessage(message);
+}
+
+void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message) {
+    RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
+    if (allyRobot == RefSerialData::RobotId::INVALID) {
+        return;
+    }
+
+    uint8_t baseIndex = 1;
+    const uint8_t* data = message.data;
+
+    float xPos = static_cast<float>(data[baseIndex]) / STATIC_CAST_SCALE_FACTOR;
+    float yPos = static_cast<float>(data[baseIndex + 1]) / STATIC_CAST_SCALE_FACTOR;
+    
+    RobotState allyRobotState;
+    allyRobotState.robotId = allyRobot;
+    allyRobotState.xPos = xPos;
+    allyRobotState.yPos = yPos;
+    allyRobotState.zPos = 0;
+
+    stateProvider.updateFromAlly(allyRobot, allyRobotState);
+    
+    baseIndex += 2;
+
+    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
+        if (!(data[0] & (1 << (i + 1)))) {
+            continue;
+        }
+
+        RobotState newState;
+        newState.robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
+        newState.xPos = data[baseIndex + 1];
+        newState.yPos = data[baseIndex + 2];
+        newState.zPos = data[baseIndex + 3];
+
+        stateProvider.updateFromAlly(newState.robotId, newState);
+
+        baseIndex += 4;
+    }
 }
 
 } // namespace aruwsrc::communication::serial
