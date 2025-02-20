@@ -45,7 +45,7 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
     refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
     refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
     refSerialTransmitter.sendGraphic(&capBankTextGraphic);
-    
+
     return true;
 }
 

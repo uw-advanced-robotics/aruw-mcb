@@ -66,6 +66,7 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
@@ -455,23 +456,21 @@ TextHudIndicators textHudIndicators(
     refSerialTransmitter);
 
 VisionTargetIndicator visionTargetIndicator(
-    drivers()->visionCoprocessor, refSerialTransmitter, transformer.getWorldToVTM());
-
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    drivers()->commandScheduler,
     drivers()->visionCoprocessor,
-    clientDisplay,
-    frictionWheels,
-    agitator,
-    turret,
-    {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
-    imuCalibrateCommand,
-    &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor,
-    drivers()->plateHitTracker,
-    &transformAdapter,
-    &drivers()->capacitorBank);
+    refSerialTransmitter,
+    transformer.getWorldToVTM());
+
+std::vector<HudIndicator *> hudIndicators = {
+    &capBankIndicator,
+    &positionHudIndicators,
+    &ammoIndicator,
+    &circleCrosshair,
+    &damageIndicator,
+    &textHudIndicators,
+    &visionTargetIndicator,
+};
+
+ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
 /* define command mappings --------------------------------------------------*/
 

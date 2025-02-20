@@ -99,14 +99,12 @@ modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
     {
         matrixHudIndicatorDrawers[matrixHudIndicatorIndex].initialize();
 
-        refSerialTransmitter.sendGraphic(
-            &matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]);
+        refSerialTransmitter.sendGraphic(&matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]);
     }
 
-    refSerialTransmitter.sendGraphic(
-        &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
+    refSerialTransmitter.sendGraphic(&matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
 
-    return true;    
+    return true;
 }
 
 modm::ResumableResult<bool> MatrixHudIndicators::update()
