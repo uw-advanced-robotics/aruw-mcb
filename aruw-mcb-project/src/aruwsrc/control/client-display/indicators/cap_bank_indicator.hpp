@@ -53,9 +53,9 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const can::capbank::CapacitorBank *capBank);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

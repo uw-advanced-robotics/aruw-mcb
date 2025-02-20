@@ -25,7 +25,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "../hud_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/resumable.hpp"
@@ -60,9 +60,9 @@ public:
         const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
         const std::vector<tap::control::Command *> avoidanceCommands);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

@@ -34,7 +34,7 @@ VisionTargetIndicator::VisionTargetIndicator(
 {
 }
 
-modm::ResumableResult<bool> VisionTargetIndicator::update()
+void VisionTargetIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
@@ -45,8 +45,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     enemyPositionScreenFrame = getEnemyPlatePosition(enemyPosition);
 
     uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
-
-    RF_BEGIN(0);
 
     // If the target is not in frame, delete the graphic
     if (!enemyPositionScreenFrame.inFrame || !visionHasTarget)
@@ -63,7 +61,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     if (prevOperation == Tx::GRAPHIC_DELETE &&
         visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
-        RF_RETURN(true);
     }
 
     RefSerialTransmitter::configRectangle(
@@ -74,15 +71,7 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         enemyPositionScreenFrame.topRightY,
         &visionTargetGraphic.graphicData);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
-
-    RF_END_RETURN(true);
-}
-
-modm::ResumableResult<bool> VisionTargetIndicator::sendInitialGraphics()
-{
-    RF_BEGIN(1);
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&visionTargetGraphic);
 }
 
 void VisionTargetIndicator::initialize()

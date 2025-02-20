@@ -23,7 +23,7 @@
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "hud_indicator.hpp"
+#include "indicators/hud_indicator.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
