@@ -37,7 +37,7 @@ TextHudIndicators::TextHudIndicators(
 {
 }
 
-modm::ResumableResult<bool> TextHudIndicators::update()
+void TextHudIndicators::update()
 {
     // Either the agitator is online and not jammed, or the shooter has no power
     if ((agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed()) ||
@@ -72,8 +72,6 @@ modm::ResumableResult<bool> TextHudIndicators::update()
             refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]);
         }
     }
-
-    return true;
 }
 
 void TextHudIndicators::initialize()

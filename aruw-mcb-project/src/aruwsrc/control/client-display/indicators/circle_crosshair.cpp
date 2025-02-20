@@ -48,10 +48,9 @@ void CircleCrosshair::initialize()
         &crosshairGraphics.graphicData);
 }
 
-modm::ResumableResult<bool> CircleCrosshair::sendInitialGraphics()
+void CircleCrosshair::sendInitialGraphics()
 {
     refSerialTransmitter.sendGraphic(&crosshairGraphics);
-    return true;
 }
 
 }  // namespace aruwsrc::control::client_display

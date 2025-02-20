@@ -53,9 +53,9 @@ public:
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

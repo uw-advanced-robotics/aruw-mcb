@@ -60,9 +60,9 @@ public:
         const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
         const std::vector<tap::control::Command *> avoidanceCommands);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

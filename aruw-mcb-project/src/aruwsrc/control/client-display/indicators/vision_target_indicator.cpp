@@ -34,7 +34,7 @@ VisionTargetIndicator::VisionTargetIndicator(
 {
 }
 
-modm::ResumableResult<bool> VisionTargetIndicator::update()
+void VisionTargetIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
@@ -61,7 +61,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
     if (prevOperation == Tx::GRAPHIC_DELETE &&
         visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
-        return true;
     }
 
     RefSerialTransmitter::configRectangle(
@@ -73,8 +72,6 @@ modm::ResumableResult<bool> VisionTargetIndicator::update()
         &visionTargetGraphic.graphicData);
 
     refSerialTransmitter.sendGraphic(&visionTargetGraphic);
-
-    return true;
 }
 
 void VisionTargetIndicator::initialize()

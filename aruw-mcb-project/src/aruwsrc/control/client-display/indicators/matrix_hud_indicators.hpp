@@ -80,9 +80,9 @@ public:
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

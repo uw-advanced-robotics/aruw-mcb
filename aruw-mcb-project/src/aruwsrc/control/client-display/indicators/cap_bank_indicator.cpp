@@ -35,7 +35,7 @@ CapBankIndicator::CapBankIndicator(
 {
 }
 
-modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
+void CapBankIndicator::sendInitialGraphics()
 {
     this->previousState = can::capbank::State::UNKNOWN;
     this->previousColor = Tx::GraphicColor::BLACK;
@@ -45,11 +45,9 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
     refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
     refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
     refSerialTransmitter.sendGraphic(&capBankTextGraphic);
-
-    return true;
 }
 
-modm::ResumableResult<bool> CapBankIndicator::update()
+void CapBankIndicator::update()
 {
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
@@ -165,8 +163,6 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             }
         }
     }
-
-    return true;
 }
 
 void CapBankIndicator::initialize()

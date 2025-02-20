@@ -35,7 +35,7 @@ DamageIndicator::DamageIndicator(
 {
 }
 
-modm::ResumableResult<bool> DamageIndicator::update()
+void DamageIndicator::update()
 {
     float prevPeakAngle = peakAngleBin.radians.getWrappedValue();
     uint32_t prevOperation = -1;
@@ -84,7 +84,6 @@ modm::ResumableResult<bool> DamageIndicator::update()
     if (prevOperation == Tx::GRAPHIC_DELETE &&
         damageGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
-        return true;
     }
 
     RefSerialTransmitter::configLine(
@@ -96,7 +95,6 @@ modm::ResumableResult<bool> DamageIndicator::update()
         &damageGraphic.graphicData);
 
     refSerialTransmitter.sendGraphic(&damageGraphic);
-    return true;
 }
 
 void DamageIndicator::initialize()

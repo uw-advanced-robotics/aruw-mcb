@@ -56,9 +56,9 @@ public:
 
     HudIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    virtual modm::ResumableResult<bool> sendInitialGraphics() { return true; };
+    virtual void sendInitialGraphics() {}
 
-    virtual modm::ResumableResult<bool> update() { return true; };
+    virtual void update() {}
 
     virtual void initialize() = 0;
 

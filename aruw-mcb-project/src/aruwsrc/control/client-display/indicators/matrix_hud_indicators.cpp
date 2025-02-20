@@ -91,7 +91,7 @@ MatrixHudIndicators::MatrixHudIndicators(
 {
 }
 
-modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
+void MatrixHudIndicators::sendInitialGraphics()
 {
     // send all matrix HUD indicator-related graphics (the labels, title, and boxes)
     for (matrixHudIndicatorIndex = 0; matrixHudIndicatorIndex < NUM_MATRIX_HUD_INDICATORS;
@@ -103,11 +103,9 @@ modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
     }
 
     refSerialTransmitter.sendGraphic(&matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
-
-    return true;
 }
 
-modm::ResumableResult<bool> MatrixHudIndicators::update()
+void MatrixHudIndicators::update()
 {
     RF_BEGIN(1);
 

@@ -35,11 +35,10 @@ ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
 
 void ImageIndicator::initialize() { index = 0; }
 
-modm::ResumableResult<bool> ImageIndicator::update()
+void ImageIndicator::update()
 {
     if (index > image.size - 1)
     {
-        return true;
     }
 
     auto currentTuple = image.lines[index];
@@ -68,8 +67,6 @@ modm::ResumableResult<bool> ImageIndicator::update()
     refSerialTransmitter.sendGraphic(&imageGraphic);
 
     index++;
-
-    return true;
 }
 
 }  // namespace aruwsrc::control::client_display

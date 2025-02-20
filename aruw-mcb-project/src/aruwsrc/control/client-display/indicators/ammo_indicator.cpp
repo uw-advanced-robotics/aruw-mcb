@@ -32,7 +32,7 @@ AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const R
 {
 }
 
-modm::ResumableResult<bool> AmmoIndicator::update()
+void AmmoIndicator::update()
 {
     // Access the correct field depending on the robot type
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
@@ -48,14 +48,12 @@ modm::ResumableResult<bool> AmmoIndicator::update()
     numberIndicator.setIndicatorState(bulletCount);
 
     numberIndicator.draw();
-    return true;
 }
 
-modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
+void AmmoIndicator::sendInitialGraphics()
 {
     refSerialTransmitter.sendGraphic(&textGraphic);
     numberIndicator.initialize();
-    return true;
 }
 
 void AmmoIndicator::initialize()

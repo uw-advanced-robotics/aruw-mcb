@@ -68,31 +68,24 @@ BooleanHudIndicators::BooleanHudIndicators(
 {
 }
 
-modm::ResumableResult<bool> BooleanHudIndicators::sendInitialGraphics()
+void BooleanHudIndicators::sendInitialGraphics()
 {
-    RF_BEGIN(0);
-
     // send all boolean hud indicator graphics (labels and circles)
     for (booleanHudIndicatorIndexSendInitialGraphics = 0;
          booleanHudIndicatorIndexSendInitialGraphics < NUM_BOOLEAN_HUD_INDICATORS;
          booleanHudIndicatorIndexSendInitialGraphics++)
     {
-        RF_CALL(
-            booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize());
+        booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize();
 
-        RF_CALL(refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
-        RF_CALL(refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
+        refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
+        refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
     }
-
-    RF_END_RETURN(true);
 }
 
-modm::ResumableResult<bool> BooleanHudIndicators::update()
+void BooleanHudIndicators::update()
 {
-    RF_BEGIN(1);
-
     // update agitator state
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
@@ -105,10 +98,8 @@ modm::ResumableResult<bool> BooleanHudIndicators::update()
          booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;
          booleanHudIndicatorIndexUpdate++)
     {
-        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw());
+        booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw();
     }
-
-    RF_END_RETURN(true);
 }
 
 void BooleanHudIndicators::initialize()

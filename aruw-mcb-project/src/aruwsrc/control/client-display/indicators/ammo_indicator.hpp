@@ -49,9 +49,9 @@ public:
 
     void initialize() override final;
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
 private:
     // X position of the text
