@@ -19,7 +19,7 @@
 
 #include "image_indicator.hpp"
 
-#include "images/marcus.hpp"
+#include "aruwsrc/control/client-display/images/marcus.hpp"
 
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::client_display::images;
@@ -68,7 +68,7 @@ modm::ResumableResult<bool> ImageIndicator::update()
     refSerialTransmitter.sendGraphic(&imageGraphic);
 
     index++;
-    
+
     return true;
 }
 

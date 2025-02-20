@@ -20,9 +20,6 @@
 #ifndef MARCUS_HPP_
 #define MARCUS_HPP_
 
-#include <cstdint>
-#include <tuple>
-
 #include "image.hpp"
 
 namespace aruwsrc::control::client_display::images

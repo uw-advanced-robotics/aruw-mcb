@@ -34,14 +34,14 @@
 #include "modm/math/utils/misc.hpp"
 #include "modm/processing/protothread.hpp"
 
-#include "ammo_indicator.hpp"
-#include "cap_bank_indicator.hpp"
-#include "circle_crosshair.hpp"
-#include "damage_indicator.hpp"
-#include "image_indicator.hpp"
-#include "matrix_hud_indicators.hpp"
-#include "text_hud_indicators.hpp"
-#include "vision_target_indicator.hpp"
+#include "indicators/ammo_indicator.hpp"
+#include "indicators/cap_bank_indicator.hpp"
+#include "indicators/circle_crosshair.hpp"
+#include "indicators/damage_indicator.hpp"
+#include "indicators/image_indicator.hpp"
+#include "indicators/matrix_hud_indicators.hpp"
+#include "indicators/text_hud_indicators.hpp"
+#include "indicators/vision_target_indicator.hpp"
 
 namespace tap::control
 {

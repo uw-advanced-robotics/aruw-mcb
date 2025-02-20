@@ -24,7 +24,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "../hud_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/utils/misc.hpp"
 
