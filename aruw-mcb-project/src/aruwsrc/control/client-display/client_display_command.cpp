@@ -42,6 +42,7 @@ ClientDisplayCommand::ClientDisplayCommand(
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
+    numIndicators = hudIndicators.size();
 }
 
 void ClientDisplayCommand::initialize()

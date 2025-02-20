@@ -73,6 +73,7 @@ private:
 
     float fps = 0.0f;
     uint32_t startTime = 0;
+    int numIndicators = 0;
 
     bool run();
     void restartHud();
