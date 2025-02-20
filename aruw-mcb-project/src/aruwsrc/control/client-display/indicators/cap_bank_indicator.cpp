@@ -41,14 +41,12 @@ modm::ResumableResult<bool> CapBankIndicator::sendInitialGraphics()
     this->previousColor = Tx::GraphicColor::BLACK;
     voltageUpdateTimer.restart(500);
 
-    RF_BEGIN(0)
-
     // remove initial graphics
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
-
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
+    refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
+    refSerialTransmitter.sendGraphic(&capBankTextGraphic);
+    
+    return true;
 }
 
 modm::ResumableResult<bool> CapBankIndicator::update()
@@ -56,8 +54,6 @@ modm::ResumableResult<bool> CapBankIndicator::update()
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
     can::capbank::State state = can::capbank::UNKNOWN;
-
-    RF_BEGIN(1);
 
     if (capBank != nullptr)
     {
@@ -154,23 +150,23 @@ modm::ResumableResult<bool> CapBankIndicator::update()
             if (state != this->previousState)
             {
                 this->previousState = state;
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
+                refSerialTransmitter.sendGraphic(&capBankTextGraphic);
             }
             if (capBankBackgroundLine.graphicData.color !=
                 static_cast<uint8_t>(this->previousColor))
             {
                 this->previousColor =
                     static_cast<Tx::GraphicColor>(capBankBackgroundLine.graphicData.color);
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
+                refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
             }
             if (voltageUpdateTimer.execute())
             {
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
+                refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
             }
         }
     }
 
-    RF_END_RETURN(true);
+    return true;
 }
 
 void CapBankIndicator::initialize()

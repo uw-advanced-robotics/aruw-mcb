@@ -55,8 +55,6 @@ public:
         const std::vector<tap::control::Command *> validChassisCommands,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
-
     modm::ResumableResult<bool> update() override final;
 
     void initialize() override final;

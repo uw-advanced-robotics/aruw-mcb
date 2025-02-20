@@ -62,8 +62,6 @@ modm::ResumableResult<bool> TextHudIndicators::update()
     // Check if we are actually in a match
     states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage == Rx::GameStage::IN_GAME;
 
-    RF_BEGIN(0);
-
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
         // If the state has changed, update the graphic
@@ -71,17 +69,11 @@ modm::ResumableResult<bool> TextHudIndicators::update()
         {
             textHudIndicatorGraphics[index].graphicData.operation =
                 states[index] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
-            RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
+            refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]);
         }
     }
 
-    RF_END_RETURN(true);
-}
-
-modm::ResumableResult<bool> TextHudIndicators::sendInitialGraphics()
-{
-    RF_BEGIN(1);
-    RF_END_RETURN(true);
+    return true;
 }
 
 void TextHudIndicators::initialize()

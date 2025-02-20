@@ -47,8 +47,6 @@ public:
 
     void initialize() override final;
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
-
     modm::ResumableResult<bool> update() override final;
 
     struct ProjectedPlateResult

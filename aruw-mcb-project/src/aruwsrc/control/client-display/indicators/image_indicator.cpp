@@ -35,20 +35,11 @@ ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
 
 void ImageIndicator::initialize() { index = 0; }
 
-modm::ResumableResult<bool> ImageIndicator::sendInitialGraphics()
-{
-    RF_BEGIN(0)
-
-    RF_END_RETURN(true);
-}
-
 modm::ResumableResult<bool> ImageIndicator::update()
 {
-    RF_BEGIN(0)
-
     if (index > image.size - 1)
     {
-        RF_RETURN(true);
+        return true;
     }
 
     auto currentTuple = image.lines[index];
@@ -74,11 +65,11 @@ modm::ResumableResult<bool> ImageIndicator::update()
         endY,
         &imageGraphic.graphicData);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&imageGraphic));
+    refSerialTransmitter.sendGraphic(&imageGraphic);
 
     index++;
-
-    RF_END_RETURN(true);
+    
+    return true;
 }
 
 }  // namespace aruwsrc::control::client_display

@@ -43,8 +43,6 @@ public:
 
     modm::ResumableResult<bool> sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
-
 private:
     // X position of the circle
     static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2;

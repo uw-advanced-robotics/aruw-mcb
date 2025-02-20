@@ -47,22 +47,15 @@ modm::ResumableResult<bool> AmmoIndicator::update()
 
     numberIndicator.setIndicatorState(bulletCount);
 
-    RF_BEGIN(1);
-
-    RF_CALL(numberIndicator.draw());
-
-    RF_END_RETURN(true);
+    numberIndicator.draw();
+    return true;
 }
 
 modm::ResumableResult<bool> AmmoIndicator::sendInitialGraphics()
 {
-    RF_BEGIN(0)
-
-    RF_CALL(refSerialTransmitter.sendGraphic(&textGraphic));
-
-    RF_CALL(numberIndicator.initialize());
-
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&textGraphic);
+    numberIndicator.initialize();
+    return true;
 }
 
 void AmmoIndicator::initialize()
