@@ -48,19 +48,9 @@ void CircleCrosshair::initialize()
         &crosshairGraphics.graphicData);
 }
 
-modm::ResumableResult<bool> CircleCrosshair::sendInitialGraphics()
+void CircleCrosshair::sendInitialGraphics()
 {
-    RF_BEGIN(0)
-
-    RF_CALL(refSerialTransmitter.sendGraphic(&crosshairGraphics));
-
-    RF_END_RETURN(true);
-}
-
-modm::ResumableResult<bool> CircleCrosshair::update()
-{
-    RF_BEGIN(1)
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&crosshairGraphics);
 }
 
 }  // namespace aruwsrc::control::client_display

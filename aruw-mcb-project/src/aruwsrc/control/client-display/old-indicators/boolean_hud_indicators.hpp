@@ -25,8 +25,8 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "../hud_indicator.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "modm/processing/resumable.hpp"
 
@@ -53,9 +53,9 @@ public:
         tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

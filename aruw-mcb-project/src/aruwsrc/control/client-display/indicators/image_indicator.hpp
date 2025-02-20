@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,47 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CIRCLE_CROSSHAIR_HPP_
-#define CIRCLE_CROSSHAIR_HPP_
+#ifndef IMAGE_INDICATOR_HPP_
+#define IMAGE_INDICATOR_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
+#include "aruwsrc/control/client-display/images/image.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
 
 namespace aruwsrc::control::client_display
 {
-class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
+
+class ImageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
-    /**
-     * Makes a dot circle crosshair on the screen.
-     *
-     * @param[in] refSerialTransmitter RefSerialTransmitter instance.
-     */
-    CircleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    ImageIndicator(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
-
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
 private:
-    // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2;
-    // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2;
-    // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 2;
-    // Thickness of the line
-    static constexpr uint16_t LINE_THICKNESS = 5;
+    int index = 0;
 
-    Tx::Graphic1Message crosshairGraphics;
+    static constexpr uint16_t IMAGE_X_OFFSET = 600;
+    static constexpr int16_t IMAGE_Y_OFFSET = -400;
+
+    static constexpr uint16_t LINE_THICKNESS = 1;
+
+    Tx::Graphic1Message imageGraphic;
+
+    images::Image image;
 };
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // CIRCLE_CROSSHAIR_HPP_
+#endif

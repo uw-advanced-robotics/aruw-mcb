@@ -24,7 +24,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "../hud_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
 
 namespace tap
@@ -54,9 +54,9 @@ public:
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 

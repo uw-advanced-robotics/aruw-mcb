@@ -91,40 +91,30 @@ MatrixHudIndicators::MatrixHudIndicators(
 {
 }
 
-modm::ResumableResult<bool> MatrixHudIndicators::sendInitialGraphics()
+void MatrixHudIndicators::sendInitialGraphics()
 {
-    RF_BEGIN(0);
-
     // send all matrix HUD indicator-related graphics (the labels, title, and boxes)
     for (matrixHudIndicatorIndex = 0; matrixHudIndicatorIndex < NUM_MATRIX_HUD_INDICATORS;
          matrixHudIndicatorIndex++)
     {
-        RF_CALL(matrixHudIndicatorDrawers[matrixHudIndicatorIndex].initialize());
+        matrixHudIndicatorDrawers[matrixHudIndicatorIndex].initialize();
 
-        RF_CALL(refSerialTransmitter.sendGraphic(
-            &matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]));
+        refSerialTransmitter.sendGraphic(&matrixHudLabelAndTitleGraphics[matrixHudIndicatorIndex]);
     }
 
-    RF_CALL(refSerialTransmitter.sendGraphic(
-        &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]));
-
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
 }
 
-modm::ResumableResult<bool> MatrixHudIndicators::update()
+void MatrixHudIndicators::update()
 {
-    RF_BEGIN(1);
-
     updateIndicatorState();
 
     // draw all matrixHudIndicatorDrawers (only actually sends data if graphic changed)
     for (matrixHudIndicatorIndex = 0; matrixHudIndicatorIndex < NUM_MATRIX_HUD_INDICATORS;
          matrixHudIndicatorIndex++)
     {
-        RF_CALL(matrixHudIndicatorDrawers[matrixHudIndicatorIndex].draw());
+        matrixHudIndicatorDrawers[matrixHudIndicatorIndex].draw();
     }
-
-    RF_END_RETURN(true);
 }
 
 void MatrixHudIndicators::updateIndicatorState()

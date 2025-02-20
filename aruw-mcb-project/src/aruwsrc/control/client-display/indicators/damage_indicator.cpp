@@ -35,12 +35,10 @@ DamageIndicator::DamageIndicator(
 {
 }
 
-modm::ResumableResult<bool> DamageIndicator::update()
+void DamageIndicator::update()
 {
     float prevPeakAngle = peakAngleBin.radians.getWrappedValue();
     uint32_t prevOperation = -1;
-
-    RF_BEGIN(1);
 
     peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
@@ -86,7 +84,6 @@ modm::ResumableResult<bool> DamageIndicator::update()
     if (prevOperation == Tx::GRAPHIC_DELETE &&
         damageGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
-        RF_RETURN(true);
     }
 
     RefSerialTransmitter::configLine(
@@ -97,15 +94,7 @@ modm::ResumableResult<bool> DamageIndicator::update()
         Y_POS + LINE_LENGTH + y,
         &damageGraphic.graphicData);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
-
-    RF_END_RETURN(true);
-}
-
-modm::ResumableResult<bool> DamageIndicator::sendInitialGraphics()
-{
-    RF_BEGIN(0);
-    RF_END_RETURN(true);
+    refSerialTransmitter.sendGraphic(&damageGraphic);
 }
 
 void DamageIndicator::initialize()

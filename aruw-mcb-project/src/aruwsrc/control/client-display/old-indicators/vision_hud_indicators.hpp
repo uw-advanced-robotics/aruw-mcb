@@ -26,8 +26,8 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "../hud_indicator.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "reticle_indicator.hpp"
@@ -50,9 +50,9 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    modm::ResumableResult<bool> sendInitialGraphics() override final;
+    void sendInitialGraphics() override final;
 
-    modm::ResumableResult<bool> update() override final;
+    void update() override final;
 
     void initialize() override final;
 
@@ -79,7 +79,7 @@ private:
     std::optional<Tx::GraphicColor> prevVisionIndicatorColor = std::nullopt;
     std::optional<Tx::GraphicColor> newVisionIndicatorColor = std::nullopt;
 
-    modm::ResumableResult<bool> updateVisionTargetStatus();
+    void updateVisionTargetStatus();
 
     /**
      * Initialize some vision hud indicator (a little square) with some x pixel location

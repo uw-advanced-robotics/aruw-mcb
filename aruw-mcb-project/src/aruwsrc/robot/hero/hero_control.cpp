@@ -59,6 +59,13 @@
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/ammo_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
+#include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
+#include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -135,8 +142,6 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
-
-ClientDisplaySubsystem clientDisplay(drivers());
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),
@@ -415,22 +420,6 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
 // @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
-ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    drivers()->commandScheduler,
-    drivers()->visionCoprocessor,
-    clientDisplay,
-    frictionWheels,
-    waterwheelAgitator,
-    turret,
-    {&beybladeSlowWhenOutOfCombatCommand},
-    imuCalibrateCommand,
-    nullptr,
-    &kicker::cvOnTargetGovernor,
-    drivers()->plateHitTracker,
-    &transformAdapter,
-    &drivers()->capacitorBank);
-
 aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 // Cap Bank
@@ -443,6 +432,52 @@ aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
+
+/* define client display / HUD related items --------------------------------*/
+
+ClientDisplaySubsystem clientDisplay(drivers());
+tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+
+CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
+
+MatrixHudIndicators positionHudIndicators(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    frictionWheels,
+    turret,
+    nullptr,
+    &kicker::cvOnTargetGovernor);
+
+AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
+
+CircleCrosshair circleCrosshair(refSerialTransmitter);
+
+DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
+
+TextHudIndicators textHudIndicators(
+    *drivers(),
+    waterwheelAgitator,
+    imuCalibrateCommand,
+    {&beybladeSlowWhenOutOfCombatCommand},
+    refSerialTransmitter);
+
+VisionTargetIndicator visionTargetIndicator(
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    transformer.getWorldToVTM());
+
+std::vector<HudIndicator *> hudIndicators = {
+    &capBankIndicator,
+    &positionHudIndicators,
+    &ammoIndicator,
+    &circleCrosshair,
+    &damageIndicator,
+    &textHudIndicators,
+    &visionTargetIndicator,
+};
+
+ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchMiddle(
