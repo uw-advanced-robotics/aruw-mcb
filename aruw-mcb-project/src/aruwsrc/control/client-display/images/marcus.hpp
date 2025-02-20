@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <tuple>
 
+#include "image.hpp"
+
 namespace aruwsrc::control::client_display::images
 {
-
-using LineTuple = std::tuple<int16_t, int16_t, int16_t, int16_t>;
 
 // clang-format off
 static constexpr LineTuple MARCUS_LINES[]{

@@ -23,6 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
+#include "images/image.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -51,13 +52,7 @@ private:
 
     Tx::Graphic1Message imageGraphic;
 
-    struct Image
-    {
-        int size;
-        const LineTuple *lines;
-    };
-
-    Image image;
+    images::Image image;
 };
 
 }  // namespace aruwsrc::control::client_display
