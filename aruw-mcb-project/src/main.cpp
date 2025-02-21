@@ -198,6 +198,8 @@ static void initializeIo(Drivers *drivers)
 #endif
 }
 
+float val = 0;
+
 static void updateIo(Drivers *drivers)
 {
     drivers->canRxHandler.pollCanData();
@@ -205,6 +207,10 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
 #if defined(TARGET_BLANK)
     drivers->imu.readAndProcessData();
+    val = drivers->imu.imuData.gyroRaw[2];
+    val = abs(val);
+    tap::buzzer::playNote(&drivers->pwm, (int) (val*100) + 400);
+
 #endif
 
 

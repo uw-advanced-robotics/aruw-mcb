@@ -40,11 +40,15 @@ public:
 
     void init()
     {
-        writeRegister(CTRL1_XL, (uint8_t)ODR_6660HZ | (uint8_t)G8_CONFIG);
-        writeRegister(CTRL2_G, (uint8_t)ODR_6660HZ | (uint8_t)DPS2000_CONFIG);
+        writeRegister(CTRL1_XL, (uint8_t)ODR_833HZ | (uint8_t)G8_CONFIG);
+        writeRegister(CTRL2_G, (uint8_t)ODR_833HZ | (uint8_t)DPS250_CONFIG);
 
         // Check Who Am I
         readRegister(WHO_AM_I, 3, rxConfig);
+
+        // updateODR(ODR_833HZ);
+        // setAccelRange(G8_CONFIG);
+        // setGyroRange(DPS250_CONFIG);
     }
 
     void readAndProcessData()
@@ -126,8 +130,8 @@ public:
 
     void updateODR(ODR odr)
     {  // Takes in ODR in Hz
-        readRegister(CTRL2_G, READ_LENGTH, current_reg_G);
-        readRegister(CTRL1_XL, READ_LENGTH, current_reg_XL);
+        readRegister(CTRL2_G, READ_LENGTH, &current_reg_G);
+        readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL);
 
         writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t)ODR_BITMASK) | (uint8_t)odr);
 
@@ -154,7 +158,7 @@ public:
         }
     }
 
-private:
+// private:
     bool readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
         uint8_t txBuff = reg;
@@ -184,7 +188,7 @@ private:
 
     uint8_t rxConfig[10];
 
-    int timeout = 300;
+    int timeout = 1200;
 
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
