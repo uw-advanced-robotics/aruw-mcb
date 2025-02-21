@@ -42,14 +42,18 @@ OledDisplay::OledDisplay(
       display(),
       viewStack(&display),
       buttonHandler(
-          drivers,
+          drivers
+#if defined(OLD_ROBOTS)
+          ,
           (tap::display::AnalogConfig){
               .ok = 50,
               .left = 1000,
               .right = 2000,
               .up = 3050,
               .down = 3700,
-          }),
+          }
+#endif
+          ),
       splashScreen(
           &viewStack,
           drivers,
