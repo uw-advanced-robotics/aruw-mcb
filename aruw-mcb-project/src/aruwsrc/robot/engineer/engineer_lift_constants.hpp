@@ -26,13 +26,15 @@
 namespace aruwsrc::robot::engineer
 {
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
-    tap::motor::MOTOR1;  // TODO: UPDATE W CORRECT VALUE
+    tap::motor::MOTOR3;  // TODO: UPDATE W CORRECT VALUE
 
 static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
-    tap::can::CanBus::CAN_BUS2;  // TODO: UPDATE W CORRECT VALUE
+    tap::can::CanBus::CAN_BUS1;  // TODO: UPDATE W CORRECT VALUE
 
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
+
+static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
 
 }  // namespace aruwsrc::robot::engineer
 #endif

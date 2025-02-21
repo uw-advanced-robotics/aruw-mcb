@@ -26,9 +26,9 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     : Subsystem(drivers),
       motor(storageLiftMotor){};
 
-void CubeStorageSubsystem::initialize() { motor.initialize(); }
+void CubeStorageSubsystem::initialize() { motor.initialize(); moveMotor(0); }
 
-void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(power); }
+void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(power + FEEDFORWARD); }
 void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
 bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }

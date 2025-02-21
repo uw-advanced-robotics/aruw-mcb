@@ -66,8 +66,8 @@ tap::motor::DjiMotor storageLiftMotor(
 
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor);
 /* define commands ----------------------------------------------------------*/
-CubeMoveCommand cubeUp(cubeLift, 100);
-CubeMoveCommand cubeDown(cubeLift, -100);
+CubeMoveCommand cubeUp(cubeLift, 1000);
+CubeMoveCommand cubeDown(cubeLift, -1000);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 

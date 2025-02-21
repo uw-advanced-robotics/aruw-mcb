@@ -20,7 +20,7 @@
 #include "cube_move_command.hpp"
 namespace aruwsrc::robot::engineer
 {
-CubeMoveCommand::CubeMoveCommand(CubeStorageSubsystem &cubeLift, int32_t power)
+CubeMoveCommand::CubeMoveCommand(CubeStorageSubsystem &cubeLift, int16_t power)
     : cubeLift(cubeLift),
       power(power)
 {
@@ -33,5 +33,5 @@ void CubeMoveCommand::execute() { cubeLift.moveMotor(power); }
 
 void CubeMoveCommand::end(bool) { cubeLift.moveMotor(0); }
 
-bool CubeMoveCommand::isFinished() const { return cubeLift.isLimitSwitched(); }
+bool CubeMoveCommand::isFinished() const { return false; } //TODO: change back to isLimitSwitched
 }  // namespace aruwsrc::robot::engineer
