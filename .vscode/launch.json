@@ -58,7 +58,7 @@
             "servertype": "openocd",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "Program - Debug",
-            "executable": "./aruw-mcb-project/build/hardware/scons-debug/aruw-mcb.elf",
+            "executable": "./aruw-mcb-project/build/hardware/scons-release/TARGET_BLANK/aruw-mcb.elf",
             "device": "STM32F427II",
             "configFiles": [
                 "./aruw-mcb-project/openocd.cfg"
