@@ -43,6 +43,8 @@ public:
     void refresh() override;
 
     void refreshSafeDisconnect() override;
+    
+    void setSetpoint(float newSetpoint);
 
     const char* getName() const override { return "Cube Storage"; }
 
@@ -51,6 +53,9 @@ protected:
 
 private:
     bool limit = false;
+    float setpoint = 0;
+    float lastTime = 0;
+    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_MOTOR_PID_CONFIG); 
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

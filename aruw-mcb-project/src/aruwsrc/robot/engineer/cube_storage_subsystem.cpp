@@ -29,9 +29,21 @@ CubeStorageSubsystem::CubeStorageSubsystem(
 void CubeStorageSubsystem::initialize() { motor.initialize(); moveMotor(0); }
 
 void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(power + FEEDFORWARD); }
+
+void CubeStorageSubsystem::setSetpoint(float newSetpoint) {
+    setpoint = newSetpoint;
+}
 void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
 bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
 
-void CubeStorageSubsystem::refresh() { limit = isLimitSwitched(); }
+void CubeStorageSubsystem::refresh() { 
+    limit = isLimitSwitched(); 
+    float error = setpoint - motor.getPositionUnwrapped();
+    float errorDerivative = motor.getShaftRPM() / 1000 / 60;
+    float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime;
+    lastTime = tap::arch::clock::getTimeMilliseconds();
+    pid.runController(error, errorDerivative, timeDifference);
+    motor.setDesiredOutput(pid.getOutput());
+}
 }  // namespace aruwsrc::robot::engineer

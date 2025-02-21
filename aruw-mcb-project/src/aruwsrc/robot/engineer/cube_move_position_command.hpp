@@ -16,35 +16,37 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef CUBE_MOVE_POSITION_COMMAND_HPP_
+#define CUBE_MOVE_POSITION_COMMAND_HPP_
 
-#ifndef ENGINEER_LIFT_CONSTANTS_HPP_
-#define ENGINEER_LIFT_CONSTANTS_HPP_
+#include "tap/control/command.hpp"
 
-#include "tap/communication/gpio/digital.hpp"
-#include "tap/motor/dji_motor.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
+#include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::robot::engineer
+
 {
-static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
-    tap::motor::MOTOR3;  // TODO: UPDATE W CORRECT VALUE
 
-static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
-    tap::can::CanBus::CAN_BUS1;  // TODO: UPDATE W CORRECT VALUE
+class CubeMovePositionCommand : public tap::control::Command
+{
+public:
+    CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint);
 
-static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
-    tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
+    void initialize() override;
 
-static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
+    void execute() override;
 
-static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
-    .errorDerivativeFloor = 0.0f,
-};
+    void end(bool interrupted) override;
+
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Cube Move Position Command"; }
+
+private:
+    CubeStorageSubsystem &cubeLift;
+    float setpoint;
+
+};  // class CubeMovePositionCommand
 
 }  // namespace aruwsrc::robot::engineer
-#endif
+#endif  // CUBE_MOVE_POSITION_COMMAND_HPP_
