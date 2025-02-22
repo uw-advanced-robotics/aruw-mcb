@@ -86,4 +86,6 @@ RobotState RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID
     getRobotState(robotID, state);
     return state;
 
+}
+
 } // namespace aruwsrc::communication::serial
