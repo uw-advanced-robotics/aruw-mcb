@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_ORBIT_STATE_HPP
-#define ROBOT_ORBIT_STATE_HPP
+#ifndef ROBOT_ORBIT_STATE_HPP_
+#define ROBOT_ORBIT_STATE_HPP_
 
 #include <cstdint>
 #include "tap/communication/serial/ref_serial_data.hpp"
@@ -54,4 +54,4 @@ private:
 
 } // namespace aruwsrc::communication::serial
 
-#endif // ROBOT_ORBIT_STATE_HPP
+#endif // ROBOT_ORBIT_STATE_HPP_

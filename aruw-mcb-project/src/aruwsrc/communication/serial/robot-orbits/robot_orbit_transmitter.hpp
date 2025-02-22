@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_ORBIT_TRANSMITTER_HPP
-#define ROBOT_ORBIT_TRANSMITTER_HPP
+#ifndef ROBOT_ORBIT_TRANSMITTER_HPP_
+#define ROBOT_ORBIT_TRANSMITTER_HPP_
 
 #include <modm/processing/resumable.hpp>
 #include "robot_orbit_state.hpp"
@@ -62,4 +62,4 @@ private:
 
 } // namespace aruwsrc::communication::serial
 
-#endif // ROBOT_ORBIT_TRANSMITTER_HPP
+#endif // ROBOT_ORBIT_TRANSMITTER_HPP_
