@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016, Sascha Schade
  * Copyright (c) 2016-2017, Fabian Greif
- * Copyright (c) 2016-2017, 2019, Niklas Hauser
+ * Copyright (c) 2016-2017, 2019, 2024, Niklas Hauser
  * Copyright (c) 2021, Raphael Lehmann
  * Copyright (c) 2021, Christopher Durand
  *
@@ -29,13 +29,12 @@ void
 __modm_initialize_platform(void)
 {
 	// Enable SYSCFG
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-// Only the more powerful F4 targets have CCM or Backup SRAM
-#ifdef RCC_AHB1ENR_CCMDATARAMEN
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN; __DSB();
 	// Enable power to backup domain
-	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-	// Enable write access to backup SRAM
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN; __DSB();
 	PWR->CR |= PWR_CR_DBP;
+	// Only the more powerful F4 targets have CCM or Backup SRAM
+#ifdef RCC_AHB1ENR_CCMDATARAMEN
 	// Enable Core Coupled Memory (CCM) and backup SRAM (BKPSRAM)
 	RCC->AHB1ENR |= RCC_AHB1ENR_CCMDATARAMEN | RCC_AHB1ENR_BKPSRAMEN;
 #endif

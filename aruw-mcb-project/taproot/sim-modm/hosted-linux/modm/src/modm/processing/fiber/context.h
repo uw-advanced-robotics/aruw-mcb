@@ -64,7 +64,7 @@ modm_context_reset(modm_context_t *ctx);
  * Switches control from the main context to the fiber context. This initializes
  * the hardware and then jumps from the caller context into the `to` fiber.
  */
-void
+uintptr_t
 modm_context_start(modm_context_t *to);
 
 /**
@@ -72,7 +72,7 @@ modm_context_start(modm_context_t *to);
  * to jump from one fiber to the next.
  */
 void
-modm_context_jump(modm_context_t *from, modm_context_t *to) asm("modm_context_jump");
+modm_context_jump(modm_context_t *from, modm_context_t *to);
 
 /**
  * Switches control from the fiber context back to the main context.
@@ -80,7 +80,7 @@ modm_context_jump(modm_context_t *from, modm_context_t *to) asm("modm_context_ju
  * `modm_context_start()` function.
  */
 void modm_noreturn
-modm_context_end();
+modm_context_end(uintptr_t retval);
 
 /**
  * Zeros the register file and watermarks the rest of the stack.
@@ -88,19 +88,15 @@ modm_context_end();
  * *NOT* while the fiber is running!
  */
 void
-modm_context_watermark(modm_context_t *ctx);
+modm_context_stack_watermark(modm_context_t *ctx);
 
 /**
  * Returns the stack usage by searching from the bottom of the stack for the
  * watermark level. You may call this function at any point after calling
- * `modm_context_watermark()`.
+ * `modm_context_stack_watermark()`.
  */
 size_t
 modm_context_stack_usage(const modm_context_t *ctx);
-
-/// A cheap way to check if the last word of the stack was written.
-bool
-modm_context_stack_overflow(const modm_context_t *ctx);
 /// @}
 
 #ifdef __cplusplus

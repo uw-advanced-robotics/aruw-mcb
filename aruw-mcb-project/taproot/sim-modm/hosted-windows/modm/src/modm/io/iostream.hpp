@@ -25,6 +25,8 @@
 #include <inttypes.h>
 #include <type_traits>
 #include <climits>
+#include <chrono>
+#include <string_view>
 
 #include "iodevice.hpp"
 #include "iodevice_wrapper.hpp" // convenience
@@ -193,6 +195,13 @@ public:
 	operator << (const char* s)
 	{ device->write(s); return *this; }
 
+	inline IOStream&
+	operator << (const std::string_view sv)
+	{
+		for (const auto c : sv) device->write(c);
+		return *this;
+	}
+
 	/// write the hex value of a pointer
 	inline IOStream&
 	operator << (const void* p)
@@ -273,11 +282,14 @@ inline IOStream&
 flush(IOStream& ios)
 { return ios.flush(); }
 
-//// Write a newline. **DOES NOT FLUSH THE STREAM!**
+/// Write a newline. **DOES NOT FLUSH THE STREAM!**
 inline IOStream&
 endl(IOStream& ios)
-{ return ios.endl(); }
-
+{
+	ios.endl();
+	ios.flush();
+	return ios;
+}
 /// set the output mode to binary style
 inline IOStream&
 bin(IOStream& ios)
@@ -320,5 +332,7 @@ white(IOStream& ios);
 /// @}
 
 }	// namespace modm
+
+#include "iostream_chrono.hpp"
 
 #endif // MODM_IOSTREAM_HPP

@@ -22,6 +22,8 @@
 // ----------------------------------------------------------------------------
 // Default implementation of platform initialization
 modm_weak void modm_initialize_platform(void) {}
+extern void __modm_initialize_memory(void);
+extern int main(void);
 
 // ----------------------------------------------------------------------------
 // Linker section start and end pointers
@@ -95,10 +97,13 @@ void __modm_startup(void)
 	table_copy(__table_copy_intern_start, __table_copy_intern_end);
 	table_zero(__table_zero_intern_start, __table_zero_intern_end);
 
+
 	// Set the vector table location
 	SCB->VTOR = (uint32_t)__vector_table_rom_start;
+
 	// Enable trapping of divide by zero for UDIV/SDIV instructions.
 	SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk;
+
 	// Call all hardware initialize hooks
 	table_call(__hardware_init_start, __hardware_init_end);
 
@@ -107,14 +112,12 @@ void __modm_startup(void)
 	table_zero(__table_zero_extern_start, __table_zero_extern_end);
 
 	// Initialize heap as implemented by the heap option
-	extern void __modm_initialize_memory(void);
 	__modm_initialize_memory();
 
 	// Call all constructors of static objects
 	table_call(__init_array_start, __init_array_end);
 
 	// Call the application's entry point
-	extern int main(void);
 	main();
 
 	// If main exits, assert here in debug mode

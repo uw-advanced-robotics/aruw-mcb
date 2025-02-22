@@ -15,6 +15,7 @@
 #define MODM_FIBER_SCHEDULER_HPP
 
 #include "task.hpp"
+#include <modm/architecture/interface/assert.hpp>
 #include <modm/platform/device.hpp>
 namespace modm::fiber
 {
@@ -85,11 +86,11 @@ protected:
 	}
 
 	void inline
-	jump(Task& other)
+	jump(Task* other)
 	{
 		auto from = current;
-		current = &other;
-		modm_context_jump(&from->ctx, &other.ctx);
+		current = other;
+		modm_context_jump(&from->ctx, &other->ctx);
 	}
 
 	void inline
@@ -97,9 +98,12 @@ protected:
 	{
 		if (current == nullptr) return;
 		Task* next = current->next;
-		if (next == current) return;
+		// If there's only one fiber running, we could just return here.
+		// However, we need to check the stack for overflow.
+		// We do that by running the context switch!
+		// if (next == current) return;
 		last = current;
-		jump(*next);
+		jump(next);
 	}
 
 	[[noreturn]]
@@ -111,23 +115,23 @@ protected:
 		if (empty())
 		{
 			current = nullptr;
-			modm_context_end();
+			modm_context_end(0);
 		}
-		jump(*next);
+		jump(next);
 		__builtin_unreachable();
 	}
 
 	void inline
-	add(Task& task)
+	add(Task* task)
 	{
-		task.scheduler = this;
+		task->scheduler = this;
 		if (last == nullptr)
 		{
-			task.next = &task;
-			last = &task;
+			task->next = task;
+			last = task;
 			return;
 		}
-		runLast(&task);
+		runLast(task);
 	}
 
 	bool inline
@@ -135,7 +139,8 @@ protected:
 	{
 		if (empty()) return false;
 		current = last->next;
-		modm_context_start(&current->ctx);
+		const auto overflow = (Task *) modm_context_start(&current->ctx);
+		modm_assert(not overflow, "fbr.stkof", "Fiber stack overflow", overflow);
 		return true;
 	}
 

@@ -26,6 +26,7 @@
 #include "interface/can_message.hpp"
 #include "interface/clock.hpp"
 #include "interface/delay.hpp"
+#include "interface/fiber.hpp"
 #include "interface/gpio.hpp"
 #include "interface/i2c.hpp"
 #include "interface/i2c_device.hpp"

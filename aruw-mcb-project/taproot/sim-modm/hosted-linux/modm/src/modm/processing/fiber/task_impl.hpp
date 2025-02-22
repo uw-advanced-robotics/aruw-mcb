@@ -67,7 +67,7 @@ Task::start()
 {
 	if (isRunning()) return false;
 	modm_context_reset(&ctx);
-	Scheduler::instance().add(*this);
+	Scheduler::instance().add(this);
 	return true;
 }
 

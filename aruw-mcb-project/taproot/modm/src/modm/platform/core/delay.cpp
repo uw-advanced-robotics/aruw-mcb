@@ -39,6 +39,7 @@ modm_dwt_enable(void)
 {
 	// Enable Tracing Debug Unit
 	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	__DSB();
 	// Reset counter to 0
 	DWT->CYCCNT = 0;
 	// Enable CPU cycle counter

@@ -53,6 +53,7 @@
 #include "math/units.hpp"
 #include "math/utils.hpp"
 #include "math/utils/arithmetic_traits.hpp"
+#include "math/utils/bcd.hpp"
 #include "math/utils/bit_constants.hpp"
 #include "math/utils/bit_operation.hpp"
 #include "math/utils/crc.hpp"

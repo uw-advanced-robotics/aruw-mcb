@@ -46,6 +46,10 @@ constexpr size_t StackWordsAll = StackWordsStorage + StackWordsRegisters;
 constexpr size_t StackSizeWord = sizeof(uintptr_t);
 constexpr uintptr_t StackWatermark = 0xc0ffee'f00d'facade;
 
+}
+
+uintptr_t modm_context_jump_entry(modm_context_t *from, modm_context_t *to);
+void modm_context_jump_return(uintptr_t, modm_context_t*) asm("modm_context_jump_return");
 
 void modm_naked
 modm_context_entry()
@@ -56,8 +60,6 @@ modm_context_entry()
 		"mov 8(%rsp), %rsi	\n\t" // Load function pointer
 		"jmp  *%rsi			\n\t" // Jump into function
 	);
-}
-
 }
 
 void
@@ -91,7 +93,7 @@ modm_context_reset(modm_context_t *ctx)
 }
 
 void
-modm_context_watermark(modm_context_t *ctx)
+modm_context_stack_watermark(modm_context_t *ctx)
 {
 	// clear the register file on the stack
 	for (auto *word = ctx->top - StackWordsAll;
@@ -112,26 +114,28 @@ modm_context_stack_usage(const modm_context_t *ctx)
 	return 0;
 }
 
-bool
-modm_context_stack_overflow(const modm_context_t *ctx)
-{
-	return *ctx->bottom != StackWatermark;
-}
-
 static modm_context_t main_context;
 
-void
+uintptr_t
 modm_context_start(modm_context_t *to)
 {
-	modm_context_jump(&main_context, to);
+	return modm_context_jump_entry(&main_context, to);
 }
 
 void
-modm_context_end()
+modm_context_end(uintptr_t retval)
 {
-	modm_context_t dummy;
-	modm_context_jump(&dummy, &main_context);
+	modm_context_jump_return(retval, &main_context);
 	__builtin_unreachable();
+}
+
+void
+modm_context_jump(modm_context_t *from, modm_context_t *to)
+{
+	register uintptr_t* sp asm("rsp");
+	if ((sp - StackWordsRegisters) < from->bottom or *from->bottom != StackWatermark)
+		modm_context_end((uintptr_t) from);
+	modm_context_jump_entry(from, to);
 }
 
 /*
@@ -148,8 +152,8 @@ See https://github.com/boostorg/context/tree/develop/src/asm
 			http://www.boost.org/LICENSE_1_0.txt)
 */
 
-void modm_naked
-modm_context_jump(modm_context_t*, modm_context_t*)
+uintptr_t modm_naked
+modm_context_jump_entry(modm_context_t*, modm_context_t*)
 {
 	asm volatile
 	(
@@ -166,7 +170,7 @@ modm_context_jump(modm_context_t*, modm_context_t*)
 		"movq %rbp, 0xe0(%rsp)		\n\t"	// save RBP
 
 		"movq %rsp, (%rdi)			\n\t"	// Store the SP in "from"
-		"movq (%rsi), %rsp			\n\t"	// Restore SP from "to"
+	"1:  movq (%rsi), %rsp			\n\t"	// Restore SP from "to"
 
 		"ldmxcsr 0xa0(%rsp)			\n\t"	// restore MMX control- and status-word
 		"fldcw   0xa4(%rsp)			\n\t"	// restore x87 control-word
@@ -181,5 +185,9 @@ modm_context_jump(modm_context_t*, modm_context_t*)
 		"leaq 0xe8(%rsp), %rsp		\n\t"	// move stack pointer up
 
 		"ret						\n\t"	// Perform the jump back
+
+	"modm_context_jump_return:		\n\t"
+		"mov %rdi, %rax				\n\t"	// Move first argument to return register
+		"jmp 1b						\n\t"
 	);
 }

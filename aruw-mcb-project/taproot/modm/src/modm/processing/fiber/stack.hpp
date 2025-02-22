@@ -29,7 +29,7 @@ static constexpr size_t StackSizeMinimum = 108;
 /// The default stack size is estimated experimentally so that a fiber can use
 /// `modm::IOStream` to log out information, which is fairly stack intensive.
 /// Use `modm::fiber::Task::stack_usage()` to determine the real stack usage.
-static constexpr size_t StackSizeDefault = 512;
+static constexpr size_t StackSizeDefault = 1024;
 
 /**
  * Stack captures a memory area used as fiber stack with alignment and minimal

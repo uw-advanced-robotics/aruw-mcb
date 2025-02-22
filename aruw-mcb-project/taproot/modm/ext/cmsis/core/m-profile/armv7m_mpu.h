@@ -1,9 +1,3 @@
-/******************************************************************************
- * @file     mpu_armv7.h
- * @brief    CMSIS MPU API for Armv7-M MPU
- * @version  V5.1.2
- * @date     25. May 2020
- ******************************************************************************/
 /*
  * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
@@ -22,14 +16,18 @@
  * limitations under the License.
  */
 
+/*
+ * CMSIS-Core(M) MPU API for Armv7-M MPU
+ */
+
+#ifndef ARM_MPU_ARMV7_H
+#define ARM_MPU_ARMV7_H
+
 #if   defined ( __ICCARM__ )
   #pragma system_include         /* treat file as system include file for MISRA check */
 #elif defined (__clang__)
   #pragma clang system_header    /* treat file as system include file */
 #endif
-
-#ifndef ARM_MPU_ARMV7_H
-#define ARM_MPU_ARMV7_H
 
 #define ARM_MPU_REGION_SIZE_32B      ((uint8_t)0x04U) ///!< MPU Region Size 32 Bytes
 #define ARM_MPU_REGION_SIZE_64B      ((uint8_t)0x05U) ///!< MPU Region Size 64 Bytes

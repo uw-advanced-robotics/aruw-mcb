@@ -72,8 +72,7 @@ modm_context_entry()
 {
 	asm volatile
 	(
-		"ldr r0, [sp]		\n\t"	// Load closure data pointer
-		"ldr pc, [sp, #4]	\n\t"	// Jump to closure function
+		"ldm sp, {r0, pc}	\n\t"	// Load data pointer and jump to closure
 	);
 }
 
@@ -103,7 +102,7 @@ modm_context_reset(modm_context_t *ctx)
 }
 
 void
-modm_context_watermark(modm_context_t *ctx)
+modm_context_stack_watermark(modm_context_t *ctx)
 {
 	// clear the register file on the stack
 	for (auto *word = ctx->top - StackWordsAll;
@@ -124,12 +123,6 @@ modm_context_stack_usage(const modm_context_t *ctx)
 	return 0;
 }
 
-bool
-modm_context_stack_overflow(const modm_context_t *ctx)
-{
-	return *ctx->bottom != StackWatermark;
-}
-
 #define MODM_PUSH_CONTEXT() \
 		"push {r4-r11, lr}	\n\t" \
 		"vpush {d8-d15}		\n\t"
@@ -138,7 +131,7 @@ modm_context_stack_overflow(const modm_context_t *ctx)
 		"vpop {d8-d15}		\n\t" \
 		"pop {r4-r11, pc}	\n\t"
 
-void modm_naked
+uintptr_t modm_naked
 modm_context_start(modm_context_t*)
 {
 	asm volatile
@@ -162,23 +155,36 @@ modm_context_jump(modm_context_t*, modm_context_t*)
 	(
 		MODM_PUSH_CONTEXT()
 
-		"str sp, [r0]		\n\t"	// Store the SP in from->sp
+		"ldr r3, [r0, #4]		\n\t"	// Load from->bottom
+		"str sp, [r0]			\n\t"	// Store the SP in from->sp
 
-		"ldr sp, [r1]		\n\t"	// Restore SP from to->sp
+		"cmp sp, r3				\n\t"	// Compare SP to from->bottom
+		"bls 1f					\n\t"	// If SP <= bottom, stack overflow
+
+		"ldr r3, [r3]			\n\t"	// Load stack bottom
+		"ldr r2, =%0			\n\t"	// Load StackWatermark value
+		"cmp r2, r3				\n\t"	// Check if stack watermark is still at the bottom
+		"bne 1f					\n\t"	// If not, stack overflow
+
+		"ldr sp, [r1]			\n\t"	// Restore SP from to->sp
 
 		MODM_POP_CONTEXT()
+
+	"1:  b modm_context_end	\n\t"
+		:: "i" (StackWatermark)
 	);
 }
 
 void modm_naked
-modm_context_end()
+modm_context_end(uintptr_t)
 {
 	asm volatile
 	(
-		"mrs r0, control	\n\t"
-		"bic r0, r0, #2		\n\t"	// Unset SPSEL
-		"msr control, r0	\n\t"
+		"mrs r1, control	\n\t"
+		"bic r1, r1, #2		\n\t"	// Unset SPSEL
+		"msr control, r1	\n\t"
 
 		MODM_POP_CONTEXT()
 	);
 }
+
