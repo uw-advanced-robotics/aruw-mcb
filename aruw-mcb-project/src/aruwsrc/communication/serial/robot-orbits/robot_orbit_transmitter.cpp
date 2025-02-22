@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "robot_orbit_transmitter.hpp"
 
 namespace aruwsrc::communication::serial {
@@ -67,6 +86,14 @@ void RobotOrbitTransmitter::sendRobotStates() {
         baseIndex += 4;
     }
 
+    uint32_t timestamp = tap::arch::clock::getTimeMilliseconds();
+    message.dataAndCRC16[baseIndex] = static_cast<uint8_t>(timestamp & 0xFF);
+    message.dataAndCRC16[baseIndex + 1] = static_cast<uint8_t>((timestamp >> 8) & 0xFF);
+    message.dataAndCRC16[baseIndex + 2] = static_cast<uint8_t>((timestamp >> 16) & 0xFF);
+    message.dataAndCRC16[baseIndex + 3] = static_cast<uint8_t>((timestamp >> 24) & 0xFF);
+
+    baseIndex += 4;
+
     serialTransmitter.sendRobotToRobotMsg(&message, 0x200, allyRobot, baseIndex);
 }
 
@@ -94,8 +121,6 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
     allyRobotState.yPos = yPos;
     allyRobotState.zPos = 0;
 
-    stateProvider.updateFromAlly(allyRobot, allyRobotState);
-    
     baseIndex += 2;
 
     for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
@@ -113,6 +138,27 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
 
         baseIndex += 4;
     }
+
+    uint32_t timestamp = static_cast<uint32_t>(data[baseIndex]) |
+                         (static_cast<uint32_t>(data[baseIndex + 1]) << 8) |
+                         (static_cast<uint32_t>(data[baseIndex + 2]) << 16) |
+                         (static_cast<uint32_t>(data[baseIndex + 3]) << 24);
+
+    allyRobotState.timestamp = timestamp;
+
+    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++) {
+        if (!(data[0] & (1 << (i + 1)))) {
+            continue;
+        }
+
+        RefSerialData::RobotId robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
+        RobotState updatedState = stateProvider.getRobotState(robotId);
+        updatedState.timestamp = timestamp;
+        stateProvider.updateFromAlly(robotId, updatedState);
+
+        baseIndex += 4;
+    }
+    stateProvider.updateFromAlly(allyRobot, allyRobotState);
 }
 
 } // namespace aruwsrc::communication::serial
