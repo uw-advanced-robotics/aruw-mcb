@@ -21,14 +21,16 @@
 #define ROBOT_ORBIT_STATE_HPP_
 
 #include <cstdint>
+
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 using namespace tap::communication::serial;
-namespace aruwsrc::communication::serial {
-
+namespace aruwsrc::communication::serial
+{
 constexpr uint8_t MAX_TRACKED_ROBOTS = 4;
 
-struct RobotState {
+struct RobotState
+{
     RefSerialData::RobotId robotId;
     uint8_t xPos;
     uint8_t yPos;
@@ -36,7 +38,8 @@ struct RobotState {
     uint32_t timestamp;
 };
 
-class RobotOrbitStateProvider {
+class RobotOrbitStateProvider
+{
 public:
     void updateFromVision(RefSerialData::RobotId robotID, const RobotState& state);
     void updateFromAlly(RefSerialData::RobotId robotID, const RobotState& state);
@@ -52,6 +55,6 @@ private:
     int findRobotIndex(RefSerialData::RobotId robotID) const;
 };
 
-} // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::communication::serial
 
-#endif // ROBOT_ORBIT_STATE_HPP_
+#endif  // ROBOT_ORBIT_STATE_HPP_
