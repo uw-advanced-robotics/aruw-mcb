@@ -18,6 +18,8 @@
  */
 
 #include "cube_storage_subsystem.hpp"
+#include "tap/motor/dji_motor.hpp"
+
 namespace aruwsrc::robot::engineer
 {
 CubeStorageSubsystem::CubeStorageSubsystem(
@@ -33,14 +35,19 @@ void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(pow
 void CubeStorageSubsystem::setSetpoint(float newSetpoint) {
     setpoint = newSetpoint;
 }
+
+float CubeStorageSubsystem::getSetpoint() {
+    return setpoint;
+}
+
 void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
 bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
 
 void CubeStorageSubsystem::refresh() { 
     limit = isLimitSwitched(); 
-    float error = setpoint - motor.getPositionUnwrapped();
-    float errorDerivative = motor.getShaftRPM() / 1000 / 60;
+    float error = setpoint - motor.getPositionUnwrapped() / tap::motor::DjiMotor::GEAR_RATIO_M3508 * 71.44; //71.44 mm per revolution
+    float errorDerivative = motor.getShaftRPM() / 1000 / 60 / tap::motor::DjiMotor::GEAR_RATIO_M3508 * 71.44;
     float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime;
     lastTime = tap::arch::clock::getTimeMilliseconds();
     pid.runController(error, errorDerivative, timeDifference);

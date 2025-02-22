@@ -46,6 +46,8 @@ public:
     
     void setSetpoint(float newSetpoint);
 
+    float getSetpoint();
+
     const char* getName() const override { return "Cube Storage"; }
 
 protected:
