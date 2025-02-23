@@ -95,7 +95,7 @@ public:
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
-        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        if (capacitorBank != nullptr && capacitorBank->isEnabled() && capacitorBank->isSprinting())
         {
             return capacitorBank->getMaximumOutputCurrent() *
                    can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;

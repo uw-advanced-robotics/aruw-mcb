@@ -86,6 +86,54 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
+modm::Fiber<2048> ioFiber(
+[]
+{
+    /*
+     * NOTE: We are using DoNotUse_getDrivers here because in the main
+     *      robot loop we must access the singleton drivers to update
+     *      IO states and run the scheduler.
+     */
+    Drivers *drivers = DoNotUse_getDrivers();
+
+    while (1)
+    {
+        // do this as fast as you can
+        PROFILE(drivers->profiler, updateIo, (drivers));
+
+        if (sendMotorTimeout.execute())
+        {
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            ((Drivers *)drivers)->plateHitTracker.update();
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+#endif
+
+#if defined(TARGET_SENTRY_HYDRA)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+            checkTurretMcbDisconnection(drivers);
+#endif
+        }
+        modm::this_fiber::sleep_for(10us);
+    }
+});
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -102,47 +150,6 @@ int main()
     Board::initialize();
     initializeIo(drivers);
     initSubsystemCommands(drivers);
-
-    modm::Fiber<2048> ioFiber(
-        [&]
-        {
-            while (1)
-            {
-                // do this as fast as you can
-                PROFILE(drivers->profiler, updateIo, (drivers));
-
-                if (sendMotorTimeout.execute())
-                {
-                    PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-                    PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-                    PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-                    ((Drivers *)drivers)->plateHitTracker.update();
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-                    PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-                    PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-                    checkTurretMcbDisconnection(drivers);
-#endif
-                }
-                modm::this_fiber::sleep_for(10us);
-            }
-        });
 
     modm::fiber::Scheduler::run();
     return 0;
