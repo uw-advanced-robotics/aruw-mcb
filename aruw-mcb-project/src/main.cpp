@@ -137,7 +137,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-                checkTurretMcbDisconnection(drivers);
+                    checkTurretMcbDisconnection(drivers);
 #endif
                 }
                 modm::this_fiber::sleep_for(10us);
