@@ -137,7 +137,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-                    checkTurretMcbDisconnection(drivers);
+                // checkTurretMcbDisconnection(drivers);
 #endif
                 }
                 modm::this_fiber::sleep_for(10us);
@@ -203,7 +203,9 @@ static void updateIo(Drivers *drivers)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    if (!turretMcbConnected)
+    if (!turretMcbConnected &&
+        drivers->mpu6500.getImuState() !=
+            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
         tap::buzzer::playNote(&drivers->pwm, 1000);
     }
