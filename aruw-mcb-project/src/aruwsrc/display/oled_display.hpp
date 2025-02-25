@@ -40,7 +40,7 @@ namespace aruwsrc
 {
 namespace display
 {
-class OledDisplay : public ::modm::Fiber<1024>
+class OledDisplay : public ::modm::Fiber<384>
 {
 public:
     explicit OledDisplay(

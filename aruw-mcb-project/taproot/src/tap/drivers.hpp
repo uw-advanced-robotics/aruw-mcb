@@ -100,6 +100,7 @@ protected:
           commandScheduler(this, true)
 #endif
     {
+        mpu6500.stack_watermark();
 #ifdef ENV_UNIT_TESTS
         modm::fiber::Scheduler::run();
 #endif

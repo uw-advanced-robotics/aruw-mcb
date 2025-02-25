@@ -86,7 +86,9 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
-modm::Fiber<2048> ioFiber(
+uint32_t ioSize, mpuSize, oledSize;
+
+modm::Fiber<1536> ioFiber(
 []
 {
     /*
@@ -129,6 +131,9 @@ modm::Fiber<2048> ioFiber(
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
+            ioSize = ioFiber.stack_usage();
+            mpuSize = drivers->mpu6500.stack_usage();
+            oledSize = drivers->oledDisplay.stack_usage();
         }
         modm::this_fiber::sleep_for(10us);
     }
@@ -150,6 +155,8 @@ int main()
     Board::initialize();
     initializeIo(drivers);
     initSubsystemCommands(drivers);
+
+    ioFiber.stack_watermark();
 
     modm::fiber::Scheduler::run();
     return 0;

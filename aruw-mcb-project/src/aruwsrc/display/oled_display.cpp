@@ -53,6 +53,7 @@ OledDisplay::OledDisplay(
           capacitorBank),
       drivers(drivers)
 {
+    this->stack_watermark();
 }
 
 void OledDisplay::initialize()

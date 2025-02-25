@@ -36,19 +36,17 @@ ClientDisplayCommand::ClientDisplayCommand(
     ClientDisplaySubsystem &clientDisplay,
     std::vector<HudIndicator *> &hudIndicators)
     : Command(),
-      Fiber([this] { run(); }),
+      Fiber([this] { run(); }, modm::fiber::Start::Later),
       drivers(drivers),
       hudIndicators(hudIndicators)
 {
     addSubsystemRequirement(&clientDisplay);
-    this->restartHud();
+    this->stack_watermark();
     numIndicators = hudIndicators.size();
 }
 
 void ClientDisplayCommand::initialize()
 {
-    // We cannot reset the thread from here because there might be locked
-    // resources that we need to finish first.
     this->restarting = true;
 }
 
@@ -66,11 +64,14 @@ void ClientDisplayCommand::restartHud()
     this->restarting = false;
 }
 
-void ClientDisplayCommand::execute() {}
+void ClientDisplayCommand::execute()
+{
+    if (!this->isRunning()) this->start();
+}
 
 bool ClientDisplayCommand::run()
 {
-    PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
+    drivers.refSerial.getRefSerialReceivingData();
 
     while (true)
     {
@@ -96,8 +97,6 @@ bool ClientDisplayCommand::run()
 
             // Calculate the time it took to update the HUD
             this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
-
-            PT_YIELD();
         }
     }
 
