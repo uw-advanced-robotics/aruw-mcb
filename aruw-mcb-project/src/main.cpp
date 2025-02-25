@@ -86,17 +86,19 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
-uint32_t ioSize, mpuSize, oledSize;
-
-modm::Fiber<1536> ioFiber(
+modm::Fiber<1536> mainLoop(
 []
-{
+{    
     /*
      * NOTE: We are using DoNotUse_getDrivers here because in the main
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
     Drivers *drivers = DoNotUse_getDrivers();
+
+    Board::initialize();
+    initializeIo(drivers);
+    initSubsystemCommands(drivers);
 
     while (1)
     {
@@ -131,13 +133,11 @@ modm::Fiber<1536> ioFiber(
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
-            ioSize = ioFiber.stack_usage();
-            mpuSize = drivers->mpu6500.stack_usage();
-            oledSize = drivers->oledDisplay.stack_usage();
         }
         modm::this_fiber::sleep_for(10us);
     }
 });
+
 
 int main()
 {
@@ -145,19 +145,7 @@ int main()
     std::cout << "Simulation starting..." << std::endl;
 #endif
 
-    /*
-     * NOTE: We are using DoNotUse_getDrivers here because in the main
-     *      robot loop we must access the singleton drivers to update
-     *      IO states and run the scheduler.
-     */
-    Drivers *drivers = DoNotUse_getDrivers();
-
-    Board::initialize();
-    initializeIo(drivers);
-    initSubsystemCommands(drivers);
-
-    ioFiber.stack_watermark();
-
+    mainLoop.stack_watermark();
     modm::fiber::Scheduler::run();
     return 0;
 }
@@ -219,7 +207,7 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
     if (!turretMcbConnected)
     {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
+        // tap::buzzer::playNote(&drivers->pwm, 1000);
     }
     else
     {

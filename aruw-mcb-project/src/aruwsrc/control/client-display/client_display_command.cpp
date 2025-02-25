@@ -36,7 +36,7 @@ ClientDisplayCommand::ClientDisplayCommand(
     ClientDisplaySubsystem &clientDisplay,
     std::vector<HudIndicator *> &hudIndicators)
     : Command(),
-      Fiber([this] { run(); }, modm::fiber::Start::Later),
+      Fiber([this] { run(); }),
       drivers(drivers),
       hudIndicators(hudIndicators)
 {
@@ -71,7 +71,7 @@ void ClientDisplayCommand::execute()
 
 bool ClientDisplayCommand::run()
 {
-    drivers.refSerial.getRefSerialReceivingData();
+    // while (!drivers.refSerial.getRefSerialReceivingData()) modm::this_fiber::yield();
 
     while (true)
     {
@@ -97,6 +97,8 @@ bool ClientDisplayCommand::run()
 
             // Calculate the time it took to update the HUD
             this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
+
+            modm::this_fiber::yield();
         }
     }
 
