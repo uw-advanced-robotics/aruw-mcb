@@ -24,7 +24,6 @@
 
 namespace aruwsrc::control::client_display::images
 {
-
 // clang-format off
 static constexpr LineTuple MARCUS_LINES[]{
     LineTuple(305, 744, 374, 809),

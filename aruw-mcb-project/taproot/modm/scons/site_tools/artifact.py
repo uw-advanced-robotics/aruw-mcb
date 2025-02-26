@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019, 2023, Niklas Hauser
+# Copyright (c) 2019, Niklas Hauser
 #
 # This file is part of the modm project.
 #
@@ -14,7 +14,7 @@ import os.path
 from SCons.Script import *
 from modm_tools import build_id
 
-def store_artifact(env, source):
+def store_artifact(env, source, alias="store_artifact"):
 	def run_store_artifact(target, source, env):
 		build_id.cache_elf(source[0].path, env["CONFIG_ARTIFACT_PATH"])
 		return 0
@@ -23,7 +23,8 @@ def store_artifact(env, source):
 				os.path.relpath(env["CONFIG_ARTIFACT_PATH"]),
 				build_id.extract(source[0].path))
 		return env.subst(env["ARTIFACT_COMSTR"], source=source)
-	return env.AlwaysBuildAction(run_store_artifact, comstr_artifact, source)
+	action = Action(run_store_artifact, comstr_artifact)
+	return env.AlwaysBuild(env.Alias(alias, source, action))
 
 def generate(env, **kw):
 	env.AddMethod(store_artifact, "CacheArtifact")

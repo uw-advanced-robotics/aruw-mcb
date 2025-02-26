@@ -16,7 +16,7 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 default:
-  image: aruw/mcb-2020-gitlab-ci:latest
+  image: aruw/mcb-2020-gitlab-ci:2021-06-02.1
 
 variables:
   ARTIFACT_PATH: isolated-deploy
@@ -56,7 +56,7 @@ before_script:
 "Clang Format":
   stage: Quality
   script:
-    - python3 /run-clang-format.py -r aruw-mcb-project/src/ aruw-mcb-project/test/
+    - python3 /run-clang-format.py --clang-format-executable clang-format-10 -r aruw-mcb-project/src/ aruw-mcb-project/test/
   only: *verification_only
   except: *verification_except
 
@@ -132,8 +132,8 @@ before_script:
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
-    - scons run-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
-    # - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
+    - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
   cache:
     - key: mcb-test-libs-$CI_COMMIT_REF_SLUG
       paths:
@@ -207,7 +207,7 @@ before_script:
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    # valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'

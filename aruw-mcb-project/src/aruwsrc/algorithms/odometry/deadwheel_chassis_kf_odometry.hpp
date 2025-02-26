@@ -123,10 +123,10 @@ private:
 
     // clang-format off
     static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5f * DT * DT, 0, 0 , 0            ,
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
         0, 1 , DT           , 0, 0 , 0            ,
         0, 0 , 1            , 0, 0 , 0            ,
-        0, 0 , 0            , 1, DT, 0.5f * DT * DT,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT,
         0, 0 , 0            , 0, 1 , DT           ,
         0, 0 , 0            , 0, 0 , 1            ,
     };

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2020, 2023, Niklas Hauser
+# Copyright (c) 2020, Niklas Hauser
 #
 # This file is part of the modm project.
 #
@@ -10,55 +10,65 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # -----------------------------------------------------------------------------
 
-r"""
+"""
 ### Black Magic Probe
 
 This tool wraps GDB to program an ELF file onto a target connected to a BMP.
 You can explictly pass the serial port, or let the tool guess it.
 
 ```sh
-python3 -m modm_tools.bmp path/to/project.elf
+python3 modm/modm_tools/bmp.py path/to/project.elf
 # or choose the port explicitly
-python3 -m modm_tools.bmp path/to/project.elf -p /dev/tty.usbserial-123
+python3 modm/modm_tools/bmp.py path/to/project.elf -p /dev/tty.usbserial-123
 ```
 
 You can also reset the target:
 
 ```sh
-python3 -m modm_tools.bmp --reset
+python3 modm/modm_tools/bmp.py --reset
 ```
 
 (\* *only ARM Cortex-M targets*)
 """
 
-from . import utils, gdb
-from .backend import DebugBackend
+if __name__ == "__main__":
+    import os, sys
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+from modm_tools import utils
 
-# -----------------------------------------------------------------------------
-class BlackMagicProbeBackend(DebugBackend):
+class BlackMagicProbeBackend:
     def __init__(self, port):
         if port == "auto":
             port = utils.guess_serial_port("bmp")
         if port is None:
             raise ValueError("Could not guess serial port!")
-        super().__init__(port)
+        self.port = port
 
     def init(self, elf):
-        return super().init(elf) + ["monitor swdp_scan", "attach 1"]
+        return ["target extended-remote {}".format(self.port),
+                "monitor swdp_scan", "attach 1"]
 
+    def start(self):
+        pass
 
-def program(port, source):
-    backend = BlackMagicProbeBackend(port)
+    def stop(self):
+        pass
+
+# -----------------------------------------------------------------------------
+def program(source, port=None):
+    from modm_tools import gdb
+    backend = BlackMagicProbeBackend(port=port)
     commands = ["load", "compare-sections", "kill", "quit"]
-    gdb.call(backend, source=source, commands=commands)
+    gdb.call(source=source, backend=backend, commands=commands)
 
+def reset(port=None):
+    from modm_tools import gdb
+    backend = BlackMagicProbeBackend(port=port)
+    commands = ["kill", "quit"]
+    gdb.call(backend=backend, commands=commands)
 
-def reset(port):
-    backend = BlackMagicProbeBackend(port)
-    gdb.call(backend, commands=["kill", "quit"])
-
-
+# -----------------------------------------------------------------------------
 def add_subparser(subparser):
     parser = subparser.add_parser("bmp", help="Use Black Magic Probe as Backend.")
     parser.add_argument(
@@ -66,14 +76,14 @@ def add_subparser(subparser):
             dest="port",
             default="auto",
             help="Serial port of Black Magic Probe.")
-    parser.set_defaults(backend=lambda args: BlackMagicProbeBackend(args.port))
+    def build_backend(args):
+        return BlackMagicProbeBackend(args.port)
+    parser.set_defaults(backend=build_backend)
     return parser
-
 
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     import argparse
-    import os.path
 
     parser = argparse.ArgumentParser(
         description='Program ELF file or reset device via Black Magic Probe')
@@ -95,8 +105,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if args.reset:
-        reset(args.port)
+        reset(port=args.port)
     else:
-        program(args.port, os.path.abspath(args.source))
+        program(source=os.path.abspath(args.source), port=args.port)
 
 

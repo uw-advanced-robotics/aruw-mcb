@@ -17,7 +17,7 @@ void Undefined_Handler(void);
 /* Provide weak aliases for each Exception handler to Undefined_Handler.
  * As they are weak aliases, any function with the same name will override
  * this definition. */
-void Reset_Handler(void);
+void Reset_Handler(void)						__attribute__((noreturn));
 void NMI_Handler(void)							__attribute__((weak, alias("Undefined_Handler")));
 void HardFault_Handler(void)					__attribute__((weak, alias("Undefined_Handler")));
 void MemManage_Handler(void)					__attribute__((weak, alias("Undefined_Handler")));
@@ -120,6 +120,7 @@ typedef void (* const FunctionPointer)(void);
 
 // defined in the linkerscript
 extern uint32_t __main_stack_top[];
+extern uint32_t __process_stack_top[];
 
 // Define the vector table
 modm_section(".vector_rom")

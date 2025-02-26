@@ -54,9 +54,9 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem);
 
-    void sendInitialGraphics() override final;
+    modm::ResumableResult<void> sendInitialGraphics() override final;
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
     void initialize() override final;
 

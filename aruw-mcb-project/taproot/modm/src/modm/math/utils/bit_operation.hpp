@@ -28,13 +28,13 @@ namespace modm
 	/// @{
 
 	/**
-	 * Exchange the two nibbles of a byte
+	 * \brief	Exchange the two nibbles of a byte
 	 *
 	 * \code
 	 * 0xab => 0xba
 	 * \endcode
 	 */
-	constexpr uint8_t
+	modm_always_inline uint8_t
 	swap(uint8_t n)
 	{
 #ifdef MODM_CPU_AVR
@@ -52,7 +52,7 @@ namespace modm
 	}
 
 	/// Exchange two byte
-	constexpr void
+	modm_always_inline void
 	swap(uint8_t& a, uint8_t& b)
 	{
 		uint8_t temp = a;
@@ -61,19 +61,16 @@ namespace modm
 	}
 
 	/**
-	 * Exchange the two bytes of a 16-bit integer
+	 * \brief	Exchange the two bytes of a 16-bit integer
 	 *
 	 * \code
 	 * 0xabcd => 0xcdab
 	 * \endcode
 	 */
-	constexpr uint16_t
+	modm_always_inline uint16_t
 	swap(uint16_t n)
 	{
 #ifdef MODM_CPU_ARM
-		if (std::is_constant_evaluated()) {
-			return (n << 8) | (n >> 8);
-		}
 		asm volatile(
 			"rev16 %0,%0"	"\n\t"
 			 : "=r" (n)
@@ -101,41 +98,36 @@ namespace modm
 	}
 
 	/**
-	 * Exchange the four bytes of a 32-bit integer
+	 * \brief	Exchange the four bytes of a 32-bit integer
 	 *
 	 * \code
 	 * 0xabcdefgh => 0xghefcdab
 	 * \endcode
 	 */
-	constexpr uint32_t
+	modm_always_inline uint32_t
 	swap(uint32_t n)
 	{
-#if defined(MODM_CPU_ARM)
-		if (std::is_constant_evaluated()) {
-			return (n << 24) | ((n << 8) & 0xff0000) | ((n >> 8) & 0xff00) | (n >> 24);
-		}
-#if !defined(__aarch64__)
+#if defined(MODM_CPU_ARM) && !defined(__aarch64__)
 		asm volatile(
 			"rev %0,%0"		"\n\t"
 			 : "=r" (n)
 			 : "0" (n)
 		);
 		return n;
-#else
+#elif defined(MODM_CPU_ARM) && defined(__aarch64__)
 		asm volatile(
 			"rev32 %0,%0"	"\n\t"
 			 : "=r" (n)
 			 : "0" (n)
 		);
 		return n;
-#endif
 #else
 		n = (n << 24) | ((n << 8) & 0xff0000) | ((n >> 8) & 0xff00) | (n >> 24);
 		return n;
 #endif
 	}
 
-	constexpr void
+	modm_always_inline void
 	swap(int16_t& a, int16_t& b)
 	{
 		int16_t temp = a;
@@ -145,7 +137,7 @@ namespace modm
 
 	// --------------------------------------------------------------------
 	/**
-	 * Reverse the bits in a byte
+	 * \brief	Reverse the bits in a byte
 	 *
 	 * \code
 	 * 0b01110100 => 0b00101110
@@ -172,7 +164,9 @@ namespace modm
 #endif
 	}
 
-	/// Reverse the bits in a 16-bit integer
+	/**
+	 * \brief	Reverse the bits in a 16-bit integer
+	 */
 	inline uint16_t
 	bitReverse(uint16_t n)
 	{
@@ -194,7 +188,9 @@ namespace modm
 #endif
 	}
 
-	/// Reverse the bits in a 32-bit integer
+	/**
+	 * \brief	Reverse the bits in a 32-bit integer
+	 */
 	inline uint32_t
 	bitReverse(uint32_t n)
 	{
@@ -244,7 +240,7 @@ namespace modm
 
 	// --------------------------------------------------------------------
 	/**
-	 * Count the number of bits set
+	 * \brief	Count the number of bits set
 	 *
 	 * 16 clock cycles on an AVR, without call + return.
 	 */
@@ -252,7 +248,7 @@ namespace modm
 	bitCount(uint8_t n);
 
 	/**
-	 * Count the number of bits set
+	 * \brief	Count the number of bits set
 	 *
 	 * 33 clock cycles on an AVR, without call + return.
 	 */

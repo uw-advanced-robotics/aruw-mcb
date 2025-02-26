@@ -17,9 +17,6 @@
 
 #ifdef __DOXYGEN__
 
-/// @ingroup modm_architecture_interrupt
-/// @{
-
 /**
  * Get the expanded interrupt name.
  *
@@ -41,6 +38,8 @@
  *
  * @param vector
  *        The name of the interrupt without any suffix (neither `_vect`, nor `_IRQHandler`).
+ *
+ * @ingroup	modm_architecture_interrupt
  */
 #define MODM_ISR_NAME(vector)
 
@@ -52,6 +51,8 @@
  *
  * @param vector
  *        The name of the interrupt without any suffix (neither `_vect`, nor `_IRQHandler`).
+ *
+ * @ingroup	modm_architecture_interrupt
  */
 #define MODM_ISR_DECL(vector)
 
@@ -61,14 +62,10 @@
  * This maps to `MODM_ISR_NAME({vector})()`.
  * @note You may have to forward declare the interrupt using `MODM_ISR_DECL({vector})`.
  *
- * On Cortex-M the vector name is validated at compile time against the device's
- * vector table, so that misspelled vector names get caught during compilation.
- * If this is undesirable you can manually call the vector using
- * `MODM_ISR_NAME(vector)()` or disable the validation by defining
- * `MODM_ISR_DISABLE_VALIDATION`.
- *
  * @param vector
  *        The name of the interrupt without any suffix (neither `_vect`, nor `_IRQHandler`).
+ *
+ * @ingroup	modm_architecture_interrupt
  */
 #define MODM_ISR_CALL(vector)
 
@@ -82,18 +79,14 @@
  * On Cortex-M and Hosted this maps to `void MODM_ISR_NAME({vector})(void) args`.
  * `extern "C"` is automatically added in a C++ environment.
  *
- * On Cortex-M the vector name is validated at compile time against the device's
- * vector table, so that misspelled vector names get caught during compilation.
- * You can disable the validation by defining `MODM_ISR_DISABLE_VALIDATION`.
- *
  * @param vector
  *        The name of the interrupt without any suffix (neither `_vect`, nor `_IRQHandler`).
  * @param ...
  *        Multiple compiler attributes can be added to an interrupt. For example `modm_fastcode`.
+ *
+ * @ingroup	modm_architecture_interrupt
  */
 #define MODM_ISR(vector, ...)
-
-/// @}
 
 #else
 
@@ -110,27 +103,13 @@
 
 #elif defined MODM_CPU_ARM
 
-
-#ifdef __cplusplus
-#	include <modm/platform/core/vectors.hpp>
-#else
-#	ifndef MODM_ISR_DISABLE_VALIDATION
-#  		define MODM_ISR_VALIDATE(vector_str, vector) \
-			_Static_assert(vector ## _IRQn > -127);
-#	else
-#   	define MODM_ISR_VALIDATE(...)
-#	endif
-#endif
-
 #	define MODM_ISR_NAME(vector) \
 		vector ## _IRQHandler
 #	define MODM_ISR_DECL(vector) \
 		modm_extern_c void vector ## _IRQHandler(void)
 #	define MODM_ISR_CALL(vector) \
-		MODM_ISR_VALIDATE(#vector, vector); \
 		vector ## _IRQHandler()
 #	define MODM_ISR(vector, ...) \
-		MODM_ISR_VALIDATE(#vector, vector); \
 		modm_extern_c void vector ## _IRQHandler(void) \
 			__attribute__((externally_visible)) __VA_ARGS__; \
 		void vector ## _IRQHandler(void)

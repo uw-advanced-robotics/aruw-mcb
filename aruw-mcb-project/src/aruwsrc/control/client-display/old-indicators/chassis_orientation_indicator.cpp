@@ -39,21 +39,26 @@ ChassisOrientationIndicator::ChassisOrientationIndicator(
 {
 }
 
-void ChassisOrientationIndicator::sendInitialGraphics()
+modm::ResumableResult<void> ChassisOrientationIndicator::sendInitialGraphics()
 {
+    RF_BEGIN(0);
     // send initial chassis orientation graphics
-    refSerialTransmitter.sendGraphic(&chassisOrientationGraphics);
+    RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
     chassisOrientationGraphics.graphicData[0].operation = Tx::GRAPHIC_MODIFY;
     chassisOrientationGraphics.graphicData[1].operation = Tx::GRAPHIC_MODIFY;
+
+    RF_END();
 }
 
-void ChassisOrientationIndicator::update()
+modm::ResumableResult<void> ChassisOrientationIndicator::update()
 {
     bool avoidance = false, modified = false;
     for (auto currentCommand : this->avoidanceCommands)
     {
         avoidance |= drivers.commandScheduler.isCommandScheduled(currentCommand);
     }
+
+    RF_BEGIN(1);
 
     // update chassisOrientation if turret is online
     // otherwise don't rotate chassis
@@ -87,11 +92,13 @@ void ChassisOrientationIndicator::update()
         chassisOrientationGraphics.graphicData->color = static_cast<uint8_t>(
             avoidance ? CHASSIS_ORIENTATION_AVOIDANCE_COLOR : CHASSIS_ORIENTATION_STILL_COLOR);
 
-        refSerialTransmitter.sendGraphic(&chassisOrientationGraphics);
+        RF_CALL(refSerialTransmitter.sendGraphic(&chassisOrientationGraphics));
     }
     // reset rotated orientation back to forward orientation so next time chassisOrientation
     // is rotated by `getYawAngleFromCenter` the rotation is relative to the forward.
     chassisOrientation.set(0, CHASSIS_LENGTH / 2);
+
+    RF_END();
 }
 
 void ChassisOrientationIndicator::initialize()

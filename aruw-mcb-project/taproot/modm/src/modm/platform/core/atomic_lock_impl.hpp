@@ -16,6 +16,7 @@
 
 #include "../device.hpp"
 #include <modm/architecture/utils.hpp>
+
 /// @cond
 namespace modm::atomic
 {

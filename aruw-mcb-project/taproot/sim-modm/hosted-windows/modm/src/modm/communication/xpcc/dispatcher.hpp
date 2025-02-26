@@ -48,9 +48,6 @@ namespace xpcc
 		void
 		update();
 
-		void
-		updateOnceRx();
-
 	private:
 		/// Does not handle requests which are not acknowledge.
 		bool

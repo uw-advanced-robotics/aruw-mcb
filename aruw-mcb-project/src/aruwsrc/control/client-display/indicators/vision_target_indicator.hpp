@@ -47,7 +47,7 @@ public:
 
     void initialize() override final;
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
     struct ProjectedPlateResult
     {

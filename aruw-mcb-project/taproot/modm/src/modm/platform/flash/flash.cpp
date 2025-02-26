@@ -62,7 +62,7 @@ Flash::getOffset(uint8_t index)
 }
 
 size_t
-Flash::getSize([[maybe_unused]] uint8_t index)
+Flash::getSize(uint8_t modm_unused index)
 {
 	if (index < 4) return (1ul << 14);
 	if (index == 5) return (1ul << 16);
@@ -77,6 +77,7 @@ Flash::erase(uint8_t index, WordSize size)
 			((index << FLASH_CR_SNB_Pos) & FLASH_CR_SNB_Msk);
 	while(isBusy()) ;
 	FLASH->CR = 0;
+
 	return FLASH->SR & FLASH_SR_ERR;
 }
 
@@ -98,9 +99,8 @@ Flash::program(uintptr_t addr, MaxWordType data, WordSize size)
 			break;
 	}
 	while(isBusy()) ;
-
-	FLASH->SR |= FLASH_SR_EOP;
 	FLASH->CR = 0;
+
 	return FLASH->SR & FLASH_SR_ERR;
 }
 

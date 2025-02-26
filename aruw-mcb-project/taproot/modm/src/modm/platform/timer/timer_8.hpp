@@ -3,7 +3,7 @@
  * Copyright (c) 2009, 2011-2012, Georgi Grinshpun
  * Copyright (c) 2010, Martin Rosekeit
  * Copyright (c) 2011, 2013-2017, Niklas Hauser
- * Copyright (c) 2013, 2015, 2022, Sascha Schade
+ * Copyright (c) 2013, 2015, Sascha Schade
  * Copyright (c) 2013, 2016, Kevin Läufer
  *
  * This file is part of the modm project.
@@ -17,12 +17,13 @@
 #ifndef MODM_STM32_TIMER_8_HPP
 #define MODM_STM32_TIMER_8_HPP
 
-#include <chrono>
-#include <limits>
 #include "advanced_base.hpp"
 #include <modm/platform/gpio/connector.hpp>
 
-namespace modm::platform
+namespace modm
+{
+
+namespace platform
 {
 
 /**
@@ -63,10 +64,7 @@ namespace modm::platform
 class Timer8 : public AdvancedControlTimer
 {
 public:
-	// This type is the internal size of the counter.
-	using Value = uint16_t;
-
-	template< class... Signals >
+	template< template<Peripheral _> class... Signals >
 	static void
 	connect()
 	{
@@ -79,9 +77,6 @@ public:
 
 	static void
 	disable();
-
-	static bool
-	isEnabled();
 
 	static inline void
 	pause()
@@ -99,8 +94,7 @@ public:
 	setMode(Mode mode,
 			SlaveMode slaveMode = SlaveMode::Disabled,
 			SlaveModeTrigger slaveModeTrigger = SlaveModeTrigger::Internal0,
-			MasterMode masterMode = MasterMode::Reset,
-			bool enableOnePulseMode = false
+			MasterMode masterMode = MasterMode::Reset
 			);
 
 	static inline void
@@ -140,56 +134,34 @@ public:
 		TIM8->PSC = prescaler - 1;
 	}
 
-	static uint16_t
-	getPrescaler()
-	{
-		return TIM8->PSC + 1;
-	}
-
 	static inline void
-	setOverflow(Value overflow)
+	setOverflow(uint16_t overflow)
 	{
 		TIM8->ARR = overflow;
 	}
 
-	static inline Value
-	getOverflow()
-	{
-		return TIM8->ARR;
-	}
-
 	template<class SystemClock>
-	static constexpr uint32_t
-	getClockFrequency()
+	static uint16_t
+	setPeriod(uint32_t microseconds, bool autoApply = true)
 	{
-		return SystemClock::Timer8;
-	}
+		// This will be inaccurate for non-smooth frequencies (last six digits
+		// unequal to zero)
+		uint32_t cycles = microseconds * (SystemClock::Timer8 / 1'000'000UL);
+		uint16_t prescaler = (cycles + 65'535) / 65'536;	// always round up
+		uint16_t overflow = cycles / prescaler;
 
-	template<class SystemClock, class Rep, class Period>
-	static Value
-	setPeriod(std::chrono::duration<Rep, Period> duration, bool autoApply = true)
-	{
-		// This will be inaccurate for non-smooth frequencies (last six digits unequal to zero)
-		const uint32_t cycles = duration.count() * SystemClock::Timer8 * Period::num / Period::den;
-		const uint16_t prescaler = (cycles + std::numeric_limits<Value>::max() - 1) / std::numeric_limits<Value>::max();	// always round up
-		const Value overflow = cycles / prescaler - 1;
+		overflow = overflow - 1;	// e.g. 36'000 cycles are from 0 to 35'999
 
 		setPrescaler(prescaler);
 		setOverflow(overflow);
 
-		// Generate Update Event to apply the new settings for ARR
 		if (autoApply) {
-			applyAndReset();
+			// Generate Update Event to apply the new settings for ARR
+			TIM8->EGR |= TIM_EGR_UG;
 		}
 
 		return overflow;
-	}
-
-	static inline void
-	generateEvent(Event ev)
-	{
-		TIM8->EGR = static_cast<uint32_t>(ev);
-	}
+}
 
 	static inline void
 	applyAndReset()
@@ -198,34 +170,22 @@ public:
 		generateEvent(Event::Update);
 	}
 
-	static inline Value
+	static inline void
+	generateEvent(Event ev)
+	{
+		TIM8->EGR |= static_cast<uint32_t>(ev);
+	}
+
+	static inline uint16_t
 	getValue()
 	{
 		return TIM8->CNT;
 	}
 
 	static inline void
-	setValue(Value value)
+	setValue(uint16_t value)
 	{
 		TIM8->CNT = value;
-	}
-
-	static constexpr bool
-	hasAdvancedPwmControl()
-	{
-		return true;
-	}
-
-	static inline bool
-	isCountingUp()
-	{
-		return (TIM8->CR1 & TIM_CR1_DIR) == 0;
-	}
-
-	static inline bool
-	isCountingDown()
-	{
-		return !isCountingUp();
 	}
 
 	static inline void
@@ -240,11 +200,6 @@ public:
 		TIM8->BDTR &= ~(TIM_BDTR_MOE);
 	}
 
-	static inline bool
-	isOutputEnabled()
-	{
-		return (TIM8->BDTR & TIM_BDTR_MOE);
-	}
 	/*
 	 * Enable/Disable automatic set of MOE bit at the next update event
 	 */
@@ -278,14 +233,6 @@ public:
 		flags |= (static_cast<uint32_t>(idle)   << (channel * 2));
 		flags |= (static_cast<uint32_t>(idle_n) << (channel * 2 + 1));
 		TIM8->CR2 = flags;
-	}
-
-	template<typename Signal>
-	static void
-	setOutputIdleState(OutputIdleState idle, OutputIdleState idle_n = OutputIdleState::Reset)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		setOutputIdleState(channel, idle, idle_n);
 	}
 
 	/*
@@ -340,75 +287,18 @@ public:
 		TIM8->BDTR = flags;
 	}
 
-	static inline void
-	setRepetitionCount(uint16_t repetitionCount)
-	{
-		TIM8->RCR = repetitionCount;
-	}
-
 public:
-	static void
-	configureInputChannel(uint32_t channel, uint8_t filter);
-
-	template<typename Signal>
-	static void
-	configureInputChannel(uint8_t filter)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureInputChannel(channel, filter);
-	}
-
 	static void
 	configureInputChannel(uint32_t channel, InputCaptureMapping input,
 			InputCapturePrescaler prescaler,
 			InputCapturePolarity polarity, uint8_t filter,
 			bool xor_ch1_3=false);
 
-	template<typename Signal>
-	static void
-	configureInputChannel(InputCaptureMapping input,
-			InputCapturePrescaler prescaler,
-			InputCapturePolarity polarity, uint8_t filter,
-			bool xor_ch1_3=false)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureInputChannel(channel, input, prescaler, polarity, filter, xor_ch1_3);
-	}
-
-
 	static void
 	configureOutputChannel(uint32_t channel, OutputCompareMode mode,
-			Value compareValue, PinState out = PinState::Enable);
+			uint16_t compareValue);
 	// TODO: Maybe add some functionality from the configureOutput
 	//       function below...
-
-	template<typename Signal>
-	static void
-	configureOutputChannel(OutputCompareMode mode,
-			Value compareValue, PinState out = PinState::Enable)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureOutputChannel(channel, mode, compareValue, out);
-	}
-
-	static void
-	configureOutputChannel(uint32_t channel, OutputCompareMode mode,
-			Value compareValue, PinState out,
-			OutputComparePolarity polarity, PinState out_n,
-			OutputComparePolarity polarity_n = OutputComparePolarity::ActiveHigh,
-			OutputComparePreload preload = OutputComparePreload::Disable);
-
-	template<typename Signal>
-	static void
-	configureOutputChannel(OutputCompareMode mode,
-			Value compareValue, PinState out,
-			OutputComparePolarity polarity, PinState out_n,
-			OutputComparePolarity polarity_n = OutputComparePolarity::ActiveHigh,
-			OutputComparePreload preload = OutputComparePreload::Disable)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureOutputChannel(channel, mode, compareValue, out, polarity, out_n, polarity_n, preload);
-	}
 
 	/*
 	 * Configure Output Channel without changing the Compare Value
@@ -428,18 +318,6 @@ public:
 			PinState out_n,
 			OutputComparePolarity polarity_n = OutputComparePolarity::ActiveHigh,
 			OutputComparePreload preload = OutputComparePreload::Disable);
-
-	template<typename Signal>
-	static void
-	configureOutputChannel(OutputCompareMode mode,
-			PinState out, OutputComparePolarity polarity,
-			PinState out_n,
-			OutputComparePolarity polarity_n = OutputComparePolarity::ActiveHigh,
-			OutputComparePreload preload = OutputComparePreload::Disable)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureOutputChannel(channel, mode, out, polarity, out_n, polarity_n, preload);
-	}
 
 	/*
 	 * Configure Output Channel width Mode/OutputPort uint
@@ -464,40 +342,16 @@ public:
 	static void
 	configureOutputChannel(uint32_t channel, uint32_t modeOutputPorts);
 
-	template<typename Signal>
-	static void
-	configureOutputChannel(uint32_t modeOutputPorts)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		configureOutputChannel(channel, modeOutputPorts);
-	}
-
 	static inline void
-	setCompareValue(uint32_t channel, Value value)
+	setCompareValue(uint32_t channel, uint16_t value)
 	{
 		*(&TIM8->CCR1 + (channel - 1)) = value;
 	}
 
-	template<typename Signal>
-	static void
-	setCompareValue(Value value)
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		setCompareValue(channel, value);
-	}
-
-	static inline Value
+	static inline uint16_t
 	getCompareValue(uint32_t channel)
 	{
 		return *(&TIM8->CCR1 + (channel - 1));
-	}
-
-	template<typename Signal>
-	static inline Value
-	getCompareValue()
-	{
-		constexpr auto channel = signalToChannel<Peripheral::Tim8, Signal>();
-		return getCompareValue(channel);
 	}
 
 public:
@@ -556,6 +410,8 @@ public:
 	}
 };
 
-}	// namespace modm::platform
+}	// namespace platform
+
+}	// namespace modm
 
 #endif // MODM_STM32_TIMER_8_HPP

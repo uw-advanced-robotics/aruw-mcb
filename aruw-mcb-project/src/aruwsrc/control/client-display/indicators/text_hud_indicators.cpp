@@ -37,8 +37,9 @@ TextHudIndicators::TextHudIndicators(
 {
 }
 
-void TextHudIndicators::update()
+modm::ResumableResult<void> TextHudIndicators::update()
 {
+    RF_BEGIN(1);
     // Either the agitator is online and not jammed, or the shooter has no power
     if ((agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed()) ||
         !(drivers.refSerial.getRobotData().robotPower & Rx::RobotPower::SHOOTER_HAS_POWER))
@@ -69,9 +70,11 @@ void TextHudIndicators::update()
         {
             textHudIndicatorGraphics[index].graphicData.operation =
                 states[index] ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_DELETE;
-            refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]);
+            RF_CALL(refSerialTransmitter.sendGraphic(&textHudIndicatorGraphics[index]));
         }
     }
+
+    RF_END();
 }
 
 void TextHudIndicators::initialize()

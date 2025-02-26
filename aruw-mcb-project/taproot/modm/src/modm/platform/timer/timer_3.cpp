@@ -40,12 +40,6 @@ modm::platform::Timer3::disable()
 	Rcc::disable<Peripheral::Tim3>();
 }
 
-bool
-modm::platform::Timer3::isEnabled()
-{
-	return Rcc::isEnabled<Peripheral::Tim3>();
-}
-
 // ----------------------------------------------------------------------------
 void
 modm::platform::Timer3::setMode(Mode mode, SlaveMode slaveMode,
@@ -84,35 +78,6 @@ modm::platform::Timer3::setMode(Mode mode, SlaveMode slaveMode,
 }
 
 // ----------------------------------------------------------------------------
-void
-modm::platform::Timer3::configureInputChannel(uint32_t channel, uint8_t filter) {
-		channel -= 1;	// 1..4 -> 0..3
-
-	// disable channel
-	TIM3->CCER &= ~(TIM_CCER_CC1E << (channel * 4));
-
-	uint32_t flags = static_cast<uint32_t>(filter&0xf) << 4;
-
-	if (channel <= 1)
-	{
-		const uint32_t offset = 8 * channel;
-
-		flags <<= offset;
-		flags |= TIM3->CCMR1 & ~(0xf0 << offset);
-
-		TIM3->CCMR1 = flags;
-	}
-	else {
-		const uint32_t offset = 8 * (channel - 2);
-
-		flags <<= offset;
-		flags |= TIM3->CCMR2 & ~(0xf0 << offset);
-
-		TIM3->CCMR2 = flags;
-	}
-	TIM3->CCER |= TIM_CCER_CC1E << (channel * 4);
-}
-
 void
 modm::platform::Timer3::configureInputChannel(uint32_t channel,
 		InputCaptureMapping input, InputCapturePrescaler prescaler,
@@ -198,58 +163,6 @@ modm::platform::Timer3::configureOutputChannel(uint32_t channel,
 	if (mode != OutputCompareMode::Inactive && out == PinState::Enable) {
 		TIM3->CCER |= (TIM_CCER_CC1E) << (channel * 4);
 	}
-}
-
-void
-modm::platform::Timer3::configureOutputChannel(uint32_t channel,
-OutputCompareMode mode, Value compareValue,
-PinState out, OutputComparePolarity polarity,
-OutputComparePreload preload)
-{
-	// disable output
-	TIM3->CCER &= ~(0xf << ((channel-1) * 4));
-	setCompareValue(channel, compareValue);
-	configureOutputChannel(channel, mode, out, polarity,  PinState::Disable, OutputComparePolarity::ActiveHigh, preload);
-}
-
-void
-modm::platform::Timer3::configureOutputChannel(uint32_t channel,
-OutputCompareMode mode,
-PinState out, OutputComparePolarity polarity,
-PinState out_n, OutputComparePolarity polarity_n,
-OutputComparePreload preload)
-{
-	channel -= 1;	// 1..4 -> 0..3
-
-	// disable output
-	TIM3->CCER &= ~(0xf << (channel * 4));
-
-	uint32_t flags = static_cast<uint32_t>(mode) | static_cast<uint32_t>(preload);
-
-	if (channel <= 1)
-	{
-		const uint32_t offset = 8 * channel;
-
-		flags <<= offset;
-		flags |= TIM3->CCMR1 & ~(0xff << offset);
-
-		TIM3->CCMR1 = flags;
-	}
-	else {
-		const uint32_t offset = 8 * (channel - 2);
-
-		flags <<= offset;
-		flags |= TIM3->CCMR2 & ~(0xff << offset);
-
-		TIM3->CCMR2 = flags;
-	}
-
-	// CCER Flags (Enable/Polarity)
-	flags = (static_cast<uint32_t>(polarity_n) << 2) |
-			(static_cast<uint32_t>(out_n)      << 2) |
-			 static_cast<uint32_t>(polarity) | static_cast<uint32_t>(out);
-
-	TIM3->CCER |= flags << (channel * 4);
 }
 
 // ----------------------------------------------------------------------------

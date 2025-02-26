@@ -33,29 +33,34 @@ template<typename T>
 class Ram
 {
 public:
+	modm_always_inline
 	Ram(const T* addr = 0) :
 		address(addr)
 	{
 	}
 
 	template <typename U>
+	modm_always_inline
 	explicit Ram(const Ram<U>& rhs) :
 		address((T*) rhs.address)
 	{
 	}
 
+	modm_always_inline
 	const T
 	operator *() const
 	{
 		return *address;
 	}
 
+	modm_always_inline
 	const T
 	operator [](std::size_t index) const
 	{
 		return *(address + index);
 	}
 
+	modm_always_inline
 	Ram&
 	operator ++ ()
 	{
@@ -63,6 +68,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Ram
 	operator ++ (int)
 	{
@@ -71,6 +77,7 @@ public:
 		return ret;
 	}
 
+	modm_always_inline
 	Ram&
 	operator -- ()
 	{
@@ -78,6 +85,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Ram&
 	operator -- (int)
 	{
@@ -86,6 +94,7 @@ public:
 		return ret;
 	}
 
+	modm_always_inline
 	Ram&
 	operator += (std::size_t rhs)
 	{
@@ -93,6 +102,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Ram&
 	operator -= (std::size_t rhs)
 	{
@@ -100,6 +110,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	const T*
 	getPointer() const
 	{

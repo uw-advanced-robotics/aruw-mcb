@@ -149,7 +149,7 @@ private:
     inline float wrapAngle(float angle, float denomination)
     {
         return fmod(
-            fmod(angle, denomination) + static_cast<float>(M_TWOPI),
+            fmod(angle, denomination) + M_TWOPI,
             denomination);  // replace M_TWOPI with denomination? doesn't matter for its one use
                             // case currently
         // double fmod needed to ensure output is positive bc fmod can be negative

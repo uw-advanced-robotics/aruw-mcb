@@ -25,7 +25,6 @@
 
 namespace aruwsrc::control::client_display::images
 {
-
 using LineTuple = std::tuple<int16_t, int16_t, int16_t, int16_t>;
 
 struct Image

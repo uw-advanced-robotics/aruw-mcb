@@ -37,7 +37,7 @@ namespace modm
 	* \author	Thorsten Lajewski
 	*/
 
-	template<typename Allocator = std::allocator<IAbstractView> >
+	template<typename Allocator = allocator::Dynamic<IAbstractView> >
 	class ViewStack
 	{
 	public:

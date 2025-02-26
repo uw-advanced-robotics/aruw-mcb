@@ -136,7 +136,7 @@ void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
     // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
     // convert dt in microseconds to seconds
     const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6f / static_cast<float>(dt);
+        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
     const float velocityCovariance =
         chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);

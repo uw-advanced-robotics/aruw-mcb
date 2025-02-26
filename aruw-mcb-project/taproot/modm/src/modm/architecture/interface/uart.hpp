@@ -30,11 +30,8 @@ namespace modm
  */
 class Uart : public ::modm::PeripheralDriver
 {
-public:
-	struct RxBuffer { static constexpr bool HasRxBuffer = true; };
-	struct TxBuffer { static constexpr bool HasTxBuffer = true; };
-
 #ifdef __DOXYGEN__
+public:
 	/// Size of the receive buffer.
 	static constexpr size_t RxBufferSize = 16;
 

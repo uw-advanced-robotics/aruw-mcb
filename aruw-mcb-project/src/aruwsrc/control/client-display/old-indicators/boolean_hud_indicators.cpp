@@ -68,8 +68,9 @@ BooleanHudIndicators::BooleanHudIndicators(
 {
 }
 
-void BooleanHudIndicators::sendInitialGraphics()
+modm::ResumableResult<void> BooleanHudIndicators::sendInitialGraphics()
 {
+    RF_BEGIN(0);
     // send all boolean hud indicator graphics (labels and circles)
     for (booleanHudIndicatorIndexSendInitialGraphics = 0;
          booleanHudIndicatorIndexSendInitialGraphics < NUM_BOOLEAN_HUD_INDICATORS;
@@ -77,15 +78,18 @@ void BooleanHudIndicators::sendInitialGraphics()
     {
         booleanHudIndicatorDrawers[booleanHudIndicatorIndexSendInitialGraphics].initialize();
 
-        refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
-        refSerialTransmitter.sendGraphic(
-            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]);
+        RF_CALL(refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
+        RF_CALL(refSerialTransmitter.sendGraphic(
+            &booleanHudIndicatorStaticLabelGraphics[booleanHudIndicatorIndexSendInitialGraphics]));
     }
+
+    RF_END();
 }
 
-void BooleanHudIndicators::update()
+modm::ResumableResult<void> BooleanHudIndicators::update()
 {
+    RF_BEGIN(1);
     // update agitator state
     booleanHudIndicatorDrawers[AGITATOR_STATUS_HEALTHY].setIndicatorState(
         agitatorSubsystem.isOnline() && !agitatorSubsystem.isJammed());
@@ -98,8 +102,10 @@ void BooleanHudIndicators::update()
          booleanHudIndicatorIndexUpdate < NUM_BOOLEAN_HUD_INDICATORS;
          booleanHudIndicatorIndexUpdate++)
     {
-        booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw();
+        RF_CALL(booleanHudIndicatorDrawers[booleanHudIndicatorIndexUpdate].draw());
     }
+
+    RF_END();
 }
 
 void BooleanHudIndicators::initialize()

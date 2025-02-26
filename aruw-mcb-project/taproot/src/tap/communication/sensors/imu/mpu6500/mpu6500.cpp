@@ -40,8 +40,7 @@ using namespace tap::arch;
 namespace tap::communication::sensors::imu::mpu6500
 {
 Mpu6500::Mpu6500(Drivers *drivers)
-    : Fiber([this] { run(); }),
-      drivers(drivers),
+    : drivers(drivers),
       processRawMpu6500DataFn(Mpu6500::defaultProcessRawMpu6500Data),
       raw(),
       imuHeater(drivers)
@@ -67,7 +66,7 @@ void Mpu6500::init(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
 #ifndef PLATFORM_HOSTED
     // Configure NSS pin
-    Board::ImuNss::configure(Gpio::OutputType::PushPull);
+    Board::ImuNss::GpioOutput();
 
     // connect GPIO pins to the alternate SPI function
     Board::ImuSpiMaster::connect<Board::ImuMiso::Miso, Board::ImuMosi::Mosi, Board::ImuSck::Sck>();

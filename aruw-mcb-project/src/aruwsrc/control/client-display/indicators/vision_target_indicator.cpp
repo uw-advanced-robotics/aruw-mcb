@@ -34,7 +34,7 @@ VisionTargetIndicator::VisionTargetIndicator(
 {
 }
 
-void VisionTargetIndicator::update()
+modm::ResumableResult<void> VisionTargetIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
@@ -57,10 +57,12 @@ void VisionTargetIndicator::update()
             prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
     }
 
+    RF_BEGIN(0);
     // If the graphic is already deleted, don't delete it again
     if (prevOperation == Tx::GRAPHIC_DELETE &&
         visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
     {
+        RF_RETURN();
     }
 
     RefSerialTransmitter::configRectangle(
@@ -71,7 +73,9 @@ void VisionTargetIndicator::update()
         enemyPositionScreenFrame.topRightY,
         &visionTargetGraphic.graphicData);
 
-    refSerialTransmitter.sendGraphic(&visionTargetGraphic);
+    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
+
+    RF_END();
 }
 
 void VisionTargetIndicator::initialize()

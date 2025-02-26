@@ -64,8 +64,7 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::GATED_DENY;
     }
 
-    uint32_t timeOfFlightMicros =
-        static_cast<uint32_t>(static_cast<double>(timeOfFlightSeconds) * 1e6);
+    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
     uint32_t now = tap::arch::clock::getTimeMicroseconds();
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 

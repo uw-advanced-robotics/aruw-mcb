@@ -49,6 +49,7 @@ union aligned_storage_helper
     maybe<long double> h;
 };
 } // namespace aligned_storage_impl
+/// @endcond
 
 /**
  * Implementation of std::aligned_storage that avoids GCC bug #61458 which can
@@ -62,9 +63,7 @@ template<size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storag
 struct aligned_storage {
     using type = std::aligned_storage_t<Cap, Align>;
 };
-/// @endcond
 
-/// @ingroup modm_utils
 template<size_t Cap, size_t Align = alignof(aligned_storage_impl::aligned_storage_helper<Cap>)>
 using aligned_storage_t = typename aligned_storage<Cap, Align>::type;
 
