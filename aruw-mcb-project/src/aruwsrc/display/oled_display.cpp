@@ -43,7 +43,7 @@ OledDisplay::OledDisplay(
       viewStack(&display),
       buttonHandler(
           drivers
-#if defined(OLD_ROBOTS)
+#ifndef OLD_ROBOTS
           ,
           (tap::display::AnalogConfig){
               .ok = 50,
