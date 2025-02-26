@@ -30,7 +30,6 @@
 
 namespace aruwsrc::control::client_display
 {
-
 class ImageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
@@ -38,7 +37,7 @@ public:
 
     void initialize() override final;
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
 private:
     int index = 0;

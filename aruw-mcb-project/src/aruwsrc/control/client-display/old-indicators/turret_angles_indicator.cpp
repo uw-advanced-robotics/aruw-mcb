@@ -38,16 +38,20 @@ TurretAnglesIndicator::TurretAnglesIndicator(
 {
 }
 
-void TurretAnglesIndicator::sendInitialGraphics()
+modm::ResumableResult<void> TurretAnglesIndicator::sendInitialGraphics()
 {
+    RF_BEGIN(0);
     // send turret angle data graphic and associated labels
     refSerialTransmitter.sendGraphic(&turretAnglesGraphic);
     turretAnglesGraphic.graphicData.operation = Tx::GRAPHIC_MODIFY;
-    refSerialTransmitter.sendGraphic(&turretAnglesLabelGraphics);
+    RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesLabelGraphics));
+
+    RF_END();
 }
 
-void TurretAnglesIndicator::update()
+modm::ResumableResult<void> TurretAnglesIndicator::update()
 {
+    RF_BEGIN(1);
     yaw = modm::toDegree(robotTurretSubsystem.getWorldYaw());
     pitch = modm::toDegree(robotTurretSubsystem.getWorldPitch());
 
@@ -57,11 +61,13 @@ void TurretAnglesIndicator::update()
     {
         updateTurretAnglesGraphicMsg();
 
-        refSerialTransmitter.sendGraphic(&turretAnglesGraphic);
+        RF_CALL(refSerialTransmitter.sendGraphic(&turretAnglesGraphic));
 
         prevYaw = yaw;
         prevPitch = pitch;
     }
+
+    RF_END();
 }
 
 void TurretAnglesIndicator::initialize()

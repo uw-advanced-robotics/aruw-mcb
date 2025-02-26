@@ -22,10 +22,10 @@ def strip_binary(env, target, source, options="--strip-unneeded"):
                        Action("$STRIP {} -o $TARGET $SOURCE".format(options),
                               cmdstr="$STRIPCOMSTR"))
 
-def list_symbols(env, source):
+def list_symbols(env, source, alias='__symbols'):
     action = Action("$NM $SOURCE -S -C --size-sort -td",
                     cmdstr="$SYMBOLSCOMSTR")
-    return env.AlwaysBuild(env.Alias("__symbols", source, action))
+    return env.AlwaysBuild(env.Alias(alias, source, action))
 
 
 def generate(env, **kw):

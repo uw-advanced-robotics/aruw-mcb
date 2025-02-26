@@ -43,7 +43,6 @@
 #include "tap/mock/terminal_serial_mock.hpp"
 #include "tap/mock/uart_mock.hpp"
 #include "tap/mock/command_scheduler_mock.hpp"
-#include "modm/processing/fiber.hpp"
 #else
 #include "tap/architecture/profiler.hpp"
 #include "tap/communication/can/can.hpp"
@@ -99,11 +98,7 @@ protected:
 #else
           commandScheduler(this, true)
 #endif
-    {
-#ifdef ENV_UNIT_TESTS
-        modm::fiber::Scheduler::run();
-#endif
-    }
+          {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     arch::Profiler profiler;

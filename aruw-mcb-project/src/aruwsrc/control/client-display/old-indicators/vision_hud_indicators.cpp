@@ -35,16 +35,16 @@ VisionHudIndicators::VisionHudIndicators(
 {
 }
 
-void VisionHudIndicators::sendInitialGraphics() {}
-
-void VisionHudIndicators::update()
+modm::ResumableResult<void> VisionHudIndicators::sendInitialGraphics()
 {
-    // update vision target status
-    updateVisionTargetStatus();
+    RF_BEGIN(0);
+    // Don't need to send anything since we add/delete the graphic when updating
+    RF_END();
 }
 
-void VisionHudIndicators::updateVisionTargetStatus()
+modm::ResumableResult<void> VisionHudIndicators::update()
 {
+    RF_BEGIN(1);
     {
         bool hasTarget =
             visionCoprocessor.isCvOnline() && visionCoprocessor.getSomeTurretHasTarget();
@@ -83,11 +83,13 @@ void VisionHudIndicators::updateVisionTargetStatus()
             visionTargetFoundGraphics.graphicData[1].operation = operation;
         }
 
-        refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics);
+        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics));
 
         updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
         prevVisionIndicatorColor = newVisionIndicatorColor;
     }
+
+    RF_END();
 }
 
 void VisionHudIndicators::initialize()

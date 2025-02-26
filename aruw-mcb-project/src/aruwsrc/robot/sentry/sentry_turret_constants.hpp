@@ -69,7 +69,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 3986,
     .minAngle = 0,
-    .maxAngle = static_cast<float>(M_TWOPI),
+    .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
 };
 

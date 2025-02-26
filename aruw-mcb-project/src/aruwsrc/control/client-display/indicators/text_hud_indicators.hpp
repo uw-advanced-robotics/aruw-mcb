@@ -55,7 +55,7 @@ public:
         const std::vector<tap::control::Command *> validChassisCommands,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
     void initialize() override final;
 

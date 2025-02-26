@@ -24,8 +24,6 @@
 using namespace tap::display;
 using namespace modm::literals;
 
-using namespace std::chrono_literals;
-
 namespace aruwsrc
 {
 namespace display
@@ -38,8 +36,7 @@ OledDisplay::OledDisplay(
     aruwsrc::virtualMCB::MCBLite *mcbLite1,
     aruwsrc::virtualMCB::MCBLite *mcbLite2,
     can::capbank::CapacitorBank *capacitorBank)
-    : Fiber([this] { run(); }),
-      display(),
+    : display(),
       viewStack(&display),
       buttonHandler(drivers),
       splashScreen(
@@ -72,13 +69,16 @@ void OledDisplay::initialize()
     viewStack.push(&splashScreen);
 }
 
-void OledDisplay::run()
+bool OledDisplay::updateDisplay()
 {
+    PT_BEGIN();
     while (true)
     {
-        display.updateNonblocking();
-        modm::this_fiber::sleep_for(100ms);
+        PT_CALL(display.updateNonblocking());
+        PT_WAIT_UNTIL(displayThreadTimer.execute());
     }
+    PT_END();
+    return false;
 }
 
 void OledDisplay::updateMenu()

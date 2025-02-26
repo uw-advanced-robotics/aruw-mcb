@@ -326,7 +326,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, static_cast<float>(M_PI));
+user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // beyblade governors
 PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);

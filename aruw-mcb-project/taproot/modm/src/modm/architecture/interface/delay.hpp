@@ -17,9 +17,6 @@
 namespace modm
 {
 
-/// @ingroup modm_architecture_delay
-/// @{
-
 /**
  * Spin for nanoseconds.
  *
@@ -27,16 +24,21 @@ namespace modm
  *          be very coarse especially on platforms with very slow clocks.
  *
  * @warning The maximum delay is 1'000'000ns = 1 millisecond.
+ *
+ * @ingroup modm_architecture_delay
  */
 void delay(std::chrono::nanoseconds ns);
+/// @ingroup modm_architecture_delay
 void delay_ns(uint32_t ns);
 
 /**
  * Is true if nanosecond delay is reasonably accurate.
  * On devices with low clock speed it may not be possible to provide this
  * function with <100ns or even <1000ns accuracy.
+ *
+ * @ingroup modm_architecture_delay
  */
-#define MODM_DELAY_NS_IS_ACCURATE 0/1
+#define MODM_DELAY_NS_IS_ACCURATE bool(true or false)
 
 /**
  * Spin for microseconds.
@@ -45,15 +47,21 @@ void delay_ns(uint32_t ns);
  *
  * @note In debug mode this function may raise "delay.us" if input validation
  *       fails.
+ *
+ * @ingroup modm_architecture_delay
  */
 void delay(std::chrono::microseconds us);
+/// @ingroup modm_architecture_delay
 void delay_us(uint32_t us);
 
-/// Spin for milliseconds.
+/**
+ * Spin for milliseconds.
+ *
+ * @ingroup modm_architecture_delay
+ */
 void delay(std::chrono::milliseconds ms);
+/// @ingroup modm_architecture_delay
 void delay_ms(uint32_t ms);
-
-/// @}
 
 }
 
@@ -95,6 +103,16 @@ delay(std::chrono::duration<Rep, std::milli> ms_)
 template<class Rep, class Period>
 inline void delay(std::chrono::duration<Rep, Period> time)
 { delay(std::chrono::duration_cast<std::chrono::milliseconds>(time)); }
+
+// The old methods are deprecated
+[[deprecated("Use `modm::delay_ns(uint32_t ns)` instead!")]]
+inline void delayNanoseconds(uint32_t ns) { delay_ns(ns); }
+
+[[deprecated("Use `modm::delay_us(uint32_t us)` instead!")]]
+inline void delayMicroseconds(uint32_t us) { delay_us(us); }
+
+[[deprecated("Use `modm::delay_ms(uint32_t ms)` instead!")]]
+inline void delayMilliseconds(uint32_t ms) { delay_ms(ms); }
 
 using namespace ::std::chrono_literals;
 

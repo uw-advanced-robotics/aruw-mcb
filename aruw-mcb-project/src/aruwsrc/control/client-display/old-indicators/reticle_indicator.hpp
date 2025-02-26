@@ -54,9 +54,9 @@ public:
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    void sendInitialGraphics() override final;
+    modm::ResumableResult<void> sendInitialGraphics() override final;
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
     void initialize() override final;
 

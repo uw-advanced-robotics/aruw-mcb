@@ -43,7 +43,21 @@ namespace impl
 		using type = R(Args...);
 	};
 }
+/// @endcond
 
+/**
+ * Deduce function signature type from callable
+ *
+ * Identity for function types
+ * For functions objects the return type and parameters of
+ * operator() are deduced
+ *
+ * e.g. deduces "void(int)" for "[&](int){}"
+ *
+ * @ingroup modm_utils
+ *
+ * \warning Not applicable to overload sets
+ */
 template<typename F>
 struct get_callable_signature;
 
@@ -65,20 +79,7 @@ struct get_callable_signature<F>
 {
     using type = typename impl::mem_fn_helper<decltype(&F::operator())>::type;
 };
-/// @endcond
 
-/**
- * Deduce function signature type from callable
- *
- * Identity for function types
- * For functions objects the return type and parameters of
- * operator() are deduced
- *
- * e.g. deduces "void(int)" for "[&](int){}"
- *
- * @warning Not applicable to overload sets
- * @ingroup modm_utils
- */
 template <typename T>
 using get_callable_signature_t = typename get_callable_signature<T>::type;
 

@@ -34,16 +34,23 @@ ReticleIndicator::ReticleIndicator(
 {
 }
 
-void ReticleIndicator::sendInitialGraphics()
+modm::ResumableResult<void> ReticleIndicator::sendInitialGraphics()
 {
+    RF_BEGIN(0);
     // send reticle
     for (reticleIndex = 0; reticleIndex < MODM_ARRAY_SIZE(reticleMsg); reticleIndex++)
     {
-        refSerialTransmitter.sendGraphic(&reticleMsg[reticleIndex]);
+        RF_CALL(refSerialTransmitter.sendGraphic(&reticleMsg[reticleIndex]));
     }
+
+    RF_END();
 }
 
-void ReticleIndicator::update() {}
+modm::ResumableResult<void> ReticleIndicator::update()
+{
+    RF_BEGIN(1);
+    RF_END();
+}
 
 void ReticleIndicator::initialize()
 {

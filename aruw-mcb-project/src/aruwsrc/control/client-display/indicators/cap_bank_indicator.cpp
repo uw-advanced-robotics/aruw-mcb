@@ -35,23 +35,29 @@ CapBankIndicator::CapBankIndicator(
 {
 }
 
-void CapBankIndicator::sendInitialGraphics()
+modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 {
     this->previousState = can::capbank::State::UNKNOWN;
     this->previousColor = Tx::GraphicColor::BLACK;
     voltageUpdateTimer.restart(500);
 
+    RF_BEGIN(0);
+
     // remove initial graphics
-    refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
-    refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
-    refSerialTransmitter.sendGraphic(&capBankTextGraphic);
+    RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
+    RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
+    RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
+
+    RF_END();
 }
 
-void CapBankIndicator::update()
+modm::ResumableResult<void> CapBankIndicator::update()
 {
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
     can::capbank::State state = can::capbank::UNKNOWN;
+
+    RF_BEGIN(1);
 
     if (capBank != nullptr)
     {
@@ -92,9 +98,10 @@ void CapBankIndicator::update()
                 &capBankVoltageLevel.graphicData);
 
             capBankVoltageLevel.graphicData.color = static_cast<uint8_t>(
-                voltage_squared < VOLTAGE_SQUARED_ORANGE   ? Tx::GraphicColor::ORANGE
-                : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
-                                                           : Tx::GraphicColor::GREEN);
+                voltage_squared < VOLTAGE_SQUARED_ORANGE
+                    ? Tx::GraphicColor::ORANGE
+                    : voltage_squared < VOLTAGE_SQUARED_YELLOW ? Tx::GraphicColor::YELLOW
+                                                               : Tx::GraphicColor::GREEN);
 
             // Update the background status
             state = capBank->getState();
@@ -148,21 +155,23 @@ void CapBankIndicator::update()
             if (state != this->previousState)
             {
                 this->previousState = state;
-                refSerialTransmitter.sendGraphic(&capBankTextGraphic);
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
             }
             if (capBankBackgroundLine.graphicData.color !=
                 static_cast<uint8_t>(this->previousColor))
             {
                 this->previousColor =
                     static_cast<Tx::GraphicColor>(capBankBackgroundLine.graphicData.color);
-                refSerialTransmitter.sendGraphic(&capBankBackgroundLine);
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
             }
             if (voltageUpdateTimer.execute())
             {
-                refSerialTransmitter.sendGraphic(&capBankVoltageLevel);
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
             }
         }
     }
+
+    RF_END();
 }
 
 void CapBankIndicator::initialize()

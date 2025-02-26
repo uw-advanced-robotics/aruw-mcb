@@ -21,21 +21,25 @@
 
 #ifdef	__DOXYGEN__
 
-/// @ingroup modm_architecture_accessor
-/// @{
-
 /// Define a flash variable
+/// @ingroup modm_architecture_accessor
 #define	FLASH_STORAGE(var)
-/// Define a flash variable with external linkage
-#define	EXTERN_FLASH_STORAGE(var)
-/// Define a flash string
-#define	FLASH_STORAGE_STRING(s)
-/// Declare a flash string with external linkage
-#define	EXTERN_FLASH_STORAGE_STRING(s)
-/// Declare a flash string inline
-#define IFSS(s) ((const char *)(s))
 
-/// @}
+/// Define a flash variable with external linkage
+/// @ingroup modm_architecture_accessor
+#define	EXTERN_FLASH_STORAGE(var)
+
+/// Define a flash string
+/// @ingroup modm_architecture_accessor
+#define	FLASH_STORAGE_STRING(s)
+
+/// Declare a flash string with external linkage
+/// @ingroup modm_architecture_accessor
+#define	EXTERN_FLASH_STORAGE_STRING(s)
+
+/// Declare a flash string inline
+/// @ingroup modm_architecture_accessor
+#define IFSS(s) ((const char *)(s))
 
 #else // !__DOXYGEN__
 
@@ -67,29 +71,34 @@ template<typename T>
 class Flash
 {
 public:
+	modm_always_inline
 	explicit Flash(const T* addr = 0) :
 		address(addr)
 	{
 	}
 
 	template <typename U>
+	modm_always_inline
 	explicit Flash(const Flash<U>& rhs) :
 		address((T*) rhs.address)
 	{
 	}
 
+	modm_always_inline
 	const T
 	operator *() const
 	{
 		return FlashReader<T, sizeof(T)>::read(address);
 	}
 
+	modm_always_inline
 	const T
 	operator [](size_t index) const
 	{
 		return FlashReader<T, sizeof(T)>::read(address + index);
 	}
 
+	modm_always_inline
 	Flash&
 	operator++()
 	{
@@ -97,6 +106,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Flash
 	operator++(int)
 	{
@@ -105,6 +115,7 @@ public:
 		return ret;
 	}
 
+	modm_always_inline
 	Flash&
 	operator--()
 	{
@@ -112,6 +123,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Flash&
 	operator--(int)
 	{
@@ -120,6 +132,7 @@ public:
 		return ret;
 	}
 
+	modm_always_inline
 	Flash&
 	operator+=(size_t rhs)
 	{
@@ -127,6 +140,7 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	Flash&
 	operator-=(size_t rhs)
 	{
@@ -134,12 +148,14 @@ public:
 		return *this;
 	}
 
+	modm_always_inline
 	bool
 	isValid() const
 	{
 		return (address != 0);
 	}
 
+	modm_always_inline
 	const T*
 	getPointer() const
 	{
@@ -158,7 +174,8 @@ private:
 
 /// Convert a normal pointer to a accessor::Flash
 /// @ingroup modm_architecture_accessor
-template<typename T> ::modm::accessor::Flash<T>
+template<typename T>
+modm_always_inline ::modm::accessor::Flash<T>
 asFlash(const T* ptr)
 {
 	return ::modm::accessor::Flash<T>(ptr);

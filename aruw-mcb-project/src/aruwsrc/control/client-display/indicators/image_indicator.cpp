@@ -26,7 +26,6 @@ using namespace aruwsrc::control::client_display::images;
 
 namespace aruwsrc::control::client_display
 {
-
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       image({NUM_LINES_MARCUS, MARCUS_LINES})
@@ -35,17 +34,26 @@ ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
 
 void ImageIndicator::initialize() { index = 0; }
 
-void ImageIndicator::update()
+modm::ResumableResult<void> ImageIndicator::update()
 {
+    auto currentTuple = image.lines[0];
+    int startX = 0;
+    int startY = 0;
+    int endX = 0;
+    int endY = 0;
+
+    RF_BEGIN(1);
+
     if (index > image.size - 1)
     {
+        RF_RETURN();
     }
 
-    auto currentTuple = image.lines[index];
-    int startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
-    int startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
-    int endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;
-    int endY = std::get<3>(currentTuple) + IMAGE_Y_OFFSET;
+    currentTuple = image.lines[index];
+    startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
+    startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
+    endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;
+    endY = std::get<3>(currentTuple) + IMAGE_Y_OFFSET;
 
     uint8_t graphicName[3];
     getUnusedGraphicName(graphicName);
@@ -64,9 +72,10 @@ void ImageIndicator::update()
         endY,
         &imageGraphic.graphicData);
 
-    refSerialTransmitter.sendGraphic(&imageGraphic);
+    RF_CALL(refSerialTransmitter.sendGraphic(&imageGraphic));
 
     index++;
+    RF_END();
 }
 
 }  // namespace aruwsrc::control::client_display

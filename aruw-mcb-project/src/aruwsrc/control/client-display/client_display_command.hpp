@@ -26,7 +26,7 @@
 #include "tap/drivers.hpp"
 
 #include "indicators/hud_indicator.hpp"
-#include "modm/processing/fiber.hpp"
+#include "modm/processing/protothread.hpp"
 
 #include "client_display_subsystem.hpp"
 
@@ -40,7 +40,7 @@ class ClientDisplaySubsystem;
  * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
  * instantiated, this will lead to undefined behavior.
  */
-class ClientDisplayCommand : public tap::control::Command, ::modm::Fiber<2048>
+class ClientDisplayCommand : public tap::control::Command, ::modm::pt::Protothread
 {
 public:
     /**
@@ -68,6 +68,7 @@ public:
 private:
     tap::Drivers &drivers;
     std::vector<HudIndicator *> &hudIndicators;
+    uint8_t index = 0;
 
     bool restarting = true;
 

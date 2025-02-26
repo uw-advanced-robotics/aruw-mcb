@@ -38,21 +38,18 @@ public:
 
     bool isReady() override { return true; };
 
-    void initialize() override
-    {
-        subsystem->setSetpoint(subsystem->getCurrentValue() + static_cast<float>(M_PI) / 2);
-    };
+    void initialize() override { subsystem->setSetpoint(subsystem->getCurrentValue() + M_PI / 2); };
 
-    void execute() override {};
+    void execute() override{};
 
-    void end(bool) override {};
+    void end(bool) override{};
 
     bool isFinished() const override
     {
         return tap::algorithms::compareFloatClose(
             this->subsystem->getSetpoint(),
             this->subsystem->getCurrentValue(),
-            static_cast<float>(M_PI) / 16);
+            M_PI / 16);
     };
 
     const char* getName() const override { return "agitator test command"; }

@@ -60,7 +60,7 @@ UsartHal2::initialize(Parity parity, WordLength length)
 
 	constexpr uint32_t scalar = (baudrate * 16 > SystemClock::Usart2) ? 8 : 16;
 	constexpr uint32_t max = ((scalar == 16) ? (1ul << 16) : (1ul << 15)) - 1ul;
-	constexpr auto result = Prescaler::from_linear(SystemClock::Usart2, baudrate, scalar, max);
+	constexpr auto result = Prescaler::from_range(SystemClock::Usart2, baudrate, 1, max);
 	modm::PeripheralDriver::assertBaudrateInTolerance< result.frequency, baudrate, tolerance >();
 
 	uint32_t cr1 = USART2->CR1;
@@ -157,12 +157,6 @@ UsartHal2::isTransmitRegisterEmpty()
 	return USART2->SR & USART_SR_TXE;
 }
 
-bool
-UsartHal2::isTransmissionComplete()
-{
-	return USART2->SR & USART_SR_TC;
-}
-
 void
 UsartHal2::enableInterruptVector(bool enable, uint32_t priority)
 {
@@ -216,6 +210,7 @@ UsartHal2::acknowledgeInterruptFlags(InterruptFlag_t flags)
 		tmp = USART2->DR;
 		(void) tmp;
 	}
+	(void) flags;	// avoid compiler warning
 }
 
 } // namespace modm::platform

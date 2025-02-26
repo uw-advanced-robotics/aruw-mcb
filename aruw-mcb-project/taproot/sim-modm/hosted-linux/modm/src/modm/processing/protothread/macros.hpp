@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011, 2018, Fabian Greif
- * Copyright (c) 2012, 2014-2015, 2018, 2023, Niklas Hauser
+ * Copyright (c) 2012, 2014-2015, 2018, Niklas Hauser
  * Copyright (c) 2017, Raphael Lehmann
  *
  * This file is part of the modm project.
@@ -11,8 +11,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_PT_MACROS_FIBERS_HPP
-#define MODM_PT_MACROS_FIBERS_HPP
+#ifndef MODM_PT_MACROS_HPP
+#define MODM_PT_MACROS_HPP
 
 #include <modm/architecture/utils.hpp>
 
@@ -25,7 +25,9 @@
  * \warning	Use at start of the run() implementation!
  * \hideinitializer
  */
-#define PT_BEGIN()
+#define PT_BEGIN() \
+	switch (this->ptState) { \
+		case 0:
 
 /**
  * Stop protothread and end it
@@ -34,17 +36,30 @@
  * \hideinitializer
  */
 #define PT_END() \
+		default: ; \
+	} \
+	this->stop(); \
 	return false;
 
 /// Yield protothread till next call to its run().
 /// \hideinitializer
 #define PT_YIELD() \
-	modm::this_fiber::yield()
+    do { \
+		this->ptState = __LINE__; \
+		return true; \
+		case __LINE__: ; \
+	} while (0)
 
 /// Cause protothread to wait **while** given condition is true.
 /// \hideinitializer
 #define PT_WAIT_WHILE(...) \
-	while(__VA_ARGS__) { PT_YIELD(); }
+    do { \
+		this->ptState = __LINE__; \
+		modm_fallthrough; \
+		case __LINE__: \
+			if (__VA_ARGS__) \
+				return true; \
+    } while (0)
 
 /// Cause protothread to wait **until** given condition is true.
 /// \hideinitializer
@@ -53,13 +68,15 @@
 
 /// Cause protothread to wait until given child protothread completes.
 /// \hideinitializer
-#define PT_WAIT_THREAD(...) \
-	PT_WAIT_WHILE((__VA_ARGS__).run())
+#define PT_WAIT_THREAD(...) 	PT_WAIT_UNTIL(!(__VA_ARGS__).run())
 
 /// Restart and spawn given child protothread and wait until it completes.
 /// \hideinitializer
 #define PT_SPAWN(...) \
-	PT_WAIT_THREAD(__VA_ARGS__);
+    do { \
+		(__VA_ARGS__).restart(); \
+		PT_WAIT_THREAD(__VA_ARGS__); \
+    } while (0)
 
 
 /**
@@ -68,7 +85,16 @@
  * \hideinitializer
  */
 #define PT_CALL(...) \
-	__VA_ARGS__
+	({ \
+		this->ptState = __LINE__; \
+		modm_fallthrough; \
+		case __LINE__: \
+			auto rfResult = (__VA_ARGS__); \
+			if (rfResult.getState() > modm::rf::NestingError) { \
+				return true; \
+			} \
+			rfResult.getResult(); \
+	})
 
 /**
  * Reset protothread to start from the beginning
@@ -78,13 +104,19 @@
  * \hideinitializer
  */
 #define PT_RESTART() \
-	return true;
+	do { \
+		this->restart(); \
+		return true; \
+	} while (0)
 
 /// Stop and exit from protothread.
 /// \hideinitializer
 #define PT_EXIT() \
-	return false;
+	do { \
+		this->stop(); \
+		return false; \
+	} while (0)
 
 /// @}
 
-#endif // MODM_PT_MACROS_FIBERS_HPP
+#endif // MODM_PT_MACROS_HPP

@@ -38,7 +38,7 @@ namespace aruwsrc::control::client_display
  * Draws two squares next to the reticle when vision has a target acquired and otherwise hides the
  * squares.
  */
-class VisionHudIndicators : public HudIndicator, protected modm::Resumable<3>
+class VisionHudIndicators : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**
@@ -50,9 +50,9 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
-    void sendInitialGraphics() override final;
+    modm::ResumableResult<void> sendInitialGraphics() override final;
 
-    void update() override final;
+    modm::ResumableResult<void> update() override final;
 
     void initialize() override final;
 
@@ -78,8 +78,6 @@ private:
 
     std::optional<Tx::GraphicColor> prevVisionIndicatorColor = std::nullopt;
     std::optional<Tx::GraphicColor> newVisionIndicatorColor = std::nullopt;
-
-    void updateVisionTargetStatus();
 
     /**
      * Initialize some vision hud indicator (a little square) with some x pixel location

@@ -18,7 +18,6 @@
 
 #include <cmath>
 #include <math.h>
-#include <numbers>
 
 // The circumference of a circle with diameter 1
 #ifndef M_PI
@@ -56,14 +55,14 @@ namespace modm
 	static constexpr float
 	toRadian(float angle)
 	{
-		return (angle * std::numbers::pi_v<float>) / 180.f;
+		return (angle * M_PI) / 180.f;
 	}
 
 	/// @ingroup modm_math_geometry
 	static constexpr float
 	toDegree(float angle)
 	{
-		return (angle * 180.f) / std::numbers::pi_v<float>;
+		return (angle * 180.f) / M_PI;
 	}
 
 	/**

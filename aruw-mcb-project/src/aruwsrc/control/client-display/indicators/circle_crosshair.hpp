@@ -41,7 +41,7 @@ public:
 
     void initialize() override final;
 
-    void sendInitialGraphics() override final;
+    modm::ResumableResult<void> sendInitialGraphics() override final;
 
 private:
     // X position of the circle

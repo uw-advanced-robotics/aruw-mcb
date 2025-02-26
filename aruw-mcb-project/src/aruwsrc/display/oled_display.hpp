@@ -20,13 +20,14 @@
 #ifndef OLED_DISPLAY_HPP_
 #define OLED_DISPLAY_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
 #include "tap/display/sh1106.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
-#include "modm/processing/fiber.hpp"
+#include "modm/processing/protothread.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
 #include "splash_screen.hpp"
@@ -40,7 +41,7 @@ namespace aruwsrc
 {
 namespace display
 {
-class OledDisplay : public ::modm::Fiber<1024>
+class OledDisplay : public ::modm::pt::Protothread
 {
 public:
     explicit OledDisplay(
@@ -64,7 +65,7 @@ public:
      *      Local variables *do not* necessarily behave correctly and this
      *      function should be edited with care.
      */
-    inline void run();
+    mockable bool updateDisplay();
 
     /**
      * Checks button state and updates the view stack responsible for determining what
@@ -93,6 +94,8 @@ private:
     SplashScreen splashScreen;
 
     tap::Drivers *drivers;
+
+    tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 }  // namespace display
 }  // namespace aruwsrc
