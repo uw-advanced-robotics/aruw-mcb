@@ -200,7 +200,9 @@ static void updateIo(Drivers *drivers)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    if (!turretMcbConnected)
+    if (!turretMcbConnected &&
+        drivers->mpu6500.getImuState() !=
+            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
         tap::buzzer::playNote(&drivers->pwm, 1000);
     }
