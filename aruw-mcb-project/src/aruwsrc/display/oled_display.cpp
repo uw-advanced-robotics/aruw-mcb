@@ -39,12 +39,12 @@ OledDisplay::OledDisplay(
     : display(),
       viewStack(&display),
       buttonHandler(
-        drivers
-#ifndef ROBOTS_2024
-        ,
-        buttonConfig
+          drivers
+#ifndef SSH1106_OLED
+          ,
+          buttonConfig
 #endif
-        ),
+          ),
       splashScreen(
           &viewStack,
           drivers,

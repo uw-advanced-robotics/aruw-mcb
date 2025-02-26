@@ -54,7 +54,7 @@ void SplashScreen::draw()
     display.clear();
     display.drawImage(
         modm::glcd::Point(0, 0),
-#ifdef ROBOTS_2024
+#ifdef SSH1106_OLED
         modm::accessor::asFlash(ARUW_IMAGE_128X64)
 #else
         modm::accessor::asFlash(ARUW_IMAGE_128X128)

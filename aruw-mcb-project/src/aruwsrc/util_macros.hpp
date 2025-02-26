@@ -40,7 +40,7 @@
 #if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
     defined(TARGET_STANDARD_CYGNUS) || defined(TARGET_SENTRY_HYDRA) ||   \
     defined(TARGET_HERO_PERSEUS)
-#define ROBOTS_2024
+#define SSH1106_OLED
 #endif
 
 #endif  // UTIL_MACROS_HPP_

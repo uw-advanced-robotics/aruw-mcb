@@ -77,7 +77,7 @@ public:
 private:
     tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
 
-#ifdef ROBOTS_2024
+#ifdef SSH1106_OLED
     tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
@@ -89,7 +89,7 @@ private:
         false>
         display;
 #else
-tap::display::Sh1107<
+    tap::display::Sh1107<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
         Board::DisplayCommand,
@@ -113,15 +113,10 @@ tap::display::Sh1107<
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 
-#ifndef ROBOTS_2024
+#ifndef SSH1106_OLED
 // This is defined here due to compiler issues having it be in the class definition.
-static const tap::display::AnalogConfig buttonConfig = {
-    .ok = 50,
-    .left = 1000,
-    .right = 2000,
-    .up = 3050,
-    .down = 3700
-};
+static const tap::display::AnalogConfig buttonConfig =
+    {.ok = 50, .left = 1000, .right = 2000, .up = 3050, .down = 3700};
 #endif
 }  // namespace display
 }  // namespace aruwsrc
