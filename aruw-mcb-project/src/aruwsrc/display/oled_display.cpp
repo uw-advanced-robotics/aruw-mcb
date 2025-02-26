@@ -38,7 +38,13 @@ OledDisplay::OledDisplay(
     can::capbank::CapacitorBank *capacitorBank)
     : display(),
       viewStack(&display),
-      buttonHandler(drivers),
+      buttonHandler(
+        drivers
+#ifndef ROBOTS_2024
+        ,
+        buttonConfig
+#endif
+        ),
       splashScreen(
           &viewStack,
           drivers,

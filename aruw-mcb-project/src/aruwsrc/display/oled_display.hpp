@@ -24,6 +24,7 @@
 #include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
 #include "tap/display/sh1106.hpp"
+#include "tap/display/sh1107.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
@@ -59,7 +60,7 @@ public:
 
     /**
      * Updates the display in a nonblocking fashion. This function uses protothreads
-     * to call the sh1106's updateNonblocking function at a rate of 2 hz.
+     * to call the display's updateNonblocking function at a rate of 2 hz.
      *
      * @note This function uses protothreads (http://dunkels.com/adam/pt/).
      *      Local variables *do not* necessarily behave correctly and this
@@ -76,6 +77,7 @@ public:
 private:
     tap::display::OledButtonHandler::Button prevButton = tap::display::OledButtonHandler::NONE;
 
+#ifdef ROBOTS_2024
     tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED
         Board::DisplaySpiMaster,
@@ -86,6 +88,19 @@ private:
         64,
         false>
         display;
+#else
+tap::display::Sh1107<
+#ifndef PLATFORM_HOSTED
+        Board::DisplaySpiMaster,
+        Board::DisplayCommand,
+        Board::DisplayReset,
+#endif
+        128,
+        128,
+        true,
+        true>
+        display;
+#endif
 
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
 
@@ -97,6 +112,17 @@ private:
 
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
+
+#ifndef ROBOTS_2024
+// This is defined here due to compiler issues having it be in the class definition.
+static const tap::display::AnalogConfig buttonConfig = {
+    .ok = 50,
+    .left = 1000,
+    .right = 2000,
+    .up = 3050,
+    .down = 3700
+};
+#endif
 }  // namespace display
 }  // namespace aruwsrc
 
