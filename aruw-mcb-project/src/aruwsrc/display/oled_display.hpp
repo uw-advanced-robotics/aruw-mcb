@@ -104,6 +104,11 @@ private:
 
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
 
+#ifndef SSH1106_OLED
+    const tap::display::AnalogConfig buttonConfig =
+        {.ok = 50, .left = 1000, .right = 2000, .up = 3050, .down = 3700};
+#endif
+
     tap::display::OledButtonHandler buttonHandler;
 
     SplashScreen splashScreen;
@@ -113,11 +118,6 @@ private:
     tap::arch::PeriodicMilliTimer displayThreadTimer{100};
 };  // class OledDisplay
 
-#ifndef SSH1106_OLED
-// This is defined here due to compiler issues having it be in the class definition.
-static const tap::display::AnalogConfig buttonConfig =
-    {.ok = 50, .left = 1000, .right = 2000, .up = 3050, .down = 3700};
-#endif
 }  // namespace display
 }  // namespace aruwsrc
 
