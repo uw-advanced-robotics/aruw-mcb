@@ -33,20 +33,11 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
     // Check Who Am I
     RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
 
-    modm::delay_ms(1000);
-
     setODR(ODR_833HZ);
-
-    modm::delay_ms(1000);
-
+    setGyroRange(DPS1000_CONFIG);
     setAccelRange(G4_CONFIG);
 
-    modm::delay_ms(1000);
-
-    setGyroRange(DPS1000_CONFIG);
     readTimeout.restart(timeout);
-
-    inited = true;
 }
 
 template <class I2cMaster>
@@ -74,18 +65,6 @@ void ISM330<I2cMaster>::read()
 
     imuData.temperature = tempValueToCelsius(rxBuff);
 
-    // float rawGyroX = bigEndianInt16ToFloat(rxBuff + 2);
-    // float rawGyroY = bigEndianInt16ToFloat(rxBuff + 4);
-    // float rawGyroZ = bigEndianInt16ToFloat(rxBuff + 6);
-
-    // imuData.gyroRaw = {rawGyroX, rawGyroY, rawGyroZ};
-
-    // float rawAccX = bigEndianInt16ToFloat(rxBuff + 8);
-    // float rawAccY = bigEndianInt16ToFloat(rxBuff + 10);
-    // float rawAccZ = bigEndianInt16ToFloat(rxBuff + 12);
-
-    // imuData.accRaw = {rawAccX, rawAccY, rawAccZ};
-
     float gyroX = gyroValueToDegPerSec(rxBuff + 2);
     float gyroY = gyroValueToDegPerSec(rxBuff + 4);
     float gyroZ = gyroValueToDegPerSec(rxBuff + 6);
@@ -107,7 +86,7 @@ void ISM330<I2cMaster>::read()
 template <class I2cMaster>
 void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
 {
-    RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
+    RF_CALL_BLOCKING(readRegister(CTRL1_XL, 1, &current_reg_XL));
 
     RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & G_CONFIG_BITMASK) | xl_config));
     switch (xl_config)
@@ -125,6 +104,7 @@ void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
             accelScale = 0.488;
             break;
         default:
+            accelScale = 99;
             break;
     }
 }
@@ -132,7 +112,7 @@ void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
 template <class I2cMaster>
 void ISM330<I2cMaster>::setGyroRange(Gyro_Config g_config)
 {
-    RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
+    RF_CALL_BLOCKING(readRegister(CTRL2_G, 1, &current_reg_G));
 
     RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & DPS_CONFIG_BITMASK) | g_config));
     switch (g_config)
@@ -157,8 +137,8 @@ void ISM330<I2cMaster>::setGyroRange(Gyro_Config g_config)
 template <class I2cMaster>
 void ISM330<I2cMaster>::setODR(ODR odr)
 {
-    RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
-    RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
+    RF_CALL_BLOCKING(readRegister(CTRL1_XL, 1, &current_reg_XL));
+    RF_CALL_BLOCKING(readRegister(CTRL2_G, 1, &current_reg_G));
 
     RF_CALL_BLOCKING(writeRegister(CTRL1_XL, (current_reg_XL & ODR_BITMASK) | odr));
     RF_CALL_BLOCKING(writeRegister(CTRL2_G, (current_reg_G & ODR_BITMASK) | odr));
