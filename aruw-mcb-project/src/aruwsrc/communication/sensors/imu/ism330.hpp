@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -36,138 +36,16 @@ template <class I2cMaster>
 class ISM330 : public modm::I2cDevice<I2cMaster>
 {
 public:
-    ISM330() : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS), updateTimeout(timeout) {}
+    ISM330();
 
-    void init()
-    {
-        RF_CALL_BLOCKING(writeRegister(CTRL1_XL, ODR_833HZ | G8_CONFIG));
-        RF_CALL_BLOCKING(writeRegister(CTRL2_G, ODR_833HZ | DPS250_CONFIG));
+    void init();
 
-        // Check Who Am I
-        RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
+    void read();
 
-        updateODR(ODR_833HZ);
-        setAccelRange(G8_CONFIG);
-        setGyroRange(DPS250_CONFIG);
-        updateTimeout.restart(timeout);
-    }
+    void setAccelRange(XL_Config xl_config);
+    void setGyroRange(Gyro_Config g_config);
 
-    int count = 0;
-    int currentTime;
-    void readAndProcessData()
-    {
-        currentTime = tap::arch::clock::getTimeMicroseconds();
-        if (!updateTimeout.execute())
-        {
-            return;
-        }
-        count++;
-
-        updateTimeout.restart(timeout);
-
-        pinged = RF_CALL_BLOCKING(this->ping());
-
-        // Read temp
-        uint8_t rxBuff[15];
-        readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
-        if (!readWorking)
-        {
-            return;
-        }
-        imuData.temperature = tempValueToCelsius(rxBuff);
-
-        imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
-        imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff + 4);
-        imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff + 6);
-
-        imuData.accRaw[ImuData::X] = accelValueToG(rxBuff + 8);
-        imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff + 10);
-        imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff + 12);
-    }
-
-    void setAccelRange(XL_Config xl_config)
-    {
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
-
-        RF_CALL_BLOCKING(writeRegister(
-            CTRL1_XL,
-            (current_reg_XL & (uint8_t)G_CONFIG_BITMASK) | (uint8_t)xl_config));
-        switch (xl_config)
-        {
-            case G2_CONFIG:
-                accelScale = 0.061;
-                break;
-            case G4_CONFIG:
-                accelScale = 0.122;
-                break;
-            case G8_CONFIG:
-                accelScale = 0.244;
-                break;
-            case G16_CONFIG:
-                accelScale = 0.488;
-                break;
-            default:
-                break;
-        }
-    }
-
-    void setGyroRange(Gyro_Config g_config)
-    {
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
-
-        RF_CALL_BLOCKING(writeRegister(
-            CTRL2_G,
-            (current_reg_G & (uint8_t)DPS_CONFIG_BITMASK) | (uint8_t)g_config));
-        switch (g_config)
-        {
-            case DPS250_CONFIG:
-                gyroScale = 8.75;
-                break;
-            case DPS500_CONFIG:
-                gyroScale = 17.50;
-                break;
-            case DPS1000_CONFIG:
-                gyroScale = 35;
-                break;
-            case DPS2000_CONFIG:
-                gyroScale = 70;
-                break;
-            default:
-                break;
-        }
-    }
-
-    void updateODR(ODR odr)
-    {
-        RF_CALL_BLOCKING(readRegister(CTRL1_XL, READ_LENGTH, &current_reg_XL));
-        RF_CALL_BLOCKING(readRegister(CTRL2_G, READ_LENGTH, &current_reg_G));
-
-        RF_CALL_BLOCKING(
-            writeRegister(CTRL1_XL, (current_reg_XL & (uint8_t)ODR_BITMASK) | (uint8_t)odr));
-        RF_CALL_BLOCKING(
-            writeRegister(CTRL2_G, (current_reg_G & (uint8_t)ODR_BITMASK) | (uint8_t)odr));
-
-        switch (odr)
-        {
-            case ODR_416HZ:
-                timeout = 1000000 / 416;
-                break;
-            case ODR_833HZ:
-                timeout = 1000000 / 833;
-                break;
-            case ODR_1660HZ:
-                timeout = 1000000 / 1660;
-                break;
-            case ODR_3330HZ:
-                timeout = 1000000 / 3330;
-                break;
-            case ODR_6660HZ:
-                timeout = 1000000 / 6660;
-                break;
-            default:
-                break;
-        }
-    }
+    void setODR(ODR odr);
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -193,7 +71,6 @@ private:
     };
 
     bool pinged;
-    bool readWorking;
 
     uint8_t rxConfig[10];
 
@@ -238,5 +115,7 @@ private:
     }
 };
 }  // namespace aruwsrc::communication::sensors::imu
+
+#include "ism330_impl.hpp"
 
 #endif  // ISM330_HPP_
