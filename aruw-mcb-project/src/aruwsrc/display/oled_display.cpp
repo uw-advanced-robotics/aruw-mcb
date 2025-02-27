@@ -38,7 +38,13 @@ OledDisplay::OledDisplay(
     can::capbank::CapacitorBank *capacitorBank)
     : display(),
       viewStack(&display),
-      buttonHandler(drivers),
+      buttonHandler(
+          drivers
+#ifndef SSH1106_OLED
+          ,
+          buttonConfig
+#endif
+          ),
       splashScreen(
           &viewStack,
           drivers,
