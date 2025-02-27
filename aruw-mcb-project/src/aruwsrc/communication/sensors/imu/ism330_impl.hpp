@@ -17,12 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace aruwsrc::communication::sensors::imu
+#ifndef ISM330_IMPL_HPP_
+#define ISM330_IMPL_HPP_
+
+namespace aruwsrc::communication::sensors::imu::ism330
 {
 template <class I2cMaster>
 ISM330<I2cMaster>::ISM330()
     : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
-      AbstractIMU(nullptr),
+      AbstractIMU(),
       modm::pt::Protothread()
 {
 }
@@ -52,7 +55,7 @@ bool ISM330<I2cMaster>::read()
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
-        pinged = RF_CALL_BLOCKING(this->ping());
+        pinged = PT_CALL(this->ping());
 
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
         imuData.temperature = tempValueToCelsius(rxBuff);
@@ -72,14 +75,12 @@ bool ISM330<I2cMaster>::read()
         imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
-
-        readTimeout.restart(timeout);
     }
     PT_END();
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
+void ISM330<I2cMaster>::setAccelRange(AccelerometerRangeConfig xl_config)
 {
     RF_CALL_BLOCKING(readRegister(CTRL1_XL, 1, &current_reg_XL));
 
@@ -99,13 +100,12 @@ void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
             accelScale = 0.488;
             break;
         default:
-            accelScale = 99;
             break;
     }
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::setGyroRange(Gyro_Config g_config)
+void ISM330<I2cMaster>::setGyroRange(GyroscopeRangeConfig g_config)
 {
     RF_CALL_BLOCKING(readRegister(CTRL2_G, 1, &current_reg_G));
 
@@ -130,7 +130,7 @@ void ISM330<I2cMaster>::setGyroRange(Gyro_Config g_config)
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::setODR(ODR odr)
+void ISM330<I2cMaster>::setODR(OutputDataRate odr)
 {
     RF_CALL_BLOCKING(readRegister(CTRL1_XL, 1, &current_reg_XL));
     RF_CALL_BLOCKING(readRegister(CTRL2_G, 1, &current_reg_G));
@@ -158,5 +158,9 @@ void ISM330<I2cMaster>::setODR(ODR odr)
         default:
             break;
     }
+
+    readTimeout.restart(timeout);
 }
-}  // namespace aruwsrc::communication::sensors::imu
+}  // namespace aruwsrc::communication::sensors::imu::ism330
+
+#endif  // ISM330_IMPL_HPP_

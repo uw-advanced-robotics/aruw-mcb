@@ -123,18 +123,12 @@ public:
 private:
     Drivers *drivers;
 
-    static constexpr float ACCELERATION_GRAVITY = 9.80665f;
-
     /**
      * Use to convert the raw acceleration into more conventional degrees / second^2
      */
     static constexpr float ACCELERATION_SENSITIVITY = 4096.0f;
 
     inline float getAccelerationSensitivity() override { return ACCELERATION_SENSITIVITY; }
-    /**
-     * The time to read the registers in nonblocking mode, in microseconds.
-     */
-    static constexpr int NONBLOCKING_TIME_TO_READ_REG = 450;
 
     /**
      * Time in ms to wait for the IMU heat to stabalize upon initialization.
@@ -151,8 +145,6 @@ private:
      */
     static constexpr uint8_t MPU6500_READ_BIT = 0x80;
 
-    int delayBtwnCalcAndReadReg = 2000 - NONBLOCKING_TIME_TO_READ_REG;
-
     uint8_t tx = 0;  ///< Byte used for reading data in the read protothread
     uint8_t rx = 0;  ///< Byte used for reading data in the read protothread
 
@@ -160,8 +152,6 @@ private:
 
     uint8_t txBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
     uint8_t rxBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
-
-    uint32_t time1, time2, time3;
 
     // Functions for interacting with hardware directly.
 

@@ -25,7 +25,7 @@
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
 
-namespace aruwsrc::communication::sensors::imu
+namespace aruwsrc::communication::sensors::imu::ism330
 {
 enum Register : uint8_t
 {
@@ -55,7 +55,7 @@ enum Register : uint8_t
     OUTZ_H_XL = 0x2D
 };
 
-enum XL_Config : uint8_t
+enum AccelerometerRangeConfig : uint8_t
 {
     G2_CONFIG = (0b00 << 2) | 0x0,
     G16_CONFIG = (0b01 << 2) | 0x0,
@@ -64,7 +64,7 @@ enum XL_Config : uint8_t
     G_CONFIG_BITMASK = 0b11110011
 };
 
-enum Gyro_Config : uint8_t
+enum GyroscopeRangeConfig : uint8_t
 {  // Also capable of 125 and 4000 dps
     DPS250_CONFIG = (0b00 << 2) | 0x0,
     DPS500_CONFIG = (0b01 << 2) | 0x0,
@@ -73,7 +73,7 @@ enum Gyro_Config : uint8_t
     DPS_CONFIG_BITMASK = 0b11110011
 };
 
-enum ODR : uint8_t
+enum OutputDataRate : uint8_t
 {  // Only includes high power
     ODR_416HZ = (0b0110 << 4) | 0x0,
     ODR_833HZ = (0b0111 << 4) | 0x0,
@@ -88,6 +88,6 @@ enum ODR : uint8_t
 static constexpr float TEMPERATURE_OFFSET = 25.0f;
 static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;
 
-}  // namespace aruwsrc::communication::sensors::imu
+}  // namespace aruwsrc::communication::sensors::imu::ism330
 
 #endif  // ISM330_DATA_HPP_

@@ -21,7 +21,6 @@
 #define ISM330_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "modm/architecture/interface/i2c_device.hpp"
@@ -32,12 +31,18 @@
 
 #include "ism330_data.hpp"
 
-namespace aruwsrc::communication::sensors::imu
+namespace aruwsrc::communication::sensors::imu::ism330
 {
+using namespace tap::communication::sensors::imu;
+
+/**
+ * I2C driver for the ISM330DHCX IMU
+ *
+ * For registers and datasheet, go to:
+ * https://www.st.com/en/mems-and-sensors/ism330dhcx.html
+ */
 template <class I2cMaster>
-class ISM330 : public modm::I2cDevice<I2cMaster>,
-               public tap::communication::sensors::imu::AbstractIMU,
-               public modm::pt::Protothread
+class ISM330 : public modm::I2cDevice<I2cMaster>, public AbstractIMU, public modm::pt::Protothread
 {
 public:
     ISM330();
@@ -46,13 +51,12 @@ public:
 
     bool read();
 
-    void setAccelRange(XL_Config xl_config);
-    void setGyroRange(Gyro_Config g_config);
-
-    void setODR(ODR odr);
+    void setAccelRange(AccelerometerRangeConfig xl_config);
+    void setGyroRange(GyroscopeRangeConfig g_config);
+    void setODR(OutputDataRate odr);
 
     virtual inline const char *getName() const { return "ISM330DHCX"; }
-    virtual inline float getAccelerationSensitivity() { return 9.8f; }
+    virtual inline float getAccelerationSensitivity() { return GRAVITY_MPS2; }
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -120,7 +124,7 @@ private:
         return (raw / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
     }
 };
-}  // namespace aruwsrc::communication::sensors::imu
+}  // namespace aruwsrc::communication::sensors::imu::ism330
 
 #include "ism330_impl.hpp"
 

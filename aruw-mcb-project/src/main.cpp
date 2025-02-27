@@ -84,11 +84,6 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
-float yaw, pitch, roll;
-float mainYaw, mainPitch, mainRoll;
-
-bool calibrate = false;
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -139,19 +134,6 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
-
-#if defined(TARGET_BLANK)
-            PROFILE(drivers->profiler, drivers->imu.periodicIMUUpdate, ());
-            yaw = drivers->imu.getYaw() > 180 ? drivers->imu.getYaw() - 360 : drivers->imu.getYaw();
-            mainYaw = drivers->mpu6500.getYaw() > 180 ? drivers->mpu6500.getYaw() - 360 : drivers->mpu6500.getYaw();
-
-            if(calibrate){
-                drivers->mpu6500.requestCalibration();
-                drivers->imu.requestCalibration();
-                calibrate = false;
-            }
-
-#endif
         }
         modm::delay_us(10);
     }
@@ -191,19 +173,6 @@ static void initializeIo(Drivers *drivers)
     drivers->chassisMcbLite.initialize();
     drivers->turretMajorMcbLite.initialize();
 #endif
-
-#if defined(TARGET_BLANK)
-Board::I2CMaster::initialize<Board::SystemClock, 100'000>();
-Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-    Board::I2CMaster::reset();
-    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-
-    drivers->imu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->mpu6500.setCalibrationSamples(4000);
-    drivers->imu.setCalibrationSamples(4000);
-#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -224,10 +193,6 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
-#endif
-
-#ifdef TARGET_BLANK
-    drivers->imu.read();
 #endif
 }
 
