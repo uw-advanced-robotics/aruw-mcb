@@ -97,6 +97,7 @@ void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
             accelScale = 0.061;
             break;
         case G4_CONFIG:
+            accelScale = 0.122;
             break;
         case G8_CONFIG:
             accelScale = 0.244;
