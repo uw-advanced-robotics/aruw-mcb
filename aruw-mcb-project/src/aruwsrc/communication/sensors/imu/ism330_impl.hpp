@@ -41,8 +41,6 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
     setODR(ODR_833HZ);
     setGyroRange(DPS1000_CONFIG);
     setAccelRange(G4_CONFIG);
-
-    readTimeout.restart(timeout);
 }
 
 template <class I2cMaster>
