@@ -43,50 +43,9 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::read()
+bool ISM330<I2cMaster>::read()
 {
-    count++;
-
-    if (!readTimeout.execute())
-    {
-        return;
-    }
-
-    succcess++;
-
-    readTimeout.restart(timeout);
-
-    pinged = RF_CALL_BLOCKING(this->ping());
-
-    bool readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
-    if (!readWorking)
-    {
-        return;
-    }
-
-    imuData.temperature = tempValueToCelsius(rxBuff);
-
-    float gyroX = gyroValueToDegPerSec(rxBuff + 2);
-    float gyroY = gyroValueToDegPerSec(rxBuff + 4);
-    float gyroZ = gyroValueToDegPerSec(rxBuff + 6);
-
-    imuData.gyroRaw = {gyroX, gyroY, gyroZ};
-
-    float accX = accelValueToMeterPerSec(rxBuff + 8);
-    float accY = accelValueToMeterPerSec(rxBuff + 10);
-    float accZ = accelValueToMeterPerSec(rxBuff + 12);
-
-    imuData.accRaw = {accX, accY, accZ};
-
-    imuData.gyroDegPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
-    imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
-
-    prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
-}
-
-template <class I2cMaster>
-bool ISM330<I2cMaster>::readProto()
-{
+    // Defined here as protothreads cannot have local variables
     float gyroX, gyroY, gyroZ, accX, accY, accZ;
 
     PT_BEGIN();

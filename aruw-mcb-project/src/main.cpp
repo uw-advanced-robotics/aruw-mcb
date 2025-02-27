@@ -227,7 +227,7 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #ifdef TARGET_BLANK
-    drivers->imu.readProto();
+    drivers->imu.read();
 #endif
 }
 

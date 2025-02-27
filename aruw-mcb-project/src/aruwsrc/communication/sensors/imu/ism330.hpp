@@ -44,9 +44,7 @@ public:
 
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
-    void read();
-
-    bool readProto();
+    bool read();
 
     void setAccelRange(XL_Config xl_config);
     void setGyroRange(Gyro_Config g_config);
@@ -90,8 +88,8 @@ private:
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
 
-    float gyroScale = 70;
-    float accelScale{0.488};
+    float gyroScale;
+    float accelScale;
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
@@ -121,10 +119,6 @@ private:
         float raw = bigEndianInt16ToFloat(buff);
         return (raw / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
     }
-
-    bool inited = false;
-
-    int count = 0, succcess = 0;
 };
 }  // namespace aruwsrc::communication::sensors::imu
 
