@@ -118,6 +118,10 @@ private:
         float raw = bigEndianInt16ToFloat(buff);
         return (raw / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
     }
+
+    bool inited = false;
+
+    int count = 0, succcess = 0;
 };
 }  // namespace aruwsrc::communication::sensors::imu
 

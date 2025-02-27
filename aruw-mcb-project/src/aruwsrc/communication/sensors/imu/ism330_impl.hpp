@@ -33,19 +33,27 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
     // Check Who Am I
     RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
 
+    modm::delay_ms(1000);
+
     setODR(ODR_833HZ);
     setAccelRange(G4_CONFIG);
     setGyroRange(DPS1000_CONFIG);
     readTimeout.restart(timeout);
+
+    inited = true;
 }
 
 template <class I2cMaster>
 void ISM330<I2cMaster>::read()
 {
+    count++;
+
     if (!readTimeout.execute())
     {
         return;
     }
+
+    succcess++;
 
     readTimeout.restart(timeout);
 
