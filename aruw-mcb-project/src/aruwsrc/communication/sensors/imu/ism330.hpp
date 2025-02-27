@@ -27,6 +27,7 @@
 #include "modm/architecture/interface/i2c_device.hpp"
 #include "modm/architecture/interface/register.hpp"
 #include "modm/math/utils.hpp"
+#include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "ism330_data.hpp"
@@ -35,7 +36,8 @@ namespace aruwsrc::communication::sensors::imu
 {
 template <class I2cMaster>
 class ISM330 : public modm::I2cDevice<I2cMaster>,
-               public tap::communication::sensors::imu::AbstractIMU
+               public tap::communication::sensors::imu::AbstractIMU,
+               public modm::pt::Protothread
 {
 public:
     ISM330();
@@ -43,6 +45,8 @@ public:
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
     void read();
+
+    bool readProto();
 
     void setAccelRange(XL_Config xl_config);
     void setGyroRange(Gyro_Config g_config);
@@ -55,18 +59,19 @@ public:
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
-        uint8_t txBuff = reg;
+        txBuff[0] = reg;
 
         RF_BEGIN();
 
-        RF_WAIT_WHILE(!this->transaction.configureWriteRead(&txBuff, 1, rxBuffer, length));
+        RF_WAIT_WHILE(!this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length));
 
         RF_END_RETURN_CALL(this->runTransaction());
     };
 
     modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
     {
-        uint8_t txBuff[2] = {reg, data};
+        txBuff[0] = reg;
+        txBuff[1] = data;
 
         RF_BEGIN();
 
@@ -77,7 +82,8 @@ private:
 
     bool pinged;
 
-    uint8_t rxConfig[10];
+    uint8_t rxBuff[15];
+    uint8_t txBuff[2];
 
     int timeout = 1200;
 

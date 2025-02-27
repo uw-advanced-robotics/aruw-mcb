@@ -20,8 +20,10 @@
 namespace aruwsrc::communication::sensors::imu
 {
 template <class I2cMaster>
-ISM330<I2cMaster>::ISM330() : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
-                              AbstractIMU(nullptr)
+ISM330<I2cMaster>::ISM330()
+    : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
+      AbstractIMU(nullptr),
+      modm::pt::Protothread()
 {
 }
 
@@ -31,7 +33,7 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 
     // Check Who Am I
-    RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
+    RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxBuff));
 
     setODR(ODR_833HZ);
     setGyroRange(DPS1000_CONFIG);
@@ -56,7 +58,6 @@ void ISM330<I2cMaster>::read()
 
     pinged = RF_CALL_BLOCKING(this->ping());
 
-    uint8_t rxBuff[15];
     bool readWorking = RF_CALL_BLOCKING(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
     if (!readWorking)
     {
@@ -81,6 +82,41 @@ void ISM330<I2cMaster>::read()
     imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
 
     prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+}
+
+template <class I2cMaster>
+bool ISM330<I2cMaster>::readProto()
+{
+    float gyroX, gyroY, gyroZ, accX, accY, accZ;
+
+    PT_BEGIN();
+    while (true)
+    {
+        PT_WAIT_UNTIL(readTimeout.execute());
+        pinged = RF_CALL_BLOCKING(this->ping());
+
+        PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
+        imuData.temperature = tempValueToCelsius(rxBuff);
+
+        gyroX = gyroValueToDegPerSec(rxBuff + 2);
+        gyroY = gyroValueToDegPerSec(rxBuff + 4);
+        gyroZ = gyroValueToDegPerSec(rxBuff + 6);
+
+        accX = accelValueToMeterPerSec(rxBuff + 8);
+        accY = accelValueToMeterPerSec(rxBuff + 10);
+        accZ = accelValueToMeterPerSec(rxBuff + 12);
+
+        imuData.gyroRaw = {gyroX, gyroY, gyroZ};
+        imuData.accRaw = {accX, accY, accZ};
+
+        imuData.gyroDegPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
+        imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
+
+        prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+
+        readTimeout.restart(timeout);
+    }
+    PT_END();
 }
 
 template <class I2cMaster>
