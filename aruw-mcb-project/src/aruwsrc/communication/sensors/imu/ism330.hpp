@@ -34,7 +34,8 @@
 namespace aruwsrc::communication::sensors::imu
 {
 template <class I2cMaster>
-class ISM330 : public modm::I2cDevice<I2cMaster>, public tap::communication::sensors::imu::AbstractIMU
+class ISM330 : public modm::I2cDevice<I2cMaster>,
+               public tap::communication::sensors::imu::AbstractIMU
 {
 public:
     ISM330();
@@ -49,10 +50,7 @@ public:
     void setODR(ODR odr);
 
     virtual inline const char *getName() const { return "ISM330DHCX"; }
-    virtual inline float getAccelerationSensitivity() {
-        return 9.8f;
-    }
-
+    virtual inline float getAccelerationSensitivity() { return 9.8f; }
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -88,7 +86,6 @@ private:
 
     float gyroScale = 70;
     float accelScale = 0.488;
-
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
