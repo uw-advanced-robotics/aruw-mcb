@@ -21,31 +21,33 @@ namespace aruwsrc::communication::sensors::imu
 {
 template <class I2cMaster>
 ISM330<I2cMaster>::ISM330() : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
-                              updateTimeout(timeout)
+                              AbstractIMU(nullptr)
 {
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::init()
+void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
+    AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
+
     // Check Who Am I
     RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxConfig));
 
     setODR(ODR_833HZ);
     setAccelRange(G4_CONFIG);
     setGyroRange(DPS1000_CONFIG);
-    updateTimeout.restart(timeout);
+    readTimeout.restart(timeout);
 }
 
 template <class I2cMaster>
 void ISM330<I2cMaster>::read()
 {
-    if (!updateTimeout.execute())
+    if (!readTimeout.execute())
     {
         return;
     }
 
-    updateTimeout.restart(timeout);
+    readTimeout.restart(timeout);
 
     pinged = RF_CALL_BLOCKING(this->ping());
 
@@ -58,13 +60,29 @@ void ISM330<I2cMaster>::read()
 
     imuData.temperature = tempValueToCelsius(rxBuff);
 
-    imuData.gyroRaw[ImuData::X] = gyroValueToDegPerSec(rxBuff + 2);
-    imuData.gyroRaw[ImuData::Y] = gyroValueToDegPerSec(rxBuff + 4);
-    imuData.gyroRaw[ImuData::Z] = gyroValueToDegPerSec(rxBuff + 6);
+    float rawGyroX = bigEndianInt16ToFloat(rxBuff + 2);
+    float rawGyroY = bigEndianInt16ToFloat(rxBuff + 4);
+    float rawGyroZ = bigEndianInt16ToFloat(rxBuff + 6);
 
-    imuData.accRaw[ImuData::X] = accelValueToG(rxBuff + 8);
-    imuData.accRaw[ImuData::Y] = accelValueToG(rxBuff + 10);
-    imuData.accRaw[ImuData::Z] = accelValueToG(rxBuff + 12);
+    imuData.gyroRaw = {rawGyroX, rawGyroY, rawGyroZ};
+
+    float rawAccX = bigEndianInt16ToFloat(rxBuff + 8);
+    float rawAccY = bigEndianInt16ToFloat(rxBuff + 10);
+    float rawAccZ = bigEndianInt16ToFloat(rxBuff + 12);
+
+    imuData.accRaw = {rawAccX, rawAccY, rawAccZ};
+
+    float gyroX = gyroValueToDegPerSec(rxBuff + 2);
+    float gyroY = gyroValueToDegPerSec(rxBuff + 4);
+    float gyroZ = gyroValueToDegPerSec(rxBuff + 6);
+
+    imuData.gyroDegPerSec = {gyroX, gyroY, gyroZ};
+
+    float accX = accelValueToMeterPerSec(rxBuff + 8);
+    float accY = accelValueToMeterPerSec(rxBuff + 10);
+    float accZ = accelValueToMeterPerSec(rxBuff + 12);
+
+    imuData.accG = {accX, accY, accZ};
 }
 
 template <class I2cMaster>
@@ -79,7 +97,6 @@ void ISM330<I2cMaster>::setAccelRange(XL_Config xl_config)
             accelScale = 0.061;
             break;
         case G4_CONFIG:
-            accelScale = 0.122;
             break;
         case G8_CONFIG:
             accelScale = 0.244;
@@ -147,34 +164,4 @@ void ISM330<I2cMaster>::setODR(ODR odr)
             break;
     }
 }
-
-// template <class I2cMaster>
-// modm::ResumableResult<bool> ISM330<I2cMaster>::readRegister(
-//     uint8_t reg,
-//     int length,
-//     uint8_t *rxBuffer)
-// {
-//     uint8_t txBuff = reg;
-
-//     RF_BEGIN();
-
-//     RF_WAIT_WHILE(!this->transaction.configureWriteRead(&txBuff, 1, rxBuffer, length));
-
-//     RF_END_RETURN_CALL(this->runTransaction());
-// };
-
-// template <class I2cMaster>
-// modm::ResumableResult<bool> ISM330<I2cMaster>::writeRegister(
-//     uint8_t reg,
-//     uint8_t data)
-// {
-//     uint8_t txBuff[2] = {reg, data};
-
-//     RF_BEGIN();
-
-//     RF_WAIT_WHILE(!this->transaction.configureWrite(txBuff, 2));
-
-//     RF_END_RETURN_CALL(this->runTransaction());
-// };
-
 }  // namespace aruwsrc::communication::sensors::imu

@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "modm/architecture/interface/i2c_device.hpp"
 #include "modm/architecture/interface/register.hpp"
@@ -33,12 +34,12 @@
 namespace aruwsrc::communication::sensors::imu
 {
 template <class I2cMaster>
-class ISM330 : public modm::I2cDevice<I2cMaster>
+class ISM330 : public modm::I2cDevice<I2cMaster>, public tap::communication::sensors::imu::AbstractIMU
 {
 public:
     ISM330();
 
-    void init();
+    virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
     void read();
 
@@ -46,6 +47,12 @@ public:
     void setGyroRange(Gyro_Config g_config);
 
     void setODR(ODR odr);
+
+    virtual inline const char *getName() const { return "ISM330DHCX"; }
+    virtual inline float getAccelerationSensitivity() {
+        return 9.8f;
+    }
+
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
@@ -79,9 +86,9 @@ private:
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
 
-    tap::arch::PeriodicMicroTimer updateTimeout;
+    float gyroScale = 70;
+    float accelScale = 0.488;
 
-    ImuData imuData;
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
@@ -94,14 +101,12 @@ private:
         return static_cast<float>(static_cast<int16_t>((*(buff)) | (*(buff + 1) << 8)));
     }
 
-    float accelScale = 0.488;
-    float accelValueToG(const uint8_t *buff)
+    float accelValueToMeterPerSec(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
-        return raw * accelScale / 1000.0f;
+        return raw * accelScale / 1000.0f * getAccelerationSensitivity();
     }
 
-    float gyroScale = 70;
     float gyroValueToDegPerSec(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
