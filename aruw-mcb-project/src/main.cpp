@@ -173,6 +173,16 @@ static void initializeIo(Drivers *drivers)
     drivers->chassisMcbLite.initialize();
     drivers->turretMajorMcbLite.initialize();
 #endif
+
+#if defined(TARGET_BLANK)
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 100'000>();
+    Board::I2CMaster::reset();
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    drivers->imu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -193,6 +203,10 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
+#endif
+
+#ifdef TARGET_BLANK
+    drivers->imu.read();
 #endif
 }
 
