@@ -115,8 +115,6 @@ public:
      */
     static constexpr float LSB_D_PER_S_TO_D_PER_S = 16.384f;
 
-    inline void setCalibrationSamples(float samples) { MPU6500_OFFSET_SAMPLES = samples; }
-
     inline void setTargetTemperature(float temperatureC)
     {
         imuHeater.setDesiredTemperature(temperatureC);
@@ -133,12 +131,6 @@ private:
     static constexpr float ACCELERATION_SENSITIVITY = 4096.0f;
 
     inline float getAccelerationSensitivity() override { return ACCELERATION_SENSITIVITY; }
-
-    /**
-     * The number of samples we take while calibrating in order to determine the mpu offsets.
-     */
-    float MPU6500_OFFSET_SAMPLES = 1000;
-
     /**
      * The time to read the registers in nonblocking mode, in microseconds.
      */
@@ -168,6 +160,8 @@ private:
 
     uint8_t txBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
     uint8_t rxBuff[ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE] = {0};
+
+    uint32_t time1, time2, time3;
 
     // Functions for interacting with hardware directly.
 

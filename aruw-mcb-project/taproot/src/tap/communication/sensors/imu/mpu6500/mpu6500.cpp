@@ -115,8 +115,6 @@ void Mpu6500::periodicIMUUpdate()
 {
     AbstractIMU::periodicIMUUpdate();
 
-    readTimeout.restart(delayBtwnCalcAndReadReg);
-
     imuHeater.runTemperatureController(getTemp());
 }
 bool Mpu6500::read()
@@ -126,14 +124,19 @@ bool Mpu6500::read()
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
+        time1 = tap::arch::clock::getTimeMicroseconds();
 
         mpuNssLow();
         tx = MPU6500_ACCEL_XOUT_H | MPU6500_READ_BIT;
         rx = 0;
         txBuff[0] = tx;
         PT_CALL(Board::ImuSpiMaster::transfer(&tx, &rx, 1));
+        time2 = tap::arch::clock::getTimeMicroseconds();
+        
         PT_CALL(Board::ImuSpiMaster::transfer(txBuff, rxBuff, ACC_GYRO_TEMPERATURE_BUFF_RX_SIZE));
         mpuNssHigh();
+
+        time3 = tap::arch::clock::getTimeMicroseconds();
 
         float accRawX = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
         float accRawY = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 2);
@@ -153,6 +156,8 @@ bool Mpu6500::read()
         imuData.temperature = parseTemp(static_cast<float>(rxBuff[6] << 8 | rxBuff[7]));
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+
+        readTimeout.restart(delayBtwnCalcAndReadReg);
     }
     PT_END();
 #else
