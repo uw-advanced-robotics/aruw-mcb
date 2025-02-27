@@ -41,7 +41,6 @@ public:
     MOCK_METHOD(void, init, (float, float, float), (override));
     MOCK_METHOD(void, periodicIMUUpdate, (), (override));
     MOCK_METHOD(bool, read, (), (override));
-    MOCK_METHOD(ImuState, getImuState, (), (const override));
     MOCK_METHOD(float, getAx, (), (override));
     MOCK_METHOD(float, getAy, (), (override));
     MOCK_METHOD(float, getAz, (), (override));
@@ -52,7 +51,6 @@ public:
     MOCK_METHOD(float, getYaw, (), (override));
     MOCK_METHOD(float, getPitch, (), (override));
     MOCK_METHOD(float, getRoll, (), (override));
-    MOCK_METHOD(float, getTiltAngle, (), (override));
 };  // Mpu6500Mock
 }  // namespace mock
 }  // namespace tap
