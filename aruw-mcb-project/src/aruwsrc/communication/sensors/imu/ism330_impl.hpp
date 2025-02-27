@@ -36,7 +36,13 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
     modm::delay_ms(1000);
 
     setODR(ODR_833HZ);
+
+    modm::delay_ms(1000);
+
     setAccelRange(G4_CONFIG);
+
+    modm::delay_ms(1000);
+
     setGyroRange(DPS1000_CONFIG);
     readTimeout.restart(timeout);
 
@@ -68,29 +74,34 @@ void ISM330<I2cMaster>::read()
 
     imuData.temperature = tempValueToCelsius(rxBuff);
 
-    float rawGyroX = bigEndianInt16ToFloat(rxBuff + 2);
-    float rawGyroY = bigEndianInt16ToFloat(rxBuff + 4);
-    float rawGyroZ = bigEndianInt16ToFloat(rxBuff + 6);
+    // float rawGyroX = bigEndianInt16ToFloat(rxBuff + 2);
+    // float rawGyroY = bigEndianInt16ToFloat(rxBuff + 4);
+    // float rawGyroZ = bigEndianInt16ToFloat(rxBuff + 6);
 
-    imuData.gyroRaw = {rawGyroX, rawGyroY, rawGyroZ};
+    // imuData.gyroRaw = {rawGyroX, rawGyroY, rawGyroZ};
 
-    float rawAccX = bigEndianInt16ToFloat(rxBuff + 8);
-    float rawAccY = bigEndianInt16ToFloat(rxBuff + 10);
-    float rawAccZ = bigEndianInt16ToFloat(rxBuff + 12);
+    // float rawAccX = bigEndianInt16ToFloat(rxBuff + 8);
+    // float rawAccY = bigEndianInt16ToFloat(rxBuff + 10);
+    // float rawAccZ = bigEndianInt16ToFloat(rxBuff + 12);
 
-    imuData.accRaw = {rawAccX, rawAccY, rawAccZ};
+    // imuData.accRaw = {rawAccX, rawAccY, rawAccZ};
 
     float gyroX = gyroValueToDegPerSec(rxBuff + 2);
     float gyroY = gyroValueToDegPerSec(rxBuff + 4);
     float gyroZ = gyroValueToDegPerSec(rxBuff + 6);
 
-    imuData.gyroDegPerSec = {gyroX, gyroY, gyroZ};
+    imuData.gyroRaw = {gyroX, gyroY, gyroZ};
 
     float accX = accelValueToMeterPerSec(rxBuff + 8);
     float accY = accelValueToMeterPerSec(rxBuff + 10);
     float accZ = accelValueToMeterPerSec(rxBuff + 12);
 
-    imuData.accG = {accX, accY, accZ};
+    imuData.accRaw = {accX, accY, accZ};
+
+    imuData.gyroDegPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
+    imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
+
+    prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
 }
 
 template <class I2cMaster>

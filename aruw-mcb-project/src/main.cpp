@@ -84,6 +84,8 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
+float yaw = 0;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -133,6 +135,11 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
+#endif
+
+#if defined(TARGET_BLANK)
+            PROFILE(drivers->profiler, drivers->imu.periodicIMUUpdate, ());
+            yaw = drivers->imu.getYaw();
 #endif
         }
         modm::delay_us(10);

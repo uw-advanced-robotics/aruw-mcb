@@ -85,7 +85,7 @@ private:
     uint8_t current_reg_XL;
 
     float gyroScale = 70;
-    float accelScale = 0.488;
+    float accelScale{0.488};
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
