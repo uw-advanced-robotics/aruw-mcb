@@ -29,7 +29,7 @@ namespace aruwsrc::communication::sensors::imu::ism330
 {
 enum Register : uint8_t
 {
-    DEVICE_ADDRESS = 0x6B,
+    DEVICE_ADDRESS = 0x6A,
     WHO_AM_I = 0x0F,
 
     // temperature
