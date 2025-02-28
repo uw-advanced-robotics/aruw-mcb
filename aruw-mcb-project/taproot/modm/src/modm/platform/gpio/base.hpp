@@ -51,6 +51,14 @@ struct Gpio
 		MHz100   = VeryHigh,
 	};
 
+	enum class
+	InputTrigger
+	{
+		RisingEdge,
+		FallingEdge,
+		BothEdges,
+	};
+
 	/// The Port a Gpio Pin is connected to.
 	enum class
 	Port

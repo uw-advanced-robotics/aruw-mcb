@@ -38,7 +38,7 @@ namespace modm{
 	 *    \ingroup modm_ui_menu
 	 *
 	 */
-	template<typename Allocator = std::allocator<IAbstractView> >
+	template<typename Allocator = allocator::Dynamic<IAbstractView> >
 	class ChoiceMenu : public AbstractMenu<Allocator>
 	{
 	public:

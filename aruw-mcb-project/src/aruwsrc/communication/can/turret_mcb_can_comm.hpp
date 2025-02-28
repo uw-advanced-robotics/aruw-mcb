@@ -105,8 +105,7 @@ public:
      */
     mockable inline float getRollUnwrapped() const
     {
-        return lastCompleteImuData.roll +
-               static_cast<float>(M_TWOPI) * static_cast<float>(rollRevolutions);
+        return lastCompleteImuData.roll + M_TWOPI * static_cast<float>(rollRevolutions);
     }
 
     /**
@@ -131,8 +130,7 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
-        return lastCompleteImuData.pitch +
-               static_cast<float>(M_TWOPI) * static_cast<float>(pitchRevolutions);
+        return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
     }
 
     /**
@@ -159,12 +157,9 @@ public:
     {
         // @todo this is dumb
 #ifdef TARGET_SENTRY_HYDRA
-        return lastCompleteImuData.yaw +
-               static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions) -
-               static_cast<float>(M_PI);
+        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions) - M_PI;
 #else
-        return lastCompleteImuData.yaw +
-               static_cast<float>(M_TWOPI) * static_cast<float>(yawRevolutions);
+        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
 #endif
     }
 
@@ -208,7 +203,7 @@ private:
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
-    static constexpr float CMPS2_TO_MPS2 = 0.01f;
+    static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
@@ -310,11 +305,11 @@ private:
         int& revolutionCounter)
     {
         const float angleDiff = newAngle - prevAngle;
-        if (angleDiff < -static_cast<float>(M_PI))
+        if (angleDiff < -M_PI)
         {
             revolutionCounter++;
         }
-        else if (angleDiff > static_cast<float>(M_PI))
+        else if (angleDiff > M_PI)
         {
             revolutionCounter--;
         }

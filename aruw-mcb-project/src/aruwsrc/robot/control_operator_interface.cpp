@@ -162,7 +162,7 @@ float ControlOperatorInterface::getChassisRInput()
         chassisRInputRamp,
         MAX_ACCELERATION_R,
         MAX_DECELERATION_R,
-        static_cast<float>(dt) / 1E3f);
+        static_cast<float>(dt) / 1E3);
 
     return chassisRInputRamp.getValue();
 }

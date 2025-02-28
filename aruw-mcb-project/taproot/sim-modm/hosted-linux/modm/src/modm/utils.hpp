@@ -14,7 +14,5 @@
 
 #include <modm/architecture/utils.hpp>
 
-#include "utils/type_traits.hpp"
-#include "utils/aligned_storage.hpp"
-#include "utils/inplace_any.hpp"
-#include "utils/inplace_function.hpp"
+#include "utils/allocator.hpp"
+#include "utils/dummy.hpp"

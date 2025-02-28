@@ -3,7 +3,6 @@
  * Copyright (c) 2009-2010, Martin Rosekeit
  * Copyright (c) 2009-2011, Fabian Greif
  * Copyright (c) 2012, Niklas Hauser
- * Copyright (c) 2023, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -15,8 +14,6 @@
 
 #ifndef	MODM_PAIR_HPP
 #define	MODM_PAIR_HPP
-
-#include <utility>
 
 namespace modm
 {
@@ -66,38 +63,49 @@ namespace modm
 	 * \ingroup		modm_container
 	 */
 	template<typename T1, typename T2>
-	class Pair : public std::pair<T1, T2>
+	class Pair
 	{
 	public:
-		using FirstType = T1;
-		using SecondType = T2;
+		typedef T1 FirstType;
+		typedef T2 SecondType;
 
 	public:
-		using std::pair<T1, T2>::pair;
+		// No non-trivial constructor is allowed, otherwise this class
+		// won't be POD (plain old data) :-(
+		// (this behavior changes with C++0x)
+		/*Pair(const FirstType& first, const SecondType& second) :
+			first(first), second(second)
+		{
+		}*/
 
 		FirstType&
 		getFirst()
 		{
-			return this->first;
+			return first;
 		}
 
 		const FirstType&
 		getFirst() const
 		{
-			return this->first;
+			return first;
 		}
 
 		SecondType&
 		getSecond()
 		{
-			return this->second;
+			return second;
 		}
 
 		const SecondType&
 		getSecond() const
 		{
-			return this->second;
+			return second;
 		}
+
+	// ... not allowed either, only public attributes :-(
+	//private:
+		FirstType first;
+		SecondType second;
 	};
 }
 

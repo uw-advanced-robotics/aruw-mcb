@@ -44,8 +44,7 @@ float computeGravitationalForceOffset(
     float turretCGPolarTheta = 0.0f;
     if (!cgXZero)
     {
-        turretCGPolarTheta =
-            (cgX > 0.0f) ? atanf(cgZ / cgX) : (atanf(cgZ / cgX) + static_cast<float>(M_PI));
+        turretCGPolarTheta = (cgX > 0.0f) ? atanf(cgZ / cgX) : (atanf(cgZ / cgX) + M_PI);
     }
     else
     {

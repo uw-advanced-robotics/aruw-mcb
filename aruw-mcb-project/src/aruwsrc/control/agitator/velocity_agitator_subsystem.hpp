@@ -98,8 +98,7 @@ public:
     /// @return The agitator velocity in radians / second.
     inline float getCurrentValue() const override
     {
-        return (agitatorMotor.getShaftRPM() / config.gearRatio) *
-               (static_cast<float>(M_TWOPI) / 60.0f);
+        return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
     }
 
     /**

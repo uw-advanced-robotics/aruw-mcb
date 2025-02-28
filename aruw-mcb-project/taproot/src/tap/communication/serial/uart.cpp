@@ -40,17 +40,17 @@ bool Uart::read(UartPort port, uint8_t *data)
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::read(*data);
+            return Usart1::read(*data);
         case UartPort::Uart2:
-            return Port2::read(*data);
+            return Usart2::read(*data);
         case UartPort::Uart3:
-            return Port3::read(*data);
+            return Usart3::read(*data);
         case UartPort::Uart6:
-            return Port6::read(*data);
+            return Usart6::read(*data);
         case UartPort::Uart7:
-            return Port7::read(*data);
+            return Uart7::read(*data);
         case UartPort::Uart8:
-            return Port8::read(*data);
+            return Uart8::read(*data);
         default:
             return false;
     }
@@ -68,17 +68,17 @@ std::size_t Uart::read(UartPort port, uint8_t *data, std::size_t length)
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::read(data, length);
+            return Usart1::read(data, length);
         case UartPort::Uart2:
-            return Port2::read(data, length);
+            return Usart2::read(data, length);
         case UartPort::Uart3:
-            return Port3::read(data, length);
+            return Usart3::read(data, length);
         case UartPort::Uart6:
-            return Port6::read(data, length);
+            return Usart6::read(data, length);
         case UartPort::Uart7:
-            return Port7::read(data, length);
+            return Uart7::read(data, length);
         case UartPort::Uart8:
-            return Port8::read(data, length);
+            return Uart8::read(data, length);
         default:
             return 0;
     }
@@ -94,17 +94,17 @@ std::size_t Uart::discardReceiveBuffer(UartPort port)
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::discardReceiveBuffer();
+            return Usart1::discardReceiveBuffer();
         case UartPort::Uart2:
-            return Port2::discardReceiveBuffer();
+            return Usart2::discardReceiveBuffer();
         case UartPort::Uart3:
-            return Port3::discardReceiveBuffer();
+            return Usart3::discardReceiveBuffer();
         case UartPort::Uart6:
-            return Port6::discardReceiveBuffer();
+            return Usart6::discardReceiveBuffer();
         case UartPort::Uart7:
-            return Port7::discardReceiveBuffer();
+            return Uart7::discardReceiveBuffer();
         case UartPort::Uart8:
-            return Port8::discardReceiveBuffer();
+            return Uart8::discardReceiveBuffer();
         default:
             return 0;
     }
@@ -121,17 +121,17 @@ bool Uart::write(UartPort port, uint8_t data)
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::write(data);
+            return Usart1::write(data);
         case UartPort::Uart2:
-            return Port2::write(data);
+            return Usart2::write(data);
         case UartPort::Uart3:
-            return Port3::write(data);
+            return Usart3::write(data);
         case UartPort::Uart6:
-            return Port6::write(data);
+            return Usart6::write(data);
         case UartPort::Uart7:
-            return Port7::write(data);
+            return Uart7::write(data);
         case UartPort::Uart8:
-            return Port8::write(data);
+            return Uart8::write(data);
         default:
             return false;
     }
@@ -149,17 +149,17 @@ std::size_t Uart::write(UartPort port, const uint8_t *data, std::size_t length)
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::write(data, length);
+            return Usart1::write(data, length);
         case UartPort::Uart2:
-            return Port2::write(data, length);
+            return Usart2::write(data, length);
         case UartPort::Uart3:
-            return Port3::write(data, length);
+            return Usart3::write(data, length);
         case UartPort::Uart6:
-            return Port6::write(data, length);
+            return Usart6::write(data, length);
         case UartPort::Uart7:
-            return Port7::write(data, length);
+            return Uart7::write(data, length);
         case UartPort::Uart8:
-            return Port8::write(data, length);
+            return Uart8::write(data, length);
         default:
             return 0;
     }
@@ -175,17 +175,17 @@ bool Uart::isWriteFinished(UartPort port) const
     switch (port)
     {
         case UartPort::Uart1:
-            return Port1::isWriteFinished();
+            return Usart1::isWriteFinished();
         case UartPort::Uart2:
-            return Port2::isWriteFinished();
+            return Usart2::isWriteFinished();
         case UartPort::Uart3:
-            return Port3::isWriteFinished();
+            return Usart3::isWriteFinished();
         case UartPort::Uart6:
-            return Port6::isWriteFinished();
+            return Usart6::isWriteFinished();
         case UartPort::Uart7:
-            return Port7::isWriteFinished();
+            return Uart7::isWriteFinished();
         case UartPort::Uart8:
-            return Port8::isWriteFinished();
+            return Uart8::isWriteFinished();
         default:
             return false;
     }
@@ -200,22 +200,22 @@ void Uart::flushWriteBuffer(UartPort port)
     switch (port)
     {
         case UartPort::Uart1:
-            Port1::flushWriteBuffer();
+            Usart1::flushWriteBuffer();
             break;
         case UartPort::Uart2:
-            Port2::flushWriteBuffer();
+            Usart2::flushWriteBuffer();
             break;
         case UartPort::Uart3:
-            Port3::flushWriteBuffer();
+            Usart3::flushWriteBuffer();
             break;
         case UartPort::Uart6:
-            Port6::flushWriteBuffer();
+            Usart6::flushWriteBuffer();
             break;
         case UartPort::Uart7:
-            Port7::flushWriteBuffer();
+            Uart7::flushWriteBuffer();
             break;
         case UartPort::Uart8:
-            Port8::flushWriteBuffer();
+            Uart8::flushWriteBuffer();
             break;
         default:
             break;

@@ -9,12 +9,12 @@
  */
 // ----------------------------------------------------------------------------
 
-#pragma once
+#ifndef MODM_STM32_PERIPHERALS_HPP
+#define MODM_STM32_PERIPHERALS_HPP
 
 namespace modm::platform
 {
 
-/// @ingroup modm_platform_core
 enum class
 Peripheral
 {
@@ -76,9 +76,10 @@ Peripheral
 	Usart6,
 	Usbotgfs,
 	Usbotghs,
-	Usbotghsulpi,
 	Wwdg,
 	Syscfg = Sys,
 };
 
 }
+
+#endif // MODM_STM32_PERIPHERALS_HPP

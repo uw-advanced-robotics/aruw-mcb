@@ -4,7 +4,6 @@
  * Copyright (c) 2012, Niklas Hauser
  * Copyright (c) 2013-2014, Sascha Schade
  * Copyright (c) 2015, Kevin Läufer
- * Copyright (c) 2023, Christopher Durand
  *
  * This file is part of the modm project.
  *
@@ -17,7 +16,9 @@
 #ifndef	MODM_LINKED_LIST_HPP
 #define	MODM_LINKED_LIST_HPP
 
-#include <modm/container/doubly_linked_list.hpp>
+#include <stdint.h>
+#include <iterator>
+#include <modm/utils/allocator.hpp>
 
 namespace modm
 {
@@ -33,31 +34,207 @@ namespace modm
 	 *
 	 * \author	Fabian Greif
 	 * \ingroup	modm_container
-	 *
-	 * \todo TODO: implementated as doubly-linked list
-	 * 		 std::forward_list does not save both front and back pointers.
-	 * 		 This would make operations in xpcc very inefficient.
 	 */
-	template <typename T, typename Allocator = std::allocator<T>>
-	class LinkedList : public DoublyLinkedList<T, Allocator>
+	template <typename T, typename Allocator = allocator::Dynamic<T> >
+	class LinkedList
 	{
 	public:
-		using DoublyLinkedList<T, Allocator>::DoublyLinkedList;
-		using iterator = DoublyLinkedList<T, Allocator>::iterator;
+		typedef std::size_t Size;
 
-		iterator
-		remove(const iterator& position)
-		{
-			return this->erase(position);
-		}
+	public:
+		LinkedList(const Allocator& allocator = Allocator());
 
+		~LinkedList();
+
+		/// check if there are any nodes in the list
+		inline bool
+		isEmpty() const;
+
+		/**
+		 * \brief	Get number of elements
+		 *
+		 * \warning	This method is slow because it has to iterate through
+		 * 			all elements.
+		 */
+		std::size_t
+		getSize() const;
+
+		/// Insert in front
+		bool
+		prepend(const T& value);
+
+		/// Insert at the end of the list
+		bool
+		append(const T& value);
+
+		/// Remove the first entry
 		void
-		removeAll()
+		removeFront();
+
+		/**
+		 * \return the first node in the list
+		 */
+		inline const T&
+		getFront() const;
+
+		inline T&
+		getFront();
+
+		/**
+		 * \return the last node in the list
+		 */
+		inline const T&
+		getBack() const;
+
+		inline T&
+		getBack();
+
+		/**
+		 * \brief	Remove all elements form the list
+		 */
+		void
+		removeAll();
+
+	protected:
+		struct Node
 		{
-			while (!this->isEmpty()) {
-				this->removeFront();
-			}
-		}
+			T value;
+			Node *next;
+		};
+
+		// The stored instance is not actually of type Allocator. Instead we
+		// rebind the type to Allocator<Node<T>>. Node<T> is not the same
+		// size as T (it's one pointer larger), and specializations on T may go
+		// unused because Node<T> is being bound instead.
+		typedef typename Allocator::template rebind< Node >::other NodeAllocator;
+
+		NodeAllocator nodeAllocator;
+
+		Node *front;
+		Node *back;
+
+	public:
+		/**
+		 * \brief	Forward iterator
+		 */
+		class iterator : public std::iterator<std::forward_iterator_tag, T>
+		{
+			friend class LinkedList;
+			friend class const_iterator;
+
+		public:
+			/// Default constructor
+			iterator();
+			iterator(const iterator& other);
+
+			iterator& operator = (const iterator& other);
+			iterator& operator ++ ();
+			bool operator == (const iterator& other) const;
+			bool operator != (const iterator& other) const;
+			T& operator * ();
+			T* operator -> ();
+
+		private:
+			iterator(Node* node);
+
+			Node* node;
+		};
+
+		/**
+		 * \brief	forward const iterator
+		 */
+		class const_iterator : public std::iterator<std::forward_iterator_tag, T>
+		{
+			friend class LinkedList;
+
+		public:
+			/// Default constructor
+			const_iterator();
+
+			/**
+			 * \brief	Copy construtor
+			 *
+			 * Used to convert a normal iterator to a const iterator.
+			 * The other way is not possible.
+			 */
+			const_iterator(const iterator& other);
+
+			/**
+			 * \brief	Copy construtor
+			 */
+			const_iterator(const const_iterator& other);
+
+			const_iterator& operator = (const const_iterator& other);
+			const_iterator& operator ++ ();
+			bool operator == (const const_iterator& other) const;
+			bool operator != (const const_iterator& other) const;
+			const T& operator * () const;
+			const T* operator -> () const;
+
+		private:
+			const_iterator(Node* node);
+			// TODO: this should acutally be a node that points to a const
+			// value, but since all access is const, this does not really make
+			// a difference
+			Node* node;
+		};
+
+		/**
+		 * Returns a read/write iterator that points to the first element in      the
+		 * list.  Iteration is done in ordinary element order.
+		 */
+		iterator
+		begin();
+
+		/**
+		 * Returns a read-only (constant) iterator that points to the
+		 * first element in the list.  Iteration is done in ordinary
+		 * element order.
+		 */
+		const_iterator
+		begin() const;
+
+		/**
+		 * Returns a read/write iterator that points one past the last
+		 * element in the list. Iteration is done in ordinary element
+		 * order.
+		 */
+		iterator
+		end();
+
+		/**
+		 * Returns a read-only (constant) iterator that points one past
+		 * the last element in the list.  Iteration is done in ordinary
+		 * element order.
+		 */
+		const_iterator
+		end() const;
+
+		/**
+		 * \brief	Erase element
+		 *
+		 * Removes a single element from the list container.
+		 * This effectively reduces the list size by one, calling the element's
+		 * destructor before.
+		 */
+		iterator
+		remove(const iterator& position);
+
+		bool
+		insert(const_iterator pos, const T& value);
+
+	private:
+		friend class const_iterator;
+		friend class iterator;
+
+		LinkedList(const LinkedList& other);
+
+		LinkedList&
+		operator = (const LinkedList& other);
 	};
 }
+
+#include "linked_list_impl.hpp"
+#include "linked_list_iterator_impl.hpp"
+
 #endif	// MODM_LINKED_LIST_HPP

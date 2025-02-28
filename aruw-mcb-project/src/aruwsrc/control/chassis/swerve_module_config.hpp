@@ -36,7 +36,7 @@ struct SwerveModuleConfig
 {
     // @todo not really generic over future swerve designs?
     const float WHEEL_DIAMETER_M = 0.1016f;
-    const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * static_cast<float>(M_PI);
+    const float WHEEL_CIRCUMFRENCE_M = WHEEL_DIAMETER_M * M_PI;
 
     // in encoder clicks, defines "forward" direction of the module
     // @todo why does this default?
@@ -51,7 +51,7 @@ struct SwerveModuleConfig
 
     // @todo defaults and the number of fields makes it hard to make this auto-generated via
     // constructor; resolve in another MR
-    float distanceFromChassisCenter = 0.2f / static_cast<float>(M_SQRT2);
+    float distanceFromChassisCenter = 0.2f / M_SQRT2;
 
     // Whether any motor is inverted
     const bool driveMotorInverted;
@@ -85,7 +85,7 @@ struct SwerveModuleConfig
 
     modm::Pair<float, float> ANGULAR_POWER_FRAC_LUT[2] = {
         {0.0f, 0.2f},
-        {static_cast<float>(M_PI_2), 0.75f},
+        {M_PI_2, 0.75f},
     };
 
     const float gearboxRatio = (1.0f / 19.0f);

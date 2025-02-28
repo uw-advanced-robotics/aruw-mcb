@@ -135,12 +135,6 @@ public:
 	 */
 	static void
 	acknowledgeInterruptFlag(InterruptFlag_t flags);
-
-	static void
-	enableTransfer();
-
-	static void
-	disableTransfer();
 };
 
 } // namespace platform
