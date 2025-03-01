@@ -23,15 +23,20 @@
 
 namespace aruwsrc::control
 {
-MotorStallTrigger::MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque)
+MotorStallTrigger::MotorStallTrigger(
+    tap::motor::DjiMotor& motor,
+    float maxVelocity,
+    int16_t minTorque)
     : motor(motor),
-      maxRPM(maxRPM),
+      maxVelocity(maxVelocity),
       minTorque(minTorque)
 {
 }
 
 bool MotorStallTrigger::isTriggered()
 {
-    return ((abs(motor.getShaftRPM()) < maxRPM) && (abs(motor.getTorque()) > minTorque));
+    return (
+        (fabs(motor.getEncoder()->getVelocity()) < maxVelocity) &&
+        (abs(motor.getTorque()) > minTorque));
 }
 }  // namespace aruwsrc::control

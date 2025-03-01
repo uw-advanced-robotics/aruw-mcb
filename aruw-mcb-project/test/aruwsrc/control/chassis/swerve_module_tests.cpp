@@ -91,13 +91,16 @@ TEST_F(SwerveModuleTest, initialize)
 
 TEST_F(SwerveModuleTest, getAngle)
 {
-    ON_CALL(module.azimuthMotor, getEncoderUnwrapped).WillByDefault(Return(0));
+    ON_CALL(module.azimuthMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(module.azimuthMotor.getInternalEncoder(), getPosition)
+        .WillByDefault(Return(tap::algorithms::Angle(0)));
     EXPECT_NEAR(0, module.getAngle(), 1E-3);
 }
 
 TEST_F(SwerveModuleTest, getDriveVelocity)
 {
-    ON_CALL(module.driveMotor, getShaftRPM).WillByDefault(Return(0));
+    ON_CALL(module.azimuthMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(module.driveMotor.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
     EXPECT_NEAR(0, module.getDriveVelocity(), 1E-3);
 }
 

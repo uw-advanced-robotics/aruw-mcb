@@ -28,7 +28,8 @@ void MecanumWheel::executeWheelVelocity(float vx, float vy)
 {
     CMSISMat<2, 1> desiredMat = PRODUCT_MAT * CMSISMat<2, 1>({vx, vy});
     double currentTime = tap::arch::clock::getTimeMicroseconds();
-    double error = desiredMat.data[0] - motor.getShaftRPM();
+    double error =
+        desiredMat.data[0] - motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     motor.setDesiredOutput(velocityPid.runControllerDerivateError(error, currentTime - prevTime));
     prevTime = currentTime;
 }

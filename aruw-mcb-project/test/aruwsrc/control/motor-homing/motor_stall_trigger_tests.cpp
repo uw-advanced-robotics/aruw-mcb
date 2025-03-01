@@ -32,81 +32,85 @@ class MotorStallTriggerTest : public Test
 protected:
     MotorStallTriggerTest()
         : motor(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "mock motor"),
-          trigger(motor, maxRPM, minTorque)
+          trigger(motor, maxVelocity, minTorque)
     {
     }
 
     tap::Drivers drivers;
     NiceMock<tap::mock::DjiMotorMock> motor;
-    const int16_t maxRPM = 100;
+    const float maxVelocity = 100;
     const int16_t minTorque = 10;
     MotorStallTrigger trigger;
 };
 
-TEST_F(MotorStallTriggerTest, torque_in_rpm_out_no_stall)
+TEST_F(MotorStallTriggerTest, torque_in_velocity_out_no_stall)
 {
-    int16_t rpm;
+    float velocity;
     int16_t torque;
 
-    ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
-    rpm = maxRPM + 1;
+    velocity = (maxVelocity + 1);
     torque = minTorque - 1;
     EXPECT_EQ(false, trigger.isTriggered());
 
-    rpm = -maxRPM - 1;
+    velocity = (-maxVelocity - 1);
     torque = -minTorque + 1;
     EXPECT_EQ(false, trigger.isTriggered());
 }
 
-TEST_F(MotorStallTriggerTest, torque_out_rpm_in_stall)
+TEST_F(MotorStallTriggerTest, torque_out_velocity_in_stall)
 {
-    int16_t rpm;
+    float velocity;
     int16_t torque;
 
-    ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
-    rpm = maxRPM - 1;
+    velocity = (maxVelocity - 1);
     torque = minTorque + 1;
     EXPECT_EQ(true, trigger.isTriggered());
 
-    rpm = -maxRPM + 1;
+    velocity = (-maxVelocity + 1);
     torque = -minTorque - 1;
     EXPECT_EQ(true, trigger.isTriggered());
 }
 
-TEST_F(MotorStallTriggerTest, torque_in_rpm_in_no_stall)
+TEST_F(MotorStallTriggerTest, torque_in_velocity_in_no_stall)
 {
-    int16_t rpm;
+    float velocity;
     int16_t torque;
 
-    ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
-    rpm = maxRPM - 1;
+    velocity = (maxVelocity - 1);
     torque = minTorque - 1;
     EXPECT_EQ(false, trigger.isTriggered());
 
-    rpm = -maxRPM + 1;
+    velocity = (-maxVelocity + 1);
     torque = -minTorque + 1;
     EXPECT_EQ(false, trigger.isTriggered());
 }
 
-TEST_F(MotorStallTriggerTest, torque_out_rpm_out_no_stall)
+TEST_F(MotorStallTriggerTest, torque_out_velocity_out_no_stall)
 {
-    int16_t rpm;
+    float velocity;
     int16_t torque;
 
-    ON_CALL(motor, getShaftRPM).WillByDefault(ReturnPointee(&rpm));
+    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+    ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
-    rpm = maxRPM + 1;
+    velocity = (maxVelocity + 1);
     torque = minTorque + 1;
     EXPECT_EQ(false, trigger.isTriggered());
 
-    rpm = -maxRPM - 1;
+    velocity = (-maxVelocity - 1);
     torque = -minTorque - 1;
     EXPECT_EQ(false, trigger.isTriggered());
 }

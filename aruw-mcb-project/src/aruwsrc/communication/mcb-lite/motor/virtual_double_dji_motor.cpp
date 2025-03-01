@@ -36,8 +36,9 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     bool isInvertedTwo,
     const char* nameOne,
     const char* nameTwo,
-    uint16_t encWrapped,
-    int64_t encRevolutions)
+    float gearRatio,
+    uint32_t encoderHomePositionOne,
+    tap::encoder::EncoderInterface* externalEncoder)
     : DoubleDjiMotor(
           drivers,
           desMotorIdentifierOne,
@@ -48,8 +49,9 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
           isInvertedTwo,
           nameOne,
           nameTwo,
-          encWrapped,
-          encRevolutions),
+          gearRatio,
+          encoderHomePositionOne,
+          externalEncoder),
       mcbLite(mcbLite)
 {
 }

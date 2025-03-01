@@ -51,16 +51,13 @@ protected:
     void SetUp() override
     {
         ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
-        ON_CALL(djiMotor, getEncoderUnwrapped).WillByDefault([&]() {
-            return chassisFrameMeasurement.getUnwrappedValue() *
-                   tap::motor::DjiMotor::ENC_RESOLUTION / M_TWOPI;
-        });
-        ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
-            return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
-        });
-        ON_CALL(djiMotor, getOutputDesired).WillByDefault([&]() {
-            return djiMotor.DjiMotor::getOutputDesired();
-        });
+        ON_CALL(djiMotor.getInternalEncoder(), getPosition)
+            .WillByDefault(ReturnPointee(&chassisFrameMeasurement));
+        ON_CALL(djiMotor, setDesiredOutput)
+            .WillByDefault([&](int32_t desiredOutput)
+                           { return djiMotor.DjiMotor::setDesiredOutput(desiredOutput); });
+        ON_CALL(djiMotor, getOutputDesired)
+            .WillByDefault([&]() { return djiMotor.DjiMotor::getOutputDesired(); });
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));

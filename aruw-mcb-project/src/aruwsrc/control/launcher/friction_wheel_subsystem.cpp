@@ -80,8 +80,10 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 
 float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 {
-    float leftWheelSpeed = leftWheel.getShaftRPM();
-    float rightWheelSpeed = rightWheel.getShaftRPM();
+    float leftWheelSpeed =
+        leftWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    float rightWheelSpeed =
+        rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
 }
 
@@ -95,9 +97,13 @@ void FrictionWheelSubsystem::refresh()
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
+    velocityPidLeftWheel.update(
+        desiredRpmRamp.getValue() -
+        leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI);
     leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
+    velocityPidRightWheel.update(
+        desiredRpmRamp.getValue() -
+        rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI);
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 
