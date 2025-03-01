@@ -17,10 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRANSLATION_PROVIDER_HPP_
-#define TRANSLATION_PROVIDER_HPP_
+#ifndef ORIENTATION_PROVIDER_INTERFACE_HPP_
+#define ORIENTATION_PROVIDER_INTERFACE_HPP_
 
-#include "tap/algorithms/transforms/position.hpp"
+#include "tap/algorithms/transforms/orientation.hpp"
 
 #include "frames.hpp"
 
@@ -29,12 +29,12 @@ using namespace tap::algorithms::transforms;
 namespace aruwsrc::algorithms::state
 {
 template <Frame BASE, Frame FOLLOWER>
-class TranslationProvider
+class OrientationProviderInterface
 {
 public:
-    virtual Position getTranslation();
+    virtual Orientation getOrientation();
 };
 
 }  // namespace aruwsrc::algorithms::state
 
-#endif  // TRANSLATION_PROVIDER_HPP_
+#endif  // ORIENTATION_PROVIDER_INTERFACE_HPP_
