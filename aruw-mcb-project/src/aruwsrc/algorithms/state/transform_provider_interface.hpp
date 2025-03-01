@@ -35,7 +35,7 @@ class TransformProviderInterface : public TranslationProviderInterface<BASE, FOL
                                    public OrientationProviderInterface<BASE, FOLLOWER>
 {
 public:
-    virtual Transform getTransform();
+    inline Transform getTransform() { return Transform(getTranslation(), getOrientation()) }
 };
 
 }  // namespace aruwsrc::algorithms::state
