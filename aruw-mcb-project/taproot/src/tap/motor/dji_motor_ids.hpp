@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,11 +21,30 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "motor_interface_mock.hpp"
+#ifndef TAPROOT_DJI_MOTOR_IDS_HPP_
+#define TAPROOT_DJI_MOTOR_IDS_HPP_
 
-namespace tap::mock
+#include <cstdint>
+
+namespace tap::motor
 {
-MotorInterfaceMock::MotorInterfaceMock() : tap::motor::MotorInterface(), encoder() {}
+/**
+ * CAN IDs for the feedback messages sent by DJI motor controllers. Motor `i` in the set
+ * {1, 2,...,8} sends feedback data with in a CAN message with ID 0x200 + `i`.
+ * for declaring a new motor, must be one of these motor
+ * identifiers
+ */
+enum MotorId : uint32_t
+{
+    MOTOR1 = 0X201,
+    MOTOR2 = 0x202,
+    MOTOR3 = 0x203,
+    MOTOR4 = 0x204,
+    MOTOR5 = 0x205,
+    MOTOR6 = 0x206,
+    MOTOR7 = 0x207,
+    MOTOR8 = 0x208,
+};
+}  // namespace tap::motor
 
-MotorInterfaceMock::~MotorInterfaceMock() {}
-}  // namespace tap::mock
+#endif  // TAPROOT_DJI_MOTOR_IDS_HPP_

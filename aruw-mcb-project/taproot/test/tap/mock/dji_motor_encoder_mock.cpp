@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,11 +21,17 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "motor_interface_mock.hpp"
+#include "dji_motor_encoder_mock.hpp"
 
 namespace tap::mock
 {
-MotorInterfaceMock::MotorInterfaceMock() : tap::motor::MotorInterface(), encoder() {}
+DjiMotorEncoderMock::DjiMotorEncoderMock(
+    bool isInverted,
+    float gearRatio,
+    uint32_t encoderHomePosition)
+    : DjiMotorEncoder(isInverted, gearRatio, encoderHomePosition)
 
-MotorInterfaceMock::~MotorInterfaceMock() {}
+{
+}
+DjiMotorEncoderMock::~DjiMotorEncoderMock() {}
 }  // namespace tap::mock
