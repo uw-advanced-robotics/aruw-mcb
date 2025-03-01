@@ -23,18 +23,32 @@
 namespace aruwsrc::algorithms::state
 {
 
+#if defined(ALL_SENTRIES)
 enum class Frame
 {
     WORLD,
     CHASSIS,
-
-#ifdef TARGET_SENTRY_HYDRA
     TURRET_MAJOR,
-#endif
-
     TURRET
 };
+#elif defined(TARGET_ENGINEER)
+enum class Frame
+{
+    WORLD,
+    CHASSIS,
+    GANTRY,
+    WRIST,
+    END_EFFECTOR
+};
+#else
+enum class Frame
+{
+    WORLD,
+    CHASSIS,
+    TURRET
+};
+#endif
 
 }  // namespace aruwsrc::algorithms::state
 
-#endif  // ORIENTATION_PROVIDER_HPP_
+#endif  // FRAMES_HPP_
