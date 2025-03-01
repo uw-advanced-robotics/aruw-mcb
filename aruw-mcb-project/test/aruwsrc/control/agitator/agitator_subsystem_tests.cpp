@@ -92,8 +92,9 @@ TEST_P(AgitatorSubsystemTest, refresh_runs_pid_controller)
 {
     static constexpr float UPDATE_INCR = M_PI / 100;
 
-    ON_CALL(agitator.agitatorMotor, setDesiredOutput)
-        .WillByDefault([&](int32_t) { position += UPDATE_INCR; });
+    ON_CALL(agitator.agitatorMotor, setDesiredOutput).WillByDefault([&](int32_t) {
+        position += UPDATE_INCR;
+    });
 
     agitator.calibrateHere();
 

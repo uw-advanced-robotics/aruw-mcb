@@ -222,8 +222,7 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
-    pid->update(
-        desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI);
+    pid->update(desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI);
     float value = VELOCITY_PID_KV * desiredRpm + pid->getValue() + VELOCITY_PID_KS;
     motor->setDesiredOutput(value);
 }

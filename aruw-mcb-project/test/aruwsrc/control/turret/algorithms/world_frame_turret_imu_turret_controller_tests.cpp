@@ -53,11 +53,12 @@ protected:
         ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
         ON_CALL(djiMotor.getInternalEncoder(), getPosition)
             .WillByDefault(ReturnPointee(&chassisFrameMeasurement));
-        ON_CALL(djiMotor, setDesiredOutput)
-            .WillByDefault([&](int32_t desiredOutput)
-                           { return djiMotor.DjiMotor::setDesiredOutput(desiredOutput); });
-        ON_CALL(djiMotor, getOutputDesired)
-            .WillByDefault([&]() { return djiMotor.DjiMotor::getOutputDesired(); });
+        ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
+            return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
+        });
+        ON_CALL(djiMotor, getOutputDesired).WillByDefault([&]() {
+            return djiMotor.DjiMotor::getOutputDesired();
+        });
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));

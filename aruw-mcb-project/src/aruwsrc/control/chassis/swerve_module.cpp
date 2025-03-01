@@ -128,8 +128,7 @@ void SwerveModule::refresh()
 
 float SwerveModule::getDriveVelocity() const
 {
-    return wheel.rpmToMps(
-        driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI);
+    return wheel.rpmToMps(driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI);
 }
 
 float SwerveModule::getDriveRPM() const
