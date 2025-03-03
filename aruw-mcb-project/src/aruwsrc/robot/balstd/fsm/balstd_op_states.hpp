@@ -1,11 +1,11 @@
 
-#ifndef BALSTD_STATES_HPP_
-#define BALSTD_STATES_HPP_
+#ifndef BALSTD_OP_STATES_HPP_
+#define BALSTD_OP_STATES_HPP_
 
 namespace aruwsrc::control::balstd
 {
 
-enum class BalstdState
+enum class BalstdOpState
 {
     UNKNOWN,
     FALLEN_FORWARD,
@@ -18,4 +18,4 @@ enum class BalstdState
 
 }  // namespace aruwsrc::control::balstd
 
-#endif  // BALSTD_STATES_HPP_
+#endif  // BALSTD_OP_STATES_HPP_
