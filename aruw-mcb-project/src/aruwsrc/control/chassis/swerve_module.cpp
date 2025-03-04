@@ -119,8 +119,9 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
 
 void SwerveModule::refresh()
 {
-    drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    driveMotor.setDesiredOutput(drivePid.getOutput() * powerLimitFrac);
+    // drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
+    // driveMotor.setDesiredOutput(drivePid.getOutput() * powerLimitFrac);
+    driveMotor.setDesiredOutput(0);
 
     azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput() * powerLimitFrac);
@@ -128,20 +129,20 @@ void SwerveModule::refresh()
 
 float SwerveModule::getDriveVelocity() const
 {
-    return wheel.rpmToMps(driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI);
+    return wheel.rpmToMps(getDriveRPM());
 }
 
 float SwerveModule::getDriveRPM() const
 {
-    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI / (config.driveMotorGearing * config.gearboxRatio);
 }
 
 float SwerveModule::getAngle() const
 {
-    return azimuthMotor.getEncoder()->getPosition().getWrappedValue();
+    return azimuthMotor.getEncoder()->getPosition().getUnwrappedValue() / config.azimuthMotorGearing;
 }
 
-float SwerveModule::getAngularVelocity() const { return azimuthMotor.getEncoder()->getVelocity(); }
+float SwerveModule::getAngularVelocity() const { return azimuthMotor.getEncoder()->getVelocity() / config.azimuthMotorGearing; }
 
 void SwerveModule::limitPower(float frac)
 {

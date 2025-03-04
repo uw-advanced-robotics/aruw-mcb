@@ -150,7 +150,7 @@ TurretMinorMotors turretLeftMotors{
         "Left Minor Pitch Turret",
         false,
         1.0,
-        turretLeft::YAW_MOTOR_CONFIG.startEncoderValue),
+        turretLeft::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretLeft::YAW_MOTOR_CONFIG,
     .pitchMotorConfig = turretLeft::PITCH_MOTOR_CONFIG
@@ -248,7 +248,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor",
     false,
-    rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
+    rightFrontSwerveConfig.gearboxRatio * rightFrontSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
@@ -269,7 +269,7 @@ VirtualDjiMotor leftBackDriveMotor(
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor",
     false,
-    leftBackSwerveConfig.gearboxRatio *leftBackSwerveConfig.driveMotorGearing);
+    leftBackSwerveConfig.gearboxRatio * leftBackSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),

@@ -74,7 +74,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "left front drive motor",
           false,
-          CHASSIS_GEARBOX_RATIO),
+          1.0f / CHASSIS_GEARBOX_RATIO),
       leftBackMotor(
           drivers,
           leftBackMotorId,
@@ -82,7 +82,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "left back drive motor",
           false,
-          CHASSIS_GEARBOX_RATIO),
+          1.0f / CHASSIS_GEARBOX_RATIO),
       rightFrontMotor(
           drivers,
           rightFrontMotorId,
@@ -90,7 +90,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "right front drive motor",
           false,
-          CHASSIS_GEARBOX_RATIO),
+          1.0f / CHASSIS_GEARBOX_RATIO),
       rightBackMotor(
           drivers,
           rightBackMotorId,
@@ -98,7 +98,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "right back drive motor",
           false,
-          CHASSIS_GEARBOX_RATIO)
+          1.0f / CHASSIS_GEARBOX_RATIO)
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
@@ -222,7 +222,8 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
-    pid->update(desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI);
+    // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM and not the wheel rpm
+    pid->update(desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
     float value = VELOCITY_PID_KV * desiredRpm + pid->getValue() + VELOCITY_PID_KS;
     motor->setDesiredOutput(value);
 }
