@@ -248,7 +248,7 @@ VirtualDjiMotor rightFrontDriveMotor(
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor",
     false,
-    rightFrontSwerveConfig.gearboxRatio * rightFrontSwerveConfig.driveMotorGearing);
+    rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
@@ -269,7 +269,7 @@ VirtualDjiMotor leftBackDriveMotor(
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor",
     false,
-    leftBackSwerveConfig.gearboxRatio * leftBackSwerveConfig.driveMotorGearing);
+    leftBackSwerveConfig.gearboxRatio *leftBackSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),

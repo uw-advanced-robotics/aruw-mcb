@@ -48,7 +48,6 @@ TEST_F(MotorStallTriggerTest, torque_in_velocity_out_no_stall)
     float velocity;
     int16_t torque;
 
-    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
     ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
@@ -66,7 +65,6 @@ TEST_F(MotorStallTriggerTest, torque_out_velocity_in_stall)
     float velocity;
     int16_t torque;
 
-    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
     ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
@@ -84,7 +82,6 @@ TEST_F(MotorStallTriggerTest, torque_in_velocity_in_no_stall)
     float velocity;
     int16_t torque;
 
-    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
     ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 
@@ -102,7 +99,6 @@ TEST_F(MotorStallTriggerTest, torque_out_velocity_out_no_stall)
     float velocity;
     int16_t torque;
 
-    ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
     ON_CALL(motor.getInternalEncoder(), getVelocity).WillByDefault(ReturnPointee(&velocity));
     ON_CALL(motor, getTorque).WillByDefault(ReturnPointee(&torque));
 

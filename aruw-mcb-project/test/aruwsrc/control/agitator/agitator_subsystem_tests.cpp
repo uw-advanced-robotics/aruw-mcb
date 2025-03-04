@@ -56,12 +56,12 @@ protected:
 
     void SetUp() override
     {
+        ON_CALL(agitator.agitatorMotor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
         ON_CALL(agitator.agitatorMotor.getInternalEncoder(), getPosition)
             .WillByDefault(ReturnPointee(&position));
         ON_CALL(agitator.agitatorMotor.getInternalEncoder(), isOnline)
             .WillByDefault(ReturnPointee(&motorOnline));
-        ON_CALL(agitator.agitatorMotor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
-        ON_CALL(agitator.agitatorMotor.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
+        ON_CALL(agitator.agitatorMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     }
 
     tap::arch::clock::ClockStub clock;

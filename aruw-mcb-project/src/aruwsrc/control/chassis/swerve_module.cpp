@@ -127,22 +127,24 @@ void SwerveModule::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput() * powerLimitFrac);
 }
 
-float SwerveModule::getDriveVelocity() const
-{
-    return wheel.rpmToMps(getDriveRPM());
-}
+float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(getDriveRPM()); }
 
 float SwerveModule::getDriveRPM() const
 {
-    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI / (config.driveMotorGearing * config.gearboxRatio);
+    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI /
+           (config.driveMotorGearing * config.gearboxRatio);
 }
 
 float SwerveModule::getAngle() const
 {
-    return azimuthMotor.getEncoder()->getPosition().getUnwrappedValue() / config.azimuthMotorGearing;
+    return azimuthMotor.getEncoder()->getPosition().getUnwrappedValue() /
+           config.azimuthMotorGearing;
 }
 
-float SwerveModule::getAngularVelocity() const { return azimuthMotor.getEncoder()->getVelocity() / config.azimuthMotorGearing; }
+float SwerveModule::getAngularVelocity() const
+{
+    return azimuthMotor.getEncoder()->getVelocity() / config.azimuthMotorGearing;
+}
 
 void SwerveModule::limitPower(float frac)
 {
