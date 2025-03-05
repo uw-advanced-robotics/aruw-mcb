@@ -113,7 +113,7 @@ float SwerveWheel::getDriveRPM() const
 
 float SwerveWheel::getAngle() const
 {
-    return azimuthMotor.getEncoder()->getPosition().getWrappedValue();
+    return azimuthMotor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
 void SwerveWheel::initialize()

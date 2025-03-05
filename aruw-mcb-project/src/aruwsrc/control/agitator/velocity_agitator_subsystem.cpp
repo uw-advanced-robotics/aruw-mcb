@@ -102,7 +102,7 @@ float VelocityAgitatorSubsystem::getCurrentValueIntegral() const
     {
         return 0.0f;
     }
-    return agitatorMotor.getEncoder()->getPosition().getWrappedValue();
+    return agitatorMotor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
 void VelocityAgitatorSubsystem::runVelocityPidControl()

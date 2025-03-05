@@ -36,6 +36,7 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     bool isInvertedTwo,
     const char* nameOne,
     const char* nameTwo,
+    bool currentControl,
     float gearRatio,
     uint32_t encoderHomePositionOne,
     tap::encoder::EncoderInterface* externalEncoder)
@@ -49,6 +50,7 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
           isInvertedTwo,
           nameOne,
           nameTwo,
+          currentControl,
           gearRatio,
           encoderHomePositionOne,
           externalEncoder),

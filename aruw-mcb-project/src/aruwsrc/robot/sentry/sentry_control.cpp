@@ -120,7 +120,8 @@ aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     false,
     "Major Yaw Turret 1",
     "Major Yaw Turret 2",
-    1,
+    false,
+    1.f,
     turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
 struct TurretMinorMotors
@@ -240,21 +241,19 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-VirtualDjiMotor rightFrontDriveMotor(
+DjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor",
     false,
-    rightFrontSwerveConfig.gearboxRatio * rightFrontSwerveConfig.driveMotorGearing);
+    1 / (rightFrontSwerveConfig.gearboxRatio * rightFrontSwerveConfig.driveMotorGearing));
 
-VirtualDjiMotor rightFrontAzimuthMotor(
+DjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor",
     false,
@@ -269,7 +268,7 @@ VirtualDjiMotor leftBackDriveMotor(
     leftBackSwerveConfig.driveMotorInverted,
     "Left Back Swerve Drive Motor",
     false,
-    leftBackSwerveConfig.gearboxRatio * leftBackSwerveConfig.driveMotorGearing);
+    1 / (leftBackSwerveConfig.gearboxRatio * leftBackSwerveConfig.driveMotorGearing));
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
