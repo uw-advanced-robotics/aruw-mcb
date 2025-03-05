@@ -53,6 +53,11 @@ public:
 
     tap::algorithms::WrappedFloat getPosition() const override;
 
+    /**
+     * Gets the raw encoder position.
+     */
+    mockable tap::algorithms::WrappedFloat getEncoder() const { return encoder; }
+
     float getVelocity() const override;
 
     void alignWith(EncoderInterface* other) override;
@@ -72,11 +77,6 @@ protected:
      * special logic necessary for keeping track of unwrapped encoder value.
      */
     void updateEncoderValue(uint32_t encoderActual);
-
-    /**
-     * Gets the raw encoder position.
-     */
-    mockable tap::algorithms::WrappedFloat getEncoder() const { return encoder; }
 
     /**
      * The current encoder position.

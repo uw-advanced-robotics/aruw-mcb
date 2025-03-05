@@ -93,7 +93,7 @@ TEST_F(SwerveModuleTest, getAngle)
 {
     ON_CALL(module.azimuthMotor.getInternalEncoder(), getPosition)
         .WillByDefault(Return(tap::algorithms::Angle(0)));
-    EXPECT_NEAR(0, module.getAngle(), 1E-3);
+    EXPECT_NEAR(0, module.getAngle().getUnwrappedValue(), 1E-3);
 }
 
 TEST_F(SwerveModuleTest, getDriveVelocity)
