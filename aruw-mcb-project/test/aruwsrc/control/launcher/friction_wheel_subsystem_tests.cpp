@@ -62,11 +62,9 @@ TEST_F(FrictionWheelSubsystemTest, endingHardwareTestCommand__sets_desired_speed
 
 TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
 {
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(0)).Times(2);
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(0)).Times(2);
 
     clock.time = 0;
@@ -82,11 +80,9 @@ TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_
 
 TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_10_shaft_rpm_0)
 {
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(Gt(0)));
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getVelocity).WillByDefault(Return(0));
+    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Gt(0)));
 
     frictionWheels.setDesiredLaunchSpeed(10);
@@ -100,11 +96,9 @@ TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_1
 
 TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0_shaft_rpm_negative)
 {
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getVelocity).WillByDefault(Return(1000));
+    ON_CALL(frictionWheels.leftWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(Lt(0)));
-    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getVelocity)
+    ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM)
         .WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Lt(0)));
 

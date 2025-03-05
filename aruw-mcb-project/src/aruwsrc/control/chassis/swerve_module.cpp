@@ -129,14 +129,12 @@ void SwerveModule::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput() * powerLimitFrac);
 }
 
-float SwerveModule::getDriveVelocity() const
-{
-    return wheel.rpmToMps(getDriveRPM());
-}
+float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(getDriveRPM()); }
 
 float SwerveModule::getDriveRPM() const
 {
-    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI / (config.driveMotorGearing * config.gearboxRatio);
+    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI /
+           (config.driveMotorGearing * config.gearboxRatio);
 }
 
 tap::algorithms::WrappedFloat SwerveModule::getAngle() const

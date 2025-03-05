@@ -222,8 +222,10 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
-    // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM and not the wheel rpm
-    pid->update(desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
+    // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM
+    // and not the wheel rpm
+    pid->update(
+        desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
     float value = VELOCITY_PID_KV * desiredRpm + pid->getValue() + VELOCITY_PID_KS;
     motor->setDesiredOutput(value);
 }

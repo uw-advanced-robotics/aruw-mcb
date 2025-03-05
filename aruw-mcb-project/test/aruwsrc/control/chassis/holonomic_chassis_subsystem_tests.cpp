@@ -254,7 +254,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 struct ActualVelocityParam
 {
-    float lfVelocity, lbVelocity, rfVelocity, rbVelocity;
+    int16_t lfRPM, lbRPM, rfRPM, rbRPM;
     float expectedX, expectedY, expectedR;
 };
 
@@ -266,18 +266,14 @@ public:
     {
         HolonomicChassisSubsystemTest::SetUp();
 
-        ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), getVelocity)
-            .WillByDefault(Return(GetParam().lfVelocity));
-        ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-        ON_CALL(chassis.leftBackMotor.getInternalEncoder(), getVelocity)
-            .WillByDefault(Return(GetParam().lbVelocity));
-        ON_CALL(chassis.leftBackMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-        ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), getVelocity)
-            .WillByDefault(Return(GetParam().rfVelocity));
-        ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
-        ON_CALL(chassis.rightBackMotor.getInternalEncoder(), getVelocity)
-            .WillByDefault(Return(GetParam().rbVelocity));
-        ON_CALL(chassis.rightBackMotor.getInternalEncoder(), isOnline).WillByDefault(Return(true));
+        ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().lfRPM));
+        ON_CALL(chassis.leftBackMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().lbRPM));
+        ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().rfRPM));
+        ON_CALL(chassis.rightBackMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().rbRPM));
     }
 };
 
@@ -292,46 +288,46 @@ TEST_P(ActualVelocityTest, getActualVelocityChassisRelative)
 
 ActualVelocityParam actualVelocityValuesToTest[] = {
     {
-        .lfVelocity = 0,
-        .lbVelocity = 0,
-        .rfVelocity = 0,
-        .rbVelocity = 0,
+        .lfRPM = 0,
+        .lbRPM = 0,
+        .rfRPM = 0,
+        .rbRPM = 0,
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = 0,
     },
     {
-        .lfVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .lbVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rfVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rbVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
+        .lfRPM = static_cast<int16_t>(WHEEL_VEL),
+        .lbRPM = static_cast<int16_t>(WHEEL_VEL),
+        .rfRPM = static_cast<int16_t>(WHEEL_VEL),
+        .rbRPM = static_cast<int16_t>(WHEEL_VEL),
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = -CHASSIS_VEL_R,
     },
     {
-        .lfVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .lbVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rfVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rbVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
+        .lfRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .lbRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .rfRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .rbRPM = static_cast<int16_t>(-WHEEL_VEL),
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = CHASSIS_VEL_R,
     },
     {
-        .lfVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .lbVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rfVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rbVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
+        .lfRPM = static_cast<int16_t>(WHEEL_VEL),
+        .lbRPM = static_cast<int16_t>(WHEEL_VEL),
+        .rfRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .rbRPM = static_cast<int16_t>(-WHEEL_VEL),
         .expectedX = CHASSIS_VEL,
         .expectedY = 0,
         .expectedR = 0,
     },
     {
-        .lfVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .lbVelocity = -M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rfVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
-        .rbVelocity = M_TWOPI * WHEEL_VEL / 60.f * CHASSIS_GEARBOX_RATIO,
+        .lfRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .lbRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .rfRPM = static_cast<int16_t>(WHEEL_VEL),
+        .rbRPM = static_cast<int16_t>(WHEEL_VEL),
         .expectedX = -CHASSIS_VEL,
         .expectedY = 0,
         .expectedR = 0,
