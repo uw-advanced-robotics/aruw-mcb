@@ -74,7 +74,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "left front drive motor",
           false,
-          1.0f / CHASSIS_GEARBOX_RATIO),
+          CHASSIS_GEARBOX_RATIO),
       leftBackMotor(
           drivers,
           leftBackMotorId,
@@ -82,7 +82,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "left back drive motor",
           false,
-          1.0f / CHASSIS_GEARBOX_RATIO),
+          CHASSIS_GEARBOX_RATIO),
       rightFrontMotor(
           drivers,
           rightFrontMotorId,
@@ -90,7 +90,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "right front drive motor",
           false,
-          1.0f / CHASSIS_GEARBOX_RATIO),
+          CHASSIS_GEARBOX_RATIO),
       rightBackMotor(
           drivers,
           rightBackMotorId,
@@ -98,7 +98,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           false,
           "right back drive motor",
           false,
-          1.0f / CHASSIS_GEARBOX_RATIO)
+          CHASSIS_GEARBOX_RATIO)
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
