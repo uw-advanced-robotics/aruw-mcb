@@ -21,17 +21,17 @@
 #define CHASSIS_KF_ODOMETRY_HPP_
 
 #include "tap/algorithms/kalman_filter.hpp"
-#include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
-#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
+#include "aruwsrc/algorithms/state/transform_provider_interface.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
+using Frame = aruwsrc::algorithms::state::Frame;
 /**
  * An odometry interface that uses a kalman filter to measure odometry. This class is designed
  * specifically for robots whose chassis does not measure absolute position (i.e. all ground
@@ -51,7 +51,8 @@ public:
      */
     ChassisKFOdometry(
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+        const aruwsrc::algorithms::state::
+            OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos);
 
@@ -157,7 +158,8 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
 
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem;
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
+    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationProvider;
     tap::communication::sensors::imu::ImuInterface& imu;
 
     const modm::Vector2f initPos;
