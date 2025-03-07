@@ -20,21 +20,19 @@
 #ifndef STANDARD_TURRET_SUBSYSTEM_HPP_
 #define STANDARD_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
 /**
  * Turret subsystem for the Standard.
  */
-class StandardTurretSubsystem final : public RobotTurretSubsystem
+class StandardTurretSubsystem final
+    : public TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS>
 {
-    using RobotTurretSubsystem::RobotTurretSubsystem;
-    float getWorldYaw() const override;
-    float getWorldPitch() const override;
-    uint32_t getLastMeasurementTimeMicros() const override;
-    modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
-    float getPitchOffset() const override { return 0; };
+    using TurretSubsystem::TurretSubsystem;
+
+    inline float getPitchOffset() const override { return 0; };
 };  // class StandardTurretSubsystem
 
 }  // namespace aruwsrc::control::turret

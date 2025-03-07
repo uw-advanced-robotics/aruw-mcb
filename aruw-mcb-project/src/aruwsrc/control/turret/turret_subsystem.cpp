@@ -31,34 +31,50 @@
 using namespace tap::motor;
 using namespace tap::algorithms;
 
+using Frame = aruwsrc::algorithms::state::Frame;
+
 namespace aruwsrc::control::turret
 {
-TurretSubsystem::TurretSubsystem(
+template <Frame MOUNTING_FRAME>
+TurretSubsystem<MOUNTING_FRAME>::TurretSubsystem(
     tap::Drivers *drivers,
     MotorInterface *pitchMotor,
     MotorInterface *yawMotor,
     const TurretMotorConfig &pitchMotorConfig,
-    const TurretMotorConfig &yawMotorConfig,
-    const aruwsrc::can::TurretMCBCanComm *turretMCB)
+    const TurretMotorConfig &yawMotorConfig)
     : tap::control::Subsystem(drivers),
       pitchMotor(pitchMotor, pitchMotorConfig),
-      yawMotor(yawMotor, yawMotorConfig),
-      turretMCB(turretMCB)
+      yawMotor(yawMotor, yawMotorConfig)
 {
     assert(drivers != nullptr);
     assert(pitchMotor != nullptr);
     assert(yawMotor != nullptr);
 }
 
-void TurretSubsystem::initialize()
+template <Frame MOUNTING_FRAME>
+void TurretSubsystem<MOUNTING_FRAME>::initialize()
 {
     yawMotor.initialize();
     pitchMotor.initialize();
 }
 
-void TurretSubsystem::refresh()
+template <Frame MOUNTING_FRAME>
+void TurretSubsystem<MOUNTING_FRAME>::refresh()
 {
     yawMotor.updateMotorAngle();
     pitchMotor.updateMotorAngle();
+}
+
+template <Frame MOUNTING_FRAME>
+tap::algorithms::transforms::DynamicOrientation TurretSubsystem<MOUNTING_FRAME>::getOrientation()
+    const
+{
+    return tap::algorithms::transforms::DynamicOrientation(
+        0.0f,
+        pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        yawMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        0.0f,
+        pitchMotor.getChassisFrameVelocity(),
+        yawMotor.getChassisFrameVelocity());
 }
 }  // namespace aruwsrc::control::turret

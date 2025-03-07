@@ -30,14 +30,15 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+using TurretMotor = testing::NiceMock<mock::TurretMotorMock>;
 #else
 #include "turret_motor.hpp"
 #endif
 
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/algorithms/state/orientation_provider_interface.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "modm/math/filter/pid.hpp"
 
 namespace aruwsrc::can
 {
@@ -60,7 +61,11 @@ namespace aruwsrc::control::turret
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from the right side of the turret.
  */
-class TurretSubsystem : public tap::control::Subsystem
+template <aruwsrc::algorithms::state::Frame MOUNTING_FRAME>
+class TurretSubsystem
+    : public tap::control::Subsystem,
+      public aruwsrc::algorithms::state::
+          OrientationProviderInterface<MOUNTING_FRAME, aruwsrc::algorithms::state::Frame::TURRET>
 {
 public:
     /**
@@ -74,8 +79,7 @@ public:
         tap::motor::MotorInterface* pitchMotor,
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB);
+        const TurretMotorConfig& yawMotorConfig);
 
     void initialize() override;
 
@@ -91,20 +95,19 @@ public:
 
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
-    const inline aruwsrc::can::TurretMCBCanComm* getTurretMCB() const { return turretMCB; }
+    /**
+     * @return Distance between the pitch axis and the yaw axis in the X-Y plane. Units meters
+     */
+    virtual inline float getPitchOffset() const = 0;
 
-#ifdef ENV_UNIT_TESTS
-    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
-    testing::NiceMock<mock::TurretMotorMock> yawMotor;
-#else
+    tap::algorithms::transforms::DynamicOrientation getOrientation() const override;
+
+    inline bool providerOnline() const override { return isOnline(); }
+
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
-#endif
-
-protected:
-    const aruwsrc::can::TurretMCBCanComm* turretMCB;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret
