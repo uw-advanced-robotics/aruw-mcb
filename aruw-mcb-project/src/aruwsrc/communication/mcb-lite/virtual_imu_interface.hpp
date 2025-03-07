@@ -42,17 +42,17 @@ public:
         calibrateIMUMessage.setCRC16();
     }
 
-    float getPitch() override { return pitch; }
-    float getRoll() override { return roll; }
-    float getYaw() override { return yaw; }
-    float getGx() override { return Gx; }
-    float getGy() override { return Gy; }
-    float getGz() override { return Gz; }
-    float getAx() override { return Ax; }
-    float getAy() override { return Ay; }
-    float getAz() override { return Az; }
-    float getTemp() override { return temperature; }
-    Mpu6500::ImuState getImuState() { return imuState; }
+    float getPitch() const override { return pitch; }
+    float getRoll() const override { return roll; }
+    float getYaw() const override { return yaw; }
+    float getGx() const override { return Gx; }
+    float getGy() const override { return Gy; }
+    float getGz() const override { return Gz; }
+    float getAx() const override { return Ax; }
+    float getAy() const override { return Ay; }
+    float getAz() const override { return Az; }
+    float getTemp() const override { return temperature; }
+    Mpu6500::ImuState getImuState() const { return imuState; }
     virtual inline const char* getName() const { return "Virtual MPU6500"; }
     void requestCalibration() { sendIMUCalibrationMessage = true; }
 

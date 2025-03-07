@@ -23,10 +23,12 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/algorithms/state/orientation_provider_interface.hpp"
 #include "aruwsrc/control/client-display/projection_utils.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
+
+using Frame = aruwsrc::algorithms::state::Frame;
 
 namespace aruwsrc::algorithms::transforms
 {
@@ -42,7 +44,13 @@ class StandardAndHeroTransformer
 public:
     StandardAndHeroTransformer(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-        const aruwsrc::control::turret::RobotTurretSubsystem& turret);
+        const aruwsrc::algorithms::state::
+            OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
+        const aruwsrc::algorithms::state::
+            OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+        const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::TURRET>&
+            turretImu,
+        const tap::algorithms::transforms::Position& chassisToTurretTranslation);
 
     /**
      * @brief updates the transforms stored by the transformer
@@ -81,7 +89,12 @@ protected:
 
 private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
-    const aruwsrc::control::turret::RobotTurretSubsystem& turret;
+    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationProvider;
+    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>&
+        turretEncoders;
+    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::TURRET>&
+        turretImu;
 
     tap::algorithms::transforms::Transform worldToChassis;
     tap::algorithms::transforms::Transform worldToTurret;

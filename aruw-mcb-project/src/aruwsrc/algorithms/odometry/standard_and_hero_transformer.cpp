@@ -21,21 +21,29 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
+using namespace aruwsrc::algorithms::state;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::turret;
 
 namespace aruwsrc::algorithms::transforms
 {
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
-    const RobotTurretSubsystem& turret)
+    const OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
+    const OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+    const OrientationProviderInterface<Frame::WORLD, Frame::TURRET>& turretImu,
+    const tap::algorithms::transforms::Position& chassisToTurretTranslation)
     : chassisOdometry(chassisOdometry),
-      turret(turret),
+      chassisOrientationProvider(chassisOrientationProvider),
+      turretEncoders(turretEncoders),
+      turretImu(turretImu),
       worldToChassis(Transform::identity()),
       worldToTurret(Transform::identity()),
-      chassisToTurret(Transform::identity()),  // do we care about z offset?
+      chassisToTurret(Transform(
+          chassisToTurretTranslation,
+          Orientation(0, 0, 0))),  // do we care about z offset?
       worldToVTM(Transform::identity())
 {
 }
@@ -48,19 +56,23 @@ void StandardAndHeroTransformer::updateTransforms()
     // @note: here we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
-    worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    // worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    DynamicOrientation chassisOrientation = chassisOrientationProvider.getOrientation();
+    worldToChassis.updateRotation(chassisOrientation);
 
-    float roll = 0.0f;
-    const aruwsrc::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
+    if (turretImu.providerOnline())
+    {
+        chassisToTurret.updateRotation(
+            chassisOrientation.inverse().compose(turretImu.getOrientation()));
+    }
+    else
+    {
+        chassisToTurret.updateRotation(turretEncoders.getOrientation());
+    }
 
-    if (turretMCB != nullptr) roll = turretMCB->getRoll();
+    worldToTurret = worldToChassis.compose(chassisToTurret);
 
-    worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
-
-    worldToTurret.updateTranslation(worldToChassis.getTranslation());
-    chassisToTurret = worldToChassis.getInverse().compose(worldToTurret);
-
-    worldToVTM = worldToTurret.compose(VTM_OFFSET);
+    worldToVTM = worldToTurret.composeStatic(VTM_OFFSET);
 }
 
 }  // namespace aruwsrc::algorithms::transforms
