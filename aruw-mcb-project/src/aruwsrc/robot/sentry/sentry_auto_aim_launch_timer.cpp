@@ -64,7 +64,7 @@ SentryAutoAimLaunchTimer::LaunchInclination SentryAutoAimLaunchTimer::getCurrent
         return LaunchInclination::GATED_DENY;
     }
 
-    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6f;
+    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
     uint32_t now = tap::arch::clock::getTimeMicroseconds();
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 

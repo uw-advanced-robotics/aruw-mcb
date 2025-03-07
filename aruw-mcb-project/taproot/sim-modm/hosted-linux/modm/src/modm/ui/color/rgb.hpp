@@ -148,7 +148,6 @@ normalizeColor(RgbT<T> rgb, IntermediateType multiplier = 1)
 #if __has_include(<modm/io/iostream.hpp>)
 #include <modm/io/iostream.hpp>
 
-/// @ingroup modm_ui_color
 template<std::unsigned_integral U>
 IOStream&
 operator<<(IOStream& os, const color::RgbT<U>& color)

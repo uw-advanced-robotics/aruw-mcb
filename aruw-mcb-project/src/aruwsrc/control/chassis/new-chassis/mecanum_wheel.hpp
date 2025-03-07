@@ -53,7 +53,7 @@ private:
     double prevTime = 0;
     // PID used to control the driving motor
     const double WHEEL_RELATIVE_TO_ROLLER_ANGLE = M_PI_4;
-    const double AXLE_TO_ROBOT_FRONT = static_cast<float>(M_PI_2);
+    const double AXLE_TO_ROBOT_FRONT = M_PI_2;
     const CMSISMat<2, 2> MAT1 = CMSISMat<2, 2>({0.0f,
                                                 (float)sin(WHEEL_RELATIVE_TO_ROLLER_ANGLE),
                                                 config.diameter / 2,

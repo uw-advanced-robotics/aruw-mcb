@@ -9,12 +9,16 @@
  */
 // ----------------------------------------------------------------------------
 
-#pragma once
+#ifndef MODM_STM32_GPIO_SOFTWARE_PORT_HPP
+#define MODM_STM32_GPIO_SOFTWARE_PORT_HPP
 
 #include "set.hpp"
 #include <type_traits>
 
-namespace modm::platform
+namespace modm
+{
+
+namespace platform
 {
 
 /**
@@ -1036,4 +1040,8 @@ public:
 	}
 };
 
-} // namespace modm::platform
+} // namespace platform
+
+} // namespace modm
+
+#endif // MODM_STM32_GPIO_SOFTWARE_PORT_HPP

@@ -40,10 +40,7 @@ public:
     /// Get RPM of odom wheel oriented such that it rolls on the line perpendicular to the chassis
     float getPerpendicularRPM() const;
 
-    inline float rpmToMetersPerSecond(float rpm) const
-    {
-        return rpm / 60 * static_cast<float>(M_TWOPI) * WHEEL_RADIUS;
-    }
+    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * WHEEL_RADIUS; }
 
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis

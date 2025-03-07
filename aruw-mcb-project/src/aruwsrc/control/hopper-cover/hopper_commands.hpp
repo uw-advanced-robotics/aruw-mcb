@@ -44,10 +44,9 @@ class StandardOpenHopperCommand : public tap::control::setpoint::MoveAbsoluteCom
 {
 public:
     // 3.12 revolutions
-    static constexpr float STANDARD_OPEN_HOPPER_TARGET_ANGLE = 3.12 * static_cast<float>(M_PI);
+    static constexpr float STANDARD_OPEN_HOPPER_TARGET_ANGLE = 3.12 * M_PI;
     // 5000 milliradians/second
-    static constexpr uint32_t STANDARD_OPEN_HOPPER_ANGULAR_SPEED =
-        5.0f * static_cast<float>(M_PI) * 1000.0f;
+    static constexpr uint32_t STANDARD_OPEN_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float STANDARD_OPEN_HOPPER_TOLERANCE = 0.05f;
     // Whether or not the command should clear jam on end (based on how we want this command
@@ -88,8 +87,7 @@ public:
     // 0 revolutions
     static constexpr float STANDARD_CLOSE_HOPPER_TARGET_ANGLE = 0;
     // 5000 milliradians/second
-    static constexpr uint32_t STANDARD_CLOSE_HOPPER_ANGULAR_SPEED =
-        5.0f * static_cast<float>(M_PI) * 1000.0f;
+    static constexpr uint32_t STANDARD_CLOSE_HOPPER_ANGULAR_SPEED = 5.0f * M_PI * 1000.0f;
     // Allowable error in radians within which motor will consider target angle reached.
     static constexpr float STANDARD_CLOSE_HOPPER_TOLERANCE = 0.05f;
     // Whether or not the command should clear jam on end (based on how we want this command

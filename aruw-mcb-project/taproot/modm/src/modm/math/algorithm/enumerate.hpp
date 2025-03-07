@@ -12,10 +12,8 @@
 
 #pragma once
 
-#include <cstdint>
-#include <ranges>
+#include <stdint.h>
 #include <tuple>
-#include <utility>
 
 namespace modm
 {
@@ -33,10 +31,7 @@ constexpr auto enumerate(T && iterable)
         TIter iter;
         constexpr bool operator != (const iterator & other) const { return iter != other.iter; }
         constexpr void operator ++ () { ++i; ++iter; }
-        constexpr auto operator * () const
-        {
-            return std::tuple<size_t, std::ranges::range_reference_t<T>>{i, *iter};
-        }
+        constexpr auto operator * () const { return std::tie(i, *iter); }
     };
     struct iterable_wrapper
     {

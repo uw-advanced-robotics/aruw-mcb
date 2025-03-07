@@ -18,7 +18,6 @@
 #include "../device.hpp"
 #include "uart_base.hpp"
 #include <modm/architecture/interface/peripheral.hpp>
-#include <modm/utils/inplace_function.hpp>
 
 
 namespace modm::platform
@@ -39,8 +38,6 @@ class UsartHal6 : public UartBase
 {
 public:
 	static constexpr bool isExtended = false;
-	static const Peripheral UartPeripheral = Peripheral::Usart6;
-	static inline modm::inplace_function<bool(bool)> InterruptCallback;
 
 	/// Enables the clock, resets the hardware
 	/// @warning Call `enableOperation()` to start the peripheral!
@@ -105,10 +102,6 @@ public:
 	/// Returns true if data can be written
 	static inline bool
 	isTransmitRegisterEmpty();
-
-	/// Returns true if the transmission of a frame containing data is complete
-	static inline bool
-	isTransmissionComplete();
 
 	static inline void
 	enableInterruptVector(bool enable, uint32_t priority);

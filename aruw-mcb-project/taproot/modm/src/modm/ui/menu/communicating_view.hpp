@@ -25,7 +25,7 @@
 namespace modm
 {
 	/// @ingroup modm_ui_menu
-	template<typename Allocator = std::allocator<IAbstractView> >
+	template<typename Allocator = allocator::Dynamic<IAbstractView> >
 	class CommunicatingView : public xpcc::Communicatable
 	{
 	public:

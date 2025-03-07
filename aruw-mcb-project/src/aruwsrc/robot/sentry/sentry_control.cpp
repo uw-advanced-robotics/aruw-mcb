@@ -42,6 +42,10 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/client-display/client_display_command.hpp"
+#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
+#include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -91,6 +95,7 @@ using namespace aruwsrc::control::turret::sentry;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::client_display;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -735,6 +740,19 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
 
+/* define client display / HUD related items --------------------------------*/
+
+// This shit is currently banned by DJI, but left for a hopeful future
+ClientDisplaySubsystem clientDisplay(drivers());
+tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+
+CircleCrosshair circleCrosshair(refSerialTransmitter);
+ImageIndicator imageIndicator(refSerialTransmitter);
+
+std::vector<HudIndicator *> indicators = {&imageIndicator, &circleCrosshair};
+
+ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators);
+
 /* define command mappings --------------------------------------------------*/
 
 HoldCommandMapping rightUp(
@@ -824,6 +842,12 @@ HoldCommandMapping leftDownRightDown(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+// Restart HUD
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -844,6 +868,8 @@ void initializeSubsystems()
 
     turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
+
+    clientDisplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -856,6 +882,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
 
     drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
@@ -875,6 +902,8 @@ void setDefaultSentryCommands(Drivers *)
 
     turretLeftFrictionWheels.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
     turretRightFrictionWheels.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
