@@ -20,7 +20,7 @@
 #ifndef ORIENTATION_PROVIDER_INTERFACE_HPP_
 #define ORIENTATION_PROVIDER_INTERFACE_HPP_
 
-#include "tap/algorithms/transforms/orientation.hpp"
+#include "tap/algorithms/transforms/dynamic_orientation.hpp"
 
 #include "frames.hpp"
 
@@ -32,7 +32,9 @@ template <Frame BASE, Frame FOLLOWER>
 class OrientationProviderInterface
 {
 public:
-    virtual Orientation getOrientation();
+    virtual DynamicOrientation getOrientation() const;
+
+    virtual bool providerOnline() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::state

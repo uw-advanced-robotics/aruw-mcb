@@ -20,7 +20,7 @@
 #ifndef TRANSLATION_PROVIDER_INTERFACE_HPP_
 #define TRANSLATION_PROVIDER_INTERFACE_HPP_
 
-#include "tap/algorithms/transforms/position.hpp"
+#include "tap/algorithms/transforms/dynamic_position.hpp"
 
 #include "frames.hpp"
 
@@ -32,7 +32,9 @@ template <Frame BASE, Frame FOLLOWER>
 class TranslationProviderInterface
 {
 public:
-    virtual Position getTranslation();
+    virtual DynamicPosition getTranslation() const = 0;
+
+    virtual bool providerOnline() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::state
