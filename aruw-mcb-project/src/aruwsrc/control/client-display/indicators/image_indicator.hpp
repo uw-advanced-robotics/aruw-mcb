@@ -40,8 +40,8 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    int image_index = 0;
-    int line_index = 0;
+    uint8_t image_index = 0;
+    uint8_t line_index = 0;
 
     Tx::Graphic1Message imageGraphic;
     static constexpr uint16_t LINE_THICKNESS = 1;
