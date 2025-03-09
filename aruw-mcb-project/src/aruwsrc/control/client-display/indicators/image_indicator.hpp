@@ -40,23 +40,13 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    int index = 0;
+    int image_index = 0;
+    int line_index = 0;
+ 
     Tx::Graphic1Message imageGraphic;
-    images::Image image;
     static constexpr uint16_t LINE_THICKNESS = 1;
 
-// #define CURRENT_IMAGE_MARCUS
-    #define CURRENT_IMAGE_NATHANIEL_SUSSY
-
-#ifdef CURRENT_IMAGE_MARCUS
-    static constexpr uint16_t IMAGE_X_OFFSET = 600;
-    static constexpr int16_t IMAGE_Y_OFFSET = -400;
-    static constexpr float IMAGE_SCALE = 1.0;
-#else if defined(CURRENT_IMAGE_NATHANIEL_SUSSY)
-    static constexpr uint16_t IMAGE_X_OFFSET = 600;
-    static constexpr int16_t IMAGE_Y_OFFSET = -400;
-    static constexpr float IMAGE_SCALE = 0.65;
-#endif
+    std::vector<images::Image> images;
 };
 
 }  // namespace aruwsrc::control::client_display

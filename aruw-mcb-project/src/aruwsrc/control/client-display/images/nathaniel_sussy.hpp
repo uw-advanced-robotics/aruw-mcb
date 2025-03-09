@@ -17,14 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #ifndef NATHANIEL_SUSSY_HPP_
- #define NATHANIEL_SUSSY_HPP_
- 
- #include "image.hpp"
- 
- namespace aruwsrc::control::client_display::images
- {
- // clang-format off
+#ifndef NATHANIEL_SUSSY_HPP_
+#define NATHANIEL_SUSSY_HPP_
+
+#include "image.hpp"
+
+namespace aruwsrc::control::client_display::images
+{
+// clang-format off
  static constexpr LineTuple NATHANIEL_SUSSY_LINES[]{
     LineTuple(1, 642, 64, 684),
     LineTuple(64, 683, 72, 712),
@@ -184,11 +184,18 @@
     LineTuple(201, 541, 213, 490),
     LineTuple(214, 556, 226, 490)
  };
- // clang-format on
- 
- static constexpr int NUM_LINES_NATHANIEL_SUSSY = sizeof(NATHANIEL_SUSSY_LINES) / sizeof(LineTuple);
- 
- };  // namespace aruwsrc::control::client_display::images
- 
- #endif  // NATHANIEL_SUSSY_HPP_
- 
+// clang-format on
+
+static constexpr int NUM_LINES_NATHANIEL_SUSSY = sizeof(NATHANIEL_SUSSY_LINES) / sizeof(LineTuple);
+
+Image nathaniel_sussy(
+    {.size = NUM_LINES_NATHANIEL_SUSSY,
+     .lines = NATHANIEL_SUSSY_LINES,
+     .IMAGE_X_OFFSET = 600,
+     .IMAGE_Y_OFFSET = -400,
+     .IMAGE_SCALE = 0.65});
+
+
+};  // namespace aruwsrc::control::client_display::images
+
+#endif  // NATHANIEL_SUSSY_HPP_
