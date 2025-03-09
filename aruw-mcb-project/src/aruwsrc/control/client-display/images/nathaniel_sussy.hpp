@@ -195,7 +195,6 @@ Image nathaniel_sussy(
      .IMAGE_Y_OFFSET = -400,
      .IMAGE_SCALE = 0.65});
 
-
 };  // namespace aruwsrc::control::client_display::images
 
 #endif  // NATHANIEL_SUSSY_HPP_

@@ -42,7 +42,7 @@ void ImageIndicator::initialize()
 modm::ResumableResult<void> ImageIndicator::update()
 {
     auto currentImage = images[image_index];
-    auto currentTuple = currentImage.lines[0]; // 0 here as placeholder until we access later
+    auto currentTuple = currentImage.lines[0];  // 0 here as placeholder until we access later
     int startX, startY, endX, endY;
 
     RF_BEGIN(1);
