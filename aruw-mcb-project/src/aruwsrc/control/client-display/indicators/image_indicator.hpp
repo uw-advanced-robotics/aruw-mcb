@@ -41,15 +41,22 @@ public:
 
 private:
     int index = 0;
-
-    static constexpr uint16_t IMAGE_X_OFFSET = 600;
-    static constexpr int16_t IMAGE_Y_OFFSET = -400;
-
+    Tx::Graphic1Message imageGraphic;
+    images::Image image;
     static constexpr uint16_t LINE_THICKNESS = 1;
 
-    Tx::Graphic1Message imageGraphic;
+// #define CURRENT_IMAGE_MARCUS
+    #define CURRENT_IMAGE_NATHANIEL_SUSSY
 
-    images::Image image;
+#ifdef CURRENT_IMAGE_MARCUS
+    static constexpr uint16_t IMAGE_X_OFFSET = 600;
+    static constexpr int16_t IMAGE_Y_OFFSET = -400;
+    static constexpr float IMAGE_SCALE = 1.0;
+#else if defined(CURRENT_IMAGE_NATHANIEL_SUSSY)
+    static constexpr uint16_t IMAGE_X_OFFSET = 600;
+    static constexpr int16_t IMAGE_Y_OFFSET = -400;
+    static constexpr float IMAGE_SCALE = 0.65;
+#endif
 };
 
 }  // namespace aruwsrc::control::client_display

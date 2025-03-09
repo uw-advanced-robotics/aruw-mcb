@@ -20,6 +20,7 @@
 #include "image_indicator.hpp"
 
 #include "aruwsrc/control/client-display/images/marcus.hpp"
+#include "aruwsrc/control/client-display/images/nathaniel_sussy.hpp"
 
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::client_display::images;
@@ -28,7 +29,11 @@ namespace aruwsrc::control::client_display
 {
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
+#ifdef CURRENT_IMAGE_MARCUS
       image({NUM_LINES_MARCUS, MARCUS_LINES})
+#else if defined(CURRENT_IMAGE_NATHANIEL_SUSSY)
+      image({NUM_LINES_NATHANIEL_SUSSY, NATHANIEL_SUSSY_LINES})
+#endif
 {
 }
 
@@ -50,10 +55,10 @@ modm::ResumableResult<void> ImageIndicator::update()
     }
 
     currentTuple = image.lines[index];
-    startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
-    startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
-    endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;
-    endY = std::get<3>(currentTuple) + IMAGE_Y_OFFSET;
+    startX = std::get<0>(currentTuple) * IMAGE_SCALE + IMAGE_X_OFFSET;
+    startY = std::get<1>(currentTuple) * IMAGE_SCALE + IMAGE_Y_OFFSET;
+    endX = std::get<2>(currentTuple) * IMAGE_SCALE + IMAGE_X_OFFSET;
+    endY = std::get<3>(currentTuple) * IMAGE_SCALE + IMAGE_Y_OFFSET;
 
     uint8_t graphicName[3];
     getUnusedGraphicName(graphicName);
