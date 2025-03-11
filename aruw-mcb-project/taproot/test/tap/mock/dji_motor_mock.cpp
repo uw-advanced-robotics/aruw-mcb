@@ -32,8 +32,7 @@ DjiMotorMock::DjiMotorMock(
     bool isInverted,
     const char *name,
     uint16_t encWrapped,
-    int64_t encRevolutions,
-    bool currentControl)
+    int64_t encRevolutions)
     : DjiMotor(
           drivers,
           desMotorIdentifier,
@@ -41,8 +40,7 @@ DjiMotorMock::DjiMotorMock(
           isInverted,
           name,
           encWrapped,
-          encRevolutions,
-          currentControl)
+          encRevolutions)
 {
 }
 DjiMotorMock::~DjiMotorMock() {}

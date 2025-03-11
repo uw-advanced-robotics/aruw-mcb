@@ -23,8 +23,6 @@
 
 #include "subsystem.hpp"
 
-#include "tap/drivers.hpp"
-
 #include "command_scheduler.hpp"
 
 namespace tap
@@ -34,18 +32,11 @@ namespace control
 Subsystem::Subsystem(Drivers* drivers)
     : drivers(drivers),
       defaultCommand(nullptr),
-      testCommand(nullptr),
       globalIdentifier(CommandScheduler::constructSubsystem(this))
 {
 }
 
 Subsystem::~Subsystem() { CommandScheduler::destructSubsystem(this); }
-
-void Subsystem::registerAndInitialize()
-{
-    initialize();
-    drivers->commandScheduler.registerSubsystem(this);
-}
 
 void Subsystem::setDefaultCommand(Command* command)
 {
@@ -55,21 +46,12 @@ void Subsystem::setDefaultCommand(Command* command)
     }
 }
 
-void Subsystem::setTestCommand(Command* command)
-{
-    if (command != nullptr)
-    {
-        testCommand = command;
-    }
-}
-
-const char* Subsystem::getName() const { return "Subsystem"; }
+const char* Subsystem::getName() { return "Subsystem"; }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 Subsystem::Subsystem()
     : drivers(nullptr),
       defaultCommand(nullptr),
-      testCommand(nullptr),
       globalIdentifier(CommandScheduler::constructSubsystem(this))
 {
 }

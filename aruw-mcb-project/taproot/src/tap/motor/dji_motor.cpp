@@ -48,8 +48,7 @@ DjiMotor::DjiMotor(
     bool isInverted,
     const char* name,
     uint16_t encoderWrapped,
-    int64_t encoderRevolutions,
-    bool currentControl)
+    int64_t encoderRevolutions)
     : CanRxListener(drivers, static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
       motorName(name),
       drivers(drivers),
@@ -62,8 +61,7 @@ DjiMotor::DjiMotor(
       motorInverted(isInverted),
       encoderWrapped(encoderWrapped),
       encoderRevolutions(encoderRevolutions),
-      encoderHomePosition(0),
-      currentControl(currentControl)
+      encoderHomePosition(0)
 {
     motorDisconnectTimeout.stop();
 }
@@ -145,8 +143,6 @@ bool DjiMotor::isMotorInverted() const { return motorInverted; }
 tap::can::CanBus DjiMotor::getCanBus() const { return motorCanBus; }
 
 const char* DjiMotor::getName() const { return motorName; }
-
-bool DjiMotor::isInCurrentControl() const { return currentControl; }
 
 int64_t DjiMotor::getEncoderUnwrapped() const
 {
