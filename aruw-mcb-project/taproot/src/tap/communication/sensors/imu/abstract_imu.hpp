@@ -28,29 +28,23 @@
 #include "tap/algorithms/transforms/orientation.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
-#include "tap/architecture/timeout.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
-
-namespace tap
-{
-class Drivers;
-}
-using tap::algorithms::transforms::Orientation;
-using tap::algorithms::transforms::Transform;
 
 namespace tap::communication::sensors::imu
 {
+using tap::algorithms::transforms::Orientation;
+using tap::algorithms::transforms::Transform;
+
 constexpr float GRAVITY_MPS2 = 9.81f;
 class AbstractIMU : public ImuInterface
 {
 public:
-    explicit AbstractIMU(tap::Drivers* drivers)
-        : drivers(drivers),
-          mountingTransform(Transform::identity())
+    AbstractIMU(const Transform& mountingTransform = Transform::identity())
+        : mountingTransform(mountingTransform)
     {
     }
 
-    AbstractIMU(const Transform& mountingTransform = Transform(Transform::identity()));
     void setMountingTransform(const Transform& transform);
 
     virtual ~AbstractIMU() = default;
@@ -83,20 +77,20 @@ public:
      */
     virtual ImuState getImuState() const { return imuState; }
 
-    inline float getAx() override { return imuData.accG.x(); }
-    inline float getAy() override { return imuData.accG.y(); }
-    inline float getAz() override { return imuData.accG.z(); }
-    inline float getAzMinusG() { return imuData.accG.z() - GRAVITY_MPS2; }
+    inline float getAx() const override { return imuData.accG.x(); }
+    inline float getAy() const override { return imuData.accG.y(); }
+    inline float getAz() const override { return imuData.accG.z(); }
+    inline float getAzMinusG() const { return imuData.accG.z() - GRAVITY_MPS2; }
 
-    inline float getGx() override { return imuData.gyroDegPerSec.x(); }
-    inline float getGy() override { return imuData.gyroDegPerSec.y(); }
-    inline float getGz() override { return imuData.gyroDegPerSec.z(); }
+    inline float getGx() const override { return imuData.gyroDegPerSec.x(); }
+    inline float getGy() const override { return imuData.gyroDegPerSec.y(); }
+    inline float getGz() const override { return imuData.gyroDegPerSec.z(); }
 
-    inline float getTemp() override { return imuData.temperature; }
+    inline float getTemp() const override { return imuData.temperature; }
 
-    virtual float getYaw() override { return mahonyAlgorithm.getYaw(); }
-    virtual float getPitch() override { return mahonyAlgorithm.getPitch(); }
-    virtual float getRoll() override { return mahonyAlgorithm.getRoll(); }
+    virtual float getYaw() const override { return mahonyAlgorithm.getYaw(); }
+    virtual float getPitch() const override { return mahonyAlgorithm.getPitch(); }
+    virtual float getRoll() const override { return mahonyAlgorithm.getRoll(); }
 
     struct ImuData
     {
@@ -120,7 +114,6 @@ protected:
 
     virtual inline float getAccelerationSensitivity() = 0;
 
-    tap::Drivers* drivers;
     tap::algorithms::transforms::Transform mountingTransform;
 
     Mahony mahonyAlgorithm;
@@ -131,7 +124,7 @@ protected:
 
     ImuData imuData;
 
-    tap::arch::MicroTimeout readTimeout;
+    tap::arch::PeriodicMicroTimer readTimeout;
 
     uint32_t prevIMUDataReceivedTime = 0;
 };

@@ -191,8 +191,6 @@ private:
 
     int16_t desiredOutput;
 
-    int16_t shaftRPM;
-
     int8_t temperature;
 
     int16_t torque;
