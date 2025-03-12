@@ -51,6 +51,6 @@ void CubeStorageSubsystem::refresh() {
     float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime;
     lastTime = tap::arch::clock::getTimeMilliseconds();
     pid.runController(error, errorDerivative, timeDifference);
-    motor.setDesiredOutput(pid.getOutput());
+    motor.setDesiredOutput(pid.getOutput() + FEEDFORWARD);
 }
 }  // namespace aruwsrc::robot::engineer

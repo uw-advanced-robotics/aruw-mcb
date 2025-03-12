@@ -38,19 +38,19 @@ static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
 static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
-    .kp = 10.0f,
+    .kp = 1400.0f,
     .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = 30000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr float MANUAL_MOVE_SPEED = 10; //TODO: choose value alter
 
-static constexpr float ONE_CUBE_SETPOINT = 500;
-static constexpr float TWO_CUBE_SETPOINT = 200;
-static constexpr float THREE_CUBE_SETPOINT = 300; //TODO: update correct values
+static constexpr float ONE_CUBE_SETPOINT = 10;
+static constexpr float TWO_CUBE_SETPOINT = 20;
+static constexpr float THREE_CUBE_SETPOINT = 30; //TODO: update correct values
 
 }  // namespace aruwsrc::robot::engineer
 #endif
