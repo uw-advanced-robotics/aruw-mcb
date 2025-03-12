@@ -30,10 +30,6 @@ variables:
   - develop
   - schedules
 
-.default_except: &default_except
-  variables:
-    - $UPDATE_SUBMODULE
-
 .verification_only: &verification_only
   - merge_requests
   - develop
@@ -411,31 +407,3 @@ pages:
     - develop
   except:
     - schedules
-
-"Update Submodule":
-  stage: Quality
-  needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-  before_script:
-    - apt-get update -y && apt-get install -yqqf curl openssh-client git unzip sshpass rsync --fix-missing
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_TOOLKIT" | base64 -d | ssh-add - > /dev/null
-
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-
-    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-
-    - git config --global user.email "robomstr@uw.edu"
-    - git config --global user.name "Gitlab Runner"
-
-    - git remote rm origin
-    - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
-  script:
-    - ./taproot-scripts/update_taproot_submodule.sh ./aruw-mcb-project 20675733 develop
-  only:
-    variables:
-      - $UPDATE_SUBMODULE
