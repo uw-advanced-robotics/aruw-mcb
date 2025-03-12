@@ -30,6 +30,8 @@ variables:
   - develop
   - schedules
 
+.default_except: &default_except
+
 .verification_only: &verification_only
   - merge_requests
   - develop
