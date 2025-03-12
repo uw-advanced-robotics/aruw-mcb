@@ -31,6 +31,9 @@ struct Image
 {
     int size;
     const LineTuple *lines;
+    const uint16_t IMAGE_X_OFFSET;
+    const int16_t IMAGE_Y_OFFSET;
+    const float IMAGE_SCALE;
 };
 
 };  // namespace aruwsrc::control::client_display::images
