@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,31 +21,30 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dji_motor_mock.hpp"
+#include "dji_motor_encoder_mock.hpp"
 
 namespace tap::mock
 {
-DjiMotorMock::DjiMotorMock(
-    Drivers *drivers,
-    tap::motor::MotorId desMotorIdentifier,
-    tap::can::CanBus motorCanBus,
+DjiMotorEncoderMock::DjiMotorEncoderMock(
     bool isInverted,
-    const char *name,
-    bool currentControl,
     float gearRatio,
-    uint32_t encoderHomePosition,
-    tap::encoder::EncoderInterface *externalEncoder)
-    : DjiMotor(
-          drivers,
-          desMotorIdentifier,
-          motorCanBus,
-          isInverted,
-          name,
-          currentControl,
-          gearRatio,
-          encoderHomePosition,
-          externalEncoder)
+    uint32_t encoderHomePosition)
+    : DjiMotorEncoder(isInverted, gearRatio, encoderHomePosition)
 {
+    ON_CALL(*this, isOnline).WillByDefault(testing::Return(true));
+    ON_CALL(*this, getVelocity).WillByDefault(testing::Invoke([&]() {
+        return this->DjiMotorEncoder::getVelocity();
+    }));
+    ON_CALL(*this, getPosition).WillByDefault(testing::Invoke([&]() {
+        return this->DjiMotorEncoder::getPosition();
+    }));
+    ON_CALL(*this, getEncoder)
+        .WillByDefault(testing::Return(tap::algorithms::WrappedFloat(0, 0, ENC_RESOLUTION)));
 }
-DjiMotorMock::~DjiMotorMock() {}
+
+DjiMotorEncoderMock::~DjiMotorEncoderMock()
+{
+    ON_CALL(*this, getVelocity).WillByDefault(testing::Return(0));
+    ON_CALL(*this, getPosition).WillByDefault(testing::Return(tap::algorithms::Angle(0)));
+}
 }  // namespace tap::mock

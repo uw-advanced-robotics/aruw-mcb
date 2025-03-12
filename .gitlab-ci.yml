@@ -198,16 +198,30 @@ before_script:
   variables:
     ROBOT: STANDARD_SPIDER
 
-# Test build script is different from the others since we use this one to track test coverage for the repo
 "Standard (Spider): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_SPIDER
+
+# Standard (Orion) build
+
+"Standard (Orion): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_ORION
+
+# Test build script is different from the others since we use this one to track test coverage for the repo
+"Standard (Orion): Test Build":
   stage: Tests
   needs: []
   only: *default_only
   except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
+    - scons run-tests-gcov profile=fast robot=STANDARD_ORION -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_ORION/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -220,26 +234,12 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
   cache:
-    key: robot-STANDARD_SPIDER-$CI_COMMIT_REF_SLUG-tests
+    key: robot-STANDARD_ORION-$CI_COMMIT_REF_SLUG-tests
     paths:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
-      - robot-STANDARD_SPIDER-develop-tests
+      - robot-STANDARD_ORION-develop-tests
     when: 'always'
-
-# Standard (Orion) build
-
-"Standard (Orion): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ORION
-
-"Standard (Orion): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ORION
 
 # Standard (Cygnus) build
 

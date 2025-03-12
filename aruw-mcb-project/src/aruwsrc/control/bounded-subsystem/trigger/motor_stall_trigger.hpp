@@ -33,7 +33,7 @@ namespace aruwsrc::control
 class MotorStallTrigger : public TriggerInterface
 {
 public:
-    MotorStallTrigger(tap::motor::DjiMotor& motor, int16_t maxRPM, int16_t minTorque);
+    MotorStallTrigger(tap::motor::DjiMotor& motor, float maxVelocity, int16_t minTorque);
 
     /**
      * Detects whether the subsystem's motor is stalled, indicating that the trigger is triggered.
@@ -42,7 +42,7 @@ public:
 
 private:
     tap::motor::DjiMotor& motor;
-    int16_t maxRPM;
+    float maxVelocity;
     int16_t minTorque;
 };
 }  // namespace aruwsrc::control

@@ -32,16 +32,20 @@ VirtualDjiMotor::VirtualDjiMotor(
     MCBLite* mcbLite,
     bool isInverted,
     const char* name,
-    uint16_t encoderWrapped,
-    int64_t encoderRevolutions)
+    bool currentControl,
+    float gearRatio,
+    uint32_t encoderHomePosition,
+    tap::encoder::EncoderInterface* externalEncoder)
     : DjiMotor(
           drivers,
           desMotorIdentifier,
           motorCanBus,
           isInverted,
           name,
-          encoderWrapped,
-          encoderRevolutions),
+          currentControl,
+          gearRatio,
+          encoderHomePosition,
+          externalEncoder),
       mcbLite(mcbLite)
 {
 }

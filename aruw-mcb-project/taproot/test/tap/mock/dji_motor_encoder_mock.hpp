@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,41 +21,40 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_MOTOR_INTERFACE_MOCK_HPP_
-#define TAPROOT_MOTOR_INTERFACE_MOCK_HPP_
-
-#include <cstdint>
+#ifndef TAPROOT_DJI_MOTOR_ENCODER_MOCK_HPP_
+#define TAPROOT_DJI_MOTOR_ENCODER_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "tap/motor/motor_interface.hpp"
+#include "tap/motor/dji_motor_encoder.hpp"
 
-#include "encoder_interface_mock.hpp"
+#include "modm/architecture/interface/can_message.hpp"
 
 namespace tap::mock
 {
-class MotorInterfaceMock : public tap::motor::MotorInterface
+class DjiMotorEncoderMock : public tap::motor::DjiMotorEncoder
 {
 public:
-    MotorInterfaceMock();
-    virtual ~MotorInterfaceMock();
+    DjiMotorEncoderMock(bool isInverted, float gearRatio = 1, uint32_t encoderHomePosition = 0);
+    virtual ~DjiMotorEncoderMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredOutput, (int32_t), (override));
-    MOCK_METHOD(bool, isMotorOnline, (), (const override));
-    MOCK_METHOD(int16_t, getOutputDesired, (), (const override));
-    MOCK_METHOD(int8_t, getTemperature, (), (const override));
-    MOCK_METHOD(int16_t, getTorque, (), (const override));
 
-    EncoderInterfaceMock* getEncoder() const override
-    {
-        return const_cast<testing::NiceMock<tap::mock::EncoderInterfaceMock>*>(&encoder);
-    }
+    MOCK_METHOD(bool, isOnline, (), (const override));
 
-private:
-    testing::NiceMock<tap::mock::EncoderInterfaceMock> encoder;
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getPosition, (), (const override));
+
+    MOCK_METHOD(float, getVelocity, (), (const override));
+
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getEncoder, (), (const));
+
+    MOCK_METHOD(int16_t, getShaftRPM, (), (const override));
+
+    MOCK_METHOD(void, resetEncoderValue, (), (override));
+
+    MOCK_METHOD(void, processMessage, (const modm::can::Message& message), (override));
 };
 
 }  // namespace tap::mock
 
-#endif  //  TAPROOT_MOTOR_INTERFACE_MOCK_HPP_
+#endif  // TAPROOT_DJI_MOTOR_ENCODER_MOCK_HPP_

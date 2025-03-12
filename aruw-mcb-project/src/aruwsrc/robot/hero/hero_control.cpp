@@ -158,8 +158,19 @@ tap::motor::DjiMotor pitchMotor(
     PITCH_MOTOR_ID,
     CAN_BUS_PITCH_MOTOR,
     true,
-    "Pitch Turret");
-tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
+    "Pitch Turret",
+    false,
+    1,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_YAW_MOTOR,
+    true,
+    "Yaw Turret",
+    false,
+    1,
+    YAW_MOTOR_CONFIG.startEncoderValue);
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
