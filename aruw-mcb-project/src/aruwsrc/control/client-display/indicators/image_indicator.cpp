@@ -29,7 +29,7 @@ namespace aruwsrc::control::client_display
 {
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
-      images({marcus, nathaniel_sussy})
+      images({nathaniel_sussy, marcus})
 {
 }
 

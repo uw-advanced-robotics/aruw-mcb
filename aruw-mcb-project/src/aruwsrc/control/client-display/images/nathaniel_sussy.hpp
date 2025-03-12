@@ -191,8 +191,8 @@ static constexpr int NUM_LINES_NATHANIEL_SUSSY = sizeof(NATHANIEL_SUSSY_LINES) /
 Image nathaniel_sussy(
     {.size = NUM_LINES_NATHANIEL_SUSSY,
      .lines = NATHANIEL_SUSSY_LINES,
-     .IMAGE_X_OFFSET = 600,
-     .IMAGE_Y_OFFSET = -400,
+     .IMAGE_X_OFFSET = 300,
+     .IMAGE_Y_OFFSET = 200,
      .IMAGE_SCALE = 0.65});
 
 };  // namespace aruwsrc::control::client_display::images

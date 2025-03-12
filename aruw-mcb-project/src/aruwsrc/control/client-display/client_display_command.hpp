@@ -27,11 +27,14 @@
 
 #include "indicators/hud_indicator.hpp"
 #include "modm/processing/protothread.hpp"
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 
 #include "client_display_subsystem.hpp"
 
 namespace aruwsrc::control::client_display
 {
+using namespace tap::communication::serial;
+
 class ClientDisplaySubsystem;
 
 /**
@@ -69,6 +72,7 @@ private:
     tap::Drivers &drivers;
     std::vector<HudIndicator *> &hudIndicators;
     uint8_t index = 0;
+    RefSerialTransmitter refSerialTransmitter;
 
     bool restarting = true;
 

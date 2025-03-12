@@ -20,6 +20,8 @@
 #ifndef IMAGE_INDICATOR_HPP_
 #define IMAGE_INDICATOR_HPP_
 
+#include <vector>
+
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
