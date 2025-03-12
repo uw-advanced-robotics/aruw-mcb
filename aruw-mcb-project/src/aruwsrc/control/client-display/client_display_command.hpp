@@ -22,12 +22,12 @@
 
 #include <vector>
 
+#include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
 #include "indicators/hud_indicator.hpp"
 #include "modm/processing/protothread.hpp"
-#include "tap/communication/serial/ref_serial_transmitter.hpp"
 
 #include "client_display_subsystem.hpp"
 
