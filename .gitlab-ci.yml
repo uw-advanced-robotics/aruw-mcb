@@ -30,8 +30,6 @@ variables:
   - develop
   - schedules
 
-.default_except: &default_except
-
 .verification_only: &verification_only
   - merge_requests
   - develop
@@ -94,7 +92,6 @@ before_script:
 .mcb_build:
   stage: Build
   only: *default_only
-  except: *default_except
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -126,7 +123,6 @@ before_script:
 .test_build:
   stage: Tests
   only: *default_only
-  except: *default_except
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -152,7 +148,6 @@ before_script:
 "MCB Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   variables:
     GIT_SUBMODULE_STRATEGY: none
@@ -172,7 +167,6 @@ before_script:
 "Test Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   script:
     - cd aruw-mcb-project
@@ -215,7 +209,6 @@ before_script:
   stage: Tests
   needs: []
   only: *default_only
-  except: *default_except
   script:
     - cd aruw-mcb-project
     - scons run-tests-gcov profile=fast robot=STANDARD_ORION -j${NUM_JOBS}
