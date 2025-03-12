@@ -66,6 +66,7 @@ public:
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #endif
 
 namespace aruwsrc::drone
