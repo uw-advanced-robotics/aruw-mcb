@@ -119,7 +119,10 @@ aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     false,
     false,
     "Major Yaw Turret 1",
-    "Major Yaw Turret 2");
+    "Major Yaw Turret 2",
+    false,
+    1.f,
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
 struct TurretMinorMotors
 {
@@ -135,14 +138,20 @@ TurretMinorMotors turretLeftMotors{
         turretLeft::YAW_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
         false,
-        "Left Minor Yaw Turret"),
+        "Left Minor Yaw Turret",
+        false,
+        1.0,
+        turretLeft::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
         drivers(),
         turretLeft::PITCH_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
         true,
-        "Left Minor Pitch Turret"),
+        "Left Minor Pitch Turret",
+        false,
+        1.0,
+        turretLeft::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretLeft::YAW_MOTOR_CONFIG,
     .pitchMotorConfig = turretLeft::PITCH_MOTOR_CONFIG
@@ -155,14 +164,20 @@ TurretMinorMotors turretRightMotors{
         turretRight::YAW_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
         false,
-        "Right Minor Yaw Turret"),
+        "Right Minor Yaw Turret",
+        false,
+        1.0,
+        turretRight::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
         drivers(),
         turretRight::PITCH_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
         false,
-        "Right Minor Pitch Turret"),
+        "Right Minor Pitch Turret",
+        false,
+        1.0,
+        turretRight::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretRight::YAW_MOTOR_CONFIG,
     .pitchMotorConfig = turretRight::PITCH_MOTOR_CONFIG
@@ -226,21 +241,24 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-VirtualDjiMotor rightFrontDriveMotor(
+DjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
-    "Right Front Swerve Drive Motor");
+    "Right Front Swerve Drive Motor",
+    false,
+    rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
 
-VirtualDjiMotor rightFrontAzimuthMotor(
+DjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
-    "Right Front Swerve Azimuth Motor");
+    "Right Front Swerve Azimuth Motor",
+    false,
+    rightFrontSwerveConfig.azimuthMotorGearing,
+    rightFrontSwerveConfig.azimuthZeroOffset);
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
@@ -248,7 +266,9 @@ VirtualDjiMotor leftBackDriveMotor(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
-    "Left Back Swerve Drive Motor");
+    "Left Back Swerve Drive Motor",
+    false,
+    leftBackSwerveConfig.gearboxRatio *leftBackSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
@@ -256,7 +276,10 @@ VirtualDjiMotor leftBackAzimuthMotor(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
-    "Left Back Swerve Azimuth Motor");
+    "Left Back Swerve Azimuth Motor",
+    false,
+    leftBackSwerveConfig.azimuthMotorGearing,
+    leftBackSwerveConfig.azimuthZeroOffset);
 
 // This is the one facing parallel to the frame
 VirtualDjiMotor leftOmni(

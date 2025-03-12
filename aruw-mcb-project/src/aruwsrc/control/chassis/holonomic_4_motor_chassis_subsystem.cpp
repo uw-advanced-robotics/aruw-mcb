@@ -67,10 +67,38 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
               VELOCITY_PID_KD,
               VELOCITY_PID_MAX_ERROR_SUM,
               VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(drivers, leftFrontMotorId, CAN_BUS_MOTORS, false, "left front drive motor"),
-      leftBackMotor(drivers, leftBackMotorId, CAN_BUS_MOTORS, false, "left back drive motor"),
-      rightFrontMotor(drivers, rightFrontMotorId, CAN_BUS_MOTORS, false, "right front drive motor"),
-      rightBackMotor(drivers, rightBackMotorId, CAN_BUS_MOTORS, false, "right back drive motor")
+      leftFrontMotor(
+          drivers,
+          leftFrontMotorId,
+          CAN_BUS_MOTORS,
+          false,
+          "left front drive motor",
+          false,
+          CHASSIS_GEARBOX_RATIO),
+      leftBackMotor(
+          drivers,
+          leftBackMotorId,
+          CAN_BUS_MOTORS,
+          false,
+          "left back drive motor",
+          false,
+          CHASSIS_GEARBOX_RATIO),
+      rightFrontMotor(
+          drivers,
+          rightFrontMotorId,
+          CAN_BUS_MOTORS,
+          false,
+          "right front drive motor",
+          false,
+          CHASSIS_GEARBOX_RATIO),
+      rightBackMotor(
+          drivers,
+          rightBackMotorId,
+          CAN_BUS_MOTORS,
+          false,
+          "right back drive motor",
+          false,
+          CHASSIS_GEARBOX_RATIO)
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
@@ -194,7 +222,10 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     tap::motor::DjiMotor* const motor,
     float desiredRpm)
 {
-    pid->update(desiredRpm - motor->getShaftRPM());
+    // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM
+    // and not the wheel rpm
+    pid->update(
+        desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
     float value = VELOCITY_PID_KV * desiredRpm + pid->getValue() + VELOCITY_PID_KS;
     motor->setDesiredOutput(value);
 }
@@ -203,11 +234,11 @@ modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChas
 {
     modm::Matrix<float, MODM_ARRAY_SIZE(motors), 1> wheelVelocity;
 
-    wheelVelocity[LF][0] = leftFrontMotor.getShaftRPM();
-    wheelVelocity[RF][0] = rightFrontMotor.getShaftRPM();
-    wheelVelocity[LB][0] = leftBackMotor.getShaftRPM();
-    wheelVelocity[RB][0] = rightBackMotor.getShaftRPM();
-    return wheelVelToChassisVelMat * convertRawRPM(wheelVelocity);
+    wheelVelocity[LF][0] = leftFrontMotor.getEncoder()->getVelocity();
+    wheelVelocity[RF][0] = rightFrontMotor.getEncoder()->getVelocity();
+    wheelVelocity[LB][0] = leftBackMotor.getEncoder()->getVelocity();
+    wheelVelocity[RB][0] = rightBackMotor.getEncoder()->getVelocity();
+    return wheelVelToChassisVelMat * wheelVelocity;
 }
 
 modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getDesiredVelocityChassisRelative() const

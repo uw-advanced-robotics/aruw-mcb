@@ -83,7 +83,7 @@ public:
     /**
      * This returns Radian position of azimuth motor, CCW+
      */
-    float getAngle() const;
+    tap::algorithms::WrappedFloat getAngle() const;
 
     /**
      * This returns deg/sec velocity of azimuth motor, CCW+
@@ -104,8 +104,8 @@ public:
     inline modm::Matrix<float, 2, 1> getActualModuleVelocity() const
     {
         modm::Matrix<float, 2, 1> velocity;
-        velocity[0][0] = getDriveVelocity() * cos(getAngle());
-        velocity[1][0] = getDriveVelocity() * sin(getAngle());
+        velocity[0][0] = getDriveVelocity() * cos(getAngle().getWrappedValue());
+        velocity[1][0] = getDriveVelocity() * sin(getAngle().getWrappedValue());
         return velocity;
     }
 
