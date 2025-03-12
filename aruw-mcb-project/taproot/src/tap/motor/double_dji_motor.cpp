@@ -105,8 +105,10 @@ int8_t DoubleDjiMotor::getTemperature() const
 
 int16_t DoubleDjiMotor::getTorque() const
 {
-    return (static_cast<int32_t>(motorOne.getTorque()) +
-            static_cast<int32_t>(motorTwo.getTorque())) /
-           2;
+    int32_t m1Torque = motorOne.getTorque();
+    int32_t m2Torque = motorTwo.getTorque();
+    int num_online = motorOne.isMotorOnline() + motorTwo.isMotorOnline();
+
+    return num_online == 0 ? 0 : (m1Torque + m2Torque) / num_online;
 }
 }  // namespace tap::motor
