@@ -60,10 +60,8 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    float rawV1 = deadwheelOdometry.getPerpendicularRPM();
-    float rawV2 = deadwheelOdometry.getParallelMotorRPM();
-    float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
-    float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
+    float V1 = deadwheelOdometry.getPerpendicularVelocity();
+    float V2 = deadwheelOdometry.getParallelMotorVelocity();
 
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot

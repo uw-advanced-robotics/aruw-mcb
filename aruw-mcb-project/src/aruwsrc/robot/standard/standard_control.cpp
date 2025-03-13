@@ -131,7 +131,15 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret",
+    false,
+    1,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
 
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -143,7 +151,10 @@ tap::motor::DjiMotor yawMotor(
 #else
 #error "did not define standard!"
 #endif
-    "Yaw Turret");
+    "Yaw Turret",
+    false,
+    1,
+    YAW_MOTOR_CONFIG.startEncoderValue);
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,

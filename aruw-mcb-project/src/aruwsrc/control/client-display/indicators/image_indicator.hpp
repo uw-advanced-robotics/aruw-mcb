@@ -20,6 +20,8 @@
 #ifndef IMAGE_INDICATOR_HPP_
 #define IMAGE_INDICATOR_HPP_
 
+#include <vector>
+
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
@@ -40,16 +42,13 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    int index = 0;
-
-    static constexpr uint16_t IMAGE_X_OFFSET = 600;
-    static constexpr int16_t IMAGE_Y_OFFSET = -400;
-
-    static constexpr uint16_t LINE_THICKNESS = 1;
+    uint8_t image_index = 0;
+    uint8_t line_index = 0;
 
     Tx::Graphic1Message imageGraphic;
+    static constexpr uint16_t LINE_THICKNESS = 1;
 
-    images::Image image;
+    std::vector<images::Image> images;
 };
 
 }  // namespace aruwsrc::control::client_display

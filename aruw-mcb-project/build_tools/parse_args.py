@@ -90,6 +90,9 @@ def parse_args():
     if args["PROFILING"] not in VALID_PROFILING_TYPES:
         raise Exception("You specified an invalid profiling type.\n" + USAGE)
 
+    if "test" in ARGUMENTS:
+        args["TEST"] = ARGUMENTS.get("test", None)
+
     # Extract the robot type from either the command line or robot_type.hpp
     args["ROBOT_TYPE"] = extract_robot_type.get_robot_type()
 

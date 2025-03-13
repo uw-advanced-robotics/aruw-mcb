@@ -266,10 +266,14 @@ public:
     {
         HolonomicChassisSubsystemTest::SetUp();
 
-        ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(GetParam().lfRPM));
-        ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(GetParam().lbRPM));
-        ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(GetParam().rfRPM));
-        ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(GetParam().rbRPM));
+        ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().lfRPM));
+        ON_CALL(chassis.leftBackMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().lbRPM));
+        ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().rfRPM));
+        ON_CALL(chassis.rightBackMotor.getInternalEncoder(), getShaftRPM)
+            .WillByDefault(Return(GetParam().rbRPM));
     }
 };
 
