@@ -1,13 +1,25 @@
 #ifndef CHASSIS_CONTROLLER_INTERFACE_HPP_
 #define CHASSIS_CONTROLLER_INTERFACE_HPP_
 
+#include "aruwsrc/robot/balstd/balstd_control_operator_interface.hpp"
+#include "aruwsrc/robot/balstd/chassis/balstd_chassis_output.hpp"
+#include "aruwsrc/robot/balstd/chassis/balstd_chassis_state.hpp"
+
 namespace aruwsrc::control::balstd
 {
 class BalstdChassisControllerInterface
 {
 public:
-    virtual void runController() const;
+    BalstdChassisControllerInterface(const BalstdControlOperatorInterface& controlOperatorInterface)
+        : controlOperatorInterface(controlOperatorInterface)
+    {
+    }
+
+    virtual BalstdChassisOutput runController(const BalstdChassisState& state) const;
+
+protected:
+    const BalstdControlOperatorInterface& controlOperatorInterface;
 };
 }  // namespace aruwsrc::control::balstd
 
-#endif CHASSIS_CONTROLLER_INTERFACE_HPP_
+#endif  // CHASSIS_CONTROLLER_INTERFACE_HPP_

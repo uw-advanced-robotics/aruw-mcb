@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_DRIVERS_HPP_
-#define STANDARD_DRIVERS_HPP_
+#ifndef BALSTD_DRIVERS_HPP_
+#define BALSTD_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
@@ -36,10 +36,11 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+
+#include "balstd_control_operator_interface.hpp"
 #endif
 
-namespace aruwsrc::standard
+namespace aruwsrc::balstd
 {
 class Drivers : public tap::Drivers
 {
@@ -74,14 +75,14 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    control::ControlOperatorInterface controlOperatorInterface;
+    aruwsrc::control::balstd::BalstdControlOperatorInterface controlOperatorInterface;
     serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
 #endif
-};  // class aruwsrc::StandardDrivers
-}  // namespace aruwsrc::standard
+};  // class aruwsrc::BalstdDrivers
+}  // namespace aruwsrc::balstd
 
-#endif  // STANDARD_DRIVERS_HPP_
+#endif  // BALSTD_DRIVERS_HPP_

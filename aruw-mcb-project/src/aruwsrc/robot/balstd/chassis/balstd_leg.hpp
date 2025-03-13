@@ -4,18 +4,19 @@
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/motor/motor_interface.hpp"
 
-using tap::algorithms::transforms::Vector;
+#include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::control::balstd
 {
-typedef struct BalstdLegState
+using tap::algorithms::transforms::Vector;
+struct BalstdLegState
 {
     float qFront, qBack;  // angles of upper linkages in radians
     float xc, yc;         // coordinates of wheel axle wrt hip center
     float L, theta;       // pendulum length and angle wrt hip center
 };
 
-typedef struct BalstdLegConfig
+struct BalstdLegConfig
 {
     float upperLinkLength;  // meters
     float lowerLinkLength;  // meters
@@ -37,15 +38,21 @@ public:
     {
     }
 
-    void setThrust(tap::algorithms::transforms::Vector& thrust);
+    void initialize();
+
+    bool allMotorsOnline() const;
+
+    void setThrust(const tap::algorithms::transforms::Vector thrust);
 
     void setWheelTorque(float torque);
 
     void updateState();
 
+    inline BalstdLegState getState() const { return currState; }
+
 private:
-    tap::motor::MotorInterface& frontHipMotor;
-    tap::motor::MotorInterface& backHipMotor;
+    tap::motor::MotorInterface& frontHipMotor;  // 0
+    tap::motor::MotorInterface& backHipMotor;   // 1
     tap::motor::MotorInterface& wheelMotor;
 
     BalstdLegConfig config;
@@ -54,7 +61,13 @@ private:
 
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
 
-    void setHipMotorTorque(tap::motor::MotorInterface& hipMotor, float torque);
+    static constexpr float FRONT_HIP_OUTER_LIMIT = modm::toRadian(-15);
+    static constexpr float FRONT_HIP_INNER_LIMIT = modm::toRadian(90);
+    static constexpr float BACK_HIP_OUTER_LIMIT = modm::toRadian(195);
+    static constexpr float BACK_HIP_INNER_LIMIT = modm::toRadian(90);
+
+    void setFrontHipMotorTorque(float torque);
+    void setBackHipMotorTorque(float torque);
 
     void calculateJacobianTranspose();
 };

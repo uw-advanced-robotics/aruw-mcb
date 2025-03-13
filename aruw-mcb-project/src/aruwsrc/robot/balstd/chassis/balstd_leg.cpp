@@ -5,12 +5,25 @@ using tap::algorithms::CMSISMat;
 namespace aruwsrc::control::balstd
 {
 
-void BalstdLeg::setThrust(Vector& thrust)
+void BalstdLeg::initialize()
+{
+    frontHipMotor.initialize();
+    backHipMotor.initialize();
+    wheelMotor.initialize();
+}
+
+bool BalstdLeg::allMotorsOnline() const
+{
+    return frontHipMotor.isMotorOnline() && backHipMotor.isMotorOnline() &&
+           wheelMotor.isMotorOnline();
+}
+
+void BalstdLeg::setThrust(const Vector thrust)
 {
     CMSISMat<2, 1> torques = jacobianTranspose * CMSISMat<2, 1>({thrust.x(), thrust.y()});
 
-    setHipMotorTorque(frontHipMotor, torques.data[0]);
-    setHipMotorTorque(backHipMotor, torques.data[1]);
+    setFrontHipMotorTorque(torques.data[0]);
+    setBackHipMotorTorque(torques.data[1]);
 }
 
 void BalstdLeg::setWheelTorque(float torque)
@@ -19,10 +32,24 @@ void BalstdLeg::setWheelTorque(float torque)
     // wheelMotor.setDesiredOutput(torque);
 }
 
-void BalstdLeg::setHipMotorTorque(tap::motor::MotorInterface& hipMotor, float torque)
+void BalstdLeg::setFrontHipMotorTorque(float torque)
 {
+    // TODO: wait for encoders mr for radian position getter, this is wrong rn
+    if (frontHipMotor.getEncoderWrapped() <= FRONT_HIP_OUTER_LIMIT && torque < 0) torque = 0;
+    if (frontHipMotor.getEncoderWrapped() >= FRONT_HIP_INNER_LIMIT && torque > 0) torque = 0;
+
     // TODO: once characterized
-    // hipMotor.setDesiredOutput(torque);
+    // frontHipMotor.setDesiredOutput(torque);
+}
+
+void BalstdLeg::setBackHipMotorTorque(float torque)
+{
+    // TODO: wait for encoders mr for radian position getter, this is wrong rn
+    if (backHipMotor.getEncoderWrapped() <= BACK_HIP_INNER_LIMIT && torque < 0) torque = 0;
+    if (backHipMotor.getEncoderWrapped() >= BACK_HIP_OUTER_LIMIT && torque > 0) torque = 0;
+
+    // TODO: once characterized
+    // backHipMotor.setDesiredOutput(torque);
 }
 
 void BalstdLeg::updateState()

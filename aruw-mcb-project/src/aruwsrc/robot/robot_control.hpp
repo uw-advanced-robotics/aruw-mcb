@@ -31,6 +31,8 @@
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
+#elif defined(TARGET_BALSTD)
+namespace aruwsrc::balstd
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
 #elif defined(TARGET_HERO_PERSEUS)

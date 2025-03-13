@@ -25,69 +25,54 @@ namespace aruwsrc::control::balstd
 {
 BalstdChassisSubsystem::BalstdChassisSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DjiMotor* leftMotor,
-    tap::motor::DjiMotor* leftMidMotor,
-    tap::motor::DjiMotor* rightMidMotor,
-    tap::motor::DjiMotor* rightMotor,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
-    : HolonomicChassisSubsystem(drivers, currentSensor, nullptr),
-      motors{leftMotor, leftMidMotor, rightMidMotor, rightMotor}
+    BalstdLeg& leftLeg,
+    BalstdLeg& rightLeg)
+    : ChassisSubsystemInterface(drivers),
+      leftLeg(leftLeg),
+      rightLeg(rightLeg),
+      controller(nullptr),
+      currState(ZERO_STATE)
 {
 }
 
 void BalstdChassisSubsystem::initialize()
 {
-    for (auto motor : motors)
-    {
-        motor->initialize();
-    }
+    leftLeg.initialize();
+    rightLeg.initialize();
 }
 
 bool BalstdChassisSubsystem::allMotorsOnline() const
 {
-    bool online = true;
-    for (auto motor : motors) online &= motor->isMotorOnline();
-    return online;
+    return leftLeg.allMotorsOnline() && rightLeg.allMotorsOnline();
 }
 
-void BalstdChassisSubsystem::setZeroRPM()
+void BalstdChassisSubsystem::setZeroRPM() { setOutputs(ZERO_OUTPUT); }
+
+void BalstdChassisSubsystem::refresh()
 {
-    for (auto motor : motors) motor->setDesiredOutput(0);
+    updateState();
+
+    BalstdChassisOutput output =
+        (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState);
+
+    setOutputs(output);
 }
 
-void BalstdChassisSubsystem::setDesiredOutput(float x, float y, float r) {}
-
-void BalstdChassisSubsystem::refresh() {}
-
-void BalstdChassisSubsystem::limitChassisPower()
+void BalstdChassisSubsystem::setOutputs(const BalstdChassisOutput& output)
 {
-    // use power limiting object to compute initial power limiting fraction
-    currentSensor->update();
-    float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    leftLeg.setThrust(output.leftForce);
+    leftLeg.setWheelTorque(output.leftTorque);
+    rightLeg.setThrust(output.rightForce);
+    rightLeg.setWheelTorque(output.rightTorque);
 }
 
-modm::Matrix<float, 3, 1> BalstdChassisSubsystem::getActualVelocityChassisRelative() const
+void BalstdChassisSubsystem::updateState()
 {
-    modm::Matrix<float, 8, 1> actualModuleVectors;
-    for (unsigned int i = 0; i < 4; i++)
-    {
-        modm::Matrix<float, 2, 1> moduleVel = motors[i]->getActualModuleVelocity();
-        actualModuleVectors[2 * i][0] = moduleVel[0][0];
-        actualModuleVectors[2 * i + 1][0] = moduleVel[1][0];
-    }
-    return forwardMatrix * actualModuleVectors;
-}
+    leftLeg.updateState();
+    rightLeg.updateState();
 
-modm::Matrix<float, 3, 1> BalstdChassisSubsystem::getDesiredVelocityChassisRelative() const
-{
-    modm::Matrix<float, 8, 1> desiredModuleVectors;
-    for (unsigned int i = 0; i < NUM_MODULES; i++)
-    {
-        modm::Matrix<float, 2, 1> moduleVel = modules[i]->getDesiredModuleVelocity();
-        desiredModuleVectors[2 * i][0] = moduleVel[0][0];
-        desiredModuleVectors[2 * i + 1][0] = moduleVel[1][0];
-    }
-    return forwardMatrix * desiredModuleVectors;
+    currState.leftLegState = leftLeg.getState();
+    currState.rightLegState = rightLeg.getState();
 }
 
 }  // namespace aruwsrc::control::balstd

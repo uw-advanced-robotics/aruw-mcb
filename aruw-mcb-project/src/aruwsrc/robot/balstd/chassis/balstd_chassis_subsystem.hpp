@@ -19,44 +19,54 @@
 #ifndef BALSTD_CHASSIS_SUBSYSTEM_HPP_
 #define BALSTD_CHASSIS_SUBSYSTEM_HPP_
 
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+
+#include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
+#include "aruwsrc/robot/balstd/chassis/controllers/chassis_controller_interface.hpp"
 
 namespace aruwsrc::control::balstd
 {
 
-class BalstdChassisSubsystem : public chassis::HolonomicChassisSubsystem
+class BalstdChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    BalstdChassisSubsystem(
-        tap::Drivers* drivers,
-        tap::motor::DjiMotor* leftMotor,
-        tap::motor::DjiMotor* leftMidMotor,
-        tap::motor::DjiMotor* rightMidMotor,
-        tap::motor::DjiMotor* rightMotor,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+    BalstdChassisSubsystem(tap::Drivers* drivers, BalstdLeg& leftLeg, BalstdLeg& rightLeg);
 
     void initialize() override;
 
     void refresh() override;
 
-    void refreshSafeDisconnect() override;
+    void updateState();
 
-    void setDesiredOutput(float x, float y, float r) override;
+    void setOutputs(const BalstdChassisOutput& output);
 
-    void setZeroRPM() override;
+    inline void attachController(BalstdChassisControllerInterface* newController)
+    {
+        this->controller = newController;
+    }
+
+    void refreshSafeDisconnect() override { setZeroRPM(); }
+
+    void setZeroRPM();
 
     bool allMotorsOnline() const override;
 
-    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
+    inline modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override
+    {
+        return modm::Matrix<float, 3, 1>::zeroMatrix();
+    }
 
-    void limitChassisPower() override;
+    inline int getNumChassisMotors() const override { return 6; }
 
     const char* getName() const override { return "BalstdChassisSubsystem"; }
 
 private:
-    void balstdDriveCalculate(float x, float y, float z, float maxWheelSpeed);
+    BalstdLeg& leftLeg;
+    BalstdLeg& rightLeg;
 
-    tap::motor::DjiMotor* motors[4];
+    BalstdChassisControllerInterface* controller;
+
+    BalstdChassisState currState;
 
 };  // class BalstdChassisSubsystem
 

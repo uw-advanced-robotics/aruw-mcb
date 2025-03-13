@@ -1,6 +1,6 @@
 
-#ifndef BALSTD_OP_STATES_HPP_
-#define BALSTD_OP_STATES_HPP_
+#ifndef BALSTD_CHASSIS_STATE_HPP_
+#define BALSTD_CHASSIS_STATE_HPP_
 
 #include "tap/algorithms/transforms/transform.hpp"
 
@@ -9,12 +9,15 @@
 namespace aruwsrc::control::balstd
 {
 
-typedef struct BalstdChassisState
+struct BalstdChassisState
 {
-    tap::algorithms::transforms::Transform& worldToChassis;
     BalstdLegState leftLegState, rightLegState;
 };
 
+const BalstdChassisState ZERO_STATE{
+    .leftLegState = {0, 0, 0, 0, 0, 0},
+    .rightLegState = {0, 0, 0, 0, 0, 0}};
+
 }  // namespace aruwsrc::control::balstd
 
-#endif  // BALSTD_OP_STATES_HPP_
+#endif  // BALSTD_CHASSIS_STATE_HPP_

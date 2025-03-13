@@ -52,6 +52,8 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
+#elif defined(TARGET_BALSTD)
+using namespace aruwsrc::balstd;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
 #elif defined(TARGET_HERO_PERSEUS)
