@@ -256,6 +256,20 @@ before_script:
   variables:
     ROBOT: STANDARD_CYGNUS
 
+# Balancing Standard build
+
+"Balancing Standard: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: BALSTD
+
+"Balancing Standard: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: BALSTD
+
 # Drone build
 
 "Drone: MCB Build":
