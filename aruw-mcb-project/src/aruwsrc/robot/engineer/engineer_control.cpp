@@ -26,10 +26,10 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cube_move_command.hpp"
-#include "aruwsrc/robot/engineer/cube_move_manual_command.hpp"
-#include "aruwsrc/robot/engineer/cube_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_move_command.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 using namespace tap::gpio;
 using tap::communication::serial::Remote;

@@ -23,8 +23,8 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "engineer_drivers.hpp"
-#include "engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 
 namespace aruwsrc::robot::engineer
 {
