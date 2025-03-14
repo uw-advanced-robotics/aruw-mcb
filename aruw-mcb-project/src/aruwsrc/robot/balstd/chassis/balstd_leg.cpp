@@ -34,9 +34,12 @@ void BalstdLeg::setWheelTorque(float torque)
 
 void BalstdLeg::setFrontHipMotorTorque(float torque)
 {
-    // TODO: wait for encoders mr for radian position getter, this is wrong rn
-    if (frontHipMotor.getEncoderWrapped() <= FRONT_HIP_OUTER_LIMIT && torque < 0) torque = 0;
-    if (frontHipMotor.getEncoderWrapped() >= FRONT_HIP_INNER_LIMIT && torque > 0) torque = 0;
+    if (frontHipMotor.getEncoder()->getPosition().getWrappedValue() <= config.frontHipOuterLimit &&
+        torque < 0)
+        torque = 0;
+    if (frontHipMotor.getEncoder()->getPosition().getWrappedValue() >= config.frontHipInnerLimit &&
+        torque > 0)
+        torque = 0;
 
     // TODO: once characterized
     // frontHipMotor.setDesiredOutput(torque);
@@ -44,9 +47,12 @@ void BalstdLeg::setFrontHipMotorTorque(float torque)
 
 void BalstdLeg::setBackHipMotorTorque(float torque)
 {
-    // TODO: wait for encoders mr for radian position getter, this is wrong rn
-    if (backHipMotor.getEncoderWrapped() <= BACK_HIP_INNER_LIMIT && torque < 0) torque = 0;
-    if (backHipMotor.getEncoderWrapped() >= BACK_HIP_OUTER_LIMIT && torque > 0) torque = 0;
+    if (backHipMotor.getEncoder()->getPosition().getWrappedValue() <= config.backHipOuterLimit &&
+        torque < 0)
+        torque = 0;
+    if (backHipMotor.getEncoder()->getPosition().getWrappedValue() >= config.backHipInnerLimit &&
+        torque > 0)
+        torque = 0;
 
     // TODO: once characterized
     // backHipMotor.setDesiredOutput(torque);
@@ -55,8 +61,8 @@ void BalstdLeg::setBackHipMotorTorque(float torque)
 void BalstdLeg::updateState()
 {
     // TODO: wait for motor/encoder tap mr lol
-    currState.qFront = frontHipMotor.getEncoderWrapped();
-    currState.qBack = backHipMotor.getEncoderWrapped();
+    currState.qFront = frontHipMotor.getEncoder()->getPosition().getWrappedValue();
+    currState.qBack = backHipMotor.getEncoder()->getPosition().getWrappedValue();
 
     calculateJacobianTranspose();
 }

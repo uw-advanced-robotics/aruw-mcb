@@ -21,6 +21,11 @@ struct BalstdLegConfig
     float upperLinkLength;  // meters
     float lowerLinkLength;  // meters
     float fixedLinkLength;  // meters
+
+    float frontHipOuterLimit = modm::toRadian(-15);  // radians
+    float frontHipInnerLimit = modm::toRadian(90);   // radians
+    float backHipOuterLimit = modm::toRadian(195);   // radians
+    float backHipInnerLimit = modm::toRadian(90);    // radians
 };
 
 class BalstdLeg
@@ -30,7 +35,7 @@ public:
         tap::motor::MotorInterface& frontHipMotor,
         tap::motor::MotorInterface& backHipMotor,
         tap::motor::MotorInterface& wheelMotor,
-        BalstdLegConfig& config)
+        const BalstdLegConfig config)
         : frontHipMotor(frontHipMotor),
           backHipMotor(backHipMotor),
           wheelMotor(wheelMotor),
@@ -55,16 +60,11 @@ private:
     tap::motor::MotorInterface& backHipMotor;   // 1
     tap::motor::MotorInterface& wheelMotor;
 
-    BalstdLegConfig config;
+    const BalstdLegConfig config;
 
     BalstdLegState currState;
 
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
-
-    static constexpr float FRONT_HIP_OUTER_LIMIT = modm::toRadian(-15);
-    static constexpr float FRONT_HIP_INNER_LIMIT = modm::toRadian(90);
-    static constexpr float BACK_HIP_OUTER_LIMIT = modm::toRadian(195);
-    static constexpr float BACK_HIP_INNER_LIMIT = modm::toRadian(90);
 
     void setFrontHipMotorTorque(float torque);
     void setBackHipMotorTorque(float torque);

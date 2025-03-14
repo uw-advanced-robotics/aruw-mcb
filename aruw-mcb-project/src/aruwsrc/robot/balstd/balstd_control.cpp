@@ -113,6 +113,10 @@ BalstdLegConfig legConfig{
     .upperLinkLength = 0.15,
     .lowerLinkLength = 0.25,
     .fixedLinkLength = 0.108,
+    .frontHipOuterLimit = modm::toRadian(-15),
+    .frontHipInnerLimit = modm::toRadian(90),
+    .backHipOuterLimit = modm::toRadian(195),
+    .backHipInnerLimit = modm::toRadian(90),
 };
 
 BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
