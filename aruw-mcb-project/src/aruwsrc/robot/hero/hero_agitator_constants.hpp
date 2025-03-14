@@ -52,7 +52,7 @@ static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 19.2f * 152.0f / 24.0f,  // M3508 * Agitator Teeth / Pully Teeth
+    .gearRatio = 1.0f / (19.2f * 152.0f / 24.0f),  // M3508 * Agitator Teeth / Pully Teeth
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -98,7 +98,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 };
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR8,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
