@@ -29,7 +29,6 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "sentry_drive_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
@@ -195,15 +194,6 @@ HopperSubsystemMock::HopperSubsystemMock(
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
-SentryDriveSubsystemMock::SentryDriveSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::InputPin leftLimitSwitch,
-    tap::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentry::drive::SentryDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
-{
-}
-SentryDriveSubsystemMock::~SentryDriveSubsystemMock() {}
-
 SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
     : SentryRequestSubsystem(drivers)
 {
@@ -234,13 +224,12 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement)
-                       { return measurement.minDifference(setpoint); });
-    ON_CALL(*this, getValidChassisMeasurementError)
-        .WillByDefault(
-            [&]() {
-                return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
-            });
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement) {
+            return measurement.minDifference(setpoint);
+        });
+    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
+        return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
+    });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}

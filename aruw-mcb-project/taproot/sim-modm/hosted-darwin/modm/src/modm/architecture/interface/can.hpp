@@ -118,7 +118,6 @@ public:
 #endif
 };
 
-/// @ingroup modm_architecture_can
 modm::IOStream&
 operator << (modm::IOStream& stream, const Can::BusState state);
 

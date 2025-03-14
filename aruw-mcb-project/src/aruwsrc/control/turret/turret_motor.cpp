@@ -33,8 +33,7 @@ TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorCon
     : config(motorConfig),
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
-      chassisFrameMeasuredAngle(Angle(config.startAngle)),
-      lastUpdatedEncoderValue(config.startEncoderValue)
+      chassisFrameMeasuredAngle(Angle(config.startAngle))
 {
     assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
@@ -44,31 +43,13 @@ void TurretMotor::updateMotorAngle()
 {
     if (isOnline())
     {
-        int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
-
-        if (lastUpdatedEncoderValue == encoderUnwrapped)
-        {
-            return;
-        }
-
-        lastUpdatedEncoderValue = encoderUnwrapped;
-
         float chassisFrameUnwrappedMeasurement =
-            static_cast<float>(encoderUnwrapped - config.startEncoderValue) *
-                static_cast<float>(M_TWOPI) / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;
+            motor->getEncoder()->getPosition().getUnwrappedValue() + config.startAngle;
 
         chassisFrameMeasuredAngle.setUnwrappedValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
-        if (lastUpdatedEncoderValue == config.startEncoderValue)
-        {
-            return;
-        }
-
-        lastUpdatedEncoderValue = config.startEncoderValue;
-
         chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
 }
@@ -129,7 +110,7 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
         }
         else if (pos > neg)
         {
-            return (setpoint - measurement).getWrappedValue() - static_cast<float>(M_TWOPI);
+            return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
     }
 

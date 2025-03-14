@@ -49,6 +49,7 @@ namespace atomic
 class Lock
 {
 public:
+	modm_always_inline
 	Lock();
 };
 
@@ -65,6 +66,7 @@ public:
 class Unlock
 {
 public:
+	modm_always_inline
 	Unlock();
 };
 

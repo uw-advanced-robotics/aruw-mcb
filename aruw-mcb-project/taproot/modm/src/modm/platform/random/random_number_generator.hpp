@@ -10,13 +10,18 @@
  */
 // ----------------------------------------------------------------------------
 
-#pragma once
+#ifndef MODM_STM32_RANDOM_NUMBER_GENERATOR_HPP
+#define MODM_STM32_RANDOM_NUMBER_GENERATOR_HPP
 
 #include <stdint.h>
 #include "../device.hpp"
 #include <modm/platform/clock/rcc.hpp>
 
-namespace modm::platform
+
+namespace modm
+{
+
+namespace platform
 {
 
 /**
@@ -37,17 +42,10 @@ public:
 		RNG->CR = RNG_CR_RNGEN;
 	}
 
-	static inline void
-	disable()
-	{
-		RNG->CR = 0;
-		Rcc::disable<Peripheral::Rng>();
-	}
-
 	/**
 	 * Check if a new random number is ready
 	 *
-	 * @return	`true` if a new random number has been generated
+	 * @return	 `true` if a new random number has been generated
 	 * 			and can be read via getValue()
 	 */
 	static inline bool
@@ -71,3 +69,6 @@ public:
 
 }
 
+}
+
+#endif	// MODM_STM32_RANDOM_NUMBER_GENERATOR_HPP

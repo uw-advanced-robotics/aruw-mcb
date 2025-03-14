@@ -20,18 +20,31 @@
 namespace modm::platform
 {
 
-/// @ingroup modm_platform_clock
+typedef void (*InterruptHandler)(void);
+
+/**
+ * @brief		SysTick Timer
+ * @ingroup		modm_platform_clock_cortex
+ */
 class SysTickTimer
 {
 public:
 	/**
-	 * Initializes the SysTick to provide a timer to `modm::Clock` and
-	 * `modm::PreciseClock`.
+	 * Initializes the SysTick Timer to generate periodic events.
+	 *
+	 *
+	 * @warning	The SysTick Timer is used by default to increment
+	 * 			modm::Clock, which is used by modm::Timeout and other
+	 * 			similar processing classes.
+	 * 			You must not increment the modm::Clock
+	 * 			additionally somewhere else.
 	 *
 	 * @tparam	SystemClock
 	 * 		the currently active system clock
+	 * @tparam	rate
+	 * 		the desired update rate of the modm::Clock
 	 * @tparam	tolerance
-	 * 		the allowed tolerance for the resulting clock rate
+	 * 		the allowed absolute tolerance for the resulting clock rate
 	 */
 	template< class SystemClock, percent_t tolerance=pct(0) >
 	static void
@@ -41,38 +54,40 @@ public:
 		              "HLCK is too fast for the SysTick to run at 4Hz!");
 		if constexpr (SystemClock::Frequency < 8'000'000)
 		{
-			constexpr auto result = Prescaler::from_linear(
+			constexpr auto result = Prescaler::from_range(
 					SystemClock::Frequency, 4, 1, (1ul << 24)-1);
 			PeripheralDriver::assertBaudrateInTolerance< result.frequency, 4, tolerance >();
 
 			us_per_Ncycles = ((1ull << Ncycles) * 1'000'000ull) / SystemClock::Frequency;
 			ms_per_Ncycles = ((1ull << Ncycles) * 1'000ull) / SystemClock::Frequency;
-			enable(result.index, true);
+			enable(result.index, false);
 		}
 		else
 		{
-			constexpr auto result = Prescaler::from_linear(
+			constexpr auto result = Prescaler::from_range(
 					SystemClock::Frequency/8, 4, 1, (1ul << 24)-1);
 			PeripheralDriver::assertBaudrateInTolerance< result.frequency, 4, tolerance >();
 
 			us_per_Ncycles = ((1ull << Ncycles) * 8'000'000ull) / SystemClock::Frequency;
 			ms_per_Ncycles = ((1ull << Ncycles) * 8'000ull) / SystemClock::Frequency;
-			enable(result.index, false);
+			enable(result.index, true);
 		}
 	}
 
 	/**
 	 * Disables SysTick Timer.
 	 *
-	 * @warning	If the SysTick Timer is disabled, `modm::Clock` and
-	 *			`modm::PreciseClock` will stop incrementing.
+	 * @warning	If the SysTick Timer is disabled modm::Clock is not
+	 * 			incremented automatically. Workflow classes which
+	 * 			rely on modm::Clock will not work if modm::Clock
+	 * 			is not incremented.
 	 */
 	static void
 	disable();
 
 private:
 	static void
-	enable(uint32_t reload, bool use_processor_clock);
+	enable(uint32_t reload, bool prescaler8);
 
 	// FCPU < 8MHz
 	// 536e6/4 < 27-bit, 8e6/4 < 21-bit
@@ -87,6 +102,11 @@ private:
 	friend class modm::chrono::micro_clock;
 };
 
+}
+
+namespace modm::cortex {
+	using SysTickTimer [[deprecated("Use `modm::platform:SysTickTimer` instead!")]] =
+		::modm::platform::SysTickTimer;
 }
 
 #endif	//  MODM_STM32_CORTEX_TIMER_HPP

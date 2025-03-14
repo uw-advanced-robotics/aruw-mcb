@@ -47,13 +47,12 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
 
 static constexpr float DESIRED_LOAD_TIME_S = 1.0f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
-static constexpr float WATERWHEEL_TARGET_DISPLACEMENT =
-    static_cast<float>(M_TWOPI) / WATERWHEEL_NUM_BALL_POCKETS;
+static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 19.2f * 152.0f / 24.0f,  // M3508 * Agitator Teeth / Pully Teeth
+    .gearRatio = 1.0f / (19.2f * 152.0f / 24.0f),  // M3508 * Agitator Teeth / Pully Teeth
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -99,7 +98,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 };
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR8,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -111,8 +110,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = static_cast<float>(M_PI) / 8.0f,
-        .desiredSetpoint = (static_cast<float>(M_PI) / 2.0f) / DESIRED_LOAD_TIME_S,
+        .targetIntegralChange = M_PI / 8.0f,
+        .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -
@@ -122,8 +121,8 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = static_cast<float>(M_TWOPI),
-        .desiredSetpoint = 6.0f * static_cast<float>(M_PI),
+        .targetIntegralChange = M_TWOPI,
+        .desiredSetpoint = 6.0 * M_PI,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -

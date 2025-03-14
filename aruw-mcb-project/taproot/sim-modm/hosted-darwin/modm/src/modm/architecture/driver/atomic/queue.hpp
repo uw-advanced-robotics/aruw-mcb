@@ -33,7 +33,8 @@ namespace modm
 		 *
 		 * \todo	This implementation should work but could be improved
 		 */
-		template<typename T, std::size_t N>
+		template<typename T,
+				 std::size_t N>
 		class Queue
 		{
 		public:
@@ -45,10 +46,10 @@ namespace modm
 		public:
 			Queue();
 
-			bool
+			modm_always_inline bool
 			isFull() const;
 
-			bool
+			modm_always_inline bool
 			isNotFull() const { return not isFull(); }
 
 			/**
@@ -60,10 +61,10 @@ namespace modm
 			bool
 			isNearlyFull() const;
 
-			bool
+			modm_always_inline bool
 			isEmpty() const;
 
-			bool
+			modm_always_inline bool
 			isNotEmpty() const { return not isEmpty(); }
 
 			/**
@@ -78,7 +79,7 @@ namespace modm
 			bool
 			isNearlyEmpty() const;
 
-			Size
+			modm_always_inline Size
 			getMaxSize() const;
 
 			Size

@@ -83,7 +83,7 @@ public:
     /**
      * This returns Radian position of azimuth motor, CCW+
      */
-    float getAngle() const;
+    tap::algorithms::WrappedFloat getAngle() const;
 
     /**
      * This returns deg/sec velocity of azimuth motor, CCW+
@@ -104,8 +104,8 @@ public:
     inline modm::Matrix<float, 2, 1> getActualModuleVelocity() const
     {
         modm::Matrix<float, 2, 1> velocity;
-        velocity[0][0] = getDriveVelocity() * cos(getAngle());
-        velocity[1][0] = getDriveVelocity() * sin(getAngle());
+        velocity[0][0] = getDriveVelocity() * cos(getAngle().getWrappedValue());
+        velocity[1][0] = getDriveVelocity() * sin(getAngle().getWrappedValue());
         return velocity;
     }
 
@@ -149,7 +149,7 @@ private:
     inline float wrapAngle(float angle, float denomination)
     {
         return fmod(
-            fmod(angle, denomination) + static_cast<float>(M_TWOPI),
+            fmod(angle, denomination) + M_TWOPI,
             denomination);  // replace M_TWOPI with denomination? doesn't matter for its one use
                             // case currently
         // double fmod needed to ensure output is positive bc fmod can be negative

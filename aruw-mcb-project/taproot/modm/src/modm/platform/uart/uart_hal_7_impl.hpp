@@ -60,7 +60,7 @@ UartHal7::initialize(Parity parity, WordLength length)
 
 	constexpr uint32_t scalar = (baudrate * 16 > SystemClock::Uart7) ? 8 : 16;
 	constexpr uint32_t max = ((scalar == 16) ? (1ul << 16) : (1ul << 15)) - 1ul;
-	constexpr auto result = Prescaler::from_linear(SystemClock::Uart7, baudrate, scalar, max);
+	constexpr auto result = Prescaler::from_range(SystemClock::Uart7, baudrate, 1, max);
 	modm::PeripheralDriver::assertBaudrateInTolerance< result.frequency, baudrate, tolerance >();
 
 	uint32_t cr1 = UART7->CR1;
@@ -140,12 +140,6 @@ UartHal7::isTransmitRegisterEmpty()
 	return UART7->SR & USART_SR_TXE;
 }
 
-bool
-UartHal7::isTransmissionComplete()
-{
-	return UART7->SR & USART_SR_TC;
-}
-
 void
 UartHal7::enableInterruptVector(bool enable, uint32_t priority)
 {
@@ -199,6 +193,7 @@ UartHal7::acknowledgeInterruptFlags(InterruptFlag_t flags)
 		tmp = UART7->DR;
 		(void) tmp;
 	}
+	(void) flags;	// avoid compiler warning
 }
 
 } // namespace modm::platform

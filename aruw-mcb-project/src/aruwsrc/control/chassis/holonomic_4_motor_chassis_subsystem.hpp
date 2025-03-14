@@ -53,10 +53,22 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-    virtual inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
-    virtual inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+    virtual inline float getLeftFrontRpmActual() const
+    {
+        return leftFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getLeftBackRpmActual() const
+    {
+        return leftBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getRightFrontRpmActual() const
+    {
+        return rightFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getRightBackRpmActual() const
+    {
+        return rightBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
@@ -107,7 +119,7 @@ public:
 
     float mpsToRpm(float mps) const override
     {
-        return mps / (static_cast<float>(M_TWOPI) * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
+        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
     }
 
 protected:

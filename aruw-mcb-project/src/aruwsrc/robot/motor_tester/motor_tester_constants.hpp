@@ -47,7 +47,7 @@ static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR2,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -55,23 +55,21 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CON
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = 2.0f * static_cast<float>(M_TWOPI),
+    .jammingVelocityDifference = 2.0f * M_TWOPI,
     .jammingTime = 200,  // Fudge factor because it's unjamming more than it should; used to be 100
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / static_cast<float>(M_TWOPI),
+    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     // magic numbers are fudge factors
-    .targetIntegralChange =
-        static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
-    .desiredSetpoint = AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS),
-    .integralSetpointTolerance = (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS) * 0.1f,
+    .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
+    .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-constexpr float UNJAM_VELOCITY =
-    0.35f * AGITATOR_MAX_ROF * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS);
-constexpr float UNJAM_DISTANCE = 0.6f * (static_cast<float>(M_TWOPI) / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = UNJAM_DISTANCE,

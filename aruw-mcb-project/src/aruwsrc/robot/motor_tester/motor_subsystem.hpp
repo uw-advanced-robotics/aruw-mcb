@@ -36,14 +36,10 @@ public:
     MotorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motor,
-        tap::algorithms::SmoothPidConfig pidConfig,
-        float gearRatio,
-        bool akMotor = false)
+        tap::algorithms::SmoothPidConfig pidConfig)
         : Subsystem(drivers),
           motor(motor),
-          velocityPid(pidConfig),
-          gearRatio(gearRatio),
-          akMotor(akMotor)
+          velocityPid(pidConfig)
     {
     }
 
@@ -70,7 +66,10 @@ public:
     };
 
     // in output shaft rpm
-    inline float getCurrentRPM() const { return (motor.getShaftRPM() * gearRatio); }
+    inline float getCurrentRPM() const
+    {
+        return motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
 
     inline void refreshSafeDisconnect() override { stop(); };
 
@@ -89,7 +88,6 @@ public:
 private:
     tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid velocityPid;
-    float gearRatio;
 
     float desiredRPM{0};
     uint32_t prevTime = 0;

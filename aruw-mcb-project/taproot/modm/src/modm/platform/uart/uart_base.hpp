@@ -18,7 +18,6 @@
 #include "../device.hpp"
 #include <modm/architecture/interface/register.hpp>
 #include <modm/architecture/interface/interrupt.hpp>
-#include <modm/platform/gpio/connector.hpp>
 
 /// @cond
 // STM has some weird ideas about continuity

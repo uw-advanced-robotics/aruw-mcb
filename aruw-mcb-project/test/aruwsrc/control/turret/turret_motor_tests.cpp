@@ -47,22 +47,19 @@ protected:
 
     TurretMotorTest()
         : motor(&drivers, MOTOR1, CanBus::CAN_BUS1, false, "pitch"),
-          turretMotor(&motor, TURRET_MOTOR_CONFIG)
+          turretMotor(&motor, TURRET_MOTOR_CONFIG),
+          position(tap::algorithms::Angle(TURRET_MOTOR_CONFIG.startAngle))
     {
     }
 
     void SetUp() override
     {
         ON_CALL(motor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
-        ON_CALL(motor, getEncoderWrapped).WillByDefault(ReturnPointee(&encoderWrapped));
-        ON_CALL(motor, getEncoderUnwrapped).WillByDefault(ReturnPointee(&encoderUnwrapped));
+        ON_CALL(motor.getInternalEncoder(), isOnline).WillByDefault(ReturnPointee(&motorOnline));
+        ON_CALL(motor.getInternalEncoder(), getPosition).WillByDefault(ReturnPointee(&position));
     }
 
-    void setEncoder(int64_t encoderUnwrapped)
-    {
-        this->encoderUnwrapped = encoderUnwrapped;
-        encoderWrapped = encoderUnwrapped % DjiMotor::ENC_RESOLUTION;
-    }
+    void setEncoder(tap::algorithms::WrappedFloat position) { this->position = position; }
 
     tap::Drivers drivers;
     NiceMock<DjiMotorMock> motor;
@@ -70,8 +67,7 @@ protected:
     bool motorOnline = true;
 
 private:
-    uint16_t encoderWrapped = 0;
-    int64_t encoderUnwrapped = 0;
+    tap::algorithms::WrappedFloat position;
 };
 
 TEST_F(TurretMotorTest, isOnline_reflective_of_motor_online)
@@ -146,26 +142,18 @@ TEST_F(
     getChassisFrameMeasuredAngle__returns_values_based_on_enc_position_if_yaw_motor_online)
 {
     // Default expectations so turret assumes motors are good to go and within valid angle range
-    const int encStep = DjiMotor::ENC_RESOLUTION / 8;
-    std::vector<std::tuple<float, int>> angleAndEncoderPairs{
-        {TURRET_MOTOR_CONFIG.startAngle, TURRET_MOTOR_CONFIG.startEncoderValue},
-        {TURRET_MOTOR_CONFIG.startAngle + M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + encStep},
-        {TURRET_MOTOR_CONFIG.startAngle + 2 * M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + 2 * encStep},
-        {TURRET_MOTOR_CONFIG.startAngle + 3 * M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + 3 * encStep},
-        {TURRET_MOTOR_CONFIG.startAngle + 4 * M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + 4 * encStep},
-        {TURRET_MOTOR_CONFIG.startAngle + 5 * M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + 5 * encStep},
-        {TURRET_MOTOR_CONFIG.startAngle + 6 * M_TWOPI / 8,
-         TURRET_MOTOR_CONFIG.startEncoderValue + 6 * encStep},
-    };
+    std::vector<float> angleAndEncoderPairs{
+        TURRET_MOTOR_CONFIG.startAngle + 0 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 1 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 2 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 3 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 4 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 5 * M_TWOPI / 8,
+        TURRET_MOTOR_CONFIG.startAngle + 6 * M_TWOPI / 8};
 
-    for (auto [angle, encoder] : angleAndEncoderPairs)
+    for (auto angle : angleAndEncoderPairs)
     {
-        setEncoder(encoder);
+        setEncoder(tap::algorithms::Angle(angle - TURRET_MOTOR_CONFIG.startAngle));
         turretMotor.updateMotorAngle();
         EXPECT_NEAR(0.0f, turretMotor.getChassisFrameMeasuredAngle().minDifference(angle), 1E-3);
     }
@@ -184,7 +172,7 @@ TEST_F(
     TurretMotorTest,
     setMotorOutput__desired_output_identical_to_input_when_turret_online_and_enc_within_bounds)
 {
-    setEncoder(TURRET_MOTOR_CONFIG.startEncoderValue);
+    setEncoder(tap::algorithms::Angle(TURRET_MOTOR_CONFIG.startAngle));
 
     InSequence seq;
     EXPECT_CALL(motor, setDesiredOutput(1000));
@@ -197,36 +185,16 @@ TEST_F(
 
 TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_min_max_bound)
 {
-    uint16_t minEncoderValue =
-        WrappedFloat(
-            TURRET_MOTOR_CONFIG.startEncoderValue +
-                +(TURRET_MOTOR_CONFIG.minAngle - TURRET_MOTOR_CONFIG.startAngle) *
-                    DjiMotor::ENC_RESOLUTION / M_TWOPI +
-                1,
-            0,
-            DjiMotor::ENC_RESOLUTION)
-            .getWrappedValue();
-
-    uint16_t maxEncoderValue =
-        WrappedFloat(
-            TURRET_MOTOR_CONFIG.startEncoderValue +
-                +(TURRET_MOTOR_CONFIG.maxAngle - TURRET_MOTOR_CONFIG.startAngle) *
-                    DjiMotor::ENC_RESOLUTION / M_TWOPI -
-                1,
-            0,
-            DjiMotor::ENC_RESOLUTION)
-            .getWrappedValue();
-
     InSequence seq;
     EXPECT_CALL(motor, setDesiredOutput(-1000));
     EXPECT_CALL(motor, setDesiredOutput(1000));
 
     // desired output negative, equal to min
-    setEncoder(minEncoderValue);
+    setEncoder(tap::algorithms::Angle(TURRET_MOTOR_CONFIG.minAngle));
     turretMotor.setMotorOutput(-1000);
 
     // desired output position, equal to max
-    setEncoder(maxEncoderValue);
+    setEncoder(tap::algorithms::Angle(TURRET_MOTOR_CONFIG.maxAngle));
     turretMotor.updateMotorAngle();
     turretMotor.setMotorOutput(1000);
 }
@@ -234,7 +202,8 @@ TEST_F(TurretMotorTest, setMotorOutput__desired_output_not_limited_if_equal_to_m
 TEST_F(TurretMotorTest, updateMotorAngle_sets_actual_angle_back_to_start_when_offline)
 {
     // Initially turret online
-    setEncoder(TURRET_MOTOR_CONFIG.startEncoderValue + 1000);
+    setEncoder(
+        tap::algorithms::Angle(TURRET_MOTOR_CONFIG.startAngle) + tap::algorithms::Angle(M_PI_4));
 
     turretMotor.updateMotorAngle();
 
@@ -333,13 +302,6 @@ TEST_F(TurretMotorTest, setChassisFrameSetpoint_large_min_max_difference_limited
     EXPECT_NEAR(0, tm.getChassisFrameSetpoint().minDifference(M_PI), 1E-3);
 }
 
-static int64_t getEncoderUnwrapped(const TurretMotorConfig &motorConfig, float angle)
-{
-    return static_cast<int64_t>(motorConfig.startEncoderValue) +
-           static_cast<int64_t>(DjiMotor::ENC_RESOLUTION) * (angle - motorConfig.startAngle) /
-               M_TWOPI;
-}
-
 TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
 {
     TurretMotorConfig mc = {
@@ -360,12 +322,12 @@ TEST_F(TurretMotorTest, getValidChassisMeasurementError_various_setpoints)
         {M_TWOPI, -M_TWOPI, 0},
     };
 
-    setEncoder(getEncoderUnwrapped(mc, mc.startAngle));
+    setEncoder(tap::algorithms::Angle(mc.startAngle));
     tm.updateMotorAngle();
 
     for (auto [measured, setpoint, expectedErr] : errorMeasurementsToTest)
     {
-        setEncoder(getEncoderUnwrapped(mc, measured));
+        setEncoder(tap::algorithms::Angle(measured));
         tm.updateMotorAngle();
 
         EXPECT_NEAR(0, tm.getChassisFrameMeasuredAngle().minDifference(measured), 1E-3);

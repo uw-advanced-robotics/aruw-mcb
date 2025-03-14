@@ -51,7 +51,9 @@ VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
           config.agitatorMotorId,
           config.agitatorCanBusId,
           config.isAgitatorInverted,
-          "agitator motor")
+          "agitator motor",
+          false,
+          config.gearRatio)
 {
     assert(config.jammingVelocityDifference >= 0);
 }
@@ -87,7 +89,7 @@ bool VelocityAgitatorSubsystem::calibrateHere()
     {
         return false;
     }
-    agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
+    agitatorMotor.getEncoder()->resetEncoderValue();
     agitatorIsCalibrated = true;
     velocitySetpoint = 0.0f;
     clearJam();
@@ -100,13 +102,7 @@ float VelocityAgitatorSubsystem::getCurrentValueIntegral() const
     {
         return 0.0f;
     }
-    return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
-}
-
-float VelocityAgitatorSubsystem::getUncalibratedAgitatorAngle() const
-{
-    return (2.0f * static_cast<float>(M_PI) / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
-           agitatorMotor.getEncoderUnwrapped() / config.gearRatio;
+    return agitatorMotor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
 void VelocityAgitatorSubsystem::runVelocityPidControl()

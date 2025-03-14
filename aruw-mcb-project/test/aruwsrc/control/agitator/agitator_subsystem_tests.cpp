@@ -30,8 +30,6 @@ using namespace aruwsrc;
 using namespace tap::motor;
 
 static constexpr float GEAR_RATIO = AgitatorSubsystem::AGITATOR_GEAR_RATIO_GM3508;
-static constexpr float ENC_TO_ANGLE_RATIO =
-    2.0 * M_PI / (static_cast<float>(DjiMotor::ENC_RESOLUTION) * GEAR_RATIO);
 
 /**
  * TestWithParam tuple template params:
@@ -58,17 +56,19 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(agitator.agitatorMotor, getEncoderUnwrapped)
-            .WillByDefault(ReturnPointee(&encUnwrapped));
         ON_CALL(agitator.agitatorMotor, isMotorOnline).WillByDefault(ReturnPointee(&motorOnline));
-        ON_CALL(agitator.agitatorMotor, getShaftRPM).WillByDefault(Return(0));
+        ON_CALL(agitator.agitatorMotor.getInternalEncoder(), getPosition)
+            .WillByDefault(ReturnPointee(&position));
+        ON_CALL(agitator.agitatorMotor.getInternalEncoder(), isOnline)
+            .WillByDefault(ReturnPointee(&motorOnline));
+        ON_CALL(agitator.agitatorMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     }
 
     tap::arch::clock::ClockStub clock;
     tap::Drivers drivers;
     AgitatorSubsystem agitator;
 
-    int32_t encUnwrapped = 0;
+    tap::algorithms::WrappedFloat position = tap::algorithms::Angle(0);
     bool motorOnline = true;
 };
 
@@ -92,14 +92,9 @@ TEST_P(AgitatorSubsystemTest, refresh_runs_pid_controller)
 {
     static constexpr float UPDATE_INCR = M_PI / 100;
 
-    ON_CALL(agitator.agitatorMotor, setDesiredOutput)
-        .WillByDefault(
-            [&](int32_t out)
-            {
-                encUnwrapped += out < 0   ? -UPDATE_INCR / ENC_TO_ANGLE_RATIO
-                                : out > 0 ? UPDATE_INCR / ENC_TO_ANGLE_RATIO
-                                          : 0;
-            });
+    ON_CALL(agitator.agitatorMotor, setDesiredOutput).WillByDefault([&](int32_t) {
+        position += UPDATE_INCR;
+    });
 
     agitator.calibrateHere();
 
@@ -118,32 +113,6 @@ TEST_P(AgitatorSubsystemTest, getCurrentValue_returns_0_when_not_calibrated)
     EXPECT_NEAR(0.0f, agitator.getCurrentValue(), 1E-3);
 }
 
-TEST_P(AgitatorSubsystemTest, getCurrentValue_proportional_to_wrapped_encoder)
-{
-    // must first initialize the agitator
-    agitator.calibrateHere();
-
-    std::vector<int32_t> valuesToTry{-100, 0, 100, -100'000, 100'000};
-
-    for (int32_t i : valuesToTry)
-    {
-        encUnwrapped = i;
-        EXPECT_NEAR(ENC_TO_ANGLE_RATIO * encUnwrapped, agitator.getCurrentValue(), 1E-3);
-    }
-}
-
-TEST_P(AgitatorSubsystemTest, calibrateHere_resets_value_to_0)
-{
-    std::vector<int32_t> valuesToTry{-100, 0, 100, -100'000, 100'000};
-
-    for (int32_t i : valuesToTry)
-    {
-        encUnwrapped = i;
-        agitator.calibrateHere();
-        EXPECT_NEAR(0.0f, agitator.getCurrentValue(), 1E-3);
-    }
-}
-
 TEST_P(AgitatorSubsystemTest, getJamSetpointTolerance_returns_setpoint_tolerance)
 {
     EXPECT_EQ(std::get<0>(GetParam()), agitator.getJamSetpointTolerance());
@@ -158,8 +127,8 @@ TEST_P(AgitatorSubsystemTest, isJammed_false_when_within_tolerance)
     for (int32_t i : valuesToTry)
     {
         clock.time += 1000;
-        agitator.setSetpoint(ENC_TO_ANGLE_RATIO * i);
-        encUnwrapped = i;
+        agitator.setSetpoint(i);
+        position = tap::algorithms::Angle(i);
         agitator.refresh();
     }
 

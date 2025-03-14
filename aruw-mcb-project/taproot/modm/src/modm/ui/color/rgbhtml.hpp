@@ -13,7 +13,6 @@
 
 #include "rgb.hpp"
 
-/// @ingroup     modm_ui_color
 namespace modm::color::html
 {
 

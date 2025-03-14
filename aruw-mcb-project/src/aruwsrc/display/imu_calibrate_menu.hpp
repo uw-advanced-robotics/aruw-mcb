@@ -70,7 +70,7 @@ private:
         "WAIT SYSTEMS ONLINE",
         "LOCKING TURRET",
         "CALIBRATING IMUS",
-        "BUZZING",
+        "BUZZING"
         "WAITING FOR CALIBRATION\nCOMPLETE",
     };
 

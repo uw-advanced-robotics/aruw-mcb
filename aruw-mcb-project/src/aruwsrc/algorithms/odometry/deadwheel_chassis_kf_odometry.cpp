@@ -60,10 +60,8 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    float rawV1 = deadwheelOdometry.getPerpendicularRPM();
-    float rawV2 = deadwheelOdometry.getParallelMotorRPM();
-    float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
-    float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
+    float V1 = deadwheelOdometry.getPerpendicularVelocity();
+    float V2 = deadwheelOdometry.getParallelMotorVelocity();
 
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
@@ -136,7 +134,7 @@ void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
     // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
     // convert dt in microseconds to seconds
     const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6f / static_cast<float>(dt);
+        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
 
     const float velocityCovariance =
         chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);

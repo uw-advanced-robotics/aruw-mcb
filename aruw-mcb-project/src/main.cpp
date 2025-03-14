@@ -72,8 +72,6 @@ using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::characterizer;
 #endif
 
-using namespace std::chrono_literals;
-
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
 static void initializeIo(Drivers *drivers);
@@ -105,48 +103,42 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    modm::Fiber<2048> ioFiber(
-        [&]
-        {
-            while (1)
-            {
-                // do this as fast as you can
-                PROFILE(drivers->profiler, updateIo, (drivers));
+    while (1)
+    {
+        // do this as fast as you can
+        PROFILE(drivers->profiler, updateIo, (drivers));
 
-                if (sendMotorTimeout.execute())
-                {
-                    PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-                    PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-                    PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+        if (sendMotorTimeout.execute())
+        {
+            PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-                    ((Drivers *)drivers)->plateHitTracker.update();
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+            ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-                    PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-                    PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-                    PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-                    checkTurretMcbDisconnection(drivers);
+            checkTurretMcbDisconnection(drivers);
 #endif
-                }
-                modm::this_fiber::sleep_for(10us);
-            }
-        });
-
-    modm::fiber::Scheduler::run();
+        }
+        modm::delay_us(10);
+    }
     return 0;
 }
 
@@ -190,6 +182,11 @@ static void updateIo(Drivers *drivers)
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
+    drivers->mpu6500.read();
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+#endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
@@ -205,7 +202,9 @@ static void updateIo(Drivers *drivers)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    if (!turretMcbConnected)
+    if (!turretMcbConnected &&
+        drivers->mpu6500.getImuState() !=
+            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
         tap::buzzer::playNote(&drivers->pwm, 1000);
     }

@@ -42,6 +42,10 @@
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
+#include "aruwsrc/control/client-display/client_display_command.hpp"
+#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
+#include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -91,6 +95,7 @@ using namespace aruwsrc::control::turret::sentry;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::client_display;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -114,7 +119,10 @@ aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
     false,
     false,
     "Major Yaw Turret 1",
-    "Major Yaw Turret 2");
+    "Major Yaw Turret 2",
+    false,
+    1.f,
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
 struct TurretMinorMotors
 {
@@ -130,14 +138,20 @@ TurretMinorMotors turretLeftMotors{
         turretLeft::YAW_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
         false,
-        "Left Minor Yaw Turret"),
+        "Left Minor Yaw Turret",
+        false,
+        1.0,
+        turretLeft::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
         drivers(),
         turretLeft::PITCH_MOTOR_ID,
         turretLeft::CAN_BUS_MOTORS,
         true,
-        "Left Minor Pitch Turret"),
+        "Left Minor Pitch Turret",
+        false,
+        1.0,
+        turretLeft::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretLeft::YAW_MOTOR_CONFIG,
     .pitchMotorConfig = turretLeft::PITCH_MOTOR_CONFIG
@@ -150,14 +164,20 @@ TurretMinorMotors turretRightMotors{
         turretRight::YAW_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
         false,
-        "Right Minor Yaw Turret"),
+        "Right Minor Yaw Turret",
+        false,
+        1.0,
+        turretRight::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
         drivers(),
         turretRight::PITCH_MOTOR_ID,
         turretRight::CAN_BUS_MOTORS,
         false,
-        "Right Minor Pitch Turret"),
+        "Right Minor Pitch Turret",
+        false,
+        1.0,
+        turretRight::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretRight::YAW_MOTOR_CONFIG,
     .pitchMotorConfig = turretRight::PITCH_MOTOR_CONFIG
@@ -221,21 +241,24 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-VirtualDjiMotor rightFrontDriveMotor(
+DjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
-    "Right Front Swerve Drive Motor");
+    "Right Front Swerve Drive Motor",
+    false,
+    rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
 
-VirtualDjiMotor rightFrontAzimuthMotor(
+DjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
-    "Right Front Swerve Azimuth Motor");
+    "Right Front Swerve Azimuth Motor",
+    false,
+    rightFrontSwerveConfig.azimuthMotorGearing,
+    rightFrontSwerveConfig.azimuthZeroOffset);
 
 VirtualDjiMotor leftBackDriveMotor(
     drivers(),
@@ -243,7 +266,9 @@ VirtualDjiMotor leftBackDriveMotor(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.driveMotorInverted,
-    "Left Back Swerve Drive Motor");
+    "Left Back Swerve Drive Motor",
+    false,
+    leftBackSwerveConfig.gearboxRatio *leftBackSwerveConfig.driveMotorGearing);
 
 VirtualDjiMotor leftBackAzimuthMotor(
     drivers(),
@@ -251,7 +276,10 @@ VirtualDjiMotor leftBackAzimuthMotor(
     tap::can::CanBus::CAN_BUS1,
     &(drivers()->chassisMcbLite),
     leftBackSwerveConfig.azimuthMotorInverted,
-    "Left Back Swerve Azimuth Motor");
+    "Left Back Swerve Azimuth Motor",
+    false,
+    leftBackSwerveConfig.azimuthMotorGearing,
+    leftBackSwerveConfig.azimuthZeroOffset);
 
 // This is the one facing parallel to the frame
 VirtualDjiMotor leftOmni(
@@ -735,6 +763,19 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
 
+/* define client display / HUD related items --------------------------------*/
+
+// This shit is currently banned by DJI, but left for a hopeful future
+ClientDisplaySubsystem clientDisplay(drivers());
+tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+
+CircleCrosshair circleCrosshair(refSerialTransmitter);
+ImageIndicator imageIndicator(refSerialTransmitter);
+
+std::vector<HudIndicator *> indicators = {&imageIndicator, &circleCrosshair};
+
+ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators);
+
 /* define command mappings --------------------------------------------------*/
 
 HoldCommandMapping rightUp(
@@ -824,6 +865,12 @@ HoldCommandMapping leftDownRightDown(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+// Restart HUD
+PressCommandMapping bCtrlPressed(
+    drivers(),
+    {&clientDisplayCommand},
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -844,6 +891,8 @@ void initializeSubsystems()
 
     turretLeftAgitator.initialize();
     turretRightAgitator.initialize();
+
+    clientDisplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -856,6 +905,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
 
     drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
@@ -875,6 +925,8 @@ void setDefaultSentryCommands(Drivers *)
 
     turretLeftFrictionWheels.setDefaultCommand(&stopTurretLeftFrictionWheelSpinCommand);
     turretRightFrictionWheels.setDefaultCommand(&stopTurretRightFrictionWheelSpinCommand);
+
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
