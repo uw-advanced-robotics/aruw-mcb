@@ -1,7 +1,7 @@
 #ifndef BALSTD_OP_STATE_MACHINE_HPP_
 #define BALSTD_OP_STATE_MACHINE_HPP_
 
-#include "balstd_states.hpp"
+#include "balstd_op_states.hpp"
 
 namespace aruwsrc::control::balstd
 {
@@ -10,6 +10,8 @@ class BalstdOpStateMachine
 {
 public:
     BalstdOpStateMachine();
+
+    void update();
 
 private:
     BalstdOpState currentState;
