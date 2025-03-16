@@ -28,8 +28,21 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/motor_interface.hpp"
 
+#include "tmotor_ak80_9_encoder.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <gmock/gmock.h>
+
+#include "tap/mock/dji_motor_encoder_mock.hpp"
+#endif
+
 namespace aruwsrc::control::motor
 {
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+using Encoder = tap::mock::DjiMotorEncoderMock;
+#else
+using Encoder = Tmotor_AK809Encoder;
+#endif
 /**
  * CAN IDs for the command messages sent by AK80-9 motor controller. Motor `i` in the set
  * {1, 2,...,8} sends feedback data with in a CAN message with ID 0x2900 + `i`.
@@ -37,14 +50,14 @@ namespace aruwsrc::control::motor
  */
 enum TMotorId : uint32_t
 {
-    MOTOR1 = 0X01,
-    MOTOR2 = 0x02,
-    MOTOR3 = 0x03,
-    MOTOR4 = 0x04,
-    MOTOR5 = 0x05,
-    MOTOR6 = 0x06,
-    MOTOR7 = 0x07,
-    MOTOR8 = 0x08,
+    MOTOR1 = 0X2901,
+    MOTOR2 = 0x2902,
+    MOTOR3 = 0x2903,
+    MOTOR4 = 0x2904,
+    MOTOR5 = 0x2905,
+    MOTOR6 = 0x2906,
+    MOTOR7 = 0x2907,
+    MOTOR8 = 0x2908,
 };
 
 /** Number of motors on each CAN bus. */
@@ -70,9 +83,7 @@ static constexpr float AK809_TORQUE_CONSTANT = 0.105f * 9;  // Nm/A, 9:1 gear ra
 class Tmotor_AK809 : public tap::can::CanRxListener, public tap::motor::MotorInterface
 {
 public:
-    // 14-bit encoder
-    static constexpr uint16_t ENC_RESOLUTION = 3600;
-
+    static constexpr float GEAR_RATIO = 1.0f / 9.0f;
     /**
      * @param drivers a pointer to the drivers struct
      * @param tMotorTxHandler a pointer to the drivers member tMotorTxHandler
@@ -84,8 +95,7 @@ public:
      * @param name a name to associate with the motor for use in the motor menu
      * @param encoderWrapped the starting encoderValue to store for this motor.
      *      Will be overwritten by the first reported encoder value from the motor
-     * @param encoderRevolutions the starting number of encoder revolutions to store.
-     *      See comment for DjiMotor::encoderRevolutions for more details.
+     * @param encoderHomePosition the starting number of encoder ticks to store.
      */
     Tmotor_AK809(
         tap::Drivers* drivers,
@@ -93,38 +103,23 @@ public:
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
-        int64_t encoderRevolutions = 0);
+        int32_t encoderHomePosition = 1750);
 
     mockable ~Tmotor_AK809();
 
     void initialize() override;
-    /***
-     * @returns Angular position of motor, unwrapped, in 0.1ths of a Degree
-     */
-    int64_t getEncoderUnwrapped() const override;
 
-    /***
-     * @returns Angular position of motor, wrapped from 0 to 3599, in 0.1ths of a Degree
+    tap::encoder::EncoderInterface* getEncoder() const override
+    {
+        return const_cast<Encoder*>(&this->internalEncoder);
+    }
+
+    /**
+     * Returns the builtin encoder associated with the motor.
      */
-    uint16_t getEncoderWrapped() const override;
+    mockable const Encoder& getInternalEncoder() const { return this->internalEncoder; }
 
     void resetEncoderValue();
-
-    /***
-     * @returns Angular position of motor, unwrapped, in radians.
-     */
-    float getPositionUnwrapped() const
-    {
-        return ((getEncoderUnwrapped()) / ((float)ENC_RESOLUTION)) * static_cast<float>(M_TWOPI);
-    };
-
-    /***
-     * @returns Angular position of motor, wrapped to one rotation, in radians.
-     */
-    float getPositionWrapped() const
-    {
-        return (getEncoderWrapped()) / ((float)ENC_RESOLUTION) * static_cast<float>(M_TWOPI);
-    };
 
     DISALLOW_COPY_AND_ASSIGN(Tmotor_AK809)
 
@@ -192,9 +187,6 @@ public:
 
     int16_t getTorque() const override;
 
-    /// For interpreting the sign of return value see class comment
-    int16_t getShaftRPM() const override;
-
     mockable bool isMotorInverted() const;
 
     mockable tap::can::CanBus getCanBus() const;
@@ -215,8 +207,6 @@ private:
 
     int32_t desiredOutput;
 
-    int16_t shaftRPM;
-
     int8_t temperature;
 
     int16_t torque;
@@ -228,19 +218,11 @@ private:
      */
     bool motorInverted;
 
-    /**
-     * The raw position value reported by the motor controller. [-32,000 to +32,000]
-     */
-    int16_t encoderPosition;
-
-    /**
-     * Absolute unwrapped encoder position =
-     *      encoderRevolutions * ENCODER_RESOLUTION + encoderWrapped
-     * This lets us keep track of some sense of absolute position even while
-     * raw encoderValue continuosly loops within {0..8191}. Origin value is
-     * arbitrary.
-     */
-    int64_t encoderRevolutions;
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<Encoder> internalEncoder;
+#else
+    Encoder internalEncoder;
+#endif
 
     tap::arch::MilliTimeout motorDisconnectTimeout;
 
@@ -248,9 +230,6 @@ private:
      * the position of the AK80-9 should be 0'd on it's powerup via the home resetting message.
      */
     bool motorHomed;
-
-    int debug1 = 0;
-    int debug2 = 0;
 };
 
 }  // namespace aruwsrc::control::motor
