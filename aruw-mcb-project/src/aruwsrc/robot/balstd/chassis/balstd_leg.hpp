@@ -22,10 +22,10 @@ struct BalstdLegConfig
     float lowerLinkLength;  // meters
     float fixedLinkLength;  // meters
 
-    float frontHipOuterLimit = modm::toRadian(-15);  // radians
-    float frontHipInnerLimit = modm::toRadian(90);   // radians
-    float backHipOuterLimit = modm::toRadian(195);   // radians
-    float backHipInnerLimit = modm::toRadian(90);    // radians
+    float frontHipOuterLimit;  // radians
+    float frontHipInnerLimit;  // radians
+    float backHipOuterLimit;   // radians
+    float backHipInnerLimit;   // radians
 };
 
 class BalstdLeg
