@@ -241,19 +241,21 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-DjiMotor rightFrontDriveMotor(
+VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor",
     false,
     rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
 
-DjiMotor rightFrontAzimuthMotor(
+VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor",
     false,
