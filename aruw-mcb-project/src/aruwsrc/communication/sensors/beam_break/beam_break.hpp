@@ -26,6 +26,12 @@
 
 namespace aruwsrc::control::governor
 {
+
+/**
+ * Implements an analog input beam break sensor. The sensor is considered to be triggered when the
+ * analog input value is above the threshold. This can be inverted to trigger when the value is
+ * below the threshold.
+ */
 class AnalogBeamBreak : public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 private:
@@ -60,6 +66,10 @@ public:
     }
 };
 
+/**
+ * Implements a digital input beam break sensor. The sensor is considered to be triggered when the
+ * digital input value is high. This can be inverted to trigger when the value is low.
+ */
 class DigitalBeamBreak : public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 private:
