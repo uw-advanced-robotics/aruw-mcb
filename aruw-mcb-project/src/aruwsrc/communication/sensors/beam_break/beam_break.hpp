@@ -24,9 +24,8 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
-namespace aruwsrc::control::governor
+namespace aruwsrc::communication::sensors::beam_break
 {
-
 /**
  * Implements an analog input beam break sensor. The sensor is considered to be triggered when the
  * analog input value is above the threshold. This can be inverted to trigger when the value is
@@ -101,6 +100,6 @@ public:
     }
 };
 
-}  // namespace aruwsrc::control::governor
+}  // namespace aruwsrc::communication::sensors::beam_break
 
 #endif  // BEAM_BREAK_HPP_
