@@ -20,6 +20,7 @@
 #ifndef CHASSIS_CONSTANTS_HPP_
 #define CHASSIS_CONSTANTS_HPP_
 
+#include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -46,6 +47,52 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 #endif
+
+class ChassisHardware
+{
+public:
+    ChassisHardware(tap::Drivers* drivers)
+        : leftFrontChassisMotor(
+              drivers,
+              LEFT_FRONT_MOTOR_ID,
+              CAN_BUS_MOTORS,
+              false,
+              "left front drive motor",
+              false,
+              CHASSIS_GEARBOX_RATIO),
+          leftBackChassisMotor(
+              drivers,
+              LEFT_BACK_MOTOR_ID,
+              CAN_BUS_MOTORS,
+              false,
+              "left back drive motor",
+              false,
+              CHASSIS_GEARBOX_RATIO),
+          rightFrontChassisMotor(
+              drivers,
+              RIGHT_FRONT_MOTOR_ID,
+              CAN_BUS_MOTORS,
+              false,
+              "right front drive motor",
+              false,
+              CHASSIS_GEARBOX_RATIO),
+          rightBackChassisMotor(
+              drivers,
+              RIGHT_BACK_MOTOR_ID,
+              CAN_BUS_MOTORS,
+              false,
+              "right back drive motor",
+              false,
+              CHASSIS_GEARBOX_RATIO)
+    {
+    }
+
+    tap::motor::DjiMotor leftFrontChassisMotor;
+    tap::motor::DjiMotor leftBackChassisMotor;
+    tap::motor::DjiMotor rightFrontChassisMotor;
+    tap::motor::DjiMotor rightBackChassisMotor;
+};
+
 }  // namespace aruwsrc::chassis
 
 #endif  // CHASSIS_CONSTANTS_HPP_
