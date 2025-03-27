@@ -60,7 +60,6 @@ void BalstdLeg::setBackHipMotorTorque(float torque)
 
 void BalstdLeg::updateState()
 {
-    // TODO: wait for motor/encoder tap mr lol
     currState.qFront = frontHipMotor.getEncoder()->getPosition().getWrappedValue();
     currState.qBack = backHipMotor.getEncoder()->getPosition().getWrappedValue();
 

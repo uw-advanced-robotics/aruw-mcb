@@ -12,6 +12,8 @@ namespace aruwsrc::control::balstd
 struct BalstdChassisState
 {
     BalstdLegState leftLegState, rightLegState;
+
+    // virtual leg
 };
 
 const BalstdChassisState ZERO_STATE{

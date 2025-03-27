@@ -39,6 +39,7 @@
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
+#include "aruwsrc/robot/balstd/fsm/balstd_op_state_machine.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -134,6 +135,8 @@ ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
 // StandardAndHeroTransformAdapter transformAdapter(transformer);
 
+BalstdOpStateMachine stateMachine(drivers());
+
 /* define commands ----------------------------------------------------------*/
 
 // aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -149,12 +152,14 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void registerStandardSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&stateMachine);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
     chassis.initialize();
+    stateMachine.initialize();
     // odometrySubsystem.initialize();
     // transformSubsystem.initialize();
 
