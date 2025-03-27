@@ -90,24 +90,24 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-using namespace tap::control::setpoint;
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::governor;
+using namespace tap::control::setpoint;
+using namespace aruwsrc::agitator;
+using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
-using namespace aruwsrc::control::turret;
-using namespace tap::control;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
-using namespace tap::communication::serial;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::hero;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
-using namespace aruwsrc::algorithms::transforms;
-using namespace aruwsrc::hero;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -132,7 +132,43 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor");
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor");
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor");
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor");
+
+MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    WHEEL_VELOCITY_PID_CONFIG,
+    &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
     frictionWheels(

@@ -41,11 +41,12 @@ public:
     MecanumChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        tap::motor::DjiMotor& leftFrontMotor,
+        tap::motor::DjiMotor& leftBackMotor,
+        tap::motor::DjiMotor& rightFrontMotor,
+        tap::motor::DjiMotor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 };
 
 }  // namespace chassis

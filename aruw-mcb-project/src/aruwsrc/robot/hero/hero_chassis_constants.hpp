@@ -20,6 +20,7 @@
 #ifndef HERO_CHASSIS_CONSTANTS_HPP_
 #define HERO_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
 #include "modm/math/filter/pid.hpp"
@@ -78,6 +79,13 @@ static constexpr float VELOCITY_PID_KS = 730.0f;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the

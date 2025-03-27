@@ -20,11 +20,11 @@
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/communication/gpio/analog.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
-#include "constants/chassis_constants.hpp"
+// #include "constants/chassis_constants.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 
@@ -41,11 +41,12 @@ public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        tap::motor::DjiMotor& leftFrontMotor,
+        tap::motor::DjiMotor& leftBackMotor,
+        tap::motor::DjiMotor& rightFrontMotor,
+        tap::motor::DjiMotor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     inline bool allMotorsOnline() const override
     {
@@ -132,13 +133,12 @@ private:
      */
     void calculateOutput(float x, float y, float r, float maxWheelSpeed);
 
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
+    void updateMotorRpmPid(int i);
 
     // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
+    tap::algorithms::SmoothPid velocityPid[4];
+
+    float velocityPidErrors[4];
 
     // ✨ the motors ✨
     tap::motor::DjiMotor* motors[4];
@@ -153,10 +153,10 @@ public:
 private:
 #else
     // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
+    tap::motor::DjiMotor& leftFrontMotor;
+    tap::motor::DjiMotor& leftBackMotor;
+    tap::motor::DjiMotor& rightFrontMotor;
+    tap::motor::DjiMotor& rightBackMotor;
 #endif
 };
 
