@@ -85,6 +85,7 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .ki = VELOCITY_PID_KI,
     .kd = VELOCITY_PID_KD,
     .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
 };
 
 /**

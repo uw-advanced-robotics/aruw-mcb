@@ -53,7 +53,42 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor");
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor");
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor");
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor");
+
+XDriveChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    WHEEL_VELOCITY_PID_CONFIG);
 
 // aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
