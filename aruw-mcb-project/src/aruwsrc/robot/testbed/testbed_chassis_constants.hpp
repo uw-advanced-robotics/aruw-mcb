@@ -20,6 +20,7 @@
 #ifndef TESTBED_CHASSIS_CONSTANTS_HPP_
 #define TESTBED_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
 
