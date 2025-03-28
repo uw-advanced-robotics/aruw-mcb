@@ -14,6 +14,12 @@ struct BalstdLegState
     float qFront, qBack;  // angles of upper linkages in radians
     float xc, yc;         // coordinates of wheel axle wrt hip center
     float L, theta;       // pendulum length and angle wrt hip center
+
+    void calculatePendulumState()
+    {
+        L = atan2(xc, yc);
+        theta = sqrt(xc * xc + yc * yc);
+    }
 };
 
 struct BalstdLegConfig
@@ -56,8 +62,8 @@ public:
     inline BalstdLegState getState() const { return currState; }
 
 private:
-    tap::motor::MotorInterface& frontHipMotor;  // 0
-    tap::motor::MotorInterface& backHipMotor;   // 1
+    tap::motor::MotorInterface& frontHipMotor;
+    tap::motor::MotorInterface& backHipMotor;
     tap::motor::MotorInterface& wheelMotor;
 
     const BalstdLegConfig config;
