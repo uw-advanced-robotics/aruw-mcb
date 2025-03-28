@@ -28,10 +28,22 @@
 
 #include "holonomic_chassis_subsystem.hpp"
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <gmock/gmock.h>
+
+#include "tap/mock/dji_motor_mock.hpp"
+#endif
+
 namespace aruwsrc
 {
 namespace chassis
 {
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+using Motor = tap::motor::DjiMotor;
+#endif
+
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
  */
@@ -41,10 +53,10 @@ public:
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        tap::motor::DjiMotor& leftFrontMotor,
-        tap::motor::DjiMotor& leftBackMotor,
-        tap::motor::DjiMotor& rightFrontMotor,
-        tap::motor::DjiMotor& rightBackMotor,
+        Motor& leftFrontMotor,
+        Motor& leftBackMotor,
+        Motor& rightFrontMotor,
+        Motor& rightBackMotor,
         tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
         can::capbank::CapacitorBank* capacitorBank = nullptr);
 
@@ -145,18 +157,17 @@ private:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
+    Motor& leftFrontMotor;
+    Motor& leftBackMotor;
+    Motor& rightFrontMotor;
+    Motor& rightBackMotor;
 
 private:
 #else
-    // motors
-    tap::motor::DjiMotor& leftFrontMotor;
-    tap::motor::DjiMotor& leftBackMotor;
-    tap::motor::DjiMotor& rightFrontMotor;
-    tap::motor::DjiMotor& rightBackMotor;
+    Motor& leftFrontMotor;
+    Motor& leftBackMotor;
+    Motor& rightFrontMotor;
+    Motor& rightBackMotor;
 #endif
 };
 

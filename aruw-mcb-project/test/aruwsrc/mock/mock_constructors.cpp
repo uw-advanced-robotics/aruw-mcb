@@ -100,16 +100,40 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : MecanumChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::DjiMotorMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : XDriveChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
@@ -224,12 +248,14 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement) {
-            return measurement.minDifference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
-    });
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement)
+                       { return measurement.minDifference(setpoint); });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]()
+            {
+                return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}
@@ -271,9 +297,9 @@ OttoBallisticsSolverMock::OttoBallisticsSolverMock(
           turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
-          turretID){};
+          turretID) {};
 
-OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
+OttoBallisticsSolverMock::~OttoBallisticsSolverMock() {};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)

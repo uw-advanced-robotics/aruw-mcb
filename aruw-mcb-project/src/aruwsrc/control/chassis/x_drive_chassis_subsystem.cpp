@@ -36,10 +36,10 @@ namespace chassis
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-    tap::motor::DjiMotor& leftFrontMotor,
-    tap::motor::DjiMotor& leftBackMotor,
-    tap::motor::DjiMotor& rightFrontMotor,
-    tap::motor::DjiMotor& rightBackMotor,
+    Motor& leftFrontMotor,
+    Motor& leftBackMotor,
+    Motor& rightFrontMotor,
+    Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
     can::capbank::CapacitorBank* capacitorBank)
     : Holonomic4MotorChassisSubsystem(

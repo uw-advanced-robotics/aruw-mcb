@@ -36,6 +36,12 @@ using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
 class ChassisAutorotateCommandTest : public Test
 {
 protected:
@@ -47,7 +53,11 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor),
+          lfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          lbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          rfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          rbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          chassis(&drivers, &currentSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
           turret(&drivers),
           controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
@@ -64,6 +74,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    NiceMock<tap::mock::DjiMotorMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
@@ -182,9 +193,10 @@ public:
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&GetParam().yawSetpoint));
 
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float angle, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d);
-        });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float angle, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(angle, d); });
     }
 
     float yawAngleFromCenter;
@@ -348,7 +360,8 @@ INSTANTIATE_TEST_SUITE_P(
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         }),
-    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info) {
+    [](const ::testing::TestParamInfo<TurretOnlineTest::ParamType>& info)
+    {
         std::stringstream ss;
         ss << "x_" << PrintToString(info.param.x) << "_y_" << PrintToString(info.param.y) << "_r_"
            << PrintToString(info.param.r) << "_yawAngle_"

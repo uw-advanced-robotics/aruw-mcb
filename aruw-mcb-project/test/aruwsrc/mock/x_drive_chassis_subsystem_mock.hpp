@@ -33,7 +33,12 @@ class XDriveChassisSubsystemMock : public aruwsrc::chassis::XDriveChassisSubsyst
 public:
     XDriveChassisSubsystemMock(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        testing::NiceMock<tap::mock::DjiMotorMock>& leftFrontMotor,
+        testing::NiceMock<tap::mock::DjiMotorMock>& leftBackMotor,
+        testing::NiceMock<tap::mock::DjiMotorMock>& rightFrontMotor,
+        testing::NiceMock<tap::mock::DjiMotorMock>& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig);
     virtual ~XDriveChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

@@ -38,6 +38,12 @@ using namespace testing;
 
 static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
 
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
 class ChassisImuDriveCommandTest : public Test
 {
 protected:
@@ -49,7 +55,11 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor),
+          lfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          lbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          rfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          rbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          chassis(&drivers, &currentSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
           controlOperatorInterface(&drivers),
           robotData{}
     {
@@ -59,12 +69,16 @@ protected:
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-            return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
-        });
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d);
-        });
+        ON_CALL(chassis, calculateRotationTranslationalGain)
+            .WillByDefault(
+                [&](float r)
+                {
+                    return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
+                });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float r, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d); });
 
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
         ON_CALL(drivers.mpu6500, getImuState).WillByDefault(ReturnPointee(&imuState));
@@ -79,6 +93,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    NiceMock<tap::mock::DjiMotorMock> lfm, lbm, rfm, rbm;
     NiceMock<aruwsrc::mock::MecanumChassisSubsystemMock> chassis;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
