@@ -59,7 +59,7 @@
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
+#include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
 #include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
@@ -349,14 +349,13 @@ SentryTransforms transformer(
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+SentryTransformAdapter transformAdapter(transformer);
 
-SentryArucoResetSubsystem arucoResetSubsystem(
+aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     *drivers(),
     drivers()->visionCoprocessor,
-    chassisYawObserver,
     odometrySubsystem,
-    transformer);
-SentryTransformAdapter transformAdapter(transformer);
+    transformerAdapter);
 
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
