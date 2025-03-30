@@ -18,6 +18,7 @@
  */
 
 #include "aruco_reset_subsystem.hpp"
+
 #include "tap/algorithms/math_user_utils.hpp"
 
 using namespace tap::algorithms;
@@ -61,6 +62,5 @@ void ArucoResetSubsystem::refresh()
     // Set the new position in the odometry subsystem
     odometry.overrideOdometryPosition(modm::Vector2f(newX, newY));
 }
-
 
 }  // namespace aruwsrc::control::aruco

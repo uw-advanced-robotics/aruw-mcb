@@ -87,7 +87,7 @@ public:
 
     void update();
 
-    void overrideOdometryPosition(const modm::Vector2f &newPos);
+    void overrideOdometryPosition(const modm::Vector2f& newPos);
 
 protected:
     enum class OdomState
@@ -183,7 +183,6 @@ private:
     const float parallelWheelChassisRelativeAngleRadians;
     const float perpendicularWheelChassisRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
-
 };
 }  // namespace aruwsrc::algorithms::odometry
 
