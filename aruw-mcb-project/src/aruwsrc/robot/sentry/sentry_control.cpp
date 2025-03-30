@@ -355,7 +355,7 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     *drivers(),
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    transformerAdapter);
+    transformAdapter);
 
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
