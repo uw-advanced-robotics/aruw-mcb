@@ -352,7 +352,7 @@ SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
-    *drivers(),
+    drivers(),
     drivers()->visionCoprocessor,
     odometrySubsystem,
     transformAdapter);
