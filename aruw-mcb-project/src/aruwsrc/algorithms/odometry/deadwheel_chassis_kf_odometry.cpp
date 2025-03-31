@@ -100,15 +100,15 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
-void DeadwheelChassisKFOdometry::overrideOdometryPosition(const modm::Vector2f& newPos)
+void DeadwheelChassisKFOdometry::overrideOdometryPosition(float positionX, float positionY)
 {
     auto currKFState = kf.getStateVectorAsMatrix();
 
     float newState[int(OdomState::NUM_STATES)] = {
-        newPos.x,
+        positionX,
         currKFState[int(OdomState::VEL_X)],
         currKFState[int(OdomState::ACC_X)],
-        newPos.y,
+        positionY,
         currKFState[int(OdomState::VEL_Y)],
         currKFState[int(OdomState::ACC_Y)]};
 

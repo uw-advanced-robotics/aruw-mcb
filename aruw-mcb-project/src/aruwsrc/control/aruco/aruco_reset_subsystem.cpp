@@ -60,7 +60,7 @@ void ArucoResetSubsystem::refresh()
     float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
 
     // Set the new position in the odometry subsystem
-    odometry.overrideOdometryPosition(modm::Vector2f(newX, newY));
+    odometry.overrideOdometryPosition(newX, newY);
 }
 
 }  // namespace aruwsrc::control::aruco

@@ -87,7 +87,7 @@ public:
 
     void update();
 
-    void overrideOdometryPosition(const modm::Vector2f& newPos);
+    void overrideOdometryPosition(float positionX, float positionY);
 
 protected:
     enum class OdomState
