@@ -45,7 +45,8 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/hold_command_mapping.hpp"
 
 using namespace aruwsrc::drone;
 using namespace aruwsrc::control;
@@ -182,6 +183,21 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 
+// Remote related mappings
+HoldRepeatCommandMapping rightSwitchMiddle(
+    drivers(),
+    {&spinFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
+    true);
+
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatLimiting},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
+
+
+
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -216,6 +232,8 @@ void startDroneCommands([[maybe_unused]] Drivers *drivers) {
 /* register io mappings here ------------------------------------------------*/
 void registerDroneIoMappings([[maybe_unused]] Drivers *drivers) {
     // Add IO mappings for control operator interface
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
+    drivers->commandMapper.addMap(&rightSwitchUp);
     
 }
 }  // namespace drone_control
