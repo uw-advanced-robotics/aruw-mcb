@@ -117,6 +117,30 @@ Transform::Transform(
 }
 
 Transform::Transform(
+    const DynamicPosition& dynamicPosition,
+    const DynamicOrientation& dynamicOrientation)
+    : dynamic(true),
+      translation(dynamicPosition.position),
+      transVel(dynamicPosition.velocity),
+      transAcc(dynamicPosition.acceleration),
+      rotation(dynamicOrientation.orientation),
+      tRotation(rotation.transpose()),
+      angVel(dynamicOrientation.angularVelocity)
+{
+}
+
+Transform::Transform(DynamicPosition&& dynamicPosition, DynamicOrientation&& dynamicOrientation)
+    : dynamic(true),
+      translation(std::move(dynamicPosition.position)),
+      transVel(std::move(dynamicPosition.velocity)),
+      transAcc(std::move(dynamicPosition.acceleration)),
+      rotation(std::move(dynamicOrientation.orientation)),
+      tRotation(rotation.transpose()),
+      angVel(std::move(dynamicOrientation.angularVelocity))
+{
+}
+
+Transform::Transform(
     const CMSISMat<3, 1>& translation,
     const CMSISMat<3, 3>& rotation,
     const CMSISMat<3, 1>& velocity,
@@ -208,14 +232,13 @@ DynamicOrientation Transform::apply(const DynamicOrientation& dynamicOrientation
 Transform Transform::getInverse() const
 {
     // negative transposed rotation matrix times original position = new position
-    CMSISMat<3, 1> invTranslation = -(tRotation * translation);
+    CMSISMat<3, 1> invTranslation = -tRotation * translation;
     if (dynamic)
     {
-        CMSISMat<3, 1> angVelVec = getAngularVel().coordinates_;
-        CMSISMat<3, 1> invVel =
-            -(tRotation * transVel) - cross(-(tRotation * angVelVec), -(tRotation * translation));
-        CMSISMat<3, 1> invAcc = -(tRotation * transVel) - cross(-(tRotation * angVelVec), invVel);
-        CMSISMat<3, 3> invAngVel = -(tRotation * angVel * rotation);
+        CMSISMat<3, 1> invVel = tRotation * (angVel * translation - transVel);
+        CMSISMat<3, 1> invAcc =
+            tRotation * (angVel * (2 * transVel - angVel * translation) - transAcc);
+        CMSISMat<3, 3> invAngVel = -tRotation * angVel * rotation;
         return Transform(invTranslation, tRotation, invVel, invAcc, invAngVel);
     }
     else

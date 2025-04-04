@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,11 +21,34 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "motor_interface_mock.hpp"
+#ifndef TAPROOT_ENCODER_INTERFACE_MOCK_HPP_
+#define TAPROOT_ENCODER_INTERFACE_MOCK_HPP_
+
+#include <gmock/gmock.h>
+
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
 
 namespace tap::mock
 {
-MotorInterfaceMock::MotorInterfaceMock() : tap::motor::MotorInterface(), encoder() {}
+class EncoderInterfaceMock : public tap::encoder::EncoderInterface
+{
+public:
+    EncoderInterfaceMock();
+    virtual ~EncoderInterfaceMock();
 
-MotorInterfaceMock::~MotorInterfaceMock() {}
+    MOCK_METHOD(void, initialize, (), (override));
+
+    MOCK_METHOD(bool, isOnline, (), (const override));
+
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getPosition, (), (const override));
+
+    MOCK_METHOD(float, getVelocity, (), (const override));
+
+    MOCK_METHOD(void, resetEncoderValue, (), (override));
+
+    MOCK_METHOD(void, alignWith, (EncoderInterface*), (override));
+};
+
 }  // namespace tap::mock
+
+#endif  // TAPROOT_ENCODER_INTERFACE_MOCK_HPP_
