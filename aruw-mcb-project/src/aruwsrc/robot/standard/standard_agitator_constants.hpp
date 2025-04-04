@@ -58,7 +58,7 @@ static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR7,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -107,7 +107,7 @@ static constexpr int AGITATOR_NUM_POCKETS = 10;   // number of balls in one rota
 static constexpr float AGITATOR_MAX_ROF = 20.0f;  // balls per second
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR7,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
