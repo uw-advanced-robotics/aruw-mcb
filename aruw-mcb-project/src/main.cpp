@@ -43,6 +43,7 @@
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
@@ -169,6 +170,10 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
+#if defined(TARGET_HERO_PERSEUS)
+drivers->mpu6500.setMountingTransform(
+    aruwsrc::chassis::MPU6500_HERO_MCB_MOUNTING_TRANSFORM);
+#endif
 #if defined(TARGET_SENTRY_HYDRA)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
@@ -215,7 +220,8 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
         drivers->mpu6500.getImuState() !=
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
+        // tap::buzzer::playNote(&drivers->pwm, 1000);
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
     }
     else
     {

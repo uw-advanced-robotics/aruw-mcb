@@ -22,6 +22,9 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
+#include "tap/algorithms/transforms/position.hpp"
+#include "tap/algorithms/transforms/orientation.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
@@ -45,9 +48,16 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {120, 8'000},
 };
 
+
+static const tap::algorithms::transforms::Transform MPU6500_HERO_MCB_MOUNTING_TRANSFORM = tap::algorithms::transforms::Transform(
+    0,0,0,M_PI_2,0,0
+);
+
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
+
+
 
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
