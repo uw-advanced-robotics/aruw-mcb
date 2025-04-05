@@ -72,6 +72,8 @@ bool ISM330<I2cMaster>::read()
         imuData.gyroDegPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
         imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
 
+        applyTransform(imuData);
+
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
     }
     PT_END();

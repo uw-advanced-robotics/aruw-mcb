@@ -112,6 +112,12 @@ protected:
     void setAccelOffset(float x, float y, float z);
     void setGyroOffset(float x, float y, float z);
 
+    inline void applyTransform(const ImuData& data)
+    {
+        imuData.accG = mountingTransform.apply(data.accG);
+        imuData.gyroDegPerSec = mountingTransform.apply(data.gyroDegPerSec);
+    }
+
     virtual inline float getAccelerationSensitivity() = 0;
 
     tap::algorithms::transforms::Transform mountingTransform;
