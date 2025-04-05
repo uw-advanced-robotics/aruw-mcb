@@ -23,8 +23,6 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
-#include "tap/algorithms/transforms/position.hpp"
-#include "tap/algorithms/transforms/orientation.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"

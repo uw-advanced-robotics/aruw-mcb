@@ -220,8 +220,7 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
         drivers->mpu6500.getImuState() !=
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
-        // tap::buzzer::playNote(&drivers->pwm, 1000);
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
+        tap::buzzer::playNote(&drivers->pwm, 1000);
     }
     else
     {
