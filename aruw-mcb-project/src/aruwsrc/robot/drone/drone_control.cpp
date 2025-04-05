@@ -209,20 +209,20 @@ void registerDroneSubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands([[maybe_unused]] Drivers *drivers)
+void setDefaultDroneCommands(Drivers *)
 {
     turret.setDefaultCommand(&turrettUserControlCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands([[maybe_unused]] Drivers *drivers)
+void startDroneCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&turrettUserControlCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings([[maybe_unused]] Drivers *drivers)
+void registerDroneIoMappings(Drivers *drivers)
 {
     // Add IO mappings for control operator interface
     drivers->commandMapper.addMap(&rightSwitchMiddle);

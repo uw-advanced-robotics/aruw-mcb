@@ -16,40 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-/*
-#ifndef DRONE_DRIVERS_HPP_
-#define DRONE_DRIVERS_HPP_
-
-#include "tap/drivers.hpp"
-
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
-#else
-
-#endif
-
-namespace aruwsrc::drone
-{
-class Drivers : public tap::Drivers
-{
-    friend class DriversSingleton;
-
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers() {}
-
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
-#else
-public:
-
-#endif
-};  // class aruwsrc::DroneDrivers
-}  // namespace aruwsrc::drone
-
-#endif  // DRONE_DRIVERS_HPP_
-*/
 
 #ifndef DRONE_DRIVERS_HPP_
 #define DRONE_DRIVERS_HPP_
