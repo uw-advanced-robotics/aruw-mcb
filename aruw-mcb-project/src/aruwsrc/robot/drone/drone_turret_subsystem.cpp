@@ -35,6 +35,9 @@ float DroneTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPi
 /**
  *  TODO: implement this
  */
-uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const { return getTurretMCB()->getIMUDataTimestamp(); }
+uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return getTurretMCB()->getIMUDataTimestamp();
+}
 
 }  // namespace aruwsrc::control::turret

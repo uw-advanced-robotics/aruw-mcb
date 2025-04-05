@@ -18,35 +18,35 @@
  */
 
 #if defined(TARGET_DRONE)
-#include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/robot/drone/drone_drivers.hpp"
-#include "aruwsrc/robot/drone/drone_turret_subsystem.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
+#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
+#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
+#include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
-#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
-#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
-#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
-#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
-#include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
-#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
-#include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
-#include "tap/control/governor/governor_limited_command.hpp"
-#include "aruwsrc/control/governor/heat_limit_governor.hpp"
-#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
-#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/hold_command_mapping.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/drone/drone_drivers.hpp"
+#include "aruwsrc/robot/drone/drone_turret_subsystem.hpp"
 
 using namespace aruwsrc::drone;
 using namespace aruwsrc::control;
@@ -61,7 +61,6 @@ using namespace tap::control::governor;
 
 using namespace aruwsrc::control::governor;
 
-
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -70,7 +69,7 @@ using namespace aruwsrc::control::governor;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace drone_control 
+namespace drone_control
 {
 inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
@@ -95,8 +94,7 @@ aruwsrc::control::turret::DroneTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-
-//transforms
+// transforms
 VelocityAgitatorSubsystem agitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
@@ -112,7 +110,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-
 /* define commands ----------------------------------------------------------*/
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     turret.pitchMotor,
@@ -123,18 +120,15 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     chassis_rel::YAW_PID_CONFIG);
 
 TurretUserControlCommand turrettUserControlCommand(
-        drivers(),
-        drivers()->controlOperatorInterface,
-        &turret, 
-        &chassisFrameYawTurretController,  
-        &chassisFramePitchTurretController,  
-        USER_YAW_INPUT_SCALAR,  
-        USER_PITCH_INPUT_SCALAR,  
-        0  // Assuming this is the desired turret ID
-    );
-
-
-
+    drivers(),
+    drivers()->controlOperatorInterface,
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    0  // Assuming this is the desired turret ID
+);
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -182,7 +176,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-
 // Remote related mappings
 HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
@@ -196,45 +189,44 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
-
-
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() {
+void initializeSubsystems()
+{
     turret.initialize();
     agitator.initialize();
     frictionWheels.initialize();
-
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(Drivers *drivers) {
+void registerDroneSubsystems(Drivers *drivers)
+{
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands([[maybe_unused]] Drivers *drivers) {
+void setDefaultDroneCommands([[maybe_unused]] Drivers *drivers)
+{
     turret.setDefaultCommand(&turrettUserControlCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands([[maybe_unused]] Drivers *drivers) {
+void startDroneCommands([[maybe_unused]] Drivers *drivers)
+{
     drivers->commandScheduler.addCommand(&turrettUserControlCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings([[maybe_unused]] Drivers *drivers) {
+void registerDroneIoMappings([[maybe_unused]] Drivers *drivers)
+{
     // Add IO mappings for control operator interface
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    
 }
 }  // namespace drone_control
 
