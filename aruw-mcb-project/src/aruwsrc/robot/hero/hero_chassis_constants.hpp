@@ -55,8 +55,6 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
-
-
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
