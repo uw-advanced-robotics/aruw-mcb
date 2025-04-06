@@ -58,28 +58,36 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
-    "Left Front Chassis Motor");
+    "Left Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
     aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
-    "Left Back Chassis Motor");
+    "Left Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
     aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
-    "Right Front Chassis Motor");
+    "Right Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
     aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
-    "Right Back Chassis Motor");
+    "Right Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 XDriveChassisSubsystem chassis(
     drivers(),
