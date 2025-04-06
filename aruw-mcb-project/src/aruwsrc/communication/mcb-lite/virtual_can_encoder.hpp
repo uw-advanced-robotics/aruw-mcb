@@ -22,11 +22,11 @@
 
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
-#include "mcb_lite.hpp"
-
 namespace aruwsrc::virtualMCB
 {
 using namespace tap::encoder;
+
+class MCBLite;
 
 class VirtualCanEncoder : public CanEncoder
 {

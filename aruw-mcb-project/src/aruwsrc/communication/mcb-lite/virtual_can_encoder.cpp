@@ -19,6 +19,8 @@
 
 #include "virtual_can_encoder.hpp"
 
+#include "mcb_lite.hpp"
+
 namespace aruwsrc::virtualMCB
 {
 using namespace tap::encoder;
