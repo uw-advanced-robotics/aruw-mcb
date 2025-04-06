@@ -38,7 +38,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
  */

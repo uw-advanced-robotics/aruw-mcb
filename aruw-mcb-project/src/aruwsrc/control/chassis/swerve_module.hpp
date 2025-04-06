@@ -40,7 +40,6 @@ namespace aruwsrc
 {
 namespace chassis
 {
-
 /**
  *
  * This class encapsulates a swerve module with two motors.
