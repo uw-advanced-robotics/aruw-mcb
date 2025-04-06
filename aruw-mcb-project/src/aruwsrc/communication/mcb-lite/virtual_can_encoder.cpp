@@ -30,9 +30,9 @@ VirtualCanEncoder::VirtualCanEncoder(
     CanEncoderId id,
     MCBLite* lite,
     tap::can::CanBus canBus,
-    bool isInverted = false,
-    float gearRatio = 1,
-    uint32_t encoderHomePosition = 0)
+    bool isInverted,
+    float gearRatio,
+    uint32_t encoderHomePosition)
     : CanEncoder(drivers, id, canBus, isInverted, gearRatio, encoderHomePosition)
 {
     if (canBus == tap::can::CanBus::CAN_BUS1)
