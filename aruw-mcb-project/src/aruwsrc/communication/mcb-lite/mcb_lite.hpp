@@ -83,7 +83,9 @@ private:
 
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
-    void processCanEncoderMessage(const ReceivedSerialMessage& completeMessage, VirtualCanEncoder** encoders);
+    void processCanEncoderMessage(
+        const ReceivedSerialMessage& completeMessage,
+        VirtualCanEncoder** encoders);
 
     tap::communication::serial::Uart::UartPort port;
 

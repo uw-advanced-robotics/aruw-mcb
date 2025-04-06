@@ -20,13 +20,12 @@
 #ifndef VIRTUAL_CAN_ENCODER_HPP_
 #define VIRTUAL_CAN_ENCODER_HPP_
 
-#include "mcb_lite.hpp"
-
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
+
+#include "mcb_lite.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-
 using namespace tap::encoder;
 
 class VirtualCanEncoder : public CanEncoder
