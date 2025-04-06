@@ -24,8 +24,9 @@ namespace aruwsrc::robot::engineer
 {
 CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& storageLiftMotor)
-    : Subsystem(drivers),
+    tap::motor::MotorInterface& storageLiftMotor, aruwsrc::control::TriggerInterface& trigger,
+    uint64_t length)
+    : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
       motor(storageLiftMotor){};
 
 void CubeStorageSubsystem::initialize() { motor.initialize(); moveMotor(0); }
@@ -42,14 +43,14 @@ float CubeStorageSubsystem::getSetpoint() {
 
 void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
+bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT); }
 
 void CubeStorageSubsystem::refresh() { 
     limit = isLimitSwitched(); 
-    float error = setpoint - motor.getPositionUnwrapped() / tap::motor::DjiMotor::GEAR_RATIO_M3508 * 71.44; //71.44 mm per revolution
-    float errorDerivative = motor.getShaftRPM() / 1000 / 60 / tap::motor::DjiMotor::GEAR_RATIO_M3508 * 71.44;
-    float timeDifference = tap::arch::clock::getTimeMilliseconds() - lastTime;
-    lastTime = tap::arch::clock::getTimeMilliseconds();
+    float error = setpoint - motor.getPositionUnwrapped() / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION;
+    float errorDerivative = motor.getShaftRPM() / 1000 / 60 / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION / 1000;
+    float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
+    lastTime = tap::arch::clock::getTimeMilliseconds(); 
     pid.runController(error, errorDerivative, timeDifference);
     motor.setDesiredOutput(pid.getOutput() + FEEDFORWARD);
 }

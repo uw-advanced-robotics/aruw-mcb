@@ -31,6 +31,8 @@
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
@@ -50,12 +52,6 @@ namespace aruwsrc
 {
 namespace control
 {
-static constexpr Digital::OutputPin GRABBER_PIN = Digital::OutputPin::E;
-static constexpr Digital::OutputPin X_AXIS_PIN = Digital::OutputPin::F;
-static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
-static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
-static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
-static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
 
 tap::motor::DjiMotor storageLiftMotor(
     drivers(),
@@ -63,13 +59,14 @@ tap::motor::DjiMotor storageLiftMotor(
     LIFT_MOTOR_CAN_BUS,
     false,
     "Lifting Motor");
-
+LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
-
-CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor);
+CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
 /* define commands ----------------------------------------------------------*/
 CubeMoveCommand cubeUp(cubeLift, 1000);
 CubeMoveCommand cubeDown(cubeLift, -1000);
+
+//HomingCommand cubeHomingCommand(cubeLift);
 
 CubeMoveManualCommand cubeManualControl(cubeLift,  &drivers()->controlOperatorInterface);
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);

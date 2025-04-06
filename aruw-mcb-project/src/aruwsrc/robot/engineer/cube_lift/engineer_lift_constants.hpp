@@ -32,10 +32,16 @@ static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
 static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
     tap::can::CanBus::CAN_BUS1;  // TODO: UPDATE W CORRECT VALUE
 
-static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
+static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
 
+static constexpr float LIFT_UPPER_BOUND = 1000; // TODO: UPDATE
+
+static constexpr int64_t LENGTH = 100; //TODO: UPDATE LATER
+
 static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
+
+static constexpr float MM_PER_REVOLUTION = 71.44;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .kp = 1400.0f,
