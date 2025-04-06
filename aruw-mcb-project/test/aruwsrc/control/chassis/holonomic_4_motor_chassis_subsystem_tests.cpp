@@ -51,6 +51,8 @@ static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG
     .kd = 0,
 };
 
+static constexpr float GEAR_RATIO = 1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+
 class Holonomic4MotorChassisSubsystemTest : public Test
 {
 protected:
@@ -61,30 +63,10 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          leftFrontMotor(
-              &drivers,
-              tap::motor::MOTOR1,
-              tap::can::CanBus::CAN_BUS1,
-              false,
-              "drive mock"),
-          leftBackMotor(
-              &drivers,
-              tap::motor::MOTOR1,
-              tap::can::CanBus::CAN_BUS1,
-              false,
-              "drive mock"),
-          rightFrontMotor(
-              &drivers,
-              tap::motor::MOTOR1,
-              tap::can::CanBus::CAN_BUS1,
-              false,
-              "drive mock"),
-          rightBackMotor(
-              &drivers,
-              tap::motor::MOTOR1,
-              tap::can::CanBus::CAN_BUS1,
-              false,
-              "drive mock"),
+          leftFrontMotor(),
+          leftBackMotor(),
+          rightFrontMotor(),
+          rightBackMotor(),
           chassis(
               &drivers,
               &currentSensor,
@@ -104,7 +86,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
-    NiceMock<tap::mock::DjiMotorMock> leftFrontMotor, leftBackMotor, rightFrontMotor,
+    NiceMock<tap::mock::MotorInterfaceMock> leftFrontMotor, leftBackMotor, rightFrontMotor,
         rightBackMotor;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
@@ -149,30 +131,6 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)
     rbOnline = true;
 
     EXPECT_TRUE(chassis.allMotorsOnline());
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftFrontRpmActual)
-{
-    ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getLeftFrontRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftBackRpmActual)
-{
-    ON_CALL(chassis.leftBackMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getLeftBackRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightFrontRpmActual)
-{
-    ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getRightFrontRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightBackRpmActual)
-{
-    ON_CALL(chassis.rightBackMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getRightBackRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)

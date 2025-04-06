@@ -42,6 +42,8 @@ static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG
     .kd = 0,
 };
 
+static constexpr float GEAR_RATIO = 1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+
 class ChassisAutorotateCommandTest : public Test
 {
 protected:
@@ -53,10 +55,10 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          lfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
-          lbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
-          rfm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
-          rbm(&drivers, tap::motor::MOTOR1, tap::can::CanBus::CAN_BUS1, false, "drive mock"),
+          lfm(),
+          lbm(),
+          rfm(),
+          rbm(),
           chassis(&drivers, &currentSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
           turret(&drivers),
           controlOperatorInterface(&drivers),
@@ -74,7 +76,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
-    NiceMock<tap::mock::DjiMotorMock> lfm, lbm, rfm, rbm;
+    NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;

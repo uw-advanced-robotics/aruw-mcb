@@ -101,10 +101,10 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &leftFrontMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &leftBackMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &rightFrontMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &rightBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
     : MecanumChassisSubsystem(
           drivers,
@@ -121,10 +121,10 @@ MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &leftFrontMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &leftBackMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &rightFrontMotor,
-    testing::NiceMock<tap::mock::DjiMotorMock> &rightBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
     : XDriveChassisSubsystem(
           drivers,
