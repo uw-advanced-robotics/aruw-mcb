@@ -38,8 +38,8 @@ static constexpr char ROBOT_NAME[] = "TARGET_HERO_PERSEUS";
 static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_SPIDER";
 #elif defined(TARGET_STANDARD_ORION)
 static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_ORION";
-#elif defined(TARGET_STANDARD_CYGNUS)
-static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_CYGNUS";
+#elif defined(TARGET_STANDARD_NULL)
+static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_NULL";
 #else
 static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
 #endif

@@ -25,7 +25,7 @@
  * true for all standards.
  */
 #if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
+    defined(TARGET_STANDARD_NULL)
 #define ALL_STANDARDS
 #endif
 
@@ -38,8 +38,7 @@
 #endif
 
 #if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS) || defined(TARGET_SENTRY_HYDRA) ||   \
-    defined(TARGET_HERO_PERSEUS)
+    defined(TARGET_STANDARD_NULL) || defined(TARGET_SENTRY_HYDRA) || defined(TARGET_HERO_PERSEUS)
 #define SSH1106_OLED
 #endif
 

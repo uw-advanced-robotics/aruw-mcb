@@ -22,7 +22,7 @@ from build_tools.parse_args import USAGE
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
 VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
                         "STANDARD_ORION",
-                        "STANDARD_CYGNUS",
+                        "STANDARD_NULL",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_HYDRA",
@@ -35,7 +35,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
 ROBOT_CLASS = {
     "STANDARD_SPIDER": "standard",
     "STANDARD_ORION": "standard",
-    "STANDARD_CYGNUS": "standard",
+    "STANDARD_NULL": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_HYDRA": "sentry",

@@ -232,19 +232,19 @@ before_script:
       - robot-STANDARD_ORION-develop-tests
     when: 'always'
 
-# Standard (Cygnus) build
+# Standard (Null) build
 
-"Standard (Cygnus): MCB Build":
+"Standard (Null): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_CYGNUS
+    ROBOT: STANDARD_NULL
 
-"Standard (Cygnus): Test Build":
+"Standard (Null): Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: STANDARD_CYGNUS
+    ROBOT: STANDARD_NULL
 
 # Drone build
 

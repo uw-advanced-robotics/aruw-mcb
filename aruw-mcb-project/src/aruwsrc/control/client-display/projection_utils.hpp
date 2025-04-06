@@ -54,7 +54,7 @@ struct ProjectedResult
 };
 
 // This in theory is the offset between the realsense and the VTM
-#if defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_STANDARD_NULL)
 static Transform VTM_OFFSET = Transform(Position(0, 0.02, 0.085), Orientation(0, 0, 0));
 #elif defined(TARGET_STANDARD_ORION)
 static Transform VTM_OFFSET = Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));

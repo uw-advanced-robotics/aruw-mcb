@@ -146,7 +146,7 @@ tap::motor::DjiMotor yawMotor(
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
 #if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
+    defined(TARGET_STANDARD_NULL)
     false,
 #else
 #error "did not define standard!"
