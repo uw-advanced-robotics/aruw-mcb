@@ -71,6 +71,8 @@ StickOutputCommand manualFine(
 
 OutputSweepCommand sweep(
     &motorSubsystem,
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::E,
     0,      // min output
     30000,  // max output
     1000,   // step length (ms)
