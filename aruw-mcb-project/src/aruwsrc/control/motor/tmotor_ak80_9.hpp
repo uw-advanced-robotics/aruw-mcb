@@ -60,6 +60,29 @@ enum TMotorId : uint32_t
     MOTOR8 = 0x2908,
 };
 
+enum TMotorFaultCode : uint8_t
+{
+    FAULT_CODE_NONE = 0,
+    FAULT_CODE_OVER_VOLTAGE,                        // OVER VOLTAGE
+    FAULT_CODE_UNDER_VOLTAGE,                       // UNDER_VOLTAGE
+    FAULT_CODE_DRV,                                 // DRIVE FAULT
+    FAULT_CODE_ABS_OVER_CURRENT,                    // OVER_CURRENT
+    FAULT_CODE_OVER_TEMP_FET,                       // MOS OVER TEMPERATURE
+    FAULT_CODE_OVER_TEMP_MOTOR,                     // MOS OVER TEMPERATURE
+    FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE,            // DRIVER_OVER_VOLTAGE
+    FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE,           // DRIVER UNDER VOLTAGE
+    FAULT_CODE_MCU_UNDER_VOLTAGE,                   // MCU UNDRE VOLTAGE
+    FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET,         // UNDREVOLTAGE
+    FAULT_CODE_ENCODER_SPI,                         // SPI ENCODER FAULT
+    FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE,  // Encoder overrun
+    FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE,  // Encoder overrun
+    FAULT_CODE_FLASH_CORRUPTION,                    // FLASH FAULT
+    FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1,        // Current sampling channel 1 fault
+    FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2,        // Current sampling channel 2 fault
+    FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3,        // Current sampling channel 1 fault
+    FAULT_CODE_UNBALANCED_CURRENTS,                 // current unbalance
+};
+
 /** Number of motors on each CAN bus. */
 static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
 /** CAN message length of each motor control message. */
@@ -210,6 +233,8 @@ private:
     int8_t temperature;
 
     int16_t torque;
+
+    uint8_t fault;
 
     /**
      * If `false` the positive rotation direction of the shaft is counter-clockwise when

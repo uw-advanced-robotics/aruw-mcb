@@ -21,7 +21,7 @@
 #define TMOTOR_AK80_9_ENCODER_HPP_
 
 #include "tap/architecture/timeout.hpp"
-#include "tap/communication/sensors/encoder/wrapped_encoder.hpp"
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
 #include "tap/util_macros.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
@@ -47,7 +47,7 @@ namespace aruwsrc::control::motor
  * Combining them with some form of absolute encoder on the output shaft would give you knowledge of
  * the orientation of the output shaft.
  */
-class Tmotor_AK809Encoder : public tap::encoder::WrappedEncoder
+class Tmotor_AK809Encoder : public tap::encoder::EncoderInterface
 {
 public:
     // 0 - 8191 for dji motors
@@ -71,11 +71,17 @@ public:
      * @param gearRatio the ratio of input revolutions to output revolutions of this encoder.
      * @param encoderHomePosition the zero position for the encoder in encoder ticks.
      */
-    Tmotor_AK809Encoder(bool isInverted, float gearRatio = 1, uint32_t encoderHomePosition = 1750);
+    Tmotor_AK809Encoder(bool isInverted, float gearRatio = 1, uint16_t encoderHomePosition = 1750);
 
     void initialize() override {};
 
+    void alignWith(EncoderInterface* other) override;
+
+    void resetEncoderValue() override;
+
     bool isOnline() const override;
+
+    inline tap::algorithms::WrappedFloat getPosition() const override;
 
     float getVelocity() const override;
 
@@ -101,7 +107,31 @@ private:
 
     tap::arch::MilliTimeout encoderDisconnectTimeout;
 
+    /**
+     * The current encoder position.
+     */
+    tap::algorithms::WrappedFloat encoder;
+
+    /**
+     * The encoder position converted into output rotations
+     */
+    tap::algorithms::WrappedFloat position;
+
+    bool inverted;
+
+    const uint32_t encoderResolution;
+
+    const float gearRatio;
+
+    /**
+     * The actual encoder wrapped value received from CAN messages where this motor
+     * is considered to have an encoder value of 0. encoderHomePosition is 0 by default.
+     */
+    uint16_t encoderHomePosition;
+
     int16_t shaftRPM;
+
+    void updateEncoderValue(uint16_t encoderActual);
 };
 
 }  // namespace aruwsrc::control::motor

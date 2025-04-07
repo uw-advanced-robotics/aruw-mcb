@@ -49,6 +49,7 @@ Tmotor_AK809::Tmotor_AK809(
       desiredOutput(0),
       temperature(0),
       torque(0),
+      fault(TMotorFaultCode::FAULT_CODE_NONE),
       motorInverted(isInverted),
       internalEncoder(isInverted, GEAR_RATIO, encoderHomePosition)
 {
@@ -73,6 +74,7 @@ void Tmotor_AK809::processMessage(const modm::can::Message& message)
     torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature
+    fault = static_cast<uint8_t>(message.data[7]);
 
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
