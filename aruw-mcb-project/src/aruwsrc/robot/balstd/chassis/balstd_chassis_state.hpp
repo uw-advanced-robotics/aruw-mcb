@@ -12,13 +12,14 @@ namespace aruwsrc::control::balstd
 struct BalstdChassisState
 {
     BalstdLegState leftLegState, rightLegState, virtualLegState;
-
-    // virtual leg
+    float chassisPitch;
 };
 
 const BalstdChassisState ZERO_STATE{
     .leftLegState = {0, 0, 0, 0, 0, 0},
-    .rightLegState = {0, 0, 0, 0, 0, 0}};
+    .rightLegState = {0, 0, 0, 0, 0, 0},
+    .virtualLegState = {0, 0, 0, 0, 0, 0},
+};
 
 }  // namespace aruwsrc::control::balstd
 

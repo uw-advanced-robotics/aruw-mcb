@@ -68,11 +68,17 @@ void BalstdChassisSubsystem::setOutputs(const BalstdChassisOutput& output)
 
 void BalstdChassisSubsystem::updateState()
 {
+    // todo: maybe move into dedicated observer class
     leftLeg.updateState();
     rightLeg.updateState();
 
     currState.leftLegState = leftLeg.getState();
     currState.rightLegState = rightLeg.getState();
+    currState.virtualLegState = {
+        .xc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2,
+        .yc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2,
+    };
+    currState.virtualLegState.calculatePendulumState();
 }
 
 }  // namespace aruwsrc::control::balstd

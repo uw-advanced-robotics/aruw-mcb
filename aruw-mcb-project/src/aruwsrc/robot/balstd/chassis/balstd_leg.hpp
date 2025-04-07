@@ -12,8 +12,27 @@ using tap::algorithms::transforms::Vector;
 struct BalstdLegState
 {
     float qFront, qBack;  // angles of upper linkages in radians
-    float xc, yc;         // coordinates of wheel axle wrt hip center
-    float L, theta;       // pendulum length and angle wrt hip center
+
+    float xc, yc;                    // coordinates of wheel axle wrt hip center
+    float kneesWidthX, kneesWidthY;  // components of distance between knees
+
+    float L, theta;  // pendulum length and angle wrt hip center
+
+    void calculateForwardKinematics(BalstdLegConfig config)
+    {
+        // knee coordinates
+        float x2 = config.upperLinkLength * cos(qFront);
+        float y2 = config.upperLinkLength * sin(qFront);
+        float x4 = config.upperLinkLength * cos(qBack) - config.fixedLinkLength;
+        float y4 = config.upperLinkLength * sin(qBack);
+
+        kneesWidthX = x4 - x2;
+        kneesWidthY = y4 - y2;
+
+        // wheel coordinates (TODO)
+        xc = 0;
+        yc = 0;
+    }
 
     void calculatePendulumState()
     {
@@ -72,7 +91,25 @@ private:
 
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
 
-    void setFrontHipMotorTorque(float torque);
+    inline float getFrontHipAngle() const
+    {
+        return tap::algorithms::WrappedFloat(
+                   frontHipMotor.getEncoder()->getPosition().getWrappedValue(),
+                   -M_PI_2,
+                   3 * M_PI_2)
+            .getWrappedValue();
+    }
+
+    inline float getBackHipAngle() const
+    {
+        return tap::algorithms::WrappedFloat(
+                   backHipMotor.getEncoder()->getPosition().getWrappedValue(),
+                   -M_PI_2,
+                   3 * M_PI_2)
+            .getWrappedValue();
+    }
+
+    void setHipTorques(float front, float back);
     void setBackHipMotorTorque(float torque);
 
     void calculateJacobianTranspose();
