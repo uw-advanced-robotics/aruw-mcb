@@ -153,7 +153,7 @@ before_script:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_ORION compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     key: mcb-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -170,7 +170,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_ORION compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     key: mcb-test-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -182,19 +182,19 @@ before_script:
       - mcb-test-libs-develop
     when: 'always'
 
-# Standard (Spider) build
+# Standard (Null) build
 
-"Standard (Spider): MCB Build":
+"Standard (Null): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_SPIDER
+    ROBOT: STANDARD_NULL
 
-"Standard (Spider): Test Build":
+"Standard (Null): Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: STANDARD_SPIDER
+    ROBOT: STANDARD_NULL
 
 # Standard (Orion) build
 
@@ -231,20 +231,6 @@ before_script:
     fallback_keys:
       - robot-STANDARD_ORION-develop-tests
     when: 'always'
-
-# Standard (Cygnus) build
-
-"Standard (Cygnus): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_CYGNUS
-
-"Standard (Cygnus): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_CYGNUS
 
 # Drone build
 

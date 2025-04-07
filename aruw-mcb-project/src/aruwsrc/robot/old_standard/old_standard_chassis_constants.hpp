@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_CHASSIS_CONSTANTS_HPP_
-#define STANDARD_CHASSIS_CONSTANTS_HPP_
+#ifndef OLD_STANDARD_CHASSIS_CONSTANTS_HPP_
+#define OLD_STANDARD_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -39,12 +39,12 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 450},
-    {60, 570},
-    {70, 640},
-    {80, 670},
-    {100, 700},
-    {120, 800},
+    {50, 4'500},
+    {60, 5'700},
+    {70, 6'400},
+    {80, 6'700},
+    {100, 7'000},
+    {120, 8'000},
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -67,12 +67,12 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 0.0f;
+static constexpr float VELOCITY_PID_KP = 10.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_KD = 1.25f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float VELOCITY_PID_KV = 0.0f;
-static constexpr float VELOCITY_PID_KS = 0.0f;
+static constexpr float VELOCITY_PID_KV = 0.057f;
+static constexpr float VELOCITY_PID_KS = 350.0f;
 
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -85,12 +85,12 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 0.0f;
-static constexpr float AUTOROTATION_PID_KD = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 0.0f;
-static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.0f;
+static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
  * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
@@ -101,16 +101,16 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m).
  */
-static constexpr float WHEEL_RADIUS = 0.2032;
+static constexpr float WHEEL_RADIUS = 0.076;
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.458f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.458f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.37f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.415f;
 
 #else
 
-#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
+#error "Attempted to include old_standard_chassis_constants.hpp for nonstandard robot target."
 
 #endif
 
@@ -157,4 +157,4 @@ static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0
 static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
 }  // namespace aruwsrc::chassis
 
-#endif  // STANDARD_CHASSIS_CONSTANTS_HPP_
+#endif  // OLD_STANDARD_CHASSIS_CONSTANTS_HPP_
