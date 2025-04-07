@@ -107,6 +107,8 @@ private:
 
     tap::arch::MilliTimeout encoderDisconnectTimeout;
 
+    const uint32_t encoderResolution;
+
     /**
      * The current encoder position.
      */
@@ -118,8 +120,6 @@ private:
     tap::algorithms::WrappedFloat position;
 
     bool inverted;
-
-    const uint32_t encoderResolution;
 
     const float gearRatio;
 

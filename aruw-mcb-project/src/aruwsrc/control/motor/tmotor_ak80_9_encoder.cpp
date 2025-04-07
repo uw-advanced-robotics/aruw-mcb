@@ -28,10 +28,10 @@ Tmotor_AK809Encoder::Tmotor_AK809Encoder(
     float gearRatio,
     uint16_t encoderHomePosition)
     : EncoderInterface(),
+      encoderResolution(ENC_RESOLUTION),
       encoder(tap::algorithms::WrappedFloat(0, 0, encoderResolution)),
       position(tap::algorithms::Angle(0)),
       inverted(isInverted),
-      encoderResolution(ENC_RESOLUTION),
       gearRatio(gearRatio),
       encoderHomePosition(encoderHomePosition),
       shaftRPM(0)
