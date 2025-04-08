@@ -56,7 +56,7 @@ public:
     {
         if (inverted)
         {
-            return analog->read(pin) <= threshold;
+            return analog->read(pin) < threshold;
         }
         else
         {
