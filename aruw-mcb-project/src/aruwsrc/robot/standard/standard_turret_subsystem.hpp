@@ -27,7 +27,7 @@ namespace aruwsrc::control::turret
 /**
  * Turret subsystem for the Standard.
  */
-class StandardTurretSubsystem final : public RobotTurretSubsystem
+class BalstdTurretSubsystem final : public RobotTurretSubsystem
 {
     using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;

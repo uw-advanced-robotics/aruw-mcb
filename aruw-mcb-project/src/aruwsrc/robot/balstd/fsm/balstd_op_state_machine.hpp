@@ -20,7 +20,7 @@ public:
 
     void refresh() override;
 
-    inline const BalstdOpState getCurrentState() const { return currentState; }
+    inline const BalstdOpState& getCurrentState() const { return currentState; }
 
 private:
     BalstdOpState currentState;

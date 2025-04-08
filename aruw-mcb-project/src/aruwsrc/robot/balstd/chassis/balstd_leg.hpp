@@ -9,6 +9,17 @@
 namespace aruwsrc::control::balstd
 {
 using tap::algorithms::transforms::Vector;
+struct BalstdLegConfig
+{
+    float upperLinkLength;  // meters
+    float lowerLinkLength;  // meters
+    float fixedLinkLength;  // meters
+
+    float frontHipOuterLimit;  // radians
+    float frontHipInnerLimit;  // radians
+    float backHipOuterLimit;   // radians
+    float backHipInnerLimit;   // radians
+};
 struct BalstdLegState
 {
     float qFront, qBack;  // angles of upper linkages in radians
@@ -39,18 +50,6 @@ struct BalstdLegState
         L = atan2(xc, yc);
         theta = sqrt(xc * xc + yc * yc);
     }
-};
-
-struct BalstdLegConfig
-{
-    float upperLinkLength;  // meters
-    float lowerLinkLength;  // meters
-    float fixedLinkLength;  // meters
-
-    float frontHipOuterLimit;  // radians
-    float frontHipInnerLimit;  // radians
-    float backHipOuterLimit;   // radians
-    float backHipInnerLimit;   // radians
 };
 
 class BalstdLeg

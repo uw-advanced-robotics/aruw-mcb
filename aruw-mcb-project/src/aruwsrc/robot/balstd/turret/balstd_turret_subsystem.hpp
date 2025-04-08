@@ -17,19 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "standard_turret_subsystem.hpp"
+#ifndef BALSTD_TURRET_SUBSYSTEM_HPP_
+#define BALSTD_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {
-float BalstdTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
-
-float BalstdTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t BalstdTurretSubsystem::getLastMeasurementTimeMicros() const
+/**
+ * Turret subsystem for the Balancing Standard.
+ */
+class BalstdTurretSubsystem final : public RobotTurretSubsystem
 {
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+    using RobotTurretSubsystem::RobotTurretSubsystem;
+    float getWorldYaw() const override;
+    float getWorldPitch() const override;
+    uint32_t getLastMeasurementTimeMicros() const override;
+    modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
+    float getPitchOffset() const override { return 0; };
+};  // class BalstdTurretSubsystem
 
 }  // namespace aruwsrc::control::turret
+
+#endif  // BALSTD_TURRET_SUBSYSTEM_HPP_

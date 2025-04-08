@@ -22,7 +22,7 @@ void BalstdOpStateMachine::refresh()
 {
     // TODO: consider imu calibrate state when allowing get up
 
-    float chassisPitch = chassisState.leftLegState;
+    float chassisPitch = 0;  // chassisState.leftLegState;
 
     // TODO: use pendulum angle
     if (chassisPitch > CONTROLLABLE_CHASSIS_PITCH_LIMIT)

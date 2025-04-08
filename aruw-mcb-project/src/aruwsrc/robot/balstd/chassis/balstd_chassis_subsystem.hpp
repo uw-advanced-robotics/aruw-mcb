@@ -38,6 +38,8 @@ public:
 
     void updateState();
 
+    inline const BalstdChassisState& getChassisState() const { return currState; }
+
     void setOutputs(const BalstdChassisOutput& output);
 
     inline void attachController(BalstdChassisControllerInterface* newController)

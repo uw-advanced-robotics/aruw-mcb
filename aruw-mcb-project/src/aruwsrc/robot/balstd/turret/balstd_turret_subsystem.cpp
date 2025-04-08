@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "standard_turret_subsystem.hpp"
+#include "balstd_turret_subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 

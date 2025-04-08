@@ -33,6 +33,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/balstd/balstd_drivers.hpp"
@@ -40,6 +42,7 @@
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
 #include "aruwsrc/robot/balstd/fsm/balstd_op_state_machine.hpp"
+#include "aruwsrc/robot/balstd/turret/balstd_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -72,43 +75,43 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-tap::motor::DjiMotor leftFrontHipMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR1,
-    tap::can::CanBus::CAN_BUS1,
-    false,
-    "left front hip");
-tap::motor::DjiMotor leftBackHipMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR2,
-    tap::can::CanBus::CAN_BUS1,
-    false,
-    "left back hip");
-tap::motor::DjiMotor leftWheelMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
-    false,
-    "left wheel");
+// tap::motor::DjiMotor leftFrontHipMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR1,
+//     tap::can::CanBus::CAN_BUS2,
+//     false,
+//     "left front hip");
+// tap::motor::DjiMotor leftBackHipMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR2,
+//     tap::can::CanBus::CAN_BUS2,
+//     false,
+//     "left back hip");
+// tap::motor::DjiMotor leftWheelMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR3,
+//     tap::can::CanBus::CAN_BUS2,
+//     false,
+//     "left wheel");
 
-tap::motor::DjiMotor rightFrontHipMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR4,
-    tap::can::CanBus::CAN_BUS1,
-    true,
-    "right front hip");
-tap::motor::DjiMotor rightBackHipMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR5,
-    tap::can::CanBus::CAN_BUS1,
-    true,
-    "right back hip");
-tap::motor::DjiMotor rightWheelMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
-    true,
-    "right wheel");
+// tap::motor::DjiMotor rightFrontHipMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR4,
+//     tap::can::CanBus::CAN_BUS2,
+//     true,
+//     "right front hip");
+// tap::motor::DjiMotor rightBackHipMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR5,
+//     tap::can::CanBus::CAN_BUS2,
+//     true,
+//     "right back hip");
+// tap::motor::DjiMotor rightWheelMotor(
+//     drivers(),
+//     tap::motor::MotorId::MOTOR3,
+//     tap::can::CanBus::CAN_BUS2,
+//     true,
+//     "right wheel");
 
 BalstdLegConfig legConfig{
     .upperLinkLength = 0.15,
@@ -120,14 +123,14 @@ BalstdLegConfig legConfig{
     .backHipInnerLimit = modm::toRadian(90),
 };
 
-BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
-BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
+// BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
+// BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
 
-BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg);
+// BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg);
 
 // controllers
 
-ManualLegController manualLegController(drivers()->controlOperatorInterface);
+// ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
 // transforms
 // StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -135,7 +138,52 @@ ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
 // StandardAndHeroTransformAdapter transformAdapter(transformer);
 
-BalstdOpStateMachine stateMachine(drivers());
+// BalstdOpStateMachine stateMachine(drivers(), chassis.getChassisState());
+
+// turret
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    aruwsrc::control::turret::PITCH_MOTOR_ID,
+    aruwsrc::control::turret::CAN_BUS_PITCH_MOTOR,
+    false,
+    "Pitch Turret",
+    true,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
+
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    aruwsrc::control::turret::YAW_MOTOR_ID,
+    aruwsrc::control::turret::CAN_BUS_YAW_MOTOR,
+    true,
+    "Yaw Turret",
+    true);
+
+aruwsrc::control::turret::BalstdTurretSubsystem turret(
+    drivers(),
+    &pitchMotor,
+    &yawMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
+
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    turret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG);
+
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    turret.yawMotor,
+    chassis_rel::YAW_PID_CONFIG);
+
+user::TurretUserControlCommand turretUserControlCommand(
+    drivers(),
+    drivers()->controlOperatorInterface,
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    0  // Assuming this is the desired turret ID
+);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -151,24 +199,27 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&stateMachine);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&turret);
+    // drivers->commandScheduler.registerSubsystem(&stateMachine);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
-    stateMachine.initialize();
+    // chassis.initialize();
+    // stateMachine.initialize();
+    turret.initialize();
     // odometrySubsystem.initialize();
     // transformSubsystem.initialize();
 
-    chassis.attachController(&manualLegController);
+    // chassis.attachController(&manualLegController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
+    turret.setDefaultCommand(&turretUserControlCommand);
     // chassis.setDefaultCommand(&chassisAutorotateCommand);
 }
 
@@ -178,6 +229,7 @@ void startStandardCommands(Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     // drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    // drivers->commandScheduler.addCommand(&turretUserControlCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
