@@ -44,7 +44,7 @@
 #define ALL_SENTRIES
 #endif
 
-#if defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_NULL) || \
+#if defined(TARGET_STANDARD_ORION) || \
     defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
 #define SSH1106_OLED
 #endif
