@@ -31,7 +31,16 @@ CubeStorageSubsystem::CubeStorageSubsystem(
 
 void CubeStorageSubsystem::initialize() { motor.initialize(); moveMotor(0); }
 
-void CubeStorageSubsystem::moveMotor(int16_t power) { motor.setDesiredOutput(power + FEEDFORWARD); }
+void CubeStorageSubsystem::moveMotor(int16_t power) { motorDesiredOutput = power + FEEDFORWARD; }
+
+bool CubeStorageSubsystem::homedAndBounded() const {
+    return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
+}
+
+void CubeStorageSubsystem::stopDuringHoming() {
+    isPIDControl = false;
+    moveMotor(0);
+}
 
 void CubeStorageSubsystem::setSetpoint(float newSetpoint) {
     setpoint = newSetpoint;
@@ -41,17 +50,54 @@ float CubeStorageSubsystem::getSetpoint() {
     return setpoint;
 }
 
-void CubeStorageSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
+void CubeStorageSubsystem::moveTowardLowerBound() {
+    isPIDControl = false;
+    moveMotor(homingOutput);
+}
+
+void CubeStorageSubsystem::setHome(uint64_t encoderPosition) {
+    home = encoderPosition;
+}
+
+void CubeStorageSubsystem::setUpperBound(uint64_t encoderPosition) {
+    upperBound = encoderPosition;
+}
+
+uint64_t CubeStorageSubsystem::getUpperBound() const {
+    return upperBound;
+}
+
+void CubeStorageSubsystem::setLowerBound(uint64_t encoderPosition) {
+    lowerBound = encoderPosition;
+}
+
+uint64_t CubeStorageSubsystem::getLowerBound() const {
+    return lowerBound;
+}
+    
+void CubeStorageSubsystem::setUpperBound(uint64_t encoderPosition) {
+    lowerBound = encoderPosition;
+}
+
+void CubeStorageSubsystem::refreshSafeDisconnect() { 
+    isPIDControl = false;
+    motorDesiredOutput = 0; 
+}
 
 bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT); }
 
 void CubeStorageSubsystem::refresh() { 
-    limit = isLimitSwitched(); 
-    float error = setpoint - motor.getPositionUnwrapped() / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION;
-    float errorDerivative = motor.getShaftRPM() / 1000 / 60 / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION / 1000;
-    float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
-    lastTime = tap::arch::clock::getTimeMilliseconds(); 
-    pid.runController(error, errorDerivative, timeDifference);
-    motor.setDesiredOutput(pid.getOutput() + FEEDFORWARD);
+    isLimitSwitch = isLimitSwitched(); 
+
+    if(isPIDControl) {
+        float error = setpoint - motor.getPositionUnwrapped() / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION;
+        float errorDerivative = motor.getShaftRPM() / 1000 / 60 / tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION / 1000;
+        float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
+        lastTime = tap::arch::clock::getTimeMilliseconds(); 
+        pid.runController(error, errorDerivative, timeDifference);
+        motor.setDesiredOutput(pid.getOutput() + FEEDFORWARD);
+    } else {
+        motor.setDesiredOutput(motorDesiredOutput);
+    }
 }
 }  // namespace aruwsrc::robot::engineer

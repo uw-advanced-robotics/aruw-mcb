@@ -47,11 +47,21 @@ public:
 
     void refreshSafeDisconnect() override;
 
+    uint64_t getUpperBound() const;
+
+    uint64_t getLowerBound() const;
+
+    bool homedAndBounded() const;
+
+    void moveTowardLowerBound();
+
+    void stopDuringHoming();
+
     void setHome(uint64_t encoderPosition);
 
     void setUpperBound(uint64_t encoderPosition);
-    
-    void setUpperBound(uint64_t encoderPosition);
+
+    void setLowerBound(uint64_t encoderPosition);
     
     void setSetpoint(float newSetpoint);
 
@@ -63,12 +73,15 @@ protected:
     tap::motor::MotorInterface& motor;
 
 private:
-    bool limit = false;
+    bool isLimitSwitch = false;
+    bool isPIDControl = true;
     float setpoint = 0;
     float lastTime = 0;
-    float home = 0;
-    float upperBound = LIFT_UPPER_BOUND;
-    float lowerBound = 0;
+    float motorDesiredOutput = 0;
+    int16_t homingOutput = -500;
+    uint64_t home = 0;
+    uint64_t upperBound = LIFT_UPPER_BOUND;
+    uint64_t lowerBound = 0;
     tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_MOTOR_PID_CONFIG); 
 };  // class CUBE_STORAGE
 

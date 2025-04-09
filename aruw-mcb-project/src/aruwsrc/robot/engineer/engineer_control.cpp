@@ -26,7 +26,6 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/cube_move_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
@@ -63,8 +62,6 @@ LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
 /* define commands ----------------------------------------------------------*/
-CubeMoveCommand cubeUp(cubeLift, 1000);
-CubeMoveCommand cubeDown(cubeLift, -1000);
 
 //HomingCommand cubeHomingCommand(cubeLift);
 
