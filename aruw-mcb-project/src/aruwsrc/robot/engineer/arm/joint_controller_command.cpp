@@ -32,6 +32,7 @@ JointControllerCommand::JointControllerCommand(
       operatorInterface(operatorInterface),
       scalingFactor(scalingFactor)
 {
+    addSubsystemRequirement(&joint);
 }
 
 void JointControllerCommand::initialize()

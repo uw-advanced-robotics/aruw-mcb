@@ -46,6 +46,10 @@ JointControllerCommand::JointControllerCommand(
       wristPitchScalingFactor(wristPitchScalingFactor),
       wristYawScalingFactor(wristYawScalingFactor)
 {
+    addSubsystemRequirement(&lift);
+    addSubsystemRequirement(&extension);
+    addSubsystemRequirement(&wristRoll);
+    addSubsystemRequirement(&wrist);
 }
 
 void JointControllerCommand::initialize() {}

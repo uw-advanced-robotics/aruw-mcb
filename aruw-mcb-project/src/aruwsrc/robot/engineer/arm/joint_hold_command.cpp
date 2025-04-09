@@ -28,6 +28,7 @@ JointHoldCommand::JointHoldCommand(JointSubsystem &joint, float setpoint)
       joint(joint),
       setpoint(setpoint)
 {
+    addSubsystemRequirement(&joint);
 }
 
 void JointHoldCommand::initialize() { joint.setSetpoint(setpoint); }
