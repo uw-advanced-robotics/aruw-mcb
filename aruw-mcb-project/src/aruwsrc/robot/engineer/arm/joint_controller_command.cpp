@@ -37,12 +37,11 @@ JointControllerCommand::JointControllerCommand(
 
 void JointControllerCommand::initialize()
 {
-    // todo use custom chassisOperatorInterface for engineer
-    joint.setSetpoint(operatorInterface->getChassisYInput() * scalingFactor);
 }
 
 void JointControllerCommand::execute()
 {
+    // todo use custom chassisOperatorInterface for engineer
     joint.setSetpoint(operatorInterface->getChassisYInput() * scalingFactor);
 }
 
