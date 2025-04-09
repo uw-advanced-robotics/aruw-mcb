@@ -38,6 +38,7 @@ private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::algorithms::SmoothPid pidPitch, pidYaw;
     float ratio;
+    // Constant added to output to overcome static friction
     float kS;
     const float epsilon;
     float setpointPitch, setpointYaw;

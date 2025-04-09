@@ -37,7 +37,8 @@ private:
     tap::algorithms::SmoothPid pidPos, pidAlign;
     tap::motor::MotorInterface &motorLeft, &motorRight;
     float radius;
-    float kS = 0;
+    // Constant added to output to overcome static friction
+    float kS;
 
 public:
     ArmLiftSubsystem(

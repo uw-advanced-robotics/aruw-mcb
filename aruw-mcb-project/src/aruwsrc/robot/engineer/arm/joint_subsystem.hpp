@@ -39,7 +39,8 @@ class JointSubsystem : public LinearJointInterface
 private:
     tap::algorithms::SmoothPid pid;
     tap::motor::MotorInterface &motor;
-    float kS = 0;
+    // Constant added to output to overcome static friction
+    float kS;
 
 public:
     JointSubsystem(
