@@ -21,8 +21,6 @@
 #define ARM_EXTENSION_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/motor/dji_motor.hpp"
-#include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
@@ -36,14 +34,14 @@ class ArmExtensionSubsystem : public LinearJointInterface
 {
 private:
     tap::algorithms::SmoothPid pid;
-    tap::motor::DoubleDjiMotor &motors;
+    tap::motor::MotorInterface &motors;
     float radius;
     float kS = 0;
 
 public:
     ArmExtensionSubsystem(
         tap::Drivers *drivers,
-        tap::motor::DoubleDjiMotor &motors,
+        tap::motor::MotorInterface &motors,
         tap::algorithms::SmoothPidConfig &config,
         float radius,
         float minSetpoint,

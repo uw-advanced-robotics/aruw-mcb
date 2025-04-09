@@ -27,8 +27,8 @@ namespace engineer
 {
 ArmLiftSubsystem::ArmLiftSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DjiMotor& motorLeft,
-    tap::motor::DjiMotor& motorRight,
+    tap::motor::MotorInterface& motorLeft,
+    tap::motor::MotorInterface& motorRight,
     tap::algorithms::SmoothPidConfig& config,
     float radius,
     float minSetpoint,

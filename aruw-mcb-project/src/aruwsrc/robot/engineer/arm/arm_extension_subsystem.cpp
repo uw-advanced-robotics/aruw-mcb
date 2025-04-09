@@ -27,7 +27,7 @@ namespace engineer
 {
 ArmExtensionSubsystem::ArmExtensionSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DoubleDjiMotor& motors,
+    tap::motor::MotorInterface& motors,
     tap::algorithms::SmoothPidConfig& config,
     float radius,
     float minSetpoint,

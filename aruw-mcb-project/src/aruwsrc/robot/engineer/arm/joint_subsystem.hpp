@@ -38,13 +38,13 @@ class JointSubsystem : public LinearJointInterface
 {
 private:
     tap::algorithms::SmoothPid pid;
-    tap::motor::DjiMotor &motor;
+    tap::motor::MotorInterface &motor;
     float kS = 0;
 
 public:
     JointSubsystem(
         tap::Drivers *drivers,
-        tap::motor::DjiMotor &motor,
+        tap::motor::MotorInterface &motor,
         tap::algorithms::SmoothPidConfig &config,
         float minSetpoint,
         float maxSetpoint,

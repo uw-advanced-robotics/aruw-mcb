@@ -25,8 +25,8 @@ namespace engineer
 {
 WristSubsystem::WristSubsystem(
     tap::Drivers *drivers,
-    tap::motor::DjiMotor &motorLeft,
-    tap::motor::DjiMotor &motorRight,
+    tap::motor::MotorInterface &motorLeft,
+    tap::motor::MotorInterface &motorRight,
     tap::algorithms::SmoothPidConfig configPitch,
     tap::algorithms::SmoothPidConfig configYaw,
     float ratio,

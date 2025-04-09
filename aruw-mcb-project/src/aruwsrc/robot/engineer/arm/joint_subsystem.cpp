@@ -27,7 +27,7 @@ namespace engineer
 {
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
-    tap::motor::DjiMotor& motor,
+    tap::motor::MotorInterface& motor,
     tap::algorithms::SmoothPidConfig& config,
     float minSetpoint,
     float maxSetpoint,

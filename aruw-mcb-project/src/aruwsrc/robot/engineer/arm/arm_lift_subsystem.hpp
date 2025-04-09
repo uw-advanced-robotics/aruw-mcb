@@ -35,15 +35,15 @@ class ArmLiftSubsystem : public LinearJointInterface
 {
 private:
     tap::algorithms::SmoothPid pidPos, pidAlign;
-    tap::motor::DjiMotor &motorLeft, &motorRight;
+    tap::motor::MotorInterface &motorLeft, &motorRight;
     float radius;
     float kS = 0;
 
 public:
     ArmLiftSubsystem(
         tap::Drivers *drivers,
-        tap::motor::DjiMotor &motorLeft,
-        tap::motor::DjiMotor &motorRight,
+        tap::motor::MotorInterface &motorLeft,
+        tap::motor::MotorInterface &motorRight,
         tap::algorithms::SmoothPidConfig &config,
         float radius,
         float minSetpoint,

@@ -35,7 +35,7 @@ namespace engineer
 class WristSubsystem : public tap::control::Subsystem
 {
 private:
-    tap::motor::DjiMotor &motorLeft, &motorRight;
+    tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::algorithms::SmoothPid pidPitch, pidYaw;
     float ratio;
     float kS;
@@ -45,8 +45,8 @@ private:
 public:
     WristSubsystem(
         tap::Drivers *drivers,
-        tap::motor::DjiMotor &motorLeft,
-        tap::motor::DjiMotor &motorRight,
+        tap::motor::MotorInterface &motorLeft,
+        tap::motor::MotorInterface &motorRight,
         tap::algorithms::SmoothPidConfig configPitch,
         tap::algorithms::SmoothPidConfig configYaw,
         float ratio,
