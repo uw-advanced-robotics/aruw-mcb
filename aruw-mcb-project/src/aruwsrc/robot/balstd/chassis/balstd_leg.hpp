@@ -29,6 +29,18 @@ struct BalstdLegState
 
     float L, theta;  // pendulum length and angle wrt hip center
 
+    BalstdLegState()
+        : qFront(0),
+          qBack(0),
+          xc(0),
+          yc(0),
+          kneesWidthX(0),
+          kneesWidthY(0),
+          L(0),
+          theta(0)
+    {
+    }
+
     void calculateForwardKinematics(BalstdLegConfig config)
     {
         // knee coordinates

@@ -75,43 +75,43 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-// tap::motor::DjiMotor leftFrontHipMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR1,
-//     tap::can::CanBus::CAN_BUS2,
-//     false,
-//     "left front hip");
-// tap::motor::DjiMotor leftBackHipMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR2,
-//     tap::can::CanBus::CAN_BUS2,
-//     false,
-//     "left back hip");
-// tap::motor::DjiMotor leftWheelMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR3,
-//     tap::can::CanBus::CAN_BUS2,
-//     false,
-//     "left wheel");
+tap::motor::DjiMotor leftFrontHipMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR1,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    "left front hip");
+tap::motor::DjiMotor leftBackHipMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR2,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    "left back hip");
+tap::motor::DjiMotor leftWheelMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR3,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    "left wheel");
 
-// tap::motor::DjiMotor rightFrontHipMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR4,
-//     tap::can::CanBus::CAN_BUS2,
-//     true,
-//     "right front hip");
-// tap::motor::DjiMotor rightBackHipMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR5,
-//     tap::can::CanBus::CAN_BUS2,
-//     true,
-//     "right back hip");
-// tap::motor::DjiMotor rightWheelMotor(
-//     drivers(),
-//     tap::motor::MotorId::MOTOR3,
-//     tap::can::CanBus::CAN_BUS2,
-//     true,
-//     "right wheel");
+tap::motor::DjiMotor rightFrontHipMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR4,
+    tap::can::CanBus::CAN_BUS2,
+    true,
+    "right front hip");
+tap::motor::DjiMotor rightBackHipMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR5,
+    tap::can::CanBus::CAN_BUS2,
+    true,
+    "right back hip");
+tap::motor::DjiMotor rightWheelMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR3,
+    tap::can::CanBus::CAN_BUS2,
+    true,
+    "right wheel");
 
 BalstdLegConfig legConfig{
     .upperLinkLength = 0.15,
@@ -123,14 +123,14 @@ BalstdLegConfig legConfig{
     .backHipInnerLimit = modm::toRadian(90),
 };
 
-// BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
-// BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
+BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
+BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
 
-// BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg);
+BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg);
 
 // controllers
 
-// ManualLegController manualLegController(drivers()->controlOperatorInterface);
+ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
 // transforms
 // StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -138,7 +138,7 @@ BalstdLegConfig legConfig{
 
 // StandardAndHeroTransformAdapter transformAdapter(transformer);
 
-// BalstdOpStateMachine stateMachine(drivers(), chassis.getChassisState());
+BalstdOpStateMachine stateMachine(drivers(), chassis.getChassisState());
 
 // turret
 tap::motor::DjiMotor pitchMotor(
@@ -224,7 +224,7 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startStandardCommands(Drivers *)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -233,7 +233,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers) {}
+void registerStandardIoMappings(Drivers *) {}
 }  // namespace balstd_control
 
 namespace aruwsrc::balstd
