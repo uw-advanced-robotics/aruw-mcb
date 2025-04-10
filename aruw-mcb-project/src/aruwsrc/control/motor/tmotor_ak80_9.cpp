@@ -41,7 +41,7 @@ Tmotor_AK809::Tmotor_AK809(
     bool isInverted,
     const char* name,
     int32_t encoderHomePosition)
-    : CanRxListener(drivers, static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
+    : CanRxListener(drivers, 0x2900 | static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
       motorName(name),
       drivers(drivers),
       motorIdentifier(desMotorIdentifier),
@@ -66,11 +66,6 @@ void Tmotor_AK809::resetEncoderValue() { return; }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
-    if ((message.getIdentifier()) != Tmotor_AK809::getMotorIdentifier())
-    {
-        return;
-    }
-
     torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature

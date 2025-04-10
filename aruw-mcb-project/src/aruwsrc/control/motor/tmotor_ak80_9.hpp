@@ -50,14 +50,14 @@ using Encoder = Tmotor_AK809Encoder;
  */
 enum TMotorId : uint32_t
 {
-    MOTOR1 = 0X2901,
-    MOTOR2 = 0x2902,
-    MOTOR3 = 0x2903,
-    MOTOR4 = 0x2904,
-    MOTOR5 = 0x2905,
-    MOTOR6 = 0x2906,
-    MOTOR7 = 0x2907,
-    MOTOR8 = 0x2908,
+    MOTOR1 = 0x01,
+    MOTOR2 = 0x02,
+    MOTOR3 = 0x03,
+    MOTOR4 = 0x04,
+    MOTOR5 = 0x05,
+    MOTOR6 = 0x06,
+    MOTOR7 = 0x07,
+    MOTOR8 = 0x08,
 };
 
 enum TMotorFaultCode : uint8_t
