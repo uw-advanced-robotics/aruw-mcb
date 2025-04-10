@@ -126,7 +126,7 @@ public:
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
-        int32_t encoderHomePosition = 1750);
+        int32_t encoderHomePosition = 0);
 
     mockable ~Tmotor_AK809();
 

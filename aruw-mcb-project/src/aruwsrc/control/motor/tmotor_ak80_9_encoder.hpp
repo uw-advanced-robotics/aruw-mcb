@@ -51,7 +51,7 @@ class Tmotor_AK809Encoder : public tap::encoder::EncoderInterface
 {
 public:
     // 0 - 8191 for dji motors
-    static constexpr uint16_t ENC_RESOLUTION = 8192;
+    static constexpr uint16_t ENC_RESOLUTION = 3600;
 
     /***
      * WARNING! The Ak80-9 initializes it's encoder position to 1750 on boot.
@@ -71,7 +71,10 @@ public:
      * @param gearRatio the ratio of input revolutions to output revolutions of this encoder.
      * @param encoderHomePosition the zero position for the encoder in encoder ticks.
      */
-    Tmotor_AK809Encoder(bool isInverted, float gearRatio = 1, uint16_t encoderHomePosition = 1750);
+    Tmotor_AK809Encoder(
+        bool isInverted,
+        float gearRatio = 1,
+        uint16_t encoderHomePosition = 0);  // 1750
 
     void initialize() override {};
 
@@ -112,7 +115,7 @@ private:
     /**
      * The current encoder position.
      */
-    tap::algorithms::WrappedFloat encoder;
+    int16_t rawPosition;
 
     /**
      * The encoder position converted into output rotations
@@ -127,7 +130,7 @@ private:
      * The actual encoder wrapped value received from CAN messages where this motor
      * is considered to have an encoder value of 0. encoderHomePosition is 0 by default.
      */
-    uint16_t encoderHomePosition;
+    int16_t encoderHomePosition;
 
     int16_t shaftRPM;
 

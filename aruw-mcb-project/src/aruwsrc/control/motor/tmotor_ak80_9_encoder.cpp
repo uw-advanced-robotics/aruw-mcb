@@ -29,7 +29,7 @@ Tmotor_AK809Encoder::Tmotor_AK809Encoder(
     uint16_t encoderHomePosition)
     : EncoderInterface(),
       encoderResolution(ENC_RESOLUTION),
-      encoder(tap::algorithms::WrappedFloat(0, 0, encoderResolution)),
+      rawPosition(0),
       position(tap::algorithms::Angle(0)),
       inverted(isInverted),
       gearRatio(gearRatio),
@@ -64,8 +64,8 @@ void Tmotor_AK809Encoder::alignWith(EncoderInterface* other)
 
 void Tmotor_AK809Encoder::resetEncoderValue()
 {
-    encoderHomePosition = static_cast<uint16_t>(encoder.getUnwrappedValue()) + encoderHomePosition;
-    encoder.setUnwrappedValue(0);
+    encoderHomePosition = static_cast<uint16_t>(rawPosition) + encoderHomePosition;
+    rawPosition = 0;
     position.setUnwrappedValue(0);
 }
 
@@ -94,9 +94,9 @@ void Tmotor_AK809Encoder::updateEncoderValue(uint16_t encoderActual)
     // invert motor if necessary
     encoderActual = inverted ? -encoderActual : encoderActual;
 
-    encoder.setUnwrappedValue(encoderActual);
+    rawPosition = encoderActual;
 
     position.setUnwrappedValue(
-        encoder.getUnwrappedValue() * static_cast<float>(M_TWOPI) / encoderResolution * gearRatio);
+        rawPosition * static_cast<float>(M_TWOPI) / encoderResolution * gearRatio);
 }
 }  // namespace aruwsrc::control::motor
