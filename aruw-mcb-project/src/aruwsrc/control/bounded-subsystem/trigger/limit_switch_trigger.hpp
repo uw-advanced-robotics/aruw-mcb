@@ -19,9 +19,10 @@
 #ifndef LIMIT_SWITCH_TRIGGER_HPP_
 #define LIMIT_SWITCH_TRIGGER_HPP_
 
-#include "trigger_interface.hpp"
-#include "tap/drivers.hpp"
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/drivers.hpp"
+
+#include "trigger_interface.hpp"
 
 namespace aruwsrc::control
 {
@@ -32,10 +33,12 @@ namespace aruwsrc::control
 class LimitSwitchTrigger : public TriggerInterface
 {
 public:
-    LimitSwitchTrigger(tap::Drivers* drivers, tap::gpio::Digital::InputPin inputPin): drivers(drivers), inputPin(inputPin) {}
-    bool isTriggered() {
-        return drivers->digital.read(inputPin);
+    LimitSwitchTrigger(tap::Drivers* drivers, tap::gpio::Digital::InputPin inputPin)
+        : drivers(drivers),
+          inputPin(inputPin)
+    {
     }
+    bool isTriggered() { return drivers->digital.read(inputPin); }
 
 private:
     tap::Drivers* drivers;

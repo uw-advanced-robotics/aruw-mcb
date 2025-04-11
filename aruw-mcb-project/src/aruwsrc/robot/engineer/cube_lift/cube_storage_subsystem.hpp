@@ -23,18 +23,20 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 #include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
-namespace aruwsrc::robot::engineer 
+namespace aruwsrc::robot::engineer
 {
-
-class CubeStorageSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface 
+class CubeStorageSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface
 {
 public:
-    CubeStorageSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface& storageLiftMotor, aruwsrc::control::TriggerInterface& trigger,
+    CubeStorageSubsystem(
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& storageLiftMotor,
+        aruwsrc::control::TriggerInterface& trigger,
         uint64_t length);
 
     void initialize() override;
@@ -62,7 +64,7 @@ public:
     void setUpperBound(uint64_t encoderPosition);
 
     void setLowerBound(uint64_t encoderPosition);
-    
+
     void setSetpoint(float newSetpoint);
 
     float getSetpoint();
@@ -82,7 +84,8 @@ private:
     uint64_t home = 0;
     uint64_t upperBound = LIFT_UPPER_BOUND;
     uint64_t lowerBound = 0;
-    tap::algorithms::SmoothPid pid = tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_MOTOR_PID_CONFIG); 
+    tap::algorithms::SmoothPid pid =
+        tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_MOTOR_PID_CONFIG);
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

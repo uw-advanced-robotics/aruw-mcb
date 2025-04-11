@@ -17,25 +17,30 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "cube_move_manual_command.hpp"
- namespace aruwsrc::robot::engineer
- {
- CubeMoveManualCommand::CubeMoveManualCommand(CubeStorageSubsystem &cubeLift, aruwsrc::control::ControlOperatorInterface* operatorInterface)
-     : cubeLift(cubeLift),
-        operatorInterface(operatorInterface)
- {
-     addSubsystemRequirement(&cubeLift);
- }
- 
- void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
- 
- void CubeMoveManualCommand::execute() { 
-    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED; //right up joystick
-    cubeLift.setSetpoint(setpoint); 
+#include "cube_move_manual_command.hpp"
+namespace aruwsrc::robot::engineer
+{
+CubeMoveManualCommand::CubeMoveManualCommand(
+    CubeStorageSubsystem& cubeLift,
+    aruwsrc::control::ControlOperatorInterface* operatorInterface)
+    : cubeLift(cubeLift),
+      operatorInterface(operatorInterface)
+{
+    addSubsystemRequirement(&cubeLift);
 }
- 
- void CubeMoveManualCommand::end(bool) { cubeLift.moveMotor(0); }
- 
- bool CubeMoveManualCommand::isFinished() const { return false; } //TODO: change back to isLimitSwitched
- }  // namespace aruwsrc::robot::engineer
- 
+
+void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
+
+void CubeMoveManualCommand::execute()
+{
+    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up joystick
+    cubeLift.setSetpoint(setpoint);
+}
+
+void CubeMoveManualCommand::end(bool) { cubeLift.moveMotor(0); }
+
+bool CubeMoveManualCommand::isFinished() const
+{
+    return false;
+}  // TODO: change back to isLimitSwitched
+}  // namespace aruwsrc::robot::engineer

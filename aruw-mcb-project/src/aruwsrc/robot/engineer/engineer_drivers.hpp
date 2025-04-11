@@ -21,6 +21,7 @@
 #define ENGINEER_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -44,7 +45,7 @@ public:
 
 #else
 public:
-control::ControlOperatorInterface controlOperatorInterface;
+    control::ControlOperatorInterface controlOperatorInterface;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

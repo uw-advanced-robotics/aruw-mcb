@@ -20,9 +20,9 @@
 #ifndef ENGINEER_LIFT_CONSTANTS_HPP_
 #define ENGINEER_LIFT_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "tap/algorithms/smooth_pid.hpp"
 
 namespace aruwsrc::robot::engineer
 {
@@ -35,9 +35,9 @@ static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
 
-static constexpr float LIFT_UPPER_BOUND = 1000; // TODO: UPDATE
+static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
-static constexpr int64_t LENGTH = 100; //TODO: UPDATE LATER
+static constexpr int64_t LENGTH = 100;  // TODO: UPDATE LATER
 
 static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
 
@@ -52,11 +52,11 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float MANUAL_MOVE_SPEED = 10; //TODO: choose value alter
+static constexpr float MANUAL_MOVE_SPEED = 10;  // TODO: choose value alter
 
 static constexpr float ONE_CUBE_SETPOINT = 10;
 static constexpr float TWO_CUBE_SETPOINT = 20;
-static constexpr float THREE_CUBE_SETPOINT = 30; //TODO: update correct values
+static constexpr float THREE_CUBE_SETPOINT = 30;  // TODO: update correct values
 
 }  // namespace aruwsrc::robot::engineer
 #endif

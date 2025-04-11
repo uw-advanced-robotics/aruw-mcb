@@ -24,14 +24,14 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 
+#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
@@ -51,7 +51,6 @@ namespace aruwsrc
 {
 namespace control
 {
-
 tap::motor::DjiMotor storageLiftMotor(
     drivers(),
     CUBE_LIFT_MOTOR_ID,
@@ -64,9 +63,9 @@ CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENG
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 
-//HomingCommand cubeHomingCommand(cubeLift);
+// HomingCommand cubeHomingCommand(cubeLift);
 
-CubeMoveManualCommand cubeManualControl(cubeLift,  &drivers()->controlOperatorInterface);
+CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInterface);
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
@@ -85,7 +84,7 @@ tap::control::HoldCommandMapping leftSwitchMid(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping leftDownRightUp(
-    drivers(), 
+    drivers(),
     {&threeCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 tap::control::HoldCommandMapping leftDownRightMid(

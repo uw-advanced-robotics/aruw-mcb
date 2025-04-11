@@ -46,7 +46,7 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Homing Command"; }
+    const char* getName() const override { return "Homing Command"; }
 
 protected:
     aruwsrc::control::BoundedSubsystemInterface& subsystem;

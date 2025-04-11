@@ -17,22 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "cube_move_position_command.hpp"
- namespace aruwsrc::robot::engineer
- {
- CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint)
-     : cubeLift(cubeLift),
-       setpoint(setpoint)
- {
-     addSubsystemRequirement(&cubeLift);
- }
- 
- void CubeMovePositionCommand::initialize() {}
- 
- void CubeMovePositionCommand::execute() { cubeLift.setSetpoint(setpoint); }
- 
- void CubeMovePositionCommand::end(bool) { cubeLift.moveMotor(0); }
- 
- bool CubeMovePositionCommand::isFinished() const { return false; } //TODO: change back to isLimitSwitched
- }  // namespace aruwsrc::robot::engineer
- 
+#include "cube_move_position_command.hpp"
+namespace aruwsrc::robot::engineer
+{
+CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint)
+    : cubeLift(cubeLift),
+      setpoint(setpoint)
+{
+    addSubsystemRequirement(&cubeLift);
+}
+
+void CubeMovePositionCommand::initialize() {}
+
+void CubeMovePositionCommand::execute() { cubeLift.setSetpoint(setpoint); }
+
+void CubeMovePositionCommand::end(bool) { cubeLift.moveMotor(0); }
+
+bool CubeMovePositionCommand::isFinished() const
+{
+    return false;
+}  // TODO: change back to isLimitSwitched
+}  // namespace aruwsrc::robot::engineer

@@ -26,7 +26,6 @@
 namespace aruwsrc::robot::engineer
 
 {
-
 class CubeMovePositionCommand : public tap::control::Command
 {
 public:
