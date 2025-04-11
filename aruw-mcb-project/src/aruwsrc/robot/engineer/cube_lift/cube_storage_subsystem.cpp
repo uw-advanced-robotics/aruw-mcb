@@ -87,6 +87,16 @@ void CubeStorageSubsystem::refreshSafeDisconnect() {
 bool CubeStorageSubsystem::isLimitSwitched() { return drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT); }
 
 void CubeStorageSubsystem::refresh() { 
+    if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND) {
+        if (trigger.isTriggered()) {
+            calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+            motor.resetEncoderValue();
+            moveMotor(0);
+        } else {
+            moveTowardLowerBound();
+        }
+        return;
+    }
     isLimitSwitch = isLimitSwitched(); 
 
     if(isPIDControl) {

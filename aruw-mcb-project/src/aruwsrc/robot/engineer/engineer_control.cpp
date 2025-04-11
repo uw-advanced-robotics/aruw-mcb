@@ -62,6 +62,7 @@ LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
 /* define commands ----------------------------------------------------------*/
+HomingCommand cubeLiftHome(cubeLift);
 
 //HomingCommand cubeHomingCommand(cubeLift);
 
@@ -73,20 +74,15 @@ CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&cubeUp},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&cubeDown},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
 tap::control::HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&cubeManualControl},
+    {&cubeLiftHome},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping leftSwitchMid(
+    drivers(),
+    {&cubeManualControl},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping leftDownRightUp(
     drivers(), 

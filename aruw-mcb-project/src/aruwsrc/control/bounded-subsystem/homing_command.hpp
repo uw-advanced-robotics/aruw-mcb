@@ -40,7 +40,13 @@ public:
 
     void initialize() override;
 
+    void execute() override;
+
+    void end(bool interrupted) override;
+
     bool isFinished() const override;
+
+    const char *getName() const override { return "Homing Command"; }
 
 protected:
     aruwsrc::control::BoundedSubsystemInterface& subsystem;
