@@ -101,10 +101,8 @@ void CubeStorageSubsystem::refresh()
 
     if (isPIDControl)
     {
-        float error =
-            setpoint - motor.getEncoder()->getPosition().getUnwrappedValue() / MM_PER_REVOLUTION;
-        float errorDerivative =
-            motor.getEncoder()->getVelocity() / 1000 / 60 / MM_PER_REVOLUTION / 1000;
+        float error = setpoint - motor.getPositionUnwrapped() / MM_PER_REVOLUTION;
+        float errorDerivative = motor.getShaftRPM() / 1000 / 60 / MM_PER_REVOLUTION / 1000;
         float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
         lastTime = tap::arch::clock::getTimeMilliseconds();
         pid.runController(error, errorDerivative, timeDifference);
