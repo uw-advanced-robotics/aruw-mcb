@@ -41,7 +41,7 @@ public:
     Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<tap::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
