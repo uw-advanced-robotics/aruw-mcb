@@ -88,7 +88,7 @@ void CubeStorageSubsystem::refresh()
         if (trigger.isTriggered())
         {
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
-            motor.resetEncoderValue();
+            motor.getEncoder()->resetEncoderValue();
             moveMotor(0);
         }
         else
@@ -102,9 +102,9 @@ void CubeStorageSubsystem::refresh()
     if (isPIDControl)
     {
         float error = setpoint - motor.getPositionUnwrapped() /
-                                     tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION;
+                                     MM_PER_REVOLUTION;
         float errorDerivative = motor.getShaftRPM() / 1000 / 60 /
-                                tap::motor::DjiMotor::GEAR_RATIO_M3508 * MM_PER_REVOLUTION / 1000;
+                                 MM_PER_REVOLUTION / 1000;
         float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
         lastTime = tap::arch::clock::getTimeMilliseconds();
         pid.runController(error, errorDerivative, timeDifference);

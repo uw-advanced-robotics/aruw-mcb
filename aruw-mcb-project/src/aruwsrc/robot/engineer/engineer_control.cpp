@@ -56,7 +56,7 @@ tap::motor::DjiMotor storageLiftMotor(
     CUBE_LIFT_MOTOR_ID,
     LIFT_MOTOR_CAN_BUS,
     false,
-    "Lifting Motor");
+    "Lifting Motor", false, tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
