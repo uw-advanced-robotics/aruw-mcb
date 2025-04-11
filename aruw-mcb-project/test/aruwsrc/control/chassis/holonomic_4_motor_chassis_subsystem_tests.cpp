@@ -114,26 +114,26 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftFrontRpmActual)
 {
-    ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftFrontRpmActual(), 1E-3);
+    ON_CALL(chassis.leftFrontMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getLeftFrontRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftBackRpmActual)
 {
-    ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftBackRpmActual(), 1E-3);
+    ON_CALL(chassis.leftBackMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getLeftBackRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, getRightFrontRpmActual)
 {
-    ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightFrontRpmActual(), 1E-3);
+    ON_CALL(chassis.rightFrontMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getRightFrontRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, getRightBackRpmActual)
 {
-    ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightBackRpmActual(), 1E-3);
+    ON_CALL(chassis.rightBackMotor.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_NEAR(CHASSIS_GEARBOX_RATIO * 1000, chassis.getRightBackRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)

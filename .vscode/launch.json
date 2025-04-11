@@ -7,7 +7,7 @@
             "request": "launch",
             "cwd": "${workspaceFolder}/aruw-mcb-project",
             "module": "pipenv",
-            "args": ["run", "scons", "build-tests", "profile=debug"],
+            "args": ["run", "scons", "build-tests", "profile=debug", "robot=STANDARD_ORION"],
             "justMyCode": false,
             "console": "integratedTerminal"
         },
@@ -16,7 +16,7 @@
             "type": "cppdbg",
             "request": "launch",
             "preLaunchTask": "Build Tests - Debug",
-            "program": "${workspaceFolder}/aruw-mcb-project/build/tests/scons-debug/aruw-mcb-tests.elf",
+            "program": "${workspaceFolder}/aruw-mcb-project/build/tests/scons-debug/TARGET_STANDARD_ORION/aruw-mcb-tests.elf",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

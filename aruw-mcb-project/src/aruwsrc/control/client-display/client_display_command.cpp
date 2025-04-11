@@ -37,7 +37,8 @@ ClientDisplayCommand::ClientDisplayCommand(
     std::vector<HudIndicator *> &hudIndicators)
     : Command(),
       drivers(drivers),
-      hudIndicators(hudIndicators)
+      hudIndicators(hudIndicators),
+      refSerialTransmitter(&drivers)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -81,6 +82,8 @@ bool ClientDisplayCommand::run()
     PT_BEGIN();
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
+
+    PT_CALL(refSerialTransmitter.deleteGraphicLayer(RefSerialTransmitter::Tx::DELETE_ALL, 0));
 
     for (index = 0; index < numIndicators; index++)
     {

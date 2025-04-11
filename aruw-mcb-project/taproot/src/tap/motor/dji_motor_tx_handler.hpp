@@ -28,7 +28,9 @@
 
 #include "tap/util_macros.hpp"
 
-#include "dji_motor.hpp"
+#include "modm/architecture/interface/can_message.hpp"
+
+#include "dji_motor_ids.hpp"
 
 namespace tap
 {
@@ -37,6 +39,8 @@ class Drivers;
 
 namespace tap::motor
 {
+class DjiMotor;
+
 /**
  * Converts the dji MotorId to a uint32_t.
  * @param[in] id Some CAN MotorId

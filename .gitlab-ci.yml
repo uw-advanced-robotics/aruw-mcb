@@ -30,10 +30,6 @@ variables:
   - develop
   - schedules
 
-.default_except: &default_except
-  variables:
-    - $UPDATE_SUBMODULE
-
 .verification_only: &verification_only
   - merge_requests
   - develop
@@ -96,7 +92,6 @@ before_script:
 .mcb_build:
   stage: Build
   only: *default_only
-  except: *default_except
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -128,7 +123,6 @@ before_script:
 .test_build:
   stage: Tests
   only: *default_only
-  except: *default_except
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
@@ -154,7 +148,6 @@ before_script:
 "MCB Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   variables:
     GIT_SUBMODULE_STRATEGY: none
@@ -174,7 +167,6 @@ before_script:
 "Test Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   script:
     - cd aruw-mcb-project
@@ -198,16 +190,29 @@ before_script:
   variables:
     ROBOT: STANDARD_SPIDER
 
-# Test build script is different from the others since we use this one to track test coverage for the repo
 "Standard (Spider): Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: STANDARD_SPIDER
+
+# Standard (Orion) build
+
+"Standard (Orion): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_ORION
+
+# Test build script is different from the others since we use this one to track test coverage for the repo
+"Standard (Orion): Test Build":
   stage: Tests
   needs: []
   only: *default_only
-  except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_SPIDER/aruw-mcb-tests.elf
+    - scons run-tests-gcov profile=fast robot=STANDARD_ORION -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_ORION/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -220,26 +225,12 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
   cache:
-    key: robot-STANDARD_SPIDER-$CI_COMMIT_REF_SLUG-tests
+    key: robot-STANDARD_ORION-$CI_COMMIT_REF_SLUG-tests
     paths:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
-      - robot-STANDARD_SPIDER-develop-tests
+      - robot-STANDARD_ORION-develop-tests
     when: 'always'
-
-# Standard (Orion) build
-
-"Standard (Orion): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ORION
-
-"Standard (Orion): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ORION
 
 # Standard (Cygnus) build
 
@@ -411,31 +402,3 @@ pages:
     - develop
   except:
     - schedules
-
-"Update Submodule":
-  stage: Quality
-  needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-  before_script:
-    - apt-get update -y && apt-get install -yqqf curl openssh-client git unzip sshpass rsync --fix-missing
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_TOOLKIT" | base64 -d | ssh-add - > /dev/null
-
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-
-    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-
-    - git config --global user.email "robomstr@uw.edu"
-    - git config --global user.name "Gitlab Runner"
-
-    - git remote rm origin
-    - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
-  script:
-    - ./taproot-scripts/update_taproot_submodule.sh ./aruw-mcb-project 20675733 develop
-  only:
-    variables:
-      - $UPDATE_SUBMODULE
