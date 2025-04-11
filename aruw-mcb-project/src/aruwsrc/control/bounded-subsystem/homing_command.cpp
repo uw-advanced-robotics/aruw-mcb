@@ -29,7 +29,7 @@ void HomingCommand::initialize() { subsystem.startCalibrate(); }
 
 void HomingCommand::execute() {}
 
-bool HomingCommand::isFinished() const { return subsystem.homedAndBounded();} 
+bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
 
 void HomingCommand::end(bool interrupted) {}
 
