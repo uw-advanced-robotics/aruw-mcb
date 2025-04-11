@@ -70,8 +70,6 @@ void CubeStorageSubsystem::setLowerBound(uint64_t encoderPosition) { lowerBound 
 
 uint64_t CubeStorageSubsystem::getLowerBound() const { return lowerBound; }
 
-void CubeStorageSubsystem::setUpperBound(uint64_t encoderPosition) { lowerBound = encoderPosition; }
-
 void CubeStorageSubsystem::refreshSafeDisconnect()
 {
     isPIDControl = false;

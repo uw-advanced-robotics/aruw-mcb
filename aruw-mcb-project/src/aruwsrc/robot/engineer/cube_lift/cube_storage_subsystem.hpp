@@ -57,14 +57,6 @@ public:
 
     void moveTowardLowerBound();
 
-    void stopDuringHoming();
-
-    void setHome(uint64_t encoderPosition);
-
-    void setUpperBound(uint64_t encoderPosition);
-
-    void setLowerBound(uint64_t encoderPosition);
-
     void setSetpoint(float newSetpoint);
 
     float getSetpoint();
@@ -73,6 +65,14 @@ public:
 
 protected:
     tap::motor::MotorInterface& motor;
+
+    void stopDuringHoming();
+
+    void setHome(uint64_t encoderPosition);
+
+    void setUpperBound(uint64_t encoderPosition);
+
+    void setLowerBound(uint64_t encoderPosition);
 
 private:
     bool isLimitSwitch = false;
