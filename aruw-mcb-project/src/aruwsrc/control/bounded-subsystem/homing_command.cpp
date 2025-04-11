@@ -31,6 +31,6 @@ void HomingCommand::execute() {}
 
 bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
 
-void HomingCommand::end(bool interrupted) {}
+void HomingCommand::end(bool) {}
 
 }  // namespace aruwsrc::control
