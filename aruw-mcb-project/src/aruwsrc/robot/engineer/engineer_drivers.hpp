@@ -25,7 +25,7 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #else
 
 #endif
@@ -42,7 +42,7 @@ public:
     Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<tap::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
