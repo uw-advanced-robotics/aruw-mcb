@@ -179,7 +179,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getRoll(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
+        modm::toRadian(static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_RAD_PER_S),
         dut.getGx(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x4321) * 0.01, dut.getAx(), 1E-5);
@@ -189,7 +189,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getPitch(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x5678) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
+        modm::toRadian(static_cast<int16_t>(0x5678) / Mpu6500::LSB_D_PER_S_TO_RAD_PER_S),
         dut.getGy(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x5432) * 0.01, dut.getAy(), 1E-5);
@@ -199,7 +199,7 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getYaw(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x6789) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
+        modm::toRadian(static_cast<int16_t>(0x6789) / Mpu6500::LSB_D_PER_S_TO_RAD_PER_S),
         dut.getGz(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x6543) * 0.01, dut.getAz(), 1E-4);
