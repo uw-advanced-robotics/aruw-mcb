@@ -58,9 +58,9 @@ bool ISM330<I2cMaster>::read()
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
         imuData.temperature = tempValueToCelsius(rxBuff);
 
-        gyroX = gyroValueToDegPerSec(rxBuff + 2);
-        gyroY = gyroValueToDegPerSec(rxBuff + 4);
-        gyroZ = gyroValueToDegPerSec(rxBuff + 6);
+        gyroX = gyroValueToRadPerSec(rxBuff + 2);
+        gyroY = gyroValueToRadPerSec(rxBuff + 4);
+        gyroZ = gyroValueToRadPerSec(rxBuff + 6);
 
         accX = accelValueToMeterPerSec(rxBuff + 8);
         accY = accelValueToMeterPerSec(rxBuff + 10);
@@ -69,7 +69,7 @@ bool ISM330<I2cMaster>::read()
         imuData.gyroRaw = {gyroX, gyroY, gyroZ};
         imuData.accRaw = {accX, accY, accZ};
 
-        imuData.gyroDegPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
+        imuData.gyroRadPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
         imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
@@ -111,16 +111,16 @@ void ISM330<I2cMaster>::setGyroRange(GyroscopeRangeConfig g_config)
     switch (g_config)
     {
         case DPS250_CONFIG:
-            gyroScale = 8.75;
+            gyroScale = modm::toRadian(8.75);
             break;
         case DPS500_CONFIG:
-            gyroScale = 17.50;
+            gyroScale = modm::toRadian(17.50);
             break;
         case DPS1000_CONFIG:
-            gyroScale = 35;
+            gyroScale = modm::toRadian(35);
             break;
         case DPS2000_CONFIG:
-            gyroScale = 70;
+            gyroScale = modm::toRadian(70);
             break;
         default:
             break;
