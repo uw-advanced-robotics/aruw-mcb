@@ -99,9 +99,9 @@ public:
     mockable inline uint32_t getPrevIMUDataReceivedTime() const { return prevIMUDataReceivedTime; }
 
     /**
-     * Use for converting from gyro values we receive to more conventional degrees / second.
+     * Use for converting from gyro values we receive to more conventional radians / second.
      */
-    static constexpr float LSB_D_PER_S_TO_RAD_PER_S = modm::toRadian(16.384f);
+    static constexpr float LSB_D_PER_S_TO_RAD_PER_S = modm::toDegree(16.384f);
 
     inline void setTargetTemperature(float temperatureC)
     {
