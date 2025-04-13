@@ -189,7 +189,7 @@ TEST_P(
 
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     chassisImuDriveCommand.execute();
 }
@@ -204,10 +204,10 @@ TEST_P(
     imuYaw = 0;
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 90;
+    imuYaw += modm::toRadian(90);
     chassisImuDriveCommand.execute();
 
-    imuYaw = 90 - modm::toDegree(ChassisImuDriveCommand::MAX_ROTATION_ERR);
+    imuYaw = modm::toRadian(90) - ChassisImuDriveCommand::MAX_ROTATION_ERR;
     float rotation = INFINITY;
     ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
 
@@ -226,7 +226,7 @@ TEST_P(
 {
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     float xExpected = std::get<0>(GetParam());
     float yExpected = std::get<1>(GetParam());
@@ -244,10 +244,10 @@ INSTANTIATE_TEST_SUITE_P(
     ChassisImuDriveCommandNoTurretParameterizedTest,
     Values(
         ParameterizedTuple(0, 0, 0, 0),
-        ParameterizedTuple(0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 45),
-        ParameterizedTuple(-0.2 * MAX_SPEED, 0.4 * MAX_SPEED, 0.7 * MAX_SPEED, -45),
-        ParameterizedTuple(MAX_SPEED, MAX_SPEED, MAX_SPEED, 90),
-        ParameterizedTuple(-MAX_SPEED, -MAX_SPEED, -MAX_SPEED, 135)));
+        ParameterizedTuple(0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 0.5 * MAX_SPEED, modm::toRadian(45)),
+        ParameterizedTuple(-0.2 * MAX_SPEED, 0.4 * MAX_SPEED, 0.7 * MAX_SPEED, modm::toRadian(-45)),
+        ParameterizedTuple(MAX_SPEED, MAX_SPEED, MAX_SPEED, modm::toRadian(90)),
+        ParameterizedTuple(-MAX_SPEED, -MAX_SPEED, -MAX_SPEED, modm::toRadian(135))));
 
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {
