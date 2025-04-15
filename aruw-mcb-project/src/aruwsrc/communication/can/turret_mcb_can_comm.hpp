@@ -96,7 +96,7 @@ public:
     mockable inline float getGx() const override
     {
         return static_cast<float>(lastCompleteImuData.rawRollVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_RAD_PER_S;
+               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
     }
 
     /**
@@ -120,7 +120,7 @@ public:
     mockable inline float getGy() const override
     {
         return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_RAD_PER_S;
+               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
     }
 
     /**
@@ -144,7 +144,7 @@ public:
     mockable inline float getGz() const override
     {
         return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_RAD_PER_S;
+               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
     }
 
     /**
