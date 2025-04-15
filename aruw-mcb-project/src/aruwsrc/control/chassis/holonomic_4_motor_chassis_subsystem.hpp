@@ -24,8 +24,6 @@
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
-// #include "constants/chassis_constants.hpp"
-
 #include "holonomic_chassis_subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
