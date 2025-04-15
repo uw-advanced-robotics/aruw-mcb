@@ -23,6 +23,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -53,7 +54,9 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+
+XDriveChassisSubsystem chassis(drivers(), &currentSensor, &voltageSensor);
 
 // aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),

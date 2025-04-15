@@ -33,7 +33,8 @@ class MecanumChassisSubsystemMock : public aruwsrc::chassis::MecanumChassisSubsy
 public:
     MecanumChassisSubsystemMock(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor);
     virtual ~MecanumChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

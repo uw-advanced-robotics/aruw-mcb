@@ -126,8 +126,7 @@ void RefSerialMenu::printPower(modm::IOStream& stream)
 {
     const auto& robotData = drivers->refSerial.getRobotData();
     stream.printf(
-        "Power: %.2f / %i",
-        static_cast<double>(robotData.chassis.power),
+        "Power limit: %i",
         robotData.chassis.powerConsumptionLimit);
 }
 

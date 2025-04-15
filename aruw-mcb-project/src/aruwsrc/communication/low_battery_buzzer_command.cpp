@@ -25,9 +25,9 @@ namespace aruwsrc::communication
 {
 LowBatteryBuzzerCommand::LowBatteryBuzzerCommand(
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
-    tap::Drivers* drivers)
+    tap::communication::sensors::voltage::VoltageSensorInterface* chassisVoltage)
     : buzzer(buzzer),
-      drivers(drivers)
+      chassisVoltage(chassisVoltage)
 {
     addSubsystemRequirement(&buzzer);
 }
@@ -36,7 +36,7 @@ void LowBatteryBuzzerCommand::initialize() {}
 
 void LowBatteryBuzzerCommand::execute()
 {
-    if (drivers->refSerial.getRobotData().chassis.volt < LOW_BATTERY_THRESHOLD)
+    if (chassisVoltage->getVoltageMv() < LOW_BATTERY_THRESHOLD)
     {
         buzzer.playNoise();
     }

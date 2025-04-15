@@ -24,6 +24,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/mock/swerve_module_mock.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -63,6 +64,7 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          voltageSensor(),
           LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
           LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
           RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
@@ -78,6 +80,7 @@ protected:
           chassis(
               &drivers,
               &currentSensor,
+              &voltageSensor,
               &moduleLF,
               &moduleRF,
               &moduleLB,
@@ -94,6 +97,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
     NiceMock<tap::mock::DjiMotorMock> LFDr;
     NiceMock<tap::mock::DjiMotorMock> LFAz;
     NiceMock<tap::mock::DjiMotorMock> RFDr;

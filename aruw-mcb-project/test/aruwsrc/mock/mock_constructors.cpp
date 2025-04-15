@@ -100,16 +100,18 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor)
+    : MecanumChassisSubsystem(drivers, currentSensor, voltageSensor)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor)
+    : XDriveChassisSubsystem(drivers, currentSensor, voltageSensor)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
@@ -117,11 +119,20 @@ XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
 SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rb)
-    : SwerveChassisSubsystem(drivers, currentSensor, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
+    : SwerveChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          lf,
+          rf,
+          lb,
+          rb,
+          SWERVE_FORWARD_MATRIX)
 {
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}

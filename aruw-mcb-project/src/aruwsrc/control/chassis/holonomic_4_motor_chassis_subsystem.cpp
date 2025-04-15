@@ -36,12 +36,13 @@ namespace chassis
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     can::capbank::CapacitorBank* capacitorBank,
     tap::motor::MotorId leftFrontMotorId,
     tap::motor::MotorId leftBackMotorId,
     tap::motor::MotorId rightFrontMotorId,
     tap::motor::MotorId rightBackMotorId)
-    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       velocityPid{
           modm::Pid<float>(
               VELOCITY_PID_KP,
