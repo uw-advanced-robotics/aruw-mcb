@@ -17,6 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef FAKE_VOLTAGE_SENSOR_HPP_
+#define FAKE_VOLTAGE_SENSOR_HPP_
+
 #include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 
 namespace aruwsrc::communication::sensors::voltage
@@ -28,3 +31,5 @@ class FakeVoltageSensor : public tap::communication::sensors::voltage::VoltageSe
     float getVoltageMv() const override { return 26'000; }
 };
 }  // namespace aruwsrc::communication::sensors::voltage
+
+#endif  // FAKE_VOLTAGE_SENSOR_HPP_
