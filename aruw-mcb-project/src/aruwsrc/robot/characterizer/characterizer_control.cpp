@@ -43,7 +43,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace characterizer_control
 {
-
 aruwsrc::control::motor::Tmotor_AK809 motor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR4,

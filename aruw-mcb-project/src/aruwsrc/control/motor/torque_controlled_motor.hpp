@@ -26,7 +26,6 @@
 
 namespace aruwsrc::control::motor
 {
-
 class TorqueControlledMotor
 {
 public:
