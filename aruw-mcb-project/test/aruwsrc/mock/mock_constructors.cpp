@@ -248,14 +248,12 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement)
-                       { return measurement.minDifference(setpoint); });
-    ON_CALL(*this, getValidChassisMeasurementError)
-        .WillByDefault(
-            [&]()
-            {
-                return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
-            });
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement) {
+            return measurement.minDifference(setpoint);
+        });
+    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
+        return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
+    });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }
 TurretMotorMock::~TurretMotorMock() {}
@@ -297,9 +295,9 @@ OttoBallisticsSolverMock::OttoBallisticsSolverMock(
           turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
-          turretID) {};
+          turretID){};
 
-OttoBallisticsSolverMock::~OttoBallisticsSolverMock() {};
+OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)
