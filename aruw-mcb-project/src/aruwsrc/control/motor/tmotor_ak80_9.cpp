@@ -58,6 +58,7 @@ Tmotor_AK809::Tmotor_AK809(
 
 void Tmotor_AK809::initialize()
 {
+    // 6500ms delay before CAN init makes it so you don't need to reconnect can wire
     attachSelfToRxHandler();
     sendPositionHomeGetMessage();
 }
