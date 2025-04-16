@@ -40,10 +40,10 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
@@ -171,8 +171,7 @@ static void initializeIo(Drivers *drivers)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS)
-drivers->mpu6500.setMountingTransform(
-    aruwsrc::chassis::MPU6500_HERO_MCB_MOUNTING_TRANSFORM);
+    drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_HERO_MCB_MOUNTING_TRANSFORM);
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
     drivers->turretMCBCanCommBus2.init();
