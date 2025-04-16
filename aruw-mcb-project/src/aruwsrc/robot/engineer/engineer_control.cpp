@@ -19,14 +19,22 @@
 
 #if defined(TARGET_ENGINEER)
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command_scheduler.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/arm/raw_motor_command.hpp"
+#include "aruwsrc/robot/engineer/arm/raw_motor_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
 using namespace tap::gpio;
@@ -106,6 +114,40 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
+static constexpr tap::algorithms::SmoothPidConfig LIFT_PID_CONFIG = {
+    .kp = 0,
+    .ki = 0,
+    .kd = 0,
+    .maxICumulative = 0,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+};
+
+tap::motor::DoubleDjiMotor liftMotors(
+    drivers(),
+    tap::motor::MotorId::MOTOR2,
+    tap::motor::MotorId::MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    tap::can::CanBus::CAN_BUS1,
+    true,
+    false,
+    "Left Lift Motor",
+    "Right Lift Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::engineer::RawMotorSubsystem lift(drivers(), liftMotors);
+
+aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::E);
+
+aruwsrc::engineer::DigitalOutSubsystem blowSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::F,
+    true);
+
 /* define commands ----------------------------------------------------------*/
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
@@ -113,29 +155,66 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassis);
 
+aruwsrc::engineer::RawMotorCommand liftManualCommand(
+    &lift,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::WHEEL,
+    5000.0f);
+
+aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
+aruwsrc::engineer::DigitalOutCommand blowOffCommand(blowSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand blowOnCommand(blowSubsystem, true);
+
+tap::control::HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&suckOnCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+tap::control::HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&blowOnCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { chassis.initialize(); }
+void initializeSubsystems()
+{
+    chassis.initialize();
+    lift.initialize();
+    suckSubsystem.initialize();
+    blowSubsystem.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&lift);
+    drivers->commandScheduler.registerSubsystem(&suckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&blowSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
+    lift.setDefaultCommand(&liftManualCommand);
+    suckSubsystem.setDefaultCommand(&suckOffCommand);
+    blowSubsystem.setDefaultCommand(&blowOffCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+}
 }  // namespace control
 
 }  // namespace aruwsrc

@@ -24,8 +24,10 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/oled_display_mock.hpp"
 
 #else
+#include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
@@ -38,13 +40,20 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
+    Drivers()
+        : tap::Drivers(),
+          controlOperatorInterface(this),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr)
+    {
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
+    display::OledDisplay oledDisplay;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer
