@@ -27,13 +27,13 @@ namespace aruwsrc::algorithms::odometry
 {
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationProvider,
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
-      chassisOrientationProvider(chassisOrientationProvider),
+      chassisOrientationObserver(chassisOrientationObserver),
       imu(imu),
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -51,12 +51,12 @@ void ChassisKFOdometry::reset()
 
 void ChassisKFOdometry::update()
 {
-    if (!chassisOrientationProvider.providerOnline())
+    if (!chassisOrientationObserver.observerOnline())
     {
         return;
     }
 
-    DynamicOrientation chassisOrientation = chassisOrientationProvider.getOrientation();
+    DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
     chassisYaw = chassisOrientation.yaw();
     float chassisYawVel = chassisOrientation.getYawVelocity();
 

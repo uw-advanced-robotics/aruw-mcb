@@ -31,12 +31,12 @@ namespace aruwsrc::algorithms::transforms
 {
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
-    const OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
-    const OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
-    const OrientationProviderInterface<Frame::WORLD, Frame::TURRET>& turretImu,
+    const OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationObserver,
+    const OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretImu,
     const tap::algorithms::transforms::Position& chassisToTurretTranslation)
     : chassisOdometry(chassisOdometry),
-      chassisOrientationProvider(chassisOrientationProvider),
+      chassisOrientationObserver(chassisOrientationObserver),
       turretEncoders(turretEncoders),
       turretImu(turretImu),
       worldToChassis(Transform::identity()),
@@ -57,10 +57,10 @@ void StandardAndHeroTransformer::updateTransforms()
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
     // worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
-    DynamicOrientation chassisOrientation = chassisOrientationProvider.getOrientation();
+    DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
     worldToChassis.updateRotation(chassisOrientation);
 
-    if (turretImu.providerOnline())
+    if (turretImu.observerOnline())
     {
         chassisToTurret.updateRotation(
             chassisOrientation.inverse().compose(turretImu.getOrientation()));

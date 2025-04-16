@@ -37,7 +37,7 @@ using TurretMotor = testing::NiceMock<mock::TurretMotorMock>;
 
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/algorithms/state/orientation_provider_interface.hpp"
+#include "aruwsrc/algorithms/state/orientation_observer_interface.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc::can
@@ -65,7 +65,7 @@ template <aruwsrc::algorithms::state::Frame MOUNTING_FRAME>
 class TurretSubsystem
     : public tap::control::Subsystem,
       public aruwsrc::algorithms::state::
-          OrientationProviderInterface<MOUNTING_FRAME, aruwsrc::algorithms::state::Frame::TURRET>
+          OrientationObserverInterface<MOUNTING_FRAME, aruwsrc::algorithms::state::Frame::TURRET>
 {
 public:
     /**
@@ -102,7 +102,7 @@ public:
 
     tap::algorithms::transforms::DynamicOrientation getOrientation() const override;
 
-    inline bool providerOnline() const override { return isOnline(); }
+    inline bool observerOnline() const override { return isOnline(); }
 
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;

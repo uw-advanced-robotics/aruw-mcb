@@ -25,7 +25,7 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
-#include "aruwsrc/algorithms/state/transform_provider_interface.hpp"
+#include "aruwsrc/algorithms/state/transform_observer_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
@@ -43,7 +43,7 @@ using Frame = aruwsrc::algorithms::state::Frame;
  */
 class DeadwheelChassisKFOdometry
     : public tap::algorithms::odometry::Odometry2DInterface,
-      public aruwsrc::algorithms::state::TransformProviderInterface<Frame::WORLD, Frame::CHASSIS>
+      public aruwsrc::algorithms::state::TransformObserverInterface<Frame::WORLD, Frame::CHASSIS>
 {
 public:
     /**
@@ -67,7 +67,7 @@ public:
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
         const aruwsrc::algorithms::state::
-            OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
+            OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
         const float parallelCenterToWheelDistance,
@@ -176,8 +176,8 @@ private:
     static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
 
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationProvider;
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 
     const modm::Vector2f initPos;

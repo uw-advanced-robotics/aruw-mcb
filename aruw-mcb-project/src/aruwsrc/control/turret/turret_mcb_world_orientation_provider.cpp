@@ -1,17 +1,17 @@
-#include "turret_mcb_world_orientation_provider.hpp"
+#include "turret_mcb_world_orientation_observer.hpp"
 
 using tap::algorithms::transforms::DynamicOrientation;
 
 namespace aruwsrc::control::turret
 {
 
-TurretMcbWorldOrientationProvider::TurretMcbWorldOrientationProvider(
+TurretMcbWorldOrientationObserver::TurretMcbWorldOrientationObserver(
     const aruwsrc::can::TurretMCBCanComm& turretMcb)
     : turretMcb(turretMcb)
 {
 }
 
-DynamicOrientation TurretMcbWorldOrientationProvider::getOrientation() const
+DynamicOrientation TurretMcbWorldOrientationObserver::getOrientation() const
 {
     return DynamicOrientation(
         turretMcb.getRoll(),
@@ -22,6 +22,6 @@ DynamicOrientation TurretMcbWorldOrientationProvider::getOrientation() const
         turretMcb.getYawVelocity());
 }
 
-bool TurretMcbWorldOrientationProvider::providerOnline() const { return turretMcb.isConnected(); }
+bool TurretMcbWorldOrientationObserver::observerOnline() const { return turretMcb.isConnected(); }
 
 }  // namespace aruwsrc::control::turret

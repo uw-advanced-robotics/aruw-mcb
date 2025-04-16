@@ -17,27 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRANSFORM_PROVIDER_INTERFACE_HPP_
-#define TRANSFORM_PROVIDER_INTERFACE_HPP_
+#ifndef TRANSLATION_OBSERVER_INTERFACE_HPP_
+#define TRANSLATION_OBSERVER_INTERFACE_HPP_
 
-#include "tap/algorithms/transforms/transform.hpp"
+#include "tap/algorithms/transforms/dynamic_position.hpp"
 
 #include "frames.hpp"
-#include "orientation_provider_interface.hpp"
-#include "translation_provider_interface.hpp"
 
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::algorithms::state
 {
 template <Frame BASE, Frame FOLLOWER>
-class TransformProviderInterface : public TranslationProviderInterface<BASE, FOLLOWER>,
-                                   public OrientationProviderInterface<BASE, FOLLOWER>
+class TranslationObserverInterface
 {
 public:
-    inline Transform getTransform() const { return Transform(getTranslation(), getOrientation()) }
+    virtual DynamicPosition getTranslation() const = 0;
+
+    virtual bool observerOnline() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::state
 
-#endif  // TRANSFORM_PROVIDER_INTERFACE_HPP_
+#endif  // TRANSLATION_OBSERVER_INTERFACE_HPP_

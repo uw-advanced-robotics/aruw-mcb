@@ -1,4 +1,4 @@
-#include "chassis_world_orientation_provider.hpp"
+#include "chassis_world_orientation_observer.hpp"
 
 using aruwsrc::algorithms::state::Frame;
 using tap::algorithms::transforms::DynamicOrientation;
@@ -7,9 +7,9 @@ namespace aruwsrc::algorithms::odometry
 {
 
 template <Frame ADJACENT>
-DynamicOrientation ChassisWorldOrientationProvider<ADJACENT>::getOrientation() const
+DynamicOrientation ChassisWorldOrientationObserver<ADJACENT>::getOrientation() const
 {
-    if (adjacentImu.providerOnline())
+    if (adjacentImu.observerOnline())
     {
         return adjacentImu.getOrientation().compose(adjacentEncoder.getOrientation().inverse());
     }
@@ -23,9 +23,9 @@ DynamicOrientation ChassisWorldOrientationProvider<ADJACENT>::getOrientation() c
 }
 
 template <Frame ADJACENT>
-bool ChassisWorldOrientationProvider<ADJACENT>::providerOnline() const
+bool ChassisWorldOrientationObserver<ADJACENT>::observerOnline() const
 {
-    // This provider handles fallback behavior, so its promise is that it will always have a valid
+    // This observer handles fallback behavior, so its promise is that it will always have a valid
     // estimate.
     return true;
 }

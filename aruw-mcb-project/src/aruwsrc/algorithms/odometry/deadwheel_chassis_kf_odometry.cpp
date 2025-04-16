@@ -25,8 +25,8 @@ namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationProvider,
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float parallelCenterToWheelDistance,
@@ -34,7 +34,7 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const float perpendicularWheelChassisRelativeAngleRadians)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
-      chassisOrientationProvider(chassisOrientationProvider),
+      chassisOrientationObserver(chassisOrientationObserver),
       imu(imu),
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -55,12 +55,12 @@ void DeadwheelChassisKFOdometry::reset()
 
 void DeadwheelChassisKFOdometry::update()
 {
-    if (!chassisOrientationProvider.providerOnline())
+    if (!chassisOrientationObserver.observerOnline())
     {
         return;
     }
 
-    DynamicOrientation chassisOrientation = chassisOrientationProvider.getOrientation();
+    DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
     chassisYaw = chassisOrientation.yaw();
     float chassisYawVel = chassisOrientation.getYawVelocity();
 

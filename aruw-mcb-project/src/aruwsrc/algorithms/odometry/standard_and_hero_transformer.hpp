@@ -23,7 +23,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/algorithms/state/orientation_provider_interface.hpp"
+#include "aruwsrc/algorithms/state/orientation_observer_interface.hpp"
 #include "aruwsrc/control/client-display/projection_utils.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -33,7 +33,7 @@ using Frame = aruwsrc::algorithms::state::Frame;
 namespace aruwsrc::algorithms::transforms
 {
 /**
- * @brief transform provider for both the standard and hero
+ * @brief transform observer for both the standard and hero
  * Use the StandardAndHeroTransformerSubsystem as a convenience class to
  * update the transformer each loop
  */
@@ -45,10 +45,10 @@ public:
     StandardAndHeroTransformer(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::algorithms::state::
-            OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationProvider,
+            OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationObserver,
         const aruwsrc::algorithms::state::
-            OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
-        const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::TURRET>&
+            OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+        const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::TURRET>&
             turretImu,
         const tap::algorithms::transforms::Position& chassisToTurretTranslation);
 
@@ -89,11 +89,11 @@ protected:
 
 private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationProvider;
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::CHASSIS, Frame::TURRET>&
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
+        chassisOrientationObserver;
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>&
         turretEncoders;
-    const aruwsrc::algorithms::state::OrientationProviderInterface<Frame::WORLD, Frame::TURRET>&
+    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::TURRET>&
         turretImu;
 
     tap::algorithms::transforms::Transform worldToChassis;

@@ -34,7 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_world_orientation_provider.hpp"
+#include "aruwsrc/algorithms/odometry/chassis_world_orientation_observer.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -89,7 +89,7 @@
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
-#include "aruwsrc/control/turret/turret_mcb_world_orientation_provider.hpp"
+#include "aruwsrc/control/turret/turret_mcb_world_orientation_observer.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
@@ -166,9 +166,9 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     &currentSensor,
     &drivers()->capacitorBank);
 
-aruwsrc::control::turret::TurretMcbWorldOrientationProvider turretImu(getTurretMCBCanComm());
+aruwsrc::control::turret::TurretMcbWorldOrientationObserver turretImu(getTurretMCBCanComm());
 
-ChassisWorldOrientationProvider<Frame::TURRET> chassisWorldOrientationProvider(
+ChassisWorldOrientationObserver<Frame::TURRET> chassisWorldOrientationObserver(
     drivers()->mpu6500,
     turretImu,
     turret);
@@ -178,7 +178,7 @@ OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::V
 // transforms
 StandardAndHeroTransformer transformer(
     odometrySubsystem,
-    chassisWorldOrientationProvider,
+    chassisWorldOrientationObserver,
     turret,
     turretImu,
     Position(0, 0, 0));
