@@ -22,6 +22,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
@@ -33,6 +34,7 @@
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
+using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::chassis;
 using namespace tap::control;
 
@@ -46,6 +48,18 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
+VirtualCanEncoder forwardEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
+
+VirtualCanEncoder strafeEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
+
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
