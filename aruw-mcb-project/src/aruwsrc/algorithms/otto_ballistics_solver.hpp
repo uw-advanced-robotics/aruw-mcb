@@ -22,12 +22,16 @@
 
 #include <optional>
 
-#include "aruwsrc/algorithms/state/frame.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
+namespace aruwsrc::chassis
+{
+class HolonomicChassisSubsystem;
+}
 
 namespace aruwsrc::control::turret
 {
-class TurretSubsystem;
+class RobotTurretSubsystem;
 }
 
 namespace aruwsrc::serial
@@ -40,9 +44,9 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace tap::algorithms::transforms
+namespace tap::algorithms::odometry
 {
-class Transform;
+class Odometry2DInterface;
 }
 
 namespace aruwsrc::algorithms
@@ -111,11 +115,10 @@ public:
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
      */
-    template <aruwsrc::algorithms::state::Frame TURRET_MOUNTING_FRAME>
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::transforms::Transform &worldToTurret,
-        const control::turret::TurretSubsystem<TURRET_MOUNTING_FRAME> &turretSubsystem,
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID);
@@ -134,8 +137,8 @@ public:
 
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const tap::algorithms::transforms::Transform &worldToTurret;
-    const control::turret::TurretSubsystem &turretSubsystem;
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
+    const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     modm::Vector3f turretOrigin;

@@ -21,19 +21,16 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-using namespace tap::algorithms::transforms;
-
 namespace aruwsrc::algorithms::odometry
 {
 ChassisKFOdometry::ChassisKFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationObserver,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       chassisSubsystem(chassisSubsystem),
-      chassisOrientationObserver(chassisOrientationObserver),
+      chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -51,14 +48,11 @@ void ChassisKFOdometry::reset()
 
 void ChassisKFOdometry::update()
 {
-    if (!chassisOrientationObserver.observerOnline())
+    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
+        chassisYaw = 0;
         return;
     }
-
-    DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
-    chassisYaw = chassisOrientation.yaw();
-    float chassisYawVel = chassisOrientation.getYawVelocity();
 
     // get chassis frame velocity as measured by the motor encoders
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();

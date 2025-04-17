@@ -19,14 +19,11 @@
 
 #include "deadwheel_chassis_kf_odometry.hpp"
 
-using namespace tap::algorithms::transforms;
-
 namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
-    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
-        chassisOrientationObserver,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float parallelCenterToWheelDistance,
@@ -34,7 +31,7 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const float perpendicularWheelChassisRelativeAngleRadians)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
-      chassisOrientationObserver(chassisOrientationObserver),
+      chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
       chassisAccelerationToMeasurementCovarianceInterpolator(
@@ -55,17 +52,14 @@ void DeadwheelChassisKFOdometry::reset()
 
 void DeadwheelChassisKFOdometry::update()
 {
-    if (!chassisOrientationObserver.observerOnline())
+    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
+        chassisYaw = 0;
         return;
     }
 
-    DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
-    chassisYaw = chassisOrientation.yaw();
-    float chassisYawVel = chassisOrientation.getYawVelocity();
-
-    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return
-    // the velocities of the two omni wheels
+    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
+    // of the two omni wheels
     float rawV1 = deadwheelOdometry.getPerpendicularRPM();
     float rawV2 = deadwheelOdometry.getParallelMotorRPM();
     float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
@@ -73,7 +67,7 @@ void DeadwheelChassisKFOdometry::update()
 
     // Calculate velocities in the robot's frame of reference
     // Correct for roation of the robot
-    V2 -= chassisYawVel * parallelCenterToWheelDistance;
+    V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
     float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
     float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);

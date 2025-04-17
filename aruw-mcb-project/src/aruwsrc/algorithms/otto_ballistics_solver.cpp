@@ -27,23 +27,22 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 using namespace tap::algorithms;
 using namespace modm;
 
 namespace aruwsrc::algorithms
 {
-template <aruwsrc::algorithms::state::Frame TURRET_MOUNTING_FRAME>
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    const tap::algorithms::transforms::Transform &worldToTurret,
-    const control::turret::TurretSubsystem<TURRET_MOUNTING_FRAME> &turretSubsystem,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),
-      worldToTurret(worldToTurret),
+      odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
@@ -63,9 +62,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     }
 
     if (lastAimDataTimestamp != aimData.timestamp ||
-        lastOdometryTimestamp !=
-            odometryInterface
-                .getLastComputedOdometryTime())  // this should be true every tick so unnecessary?
+        lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
     {
         lastAimDataTimestamp = aimData.timestamp;
         lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
