@@ -25,6 +25,7 @@
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"

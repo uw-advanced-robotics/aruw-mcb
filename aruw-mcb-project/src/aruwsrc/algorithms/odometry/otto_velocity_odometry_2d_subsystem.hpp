@@ -17,16 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define OTTO_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "modm/math/geometry.hpp"
+#include "modm/math/geometry/location_2d.hpp"
 
-#include "chassis_kf_odometry.hpp"
 #include "otto_chassis_velocity_displacement_2d_observer.hpp"
 #include "otto_chassis_world_yaw_observer.hpp"
 
@@ -48,35 +47,44 @@ class ChassisSubsystemInterface;
 namespace aruwsrc::algorithms::odometry
 {
 /**
- * @brief Kalman Filter-based odometry class for the Otto vision system.
+ * @brief Velocity-based odometry class for the Otto vision system.
+ *
+ * Stores and tracks world position relative to arbitrary origin by integrating the velocity
+ * reported by a ChassisSubsystem. The axes of the world frame are fixed to the field (ignoring
+ * error) and are based on the axes used by the turret IMU (positive z-axis should be up and
+ * out of field, x and y axes direction is undefined and just based on whatever the IMU uses).
  *
  * User is responsible for registering this subsystem with the command scheduler, or using some
  * other mechanism to call the `refresh` function periodically.
  *
- * @see ChassisKFOdometry
+ * A shallow inheritance of the tap::algorithms::odometry::Odometry2DInterface which just
+ * simplifies the construction of the Otto chassis velocity and orientation getters.
+ *
+ * @see OttoChassisOrientationGetter
+ * @see OttoChassisVelocityGetter
  */
-class OttoKFOdometry2DSubsystem final : public tap::control::Subsystem, public ChassisKFOdometry
+class OttoVelocityOdometry2DSubsystem final : public tap::control::Subsystem,
+                                              public tap::algorithms::odometry::Odometry2DTracker
 {
 public:
     /**
-     * @param[in] drivers pointer to aruwsrc drivers
+     * @param[in] drivers pointer to tap drivers
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
      * it is used
      * @param[in] chassis pointer to aruwsrc ChassisSubsystem
-     * @param[in] initPos initial position of chassis on boot
      */
-    OttoKFOdometry2DSubsystem(
-        tap::Drivers& drivers,
+    OttoVelocityOdometry2DSubsystem(
+        tap::Drivers* drivers,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        tap::control::chassis::ChassisSubsystemInterface& chassis,
-        modm::Vector2f initPos);
+        tap::control::chassis::ChassisSubsystemInterface* chassis);
 
     void refresh() override;
 
 private:
     OttoChassisWorldYawObserver orientationObserver;
+    OttoChassisVelocityDisplacement2DObserver displacementObserver;
 };
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // OTTO_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#endif  // OTTO_VELOCITY_ODOMETRY_2D_SUBSYSTEM_HPP_

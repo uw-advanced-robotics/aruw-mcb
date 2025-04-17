@@ -24,6 +24,7 @@
 
 #include "../algorithms/chassis_frame_turret_controller.hpp"
 #include "../robot_turret_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 using namespace tap::arch::clock;
