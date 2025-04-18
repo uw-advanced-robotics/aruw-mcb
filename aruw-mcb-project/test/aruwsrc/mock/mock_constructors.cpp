@@ -100,16 +100,40 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : MecanumChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : XDriveChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}

@@ -20,6 +20,7 @@
 #ifndef STANDARD_CHASSIS_CONSTANTS_HPP_
 #define STANDARD_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -81,6 +82,14 @@ static constexpr float VELOCITY_PID_KS = 0.0f;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation.
