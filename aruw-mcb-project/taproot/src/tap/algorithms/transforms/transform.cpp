@@ -96,6 +96,7 @@ Transform::Transform(
           angularVelocity.y(),
           angularVelocity.z()))
 {
+    checkDynamic();
 }
 
 Transform::Transform(
@@ -114,6 +115,7 @@ Transform::Transform(
           angularVelocity.y(),
           angularVelocity.z()))
 {
+    checkDynamic();
 }
 
 Transform::Transform(
@@ -127,6 +129,7 @@ Transform::Transform(
       tRotation(rotation.transpose()),
       angVel(dynamicOrientation.angularVelocity)
 {
+    checkDynamic();
 }
 
 Transform::Transform(DynamicPosition&& dynamicPosition, DynamicOrientation&& dynamicOrientation)
@@ -138,6 +141,7 @@ Transform::Transform(DynamicPosition&& dynamicPosition, DynamicOrientation&& dyn
       tRotation(rotation.transpose()),
       angVel(std::move(dynamicOrientation.angularVelocity))
 {
+    checkDynamic();
 }
 
 Transform::Transform(
@@ -146,14 +150,14 @@ Transform::Transform(
     const CMSISMat<3, 1>& velocity,
     const CMSISMat<3, 1>& acceleration,
     const CMSISMat<3, 3>& angularVelocity)
-    : dynamic(true),
-      translation(translation),
+    : translation(translation),
       transVel(velocity),
       transAcc(acceleration),
       rotation(rotation),
       tRotation(rotation.transpose()),
       angVel(angularVelocity)
 {
+    checkDynamic();
 }
 
 Transform::Transform(
@@ -162,14 +166,14 @@ Transform::Transform(
     CMSISMat<3, 1>&& velocity,
     CMSISMat<3, 1>&& acceleration,
     CMSISMat<3, 3>&& angularVelocity)
-    : dynamic(true),
-      translation(std::move(translation)),
+    : translation(std::move(translation)),
       transVel(std::move(velocity)),
       transAcc(std::move(acceleration)),
       rotation(std::move(rotation)),
       tRotation(rotation.transpose()),
       angVel(std::move(angularVelocity))
 {
+    checkDynamic();
 }
 
 Transform::Transform(
@@ -188,14 +192,14 @@ Transform::Transform(
     float rollVel,
     float pitchVel,
     float yawVel)
-    : dynamic(true),
-      translation({x, y, z}),
+    : translation({x, y, z}),
       transVel({vx, vy, vz}),
       transAcc({ax, ay, az}),
       rotation(Orientation::fromEulerAngles(roll, pitch, yaw)),
       tRotation(rotation.transpose()),
       angVel(AngularVelocity::skewMatFromAngVel(rollVel, pitchVel, yawVel))
 {
+    checkDynamic();
 }
 
 Position Transform::apply(const Position& position) const
@@ -294,14 +298,36 @@ Transform Transform::composeStatic(const Transform& second) const
 
 Transform Transform::projectForward(float dt) const
 {
-    // TODO: copy self if not dynamic, since dt doesn't affect static transforms
-    CMSISMat<3, 3> velDt = CMSISMat<3, 3>();
-    velDt.constructIdentityMatrix();
-    velDt = velDt + sin(dt) * this->angVel + (1 - cos(dt)) * this->angVel * this->angVel;
-    CMSISMat<3, 3> newRot = velDt * this->rotation;
+    if (!dynamic)
+    {
+        return Transform(
+            this->translation,
+            this->rotation,
+            this->transVel,
+            this->transAcc,
+            this->angVel);
+    }
+
     CMSISMat<3, 1> newPos =
         this->translation + dt * this->transVel + 0.5f * dt * dt * this->transAcc;
     CMSISMat<3, 1> newVel = this->transVel + dt * this->transAcc;
+
+    float angVelMag = sqrt(
+        getRollVelocity() * getRollVelocity() + getPitchVelocity() * getPitchVelocity() +
+        getYawVelocity() * getYawVelocity());
+
+    if (compareFloatClose(angVelMag, 0, 1e-3))
+    {
+        return Transform(newPos, this->rotation, newVel, this->transAcc, this->angVel);
+    }
+
+    float theta = dt * angVelMag;
+    CMSISMat<3, 3> angVelNormalized = angVel / angVelMag;
+    CMSISMat<3, 3> velDt = CMSISMat<3, 3>();
+    velDt.constructIdentityMatrix();
+    velDt = velDt + sin(theta) * angVelNormalized +
+            (1 - cos(theta)) * angVelNormalized * angVelNormalized;
+    CMSISMat<3, 3> newRot = velDt * this->rotation;
     return Transform(newPos, newRot, newVel, this->transAcc, this->angVel);
 }
 

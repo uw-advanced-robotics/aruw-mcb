@@ -581,7 +581,7 @@ public:
     inline float getZAcc() const { return this->transAcc.data[2]; }
 
 private:
-    bool dynamic;
+    bool dynamic{true};
 
     /**
      * Translation vector.
