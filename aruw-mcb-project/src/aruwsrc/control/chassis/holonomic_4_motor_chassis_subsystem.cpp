@@ -21,7 +21,6 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 
@@ -36,69 +35,23 @@ namespace chassis
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-    can::capbank::CapacitorBank* capacitorBank,
-    tap::motor::MotorId leftFrontMotorId,
-    tap::motor::MotorId leftBackMotorId,
-    tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId)
+    Motor& leftFrontMotor,
+    Motor& leftBackMotor,
+    Motor& rightFrontMotor,
+    Motor& rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+    can::capbank::CapacitorBank* capacitorBank)
     : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
       velocityPid{
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT),
-          modm::Pid<float>(
-              VELOCITY_PID_KP,
-              VELOCITY_PID_KI,
-              VELOCITY_PID_KD,
-              VELOCITY_PID_MAX_ERROR_SUM,
-              VELOCITY_PID_MAX_OUTPUT)},
-      leftFrontMotor(
-          drivers,
-          leftFrontMotorId,
-          CAN_BUS_MOTORS,
-          false,
-          "left front drive motor",
-          false,
-          CHASSIS_GEARBOX_RATIO),
-      leftBackMotor(
-          drivers,
-          leftBackMotorId,
-          CAN_BUS_MOTORS,
-          false,
-          "left back drive motor",
-          false,
-          CHASSIS_GEARBOX_RATIO),
-      rightFrontMotor(
-          drivers,
-          rightFrontMotorId,
-          CAN_BUS_MOTORS,
-          false,
-          "right front drive motor",
-          false,
-          CHASSIS_GEARBOX_RATIO),
-      rightBackMotor(
-          drivers,
-          rightBackMotorId,
-          CAN_BUS_MOTORS,
-          false,
-          "right back drive motor",
-          false,
-          CHASSIS_GEARBOX_RATIO)
+          tap::algorithms::SmoothPid(wheelVelocityPidConfig),
+          tap::algorithms::SmoothPid(wheelVelocityPidConfig),
+          tap::algorithms::SmoothPid(wheelVelocityPidConfig),
+          tap::algorithms::SmoothPid(wheelVelocityPidConfig)},
+      velocityPidErrors{0, 0, 0, 0},
+      leftFrontMotor(leftFrontMotor),
+      leftBackMotor(leftBackMotor),
+      rightFrontMotor(rightFrontMotor),
+      rightBackMotor(rightBackMotor)
 {
     motors[LF] = &leftFrontMotor;
     motors[RF] = &rightFrontMotor;
@@ -129,7 +82,7 @@ void Holonomic4MotorChassisSubsystem::refresh()
 {
     for (int i = 0; i < getNumChassisMotors(); i++)
     {
-        updateMotorRpmPid(&velocityPid[i], motors[i], *desiredWheelRPM[i]);
+        updateMotorRpmPid(i);
     }
 
     limitChassisPower();
@@ -147,7 +100,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     float totalError = 0.0f;
     for (int i = 0; i < NUM_MOTORS; i++)
     {
-        totalError += abs(velocityPid[i].getLastError());
+        totalError += abs(velocityPidErrors[i]);
     }
 
     bool totalErrorZero = compareFloatClose(0.0f, totalError, 1E-3);
@@ -159,9 +112,8 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
         // single motor. Some value between [0, 1]. The sum of all computed velocityErrorFrac
         // values for all motors is 1.
-        float velocityErrorFrac = totalErrorZero
-                                      ? (1.0f / NUM_MOTORS)
-                                      : (abs(velocityPid[i].getLastError()) / totalError);
+        float velocityErrorFrac =
+            totalErrorZero ? (1.0f / NUM_MOTORS) : (abs(velocityPidErrors[i]) / totalError);
         // Instead of just multiplying the desired output by powerLimitFrac, scale powerLimitFrac
         // based on the current velocity error. In this way, if the velocity error is large, the
         // motor requires more current to be directed to it than other motors. Without this
@@ -217,18 +169,19 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
     desiredRotation = r;
 }
 
-void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
-    modm::Pid<float>* pid,
-    tap::motor::DjiMotor* const motor,
-    float desiredRpm)
+void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)
 {
     // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM
     // and not the wheel rpm
-    pid->update(
-        desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
+    velocityPidErrors[i] = *desiredWheelRPM[i] - motors[i]->getEncoder()->getVelocity() * 60.0f /
+                                                     M_TWOPI / CHASSIS_GEARBOX_RATIO;
+
+    // dt is also set to 1 here because the current constants were for modm pid didn't use it
+    velocityPid[i].runControllerDerivateError(velocityPidErrors[i], 1);
+
     float value =
-        VELOCITY_PID_KV * desiredRpm + pid->getValue() + std::copysign(VELOCITY_PID_KS, desiredRpm);
-    motor->setDesiredOutput(value);
+        VELOCITY_PID_KV * (*desiredWheelRPM[i]) + velocityPid[i].getOutput() + VELOCITY_PID_KS;
+    motors[i]->setDesiredOutput(value);
 }
 
 modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChassisRelative() const
