@@ -226,7 +226,8 @@ void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(
     // and not the wheel rpm
     pid->update(
         desiredRpm - motor->getEncoder()->getVelocity() * 60.0f / M_TWOPI / CHASSIS_GEARBOX_RATIO);
-    float value = VELOCITY_PID_KV * desiredRpm + pid->getValue() + VELOCITY_PID_KS;
+    float value =
+        VELOCITY_PID_KV * desiredRpm + pid->getValue() + std::copysign(VELOCITY_PID_KS, desiredRpm);
     motor->setDesiredOutput(value);
 }
 
