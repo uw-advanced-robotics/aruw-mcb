@@ -29,7 +29,6 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "sentry_drive_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
@@ -101,16 +100,40 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : MecanumChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : XDriveChassisSubsystem(
+          drivers,
+          currentSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
@@ -194,15 +217,6 @@ HopperSubsystemMock::HopperSubsystemMock(
 {
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
-
-SentryDriveSubsystemMock::SentryDriveSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::InputPin leftLimitSwitch,
-    tap::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentry::drive::SentryDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
-{
-}
-SentryDriveSubsystemMock::~SentryDriveSubsystemMock() {}
 
 SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
     : SentryRequestSubsystem(drivers)

@@ -60,7 +60,9 @@ tap::motor::DjiMotor leftChannelMotor(
     tap::motor::MOTOR3,          // id 3
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "LMotor");
+    "LMotor",
+    false,
+    (1.0f / 36.0f));
 
 VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
@@ -70,7 +72,9 @@ tap::motor::DjiMotor rightChannelMotor(
     tap::motor::MOTOR1,          // id 1
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "RMotor");
+    "RMotor",
+    false,
+    (187.0f / 3591.0f));
 
 // 6020
 tap::motor::DjiMotor wheelChannelMotor(
@@ -78,25 +82,15 @@ tap::motor::DjiMotor wheelChannelMotor(
     tap::motor::MOTOR7,          // id 3+4
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "WMotor");
+    "WMotor",
+    false,
+    (1.0f));
 
-MotorSubsystem leftMotorSubsystem(
-    drivers(),
-    leftChannelMotor,
-    m2006VelocityPidConfig,
-    (1.0f / 36.0f));
+MotorSubsystem leftMotorSubsystem(drivers(), leftChannelMotor, m2006VelocityPidConfig);
 
-MotorSubsystem rightMotorSubsystem(
-    drivers(),
-    rightChannelMotor,
-    rm3508VelocityPidConfig,
-    (187.0f / 3591.0f));  // internal gearbox ratio
+MotorSubsystem rightMotorSubsystem(drivers(), rightChannelMotor, rm3508VelocityPidConfig);
 
-MotorSubsystem wheelMotorSubsystem(
-    drivers(),
-    wheelChannelMotor,
-    gm6020VelocityPidConfig,
-    (1.0f));  // internal gearbox ratio
+MotorSubsystem wheelMotorSubsystem(drivers(), wheelChannelMotor, gm6020VelocityPidConfig);
 
 // ----------
 // Commands

@@ -98,7 +98,7 @@ public:
     /// @return The agitator velocity in radians / second.
     inline float getCurrentValue() const override
     {
-        return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
+        return agitatorMotor.getEncoder()->getVelocity();
     }
 
     /**
@@ -163,11 +163,6 @@ private:
     /// The object that runs jam detection.
     tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
 
-    /// You can calibrate the agitator, which will set the current agitator angle to zero radians.
-    /// This value is the starting measured angle offset applied to make the motor angle "0" when
-    /// `calibrateHere` is called.
-    float agitatorCalibratedZeroAngle = 0.0f;
-
     /// Stores the jam state of the subsystem
     bool subsystemJamStatus = false;
 
@@ -182,9 +177,6 @@ private:
 
     /// The velocity setpoint in radians / second
     float velocitySetpoint = 0;
-
-    /// Get the raw angle of the shaft from the motor, in radians
-    float getUncalibratedAgitatorAngle() const;
 
     /// Runes the velocity PID controller
     void runVelocityPidControl();

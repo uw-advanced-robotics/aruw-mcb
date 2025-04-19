@@ -87,6 +87,8 @@ public:
 
     void update();
 
+    void overrideOdometryPosition(float positionX, float positionY);
+
 protected:
     enum class OdomState
     {
@@ -161,25 +163,11 @@ private:
     };
     // clang-format on
 
-    /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
-    /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
-    static constexpr float MAX_ACCELERATION = 8.0f;
-
-    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 1E0},
-            {MAX_ACCELERATION, 1E2},
-        };
-
-    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.001f;
-
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
 
     const modm::Vector2f initPos;
-
-    static constexpr size_t VEL_AVG_WINDOW = 15;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
@@ -188,23 +176,13 @@ private:
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
 
-    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
-    /// frame
-    modm::Vector2f chassisMeasuredDeltaVelocity;
-
-    modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovarianceInterpolator;
-
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
-    modm::Matrix<float, 3, 1> prevChassisVelocity;
 
     const float parallelCenterToWheelDistance;
     const float parallelWheelChassisRelativeAngleRadians;
     const float perpendicularWheelChassisRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
-
-    void updateMeasurementCovariance(float Vx, float Vy);
 };
 }  // namespace aruwsrc::algorithms::odometry
 
