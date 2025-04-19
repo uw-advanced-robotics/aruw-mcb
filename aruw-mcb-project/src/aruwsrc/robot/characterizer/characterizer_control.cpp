@@ -73,9 +73,9 @@ OutputSweepCommand sweep(
     drivers()->digital,
     tap::gpio::Digital::OutputPin::E,
     0,      // min output
-    30000,  // max output
-    1000,   // step length (ms)
-    500,    // step size
+    16500,  // max output
+    500,   // step length (ms)
+    250,    // step size
     -1);
 
 // ------------------
