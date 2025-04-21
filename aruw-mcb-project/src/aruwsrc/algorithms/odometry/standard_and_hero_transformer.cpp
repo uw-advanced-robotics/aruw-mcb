@@ -60,7 +60,7 @@ void StandardAndHeroTransformer::updateTransforms()
     DynamicOrientation chassisOrientation = chassisOrientationObserver.getOrientation();
     worldToChassis.updateRotation(chassisOrientation);
 
-    if (turretImu.observerOnline())
+    if (turretImu.isOnline())
     {
         chassisToTurret.updateRotation(
             chassisOrientation.inverse().compose(turretImu.getOrientation()));

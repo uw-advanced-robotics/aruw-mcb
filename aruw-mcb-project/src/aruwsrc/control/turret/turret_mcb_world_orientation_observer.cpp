@@ -22,6 +22,6 @@ DynamicOrientation TurretMcbWorldOrientationObserver::getOrientation() const
         turretMcb.getYawVelocity());
 }
 
-bool TurretMcbWorldOrientationObserver::observerOnline() const { return turretMcb.isConnected(); }
+bool TurretMcbWorldOrientationObserver::isOnline() const { return turretMcb.isConnected(); }
 
 }  // namespace aruwsrc::control::turret

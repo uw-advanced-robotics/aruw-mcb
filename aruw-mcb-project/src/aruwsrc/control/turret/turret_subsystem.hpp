@@ -102,8 +102,6 @@ public:
 
     tap::algorithms::transforms::DynamicOrientation getOrientation() const override;
 
-    inline bool observerOnline() const override { return isOnline(); }
-
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor

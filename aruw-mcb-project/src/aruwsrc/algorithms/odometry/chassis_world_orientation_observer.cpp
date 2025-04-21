@@ -9,7 +9,7 @@ namespace aruwsrc::algorithms::odometry
 template <Frame ADJACENT>
 DynamicOrientation ChassisWorldOrientationObserver<ADJACENT>::getOrientation() const
 {
-    if (adjacentImu.observerOnline())
+    if (adjacentImu.isOnline())
     {
         return adjacentImu.getOrientation().compose(adjacentEncoder.getOrientation().inverse());
     }
@@ -23,7 +23,7 @@ DynamicOrientation ChassisWorldOrientationObserver<ADJACENT>::getOrientation() c
 }
 
 template <Frame ADJACENT>
-bool ChassisWorldOrientationObserver<ADJACENT>::observerOnline() const
+bool ChassisWorldOrientationObserver<ADJACENT>::isOnline() const
 {
     // This observer handles fallback behavior, so its promise is that it will always have a valid
     // estimate.

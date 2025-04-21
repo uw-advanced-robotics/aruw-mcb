@@ -17,7 +17,7 @@ public:
 
     tap::algorithms::transforms::DynamicOrientation getOrientation() const;
 
-    bool observerOnline() const override;
+    bool isOnline() const override;
 
 private:
     const aruwsrc::can::TurretMCBCanComm& turretMcb;

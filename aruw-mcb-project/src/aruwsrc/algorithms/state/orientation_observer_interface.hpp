@@ -34,7 +34,7 @@ class OrientationObserverInterface
 public:
     virtual DynamicOrientation getOrientation() const;
 
-    virtual bool observerOnline() const = 0;
+    virtual bool isOnline() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::state

@@ -34,7 +34,7 @@ class TranslationObserverInterface
 public:
     virtual DynamicPosition getTranslation() const = 0;
 
-    virtual bool observerOnline() const = 0;
+    virtual bool isOnline() const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::state
