@@ -682,6 +682,7 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    drivers->robotOrbitTransmitter.attachOdometry(&odometrySubsystem);
 }
 
 /* register io mappings here ------------------------------------------------*/

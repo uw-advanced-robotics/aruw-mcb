@@ -42,23 +42,26 @@ public:
     RobotOrbitTransmitter(
         tap::Drivers* drivers,
         RobotOrbitStateProvider& stateProvider,
-        ChassisKFOdometry* chassisOdometry,
         RefSerial* refSerial);
 
-    void sendRobotStates();
-    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
     void operator()(const DJISerial::ReceivedSerialMessage& message) override final;
-
+    inline void attachOdometry(ChassisKFOdometry* odometry) { this->odometry = odometry; }
+    void update();
+    void sendRobotStates();
 private:
+
+
     tap::Drivers* drivers;
     RefSerialTransmitter serialTransmitter;
     RobotOrbitStateProvider& stateProvider;
-    ChassisKFOdometry* odometry;
+    ChassisKFOdometry* odometry = nullptr;
     RefSerial* refSerial;
 
     RefSerialTransmitter::RobotId getAllyRobotId() const;
 
     constexpr static uint8_t STATIC_CAST_SCALE_FACTOR = 100;
+
+    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
 };
 
 }  // namespace aruwsrc::communication::serial

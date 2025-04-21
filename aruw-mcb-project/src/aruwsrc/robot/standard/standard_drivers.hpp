@@ -36,6 +36,8 @@
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/communication/serial/robot-orbits/robot_orbit_state.hpp"
+#include "aruwsrc/communication/serial/robot-orbits/robot_orbit_transmitter.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
@@ -65,7 +67,9 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
-          plateHitTracker(this)
+          plateHitTracker(this),
+         robotOrbitStateProvider(),
+         robotOrbitTransmitter(this, robotOrbitStateProvider, &refSerial)
     {
     }
 
@@ -86,6 +90,8 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
+    communication::serial::RobotOrbitStateProvider robotOrbitStateProvider;
+    communication::serial::RobotOrbitTransmitter robotOrbitTransmitter;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

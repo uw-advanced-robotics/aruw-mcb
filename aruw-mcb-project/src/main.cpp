@@ -197,6 +197,10 @@ static void updateIo(Drivers *drivers)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
+#if defined(ALL_STANDARDS) 
+    drivers->robotOrbitTransmitter.update();
+#endif
+
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();

@@ -24,12 +24,10 @@ namespace aruwsrc::communication::serial
 RobotOrbitTransmitter::RobotOrbitTransmitter(
     tap::Drivers* drivers,
     RobotOrbitStateProvider& stateProvider,
-    ChassisKFOdometry* chassisOdometry,
     RefSerial* refSerial)
     : drivers(drivers),
       serialTransmitter(drivers),
       stateProvider(stateProvider),
-      odometry(chassisOdometry),
       refSerial(refSerial)
 {
 }
@@ -59,6 +57,10 @@ RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const
 
 void RobotOrbitTransmitter::sendRobotStates()
 {
+    if (odometry == nullptr)
+    {
+        return;
+    }
     RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
     if (allyRobot == RefSerialData::RobotId::INVALID)
     {
@@ -176,6 +178,11 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
         baseIndex += 4;
     }
     stateProvider.updateFromAlly(allyRobot, allyRobotState);
+}
+
+void RobotOrbitTransmitter::update()
+{
+    sendRobotStates();
 }
 
 }  // namespace aruwsrc::communication::serial
