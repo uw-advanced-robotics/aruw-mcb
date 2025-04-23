@@ -216,7 +216,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
 {
     const WrappedFloat chassisFrameYaw = turretMotor.getChassisFrameMeasuredAngle();
     const WrappedFloat worldFrameYawAngle = Angle(turretMCBCanComm.getYawUnwrapped());
-    const float worldFrameYawVelocity = turretMCBCanComm.getYawVelocity();
+    const float worldFrameYawVelocity = turretMCBCanComm.getGz();
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -313,7 +313,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
 {
     const WrappedFloat chassisFramePitch = turretMotor.getChassisFrameMeasuredAngle();
     const WrappedFloat worldFramePitchAngle = Angle(turretMCBCanComm.getPitchUnwrapped());
-    const float worldFramePitchVelocity = turretMCBCanComm.getPitchVelocity();
+    const float worldFramePitchVelocity = turretMCBCanComm.getGy();
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
