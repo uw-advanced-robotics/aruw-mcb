@@ -57,15 +57,7 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
           TURRET_STATUS_RX_CAN_ID,
           canBus,
           this,
-          &TurretMCBCanComm::handleTurretMessage),
-      timeSynchronizationRxHandler(
-          drivers,
-          SYNC_RX_CAN_ID,
-          canBus,
-          this,
-          &TurretMCBCanComm::handleTimeSynchronizationRequest),
-      txCommandMsgBitmask(),
-      sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
+          &TurretMCBCanComm::handleTurretMessage)
 {
 }
 
@@ -75,26 +67,20 @@ void TurretMCBCanComm::init()
     yAxisMessageHandler.attachSelfToRxHandler();
     zAxisMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
-    timeSynchronizationRxHandler.attachSelfToRxHandler();
 }
 
 void TurretMCBCanComm::sendData()
 {
-    if (sendMcbDataTimer.execute())
+    if (requestCalibration)
     {
         modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
-        txMsg.data[0] = txCommandMsgBitmask.value;
         drivers->can.sendMessage(canBus, txMsg);
 
-        if (txCommandMsgBitmask.any(TxCommandMsgBitmask::RECALIBRATE_IMU))
-        {
-            yawRevolutions = 0;
-            pitchRevolutions = 0;
-        }
+        yawRevolutions = 0;
+        pitchRevolutions = 0;
 
-        // set this calibrate flag to false so the calibrate command is only sent once
-        txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        requestCalibration = false;
     }
 
     if (!isConnected())
@@ -115,7 +101,7 @@ void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
 
     currProcessingImuData.roll = modm::toRadian(
         static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
-    currProcessingImuData.rawRollVelocity = xAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.rollVelocity = xAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.xAcceleration =
         static_cast<float>(xAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
@@ -144,7 +130,7 @@ void TurretMCBCanComm::handleYAxisMessage(const modm::can::Message& message)
 
     currProcessingImuData.pitch = modm::toRadian(
         static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
-    currProcessingImuData.rawPitchVelocity = yAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.pitchVelocity = yAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.yAcceleration =
         static_cast<float>(yAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 }
@@ -161,7 +147,7 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
     currProcessingImuData.yaw = modm::toRadian(
         static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
-    currProcessingImuData.rawYawVelocity = zAxisMessage->angleAngularVelocityRaw;
+    currProcessingImuData.yawVelocity = zAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.zAcceleration =
         static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
@@ -191,15 +177,6 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
     limitSwitchDepressed = message.data[0] & 0b1;
-}
-
-void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
-{
-    modm::can::Message syncResponseMessage(SYNC_TX_CAN_ID, 4);
-    syncResponseMessage.setExtended(false);
-    *reinterpret_cast<uint32_t*>(syncResponseMessage.data) =
-        tap::arch::clock::getTimeMicroseconds();
-    drivers->can.sendMessage(canBus, syncResponseMessage);
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(

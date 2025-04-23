@@ -54,14 +54,6 @@ class TurretMCBCanComm : public tap::communication::sensors::limit_switch::Limit
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
 
-    enum class TxCommandMsgBitmask : uint8_t
-    {
-        OPEN_HOPPER = modm::Bit0,
-        RECALIBRATE_IMU = modm::Bit1,
-        TURN_LASER_ON = modm::Bit2,
-    };
-    MODM_FLAGS8(TxCommandMsgBitmask);
-
     enum CanIDs
     {
         SYNC_RX_CAN_ID = 0x1f8,
@@ -91,12 +83,7 @@ public:
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getRollVelocity() const
-    {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawRollVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
-    }
+    mockable inline float getRollVelocity() const { return lastCompleteImuData.rollVelocity; }
 
     /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
@@ -116,12 +103,7 @@ public:
     /**
      * @return turret pitch angular velocity in rad/sec
      */
-    mockable inline float getPitchVelocity() const
-    {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
-    }
+    mockable inline float getPitchVelocity() const { return lastCompleteImuData.pitchVelocity; }
 
     /**
      * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
@@ -143,9 +125,7 @@ public:
      */
     mockable inline float getYawVelocity() const
     {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+        return lastCompleteImuData.yawVelocity;
     }
 
     /**
@@ -155,12 +135,7 @@ public:
      */
     mockable inline float getYawUnwrapped() const
     {
-        // @todo this is dumb
-#ifdef TARGET_SENTRY_HYDRA
-        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions) - M_PI;
-#else
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
-#endif
     }
 
     mockable inline float getAx() const { return lastCompleteImuData.xAcceleration; }
@@ -181,20 +156,7 @@ public:
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
-    mockable inline void setOpenHopperCover(bool isOpen)
-    {
-        txCommandMsgBitmask.update(TxCommandMsgBitmask::OPEN_HOPPER, isOpen);
-    }
-
-    mockable inline void setLaserStatus(bool isOn)
-    {
-        txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
-    }
-
-    mockable inline void sendImuCalibrationRequest()
-    {
-        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
-    }
+    mockable inline void sendImuCalibrationRequest() { requestCalibration = true; }
 
     mockable void sendData();
 
@@ -204,7 +166,6 @@ private:
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
     static constexpr float CMPS2_TO_MPS2 = 0.01;
-    static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
     {
@@ -232,12 +193,12 @@ private:
 
     struct ImuData
     {
-        float yaw;                     ///< Normalized yaw value, between [-pi, pi]
-        int16_t rawYawVelocity;        ///< Raw yaw velocity, in counts per second
-        float pitch;                   ///< Normalized pitch value, between [-pi, pi]
-        int16_t rawPitchVelocity;      ///< Raw pitch velocity, in counts per second
-        float roll;                    ///< Normalized roll value, between [-pi, pi]
-        int16_t rawRollVelocity;       ///< Raw roll velocity, in counts per second
+        float yaw;                     ///< Normalized yaw value, between [0, 2pi]
+        int16_t yawVelocity;           ///< Yaw velocity, in radians per second
+        float pitch;                   ///< Normalized pitch value, between [0, 2pi]
+        int16_t pitchVelocity;         ///< Pitch velocity, in radians per second
+        float roll;                    ///< Normalized roll value, between [0, 2pi]
+        int16_t rollVelocity;          ///< Roll velocity, in radians per second
         float xAcceleration;           ///< (m/s^2) X-Acceleration
         float yAcceleration;           ///< (m/s^2) Y-Acceleration
         float zAcceleration;           ///< (m/s^2) Z-Acceleration
@@ -262,13 +223,9 @@ private:
 
     TurretMcbRxHandler turretStatusRxHandler;
 
-    TurretMcbRxHandler timeSynchronizationRxHandler;
-
     tap::arch::MilliTimeout imuConnectedTimeout;
 
-    TxCommandMsgBitmask_t txCommandMsgBitmask;
-
-    tap::arch::PeriodicMilliTimer sendMcbDataTimer;
+    bool requestCalibration;
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
@@ -283,8 +240,6 @@ private:
     void handleZAxisMessage(const modm::can::Message& message);
 
     void handleTurretMessage(const modm::can::Message& message);
-
-    void handleTimeSynchronizationRequest(const modm::can::Message& message);
 
     /**
      * Updates the passed in revolutionCounter if a revolution increment or decrement has been
