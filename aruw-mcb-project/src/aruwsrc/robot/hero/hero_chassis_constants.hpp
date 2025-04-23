@@ -20,6 +20,8 @@
 #ifndef HERO_CHASSIS_CONSTANTS_HPP_
 #define HERO_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
 #include "modm/math/filter/pid.hpp"
@@ -43,6 +45,9 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {100, 7'000},
     {120, 8'000},
 };
+
+static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
+    tap::algorithms::transforms::Transform(0.1426, 0.14385, 0, M_PI_2, 0, 0);
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -78,6 +83,14 @@ static constexpr float VELOCITY_PID_KS = 730.0f;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
