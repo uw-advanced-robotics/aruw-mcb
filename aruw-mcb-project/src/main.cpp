@@ -170,9 +170,6 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_HERO_PERSEUS)
-    drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_HERO_MCB_MOUNTING_TRANSFORM);
-#endif
 #if defined(TARGET_SENTRY_HYDRA)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
