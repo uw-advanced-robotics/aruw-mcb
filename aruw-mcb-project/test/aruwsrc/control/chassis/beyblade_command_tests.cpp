@@ -44,6 +44,14 @@ static constexpr float MAX_R =
 static constexpr float BASE_DESIRED_OUT =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
 
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
+static constexpr float GEAR_RATIO = 1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+
 class BeybladeCommandTest : public Test, public WithParamInterface<std::tuple<float, float, float>>
 {
 protected:
@@ -56,7 +64,11 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
           t(&d),
-          cs(&d, &currentSensor),
+          lfm(),
+          lbm(),
+          rfm(),
+          rbm(),
+          cs(&d, &currentSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
           bc(&d, &cs, &t.yawMotor, operatorInterface),
           yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
@@ -95,6 +107,7 @@ protected:
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     NiceMock<TurretSubsystemMock> t;
+    NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> cs;
     BeybladeCommand bc;
     RefSerial::Rx::RobotData rd{};

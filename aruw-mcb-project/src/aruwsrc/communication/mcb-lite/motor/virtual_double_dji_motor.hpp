@@ -46,8 +46,10 @@ public:
         bool isInvertedTwo,
         const char* nameOne,
         const char* nameTwo,
-        uint16_t encWrapped = DjiMotor::ENC_RESOLUTION / 2,
-        int64_t encRevolutions = 0);
+        bool currentControl = false,
+        float gearRatio = 1,
+        uint32_t encoderHomePositionOne = 0,
+        tap::encoder::EncoderInterface* externalEncoder = nullptr);
 
     void initialize() override;
 

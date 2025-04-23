@@ -51,10 +51,8 @@ protected:
     void SetUp() override
     {
         ON_CALL(djiMotor, isMotorOnline).WillByDefault(Return(true));
-        ON_CALL(djiMotor, getEncoderUnwrapped).WillByDefault([&]() {
-            return chassisFrameMeasurement.getUnwrappedValue() *
-                   tap::motor::DjiMotor::ENC_RESOLUTION / M_TWOPI;
-        });
+        ON_CALL(djiMotor.getInternalEncoder(), getPosition)
+            .WillByDefault(ReturnPointee(&chassisFrameMeasurement));
         ON_CALL(djiMotor, setDesiredOutput).WillByDefault([&](int32_t desiredOutput) {
             return djiMotor.DjiMotor::setDesiredOutput(desiredOutput);
         });
@@ -64,13 +62,11 @@ protected:
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(turretMCBCanCommBus1, getYawVelocity)
-            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+        ON_CALL(turretMCBCanCommBus1, getGz).WillByDefault(ReturnPointee(&turretFrameImuVelocity));
 
         ON_CALL(turretMCBCanCommBus1, getPitchUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(turretMCBCanCommBus1, getPitchVelocity)
-            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+        ON_CALL(turretMCBCanCommBus1, getGy).WillByDefault(ReturnPointee(&turretFrameImuVelocity));
     }
 
     void setDefaultMotorBehavior(NiceMock<TurretMotorMock> &turretMotor)

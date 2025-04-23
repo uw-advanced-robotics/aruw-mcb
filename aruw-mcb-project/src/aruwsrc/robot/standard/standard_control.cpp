@@ -101,21 +101,21 @@
 #include "tap/communication/can/can.hpp"
 #endif
 
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
-using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::governor;
-using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms;
-using namespace aruwsrc::standard;
-using namespace tap::control;
-using namespace aruwsrc::control::client_display;
-using namespace aruwsrc::control;
-using namespace tap::communication::serial;
-using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::transforms;
+using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::auto_aim;
+using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::standard;
 using namespace aruwsrc::algorithms::state;
 
 /*
@@ -134,7 +134,15 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-tap::motor::DjiMotor pitchMotor(drivers(), PITCH_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DjiMotor pitchMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    false,
+    "Pitch Turret",
+    false,
+    1,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
 
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -146,7 +154,10 @@ tap::motor::DjiMotor yawMotor(
 #else
 #error "did not define standard!"
 #endif
-    "Yaw Turret");
+    "Yaw Turret",
+    false,
+    1,
+    YAW_MOTOR_CONFIG.startEncoderValue);
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -161,9 +172,50 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
 aruwsrc::chassis::MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
 aruwsrc::control::turret::TurretMcbWorldOrientationObserver turretImu(getTurretMCBCanComm());

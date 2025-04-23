@@ -66,7 +66,7 @@ static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
 
 // todo: hopefullly these can live as constants here soon :)
 aruwsrc::chassis::SwerveModuleConfig rightFrontSwerveConfig = {
-    .azimuthZeroOffset = 3399 - (3 * DjiMotor::ENC_RESOLUTION / 8),  // 3394
+    .azimuthZeroOffset = 3399 - (3 * DjiMotorEncoder::ENC_RESOLUTION / 8),  // 3394
     .positionWithinChassisX = CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .positionWithinChassisY = -CENTER_TO_WHEELBASE_RADIUS / M_SQRT2,
     .driveMotorInverted = false,

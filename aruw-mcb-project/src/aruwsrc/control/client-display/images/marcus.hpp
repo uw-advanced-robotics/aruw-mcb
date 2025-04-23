@@ -156,6 +156,13 @@ static constexpr LineTuple MARCUS_LINES[]{
 
 static constexpr int NUM_LINES_MARCUS = sizeof(MARCUS_LINES) / sizeof(LineTuple);
 
+Image marcus(
+    {.size = NUM_LINES_MARCUS,
+     .lines = MARCUS_LINES,
+     .IMAGE_X_OFFSET = 600,
+     .IMAGE_Y_OFFSET = -400,
+     .IMAGE_SCALE = 1.0});
+
 };  // namespace aruwsrc::control::client_display::images
 
 #endif  // MARCUS_HPP_
