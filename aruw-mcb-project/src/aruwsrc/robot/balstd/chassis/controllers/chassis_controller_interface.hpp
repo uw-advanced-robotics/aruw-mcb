@@ -15,7 +15,7 @@ public:
     {
     }
 
-    virtual BalstdChassisOutput runController(const BalstdChassisState& state) const;
+    virtual BalstdChassisOutput runController(const BalstdChassisState& state);
 
 protected:
     const BalstdControlOperatorInterface& controlOperatorInterface;

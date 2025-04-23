@@ -175,6 +175,9 @@ static void initializeIo(Drivers *drivers)
     drivers->chassisMcbLite.initialize();
     drivers->turretMajorMcbLite.initialize();
 #endif
+#if defined(TARGET_BALSTD)
+    drivers->chassisIsm330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -195,6 +198,9 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
+#endif
+#if defined(TARGET_BALSTD)
+    drivers->chassisIsm330.read();
 #endif
 }
 

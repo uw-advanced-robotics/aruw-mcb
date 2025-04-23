@@ -26,17 +26,22 @@ namespace aruwsrc
 namespace control::balstd
 {
 
-float BalstdControlOperatorInterface::getLegXForce() const
+float BalstdControlOperatorInterface::getXVel() const
+{
+    return drivers->remote.getChannel(Channel::LEFT_VERTICAL) * LEG_FORCE_SCALAR;
+}
+
+float BalstdControlOperatorInterface::getManualLegXForce() const
 {
     return drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * LEG_FORCE_SCALAR;
 }
 
-float BalstdControlOperatorInterface::getLegYForce() const
+float BalstdControlOperatorInterface::getManualLegYForce() const
 {
     return -drivers->remote.getChannel(Channel::LEFT_VERTICAL) * LEG_FORCE_SCALAR;
 }
 
-float BalstdControlOperatorInterface::getWheelTorque() const
+float BalstdControlOperatorInterface::getManualWheelTorque() const
 {
     return drivers->remote.getChannel(Channel::WHEEL) * WHEEL_TORQUE_SCALAR;
 }

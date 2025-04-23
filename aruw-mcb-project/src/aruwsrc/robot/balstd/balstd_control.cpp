@@ -126,7 +126,7 @@ BalstdLegConfig legConfig{
 BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
 BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
 
-BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg);
+BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg, getTurretMCBCanComm());
 
 // controllers
 

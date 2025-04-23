@@ -6,12 +6,12 @@ namespace aruwsrc::control::balstd
 BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&) const
 {
     return BalstdChassisOutput(
-        controlOperatorInterface.getLegXForce(),
-        controlOperatorInterface.getLegYForce(),
-        controlOperatorInterface.getLegXForce(),
-        controlOperatorInterface.getLegYForce(),
-        controlOperatorInterface.getWheelTorque(),
-        controlOperatorInterface.getWheelTorque());
+        controlOperatorInterface.getManualLegXForce(),
+        controlOperatorInterface.getManualLegYForce(),
+        controlOperatorInterface.getManualLegXForce(),
+        controlOperatorInterface.getManualLegYForce(),
+        controlOperatorInterface.getManualWheelTorque(),
+        controlOperatorInterface.getManualWheelTorque());
 }
 
 }  // namespace aruwsrc::control::balstd

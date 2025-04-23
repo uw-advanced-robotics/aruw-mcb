@@ -31,25 +31,29 @@ class BalstdControlOperatorInterface : public ControlOperatorInterface
 public:
     BalstdControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
 
+    mockable float getXVel() const;
+
     // ====================
     // testing input modes
     // ====================
     /**
      * @return The value used for testing leg VMC movement forward/backward
      */
-    mockable float getLegXForce() const;
+    mockable float getManualLegXForce() const;
 
     /**
      * @return The value used for testing leg VMC up/down movement
      */
-    mockable float getLegYForce() const;
+    mockable float getManualLegYForce() const;
 
     /**
      * @return The value used for testing leg wheel torque
      */
-    mockable float getWheelTorque() const;
+    mockable float getManualWheelTorque() const;
 
 private:
+    static constexpr float MAX_X_VEL = 1.0f;  // m/s
+
     static constexpr float LEG_FORCE_SCALAR = 10.0f;
     static constexpr float WHEEL_TORQUE_SCALAR = 10.0f;
 };

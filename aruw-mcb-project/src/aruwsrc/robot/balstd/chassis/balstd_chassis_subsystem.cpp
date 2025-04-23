@@ -26,10 +26,12 @@ namespace aruwsrc::control::balstd
 BalstdChassisSubsystem::BalstdChassisSubsystem(
     tap::Drivers* drivers,
     BalstdLeg& leftLeg,
-    BalstdLeg& rightLeg)
+    BalstdLeg& rightLeg,
+    tap::communication::sensors::imu::ImuInterface& chassisImu)
     : ChassisSubsystemInterface(drivers),
       leftLeg(leftLeg),
       rightLeg(rightLeg),
+      chassisImu(chassisImu),
       controller(nullptr),
       currState(ZERO_STATE)
 {
@@ -77,6 +79,12 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.xc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2;
     currState.virtualLegState.yc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2;
     currState.virtualLegState.calculatePendulumState();
+
+    currState.roll = modm::toRadian(chassisImu.getRoll());
+    currState.pitch = modm::toRadian(chassisImu.getPitch());
+    currState.yaw = modm::toRadian(chassisImu.getYaw());
+
+    currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.theta);
 }
 
 }  // namespace aruwsrc::control::balstd

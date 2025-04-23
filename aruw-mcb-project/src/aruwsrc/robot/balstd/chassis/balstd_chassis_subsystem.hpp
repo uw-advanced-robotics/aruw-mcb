@@ -30,7 +30,11 @@ namespace aruwsrc::control::balstd
 class BalstdChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:
-    BalstdChassisSubsystem(tap::Drivers* drivers, BalstdLeg& leftLeg, BalstdLeg& rightLeg);
+    BalstdChassisSubsystem(
+        tap::Drivers* drivers,
+        BalstdLeg& leftLeg,
+        BalstdLeg& rightLeg,
+        tap::communication::sensors::imu::ImuInterface& chassisImu);
 
     void initialize() override;
 
@@ -65,6 +69,8 @@ public:
 private:
     BalstdLeg& leftLeg;
     BalstdLeg& rightLeg;
+
+    tap::communication::sensors::imu::ImuInterface& chassisImu;
 
     BalstdChassisControllerInterface* controller;
 
