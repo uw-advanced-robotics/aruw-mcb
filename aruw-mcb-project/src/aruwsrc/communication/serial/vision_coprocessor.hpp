@@ -60,7 +60,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_NULL)
     // Hero slip ring cannot handle
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
 #else
