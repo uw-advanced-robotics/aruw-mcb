@@ -85,7 +85,7 @@ void Holonomic4MotorChassisSubsystem::refresh()
         updateMotorRpmPid(i);
     }
 
-    limitChassisPower();
+    // limitChassisPower();
 }
 
 void Holonomic4MotorChassisSubsystem::limitChassisPower()

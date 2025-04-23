@@ -65,8 +65,8 @@ static constexpr float VELOCITY_PID_KP = 10.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float VELOCITY_PID_KV = 0.0f;
-static constexpr float VELOCITY_PID_KS = 0.0;
+static constexpr float VELOCITY_PID_KV = 0.05f;
+static constexpr float VELOCITY_PID_KS = 300.0;
 
 /**
  * This max output is measured in the c620 robomaster translated current.

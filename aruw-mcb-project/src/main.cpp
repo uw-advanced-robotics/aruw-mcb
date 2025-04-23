@@ -112,16 +112,16 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
             PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
@@ -131,8 +131,8 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
+            // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
@@ -156,11 +156,11 @@ static void initializeIo(Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
-    drivers->visionCoprocessor.initializeCV();
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+    // drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
@@ -169,7 +169,7 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_SENTRY_ECLIPSE)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
@@ -189,15 +189,15 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-    drivers->visionCoprocessor.updateSerial();
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
+    // drivers->visionCoprocessor.updateSerial();
 #endif
 
-#ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_ECLIPSE
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
 #endif

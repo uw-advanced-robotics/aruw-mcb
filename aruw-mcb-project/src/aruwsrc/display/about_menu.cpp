@@ -30,8 +30,8 @@ namespace aruwsrc::display
 static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
 static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTRY_HYDRA)
-static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_HYDRA";
+#elif defined(TARGET_SENTRY_ECLIPSE)
+static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_ECLIPSE";
 #elif defined(TARGET_HERO_PERSEUS)
 static constexpr char ROBOT_NAME[] = "TARGET_HERO_PERSEUS";
 #elif defined(TARGET_STANDARD_SPIDER)
