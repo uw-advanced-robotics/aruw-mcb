@@ -22,9 +22,9 @@
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/drivers.hpp"
-#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
 
@@ -32,7 +32,9 @@ namespace aruwsrc::can
 {
 static constexpr uint16_t CHASSIS_SENSOR_CAN_ID = 0x1C5;
 
-class AruwChassisSensor : public tap::can::CanRxListener, public tap::communication::sensors::voltage::VoltageSensorInterface, public tap::communication::sensors::current::CurrentSensorInterface
+class AruwChassisSensor : public tap::can::CanRxListener,
+                          public tap::communication::sensors::voltage::VoltageSensorInterface,
+                          public tap::communication::sensors::current::CurrentSensorInterface
 {
 public:
     AruwChassisSensor(tap::Drivers* drivers, tap::can::CanBus canBus);
@@ -44,12 +46,9 @@ public:
     float getCurrentMa() const override { return this->current; };
     float getVoltageMv() const override { return this->voltage; };
 
-    void update() override {};
+    void update() override{};
 
-    bool isOnline() const
-    {
-        return !this->heartbeat.isExpired();
-    }
+    bool isOnline() const { return !this->heartbeat.isExpired(); }
 
 private:
     float current = 0;

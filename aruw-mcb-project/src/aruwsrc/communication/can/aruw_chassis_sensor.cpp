@@ -21,9 +21,7 @@
 
 namespace aruwsrc::can
 {
-AruwChassisSensor::AruwChassisSensor(
-    tap::Drivers* drivers,
-    tap::can::CanBus canBus)
+AruwChassisSensor::AruwChassisSensor(tap::Drivers* drivers, tap::can::CanBus canBus)
     : tap::can::CanRxListener(drivers, CHASSIS_SENSOR_CAN_ID, canBus)
 {
 }
@@ -40,4 +38,4 @@ void AruwChassisSensor::initialize()
     this->attachSelfToRxHandler();
     this->heartbeat.restart(0);
 }
-}  // namespace aruwsrc::can::capbank
+}  // namespace aruwsrc::can
