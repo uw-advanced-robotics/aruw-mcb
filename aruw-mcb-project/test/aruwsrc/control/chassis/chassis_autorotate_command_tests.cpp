@@ -61,7 +61,15 @@ protected:
           lbm(),
           rfm(),
           rbm(),
-          chassis(&drivers, &currentSensor, &voltageSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
+          chassis(
+              &drivers,
+              &currentSensor,
+              &voltageSensor,
+              lfm,
+              lbm,
+              rfm,
+              rbm,
+              MOCK_WHEEL_VELOCITY_PID_CONFIG),
           turret(&drivers),
           controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
