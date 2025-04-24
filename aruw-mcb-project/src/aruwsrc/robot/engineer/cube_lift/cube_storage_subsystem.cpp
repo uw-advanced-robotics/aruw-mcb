@@ -29,7 +29,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     aruwsrc::control::TriggerInterface& trigger,
     uint64_t length)
     : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
-      motor(storageLiftMotor){};
+      motor(storageLiftMotor){ calibrationState = CalibrationState::AWAITING_CALIBRATE; };
 
 void CubeStorageSubsystem::initialize()
 {
@@ -73,31 +73,36 @@ uint64_t CubeStorageSubsystem::getLowerBound() const { return lowerBound; }
 void CubeStorageSubsystem::refreshSafeDisconnect()
 {
     isPIDControl = false;
-    motorDesiredOutput = 0;
+    motor.setDesiredOutput(0);
 }
 
 bool CubeStorageSubsystem::isLimitSwitched()
 {
-    return drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT);
+    return !drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT);
 }
 
+//float testSwitch = 10;
 void CubeStorageSubsystem::refresh()
 {
+    
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
+        
         if (trigger.isTriggered())
         {
+            //testSwitch+=100;
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             motor.getEncoder()->resetEncoderValue();
             moveMotor(0);
+            isLimitSwitch = isLimitSwitched();
         }
         else
         {
             moveTowardLowerBound();
         }
-        return;
+        
     }
-    isLimitSwitch = isLimitSwitched();
+    
 
     if (isPIDControl)
     {

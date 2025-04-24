@@ -31,8 +31,7 @@ CubeMoveManualCommand::CubeMoveManualCommand(
 
 void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
 
-void CubeMoveManualCommand::execute()
-{
+void CubeMoveManualCommand::execute() {
     setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up joystick
     cubeLift.setSetpoint(setpoint);
 }
@@ -41,6 +40,6 @@ void CubeMoveManualCommand::end(bool) { cubeLift.moveMotor(0); }
 
 bool CubeMoveManualCommand::isFinished() const
 {
-    return false;
+    return cubeLift.isLimitSwitched();
 }  // TODO: change back to isLimitSwitched
 }  // namespace aruwsrc::robot::engineer
