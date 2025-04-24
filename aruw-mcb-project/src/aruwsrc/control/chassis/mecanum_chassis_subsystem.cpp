@@ -33,20 +33,22 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
-    can::capbank::CapacitorBank* capacitorBank,
-    tap::motor::MotorId leftFrontMotorId,
-    tap::motor::MotorId leftBackMotorId,
-    tap::motor::MotorId rightFrontMotorId,
-    tap::motor::MotorId rightBackMotorId)
+    Motor& leftFrontMotor,
+    Motor& leftBackMotor,
+    Motor& rightFrontMotor,
+    Motor& rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+    can::capbank::CapacitorBank* capacitorBank)
     : Holonomic4MotorChassisSubsystem(
           drivers,
           currentSensor,
           voltageSensor,
-          capacitorBank,
-          leftFrontMotorId,
-          leftBackMotorId,
-          rightFrontMotorId,
-          rightBackMotorId)
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig,
+          capacitorBank)
 {
     wheelVelToChassisVelMat[X][LF] = 1;
     wheelVelToChassisVelMat[X][RF] = -1;

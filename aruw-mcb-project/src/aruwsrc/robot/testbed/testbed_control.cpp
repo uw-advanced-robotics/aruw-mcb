@@ -22,6 +22,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
+#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
@@ -34,6 +35,7 @@
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
+using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::chassis;
 using namespace tap::control;
 
@@ -47,6 +49,18 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
+VirtualCanEncoder forwardEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
+
+VirtualCanEncoder strafeEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
+
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::chassis::CURRENT_SENSOR_PIN,
@@ -56,7 +70,51 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor, &voltageSensor);
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+XDriveChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    &voltageSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    WHEEL_VELOCITY_PID_CONFIG);
 
 // aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),

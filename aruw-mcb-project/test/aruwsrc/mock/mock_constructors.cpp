@@ -101,8 +101,21 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor, voltageSensor)
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : MecanumChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
@@ -110,8 +123,21 @@ MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor, voltageSensor)
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : XDriveChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}

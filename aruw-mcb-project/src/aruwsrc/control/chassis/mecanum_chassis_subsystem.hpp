@@ -42,11 +42,12 @@ public:
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        Motor& leftFrontMotor,
+        Motor& leftBackMotor,
+        Motor& rightFrontMotor,
+        Motor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 };
 
 }  // namespace chassis

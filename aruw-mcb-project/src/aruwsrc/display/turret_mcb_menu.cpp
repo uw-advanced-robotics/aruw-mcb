@@ -45,9 +45,9 @@ void TurretMCBMenu::draw()
         "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\nPitch (deg): %.2f\nPitch Velocity (deg/s): "
         "%.2f\n",
         static_cast<double>(modm::toDegree(turretMCBCanComm->getYaw())),
-        static_cast<double>(modm::toDegree(turretMCBCanComm->getYawVelocity())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGz())),
         static_cast<double>(modm::toDegree(turretMCBCanComm->getPitch())),
-        static_cast<double>(modm::toDegree(turretMCBCanComm->getPitchVelocity())));
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGy())));
 }
 
 void TurretMCBMenu::update() {}

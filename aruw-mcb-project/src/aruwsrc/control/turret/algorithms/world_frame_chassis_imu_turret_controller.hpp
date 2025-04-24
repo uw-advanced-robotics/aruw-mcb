@@ -99,10 +99,7 @@ private:
 
     WrappedFloat chassisFrameInitImuYawAngle;
 
-    inline WrappedFloat getMpu6500Yaw() const
-    {
-        return Angle::fromDegrees(drivers.mpu6500.getYaw());
-    }
+    inline WrappedFloat getMpu6500Yaw() const { return Angle(drivers.mpu6500.getYaw()); }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

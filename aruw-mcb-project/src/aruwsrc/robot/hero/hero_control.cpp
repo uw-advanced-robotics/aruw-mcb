@@ -91,24 +91,24 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-using namespace tap::control::setpoint;
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::governor;
+using namespace tap::control::setpoint;
+using namespace aruwsrc::agitator;
+using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::control;
-using namespace aruwsrc::control::turret;
-using namespace tap::control;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::launcher;
-using namespace tap::communication::serial;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::hero;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
-using namespace aruwsrc::algorithms::transforms;
-using namespace aruwsrc::hero;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -135,10 +135,51 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
 MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
     &voltageSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
@@ -634,6 +675,7 @@ void setDefaultHeroCommands()
 void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
