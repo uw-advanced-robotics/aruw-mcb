@@ -61,8 +61,8 @@ public:
               &turretMCBCanCommBus2,
               nullptr,
               nullptr),
-          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1)
-              turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
+          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
+          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           chassisIsm330()
     {

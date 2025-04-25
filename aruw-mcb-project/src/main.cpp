@@ -130,6 +130,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
+#ifdef TARGET_BALSTD
+            PROFILE(drivers->profiler, drivers->chassisIsm330.periodicImuUpdate, ());
+#endif
+
 #ifdef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
