@@ -63,10 +63,11 @@ void WristSubsystem::refresh()
 {
     float outPitch =
         pidPitch.runController(setpointPitch - getPitch(), encoderPitch.getVelocity(), 2.0f);
-    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f); //todo ks
+    float outYaw =
+        pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
 
     float outLeft = ratio * outYaw + outPitch;
-    float outRight = ratio * outYaw - outPitch;  // todo derived from info in notion, double check 
+    float outRight = ratio * outYaw - outPitch;  // todo derived from info in notion, double check
     motorLeft.setDesiredOutput(outLeft + kS);
     motorRight.setDesiredOutput(outRight + kS);
 }
