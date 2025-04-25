@@ -27,6 +27,8 @@ WristSubsystem::WristSubsystem(
     tap::Drivers *drivers,
     tap::motor::MotorInterface &motorLeft,
     tap::motor::MotorInterface &motorRight,
+    tap::encoder::EncoderInterface &encoderPitch,
+    tap::encoder::EncoderInterface &encoderYaw,
     tap::algorithms::SmoothPidConfig configPitch,
     tap::algorithms::SmoothPidConfig configYaw,
     float ratio,
@@ -35,6 +37,8 @@ WristSubsystem::WristSubsystem(
     : tap::control::Subsystem(drivers),
       motorLeft(motorLeft),
       motorRight(motorRight),
+      encoderPitch(encoderPitch),
+      encoderYaw(encoderYaw),
       pidPitch(configPitch),
       pidYaw(configYaw),
       ratio(ratio),
@@ -45,9 +49,9 @@ WristSubsystem::WristSubsystem(
     setpointYaw = 0;
 }
 
-float WristSubsystem::getPitch() { return 0.0; }  // todo logic
+float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappedValue(); }
 
-float WristSubsystem::getYaw() { return 0.0; }
+float WristSubsystem::getYaw() { return encoderYaw.getPosition().getUnwrappedValue(); }
 
 bool WristSubsystem::atSetpoint()
 {
@@ -55,7 +59,17 @@ bool WristSubsystem::atSetpoint()
            tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
 }
 
-void WristSubsystem::refresh() {}
+void WristSubsystem::refresh()
+{
+    float outPitch =
+        pidPitch.runController(setpointPitch - getPitch(), encoderPitch.getVelocity(), 2.0f);
+    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f); //todo ks
+
+    float outLeft = ratio * outYaw + outPitch;
+    float outRight = ratio * outYaw - outPitch;  // todo derived from info in notion, double check 
+    motorLeft.setDesiredOutput(outLeft + kS);
+    motorRight.setDesiredOutput(outRight + kS);
+}
 
 void WristSubsystem::refreshSafeDisconnect()
 {

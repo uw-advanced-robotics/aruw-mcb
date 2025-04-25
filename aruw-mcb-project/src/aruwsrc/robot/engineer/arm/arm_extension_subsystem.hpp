@@ -32,13 +32,6 @@ namespace engineer
 {
 class ArmExtensionSubsystem : public LinearJointInterface
 {
-private:
-    tap::algorithms::SmoothPid pid;
-    tap::motor::MotorInterface &motors;
-    float radius;
-    // Constant added to output to overcome static friction
-    float kS;
-
 public:
     ArmExtensionSubsystem(
         tap::Drivers *drivers,
@@ -57,6 +50,13 @@ public:
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
+
+private:
+    tap::algorithms::SmoothPid pid;
+    tap::motor::MotorInterface &motors;
+    float radius;
+    // Constant added to output to overcome static friction
+    float kS;
 };
 
 }  // namespace engineer

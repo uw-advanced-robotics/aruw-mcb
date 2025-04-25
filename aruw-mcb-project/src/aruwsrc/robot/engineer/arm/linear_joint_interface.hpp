@@ -30,19 +30,6 @@ namespace engineer
 {
 class LinearJointInterface : public tap::control::Subsystem
 {
-protected:
-    float setpoint;
-    const float epsilon, minSetpoint, maxSetpoint;
-    LinearJointInterface(
-        tap::Drivers *drivers,
-        float minPosition,
-        float maxSetpoint,
-        float epsilon = 1)
-        : Subsystem(drivers),
-          epsilon(epsilon),
-          minSetpoint(minPosition),
-          maxSetpoint(maxSetpoint){};
-
 public:
     virtual void setSetpoint(float setpoint)
     {
@@ -56,6 +43,19 @@ public:
     {
         return tap::algorithms::compareFloatClose(setpoint, getPosition(), epsilon);
     };
+
+protected:
+    float setpoint;
+    const float epsilon, minSetpoint, maxSetpoint;
+    LinearJointInterface(
+        tap::Drivers *drivers,
+        float minPosition,
+        float maxSetpoint,
+        float epsilon = 0.001)
+        : Subsystem(drivers),
+          epsilon(epsilon),
+          minSetpoint(minPosition),
+          maxSetpoint(maxSetpoint){};
 };
 }  // namespace engineer
 }  // namespace aruwsrc

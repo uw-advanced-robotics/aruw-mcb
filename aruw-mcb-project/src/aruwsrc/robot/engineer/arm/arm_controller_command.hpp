@@ -34,10 +34,10 @@ using namespace aruwsrc::engineer;
 /**
  * A command that moves the engineer arm based on the control operator interface.
  */
-class JointControllerCommand : public tap::control::Command
+class ArmControllerCommand : public tap::control::Command
 {
 public:
-    JointControllerCommand(
+    ArmControllerCommand(
         ArmLiftSubsystem &lift,
         ArmExtensionSubsystem &extension,
         JointSubsystem &wristRoll,

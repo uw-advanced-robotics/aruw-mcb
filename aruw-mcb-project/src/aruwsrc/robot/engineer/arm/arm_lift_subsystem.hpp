@@ -33,19 +33,13 @@ namespace engineer
 {
 class ArmLiftSubsystem : public LinearJointInterface
 {
-private:
-    tap::algorithms::SmoothPid pidPos, pidAlign;
-    tap::motor::MotorInterface &motorLeft, &motorRight;
-    float radius;
-    // Constant added to output to overcome static friction
-    float kS;
-
 public:
     ArmLiftSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorLeft,
         tap::motor::MotorInterface &motorRight,
-        tap::algorithms::SmoothPidConfig &config,
+        tap::algorithms::SmoothPidConfig &configPos,
+        tap::algorithms::SmoothPidConfig &configAlign,
         float radius,
         float minSetpoint,
         float maxSetpoint,
@@ -65,6 +59,13 @@ public:
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
+
+private:
+    tap::algorithms::SmoothPid pidPos, pidAlign;
+    tap::motor::MotorInterface &motorLeft, &motorRight;
+    float radius;
+    // Constant added to output to overcome static friction
+    float kS;
 };
 
 }  // namespace engineer

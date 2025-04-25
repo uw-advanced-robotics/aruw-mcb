@@ -23,7 +23,7 @@ namespace aruwsrc::control::engineer
 {
 using namespace aruwsrc::engineer;
 
-JointControllerCommand::JointControllerCommand(
+ArmControllerCommand::ArmControllerCommand(
     ArmLiftSubsystem &lift,
     ArmExtensionSubsystem &extension,
     JointSubsystem &wristRoll,
@@ -52,9 +52,9 @@ JointControllerCommand::JointControllerCommand(
     addSubsystemRequirement(&wrist);
 }
 
-void JointControllerCommand::initialize() {}
+void ArmControllerCommand::initialize() {}
 
-void JointControllerCommand::execute()
+void ArmControllerCommand::execute()
 {
     // Get the desired velocities from the operator interface
     float liftVelocity = operatorInterface->getArmLiftVelocity() * liftScalingFactor;

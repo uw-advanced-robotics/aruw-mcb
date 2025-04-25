@@ -36,12 +36,6 @@ namespace engineer
  */
 class JointSubsystem : public LinearJointInterface
 {
-private:
-    tap::algorithms::SmoothPid pid;
-    tap::motor::MotorInterface &motor;
-    // Constant added to output to overcome static friction
-    float kS;
-
 public:
     JointSubsystem(
         tap::Drivers *drivers,
@@ -57,6 +51,12 @@ public:
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
+
+private:
+    tap::algorithms::SmoothPid pid;
+    tap::motor::MotorInterface &motor;
+    // Constant added to output to overcome static friction
+    float kS;
 };
 
 }  // namespace engineer

@@ -34,20 +34,13 @@ namespace engineer
 {
 class WristSubsystem : public tap::control::Subsystem
 {
-private:
-    tap::motor::MotorInterface &motorLeft, &motorRight;
-    tap::algorithms::SmoothPid pidPitch, pidYaw;
-    float ratio;
-    // Constant added to output to overcome static friction
-    float kS;
-    const float epsilon;
-    float setpointPitch, setpointYaw;
-
 public:
     WristSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorLeft,
         tap::motor::MotorInterface &motorRight,
+        tap::encoder::EncoderInterface &encoderPitch,
+        tap::encoder::EncoderInterface &encoderYaw,
         tap::algorithms::SmoothPidConfig configPitch,
         tap::algorithms::SmoothPidConfig configYaw,
         float ratio,
@@ -71,6 +64,16 @@ public:
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
+
+private:
+    tap::motor::MotorInterface &motorLeft, &motorRight;
+    tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
+    tap::algorithms::SmoothPid pidPitch, pidYaw;
+    float ratio;
+    // Constant added to output to overcome static friction
+    float kS;
+    const float epsilon;
+    float setpointPitch, setpointYaw;
 };
 }  // namespace engineer
 }  // namespace aruwsrc
