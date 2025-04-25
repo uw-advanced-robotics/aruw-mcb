@@ -20,6 +20,7 @@
 #ifndef ENGINEER_CHASSIS_CONSTANTS_HPP_
 #define ENGINEER_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
 #include "modm/math/filter/pid.hpp"
@@ -60,7 +61,7 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
+static constexpr float VELOCITY_PID_KP = 10.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
@@ -74,6 +75,14 @@ static constexpr float VELOCITY_PID_KS = 0.0;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the

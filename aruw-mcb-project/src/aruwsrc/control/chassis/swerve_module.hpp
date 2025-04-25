@@ -32,13 +32,9 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
-using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
 #else
 #include "tap/motor/dji_motor.hpp"
-using Motor = tap::motor::DjiMotor;
 #endif
-
-using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
@@ -51,6 +47,14 @@ namespace chassis
  */
 class SwerveModule
 {
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+    using Motor = tap::motor::DjiMotor;
+#endif
+
+    using Wheel = aruwsrc::algorithms::Wheel;
+
 public:
     SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& swerveModuleConfig);
 

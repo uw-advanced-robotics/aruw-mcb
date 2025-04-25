@@ -26,6 +26,9 @@
 
 #include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
+#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
@@ -62,6 +65,59 @@ tap::motor::DjiMotor storageLiftMotor(
 LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
+
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 
@@ -71,6 +127,11 @@ CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInt
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
+
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &chassis);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -101,15 +162,20 @@ tap::control::HoldCommandMapping leftDownRightDown(
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems() { cubeLift.initialize(); }
+void initializeSubsystems() { chassis.initialize(); }
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&cubeLift);
+    drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *) {}
+void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
+{
+    chassis.setDefaultCommand(&chassisDriveCommand);
+}
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
