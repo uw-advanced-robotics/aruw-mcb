@@ -72,10 +72,6 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    if (turretMCB != nullptr)
-    {
-        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
-    }
 }
 
 float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
