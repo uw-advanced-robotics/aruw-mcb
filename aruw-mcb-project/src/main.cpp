@@ -40,6 +40,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -127,6 +128,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
 #endif
 
+#ifdef TARGET_TESTBED
+            PROFILE(drivers->profiler, drivers->lite.sendData, ());
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
@@ -173,6 +178,9 @@ static void initializeIo(Drivers *drivers)
     drivers->chassisMcbLite.initialize();
     drivers->turretMajorMcbLite.initialize();
 #endif
+#ifdef TARGET_TESTBED
+    drivers->lite.initialize();
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -193,6 +201,10 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_SENTRY_HYDRA
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorMcbLite.updateSerial();
+#endif
+
+#ifdef TARGET_TESTBED
+    drivers->lite.updateSerial();
 #endif
 }
 

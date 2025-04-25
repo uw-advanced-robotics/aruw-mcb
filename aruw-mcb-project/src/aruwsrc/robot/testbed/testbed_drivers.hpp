@@ -22,6 +22,8 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #else
@@ -37,7 +39,12 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
+    Drivers()
+        : tap::Drivers(),
+          controlOperatorInterface(this),
+          lite(this, tap::communication::serial::Uart::UartPort::Uart7)
+    {
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
@@ -45,6 +52,8 @@ public:
 public:
     control::ControlOperatorInterface controlOperatorInterface;
 #endif
+
+    aruwsrc::virtualMCB::MCBLite lite;
 
 public:
 };  // class aruwsrc::TestbedDrivers
