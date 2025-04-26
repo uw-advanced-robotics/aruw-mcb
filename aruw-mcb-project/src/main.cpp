@@ -132,7 +132,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
-            // PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
@@ -157,7 +157,7 @@ static void initializeIo(Drivers *drivers)
     drivers->refSerial.initialize();
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
-    // drivers->visionCoprocessor.initializeCV();
+    drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
@@ -194,7 +194,7 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_ECLIPSE)
-    // drivers->visionCoprocessor.updateSerial();
+    drivers->visionCoprocessor.updateSerial();
 #endif
 
 #ifdef TARGET_SENTRY_ECLIPSE
