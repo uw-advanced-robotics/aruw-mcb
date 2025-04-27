@@ -135,7 +135,8 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -223,8 +224,8 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
         drivers->mpu6500.getImuState() !=
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
-        // tap::buzzer::playNote(&drivers->pwm, 1000);
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
+        tap::buzzer::playNote(&drivers->pwm, 1000);
+        // tap::buzzer::silenceBuzzer(&drivers->pwm);
     }
     else
     {
