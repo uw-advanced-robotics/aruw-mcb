@@ -64,13 +64,13 @@ public:
 
     enum CanIDs
     {
+        TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
         TURRET_STATUS_RX_CAN_ID = 0x1fa,
         X_AXIS_RX_CAN_ID = 0x1fb,
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
