@@ -59,7 +59,7 @@ static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator ove
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR7,
+    .agitatorMotorId = tap::motor::MOTOR3,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
