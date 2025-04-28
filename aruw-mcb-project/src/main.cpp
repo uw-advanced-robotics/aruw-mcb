@@ -40,6 +40,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
