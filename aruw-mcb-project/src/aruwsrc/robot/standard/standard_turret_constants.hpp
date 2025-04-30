@@ -66,9 +66,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 #if defined(TARGET_STANDARD_NULL)
 // Actual CAD value is 55.76, decreased for balls in hopper
-static constexpr float TURRET_CG_X = 35.76;
-static constexpr float TURRET_CG_Z = 52.25;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -11'500;
+static constexpr float TURRET_CG_X = 33.83;
+static constexpr float TURRET_CG_Z = 26.68;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
