@@ -33,7 +33,7 @@
 namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
 namespace aruwsrc::drone
