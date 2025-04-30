@@ -97,7 +97,7 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
 static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
 static constexpr float AUTOROTATION_PID_KD = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
