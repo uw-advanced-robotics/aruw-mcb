@@ -83,10 +83,8 @@ bool CubeStorageSubsystem::isLimitSwitched()
 
 void CubeStorageSubsystem::refresh()
 {
-    
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
-        
         if (!trigger.isTriggered())
         {
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;

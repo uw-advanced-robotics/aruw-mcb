@@ -54,9 +54,9 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
 
 static constexpr float MANUAL_MOVE_SPEED = 10;  // TODO: choose value alter
 
-static constexpr float ONE_CUBE_SETPOINT = 10;
-static constexpr float TWO_CUBE_SETPOINT = 20;
-static constexpr float THREE_CUBE_SETPOINT = 30;  // TODO: update correct values
+static constexpr float ONE_CUBE_SETPOINT = 420;
+static constexpr float TWO_CUBE_SETPOINT = 210;
+static constexpr float THREE_CUBE_SETPOINT = 0;  // TODO: update correct values
 
 }  // namespace aruwsrc::robot::engineer
 #endif
