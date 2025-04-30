@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,24 +21,24 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
-#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#ifndef TAPROOT_VOLTAGE_SENSOR_INTERFACE_HPP_
+#define TAPROOT_VOLTAGE_SENSOR_INTERFACE_HPP_
 
-#include <gmock/gmock.h>
+#include "tap/communication/sensors/sensor_interface.hpp"
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-
-namespace tap::mock
+namespace tap::communication::sensors::voltage
 {
-class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
+/**
+ * Interface for a generic voltage sensor.
+ */
+class VoltageSensorInterface : public tap::communication::sensors::SensorInterface
 {
 public:
-    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
-    MOCK_METHOD(modm::Vector2f, getCurrentVelocity2D, (), (const override));
-    MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
-    MOCK_METHOD(float, getYaw, (), (const override));
-    MOCK_METHOD(void, overrideOdometryPosition, (float positionX, float positionY), (override));
+    /**
+     * @return The voltage read by the voltage sensor, in millivolts.
+     */
+    virtual float getVoltageMv() const = 0;
 };
-}  // namespace tap::mock
+}  // namespace tap::communication::sensors::voltage
 
-#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#endif  // TAPROOT_CURRENT_SENSOR_INTERFACE_HPP_
