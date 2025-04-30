@@ -27,6 +27,10 @@ namespace aruwsrc::control
  */
 void HomingCommand::initialize() { subsystem.startCalibrate(); }
 
+void HomingCommand::execute() {}
+
 bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
+
+void HomingCommand::end(bool) {}
 
 }  // namespace aruwsrc::control
