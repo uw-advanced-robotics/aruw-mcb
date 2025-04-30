@@ -144,4 +144,19 @@ void ChassisKFOdometry::updateMeasurementCovariance(
         velocityCovariance;
 }
 
+void ChassisKFOdometry::overrideOdometryPosition(float positionX, float positionY)
+{
+    auto currKFState = kf.getStateVectorAsMatrix();
+
+    float newState[int(OdomState::NUM_STATES)] = {
+        positionX,
+        currKFState[int(OdomState::VEL_X)],
+        currKFState[int(OdomState::ACC_X)],
+        positionY,
+        currKFState[int(OdomState::VEL_Y)],
+        currKFState[int(OdomState::ACC_Y)]};
+
+    kf.init(newState);
+}
+
 }  // namespace aruwsrc::algorithms::odometry

@@ -19,6 +19,7 @@
 #ifndef ARUCO_RESET_SUBSYSTEM_HPP_
 #define ARUCO_RESET_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
@@ -30,6 +31,7 @@ namespace aruwsrc::control::aruco
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::serial;
 using namespace aruwsrc::algorithms::transforms;
+using namespace tap::algorithms::odometry;
 
 class ArucoResetSubsystem : public tap::control::Subsystem
 {
@@ -37,7 +39,7 @@ public:
     ArucoResetSubsystem(
         tap::Drivers* drivers,
         VisionCoprocessor& vision,
-        DeadwheelChassisKFOdometry& odometry,
+        Odometry2DInterface& odometry,
         TransformerInterface& transformer);
 
     void initialize() override{};
@@ -48,7 +50,7 @@ public:
 
 private:
     VisionCoprocessor& vision;
-    DeadwheelChassisKFOdometry& odometry;
+    Odometry2DInterface& odometry;
     TransformerInterface& transformer;
 
     // Higher value here means we trust AruCo measurements more
