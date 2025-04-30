@@ -81,16 +81,14 @@ bool CubeStorageSubsystem::isLimitSwitched()
     return !drivers->digital.read(CUBELIFT_LIMITSWITCH_PORT);
 }
 
-//float testSwitch = 10;
 void CubeStorageSubsystem::refresh()
 {
     
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
         
-        if (trigger.isTriggered())
+        if (!trigger.isTriggered())
         {
-            //testSwitch+=100;
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             motor.getEncoder()->resetEncoderValue();
             moveMotor(0);

@@ -121,8 +121,6 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 
-// HomingCommand cubeHomingCommand(cubeLift);
-
 CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInterface);
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
