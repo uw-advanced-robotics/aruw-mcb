@@ -47,15 +47,15 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
 
 void SentryKFOdometry2DSubsystem::refresh() { update(); }
 
-void SentryKFOdometry2DSubsystem::overrideOdometryPosition(const modm::Vector2f &newPos)
+void SentryKFOdometry2DSubsystem::overrideOdometryPosition(const float positionX, const float positionY)
 {
     auto currKFState = this->kf.getStateVectorAsMatrix();
 
     float newState[int(DeadwheelChassisKFOdometry::OdomState::NUM_STATES)] = {
-        newPos.x,
+        positionX,
         currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_X)],
         currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_X)],
-        newPos.y,
+        positionY,
         currKFState[int(DeadwheelChassisKFOdometry::OdomState::VEL_Y)],
         currKFState[int(DeadwheelChassisKFOdometry::OdomState::ACC_Y)]};
 

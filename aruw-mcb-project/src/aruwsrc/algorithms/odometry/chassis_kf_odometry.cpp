@@ -144,7 +144,7 @@ void ChassisKFOdometry::updateMeasurementCovariance(
         velocityCovariance;
 }
 
-void ChassisKFOdometry::overrideOdometryPosition(float positionX, float positionY)
+void ChassisKFOdometry::overrideOdometryPosition(const float positionX, const float positionY)
 {
     auto currKFState = kf.getStateVectorAsMatrix();
 

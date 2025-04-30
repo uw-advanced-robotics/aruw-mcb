@@ -71,7 +71,7 @@ public:
 
     void update();
 
-    void overrideOdometryPosition(float positionX, float positionY);
+    void overrideOdometryPosition(const float positionX, const float positionY);
 
 protected:
     enum class OdomState
