@@ -169,7 +169,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-    tap::motor::DjiMotor leftFrontChassisMotor(
+tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
@@ -212,6 +212,7 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
