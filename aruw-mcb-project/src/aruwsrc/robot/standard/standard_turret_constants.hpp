@@ -133,9 +133,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 30.0f,
-    .ki = 0.6f,
-    .kd = 0.2f,
+    .kp = 9.0f,
+    .ki = 0.0f,
+    .kd = 0.5f,
     .maxICumulative = 0.5f,
     .maxOutput = 30.0f,
     .tQDerivativeKalman = 1.0f,
