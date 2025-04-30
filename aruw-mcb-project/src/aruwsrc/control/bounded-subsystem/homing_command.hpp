@@ -40,11 +40,11 @@ public:
 
     void initialize() override;
 
-    void execute() override;
+    void execute() override {};
 
     bool isFinished() const override;
 
-    void end(bool) override;
+    void end(bool) override {};
 
     const char* getName() const override { return "Homing Command"; }
 
