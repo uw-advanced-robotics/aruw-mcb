@@ -19,7 +19,6 @@
 #ifndef ARUCO_RESET_SUBSYSTEM_HPP_
 #define ARUCO_RESET_SUBSYSTEM_HPP_
 
-#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
