@@ -29,7 +29,10 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     aruwsrc::control::TriggerInterface& trigger,
     uint64_t length)
     : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
-      motor(storageLiftMotor){ calibrationState = CalibrationState::AWAITING_CALIBRATE; };
+      motor(storageLiftMotor)
+{
+    calibrationState = CalibrationState::AWAITING_CALIBRATE;
+};
 
 void CubeStorageSubsystem::initialize()
 {
@@ -96,9 +99,7 @@ void CubeStorageSubsystem::refresh()
         {
             moveTowardLowerBound();
         }
-        
     }
-    
 
     if (isPIDControl)
     {

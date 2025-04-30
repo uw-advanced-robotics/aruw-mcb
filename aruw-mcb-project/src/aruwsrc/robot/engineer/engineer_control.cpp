@@ -175,7 +175,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    //chassis.setDefaultCommand(&chassisDriveCommand);
+    // chassis.setDefaultCommand(&chassisDriveCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
