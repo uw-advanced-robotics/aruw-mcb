@@ -46,7 +46,8 @@ public:
 
     void end(bool) override;
 
-    const char* getName() const override {return "Homing Command"; }
+    const char* getName() const override { return "Homing Command"; }
+
 protected:
     aruwsrc::control::BoundedSubsystemInterface& subsystem;
 };  // class HomingCommand
