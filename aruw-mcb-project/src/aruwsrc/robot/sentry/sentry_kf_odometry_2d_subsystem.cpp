@@ -47,7 +47,9 @@ SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
 
 void SentryKFOdometry2DSubsystem::refresh() { update(); }
 
-void SentryKFOdometry2DSubsystem::overrideOdometryPosition(const float positionX, const float positionY)
+void SentryKFOdometry2DSubsystem::overrideOdometryPosition(
+    const float positionX,
+    const float positionY)
 {
     auto currKFState = this->kf.getStateVectorAsMatrix();
 
