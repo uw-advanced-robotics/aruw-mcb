@@ -232,6 +232,7 @@ public:
             float y;
             float z;
             float radius;
+            uint16_t robotType;
         } modm_packed;
 
         RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct
