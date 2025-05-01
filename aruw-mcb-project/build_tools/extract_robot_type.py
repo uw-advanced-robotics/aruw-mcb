@@ -20,9 +20,8 @@ from SCons.Script import *
 from build_tools.parse_args import USAGE
 
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
-VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
+VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
                         "STANDARD_ORION",
-                        "STANDARD_CYGNUS",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_ECLIPSE",
@@ -33,9 +32,8 @@ VALID_ROBOT_TYPES   = [ "STANDARD_SPIDER",
                         "MOTOR_TESTER" ]
 
 ROBOT_CLASS = {
-    "STANDARD_SPIDER": "standard",
-    "STANDARD_ORION": "standard",
-    "STANDARD_CYGNUS": "standard",
+    "STANDARD_NULL": "standard",
+    "STANDARD_ORION": "old_standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_ECLIPSE": "sentry",

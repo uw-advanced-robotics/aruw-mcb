@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,17 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AGITATOR_CONSTANTS_HPP_
-#define AGITATOR_CONSTANTS_HPP_
+#include "old_standard_turret_subsystem.hpp"
 
-#if defined(ALL_STANDARDS)
-#include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
-#elif defined(OLD_STANDARDS)
-#include "aruwsrc/robot/old_standard/old_standard_agitator_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE)
-#include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
-#include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
-#endif
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-#endif  // AGITATOR_CONSTANTS_HPP_
+namespace aruwsrc::control::turret
+{
+float OldStandardTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+
+float OldStandardTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
+
+uint32_t OldStandardTurretSubsystem::getLastMeasurementTimeMicros() const
+{
+    return getTurretMCB()->getIMUDataTimestamp();
+}
+
+}  // namespace aruwsrc::control::turret

@@ -23,6 +23,12 @@
 
 using namespace tap::display;
 
+#ifdef SSH1106_OLED
+#define ENTRIES 7
+#else
+#define ENTRIES 14
+#endif
+
 namespace aruwsrc
 {
 namespace display
@@ -42,8 +48,8 @@ MainMenu::MainMenu(
       cvMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack),
       hardwareTestMenu(stack, drivers),
-      motorMenu(stack, drivers),
-      commandSchedulerMenu(stack, drivers),
+      motorMenu(stack, drivers, ENTRIES),
+      commandSchedulerMenu(stack, drivers, ENTRIES),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500),
       turretStatusMenuBus1(stack, turretMCBCanCommBus1),

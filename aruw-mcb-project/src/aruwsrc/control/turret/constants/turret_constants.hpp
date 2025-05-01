@@ -26,6 +26,8 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
+#elif defined(OLD_STANDARDS)
+#include "aruwsrc/robot/old_standard/old_standard_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 // necessary to satiate vision_coprocessor and world turret pid controller which relies on this
 // header for number of turrets and gravity compensation values

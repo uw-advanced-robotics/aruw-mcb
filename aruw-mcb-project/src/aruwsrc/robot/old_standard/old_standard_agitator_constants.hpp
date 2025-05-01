@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_AGITATOR_CONSTANTS_HPP_
-#define STANDARD_AGITATOR_CONSTANTS_HPP_
+#ifndef OLD_STANDARD_AGITATOR_CONSTANTS_HPP_
+#define OLD_STANDARD_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
@@ -40,7 +40,7 @@ namespace aruwsrc::control::agitator::constants
 /// How much extra heat must be available beyond how much it takes to fire the next shot
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 
 // position PID terms
 // PID terms for standard
@@ -59,7 +59,7 @@ static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator ove
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR3,
+    .agitatorMotorId = tap::motor::MOTOR7,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
@@ -90,9 +90,9 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 #else
-#error "Attempted to include standard_agitator_constants.hpp for nonstandard robot target."
+#error "Attempted to include old_standard_agitator_constants.hpp for nonstandard robot target."
 #endif
 
 }  // namespace aruwsrc::control::agitator::constants
 
-#endif  // STANDARD_AGITATOR_CONSTANTS_HPP_
+#endif  // OLD_STANDARD_AGITATOR_CONSTANTS_HPP_

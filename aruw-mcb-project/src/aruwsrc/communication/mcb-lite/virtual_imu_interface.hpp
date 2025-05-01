@@ -51,7 +51,7 @@ public:
     float getAx() const override { return Ax; }
     float getAy() const override { return Ay; }
     float getAz() const override { return Az; }
-    float getTemp() const override { return temperature; }
+    float getTemp() const { return temperature; }
     Mpu6500::ImuState getImuState() { return imuState; }
     virtual inline const char* getName() const { return "Virtual MPU6500"; }
     void requestCalibration() { sendIMUCalibrationMessage = true; }

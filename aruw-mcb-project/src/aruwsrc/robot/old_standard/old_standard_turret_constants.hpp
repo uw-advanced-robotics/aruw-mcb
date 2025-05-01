@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STANDARD_TURRET_CONSTANTS_HPP_
-#define STANDARD_TURRET_CONSTANTS_HPP_
+#ifndef OLD_STANDARD_TURRET_CONSTANTS_HPP_
+#define OLD_STANDARD_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -44,10 +44,10 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4050,
+    .startEncoderValue = 1365,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -55,27 +55,27 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 6901,
-    .minAngle = modm::toRadian(-18),
-    .maxAngle = modm::toRadian(28),
+    .startEncoderValue = 4705,
+    .minAngle = modm::toRadian(-42),
+    .maxAngle = modm::toRadian(25),
     .limitMotorAngles = true,
 };
 #else
-#error "Attempted to include standard_turret_constants.hpp for nonstandard target."
+#error "Attempted to include old_standard_turret_constants.hpp for nonstandard target."
 #endif
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 // Actual CAD value is 55.76, decreased for balls in hopper
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr float TURRET_CG_X = 35.76;
+static constexpr float TURRET_CG_Z = 52.25;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -11'500;
 #else
-#error "Attempted to include standard_turret_constants.hpp for nonstandard target."
+#error "Attempted to include old_standard_turret_constants.hpp for nonstandard target."
 #endif
 
 namespace world_rel_turret_imu
 {
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10.0f,
     .ki = 0.0f,
@@ -92,7 +92,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
     .kp = 25.0f,
-    .ki = 0.0f,
+    .ki = 0.15f,
     .kd = 0.0f,
     .maxICumulative = 0.6f,
     .maxOutput = 60.0f,
@@ -105,7 +105,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 25'000.0f,
+    .kp = 28'000.0f,
     .ki = 100.0f,
     .kd = 0.0f,
     .maxICumulative = 2'000.0f,
@@ -133,9 +133,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 9.0f,
-    .ki = 0.0f,
-    .kd = 0.5f,
+    .kp = 30.0f,
+    .ki = 0.6f,
+    .kd = 0.2f,
     .maxICumulative = 0.5f,
     .maxOutput = 30.0f,
     .tQDerivativeKalman = 1.0f,
@@ -147,7 +147,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 10'000.0f,
+    .kp = 18'500.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -160,16 +160,16 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 #else
-#error "Attempted to include standard_turret_constants.hpp for nonstandard target."
+#error "Attempted to include old_standard_turret_constants.hpp for nonstandard target."
 #endif
 }  // namespace world_rel_turret_imu
 
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 25'000.0f,
+    .kp = 200'535.2f,
     .ki = 0.0f,
-    .kd = 5'000.0f,
+    .kd = 10'886.2f,
     .maxICumulative = 0.0f,
     .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
@@ -183,11 +183,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 25'000.0f,
+    .kp = 229'183.1f,
     .ki = 0.0f,
-    .kd = 5'000.2f,
+    .kd = 10'886.2f,
     .maxICumulative = 0.0f,
     .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
@@ -199,9 +199,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 80'000.0f,
+    .kp = 229'183.1f,
     .ki = 0.0f,
-    .kd = 7'000.0f,
+    .kd = 7'448.5f,
     .maxICumulative = 0.0f,
     .maxOutput = DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
@@ -211,10 +211,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
 #else
-#error "Attempted to include standard_turret_constants.hpp for nonstandard target."
+#error "Attempted to include old_standard_turret_constants.hpp for nonstandard target."
 #endif
 }  // namespace chassis_rel
 }  // namespace aruwsrc::control::turret
 
-#endif  // STANDARD_TURRET_CONSTANTS_HPP_
+#endif  // OLD_STANDARD_TURRET_CONSTANTS_HPP_

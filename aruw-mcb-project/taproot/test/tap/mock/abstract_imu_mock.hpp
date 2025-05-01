@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -21,28 +21,34 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
-#define TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#ifndef TAPROOT_ABSTRACT_IMU_MOCK_HPP_
+#define TAPROOT_ABSTRACT_IMU_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 namespace tap::mock
 {
-class Odometry2DInterfaceMock : public algorithms::odometry::Odometry2DInterface
+class AbstractImuMock : public tap::communication::sensors::imu::AbstractIMU
 {
 public:
-    MOCK_METHOD(modm::Location2D<float>, getCurrentLocation2D, (), (const override));
-    MOCK_METHOD(modm::Vector2f, getCurrentVelocity2D, (), (const override));
-    MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
+    AbstractImuMock();
+    virtual ~AbstractImuMock();
+
+    MOCK_METHOD(const char *, getName, (), (const override));
+    MOCK_METHOD(float, getTemp, (), (const override));
+    MOCK_METHOD(float, getAx, (), (const override));
+    MOCK_METHOD(float, getAy, (), (const override));
+    MOCK_METHOD(float, getAz, (), (const override));
+    MOCK_METHOD(float, getGx, (), (const override));
+    MOCK_METHOD(float, getGy, (), (const override));
+    MOCK_METHOD(float, getGz, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
-    MOCK_METHOD(
-        void,
-        overrideOdometryPosition,
-        (const float positionX, const float positionY),
-        (override));
+    MOCK_METHOD(float, getPitch, (), (const override));
+    MOCK_METHOD(float, getRoll, (), (const override));
+    MOCK_METHOD(float, getAccelerationSensitivity, (), (const override));
 };
 }  // namespace tap::mock
 
-#endif  // TAPROOT_ODOMETRY_2D_INTERFACE_MOCK_HPP_
+#endif  // TAPROOT_ABSTRACT_IMU_MOCK_HPP_

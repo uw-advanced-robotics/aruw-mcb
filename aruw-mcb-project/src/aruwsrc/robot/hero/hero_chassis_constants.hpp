@@ -21,6 +21,7 @@
 #define HERO_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
 #include "modm/math/filter/pid.hpp"
@@ -44,6 +45,9 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {100, 7'000},
     {120, 8'000},
 };
+
+static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
+    tap::algorithms::transforms::Transform(0.1426, 0.14385, 0, M_PI_2, 0, 0);
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,

@@ -671,6 +671,7 @@ void setDefaultHeroCommands()
 void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);

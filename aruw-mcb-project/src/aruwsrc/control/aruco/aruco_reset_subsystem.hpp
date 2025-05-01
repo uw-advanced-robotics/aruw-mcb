@@ -30,6 +30,7 @@ namespace aruwsrc::control::aruco
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::serial;
 using namespace aruwsrc::algorithms::transforms;
+using namespace tap::algorithms::odometry;
 
 class ArucoResetSubsystem : public tap::control::Subsystem
 {
@@ -37,7 +38,7 @@ public:
     ArucoResetSubsystem(
         tap::Drivers* drivers,
         VisionCoprocessor& vision,
-        DeadwheelChassisKFOdometry& odometry,
+        Odometry2DInterface& odometry,
         TransformerInterface& transformer);
 
     void initialize() override{};
@@ -48,7 +49,7 @@ public:
 
 private:
     VisionCoprocessor& vision;
-    DeadwheelChassisKFOdometry& odometry;
+    Odometry2DInterface& odometry;
     TransformerInterface& transformer;
 
     // Higher value here means we trust AruCo measurements more
