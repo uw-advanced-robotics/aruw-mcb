@@ -66,13 +66,13 @@ public:
 
     enum CanIDs
     {
+        TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
         TURRET_STATUS_RX_CAN_ID = 0x1fa,
         X_AXIS_RX_CAN_ID = 0x1fb,
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
@@ -119,8 +119,13 @@ public:
      */
     mockable inline float getGy() const override
     {
+#ifdef TARGET_STANDARD_NULL
+        return -static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
+               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+#else
         return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
                tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+#endif
     }
 
     /**
@@ -130,7 +135,11 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
+#ifdef TARGET_STANDARD_NULL
+        return -lastCompleteImuData.pitch - M_TWOPI * static_cast<float>(pitchRevolutions);
+#else
         return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
+#endif
     }
 
     /**
