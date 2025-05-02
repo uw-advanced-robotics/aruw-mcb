@@ -157,6 +157,9 @@ static void initializeIo(Drivers *drivers)
     drivers->pwm.init();
     drivers->digital.init();
     drivers->leds.init();
+#if defined(TARGET_BALSTD)
+    modm::delay_ms(6500);
+#endif
     drivers->can.initialize();
     drivers->errorController.init();
     drivers->remote.initialize();
