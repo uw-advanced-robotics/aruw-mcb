@@ -76,7 +76,7 @@ public:
         float gearRatio = 1,
         uint16_t encoderHomePosition = 0);  // 1750
 
-    void initialize() override {};
+    void initialize() override{};
 
     void alignWith(EncoderInterface* other) override;
 

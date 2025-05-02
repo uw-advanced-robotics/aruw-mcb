@@ -25,6 +25,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
+#include "tap/communication/sensors/encoder/multi_encoder.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/motor_interface.hpp"
 
@@ -126,7 +127,8 @@ public:
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
-        int32_t encoderHomePosition = 0);
+        int32_t encoderHomePosition = 0,
+        tap::encoder::EncoderInterface* externalEncoder = nullptr);
 
     mockable ~Tmotor_AK809();
 
@@ -134,7 +136,7 @@ public:
 
     tap::encoder::EncoderInterface* getEncoder() const override
     {
-        return const_cast<Encoder*>(&this->internalEncoder);
+        return const_cast<tap::encoder::MultiEncoder<2>*>(&this->encoder);
     }
 
     /**
@@ -248,6 +250,8 @@ private:
 #else
     Encoder internalEncoder;
 #endif
+
+    tap::encoder::MultiEncoder<2> encoder;
 
     tap::arch::MilliTimeout motorDisconnectTimeout;
 

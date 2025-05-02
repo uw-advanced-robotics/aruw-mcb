@@ -40,7 +40,8 @@ Tmotor_AK809::Tmotor_AK809(
     tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
-    int32_t encoderHomePosition)
+    int32_t encoderHomePosition,
+    tap::encoder::EncoderInterface* externalEncoder)
     : CanRxListener(drivers, 0x2900 | static_cast<uint32_t>(desMotorIdentifier), motorCanBus),
       motorName(name),
       drivers(drivers),
@@ -51,7 +52,12 @@ Tmotor_AK809::Tmotor_AK809(
       torque(0),
       fault(TMotorFaultCode::FAULT_CODE_NONE),
       motorInverted(isInverted),
-      internalEncoder(isInverted, GEAR_RATIO, encoderHomePosition)
+      internalEncoder(isInverted, GEAR_RATIO, encoderHomePosition),
+      encoder(
+          {externalEncoder != nullptr ? externalEncoder
+                                      : const_cast<Encoder*>(&this->getInternalEncoder()),
+           externalEncoder != nullptr ? const_cast<Encoder*>(&this->getInternalEncoder())
+                                      : nullptr})
 {
     motorDisconnectTimeout.stop();
 }
