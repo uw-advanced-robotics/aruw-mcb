@@ -76,7 +76,7 @@ public:
         float gearRatio = 1,
         uint16_t encoderHomePosition = 0);  // 1750
 
-    void initialize() override{};
+    void initialize() override {};
 
     void alignWith(EncoderInterface* other) override;
 
@@ -113,9 +113,14 @@ private:
     const uint32_t encoderResolution;
 
     /**
-     * The current encoder position.
+     * The raw position received from the encoder.
      */
     int16_t rawPosition;
+
+    /**
+     * The current encoder position in ticks.
+     */
+    int32_t positionTicks;
 
     /**
      * The encoder position converted into output rotations

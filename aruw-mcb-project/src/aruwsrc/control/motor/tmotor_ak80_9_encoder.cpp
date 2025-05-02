@@ -29,7 +29,7 @@ Tmotor_AK809Encoder::Tmotor_AK809Encoder(
     uint16_t encoderHomePosition)
     : EncoderInterface(),
       encoderResolution(ENC_RESOLUTION),
-      rawPosition(0),
+      positionTicks(0),
       position(tap::algorithms::Angle(0)),
       inverted(isInverted),
       gearRatio(gearRatio),
@@ -53,19 +53,18 @@ void Tmotor_AK809Encoder::processMessage(const modm::can::Message& message)
 
 void Tmotor_AK809Encoder::alignWith(EncoderInterface* other)
 {
-    // TODO !!!!!!
-    // tap::algorithms::WrappedFloat positionDifference = other->getPosition() - position;
-    // float offset = positionDifference.getUnwrappedValue() / static_cast<float>(M_TWOPI) *
-    //                encoderResolution * gearRatio;
-    // this->encoderHomePosition += offset;
-    // this->encoder += offset;
-    // this->position = other->getPosition();
+    tap::algorithms::WrappedFloat positionDifference = other->getPosition() - position;
+    float offset = positionDifference.getWrappedValue() / static_cast<float>(M_TWOPI) *
+                   encoderResolution * gearRatio;
+    this->encoderHomePosition += offset;
+    this->positionTicks += offset;
+    this->position = other->getPosition();
 }
 
 void Tmotor_AK809Encoder::resetEncoderValue()
 {
-    encoderHomePosition = static_cast<uint16_t>(rawPosition) + encoderHomePosition;
-    rawPosition = 0;
+    encoderHomePosition = static_cast<uint16_t>(positionTicks) + encoderHomePosition;
+    positionTicks = 0;
     position.setUnwrappedValue(0);
 }
 
@@ -90,13 +89,14 @@ int16_t Tmotor_AK809Encoder::getShaftRPM() const { return shaftRPM; }
 
 void Tmotor_AK809Encoder::updateEncoderValue(uint16_t encoderActual)
 {
+    rawPosition = encoderActual;
     encoderActual = encoderActual - encoderHomePosition;
     // invert motor if necessary
     encoderActual = inverted ? -encoderActual : encoderActual;
 
-    rawPosition = encoderActual;
+    positionTicks = encoderActual;
 
     position.setUnwrappedValue(
-        rawPosition * static_cast<float>(M_TWOPI) / encoderResolution * gearRatio);
+        positionTicks * static_cast<float>(M_TWOPI) / encoderResolution * gearRatio);
 }
 }  // namespace aruwsrc::control::motor
