@@ -74,7 +74,7 @@ OutputSweepCommand sweep(
     tap::gpio::Digital::OutputPin::E,
     0,      // min output
     16500,  // max output
-    500,   // step length (ms)
+    500,    // step length (ms)
     250,    // step size
     -1);
 
