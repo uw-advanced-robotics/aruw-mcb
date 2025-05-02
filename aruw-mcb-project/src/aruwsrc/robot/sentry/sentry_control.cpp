@@ -35,6 +35,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
@@ -59,7 +60,6 @@
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/sentry/sentry_aruco_reset_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
 #include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
@@ -241,19 +241,21 @@ TurretMinorChassisControllers turretRightChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-DjiMotor rightFrontDriveMotor(
+VirtualDjiMotor rightFrontDriveMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.driveMotorInverted,
     "Right Front Swerve Drive Motor",
     false,
     rightFrontSwerveConfig.gearboxRatio *rightFrontSwerveConfig.driveMotorGearing);
 
-DjiMotor rightFrontAzimuthMotor(
+VirtualDjiMotor rightFrontAzimuthMotor(
     drivers(),
     MOTOR7,
     tap::can::CanBus::CAN_BUS1,
+    &(drivers()->chassisMcbLite),
     rightFrontSwerveConfig.azimuthMotorInverted,
     "Right Front Swerve Azimuth Motor",
     false,
@@ -347,14 +349,13 @@ SentryTransforms transformer(
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
-
-SentryArucoResetSubsystem arucoResetSubsystem(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    chassisYawObserver,
-    odometrySubsystem,
-    transformer);
 SentryTransformAdapter transformAdapter(transformer);
+
+aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
+    drivers(),
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    transformAdapter);
 
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),

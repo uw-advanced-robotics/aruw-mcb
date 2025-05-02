@@ -48,21 +48,6 @@
             ]
         },
         {
-            "name": "MCB Standard Spider",
-            "includePath": [
-                "${default}",
-                "aruw-mcb-project/taproot/modm/src",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
-            ],
-            "compilerPath": "arm-none-eabi-g++",
-            "intelliSenseMode": "gcc-arm",
-            "defines": [
-                "TARGET_STANDARD_SPIDER"
-            ]
-        },
-        {
             "name": "MCB Standard Orion",
             "includePath": [
                 "${default}",
@@ -78,7 +63,7 @@
             ]
         },
         {
-            "name": "MCB Standard Cygnus",
+            "name": "MCB Standard Null",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -89,7 +74,7 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_CYGNUS"
+                "TARGET_STANDARD_NULL"
             ]
         },
         {
