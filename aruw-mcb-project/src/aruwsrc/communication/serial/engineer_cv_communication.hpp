@@ -17,43 +17,56 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #ifndef ENGINEER_CV_COMMUNICATION_HPP_
- #define ENGINEER_CV_COMMUNICATION_HPP_
+#ifndef ENGINEER_CV_COMMUNICATION_HPP_
+#define ENGINEER_CV_COMMUNICATION_HPP_
 
- #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/communication/serial/dji_serial.hpp"
 
- namespace aruwsrc
- {
- namespace serial
- {
+namespace aruwsrc
+{
+namespace serial
+{
+class EngineerCVCommunication : public tap::communication::serial::DJISerial
+{
+public:
+    static constexpr tap::communication::serial::Uart::UartPort ENGINEER_CV_RX_UART_PORT =
+        tap::communication::serial::Uart::UartPort::Uart3;  // TODO: CHANGE?
 
- class EngineerCVCommunication : public tap::communication::serial::DJISerial
- {
- public:
-     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
-         tap::communication::serial::Uart::UartPort::Uart2;
- 
-     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-         tap::communication::serial::Uart::UartPort::Uart3;
- 
- 
     EngineerCVCommunication(tap::Drivers* drivers);
-     DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
-     mockable ~EngineerCVCommunication();
- 
- 
-     /**
-      * Handles the types of messages defined above in the RX message handlers section.
-      */
-     void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
- 
-     // @todo private should not be here
- private:
+    DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
+    mockable ~EngineerCVCommunication();
 
+    struct PositionData
+    {
+        float xPos;  ///< x position of the target (in cm).
+        float yPos;  ///< y position of the target (in cm).
+        float zPos;  ///< z position of the target (in cm).
+    } modm_packed;
+
+    struct RotationData
+    {
+        float alpha;
+        float beta;
+        float gamma;
+    } modm_packed;
+
+    struct TargetPositionMessage
+    {
+        PositionData posData;
+        RotationData rotData;
+    } modm_packed;
+
+    /**
+     * Handles the types of messages defined above in the RX message handlers section.
+     */
+    void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
+
+    // @todo private should not be here
+private:
     static EngineerCVCommunication* engineerCVCommunicationInstance;
- };
- }  // namespace serial
- }  // namespace aruwsrc
- 
- #endif  // VISION_COPROCESSOR_HPP_
- 
+    TargetPositionMessage targetPositionMessage;
+};
+}  // namespace serial
+}  // namespace aruwsrc
+
+#endif  // VISION_COPROCESSOR_HPP_
