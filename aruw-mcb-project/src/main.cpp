@@ -131,7 +131,7 @@ int main()
 #endif
 
 #ifdef TARGET_BALSTD
-            PROFILE(drivers->profiler, drivers->chassisIsm330.periodicImuUpdate, ());
+            PROFILE(drivers->profiler, drivers->chassisIsm330.periodicIMUUpdate, ());
 #endif
 
 #ifdef TARGET_TESTBED
@@ -162,6 +162,10 @@ static void initializeIo(Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
+
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
 
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();

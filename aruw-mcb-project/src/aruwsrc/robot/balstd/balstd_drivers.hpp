@@ -83,7 +83,7 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm330;
+    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> chassisIsm330;
 #endif
 };  // class aruwsrc::BalstdDrivers
 }  // namespace aruwsrc::balstd

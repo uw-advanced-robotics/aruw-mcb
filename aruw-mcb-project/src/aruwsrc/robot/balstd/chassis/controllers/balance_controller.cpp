@@ -33,7 +33,7 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float legLength) const
     return CMSISMat<2, 6>({
         0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0
-    })
+    });
     // clang-format on
 }
 

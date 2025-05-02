@@ -13,7 +13,7 @@ public:
     {
     }
 
-    BalstdChassisOutput runController(const BalstdChassisState& state) const override;
+    BalstdChassisOutput runController(const BalstdChassisState& state) override;
 };
 }  // namespace aruwsrc::control::balstd
 

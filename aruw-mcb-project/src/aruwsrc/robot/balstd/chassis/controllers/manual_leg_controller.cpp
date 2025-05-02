@@ -3,7 +3,7 @@
 namespace aruwsrc::control::balstd
 {
 
-BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&) const
+BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&)
 {
     return BalstdChassisOutput(
         controlOperatorInterface.getManualLegXForce(),
