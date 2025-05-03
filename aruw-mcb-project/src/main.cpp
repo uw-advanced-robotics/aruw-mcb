@@ -50,6 +50,7 @@ static constexpr float MAHONY_KP = 0.1f;
 
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
+tap::arch::PeriodicMilliTimer sendVisionMessageTimeout(1000.0f / MAIN_LOOP_FREQUENCY * 2);
 
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
@@ -136,15 +137,18 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
         }
+        if (sendVisionMessageTimeout.execute())
+        {
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+#endif
+        }
+
         modm::delay_us(10);
     }
     return 0;

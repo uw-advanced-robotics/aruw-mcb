@@ -60,8 +60,10 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_HYRDA)
+#if defined(TARGET_SENTRY_HYDRA)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#elif defined(TARGET_STANDARD_NULL)
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 230'400;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
 #endif
