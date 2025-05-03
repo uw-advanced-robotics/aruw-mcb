@@ -78,7 +78,7 @@ private:
 
     bool autoNavOnlyInGame;
 
-    bool beybladeEnabled = true;
+    bool beybladeEnabled = false;
     bool movementEnabled = true;
 
 };  // class AutoNavBeybladeCommand

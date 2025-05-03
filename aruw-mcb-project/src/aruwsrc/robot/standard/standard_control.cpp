@@ -58,6 +58,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -92,6 +93,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
@@ -112,6 +114,7 @@ using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
 
@@ -223,6 +226,21 @@ StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
+static constexpr aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
+    .beybladeRotationalSpeedFractionOfMax = 0.45f,
+    .beybladeTranslationalSpeedMultiplier = 0.1f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 45,
+};
+
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    drivers()->visionCoprocessor,
+    transformer.getWorldToChassis(),
+    beybladeConfig);
+
 VelocityAgitatorSubsystem agitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
@@ -289,6 +307,12 @@ aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
     0.5f);  // Multiplier for slow beyblade speed
+
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    false);
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -538,7 +562,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&autoNavBeybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
