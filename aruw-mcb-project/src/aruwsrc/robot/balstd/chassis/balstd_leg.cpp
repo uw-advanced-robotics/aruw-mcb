@@ -37,12 +37,12 @@ void BalstdLeg::setHipTorques(float front, float back)
     if (getFrontHipAngle() <= config.frontHipOuterLimit && front < 0) front = 0;
     if (getFrontHipAngle() >= config.frontHipInnerLimit && front > 0) front = 0;
 
-    if (getBackHipAngle() <= config.backHipOuterLimit && back < 0) back = 0;
-    if (getBackHipAngle() >= config.backHipInnerLimit && back > 0) back = 0;
+    if (getBackHipAngle() <= config.backHipInnerLimit && back > 0) back = 0;
+    if (getBackHipAngle() >= config.backHipOuterLimit && back < 0) back = 0;
 
     // TODO: once characterized
-    // frontHipMotor.setDesiredOutput(torque);
-    // backHipMotor.setDesiredOutput(torque);
+    frontHipMotor.setDesiredOutput(front);
+    backHipMotor.setDesiredOutput(back);
 }
 
 void BalstdLeg::updateState()
@@ -52,6 +52,9 @@ void BalstdLeg::updateState()
     currState.calculateForwardKinematics(config);
 
     calculateJacobianTranspose();
+
+    frontHipMotor.sendCanMessage();
+    backHipMotor.sendCanMessage();
 }
 
 void BalstdLeg::calculateJacobianTranspose()

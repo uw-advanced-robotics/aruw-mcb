@@ -33,7 +33,8 @@ BalstdChassisSubsystem::BalstdChassisSubsystem(
       rightLeg(rightLeg),
       chassisImu(chassisImu),
       controller(nullptr),
-      currState(ZERO_STATE)
+      currState(ZERO_STATE),
+      currOutput(ZERO_OUTPUT)
 {
 }
 
@@ -54,10 +55,10 @@ void BalstdChassisSubsystem::refresh()
 {
     updateState();
 
-    BalstdChassisOutput output =
+    BalstdChassisOutput currOutput =
         (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState);
 
-    setOutputs(output);
+    setOutputs(currOutput);
 }
 
 void BalstdChassisSubsystem::setOutputs(const BalstdChassisOutput& output)
@@ -80,9 +81,9 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.yc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2;
     currState.virtualLegState.calculatePendulumState();
 
-    currState.roll = modm::toRadian(chassisImu.getRoll());
-    currState.pitch = modm::toRadian(chassisImu.getPitch());
-    currState.yaw = modm::toRadian(chassisImu.getYaw());
+    currState.roll = chassisImu.getRoll();
+    currState.pitch = chassisImu.getPitch();
+    currState.yaw = chassisImu.getYaw();
 
     currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.theta);
 }

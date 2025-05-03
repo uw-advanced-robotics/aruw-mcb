@@ -76,6 +76,8 @@ private:
 
     BalstdChassisState currState;
 
+    BalstdChassisOutput currOutput;
+
 };  // class BalstdChassisSubsystem
 
 }  // namespace aruwsrc::control::balstd

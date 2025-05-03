@@ -4,6 +4,7 @@
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/motor/motor_interface.hpp"
 
+#include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::control::balstd
@@ -68,8 +69,8 @@ class BalstdLeg
 {
 public:
     inline BalstdLeg(
-        tap::motor::MotorInterface& frontHipMotor,
-        tap::motor::MotorInterface& backHipMotor,
+        aruwsrc::control::motor::Tmotor_AK809& frontHipMotor,
+        aruwsrc::control::motor::Tmotor_AK809& backHipMotor,
         tap::motor::MotorInterface& wheelMotor,
         const BalstdLegConfig config)
         : frontHipMotor(frontHipMotor),
@@ -92,8 +93,8 @@ public:
     inline BalstdLegState getState() const { return currState; }
 
 private:
-    tap::motor::MotorInterface& frontHipMotor;
-    tap::motor::MotorInterface& backHipMotor;
+    aruwsrc::control::motor::Tmotor_AK809& frontHipMotor;
+    aruwsrc::control::motor::Tmotor_AK809& backHipMotor;
     tap::motor::MotorInterface& wheelMotor;
 
     const BalstdLegConfig config;

@@ -54,7 +54,7 @@ public:
 private:
     static constexpr float MAX_X_VEL = 1.0f;  // m/s
 
-    static constexpr float LEG_FORCE_SCALAR = 10.0f;
+    static constexpr float LEG_FORCE_SCALAR = 50000.0f;
     static constexpr float WHEEL_TORQUE_SCALAR = 10.0f;
 };
 
