@@ -128,6 +128,9 @@ static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
 static constexpr float FEEDFORWARD_GAIN = 0.0f;
 }  // namespace turretMajor
 
+static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);
+static constexpr float PADDING = modm::toRadian(5);
+
 namespace turretLeft
 {
 static constexpr uint8_t turretID = 0;
@@ -137,19 +140,21 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
+static constexpr float CENTER_OF_FREEDOM = modm::toRadian(90);
+
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7509,
-    .minAngle = modm::toRadian(-15),
-    .maxAngle = modm::toRadian(195),
+    .startEncoderValue = 951,
+    .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
+    .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4797,
-    .minAngle = modm::toRadian(-13),
-    .maxAngle = modm::toRadian(35),
+    .startEncoderValue = 2822,
+    .minAngle = modm::toRadian(-40),
+    .maxAngle = modm::toRadian(8),
     .limitMotorAngles = true,
 };
 
@@ -168,19 +173,21 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
+static constexpr float CENTER_OF_FREEDOM = modm::toRadian(-90);
+
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4839,
-    .minAngle = modm::toRadian(-195),  // actual CAD limit is -200
-    .maxAngle = modm::toRadian(15),    // actual CAD limit is -20
+    .startEncoderValue = 0,
+    .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
+    .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4762,
-    .minAngle = modm::toRadian(-13),  // actual CAD limit is -15
-    .maxAngle = modm::toRadian(35),   // actual CAD limit 37
+    .startEncoderValue = 2747,
+    .minAngle = modm::toRadian(-40),  // actual CAD limit is -44?
+    .maxAngle = modm::toRadian(8),   // actual CAD limit 9?
     .limitMotorAngles = true,
 };
 static constexpr float majorToTurretR = -0.145;
