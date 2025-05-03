@@ -41,7 +41,7 @@ public:
         int32_t levelIncrement,
         int32_t dir = 1);
 
-    void initialize() override { started = false; }
+    void initialize() override;
 
     void execute() override;
 
@@ -60,7 +60,6 @@ private:
     int32_t levelIncrement;
     int32_t dir{1};
 
-    bool started{false};
     uint32_t startTime{0}, endTime;
     int32_t currentOutput{0};
 

@@ -40,15 +40,15 @@ OutputSweepCommand::OutputSweepCommand(
     this->addSubsystemRequirement(subsystem);
 }
 
+void OutputSweepCommand::initialize()
+{
+    startTime = tap::arch::clock::getTimeMilliseconds();
+    endTime = (maxOutput - minOutput) / levelIncrement * levelLengthMillis + startTime;
+}
+
 void OutputSweepCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    if (!started)
-    {
-        started = true;
-        startTime = currTime;
-        endTime = (maxOutput - minOutput) / levelIncrement * levelLengthMillis + startTime;
-    }
 
     uint8_t levelIndex = ((currTime - startTime) / levelLengthMillis);
 
