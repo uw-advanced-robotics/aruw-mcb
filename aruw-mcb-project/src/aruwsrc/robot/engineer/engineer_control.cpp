@@ -20,6 +20,7 @@
 #if defined(TARGET_ENGINEER)
 
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_scheduler.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -27,7 +28,12 @@
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/arm/arm_extension_subsystem.hpp"
+#include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/arm/wrist_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 
 using namespace tap::gpio;
 using tap::control::CommandMapper;
@@ -45,13 +51,6 @@ namespace aruwsrc
 {
 namespace control
 {
-static constexpr Digital::OutputPin GRABBER_PIN = Digital::OutputPin::E;
-static constexpr Digital::OutputPin X_AXIS_PIN = Digital::OutputPin::F;
-static constexpr Digital::OutputPin TOWER_LEFT_PIN = Digital::OutputPin::G;
-static constexpr Digital::OutputPin TOWER_RIGHT_PIN = Digital::OutputPin::H;
-static constexpr Digital::InputPin TOWER_LEFT_LIMIT_SWITCH = Digital::InputPin::B;
-static constexpr Digital::InputPin TOWER_RIGHT_LIMIT_SWITCH = Digital::InputPin::C;
-
 /* define subsystems --------------------------------------------------------*/
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
@@ -97,38 +96,65 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(
+// aruwsrc::chassis::MecanumChassisSubsystem chassis(
+//     drivers(),
+//     &currentSensor,
+//     leftFrontChassisMotor,
+//     leftBackChassisMotor,
+//     rightFrontChassisMotor,
+//     rightBackChassisMotor,
+//     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+tap::motor::DjiMotor engineerWristRollMotor(
     drivers(),
-    &currentSensor,
-    leftFrontChassisMotor,
-    leftBackChassisMotor,
-    rightFrontChassisMotor,
-    rightBackChassisMotor,
-    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+    aruwsrc::engineer::WRIST_ROLL_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    " Wrist Roll Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor engineerWristLeftMotor(
+    drivers(),
+    aruwsrc::engineer::WRIST_LEFT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Wrist Left Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor engineerWristRightMotor(
+    drivers(),
+    aruwsrc::engineer::WRIST_RIGHT_MOTOR_ID,
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    "Wrist Right Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 /* define commands ----------------------------------------------------------*/
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
-    drivers(),
-    &drivers()->controlOperatorInterface,
-    &chassis);
+// aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+//     drivers(),
+//     &drivers()->controlOperatorInterface,
+//     &chassis);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { chassis.initialize(); }
+void initializeSubsystems() { /*chassis.initialize();*/ }
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    // chassis.setDefaultCommand(&chassisDriveCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

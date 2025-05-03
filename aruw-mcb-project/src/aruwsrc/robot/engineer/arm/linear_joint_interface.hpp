@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace engineer
 {
-class LinearJointInterface : public tap::control::Subsystem
+class LinearJointInterface
 {
 public:
     virtual void setSetpoint(float setpoint)
@@ -47,13 +47,8 @@ public:
 protected:
     float setpoint;
     const float epsilon, minSetpoint, maxSetpoint;
-    LinearJointInterface(
-        tap::Drivers *drivers,
-        float minPosition,
-        float maxSetpoint,
-        float epsilon = 0.001)
-        : Subsystem(drivers),
-          epsilon(epsilon),
+    LinearJointInterface(float minPosition, float maxSetpoint, float epsilon = 0.001)
+        : epsilon(epsilon),
           minSetpoint(minPosition),
           maxSetpoint(maxSetpoint){};
 };

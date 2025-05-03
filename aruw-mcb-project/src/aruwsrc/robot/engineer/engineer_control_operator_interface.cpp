@@ -40,14 +40,44 @@ bool EngineerControlOperatorInterface::isWristControlMode()
     return leftState == Remote::SwitchState::UP;
 }
 
-float EngineerControlOperatorInterface::getArmLiftVelocity() { return 0.0f; }
+float EngineerControlOperatorInterface::getArmLiftVelocity()
+{
+    if (isGantryControlMode())
+        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    else
+        return 0.0f;
+}
 
-float EngineerControlOperatorInterface::getArmExtensionVelocity() { return 0.0f; }
+float EngineerControlOperatorInterface::getArmExtensionVelocity()
+{
+    if (isGantryControlMode())
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    else
+        return 0.0f;
+}
 
-float EngineerControlOperatorInterface::getArmWristPitchVelocity() { return 0.0f; }
+float EngineerControlOperatorInterface::getArmWristPitchVelocity()
+{
+    if (isWristControlMode())
+        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    else
+        return 0.0f;
+}
 
-float EngineerControlOperatorInterface::getArmWristYawVelocity() { return 0.0f; }
+float EngineerControlOperatorInterface::getArmWristYawVelocity()
+{
+    if (isWristControlMode())
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    else
+        return 0.0f;
+}
 
-float EngineerControlOperatorInterface::getArmWristRollVelocity() { return 0.0f; }
+float EngineerControlOperatorInterface::getArmWristRollVelocity()
+{
+    if (isWristControlMode())
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
+    else
+        return 0.0f;
+}
 
 }  // namespace aruwsrc::control::engineer

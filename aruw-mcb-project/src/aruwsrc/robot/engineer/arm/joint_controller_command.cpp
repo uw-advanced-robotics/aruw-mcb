@@ -35,9 +35,7 @@ JointControllerCommand::JointControllerCommand(
     addSubsystemRequirement(&joint);
 }
 
-void JointControllerCommand::initialize()
-{
-}
+void JointControllerCommand::initialize() {}
 
 void JointControllerCommand::execute()
 {

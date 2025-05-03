@@ -30,7 +30,7 @@ namespace aruwsrc
 {
 namespace engineer
 {
-class ArmExtensionSubsystem : public LinearJointInterface
+class ArmExtensionSubsystem : public LinearJointInterface, public tap::control::Subsystem
 {
 public:
     ArmExtensionSubsystem(

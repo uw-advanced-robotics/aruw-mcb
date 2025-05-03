@@ -34,7 +34,7 @@ namespace engineer
 /**
  * Subsystem code for each engineer arm joint.
  */
-class JointSubsystem : public LinearJointInterface
+class JointSubsystem : public LinearJointInterface, public tap::control::Subsystem
 {
 public:
     JointSubsystem(

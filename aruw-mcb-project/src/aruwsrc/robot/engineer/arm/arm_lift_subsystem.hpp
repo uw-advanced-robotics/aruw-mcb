@@ -20,18 +20,23 @@
 #ifndef ARM_LIFT_SUBSYSTEM_HPP_
 #define ARM_LIFT_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
 #include "aruwsrc/robot/engineer/arm/linear_joint_interface.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
-class ArmLiftSubsystem : public LinearJointInterface
+class ArmLiftSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface,
+                         public LinearJointInterface
 {
 public:
     ArmLiftSubsystem(
@@ -40,13 +45,15 @@ public:
         tap::motor::MotorInterface &motorRight,
         tap::algorithms::SmoothPidConfig &configPos,
         tap::algorithms::SmoothPidConfig &configAlign,
+        control::TriggerInterface &trigger,
         float radius,
+        uint64_t length,
         float minSetpoint,
         float maxSetpoint,
         float kS = 0,
         float epsilon = 1);
 
-    virtual float getPosition() override;
+    float getAveragePosition();
 
     float getPositionDifference();
 
@@ -54,7 +61,7 @@ public:
 
     float getVelocityDifference();
 
-    virtual bool atSetpoint() override;
+    bool atSetpoint();
 
     virtual void refresh() override;
 
@@ -63,6 +70,7 @@ public:
 private:
     tap::algorithms::SmoothPid pidPos, pidAlign;
     tap::motor::MotorInterface &motorLeft, &motorRight;
+    control::TriggerInterface &trigger;
     float radius;
     // Constant added to output to overcome static friction
     float kS;

@@ -34,7 +34,8 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
     float maxSetpoint,
     float kS,
     float epsilon)
-    : LinearJointInterface(drivers, epsilon, minSetpoint, maxSetpoint),
+    : LinearJointInterface(epsilon, minSetpoint, maxSetpoint),
+      tap::control::Subsystem(drivers),
       pid(config),
       motors(motors),
       radius(radius),

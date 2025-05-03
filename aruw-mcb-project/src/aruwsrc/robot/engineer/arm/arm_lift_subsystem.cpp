@@ -18,9 +18,6 @@
  */
 
 #include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
-
-#include "tap/algorithms/math_user_utils.hpp"
-
 namespace aruwsrc
 {
 namespace engineer
@@ -31,23 +28,27 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     tap::motor::MotorInterface& motorRight,
     tap::algorithms::SmoothPidConfig& configPos,
     tap::algorithms::SmoothPidConfig& configAlign,
+    control::TriggerInterface& trigger,
     float radius,
+    uint64_t length,
     float minSetpoint,
     float maxSetpoint,
     float kS,
     float epsilon)
-    : LinearJointInterface(drivers, epsilon, minSetpoint, maxSetpoint),
+    : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
+      LinearJointInterface(epsilon, minSetpoint, maxSetpoint),
       pidPos(configPos),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight),
+      trigger(trigger),
       radius(radius),
       kS(kS)
 {
     this->setpoint = 0;
 }
 
-float ArmLiftSubsystem::getPosition()
+float ArmLiftSubsystem::getAveragePosition()
 {
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
