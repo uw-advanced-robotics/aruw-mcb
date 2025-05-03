@@ -22,10 +22,17 @@
 
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
+ * true for all old standards.
+ */
+#if defined(TARGET_STANDARD_ORION)
+#define OLD_STANDARDS
+#endif
+
+/**
+ * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
  */
-#if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_STANDARD_NULL)
 #define ALL_STANDARDS
 #endif
 
@@ -37,9 +44,7 @@
 #define ALL_SENTRIES
 #endif
 
-#if defined(TARGET_STANDARD_SPIDER) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS) || defined(TARGET_SENTRY_HYDRA) ||   \
-    defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_STANDARD_ORION) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
 #define SSH1106_OLED
 #endif
 

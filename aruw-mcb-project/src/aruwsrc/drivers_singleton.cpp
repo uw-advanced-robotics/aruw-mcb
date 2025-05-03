@@ -23,6 +23,8 @@
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
+#elif defined(OLD_STANDARDS)
+namespace aruwsrc::old_standard
 #elif defined(TARGET_BALSTD)
 namespace aruwsrc::balstd
 #elif defined(ALL_SENTRIES)
@@ -41,6 +43,8 @@ namespace aruwsrc::testbed
 namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_CHARACTERIZER)
+namespace aruwsrc::characterizer
 #endif
 {
 /**

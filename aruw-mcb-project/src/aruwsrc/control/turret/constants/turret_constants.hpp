@@ -26,6 +26,8 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
+#elif defined(OLD_STANDARDS)
+#include "aruwsrc/robot/old_standard/old_standard_turret_constants.hpp"
 #elif defined(TARGET_BALSTD)
 #include "aruwsrc/robot/balstd/turret/balstd_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
@@ -53,6 +55,8 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 #include "aruwsrc/robot/blank/blank_turret_constants.hpp"
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_turret_constants.hpp"
+#elif defined(TARGET_CHARACTERIZER)
+#include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_
