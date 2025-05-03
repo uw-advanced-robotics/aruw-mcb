@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_SUBSYSTEM_HPP_
-#define MOTOR_SUBSYSTEM_HPP_
+#ifndef RAW_MOTOR_SUBSYSTEM_HPP_
+#define RAW_MOTOR_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -28,54 +28,39 @@
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 
-namespace aruwsrc::motor_tester
+namespace aruwsrc::characterizer
 {
-class MotorSubsystem : public tap::control::Subsystem
+class RawMotorSubsystem : public tap::control::Subsystem
 {
 public:
-    MotorSubsystem(
+    RawMotorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motor,
-        tap::algorithms::SmoothPidConfig pidConfig)
+        bool akMotor = false)
         : Subsystem(drivers),
           motor(motor),
-          velocityPid(pidConfig)
+          akMotor(akMotor)
     {
     }
 
     inline void initialize() override { this->motor.initialize(); };
 
-    inline void setDesiredRPM(float rpm) { desiredRPM = rpm; }
+    inline void setDesiredOutput(int32_t rpm) { desiredOutput = rpm; }
 
     inline void refresh() override
     {
-        const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-        const uint32_t dt = curTime - prevTime;
-        prevTime = curTime;
-
-        const float velocityError = desiredRPM - getCurrentRPM();
-
-        velocityPid.runControllerDerivateError(velocityError, dt);
-
-        motor.setDesiredOutput(velocityPid.getOutput());
-
+        motor.setDesiredOutput(desiredOutput);
         if (akMotor)
         {
             static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
         }
     };
 
-    // in output shaft rpm
-    inline float getCurrentRPM() const
-    {
-        return motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
-    }
-
     inline void refreshSafeDisconnect() override { stop(); };
 
     inline void stop()
     {
-        desiredRPM = 0;
+        desiredOutput = 0;
         this->motor.setDesiredOutput(0);
         if (akMotor)
         {
@@ -87,13 +72,11 @@ public:
 
 private:
     tap::motor::MotorInterface& motor;
-    tap::algorithms::SmoothPid velocityPid;
 
-    float desiredRPM{0};
-    uint32_t prevTime = 0;
-    bool akMotor = false;
+    int32_t desiredOutput{0};
+    bool akMotor;
 };
 
-}  // namespace aruwsrc::motor_tester
+}  // namespace aruwsrc::characterizer
 
 #endif
