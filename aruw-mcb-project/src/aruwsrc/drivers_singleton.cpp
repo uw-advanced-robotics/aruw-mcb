@@ -23,6 +23,8 @@
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
+#elif defined(OLD_STANDARDS)
+namespace aruwsrc::old_standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
 #elif defined(TARGET_HERO_ZERO)
