@@ -41,8 +41,8 @@ void BalstdLeg::setHipTorques(float front, float back)
     if (getBackHipAngle() >= config.backHipOuterLimit && back < 0) back = 0;
 
     // TODO: once characterized
-    frontHipMotor.setDesiredOutput(front);
-    backHipMotor.setDesiredOutput(back);
+    frontHipMotor.setDesiredOutput(front * KT);
+    backHipMotor.setDesiredOutput(back * KT);
 }
 
 void BalstdLeg::updateState()

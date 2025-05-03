@@ -125,6 +125,8 @@ private:
     void setBackHipMotorTorque(float torque);
 
     void calculateJacobianTranspose();
+
+    static constexpr float KT = 2000.0f;
 };
 
 }  // namespace aruwsrc::control::balstd
