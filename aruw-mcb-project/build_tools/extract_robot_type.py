@@ -30,7 +30,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
                         "TESTBED",
                         "BLANK",
                         "MOTOR_TESTER",
-                         "CHARACTERIZER" ]
+                        "CHARACTERIZER", ]
 
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
@@ -43,7 +43,7 @@ ROBOT_CLASS = {
     "TESTBED": "testbed",
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
-    "CHARACTERIZER": "characterizer"
+    "CHARACTERIZER": "characterizer",
 }
 
 # Make sure that all robots have a class
