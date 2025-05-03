@@ -50,8 +50,8 @@ namespace aruwsrc::control::motor
 class Tmotor_AK809Encoder : public tap::encoder::EncoderInterface
 {
 public:
-    // 0 - 8191 for dji motors
-    static constexpr uint16_t ENC_RESOLUTION = 3600;
+    // 3600 ticks w/ 1:9 gear reduction (hacky ik)
+    static constexpr uint16_t ENC_RESOLUTION = 3600 / 9;
 
     /***
      * WARNING! The Ak80-9 initializes it's encoder position to 1750 on boot.
@@ -115,7 +115,7 @@ private:
     /**
      * The raw position received from the encoder.
      */
-    int16_t rawPosition;
+    int32_t rawPosition;
 
     /**
      * The current encoder position in ticks.
@@ -139,7 +139,7 @@ private:
 
     int16_t shaftRPM;
 
-    void updateEncoderValue(uint16_t encoderActual);
+    void updateEncoderValue(int16_t encoderActual);
 };
 
 }  // namespace aruwsrc::control::motor

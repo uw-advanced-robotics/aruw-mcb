@@ -45,8 +45,8 @@ void Tmotor_AK809Encoder::processMessage(const modm::can::Message& message)
     shaftRPM = static_cast<int16_t>(message.data[2] << 8 | message.data[3]);  // rpm
     shaftRPM = inverted ? -shaftRPM : shaftRPM;
 
-    uint16_t encoderActual =
-        static_cast<uint16_t>(message.data[0] << 8 | message.data[1]);  // encoder value
+    int16_t encoderActual =
+        static_cast<int16_t>(message.data[0] << 8 | message.data[1]);  // encoder value
 
     updateEncoderValue(encoderActual);
 }
@@ -63,7 +63,7 @@ void Tmotor_AK809Encoder::alignWith(EncoderInterface* other)
 
 void Tmotor_AK809Encoder::resetEncoderValue()
 {
-    encoderHomePosition = static_cast<uint16_t>(positionTicks) + encoderHomePosition;
+    encoderHomePosition = positionTicks + encoderHomePosition;
     positionTicks = 0;
     position.setUnwrappedValue(0);
 }
@@ -87,7 +87,7 @@ float Tmotor_AK809Encoder::getVelocity() const
 
 int16_t Tmotor_AK809Encoder::getShaftRPM() const { return shaftRPM; }
 
-void Tmotor_AK809Encoder::updateEncoderValue(uint16_t encoderActual)
+void Tmotor_AK809Encoder::updateEncoderValue(int16_t encoderActual)
 {
     rawPosition = encoderActual;
     encoderActual = encoderActual - encoderHomePosition;
