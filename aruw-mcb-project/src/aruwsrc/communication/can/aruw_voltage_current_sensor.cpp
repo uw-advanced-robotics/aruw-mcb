@@ -17,23 +17,23 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruw_chassis_sensor.hpp"
+#include "aruw_voltage_current_sensor.hpp"
 
 namespace aruwsrc::can
 {
-AruwChassisSensor::AruwChassisSensor(tap::Drivers* drivers, tap::can::CanBus canBus)
+AruwVoltageCurrentSensor::AruwVoltageCurrentSensor(tap::Drivers* drivers, tap::can::CanBus canBus)
     : tap::can::CanRxListener(drivers, CHASSIS_SENSOR_CAN_ID, canBus)
 {
 }
 
-void AruwChassisSensor::processMessage(const modm::can::Message& message)
+void AruwVoltageCurrentSensor::processMessage(const modm::can::Message& message)
 {
     this->heartbeat.restart(100);
     this->voltage = message.data[1] << 8 | message.data[0];
     this->current = message.data[3] << 8 | message.data[2];
 }
 
-void AruwChassisSensor::initialize()
+void AruwVoltageCurrentSensor::initialize()
 {
     this->attachSelfToRxHandler();
     this->heartbeat.restart(0);

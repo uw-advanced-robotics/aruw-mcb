@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUW_CHASSIS_SENSOR_HPP_
-#define ARUW_CHASSIS_SENSOR_HPP_
+#ifndef ARUW_VOLTAGE_CURRENT_SENSOR_HPP_
+#define ARUW_VOLTAGE_CURRENT_SENSOR_HPP_
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
@@ -32,30 +32,30 @@ namespace aruwsrc::can
 {
 static constexpr uint16_t CHASSIS_SENSOR_CAN_ID = 0x1C5;
 
-class AruwChassisSensor : public tap::can::CanRxListener,
+class AruwVoltageCurrentSensor : public tap::can::CanRxListener,
                           public tap::communication::sensors::voltage::VoltageSensorInterface,
                           public tap::communication::sensors::current::CurrentSensorInterface
 {
 public:
-    AruwChassisSensor(tap::Drivers* drivers, tap::can::CanBus canBus);
+    AruwVoltageCurrentSensor(tap::Drivers* drivers, tap::can::CanBus canBus);
 
     void processMessage(const modm::can::Message& message) override;
 
     mockable void initialize();
 
-    float getCurrentMa() const override { return this->current; };
     float getVoltageMv() const override { return this->voltage; };
+    float getCurrentMa() const override { return this->current; };
 
     void update() override{};
 
     bool isOnline() const { return !this->heartbeat.isExpired(); }
 
 private:
-    float current = 0;
     float voltage = 0;
+    float current = 0;
 
     tap::arch::MilliTimeout heartbeat;
 };
 }  // namespace aruwsrc::can
 
-#endif  // ARUW_CHASSIS_SENSOR_HPP_
+#endif  // ARUW_VOLTAGE_CURRENT_SENSOR_HPP_

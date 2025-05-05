@@ -23,8 +23,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 
 #include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -61,14 +60,10 @@ VirtualCanEncoder strafeEncoder(
     &drivers()->lite,
     tap::can::CanBus::CAN_BUS2);
 
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
-
-aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2
+);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -108,8 +103,8 @@ tap::motor::DjiMotor rightBackChassisMotor(
 
 XDriveChassisSubsystem chassis(
     drivers(),
-    &currentSensor,
-    &voltageSensor,
+    &voltageCurrentSensor,
+    &voltageCurrentSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
@@ -150,7 +145,11 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 
 // ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
-void initializeSubsystems() { chassis.registerAndInitialize(); }
+void initializeSubsystems()
+{
+    voltageCurrentSensor.initialize();
+    chassis.registerAndInitialize();
+}
 
 void setDefaultCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
 
