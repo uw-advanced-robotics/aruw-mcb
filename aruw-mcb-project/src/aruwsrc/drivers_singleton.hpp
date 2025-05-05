@@ -27,6 +27,9 @@
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 namespace aruwsrc::standard
+#elif defined(OLD_STANDARDS)
+#include "aruwsrc/robot/old_standard/old_standard_drivers.hpp"
+namespace aruwsrc::old_standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
@@ -51,6 +54,9 @@ namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_CHARACTERIZER)
+#include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
+namespace aruwsrc::characterizer
 #endif
 {
 /**

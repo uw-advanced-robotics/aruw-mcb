@@ -60,12 +60,10 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
-    // Hero slip ring cannot handle
-    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
-#else
+#if defined(TARGET_SENTRY_HYRDA)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
 #endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
@@ -74,8 +72,7 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -232,6 +229,7 @@ public:
             float y;
             float z;
             float radius;
+            uint16_t robotType;
         } modm_packed;
 
         RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct

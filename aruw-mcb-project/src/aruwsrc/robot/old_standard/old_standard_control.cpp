@@ -19,7 +19,7 @@
 
 #include "aruwsrc/util_macros.hpp"
 
-#ifdef ALL_STANDARDS
+#ifdef OLD_STANDARDS
 
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command_mapper.hpp"
@@ -41,7 +41,6 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
-#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -59,8 +58,8 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/ammo_indicator.hpp"
@@ -93,28 +92,28 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/standard/standard_drivers.hpp"
-#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/robot/old_standard/old_standard_drivers.hpp"
+#include "aruwsrc/robot/old_standard/old_standard_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
 
-using namespace tap::communication::serial;
-using namespace tap::control;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::algorithms;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms::transforms;
-using namespace aruwsrc::control;
-using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
-using namespace aruwsrc::control::client_display;
-using namespace aruwsrc::control::governor;
+using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::standard;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms;
+using namespace aruwsrc::old_standard;
+using namespace tap::control;
+using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control;
+using namespace tap::communication::serial;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::algorithms::transforms;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -124,7 +123,7 @@ using namespace aruwsrc::standard;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace standard_control
+namespace old_standard_control
 {
 inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
@@ -136,9 +135,9 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_MOTORS,
-    true,
+    false,
     "Pitch Turret",
-    true,
+    false,
     1,
     PITCH_MOTOR_CONFIG.startEncoderValue);
 
@@ -146,16 +145,16 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_ORION)
     false,
 #else
-#error "did not define standard!"
+#error "did not define old standard!"
 #endif
     "Yaw Turret",
-    true,
+    false,
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
-StandardTurretSubsystem turret(
+OldStandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
     &yawMotor,
@@ -169,8 +168,6 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
-
-aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -208,10 +205,9 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::chassis::XDriveChassisSubsystem chassis(
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
-    &voltageSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
@@ -642,7 +638,7 @@ HoldCommandMapping ctrlPressed(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(Drivers *drivers)
+void registerOldStandardSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -670,7 +666,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(Drivers *)
+void setDefaultOldStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -679,7 +675,7 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startOldStandardCommands(Drivers *drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -688,7 +684,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+void registerOldStandardIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -709,26 +705,26 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&shiftPressed);
     drivers->commandMapper.addMap(&ctrlPressed);
 }
-}  // namespace standard_control
+}  // namespace old_standard_control
 
-namespace aruwsrc::standard
+namespace aruwsrc::old_standard
 {
-void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::old_standard::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &standard_control::remoteSafeDisconnectFunction);
-    standard_control::initializeSubsystems();
-    standard_control::registerStandardSubsystems(drivers);
-    standard_control::setDefaultStandardCommands(drivers);
-    standard_control::startStandardCommands(drivers);
-    standard_control::registerStandardIoMappings(drivers);
+        &old_standard_control::remoteSafeDisconnectFunction);
+    old_standard_control::initializeSubsystems();
+    old_standard_control::registerOldStandardSubsystems(drivers);
+    old_standard_control::setDefaultOldStandardCommands(drivers);
+    old_standard_control::startOldStandardCommands(drivers);
+    old_standard_control::registerOldStandardIoMappings(drivers);
 }
-}  // namespace aruwsrc::standard
+}  // namespace aruwsrc::old_standard
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
-    return &standard_control::imuCalibrateCommand;
+    return &old_standard_control::imuCalibrateCommand;
 }
 #endif
 
