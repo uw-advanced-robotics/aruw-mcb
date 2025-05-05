@@ -39,8 +39,8 @@
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -162,10 +162,7 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(
-    drivers(),
-    tap::can::CanBus::CAN_BUS2
-);
+aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),

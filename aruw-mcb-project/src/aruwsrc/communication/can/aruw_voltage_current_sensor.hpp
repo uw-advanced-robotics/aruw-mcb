@@ -32,9 +32,10 @@ namespace aruwsrc::can
 {
 static constexpr uint16_t CHASSIS_SENSOR_CAN_ID = 0x1C5;
 
-class AruwVoltageCurrentSensor : public tap::can::CanRxListener,
-                          public tap::communication::sensors::voltage::VoltageSensorInterface,
-                          public tap::communication::sensors::current::CurrentSensorInterface
+class AruwVoltageCurrentSensor
+    : public tap::can::CanRxListener,
+      public tap::communication::sensors::voltage::VoltageSensorInterface,
+      public tap::communication::sensors::current::CurrentSensorInterface
 {
 public:
     AruwVoltageCurrentSensor(tap::Drivers* drivers, tap::can::CanBus canBus);

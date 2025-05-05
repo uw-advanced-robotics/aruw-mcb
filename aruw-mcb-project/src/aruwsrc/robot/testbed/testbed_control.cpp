@@ -22,8 +22,8 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
@@ -60,10 +60,7 @@ VirtualCanEncoder strafeEncoder(
     &drivers()->lite,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(
-    drivers(),
-    tap::can::CanBus::CAN_BUS2
-);
+aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
