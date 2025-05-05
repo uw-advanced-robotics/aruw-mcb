@@ -1,0 +1,232 @@
+{
+    "configurations": [
+        {
+            "name": "Test",
+            "defines": [
+                "${default}",
+                "ENV_UNIT_TESTS",
+                "PLATFORM_HOSTED",
+                "RUN_WITH_PROFILING",
+                "STANDARD_ORION"
+            ],
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src",
+                "aruw-mcb-project/taproot/test",
+                "aruw-mcb-project/test"
+            ],
+            "compilerPath": "g++",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "Sim",
+            "defines": [
+                "${default}",
+                "PLATFORM_HOSTED",
+                "RUN_WITH_PROFILING"
+            ],
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src"
+            ],
+            "compilerPath": "g++",
+            "intelliSenseMode": "gcc-x64"
+        },
+        {
+            "name": "MCB Sentry Hydra",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_SENTRY_HYDRA"
+            ]
+        },
+        {
+            "name": "MCB Standard Orion",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_STANDARD_ORION"
+            ]
+        },
+        {
+            "name": "MCB Standard Null",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_STANDARD_NULL"
+            ]
+        },
+        {
+            "name": "MCB Balancing Standard",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_BALSTD"
+            ]
+        },
+        {
+            "name": "MCB Standard Elsa",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_STANDARD_ELSA"
+            ]
+        },
+        {
+            "name": "MCB Dart",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_DART"
+            ]
+        },
+        {
+            "name": "MCB Engineer",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_ENGINEER"
+            ]
+        },
+        {
+            "name": "MCB Drone",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_DRONE"
+            ]
+        },
+        {
+            "name": "MCB Testbed",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_TESTBED"
+            ]
+        },
+        {
+            "name": "MCB Blank",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_BLANK"
+            ]
+        },
+        {
+            "name": "MCB Motor Tester",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_MOTOR_TESTER"
+            ]
+        },
+        {
+            "name": "MCB Motor Characterizer",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_CHARACTERIZER"
+            ]
+        },
+        {
+            "name": "MCB Hero Perseus",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_HERO_PERSEUS"
+            ]
+        }
+    ],
+    "version": 4
+}
