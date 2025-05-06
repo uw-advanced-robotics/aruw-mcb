@@ -30,6 +30,7 @@
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -108,6 +109,13 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
+
+aruwsrc::virtualMCB::VirtualCanEncoder turretMajorYawEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    &drivers()->chassisMcbLite,
+    tap::can::CanBus::CAN_BUS2
+);
 
 // aruwsrc::virtualMCB::VirtualDoubleDjiMotor turretMajorYawMotor(
 //     drivers(),
