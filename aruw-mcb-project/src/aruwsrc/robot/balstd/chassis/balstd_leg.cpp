@@ -57,6 +57,9 @@ void BalstdLeg::updateState()
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
 
+    currState.qFrontVelo = frontHipMotor.getEncoder()->getVelocity();
+    currState.qBackVelo = backHipMotor.getEncoder()->getVelocity();
+
     calculateJacobianTranspose();
 }
 
@@ -84,5 +87,6 @@ void BalstdLeg::calculateJacobianTranspose()
 
     jacobianTranspose = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
 }
+
 
 }  // namespace aruwsrc::control::balstd
