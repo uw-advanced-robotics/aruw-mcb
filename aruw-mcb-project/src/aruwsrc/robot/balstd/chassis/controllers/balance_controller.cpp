@@ -12,6 +12,7 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
     this->vmState.data = {0, 0, vmX, 0, currState.pitch, currState.pitchVel};
     CMSISMat<6, 1> vmRef = CMSISMat<6, 1>({0, 0, controlOperatorInterface.getXVel(), 0, 0, 0});
 
+    // u = K(x_d - x)
     CMSISMat<2, 1> vmOuts = getLQRGains(currState.virtualLegState.L) * (vmRef - vmState);
     float hipTorque = vmOuts.data[0];
     float wheelTorque = vmOuts.data[1];

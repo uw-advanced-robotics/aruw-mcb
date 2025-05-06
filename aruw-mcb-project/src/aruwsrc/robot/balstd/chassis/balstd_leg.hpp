@@ -2,7 +2,7 @@
 #define BALSTD_LEG_HPP_
 
 #include "tap/algorithms/transforms/vector.hpp"
-#include "tap/motor/motor_interface.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -24,6 +24,7 @@ struct BalstdLegConfig
 struct BalstdLegState
 {
     float qFront, qBack;  // angles of upper linkages in radians
+    float wheelVel;       // wheel angular velocity in rad/s
 
     float xc, yc;                    // coordinates of wheel axle wrt hip center
     float kneesWidthX, kneesWidthY;  // components of distance between knees
@@ -33,6 +34,7 @@ struct BalstdLegState
     BalstdLegState()
         : qFront(0),
           qBack(0),
+          wheelVel(0),
           xc(0),
           yc(0),
           kneesWidthX(0),
@@ -82,6 +84,8 @@ public:
 
     void initialize();
 
+    void refresh();
+
     bool allMotorsOnline() const;
 
     void setThrust(const tap::algorithms::transforms::Vector thrust);
@@ -122,11 +126,11 @@ private:
     }
 
     void setHipTorques(float front, float back);
-    void setBackHipMotorTorque(float torque);
 
     void calculateJacobianTranspose();
 
-    static constexpr float KT = 2000.0f;
+    static constexpr float M3508_TORQUE_CONSTANT =
+        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / Nm/A = desOut/Nm
 };
 
 }  // namespace aruwsrc::control::balstd

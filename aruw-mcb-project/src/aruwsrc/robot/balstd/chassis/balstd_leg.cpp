@@ -1,5 +1,6 @@
 #include "balstd_leg.hpp"
 
+using aruwsrc::control::motor::Tmotor_AK809;
 using tap::algorithms::CMSISMat;
 
 namespace aruwsrc::control::balstd
@@ -10,6 +11,12 @@ void BalstdLeg::initialize()
     frontHipMotor.initialize();
     backHipMotor.initialize();
     wheelMotor.initialize();
+}
+
+void BalstdLeg::refresh()
+{
+    frontHipMotor.sendCanMessage();
+    backHipMotor.sendCanMessage();
 }
 
 bool BalstdLeg::allMotorsOnline() const
@@ -27,34 +34,30 @@ void BalstdLeg::setThrust(const Vector thrust)
 
 void BalstdLeg::setWheelTorque(float torque)
 {
-    // TODO: once characterized
-    // wheelMotor.setDesiredOutput(torque);
+    wheelMotor.setDesiredOutput(torque * M3508_TORQUE_CONSTANT);
 }
 
 void BalstdLeg::setHipTorques(float front, float back)
 {
     // soft stops
-    if (getFrontHipAngle() <= config.frontHipOuterLimit && front < 0) front = 0;
-    if (getFrontHipAngle() >= config.frontHipInnerLimit && front > 0) front = 0;
+    if (currState.qFront <= config.frontHipOuterLimit && front < 0) front = 0;
+    if (currState.qFront >= config.frontHipInnerLimit && front > 0) front = 0;
 
-    if (getBackHipAngle() <= config.backHipInnerLimit && back > 0) back = 0;
-    if (getBackHipAngle() >= config.backHipOuterLimit && back < 0) back = 0;
+    if (currState.qBack <= config.backHipInnerLimit && back > 0) back = 0;
+    if (currState.qBack >= config.backHipOuterLimit && back < 0) back = 0;
 
-    // TODO: once characterized
-    frontHipMotor.setDesiredOutput(front * KT);
-    backHipMotor.setDesiredOutput(back * KT);
+    frontHipMotor.setDesiredOutput(front * Tmotor_AK809::TORQUE_CONSTANT);
+    backHipMotor.setDesiredOutput(back * Tmotor_AK809::TORQUE_CONSTANT);
 }
 
 void BalstdLeg::updateState()
 {
     currState.qFront = getFrontHipAngle();
     currState.qBack = getBackHipAngle();
+    currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
 
     calculateJacobianTranspose();
-
-    frontHipMotor.sendCanMessage();
-    backHipMotor.sendCanMessage();
 }
 
 void BalstdLeg::calculateJacobianTranspose()
