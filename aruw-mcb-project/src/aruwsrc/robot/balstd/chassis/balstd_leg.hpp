@@ -52,10 +52,11 @@ struct BalstdLegState
     {
         // knee coordinates
         CMSISMat<2, 1> P2 = CMSISMat<2, 1>(
-            {config.upperLinkLength * cos(qFront), config.upperLinkLength * sin(qFront)});
+            {config.upperLinkLength * cos(qFront) + config.fixedLinkLength / 2,
+             config.upperLinkLength * sin(qFront)});
 
         CMSISMat<2, 1> P4 = CMSISMat<2, 1>(
-            {config.upperLinkLength * cos(qBack) - config.fixedLinkLength,
+            {config.upperLinkLength * cos(qBack) - config.fixedLinkLength / 2,
              config.upperLinkLength * sin(qBack)});
 
         // wheel coordinates
@@ -74,15 +75,15 @@ struct BalstdLegState
         float P2_Ph_mag = P4_P2_mag / 2;
 
         // Ph = P2 + ||P2-Ph|| / ||P2-P4|| * (P4-P2)
-        CMSISMat<2, 1> Ph = P2 + P2_Ph_mag / P4_P2_mag * P4_P2;
+        CMSISMat<2, 1> Ph = P2 + P4_P2 / 2;
 
         // ||P3-Ph|| = sqrt(a2^2 - ||P2-Ph||^2)
         float P3_Ph_mag =
             sqrtf(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag * P2_Ph_mag);
 
         // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
-        P4_P2.data[1] *= -1;
-        CMSISMat<2, 1> P3 = Ph + P3_Ph_mag / P4_P2_mag * P4_P2;
+        CMSISMat<2, 1> P3 =
+            Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<2, 1>({P4_P2.data[1], -P4_P2.data[0]});
 
         xc = P3.data[0];
         yc = P3.data[1];
