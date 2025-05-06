@@ -137,7 +137,7 @@ int main()
 #endif
 
 #ifdef TARGET_BALSTD
-            // PROFILE(drivers->profiler, drivers->chassisIsm330.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->chassisIsm330.periodicIMUUpdate, ());
 #endif
 
 #ifdef TARGET_TESTBED
@@ -201,7 +201,7 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMajorMcbLite.initialize();
 #endif
 #if defined(TARGET_BALSTD)
-    // drivers->chassisIsm330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->chassisIsm330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
@@ -230,7 +230,7 @@ static void updateIo(Drivers *drivers)
     drivers->turretMajorMcbLite.updateSerial();
 #endif
 #if defined(TARGET_BALSTD)
-    // drivers->chassisIsm330.read();
+    drivers->chassisIsm330.read();
 #endif
 
 #ifdef TARGET_TESTBED
