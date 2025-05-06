@@ -10,8 +10,8 @@ BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&
     return BalstdChassisOutput(
         controlOperatorInterface.getManualLegXForce(),
         controlOperatorInterface.getManualLegYForce(),
-        0,  // controlOperatorInterface.getManualLegXForce(),
-        0,  // controlOperatorInterface.getManualLegYForce(),
+        controlOperatorInterface.getManualLegXForce(),
+        controlOperatorInterface.getManualLegYForce(),
         controlOperatorInterface.getManualWheelTorque(),
         controlOperatorInterface.getManualWheelTorque());
 }

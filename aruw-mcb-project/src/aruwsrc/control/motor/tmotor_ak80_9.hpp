@@ -88,7 +88,6 @@ enum TMotorFaultCode : uint8_t
 static constexpr int TMOTOR_MOTORS_PER_CAN = 8;
 /** CAN message length of each motor control message. */
 static constexpr int CAN_TMOTOR_MESSAGE_SEND_LENGTH = 8;
-static constexpr float AK809_TORQUE_CONSTANT = 0.105f * 9;  // Nm/A, 9:1 gear ratio
 
 /**
  * A class designed to interface with tmotor brand motors and motor controllers over CAN.
@@ -108,6 +107,8 @@ class Tmotor_AK809 : public tap::can::CanRxListener, public tap::motor::MotorInt
 {
 public:
     static constexpr float GEAR_RATIO = 1.0f / 9.0f;
+    static constexpr float TORQUE_CONSTANT = 2000.0f;  // desOut/Nm
+
     /**
      * @param drivers a pointer to the drivers struct
      * @param tMotorTxHandler a pointer to the drivers member tMotorTxHandler
