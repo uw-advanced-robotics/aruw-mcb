@@ -86,6 +86,7 @@ bool CubeStorageSubsystem::isLimitSwitched()
 
 void CubeStorageSubsystem::refresh()
 {
+    isLimitSwitch = isLimitSwitched();
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
         if (!trigger.isTriggered())
@@ -93,7 +94,6 @@ void CubeStorageSubsystem::refresh()
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             motor.getEncoder()->resetEncoderValue();
             moveMotor(0);
-            isLimitSwitch = isLimitSwitched();
         }
         else
         {

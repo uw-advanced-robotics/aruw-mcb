@@ -169,7 +169,7 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&cubeLift);
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

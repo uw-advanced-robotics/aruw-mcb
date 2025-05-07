@@ -27,13 +27,13 @@
 namespace aruwsrc::robot::engineer
 {
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
-    tap::motor::MOTOR5;  // TODO: UPDATE W CORRECT VALUE
+    tap::motor::MOTOR7;
 
 static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
-    tap::can::CanBus::CAN_BUS1;  // TODO: UPDATE W CORRECT VALUE
+    tap::can::CanBus::CAN_BUS2;  
 
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
-    tap::gpio::Digital::InputPin::D;  // TODO: UPDATE W CORRECT VALUE
+    tap::gpio::Digital::InputPin::B;  // TODO: UPDATE W CORRECT VALUE
 
 static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
@@ -48,7 +48,7 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 1000.0f,
-    .maxOutput = 30000.0f,
+    .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
