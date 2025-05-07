@@ -40,6 +40,7 @@
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/balstd/balstd_drivers.hpp"
+#include "aruwsrc/robot/balstd/chassis/balstd_chassis_constants.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
@@ -78,30 +79,21 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
-BalstdLegConfig legConfig{
-    .upperLinkLength = 0.15,
-    .lowerLinkLength = 0.25,
-    .fixedLinkLength = 0.108,
-    .frontHipOuterLimit = modm::toRadian(-15),
-    .frontHipInnerLimit = modm::toRadian(90),
-    .backHipOuterLimit = modm::toRadian(195),
-    .backHipInnerLimit = modm::toRadian(90),
-};
-
 aruwsrc::control::motor::Tmotor_AK809 leftFrontHipMotor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR3,
     tap::can::CanBus::CAN_BUS2,
     false,
     "left front hip",
-    static_cast<int32_t>(modm::toRadian(20) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    static_cast<int32_t>(-OUTER_HARD_STOP / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
 aruwsrc::control::motor::Tmotor_AK809 leftBackHipMotor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR4,
     tap::can::CanBus::CAN_BUS2,
     false,
     "left back hip",
-    static_cast<int32_t>(-modm::toRadian(200) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    static_cast<int32_t>(
+        (OUTER_HARD_STOP - M_PI) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
 tap::motor::DjiMotor leftWheelMotor(
     drivers(),
     tap::motor::MotorId::MOTOR1,
@@ -115,14 +107,15 @@ aruwsrc::control::motor::Tmotor_AK809 rightFrontHipMotor(
     tap::can::CanBus::CAN_BUS2,
     true,
     "right front hip",
-    static_cast<int32_t>(-modm::toRadian(20) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    static_cast<int32_t>(OUTER_HARD_STOP / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
 aruwsrc::control::motor::Tmotor_AK809 rightBackHipMotor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR2,
     tap::can::CanBus::CAN_BUS2,
     true,
     "right back hip",
-    static_cast<int32_t>(modm::toRadian(200) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    static_cast<int32_t>(
+        (M_PI - OUTER_HARD_STOP) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
 tap::motor::DjiMotor rightWheelMotor(
     drivers(),
     tap::motor::MotorId::MOTOR2,
@@ -130,8 +123,8 @@ tap::motor::DjiMotor rightWheelMotor(
     true,
     "right wheel");
 
-BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, legConfig);
-BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, legConfig);
+BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, LEG_CONFIG);
+BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, LEG_CONFIG);
 
 BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg, drivers()->chassisIsm330);
 
