@@ -28,7 +28,7 @@ namespace aruwsrc::control::aruco
 ArucoResetSubsystem::ArucoResetSubsystem(
     tap::Drivers* drivers,
     VisionCoprocessor& vision,
-    DeadwheelChassisKFOdometry& odometry,
+    Odometry2DInterface& odometry,
     TransformerInterface& transformer)
     : tap::control::Subsystem(drivers),
       vision(vision),
