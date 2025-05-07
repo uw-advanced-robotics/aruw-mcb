@@ -20,8 +20,8 @@
 #define LIMIT_SWITCH_TRIGGER_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
-#include "tap/drivers.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
+#include "tap/drivers.hpp"
 
 #include "trigger_interface.hpp"
 
@@ -34,7 +34,9 @@ namespace aruwsrc::control
 class LimitSwitchTrigger : public TriggerInterface
 {
 public:
-    LimitSwitchTrigger(tap::Drivers* drivers, tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch)
+    LimitSwitchTrigger(
+        tap::Drivers* drivers,
+        tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch)
         : drivers(drivers),
           limitSwitch(limitSwitch)
     {
