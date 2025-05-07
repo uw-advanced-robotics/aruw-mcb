@@ -180,6 +180,9 @@ static void initializeIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
+#if defined(TARGET_ENGINEER)
+    drivers->engineerCVCommunication.initializeCV();
+#endif
 }
 
 static void updateIo(Drivers *drivers)

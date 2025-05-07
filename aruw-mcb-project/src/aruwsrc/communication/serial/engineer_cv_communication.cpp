@@ -38,8 +38,10 @@
  
  EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationInstance = nullptr; }
 
+ int messages_called = 0;
  void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
  {
+    messages_called =1;
     int currIndex = 0;
     memcpy(&(targetPositionMessage.posData.xPos), &completeMessage.data[currIndex], sizeof(float));
     currIndex += sizeof(float);
@@ -54,4 +56,11 @@
     currIndex += sizeof(float);
     memcpy(&(targetPositionMessage.rotData.gamma), &completeMessage.data[currIndex], sizeof(float));
     currIndex += sizeof(float);
+ }
+
+ int uart_init = 0;
+
+ void EngineerCVCommunication::initializeCV() {
+    uart_init = 1;
+    drivers->uart.init<ENGINEER_CV_RX_UART_PORT, ENGINEER_CV_UART_BAUD_RATE>();
  }

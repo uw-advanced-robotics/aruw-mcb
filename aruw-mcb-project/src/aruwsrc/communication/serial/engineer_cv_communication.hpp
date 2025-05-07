@@ -21,6 +21,7 @@
 #define ENGINEER_CV_COMMUNICATION_HPP_
 
 #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc
 {
@@ -30,7 +31,8 @@ class EngineerCVCommunication : public tap::communication::serial::DJISerial
 {
 public:
     static constexpr tap::communication::serial::Uart::UartPort ENGINEER_CV_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;  // TODO: CHANGE?
+        tap::communication::serial::Uart::UartPort::Uart7; 
+    static constexpr size_t ENGINEER_CV_UART_BAUD_RATE = 200'000;
 
     EngineerCVCommunication(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
@@ -60,6 +62,12 @@ public:
      * Handles the types of messages defined above in the RX message handlers section.
      */
     void messageReceiveCallback(const ReceivedSerialMessage& completeMessage) override;
+
+    /**
+     * Call this before using the serial line, initializes the uart line
+     * and the callback
+     */
+    mockable void initializeCV();
 
     // @todo private should not be here
 private:
