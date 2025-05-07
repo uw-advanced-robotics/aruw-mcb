@@ -22,6 +22,7 @@
 
 #include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
+#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -36,7 +37,7 @@ class LowBatteryBuzzerCommand : public tap::control::Command
 public:
     LowBatteryBuzzerCommand(
         aruwsrc::control::buzzer::BuzzerSubsystem& buzzer,
-        tap::Drivers* drivers);
+        tap::communication::sensors::voltage::VoltageSensorInterface* chassisVoltage);
 
     void initialize() override;
 
@@ -50,7 +51,7 @@ public:
 
 private:
     aruwsrc::control::buzzer::BuzzerSubsystem& buzzer;
-    tap::Drivers* drivers;
+    tap::communication::sensors::voltage::VoltageSensorInterface* chassisVoltage;
 };
 
 }  // namespace aruwsrc::communication

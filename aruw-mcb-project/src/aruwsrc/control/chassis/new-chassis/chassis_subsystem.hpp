@@ -61,7 +61,8 @@ public:
     ChassisSubsystem(
         tap::Drivers* drivers,
         std::vector<Wheel>* wheels,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -177,6 +178,8 @@ public:
     std::vector<Wheel>& wheels;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
+
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor;
 
     tap::algorithms::SmoothPid chasisSpeedRotationPID;
 

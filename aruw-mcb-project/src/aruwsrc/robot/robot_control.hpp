@@ -21,6 +21,7 @@
 #define ROBOT_CONTROL_HPP_
 
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
+#include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
@@ -49,6 +50,8 @@ namespace aruwsrc::testbed
 namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_CHARACTERIZER)
+namespace aruwsrc::characterizer
 #endif
 {
 void initSubsystemCommands(Drivers *drivers);

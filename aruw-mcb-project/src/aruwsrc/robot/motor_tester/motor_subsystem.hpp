@@ -26,6 +26,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
+
 namespace aruwsrc::motor_tester
 {
 class MotorSubsystem : public tap::control::Subsystem
@@ -56,6 +58,11 @@ public:
         velocityPid.runControllerDerivateError(velocityError, dt);
 
         motor.setDesiredOutput(velocityPid.getOutput());
+
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     };
 
     // in output shaft rpm
@@ -70,6 +77,10 @@ public:
     {
         desiredRPM = 0;
         this->motor.setDesiredOutput(0);
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     }
 
     const char* getName() const override { return "Motor"; }
@@ -80,6 +91,7 @@ private:
 
     float desiredRPM{0};
     uint32_t prevTime = 0;
+    bool akMotor = false;
 };
 
 }  // namespace aruwsrc::motor_tester
