@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,17 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AGITATOR_CONSTANTS_HPP_
-#define AGITATOR_CONSTANTS_HPP_
+#ifndef CHARACTERIZER_DRIVERS_HPP_
+#define CHARACTERIZER_DRIVERS_HPP_
 
-#if defined(ALL_STANDARDS)
-#include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
-#elif defined(OLD_STANDARDS)
-#include "aruwsrc/robot/old_standard/old_standard_agitator_constants.hpp"
-#elif defined(TARGET_SENTRY_HYDRA)
-#include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
-#include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
+#include "tap/drivers.hpp"
+
+namespace aruwsrc::characterizer
+{
+class Drivers : public tap::Drivers
+{
+    friend class DriversSingleton;
+
+#ifdef ENV_UNIT_TESTS
+public:
 #endif
+    Drivers() : tap::Drivers() {}
 
-#endif  // AGITATOR_CONSTANTS_HPP_
+public:
+};  // class aruwsrc::MotortesterDrivers
+}  // namespace aruwsrc::characterizer
+
+#endif  // CHARACTERIZER_DRIVERS_HPP_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,28 +17,39 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_TESTER_CONSTANTS_HPP_
-#define MOTOR_TESTER_CONSTANTS_HPP_
+#ifndef OLD_STANDARD_AGITATOR_CONSTANTS_HPP_
+#define OLD_STANDARD_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
-#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::motor_tester::constants
+// Do not include this file directly: use agitator_constants.hpp instead.
+#ifndef AGITATOR_CONSTANTS_HPP_
+#error "Do not include this file directly! Use agitator_constants.hpp instead."
+#endif
+
+using tap::motor::DjiMotor;
+
+namespace aruwsrc::control::agitator::constants
 {
+/// How much extra heat must be available beyond how much it takes to fire the next shot
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
+
+#if defined(TARGET_STANDARD_ORION)
+
 // position PID terms
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
-    .kp = 3'000.0f,
+    .kp = 5'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16'000.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -48,21 +59,20 @@ static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator ove
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR2,
+    .agitatorMotorId = tap::motor::MOTOR7,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     /**
      * The jamming constants. Agitator is considered jammed if difference between the velocity
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
-    .jammingVelocityDifference = 2.0f * M_TWOPI,
-    .jammingTime = 200,  // Fudge factor because it's unjamming more than it should; used to be 100
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 100,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
-    // magic numbers are fudge factors
     .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
     .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
@@ -79,20 +89,10 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
         .targetCycleCount = 3,
 };
+#else
+#error "Attempted to include old_standard_agitator_constants.hpp for nonstandard robot target."
+#endif
 
-tap::algorithms::SmoothPidConfig m2006VelocityPidConfig =
-    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+}  // namespace aruwsrc::control::agitator::constants
 
-tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig =
-    {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-// untuned!!
-tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
-    {.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
-    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-}  // namespace aruwsrc::motor_tester::constants
-
-#endif  // MOTOR_TESTER_CONSTANTS_HPP_
+#endif  // OLD_STANDARD_AGITATOR_CONSTANTS_HPP_
