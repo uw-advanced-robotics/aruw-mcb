@@ -77,8 +77,6 @@ private:
     static constexpr int BUTTON_DEBOUNCE_SAMPLES = 10;
     static constexpr int ADC_PRESSED_RANGE = 100;
 
-    int buttonADC = 0;
-
     static constexpr struct AnalogConfig DEFAULT_ADC_CONFIG = {
         .ok = 0,
         .left = 900,

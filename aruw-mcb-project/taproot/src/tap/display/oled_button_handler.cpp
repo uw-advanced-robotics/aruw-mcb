@@ -42,7 +42,7 @@ OledButtonHandler::OledButtonHandler(tap::Drivers *drivers, const AnalogConfig a
 
 OledButtonHandler::Button OledButtonHandler::getCurrentButtonState()
 {
-    buttonADC = drivers->analog.read(gpio::Analog::Pin::OledJoystick);
+    int buttonADC = drivers->analog.read(gpio::Analog::Pin::OledJoystick);
 
     downButtonPressed.update(abs(buttonADC - adcConfig.down) < ADC_PRESSED_RANGE);
     upButtonPressed.update(abs(buttonADC - adcConfig.up) < ADC_PRESSED_RANGE);
