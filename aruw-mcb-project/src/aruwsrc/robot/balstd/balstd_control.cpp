@@ -85,15 +85,14 @@ aruwsrc::control::motor::Tmotor_AK809 leftFrontHipMotor(
     tap::can::CanBus::CAN_BUS2,
     false,
     "left front hip",
-    static_cast<int32_t>(-OUTER_HARD_STOP / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    FRONT_HIP_MOTOR_HOME);
 aruwsrc::control::motor::Tmotor_AK809 leftBackHipMotor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR4,
     tap::can::CanBus::CAN_BUS2,
     false,
     "left back hip",
-    static_cast<int32_t>(
-        (OUTER_HARD_STOP - M_PI) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    BACK_HIP_MOTOR_HOME);
 tap::motor::DjiMotor leftWheelMotor(
     drivers(),
     tap::motor::MotorId::MOTOR1,
@@ -107,15 +106,14 @@ aruwsrc::control::motor::Tmotor_AK809 rightFrontHipMotor(
     tap::can::CanBus::CAN_BUS2,
     true,
     "right front hip",
-    static_cast<int32_t>(OUTER_HARD_STOP / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    -FRONT_HIP_MOTOR_HOME);
 aruwsrc::control::motor::Tmotor_AK809 rightBackHipMotor(
     drivers(),
     aruwsrc::control::motor::TMotorId::MOTOR2,
     tap::can::CanBus::CAN_BUS2,
     true,
     "right back hip",
-    static_cast<int32_t>(
-        (M_PI - OUTER_HARD_STOP) / M_TWOPI * Tmotor_AK809Encoder::ENC_RESOLUTION * 9));
+    -BACK_HIP_MOTOR_HOME);
 tap::motor::DjiMotor rightWheelMotor(
     drivers(),
     tap::motor::MotorId::MOTOR2,

@@ -23,9 +23,9 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "balstd_leg.hpp"
+#include "aruwsrc/control/motor/tmotor_ak80_9_encoder.hpp"
 
-using tap::motor::DjiMotor;
+#include "balstd_leg.hpp"
 
 namespace aruwsrc::control::balstd
 {
@@ -33,6 +33,12 @@ static constexpr float OUTER_HARD_STOP = modm::toRadian(-20);
 static constexpr float OUTER_SOFT_STOP = modm::toRadian(-15);
 
 static constexpr float INNER_SOFT_STOP = modm::toRadian(90);
+
+static constexpr int32_t FRONT_HIP_MOTOR_HOME = static_cast<int32_t>(
+    -OUTER_HARD_STOP / M_TWOPI * aruwsrc::control::motor::Tmotor_AK809Encoder::ENC_RESOLUTION * 9);
+static constexpr int32_t BACK_HIP_MOTOR_HOME = static_cast<int32_t>(
+    (OUTER_HARD_STOP - M_PI) / M_TWOPI *
+    aruwsrc::control::motor::Tmotor_AK809Encoder::ENC_RESOLUTION * 9);
 
 BalstdLegConfig LEG_CONFIG{
     .upperLinkLength = 0.15,
