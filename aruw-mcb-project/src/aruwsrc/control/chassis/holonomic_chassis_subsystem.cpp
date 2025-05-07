@@ -37,12 +37,14 @@ can::capbank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     can::capbank::CapacitorBank* capacitorBank)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       currentSensor(currentSensor),
       chassisPowerLimiter(
           drivers,
           currentSensor,
+          voltageSensor,
           capacitorBank,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,

@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
@@ -63,12 +64,20 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          voltageSensor(),
           t(&d),
           lfm(),
           lbm(),
           rfm(),
           rbm(),
-          cs(&d, &currentSensor, lfm, lbm, rfm, rbm, MOCK_WHEEL_VELOCITY_PID_CONFIG),
+          cs(&d,
+             &currentSensor,
+             &voltageSensor,
+             lfm,
+             lbm,
+             rfm,
+             rbm,
+             MOCK_WHEEL_VELOCITY_PID_CONFIG),
           bc(&d, &cs, &t.yawMotor, operatorInterface),
           yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
@@ -106,6 +115,7 @@ protected:
     tap::Drivers d;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
     NiceMock<TurretSubsystemMock> t;
     NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> cs;

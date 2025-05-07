@@ -41,6 +41,7 @@ public:
     MecanumChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         Motor& leftFrontMotor,
         Motor& leftBackMotor,
         Motor& rightFrontMotor,
