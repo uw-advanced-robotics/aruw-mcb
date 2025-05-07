@@ -85,8 +85,11 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.calculatePendulumState();
 
     currState.roll = chassisImu.getRoll();
+    currState.rollVel = chassisImu.getGx();
     currState.pitch = chassisImu.getPitch();
+    currState.pitchVel = chassisImu.getGy();
     currState.yaw = chassisImu.getYaw();
+    currState.yawVel = chassisImu.getGz();
 
     currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.theta);
 
