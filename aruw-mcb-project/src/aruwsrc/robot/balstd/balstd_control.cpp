@@ -31,8 +31,9 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+
+#include "balstd_imu_calibrate_command.hpp"
 // #include "aruwsrc/control/motor/tmotor_ak80_9_encoder.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
@@ -190,6 +191,19 @@ user::TurretUserControlCommand turretUserControlCommand(
     USER_PITCH_INPUT_SCALAR,
     0  // Assuming this is the desired turret ID
 );
+
+BalstdImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {
+        //     {
+        //     &getTurretMCBCanComm(),
+        //     &turret,
+        //     &chassisFrameYawTurretController,
+        //     &chassisFramePitchTurretController,
+        //     true,
+        // }
+    },
+    &chassis);
 
 /* define commands ----------------------------------------------------------*/
 
