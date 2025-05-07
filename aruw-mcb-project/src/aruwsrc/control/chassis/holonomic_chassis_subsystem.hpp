@@ -61,6 +61,7 @@ public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     /**

@@ -31,6 +31,7 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_current_sensor.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
@@ -319,9 +320,12 @@ aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+
 aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     drivers(),
     &currentSensor,
+    &voltageSensor,
     &rightFrontSwerveModule,
     &leftBackSwerveModule,
     CENTER_TO_WHEELBASE_RADIUS,
