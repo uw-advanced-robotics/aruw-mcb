@@ -23,6 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
@@ -71,10 +72,10 @@ static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 15.0f;
 
 static constexpr float VELOCITY_PID_KP = 20.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 1.25f;
+static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float VELOCITY_PID_KV = 0.054f;
-static constexpr float VELOCITY_PID_KS = 730.0f;
+static constexpr float VELOCITY_PID_KS = 400.0f;
 
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -82,7 +83,7 @@ static constexpr float VELOCITY_PID_KS = 730.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = VELOCITY_PID_KP,
@@ -96,10 +97,10 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 6'000.0f;
-static constexpr float AUTOROTATION_PID_KD = 55.0f;
+static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
+static constexpr float AUTOROTATION_PID_KD = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 3'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
@@ -107,21 +108,21 @@ static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
  * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
  * X-Drive (m/s)
  */
-static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.7f;
+static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 
 // mechanical chassis constants
 /**
  * Radius of the wheels (m)
  */
-static constexpr float WHEEL_RADIUS = 0.076f;
+static constexpr float WHEEL_RADIUS = 0.1016f;
 /**
  * Distance from center of the two front wheels (m)
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.38f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.54f;
 /**
  * Distance from center of the front and rear wheels (m).
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.54f;
 
 static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
