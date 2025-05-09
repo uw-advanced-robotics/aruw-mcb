@@ -117,7 +117,7 @@ static constexpr float WHEEL_RADIUS = 0.1016;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
-static constexpr float DEADWHEEL_RADIUS = 50.8 / 1000.0f;  // 50.8mm -> m
+static constexpr float DEADWHEEL_RADIUS = 50.8 / 1000.0f;  // 2 in -> 50.8mm -> m
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0;
 static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m

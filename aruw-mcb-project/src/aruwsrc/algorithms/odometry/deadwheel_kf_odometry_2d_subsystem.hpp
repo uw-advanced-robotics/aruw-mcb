@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -90,4 +90,4 @@ private:
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#endif  // DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
