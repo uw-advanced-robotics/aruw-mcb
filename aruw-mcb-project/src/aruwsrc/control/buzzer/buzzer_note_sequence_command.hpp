@@ -26,7 +26,6 @@
 
 namespace aruwsrc::control::buzzer
 {
-
 /**
  * Plays a sequence of constant length notes on a buzzer.
  */

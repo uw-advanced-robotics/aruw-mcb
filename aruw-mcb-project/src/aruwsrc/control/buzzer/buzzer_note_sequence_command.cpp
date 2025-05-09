@@ -21,7 +21,6 @@
 
 namespace aruwsrc::control::buzzer
 {
-
 BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand(
     BuzzerSubsystem& buzzer,
     const uint8_t* notes,

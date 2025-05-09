@@ -26,7 +26,6 @@
 
 namespace aruwsrc::control::buzzer
 {
-
 static constexpr uint32_t MARIO_MUSHROOM_NOTE_LENGTH_MS = 34;
 static constexpr uint8_t MARIO_MUSHROOM_NOTES[]{37, 32, 37, 41, 44, 49, 44, 33, 37,
                                                 40, 45, 40, 45, 49, 52, 57, 52, 35,
